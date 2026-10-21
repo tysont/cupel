@@ -317,7 +317,8 @@ expression: pretty(&schema)
         "traces",
         "model-check-results",
         "proof-results",
-        "contract-violations"
+        "contract-violations",
+        "references"
       ]
     },
     "Finding": {
@@ -1103,6 +1104,9 @@ expression: pretty(&schema)
             "race-reports": {
               "type": "string"
             },
+            "references": {
+              "type": "string"
+            },
             "relation-results": {
               "type": "string"
             },
@@ -1153,6 +1157,7 @@ expression: pretty(&schema)
             "proof-results",
             "property-results",
             "race-reports",
+            "references",
             "relation-results",
             "roots",
             "simulation-results",

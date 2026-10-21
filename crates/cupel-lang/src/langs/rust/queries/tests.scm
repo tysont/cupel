@@ -205,3 +205,17 @@
   (attribute_item)*
   .
   (function_item) @test.setup)
+
+; Doc comments (ADR-134): the outer doc lines (`///`) or block (`/** … */`) directly above a test's
+; attributes. It documents only a case the patterns above found.
+((line_comment outer: (outer_doc_comment_marker))+ @test.doc
+  .
+  (attribute_item)*
+  .
+  (function_item) @doc.target)
+
+((block_comment outer: (outer_doc_comment_marker)) @test.doc
+  .
+  (attribute_item)*
+  .
+  (function_item) @doc.target)

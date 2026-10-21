@@ -129,3 +129,10 @@
       name: (identifier) @_mock))
   type: (_) @mock.target
   (#any-of? @_mock "Mock" "Spy" "MockBean")) @test.mock
+
+; Doc comments (ADR-134): a `/** … */` Javadoc directly above a test method (its annotations are
+; part of the method). It documents only a case the patterns above found.
+((block_comment) @test.doc
+  .
+  (method_declaration) @doc.target
+  (#match? @test.doc "^/\\*\\*"))

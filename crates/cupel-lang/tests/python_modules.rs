@@ -63,6 +63,13 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
         true,
     ),
     (
+        "src/ledger/__init__.py",
+        25,
+        ".rates.doubled",
+        "src/ledger/rates.py",
+        true,
+    ),
+    (
         "src/ledger/account.py",
         1,
         "typing.Protocol",
@@ -84,6 +91,14 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
         "src/ledger/__init__.py",
         false,
     ),
+    (
+        "src/ledger/rates.py",
+        3,
+        ".references._imported_rate",
+        "src/ledger/references.py",
+        true,
+    ),
+    ("src/ledger/references.py", 4, "sys", "external:sys", false),
     (
         "src/ledger/report/__init__.py",
         1,

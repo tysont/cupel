@@ -4,17 +4,17 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 27,
+      "findings": 30,
       "id": "static.dead-code",
       "metrics": {
         "dead_exports": 26.0,
-        "dead_symbols": 1.0
+        "dead_symbols": 4.0
       },
       "oracle": null,
       "score": {
-        "n": 77,
+        "n": 86,
         "unit": "dead_symbols",
-        "value": 1.0
+        "value": 4.0
       },
       "skipped": null,
       "status": "fail",
@@ -33,11 +33,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settleInvoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.js",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_5fce63",
@@ -73,11 +75,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcilePayments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.js",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_5fce63",
@@ -113,11 +117,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `orderLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.js",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_e909c8",
@@ -153,11 +159,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refundLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.js",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_59eb19",
@@ -193,11 +201,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `label` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.js",
         "module": "complexity",
         "module_files": [
           "src/complexity.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_fa80dc",
@@ -233,11 +243,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.js",
         "module": "complexity",
         "module_files": [
           "src/complexity.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_d1fac3",
@@ -273,11 +285,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `openAccount` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.js",
         "module": "complexity",
         "module_files": [
           "src/complexity.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_5df0ed",
@@ -313,11 +327,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `statementTemplate` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.js",
         "module": "complexity",
         "module_files": [
           "src/complexity.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_227423",
@@ -353,11 +369,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.js",
         "module": "complexity",
         "module_files": [
           "src/complexity.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_080dc3",
@@ -393,11 +411,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `constructor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.js",
         "module": "complexity",
         "module_files": [
           "src/complexity.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_ebdf22",
@@ -433,11 +453,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `line` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.js",
         "module": "complexity",
         "module_files": [
           "src/complexity.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_bfc6d3",
@@ -473,11 +495,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.js",
         "module": "complexity",
         "module_files": [
           "src/complexity.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_31aad0",
@@ -513,11 +537,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `overdue` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.js",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_d7b5d9",
@@ -553,11 +579,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `clamp` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.js",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_0e0a9a",
@@ -593,11 +621,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `toCents` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.js",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_b363b6",
@@ -633,11 +663,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/dead_export.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unusedTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/dead_export.js",
         "module": "dead_export",
         "module_files": [
           "src/dead_export.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_0e80b3",
@@ -673,11 +705,13 @@
       "confidence": 0.8,
       "detail": "No import in the repository resolves to src/dead_helpers.js or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgottenRate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
       "evidence": {
+        "dynamic": [],
         "file": "src/dead_helpers.js",
         "module": "dead_helpers",
         "module_files": [
           "src/dead_helpers.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_565f0a",
@@ -713,11 +747,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `load` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger.js",
         "module": "ledger",
         "module_files": [
           "src/ledger.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_7e8b03",
@@ -753,11 +789,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/pricing.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `discounted` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/pricing.js",
         "module": "pricing",
         "module_files": [
           "src/pricing.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_6da0bb",
@@ -793,11 +831,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/pricing.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `tally` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/pricing.js",
         "module": "pricing",
         "module_files": [
           "src/pricing.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_bc22d2",
@@ -827,17 +867,156 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
+        "summary": "Delete `orphanRate` from src/references.js if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `orphanRate` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/references.js:30 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/references.js:30"
+        ],
+        "file": "src/references.js",
+        "module": "references",
+        "module_files": [
+          "src/references.js"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_843f6d",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "file": "src/references.js",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_7555e3ddac8779a9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_843f6d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "references.orphanRate",
+        "hash": "sh_7555e3ddac8779a9",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`references.orphanRate` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `#isValid` from src/shapes/geometry.js if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `#isValid` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/clones_settlement.js:34 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/clones_settlement.js:34",
+          "src/clones_settlement.js:37",
+          "src/clones_settlement.js:50",
+          "src/clones_settlement.js:53",
+          "src/references.js:26",
+          "src/references.js:30"
+        ],
+        "file": "src/shapes/geometry.js",
+        "module": "shapes.geometry",
+        "module_files": [
+          "src/shapes/geometry.js"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_1983be",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 16,
+        "file": "src/shapes/geometry.js",
+        "line": 14
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_d444db00abf7a65f",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1983be --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shapes.geometry.Circle.#isValid",
+        "hash": "sh_d444db00abf7a65f",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`shapes.geometry.Circle.#isValid` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `perimeter` from src/shapes/geometry.js if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `perimeter` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/references.js:30 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/references.js:30"
+        ],
+        "file": "src/shapes/geometry.js",
+        "module": "shapes.geometry",
+        "module_files": [
+          "src/shapes/geometry.js"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_8f8098",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "file": "src/shapes/geometry.js",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_4903f9e239deb427",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_8f8098 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shapes.geometry.perimeter",
+        "hash": "sh_4903f9e239deb427",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`shapes.geometry.perimeter` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
         "summary": "Delete `netTotal` from src/twins.js if nothing outside the repository uses it, or import src/twins.js where `netTotal` is meant to be called."
       },
       "check": "static.dead-code",
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.js",
         "module": "twins",
         "module_files": [
           "src/twins.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_3f32c1",
@@ -873,11 +1052,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `sumAfterCharge` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.js",
         "module": "twins",
         "module_files": [
           "src/twins.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_3f32c1",
@@ -913,11 +1094,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalFloor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.js",
         "module": "twins",
         "module_files": [
           "src/twins.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_3f32c1",
@@ -953,11 +1136,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalLaidOut` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.js",
         "module": "twins",
         "module_files": [
           "src/twins.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_3f32c1",
@@ -993,11 +1178,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalPlus` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.js",
         "module": "twins",
         "module_files": [
           "src/twins.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_0d3c73",
@@ -1033,11 +1220,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalCapped` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.js",
         "module": "twins",
         "module_files": [
           "src/twins.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_2b7e9f",
@@ -1073,11 +1262,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.js or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalProduct` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.js",
         "module": "twins",
         "module_files": [
           "src/twins.js"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_9f1d81",

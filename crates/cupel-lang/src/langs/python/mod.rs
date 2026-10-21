@@ -7,10 +7,9 @@ mod resolve;
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::{ModuleGraph, NormTree};
+use cupel_core::syntax::NormTree;
 use cupel_core::{FactKind, LangFamily, LangId, ProducerRegistry, Stability};
 
-use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::producer::QueryProducer;
@@ -29,6 +28,10 @@ static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
             (QueryFile::Tests, include_str!("queries/tests.scm")),
             (QueryFile::Imports, include_str!("queries/imports.scm")),
             (QueryFile::Api, include_str!("queries/api.scm")),
+            (
+                QueryFile::References,
+                include_str!("queries/references.scm"),
+            ),
         ],
         include_str!("tables.toml"),
     )
@@ -86,10 +89,6 @@ impl Language for Python {
             normalize::extract,
         ));
         // Module resolution needs packages, layouts, and manifests, which queries cannot see.
-        reg.register::<ModuleGraph, _>(ImportGraph::new(
-            language,
-            Arc::clone(cache),
-            resolve::graph,
-        ));
+        crate::references::register_resolved(language, cache, resolve::graph, reg);
     }
 }

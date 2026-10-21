@@ -1387,7 +1387,7 @@
       "symbol": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       }
     },
     {
@@ -1538,6 +1538,107 @@
         "col": 1,
         "file": "src/pricing.ts",
         "line": 22
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/rates.ts",
+        "line": 3
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 17,
+            "line": 15
+          },
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 16,
+            "line": 16
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.ts",
+        "line": 14
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.ts",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 29
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.ts",
+        "line": 33
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 3,
+        "file": "src/references.ts",
+        "line": 39
       }
     },
     {

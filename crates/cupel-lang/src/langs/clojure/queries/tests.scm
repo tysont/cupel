@@ -110,3 +110,9 @@
   .
   (sym_lit name: (sym_name) @_fixtures)
   (#eq? @_fixtures "use-fixtures")) @test.setup
+
+; Doc comments (ADR-134): the `;` comment lines directly above a `deftest` or `defspec` form, which
+; take no docstring. It documents only a case the patterns above found.
+((comment)+ @test.doc
+  .
+  (list_lit) @doc.target)

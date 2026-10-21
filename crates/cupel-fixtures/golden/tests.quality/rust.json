@@ -253,9 +253,9 @@
       "location": {
         "col": 1,
         "end_col": 2,
-        "end_line": 44,
+        "end_line": 45,
         "file": "tests/ledger.rs",
-        "line": 42
+        "line": 43
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_a16ad1cddf1bae3b",
@@ -604,7 +604,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 27,
+      "files": 29,
       "languages": [
         "rust"
       ],
@@ -612,7 +612,7 @@
       "roots": [
         "."
       ],
-      "symbols": 74
+      "symbols": 80
     },
     "seed": "<seed>",
     "started": "<timestamp>",

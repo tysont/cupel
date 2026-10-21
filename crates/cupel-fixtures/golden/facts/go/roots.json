@@ -453,7 +453,7 @@
       "symbol": {
         "col": 1,
         "file": "ledger_test.go",
-        "line": 85
+        "line": 86
       }
     },
     {
@@ -461,7 +461,7 @@
       "symbol": {
         "col": 1,
         "file": "ledger_test.go",
-        "line": 85
+        "line": 86
       }
     },
     {
@@ -558,6 +558,30 @@
         "col": 1,
         "file": "pricing_test.go",
         "line": 42
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "rates.go",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 29
       }
     },
     {

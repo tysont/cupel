@@ -7,7 +7,7 @@ use cupel_core::Exclude;
 use cupel_core::syntax::ProjectInfo;
 use ignore::{WalkBuilder, WalkState};
 
-use crate::language::LanguageRegistry;
+use crate::language::{Language, LanguageRegistry, owns};
 
 /// Source files under `root` that some language in `languages` owns, relative to `root`,
 /// `/`-separated, sorted. Below each root of `project`, directories named in its `skip_dirs`
@@ -23,9 +23,48 @@ pub fn walk_excluding(
     project: &ProjectInfo,
     exclude: &Exclude,
 ) -> Vec<String> {
+    let project = project.clone();
+    files_where(
+        root,
+        exclude,
+        move |dir| generated(&project, dir),
+        |file| languages.for_path(file).is_some(),
+    )
+}
+
+/// Every file `language` owns under `root`, by the walk's rules: `.gitignore`, hidden
+/// directories, `exclude`, and the directories the language's ecosystem generates, wherever
+/// they are. For producers that read the repository rather than the scope (ADR-135).
+pub(crate) fn language_files(
+    root: &Path,
+    language: &dyn Language,
+    exclude: &Exclude,
+) -> Vec<String> {
+    let skip: Vec<&str> = language
+        .ecosystem()
+        .map(|ecosystem| ecosystem.skip_dirs.to_vec())
+        .unwrap_or_default();
+    files_where(
+        root,
+        exclude,
+        move |dir| {
+            let name = dir.rsplit('/').next().unwrap_or(dir);
+            skip.contains(&name)
+        },
+        |file| owns(language, file),
+    )
+}
+
+/// The files under `root`, relative and sorted, that `keep` accepts, never entering a directory
+/// `skip` names or a path `exclude` excludes.
+fn files_where(
+    root: &Path,
+    exclude: &Exclude,
+    skip: impl Fn(&str) -> bool + Send + Sync + 'static,
+    keep: impl Fn(&str) -> bool + Sync,
+) -> Vec<String> {
     let found = Mutex::new(Vec::new());
     let base = root.to_path_buf();
-    let project = project.clone();
     let excluded = exclude.clone();
     WalkBuilder::new(root)
         .require_git(false)
@@ -35,7 +74,7 @@ pub fn walk_excluding(
             };
             let is_dir = entry.file_type().is_some_and(|kind| kind.is_dir());
             let kept = path.is_empty() || !excluded.excludes(&path);
-            kept && !(is_dir && generated(&project, &path))
+            kept && !(is_dir && !path.is_empty() && skip(&path))
         })
         .build_parallel()
         .run(|| {
@@ -49,7 +88,7 @@ pub fn walk_excluding(
                 let Some(relative) = relative(root, entry.path()) else {
                     return WalkState::Continue;
                 };
-                if languages.for_path(&relative).is_some() {
+                if keep(&relative) {
                     found
                         .lock()
                         .unwrap_or_else(PoisonError::into_inner)

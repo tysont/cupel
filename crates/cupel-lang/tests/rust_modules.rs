@@ -39,6 +39,8 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
     ("src/lib.rs", 8, "report", "src/report/mod.rs", true),
     ("src/lib.rs", 9, "twins", "src/twins.rs", true),
     ("src/lib.rs", 11, "account::Account", "src/account.rs", true),
+    ("src/lib.rs", 35, "rates", "src/rates.rs", true),
+    ("src/lib.rs", 36, "references", "src/references.rs", true),
     ("src/main.rs", 1, "ledger::balance", "src/lib.rs", false),
     (
         "src/pricing.rs",
@@ -48,6 +50,13 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
         false,
     ),
     ("src/pricing.rs", 35, "super::*", "src/pricing.rs", true),
+    (
+        "src/rates.rs",
+        2,
+        "crate::references::imported_rate",
+        "src/references.rs",
+        false,
+    ),
     (
         "src/report/mod.rs",
         1,

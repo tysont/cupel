@@ -4,17 +4,17 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 16,
+      "findings": 19,
       "id": "static.dead-code",
       "metrics": {
         "dead_exports": 15.0,
-        "dead_symbols": 1.0
+        "dead_symbols": 4.0
       },
       "oracle": null,
       "score": {
-        "n": 74,
+        "n": 80,
         "unit": "dead_symbols",
-        "value": 1.0
+        "value": 4.0
       },
       "skipped": null,
       "status": "fail",
@@ -33,11 +33,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle_invoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.rs",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_fea98c",
@@ -73,11 +75,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcile_payments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.rs",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_fea98c",
@@ -113,11 +117,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `order_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.rs",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_806642",
@@ -153,11 +159,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refund_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.rs",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_87b20b",
@@ -193,11 +201,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `label` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.rs",
         "module": "complexity",
         "module_files": [
           "src/complexity.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_118cf2",
@@ -233,11 +243,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.rs",
         "module": "complexity",
         "module_files": [
           "src/complexity.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_2ffced",
@@ -273,11 +285,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `open_account` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.rs",
         "module": "complexity",
         "module_files": [
           "src/complexity.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_fb9843",
@@ -313,11 +327,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `statement_template` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.rs",
         "module": "complexity",
         "module_files": [
           "src/complexity.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_f22dc2",
@@ -353,11 +369,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.rs",
         "module": "complexity",
         "module_files": [
           "src/complexity.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_fd75b1",
@@ -393,11 +411,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `line` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.rs",
         "module": "complexity",
         "module_files": [
           "src/complexity.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_2fde55",
@@ -433,11 +453,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.rs",
         "module": "complexity",
         "module_files": [
           "src/complexity.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_16d597",
@@ -473,11 +495,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `overdue` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.rs",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_d383ed",
@@ -513,11 +537,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `clamp` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.rs",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_1c92f7",
@@ -553,11 +579,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `to_cents` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.rs",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_3ed392",
@@ -593,11 +621,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/dead_export.rs or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unused_total` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/dead_export.rs",
         "module": "dead_export",
         "module_files": [
           "src/dead_export.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_879edb",
@@ -633,11 +663,13 @@
       "confidence": 0.8,
       "detail": "No import in the repository resolves to src/dead_helpers.rs or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgotten_rate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
       "evidence": {
+        "dynamic": [],
         "file": "src/dead_helpers.rs",
         "module": "dead_helpers",
         "module_files": [
           "src/dead_helpers.rs"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_575858",
@@ -661,6 +693,136 @@
       },
       "tier": 0,
       "title": "`dead_helpers::forgotten_rate` is unreachable: no import resolves to src/dead_helpers.rs"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `audit_limit` from src/lib.rs if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `audit_limit` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "src/lib.rs",
+        "module": "",
+        "module_files": [
+          "shapes/src/lib.rs",
+          "src/lib.rs",
+          "src/main.rs"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_8ac4c7",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "file": "src/lib.rs",
+        "line": 24
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_44bbd9931fa27021",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_8ac4c7 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "audit_limit",
+        "hash": "sh_44bbd9931fa27021",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`audit_limit` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `scale` from src/lib.rs if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `scale` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "src/lib.rs",
+        "module": "",
+        "module_files": [
+          "shapes/src/lib.rs",
+          "src/lib.rs",
+          "src/main.rs"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_567eda",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 30,
+        "file": "src/lib.rs",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_21a1615bfa8e90ae",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_567eda --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "scale",
+        "hash": "sh_21a1615bfa8e90ae",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`scale` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orphan_rate` from src/references.rs if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `orphan_rate` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "src/references.rs",
+        "module": "references",
+        "module_files": [
+          "src/references.rs"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_3d2242",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "file": "src/references.rs",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_8f6cb8dfb3138c48",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3d2242 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "references::orphan_rate",
+        "hash": "sh_8f6cb8dfb3138c48",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`references::orphan_rate` is never referenced"
     }
   ],
   "rankings": []

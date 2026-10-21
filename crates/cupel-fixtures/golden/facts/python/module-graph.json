@@ -112,6 +112,20 @@
         },
         {
           "edge_kind": "import",
+          "from": "src/ledger/__init__.py",
+          "line": 25,
+          "names": [
+            "doubled"
+          ],
+          "relative": true,
+          "specifier": ".rates.doubled",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/rates.py"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "src/ledger/account.py",
           "line": 1,
           "names": [
@@ -161,6 +175,31 @@
           "target": {
             "kind": "file",
             "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/rates.py",
+          "line": 3,
+          "names": [
+            "_imported_rate"
+          ],
+          "relative": true,
+          "specifier": ".references._imported_rate",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/references.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/ledger/references.py",
+          "line": 4,
+          "relative": false,
+          "specifier": "sys",
+          "target": {
+            "kind": "external",
+            "package": "sys"
           }
         },
         {

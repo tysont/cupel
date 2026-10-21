@@ -174,7 +174,7 @@
       "location": {
         "col": 1,
         "end_col": 19,
-        "end_line": 57,
+        "end_line": 58,
         "file": "tests/test_ledger.py",
         "line": 56
       },
@@ -566,7 +566,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 28,
+      "files": 30,
       "languages": [
         "python"
       ],
@@ -574,7 +574,7 @@
       "roots": [
         "."
       ],
-      "symbols": 81
+      "symbols": 87
     },
     "seed": "<seed>",
     "started": "<timestamp>",

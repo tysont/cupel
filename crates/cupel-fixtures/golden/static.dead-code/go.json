@@ -4,17 +4,17 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 2,
+      "findings": 20,
       "id": "static.dead-code",
       "metrics": {
         "dead_exports": 1.0,
-        "dead_symbols": 1.0
+        "dead_symbols": 19.0
       },
       "oracle": null,
       "score": {
-        "n": 80,
+        "n": 84,
         "unit": "dead_symbols",
-        "value": 1.0
+        "value": 19.0
       },
       "skipped": null,
       "status": "fail",
@@ -34,17 +34,235 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
+        "summary": "Delete `settleInvoices` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `settleInvoices` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "clones_settlement.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_2b23b3",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 21,
+        "file": "clones_settlement.go",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ed632916472d61d2",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2b23b3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.settleInvoices",
+        "hash": "sh_ed632916472d61d2",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.settleInvoices` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcilePayments` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `reconcilePayments` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "clones_settlement.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_2b23b3",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 34,
+        "file": "clones_settlement.go",
+        "line": 23
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ed632916472d61d2",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2b23b3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.reconcilePayments",
+        "hash": "sh_ed632916472d61d2",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.reconcilePayments` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orderLines` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `orderLines` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "clones_settlement.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_aa2cb4",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 50,
+        "file": "clones_settlement.go",
+        "line": 36
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_7ebe219b8477cdb1",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_aa2cb4 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.orderLines",
+        "hash": "sh_7ebe219b8477cdb1",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.orderLines` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refundLines` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `refundLines` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "clones_settlement.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_a79783",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 67,
+        "file": "clones_settlement.go",
+        "line": 52
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ca97b0cf7974f0c7",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_a79783 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.refundLines",
+        "hash": "sh_ca97b0cf7974f0c7",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.refundLines` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
         "summary": "Delete `UnusedTotal` from dead_export/dead_export.go if nothing outside the repository uses it, or import dead_export/dead_export.go where `UnusedTotal` is meant to be called."
       },
       "check": "static.dead-code",
       "confidence": 0.4,
       "detail": "No import in the repository resolves to dead_export/dead_export.go or another file of its module, and nothing in it is an entry point, test, or framework hook. If `UnusedTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "dead_export/dead_export.go",
         "module": "deadexport",
         "module_files": [
           "dead_export/dead_export.go"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_ae44d0",
@@ -80,11 +298,13 @@
       "confidence": 0.8,
       "detail": "No import in the repository resolves to dead_helpers/dead_helpers.go or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgottenRate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
       "evidence": {
+        "dynamic": [],
         "file": "dead_helpers/dead_helpers.go",
         "module": "deadhelpers",
         "module_files": [
           "dead_helpers/dead_helpers.go"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_1a4bbc",
@@ -108,22 +328,822 @@
       },
       "tier": 0,
       "title": "`deadhelpers.forgottenRate` is unreachable: no import resolves to dead_helpers/dead_helpers.go"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `firstOverdraft` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `firstOverdraft` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "decide.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_d6a95e",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 29,
+        "file": "decide.go",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_c8aa080e4d92afb3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d6a95e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.firstOverdraft",
+        "hash": "sh_c8aa080e4d92afb3",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.firstOverdraft` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `describe` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `describe` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "decide.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_333d0e",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 48,
+        "file": "decide.go",
+        "line": 39
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_a03a03dfe774b355",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_333d0e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.describe",
+        "hash": "sh_a03a03dfe774b355",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.describe` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `kindOf` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `kindOf` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "decide.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_46c712",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 58,
+        "file": "decide.go",
+        "line": 50
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_639500ff10943fa4",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_46c712 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.kindOf",
+        "hash": "sh_639500ff10943fa4",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.kindOf` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `drain` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `drain` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "decide.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_1e1454",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 70,
+        "file": "decide.go",
+        "line": 60
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_fd21a285fc7bc076",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_1e1454 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.drain",
+        "hash": "sh_fd21a285fc7bc076",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.drain` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `audited` from ledger.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `audited` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "ledger.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_0529eb",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 59,
+        "file": "ledger.go",
+        "line": 57
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_e4ac0733a35366e8",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0529eb --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Account.audited",
+        "hash": "sh_e4ac0733a35366e8",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.Account.audited` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orphanRate` from references.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `orphanRate` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "references.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_6e99c3",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "file": "references.go",
+        "line": 24
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_057881ff21c5da08",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_6e99c3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.orphanRate",
+        "hash": "sh_057881ff21c5da08",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.orphanRate` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `scaled` from shapes/geometry.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `scaled` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "shapes/geometry.go",
+        "module": "shapes",
+        "module_files": [
+          "shapes/geometry.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_8a6c0c",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 22,
+        "file": "shapes/geometry.go",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_8cf671fda510b45b",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_8a6c0c --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shapes.Circle.scaled",
+        "hash": "sh_8cf671fda510b45b",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`shapes.Circle.scaled` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotal` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `netTotal` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "twins.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_ea072d",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "file": "twins.go",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0134d56248677416",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ea072d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.netTotal",
+        "hash": "sh_0134d56248677416",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.netTotal` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `sumAfterCharge` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `sumAfterCharge` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "twins.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_ea072d",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "file": "twins.go",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0134d56248677416",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ea072d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.sumAfterCharge",
+        "hash": "sh_0134d56248677416",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.sumAfterCharge` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalFloor` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `netTotalFloor` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "twins.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_ea072d",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 27,
+        "file": "twins.go",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0134d56248677416",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ea072d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.netTotalFloor",
+        "hash": "sh_0134d56248677416",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.netTotalFloor` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalLaidOut` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `netTotalLaidOut` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "twins.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_ea072d",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 39,
+        "file": "twins.go",
+        "line": 29
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0134d56248677416",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ea072d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.netTotalLaidOut",
+        "hash": "sh_0134d56248677416",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.netTotalLaidOut` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalPlus` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `netTotalPlus` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "twins.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_540c33",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 47,
+        "file": "twins.go",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_2b4b20df59bc267c",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_540c33 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.netTotalPlus",
+        "hash": "sh_2b4b20df59bc267c",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.netTotalPlus` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalCapped` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `netTotalCapped` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "twins.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_53f60e",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 57,
+        "file": "twins.go",
+        "line": 49
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_35dfa87324281c41",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_53f60e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.netTotalCapped",
+        "hash": "sh_35dfa87324281c41",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.netTotalCapped` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalProduct` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `netTotalProduct` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "twins.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_b860fe",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 65,
+        "file": "twins.go",
+        "line": 59
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_8d915c89cc43559e",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b860fe --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.netTotalProduct",
+        "hash": "sh_8d915c89cc43559e",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.netTotalProduct` is never referenced"
     }
   ],
   "next_actions": [
     {
       "command": null,
-      "finding": "fnd_1a4bbc",
+      "finding": "fnd_2b23b3",
       "kind": "review",
       "priority": 1,
+      "summary": "Delete `settleInvoices` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_2b23b3",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Delete `reconcilePayments` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_aa2cb4",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Delete `orderLines` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_a79783",
+      "kind": "review",
+      "priority": 4,
+      "summary": "Delete `refundLines` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_1a4bbc",
+      "kind": "review",
+      "priority": 5,
       "summary": "Delete `forgottenRate` from dead_helpers/dead_helpers.go if nothing outside the repository uses it, or import dead_helpers/dead_helpers.go where `forgottenRate` is meant to be called."
     },
     {
       "command": null,
-      "finding": "fnd_ae44d0",
+      "finding": "fnd_d6a95e",
       "kind": "review",
-      "priority": 2,
-      "summary": "Delete `UnusedTotal` from dead_export/dead_export.go if nothing outside the repository uses it, or import dead_export/dead_export.go where `UnusedTotal` is meant to be called."
+      "priority": 6,
+      "summary": "Delete `firstOverdraft` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_333d0e",
+      "kind": "review",
+      "priority": 7,
+      "summary": "Delete `describe` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_46c712",
+      "kind": "review",
+      "priority": 8,
+      "summary": "Delete `kindOf` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_1e1454",
+      "kind": "review",
+      "priority": 9,
+      "summary": "Delete `drain` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_0529eb",
+      "kind": "review",
+      "priority": 10,
+      "summary": "Delete `audited` from ledger.go if nothing outside the repository uses it, or call it where it is meant to be used."
     }
   ],
   "oracles": null,
@@ -173,7 +1193,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 21,
+      "files": 23,
       "languages": [
         "go"
       ],
@@ -181,7 +1201,7 @@
       "roots": [
         "."
       ],
-      "symbols": 80
+      "symbols": 84
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -193,7 +1213,7 @@
     "findings": {
       "fail": 0,
       "info": 1,
-      "warn": 1
+      "warn": 19
     },
     "gate": null,
     "new": 0,
@@ -201,6 +1221,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 2,
+  "total_findings": 20,
   "truncated": false
 }

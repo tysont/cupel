@@ -177,6 +177,30 @@
       }
     },
     {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Rates.java",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 13
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 32
+      }
+    },
+    {
       "reason": "entry-point",
       "symbol": {
         "col": 5,
@@ -413,7 +437,7 @@
       "symbol": {
         "col": 5,
         "file": "src/test/java/ledger/LedgerTest.java",
-        "line": 71
+        "line": 72
       }
     },
     {

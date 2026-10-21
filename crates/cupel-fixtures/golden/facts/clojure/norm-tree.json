@@ -10936,6 +10936,796 @@
       }
     },
     {
+      "hash": "sh_ba369f2d1d72839d",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn",
+            "span": {
+              "col": 2,
+              "end_col": 6,
+              "end_line": 5,
+              "line": 5
+            }
+          },
+          {
+            "children": [],
+            "label": "$lit",
+            "span": {
+              "col": 3,
+              "end_col": 46,
+              "end_line": 6,
+              "line": 6
+            },
+            "text": "\"Doubles amount through the imported rate.\""
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 4,
+                  "end_col": 10,
+                  "end_line": 7,
+                  "line": 7
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "vec_lit",
+            "span": {
+              "col": 3,
+              "end_col": 11,
+              "end_line": 7,
+              "line": 7
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "references/imported-rate",
+                "span": {
+                  "col": 4,
+                  "end_col": 28,
+                  "end_line": 8,
+                  "line": 8
+                }
+              },
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 29,
+                  "end_col": 35,
+                  "end_line": 8,
+                  "line": 8
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "list_lit",
+            "span": {
+              "col": 3,
+              "end_col": 36,
+              "end_line": 8,
+              "line": 8
+            }
+          }
+        ],
+        "label": "list_lit",
+        "span": {
+          "col": 1,
+          "end_col": 37,
+          "end_line": 8,
+          "line": 5
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/rates.clj",
+        "line": 5
+      }
+    },
+    {
+      "hash": "sh_a7034c5e1ec554a8",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn",
+            "span": {
+              "col": 2,
+              "end_col": 6,
+              "end_line": 5,
+              "line": 5
+            }
+          },
+          {
+            "children": [],
+            "label": "$lit",
+            "span": {
+              "col": 3,
+              "end_col": 61,
+              "end_line": 6,
+              "line": 6
+            },
+            "text": "\"Exported, so live by convention though nothing calls it.\""
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 4,
+                  "end_col": 10,
+                  "end_line": 7,
+                  "line": 7
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "vec_lit",
+            "span": {
+              "col": 3,
+              "end_col": 11,
+              "end_line": 7,
+              "line": 7
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "*",
+                "span": {
+                  "col": 4,
+                  "end_col": 5,
+                  "end_line": 8,
+                  "line": 8
+                }
+              },
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 6,
+                  "end_col": 12,
+                  "end_line": 8,
+                  "line": 8
+                },
+                "text": "amount"
+              },
+              {
+                "children": [],
+                "label": "$lit",
+                "span": {
+                  "col": 13,
+                  "end_col": 14,
+                  "end_line": 8,
+                  "line": 8
+                },
+                "text": "3"
+              }
+            ],
+            "label": "list_lit",
+            "span": {
+              "col": 3,
+              "end_col": 15,
+              "end_line": 8,
+              "line": 8
+            }
+          }
+        ],
+        "label": "list_lit",
+        "span": {
+          "col": 1,
+          "end_col": 16,
+          "end_line": 8,
+          "line": 5
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 5
+      }
+    },
+    {
+      "hash": "sh_bfdf16620853da3f",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn",
+            "span": {
+              "col": 2,
+              "end_col": 6,
+              "end_line": 10,
+              "line": 10
+            }
+          },
+          {
+            "children": [],
+            "label": "$lit",
+            "span": {
+              "col": 3,
+              "end_col": 66,
+              "end_line": 11,
+              "line": 11
+            },
+            "text": "\"Called only from ledger.rates, which requires this namespace.\""
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 4,
+                  "end_col": 10,
+                  "end_line": 12,
+                  "line": 12
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "vec_lit",
+            "span": {
+              "col": 3,
+              "end_col": 11,
+              "end_line": 12,
+              "line": 12
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "+",
+                "span": {
+                  "col": 4,
+                  "end_col": 5,
+                  "end_line": 13,
+                  "line": 13
+                }
+              },
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 6,
+                  "end_col": 12,
+                  "end_line": 13,
+                  "line": 13
+                },
+                "text": "amount"
+              },
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 13,
+                  "end_col": 19,
+                  "end_line": 13,
+                  "line": 13
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "list_lit",
+            "span": {
+              "col": 3,
+              "end_col": 20,
+              "end_line": 13,
+              "line": 13
+            }
+          }
+        ],
+        "label": "list_lit",
+        "span": {
+          "col": 1,
+          "end_col": 21,
+          "end_line": 13,
+          "line": 10
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 10
+      }
+    },
+    {
+      "hash": "sh_3da4a193ce7516a1",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn-",
+            "span": {
+              "col": 2,
+              "end_col": 7,
+              "end_line": 15,
+              "line": 15
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 21,
+                  "end_col": 27,
+                  "end_line": 15,
+                  "line": 15
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "vec_lit",
+            "span": {
+              "col": 20,
+              "end_col": 28,
+              "end_line": 15,
+              "line": 15
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "if",
+                "span": {
+                  "col": 4,
+                  "end_col": 6,
+                  "end_line": 16,
+                  "line": 16
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": ">",
+                    "span": {
+                      "col": 8,
+                      "end_col": 9,
+                      "end_line": 16,
+                      "line": 16
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 10,
+                      "end_col": 16,
+                      "end_line": 16,
+                      "line": 16
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$lit",
+                    "span": {
+                      "col": 17,
+                      "end_col": 20,
+                      "end_line": 16,
+                      "line": 16
+                    },
+                    "text": "100"
+                  }
+                ],
+                "label": "list_lit",
+                "span": {
+                  "col": 7,
+                  "end_col": 21,
+                  "end_line": 16,
+                  "line": 16
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "quot",
+                    "span": {
+                      "col": 23,
+                      "end_col": 27,
+                      "end_line": 16,
+                      "line": 16
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 28,
+                      "end_col": 34,
+                      "end_line": 16,
+                      "line": 16
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$lit",
+                    "span": {
+                      "col": 35,
+                      "end_col": 36,
+                      "end_line": 16,
+                      "line": 16
+                    },
+                    "text": "3"
+                  }
+                ],
+                "label": "list_lit",
+                "span": {
+                  "col": 22,
+                  "end_col": 37,
+                  "end_line": 16,
+                  "line": 16
+                }
+              },
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 38,
+                  "end_col": 44,
+                  "end_line": 16,
+                  "line": 16
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "list_lit",
+            "span": {
+              "col": 3,
+              "end_col": 45,
+              "end_line": 16,
+              "line": 16
+            }
+          }
+        ],
+        "label": "list_lit",
+        "span": {
+          "col": 1,
+          "end_col": 46,
+          "end_line": 16,
+          "line": 15
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 15
+      }
+    },
+    {
+      "hash": "sh_e070a762a52a6955",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn-",
+            "span": {
+              "col": 2,
+              "end_col": 7,
+              "end_line": 18,
+              "line": 18
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 21,
+                  "end_col": 27,
+                  "end_line": 18,
+                  "line": 18
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "vec_lit",
+            "span": {
+              "col": 20,
+              "end_col": 28,
+              "end_line": 18,
+              "line": 18
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "-",
+                "span": {
+                  "col": 4,
+                  "end_col": 5,
+                  "end_line": 19,
+                  "line": 19
+                }
+              },
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 6,
+                  "end_col": 12,
+                  "end_line": 19,
+                  "line": 19
+                },
+                "text": "amount"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "quot",
+                    "span": {
+                      "col": 14,
+                      "end_col": 18,
+                      "end_line": 19,
+                      "line": 19
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 19,
+                      "end_col": 25,
+                      "end_line": 19,
+                      "line": 19
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$lit",
+                    "span": {
+                      "col": 26,
+                      "end_col": 27,
+                      "end_line": 19,
+                      "line": 19
+                    },
+                    "text": "4"
+                  }
+                ],
+                "label": "list_lit",
+                "span": {
+                  "col": 13,
+                  "end_col": 28,
+                  "end_line": 19,
+                  "line": 19
+                }
+              }
+            ],
+            "label": "list_lit",
+            "span": {
+              "col": 3,
+              "end_col": 29,
+              "end_line": 19,
+              "line": 19
+            }
+          }
+        ],
+        "label": "list_lit",
+        "span": {
+          "col": 1,
+          "end_col": 30,
+          "end_line": 19,
+          "line": 18
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 18
+      }
+    },
+    {
+      "hash": "sh_2e488a95e3fc94f0",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn",
+            "span": {
+              "col": 2,
+              "end_col": 6,
+              "end_line": 21,
+              "line": 21
+            }
+          },
+          {
+            "children": [],
+            "label": "$lit",
+            "span": {
+              "col": 3,
+              "end_col": 55,
+              "end_line": 22,
+              "line": 22
+            },
+            "text": "\"Applies the rate kind names, resolved at run time.\""
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 4,
+                  "end_col": 8,
+                  "end_line": 23,
+                  "line": 23
+                },
+                "text": "kind"
+              },
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 9,
+                  "end_col": 15,
+                  "end_line": 23,
+                  "line": 23
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "vec_lit",
+            "span": {
+              "col": 3,
+              "end_col": 16,
+              "end_line": 23,
+              "line": 23
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "resolve",
+                    "span": {
+                      "col": 5,
+                      "end_col": 12,
+                      "end_line": 24,
+                      "line": 24
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "symbol",
+                        "span": {
+                          "col": 14,
+                          "end_col": 20,
+                          "end_line": 24,
+                          "line": 24
+                        }
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit",
+                        "span": {
+                          "col": 21,
+                          "end_col": 40,
+                          "end_line": 24,
+                          "line": 24
+                        },
+                        "text": "\"ledger.references\""
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "str",
+                            "span": {
+                              "col": 42,
+                              "end_col": 45,
+                              "end_line": 24,
+                              "line": 24
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 46,
+                              "end_col": 50,
+                              "end_line": 24,
+                              "line": 24
+                            },
+                            "text": "kind"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit",
+                            "span": {
+                              "col": 51,
+                              "end_col": 58,
+                              "end_line": 24,
+                              "line": 24
+                            },
+                            "text": "\"-rate\""
+                          }
+                        ],
+                        "label": "list_lit",
+                        "span": {
+                          "col": 41,
+                          "end_col": 59,
+                          "end_line": 24,
+                          "line": 24
+                        }
+                      }
+                    ],
+                    "label": "list_lit",
+                    "span": {
+                      "col": 13,
+                      "end_col": 60,
+                      "end_line": 24,
+                      "line": 24
+                    }
+                  }
+                ],
+                "label": "list_lit",
+                "span": {
+                  "col": 4,
+                  "end_col": 61,
+                  "end_line": 24,
+                  "line": 24
+                }
+              },
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 62,
+                  "end_col": 68,
+                  "end_line": 24,
+                  "line": 24
+                },
+                "text": "amount"
+              }
+            ],
+            "label": "list_lit",
+            "span": {
+              "col": 3,
+              "end_col": 69,
+              "end_line": 24,
+              "line": 24
+            }
+          }
+        ],
+        "label": "list_lit",
+        "span": {
+          "col": 1,
+          "end_col": 70,
+          "end_line": 24,
+          "line": 21
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 21
+      }
+    },
+    {
       "hash": "sh_73a9ad926e3d9b8c",
       "root": {
         "children": [
@@ -14405,8 +15195,8 @@
             "span": {
               "col": 2,
               "end_col": 9,
-              "end_line": 33,
-              "line": 33
+              "end_line": 34,
+              "line": 34
             }
           },
           {
@@ -14417,8 +15207,8 @@
                 "span": {
                   "col": 4,
                   "end_col": 21,
-                  "end_line": 34,
-                  "line": 34
+                  "end_line": 35,
+                  "line": 35
                 }
               },
               {
@@ -14427,8 +15217,8 @@
                 "span": {
                   "col": 22,
                   "end_col": 27,
-                  "end_line": 34,
-                  "line": 34
+                  "end_line": 35,
+                  "line": 35
                 },
                 "text": "\"ada\""
               }
@@ -14437,8 +15227,8 @@
             "span": {
               "col": 3,
               "end_col": 28,
-              "end_line": 34,
-              "line": 34
+              "end_line": 35,
+              "line": 35
             }
           }
         ],
@@ -14446,14 +15236,14 @@
         "span": {
           "col": 1,
           "end_col": 29,
-          "end_line": 34,
-          "line": 33
+          "end_line": 35,
+          "line": 34
         }
       },
       "symbol": {
         "col": 1,
         "file": "test/ledger/core_test.clj",
-        "line": 33
+        "line": 34
       }
     },
     {

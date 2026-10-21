@@ -154,6 +154,7 @@ impl Case {
                 span: at,
             }),
             property: None,
+            doc: None,
         }
     }
 

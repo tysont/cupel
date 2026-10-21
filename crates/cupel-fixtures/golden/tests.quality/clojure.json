@@ -215,9 +215,9 @@
       "location": {
         "col": 1,
         "end_col": 29,
-        "end_line": 34,
+        "end_line": 35,
         "file": "test/ledger/core_test.clj",
-        "line": 33
+        "line": 34
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_552f51a88ec35760",
@@ -513,7 +513,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 20,
+      "files": 22,
       "languages": [
         "clojure"
       ],
@@ -521,7 +521,7 @@
       "roots": [
         "."
       ],
-      "symbols": 79
+      "symbols": 85
     },
     "seed": "<seed>",
     "started": "<timestamp>",

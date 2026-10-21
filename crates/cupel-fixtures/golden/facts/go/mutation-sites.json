@@ -5202,8 +5202,8 @@
           "span": {
             "col": 2,
             "end_col": 19,
-            "end_line": 86,
-            "line": 86
+            "end_line": 87,
+            "line": 87
           },
           "to": [
             ""
@@ -5213,7 +5213,7 @@
       "symbol": {
         "col": 1,
         "file": "ledger_test.go",
-        "line": 85
+        "line": 86
       }
     },
     {
@@ -5934,6 +5934,270 @@
         "col": 1,
         "file": "pricing_test.go",
         "line": 42
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "importedRate(amount)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "77316a94f41c7067",
+          "span": {
+            "col": 9,
+            "end_col": 29,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "rates.go",
+        "line": 4
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "99014cc52723c1dd",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c2ee142e97ca6299",
+          "span": {
+            "col": 18,
+            "end_col": 19,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "e6f5fa3d50fcf062",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount > 100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "0c5d1f06acdaef51",
+          "span": {
+            "col": 5,
+            "end_col": 17,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "!(amount > 100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "94c765954cfa9662",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "bcf70bda62d119cf",
+          "span": {
+            "col": 14,
+            "end_col": 17,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "e2a88672b9112569",
+          "span": {
+            "col": 14,
+            "end_col": 17,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "100 + 1",
+            "100 - 1"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "402b5bc639c9c262",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "934f6c841b36ba8a",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "amount",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "32f6f5fd5cbdb873",
+          "span": {
+            "col": 9,
+            "end_col": 15,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 17
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "01676c33fab87d15",
+          "span": {
+            "col": 16,
+            "end_col": 17,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "6ee0a06017927e2f",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ecc45cb132fa1620",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 24
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 29
       }
     },
     {

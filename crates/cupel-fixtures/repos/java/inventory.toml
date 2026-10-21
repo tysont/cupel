@@ -230,6 +230,11 @@ file = "src/test/java/ledger/LedgerPropertyTest.java"
 name = "balanceOfOneEntryIsTheEntry"
 expect = { property = "jqwik" }
 
+[test-frames.doc]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "openingAnAccountDoesNotThrow"
+expect = { doc = "/** An account opens without a deposit (REQ-1). */" }
+
 [test-conventions.separate-test-file]
 file = "src/main/java/ledger/Ledger.java"
 name = "src/test/java/ledger/LedgerTest.java"
@@ -328,3 +333,33 @@ expect = { skip_dirs = ["target", "build", ".gradle"] }
 
 [project-info.packages]
 not-applicable = "Maven and Gradle select modules and projects by name (`-pl`, `:shapes:test`), not by path patterns."
+
+# The `references` fact (ADR-135): the reference cases live in references.* and rates.*.
+[references.local]
+file = "src/main/java/ledger/Ledger.java"
+name = "title"
+
+[references.imported]
+not-applicable = "A Java import binds a type; methods are called through it as members, and a plain method name stays unresolved because it may be inherited."
+
+[references.member]
+file = "src/main/java/ledger/Rates.java"
+name = "importedRate"
+
+[references.text]
+file = "src/main/java/ledger/References.java"
+name = "Rate"
+
+[references.attribute]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "Test"
+
+[references.implicit]
+not-applicable = "A Java constructor is named like its type, which `new` names, and the check never reports a constructor."
+
+[references.dynamic-member]
+file = "src/main/java/ledger/References.java"
+name = "References.class.getDeclaredMethod(kind + \"Rate\", long.class)"
+
+[references.dynamic-name]
+not-applicable = "Java reflection looks up the members of a class, which is recorded as member access by a computed name."

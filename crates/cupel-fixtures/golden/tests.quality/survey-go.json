@@ -463,9 +463,9 @@
       "location": {
         "col": 1,
         "end_col": 2,
-        "end_line": 87,
+        "end_line": 88,
         "file": "ledger_test.go",
-        "line": 85
+        "line": 86
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_8d0bf23821b2d110",

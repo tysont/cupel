@@ -15,6 +15,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "members pay less",
           "property": null,
@@ -49,6 +50,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -90,6 +92,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "doubles",
           "property": null,
@@ -121,6 +124,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "adds exactly",
           "property": null,
@@ -145,6 +149,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "rejects non-finite sums",
           "property": null,
@@ -169,6 +174,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "returns something",
           "property": null,
@@ -182,6 +188,7 @@
         },
         {
           "assertions": [],
+          "doc": null,
           "mocks": [],
           "name": "runs without checking",
           "property": null,
@@ -206,6 +213,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -258,6 +266,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "counts every value in a range",
           "property": null,
@@ -282,6 +291,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "adds every pair in the table",
           "property": null,
@@ -306,6 +316,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "keeps values in order",
           "property": null,
@@ -330,6 +341,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "ends with the last sum",
           "property": null,
@@ -361,6 +373,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -395,6 +408,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -429,6 +443,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -463,6 +478,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -497,6 +513,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -528,6 +545,7 @@
         },
         {
           "assertions": [],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -562,6 +580,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -590,12 +609,13 @@
               "span": {
                 "col": 5,
                 "end_col": 45,
-                "end_line": 46,
-                "line": 46
+                "end_line": 47,
+                "line": 47
               },
               "strength": "strong"
             }
           ],
+          "doc": "/** A range is consumed whole (REQ-1). */",
           "mocks": [
             {
               "span": {
@@ -610,8 +630,8 @@
               "span": {
                 "col": 21,
                 "end_col": 56,
-                "end_line": 44,
-                "line": 44
+                "end_line": 45,
+                "line": 45
               },
               "target": "vi.fn"
             }
@@ -622,8 +642,8 @@
           "span": {
             "col": 30,
             "end_col": 4,
-            "end_line": 47,
-            "line": 43
+            "end_line": 48,
+            "line": 44
           }
         }
       ],
@@ -653,6 +673,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "renders a count",
           "property": null,
@@ -684,6 +705,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "classifies overdrawn balances",
           "property": null,
@@ -708,6 +730,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "rejects empty amounts",
           "property": null,
@@ -732,6 +755,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "waits for the ledger server",
           "property": null,
@@ -781,6 +805,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "sums do not depend on the order",
           "property": "fast-check",

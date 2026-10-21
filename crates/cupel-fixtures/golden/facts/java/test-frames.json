@@ -15,6 +15,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "balanceOfOneEntryIsTheEntry",
           "property": "jqwik",
@@ -46,6 +47,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "membersPayExactlyTheDiscountedPrice",
           "property": null,
@@ -70,6 +72,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "blankAmountsAreRejected",
           "property": null,
@@ -94,6 +97,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "statementsAreNotEmpty",
           "property": null,
@@ -107,6 +111,7 @@
         },
         {
           "assertions": [],
+          "doc": null,
           "mocks": [],
           "name": "classifyingRuns",
           "property": null,
@@ -131,6 +136,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -183,6 +189,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "everyEntryCountsTowardTheBalance",
           "property": null,
@@ -207,6 +214,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "computedEntriesCountTowardTheBalance",
           "property": null,
@@ -231,6 +239,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "depositsKeepTheOwner",
           "property": null,
@@ -255,6 +264,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "depositsAccumulate",
           "property": null,
@@ -286,6 +296,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "depositAddsToTheBalance",
           "property": null,
@@ -310,6 +321,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "membersGetADiscount",
           "property": null,
@@ -334,6 +346,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "newAccountsAreRegistered",
           "property": null,
@@ -358,6 +371,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parsingGarbageFails",
           "property": null,
@@ -382,6 +396,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "newAccountsHaveDistinctIds",
           "property": null,
@@ -406,6 +421,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "classify",
           "property": null,
@@ -430,6 +446,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "statementIsMailed",
           "property": null,
@@ -462,6 +479,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parseCentsTrimsSpaces",
           "property": null,
@@ -475,6 +493,7 @@
         },
         {
           "assertions": [],
+          "doc": "/** An account opens without a deposit (REQ-1). */",
           "mocks": [],
           "name": "openingAnAccountDoesNotThrow",
           "property": null,
@@ -482,8 +501,8 @@
           "span": {
             "col": 5,
             "end_col": 6,
-            "end_line": 74,
-            "line": 71
+            "end_line": 75,
+            "line": 72
           }
         }
       ],
@@ -529,6 +548,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "tallyReportsOverdraft",
           "property": null,
@@ -553,6 +573,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parseCentsAcceptsDigits",
           "property": null,
@@ -577,6 +598,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "parseCentsRejectsBlanks",
           "property": null,
@@ -601,6 +623,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "discountSnapshot",
           "property": null,
@@ -635,6 +658,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {

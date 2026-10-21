@@ -47,6 +47,7 @@ fn case(name: &str, line: u32) -> TestCase {
         mocks: Vec::new(),
         skip: None,
         property: None,
+        doc: None,
     }
 }
 

@@ -24,6 +24,7 @@ pub struct Tables {
     /// Present when the language has a `Roots` producer.
     pub roots: Option<RootRules>,
     pub api: ApiRules,
+    pub references: ReferenceRules,
     /// Present when `check --scaffold` writes property stubs for the language (ADR-096 §4).
     pub property_stubs: Option<crate::property_stubs::StubRules>,
 }
@@ -396,6 +397,27 @@ pub struct TestsFor {
 pub struct RootRules {
     pub entry_points: Vec<String>,
     pub hooks: Vec<String>,
+}
+
+/// `[references]`: what the `References` producer reads besides `references.scm` (ADR-135).
+///
+/// ```toml
+/// [references]
+/// inert = ["inline", "allow"]   # attributes with these names only instruct the compiler or a
+///                               # linter, so they are not references to what they are on
+/// implicit = ["constructor"]    # methods with these names are called by the runtime
+/// path_imports = true           # an import that lists no names binds its path's last
+///                               # segment (Rust `use a::b` binds `b`); default false
+/// ```
+///
+/// An attribute's name is its text up to its first `(`, with a leading `@` or `#[` and any
+/// path before its last segment removed: `@functools.cache` is `cache`.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct ReferenceRules {
+    pub inert: Vec<String>,
+    pub implicit: Vec<String>,
+    pub path_imports: bool,
 }
 
 /// `[api]`: how `QueryApi` spaces the tokens of a signature, beyond the shared rules documented

@@ -148,7 +148,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 
 | ID | Measures | Finding kinds | Cost |
 |---|---|---|---|
-| `meta.traceability` | Each requirement ID in the task spec (config or `--spec FILE`) maps to ≥1 test that fails without the change | `spec.untested-requirement` | standard |
+| `meta.traceability` | Each requirement ID in the task spec (config or `--spec FILE`) maps to ≥1 test that fails without the change; a `REQ-<n>` marker in an added test's name or doc comment names a requirement too (ADR-134) | `spec.untested-requirement`, `spec.unlisted-requirement` | standard |
 | `meta.oracle-independence` | Labels each passing check by whether its oracle is independent of the change author (reference impl, spec, pre-existing tests) vs self-authored | `evidence.self-authored-only` | quick |
 
 ### 5.8 Depth → cost class mapping
@@ -629,8 +629,9 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `ModelCheckResults` | per proof harness a bounded model checker found in the project roots: verified, failed, or undetermined; the properties it refuted (description, function, place) and a counterexample (the values drawn, a test that replays them); each root's run (ADR-117) | model checker tool | `conc.model-check` |
 | `ProofResults` | a deductive verifier's run over the proof files in the project roots: the files, the declarations verified, and each obligation not discharged — failed (the verifier could not prove it) or open (assumed, or undecided in its time or resources) — with its place and related places; each root's run (ADR-118) | verifier tool | `spec.prove` |
 | `ContractViolations` | per violated contract: kind (precondition, postcondition, invariant), function, message, where it is declared, the test that violated it; whether a project root declares the contract library, each root's run (ADR-113) | contract tool, from the baseline runner's run with contract checking on | `spec.contracts` |
+| `References` | every place that may name a symbol, over every file of the language: plain names resolved in their file or through its imports, members, strings, and attributes, each from its innermost symbol; and where a name is computed at run time, with what it can reach (ADR-135) | language | `static.dead-code` |
 
-P7 added `Traces`, `Histories`, `ProofResults`, `ContractViolations`, `SimulationResults` (ADR-120), and `ModelCheckResults` (ADR-117) under the same rules. Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
+P7 added `Traces`, `Histories`, `ProofResults`, `ContractViolations`, `SimulationResults` (ADR-120), and `ModelCheckResults` (ADR-117) under the same rules. P9 added `References` (ADR-135). Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
 
 The catalog is read from those entries, in `FactKind`'s declaration order, so the table above has no counterpart list in code; each kind's schema is pinned by a snapshot of its own (ADR-123).
 

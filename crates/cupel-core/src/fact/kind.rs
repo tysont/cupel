@@ -38,4 +38,5 @@ pub enum FactKind {
     ModelCheckResults,
     ProofResults,
     ContractViolations,
+    References,
 }

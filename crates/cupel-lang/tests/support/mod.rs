@@ -39,7 +39,25 @@ pub fn produce_excluding<F: Fact>(lang: &str, root: &Path, exclude: &Exclude) ->
     fact
 }
 
+/// Produces `F` for `lang` over `root` with only `files` in scope, panicking on any event.
+pub fn produce_scoped<F: Fact>(lang: &str, root: &Path, files: &[&str]) -> F {
+    let scope = Scope::of_files(files.iter().map(|file| (*file).to_owned()).collect());
+    let (fact, events) = produce_over::<F>(lang, root, &Exclude::default(), Some(scope));
+    assert!(events.is_empty(), "{events:?}");
+    fact
+}
+
 fn produce_in<F: Fact>(lang: &str, root: &Path, exclude: &Exclude) -> (F, Vec<Event>) {
+    produce_over::<F>(lang, root, exclude, None)
+}
+
+/// Produces `F` for `lang` over `root` with `scope`, or every file the walk finds.
+fn produce_over<F: Fact>(
+    lang: &str,
+    root: &Path,
+    exclude: &Exclude,
+    scope: Option<Scope>,
+) -> (F, Vec<Event>) {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
@@ -57,12 +75,14 @@ fn produce_in<F: Fact>(lang: &str, root: &Path, exclude: &Exclude) -> (F, Vec<Ev
         writer,
         Cancellation::new(),
     );
-    let scope = Scope::of_files(walk_excluding(
-        root,
-        &languages,
-        &ProjectInfo::default(),
-        exclude,
-    ));
+    let scope = scope.unwrap_or_else(|| {
+        Scope::of_files(walk_excluding(
+            root,
+            &languages,
+            &ProjectInfo::default(),
+            exclude,
+        ))
+    });
     let mut events = Vec::new();
     let fact = producer
         .produce(&ctx, &scope, &mut events)

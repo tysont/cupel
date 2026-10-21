@@ -15,6 +15,13 @@
             "additionalProperties": false,
             "description": "Evidence of `dead.symbol` and `dead.export`.",
             "properties": {
+              "dynamic": {
+                "description": "Where the language computes a name at run time in a way that could reach the symbol,\nas `file:line` (at most ten); such access lowers the confidence.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
               "file": {
                 "description": "The file that defines the symbol.",
                 "type": "string"
@@ -30,6 +37,14 @@
                 },
                 "type": "array"
               },
+              "reach": {
+                "description": "What found it unreachable: `module` when no import or root reaches its module,\n`references` when its module is reachable but nothing names the symbol.",
+                "enum": [
+                  "module",
+                  "references"
+                ],
+                "type": "string"
+              },
               "suspect_imports": {
                 "description": "Unresolved or external imports whose specifier names this file, which may load it.",
                 "items": {
@@ -42,13 +57,15 @@
               "file",
               "module",
               "module_files",
-              "suspect_imports"
+              "suspect_imports",
+              "reach",
+              "dynamic"
             ],
             "title": "Unreachable",
             "type": "object"
           },
           "kind": "dead.symbol",
-          "summary": "A symbol in a module that nothing imports, that exports nothing, and that holds no entry point, test, or framework hook."
+          "summary": "A symbol in a module that nothing imports, that exports nothing, and that holds no entry point, test, or framework hook; or a symbol that is no root and that no reference outside its own body names."
         },
         {
           "action": "review",
@@ -57,6 +74,13 @@
             "additionalProperties": false,
             "description": "Evidence of `dead.symbol` and `dead.export`.",
             "properties": {
+              "dynamic": {
+                "description": "Where the language computes a name at run time in a way that could reach the symbol,\nas `file:line` (at most ten); such access lowers the confidence.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
               "file": {
                 "description": "The file that defines the symbol.",
                 "type": "string"
@@ -72,6 +96,14 @@
                 },
                 "type": "array"
               },
+              "reach": {
+                "description": "What found it unreachable: `module` when no import or root reaches its module,\n`references` when its module is reachable but nothing names the symbol.",
+                "enum": [
+                  "module",
+                  "references"
+                ],
+                "type": "string"
+              },
               "suspect_imports": {
                 "description": "Unresolved or external imports whose specifier names this file, which may load it.",
                 "items": {
@@ -84,7 +116,9 @@
               "file",
               "module",
               "module_files",
-              "suspect_imports"
+              "suspect_imports",
+              "reach",
+              "dynamic"
             ],
             "title": "Unreachable",
             "type": "object"
@@ -110,12 +144,13 @@
         "symbols",
         "norm-tree",
         "module-graph",
-        "roots"
+        "roots",
+        "references"
       ],
       "stability": "experimental",
-      "summary": "Symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive. Limitation: no fact carries references, so reachability is decided per module, never per call: an unused function in an imported module is not reported, and an export of an unimported module is only `dead.export` (info, low confidence) (ADR-058; a References fact is a P3 follow-up).",
+      "summary": "Symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive, then symbols that nothing outside their own body names. Limitation: references match by name, not by type, so any same-named reference keeps a symbol alive, and a function only dead code calls is reported once that code is gone; an export of an unimported module is only `dead.export` (info, low confidence) (ADR-058, ADR-135).",
       "tier": 0,
-      "version": 1,
+      "version": 2,
       "wants": []
     },
     "subject": "check"

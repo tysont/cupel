@@ -475,9 +475,9 @@
       "location": {
         "col": 30,
         "end_col": 4,
-        "end_line": 47,
+        "end_line": 48,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "new_since_baseline": false,
       "repro": "cupel check --only tests.quality --symbols sh_81f0fe0e957b356b",
@@ -653,7 +653,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 30,
+      "files": 32,
       "languages": [
         "typescript"
       ],
@@ -661,7 +661,7 @@
       "roots": [
         "."
       ],
-      "symbols": 74
+      "symbols": 83
     },
     "seed": "<seed>",
     "started": "<timestamp>",

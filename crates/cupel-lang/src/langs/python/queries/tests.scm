@@ -241,3 +241,13 @@
   (#any-of? @_setup
     "setUp" "asyncSetUp" "setUpClass" "setUpModule"
     "setup_method" "setup_class" "setup_function" "setup_module")) @test.setup
+
+; Docstrings (ADR-134): a test function's first statement, when it is a string. It documents
+; only a case the patterns above found.
+(function_definition
+  body: (block
+    .
+    (expression_statement
+      .
+      (string) @test.doc
+      .))) @doc.target

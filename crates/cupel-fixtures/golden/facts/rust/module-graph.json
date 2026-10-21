@@ -326,6 +326,28 @@
           }
         },
         {
+          "edge_kind": "declaration",
+          "from": "src/lib.rs",
+          "line": 35,
+          "relative": true,
+          "specifier": "rates",
+          "target": {
+            "kind": "file",
+            "path": "src/rates.rs"
+          }
+        },
+        {
+          "edge_kind": "declaration",
+          "from": "src/lib.rs",
+          "line": 36,
+          "relative": true,
+          "specifier": "references",
+          "target": {
+            "kind": "file",
+            "path": "src/references.rs"
+          }
+        },
+        {
           "edge_kind": "import",
           "from": "src/main.rs",
           "line": 1,
@@ -359,6 +381,20 @@
           "target": {
             "kind": "file",
             "path": "src/pricing.rs"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/rates.rs",
+          "line": 2,
+          "names": [
+            "imported_rate"
+          ],
+          "relative": false,
+          "specifier": "crate::references::imported_rate",
+          "target": {
+            "kind": "file",
+            "path": "src/references.rs"
           }
         },
         {

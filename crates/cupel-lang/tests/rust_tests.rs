@@ -52,7 +52,7 @@ fn integration_tests_are_cases_with_classified_assertions() {
                 &[],
                 36,
             ),
-            case("opening_an_account_does_not_panic", &[], Runs, &[], 42),
+            case("opening_an_account_does_not_panic", &[], Runs, &[], 43),
         ]
     );
 }

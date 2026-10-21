@@ -22,13 +22,15 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
 ];
 
 /// The command imports the root package, which is an edge to each of its files.
-const PACKAGE_FILES: [&str; 7] = [
+const PACKAGE_FILES: [&str; 9] = [
     "clones_settlement.go",
     "complexity.go",
     "crap_scores.go",
     "decide.go",
     "ledger.go",
     "pricing.go",
+    "rates.go",
+    "references.go",
     "twins.go",
 ];
 
@@ -278,5 +280,5 @@ fn every_go_import_is_an_import_edge() {
         Vec::<&(String, String, EdgeKind)>::new(),
         "Go has neither module declarations nor re-exports"
     );
-    assert_eq!(edges.len(), 36, "every fixture import is listed");
+    assert_eq!(edges.len(), 38, "every fixture import is listed");
 }

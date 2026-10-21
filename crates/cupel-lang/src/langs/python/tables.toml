@@ -168,6 +168,11 @@ template = "{base}tests/**/test_{stem}.py"
 [[conventions.tests_for]]
 template = "{base}tests/**/{stem}_test.py"
 
+# Decorators that change how a method binds or is typed, not who calls it: not references to what
+# they decorate (ADR-135).
+[references]
+inert = ["staticmethod", "classmethod", "property", "abstractmethod", "override"]
+
 # `main` is an entry point by name; api.scm adds functions a `__main__` guard calls, dunder
 # methods, pytest hooks, and fixtures. These unittest and pytest setup and teardown methods are
 # called by their runner.

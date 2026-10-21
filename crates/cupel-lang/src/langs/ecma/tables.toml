@@ -211,6 +211,10 @@ template = "{base}test/{module}.spec{ext}"
 template = "{path}"
 contains = "import.meta.vitest"
 
+# `new C()` runs C's constructor, which no reference names (ADR-135).
+[references]
+implicit = ["constructor"]
+
 # Node scripts conventionally call a `main` function; default exports are framework hooks,
 # captured in api.scm.
 [roots]

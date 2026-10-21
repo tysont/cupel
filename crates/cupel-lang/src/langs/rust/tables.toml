@@ -131,6 +131,12 @@ stems = ["lib"]
 template = "{path}"
 contains = "#[cfg(test)]"
 
+# Attributes that only instruct the compiler, rustdoc, or a linter are not references to what they
+# are on; `use a::b` binds `b` (ADR-135).
+[references]
+inert = ["allow", "warn", "deny", "expect", "inline", "cold", "must_use", "doc", "deprecated", "track_caller", "cfg", "cfg_attr"]
+path_imports = true
+
 [roots]
 entry_points = ["main"]
 

@@ -38,6 +38,7 @@ fn statement_is_mailed() {
     assert_ne!(account.statement(), "");
 }
 
+/// An account opens without a deposit (REQ-1).
 #[test]
 fn opening_an_account_does_not_panic() {
     Account::new("dee");

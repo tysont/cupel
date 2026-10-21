@@ -17,16 +17,18 @@ pub enum QueryFile {
     Tests,
     Imports,
     Api,
+    References,
 }
 
 impl QueryFile {
-    pub const ALL: [QueryFile; 6] = [
+    pub const ALL: [QueryFile; 7] = [
         Self::Symbols,
         Self::Decisions,
         Self::Mutations,
         Self::Tests,
         Self::Imports,
         Self::Api,
+        Self::References,
     ];
 
     /// The file's name under `langs/<id>/queries/`.
@@ -38,6 +40,7 @@ impl QueryFile {
             Self::Tests => "tests.scm",
             Self::Imports => "imports.scm",
             Self::Api => "api.scm",
+            Self::References => "references.scm",
         }
     }
 

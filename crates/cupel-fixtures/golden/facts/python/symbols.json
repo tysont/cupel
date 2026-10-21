@@ -993,6 +993,138 @@
     {
       "body": {
         "col": 5,
+        "end_col": 34,
+        "end_line": 7,
+        "line": 7
+      },
+      "display": "ledger.rates.doubled",
+      "file": "src/ledger/rates.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "doubled",
+      "namespace": "ledger.rates",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 34,
+        "end_line": 7,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 22,
+        "end_line": 8,
+        "line": 8
+      },
+      "display": "ledger.references.exported_rate",
+      "file": "src/ledger/references.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "exported_rate",
+      "namespace": "ledger.references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 22,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 27,
+        "end_line": 12,
+        "line": 12
+      },
+      "display": "ledger.references._imported_rate",
+      "file": "src/ledger/references.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "_imported_rate",
+      "namespace": "ledger.references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 27,
+        "end_line": 12,
+        "line": 11
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 18,
+        "end_line": 18,
+        "line": 16
+      },
+      "display": "ledger.references._tiered_rate",
+      "file": "src/ledger/references.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "_tiered_rate",
+      "namespace": "ledger.references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 18,
+        "line": 15
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 32,
+        "end_line": 22,
+        "line": 22
+      },
+      "display": "ledger.references._orphan_rate",
+      "file": "src/ledger/references.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "_orphan_rate",
+      "namespace": "ledger.references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 22,
+        "line": 21
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 5,
+        "end_col": 67,
+        "end_line": 26,
+        "line": 26
+      },
+      "display": "ledger.references.rate_named",
+      "file": "src/ledger/references.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "rate_named",
+      "namespace": "ledger.references",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 67,
+        "end_line": 26,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 5,
         "end_col": 40,
         "end_line": 7,
         "line": 7
@@ -1456,7 +1588,7 @@
       "body": {
         "col": 5,
         "end_col": 19,
-        "end_line": 57,
+        "end_line": 58,
         "line": 57
       },
       "display": "tests.test_ledger.test_opening_an_account_does_not_raise",
@@ -1469,7 +1601,7 @@
       "span": {
         "col": 1,
         "end_col": 19,
-        "end_line": 57,
+        "end_line": 58,
         "line": 56
       },
       "visibility": "public"

@@ -469,6 +469,90 @@
       }
     },
     {
+      "file": "src/rates.js",
+      "kind": "function",
+      "path": "rates.doubled",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      }
+    },
+    {
+      "file": "src/references.js",
+      "kind": "function",
+      "path": "references.exportedRate",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 6
+      }
+    },
+    {
+      "file": "src/references.js",
+      "kind": "function",
+      "path": "references.importedRate",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/references.js",
+      "kind": "function",
+      "path": "references.rateNamed",
+      "signature": "(_, _)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 25
+      }
+    },
+    {
+      "file": "src/references.js",
+      "kind": "function",
+      "path": "references.evaluate",
+      "signature": "(_)",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 29
+      }
+    },
+    {
+      "file": "src/references.js",
+      "kind": "type",
+      "path": "references.Tariff",
+      "signature": "",
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 42,
+        "line": 37
+      }
+    },
+    {
+      "file": "src/references.js",
+      "kind": "method",
+      "path": "references.Tariff.charge",
+      "signature": "(_)",
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 41,
+        "line": 38
+      }
+    },
+    {
       "file": "src/shapes/geometry.js",
       "kind": "type",
       "path": "shapes.geometry.Circle",

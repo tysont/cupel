@@ -2654,6 +2654,301 @@
     {
       "sites": [
         {
+          "from": "(references/imported-rate amount)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 36,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/rates.clj",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(* amount 3)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 15,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "7851eee8dc5a5e84",
+          "span": {
+            "col": 4,
+            "end_col": 5,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e0a1e5951864972b",
+          "span": {
+            "col": 13,
+            "end_col": 14,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(+ amount amount)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 20,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "80a3b57021cd8eb4",
+          "span": {
+            "col": 4,
+            "end_col": 5,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 10
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(if (> amount 100) (quot amount 3) amount)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 45,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "(> amount 100)",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "656338dcb68b3cb8",
+          "span": {
+            "col": 7,
+            "end_col": 21,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "(not (> amount 100))"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "0ace5cb14ed230f1",
+          "span": {
+            "col": 8,
+            "end_col": 9,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "28909a9ce6ef1362",
+          "span": {
+            "col": 17,
+            "end_col": 20,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "99df147d588dc865",
+          "span": {
+            "col": 17,
+            "end_col": 20,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "(inc 100)",
+            "(dec 100)"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ce5be598c90b7572",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 15
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "(- amount (quot amount 4))",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "838af4a83bb1e127",
+          "span": {
+            "col": 3,
+            "end_col": 29,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "41cf96b3096f69fc",
+          "span": {
+            "col": 4,
+            "end_col": 5,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ce5be598c90b7572",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 18
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "((resolve (symbol \"ledger.references\" (str kind \"-rate\"))) amount)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b6ee9f82913a3493",
+          "span": {
+            "col": 3,
+            "end_col": 69,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "nil"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "(format \"%d.%02d\" (quot cents 100) (rem cents 100))",
           "operator": "return-value",
           "set": "extended",
@@ -3693,7 +3988,7 @@
       "symbol": {
         "col": 1,
         "file": "test/ledger/core_test.clj",
-        "line": 33
+        "line": 34
       }
     },
     {

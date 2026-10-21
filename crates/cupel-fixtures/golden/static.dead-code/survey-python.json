@@ -4,17 +4,17 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 18,
+      "findings": 22,
       "id": "static.dead-code",
       "metrics": {
         "dead_exports": 17.0,
-        "dead_symbols": 1.0
+        "dead_symbols": 5.0
       },
       "oracle": null,
       "score": {
-        "n": 81,
+        "n": 87,
         "unit": "dead_symbols",
-        "value": 1.0
+        "value": 5.0
       },
       "skipped": null,
       "status": "fail",
@@ -33,11 +33,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/deps_layers/port.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `place` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/deps_layers/port.py",
         "module": "deps_layers.port",
         "module_files": [
           "src/deps_layers/port.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_65c408",
@@ -67,17 +69,107 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
+        "summary": "Delete `audit_limit` from src/ledger/__init__.py if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `audit_limit` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/ledger/references.py:26 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/ledger/references.py:26"
+        ],
+        "file": "src/ledger/__init__.py",
+        "module": "ledger",
+        "module_files": [
+          "src/ledger/__init__.py"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_59c553",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 18,
+        "file": "src/ledger/__init__.py",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0249365007d9e7be",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_59c553 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.audit_limit",
+        "hash": "sh_0249365007d9e7be",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.audit_limit` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `_audit` from src/ledger/account.py if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `_audit` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/ledger/references.py:26 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/ledger/references.py:26"
+        ],
+        "file": "src/ledger/account.py",
+        "module": "ledger.account",
+        "module_files": [
+          "src/ledger/account.py"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_d52f5b",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 35,
+        "file": "src/ledger/account.py",
+        "line": 34
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_03cb096d94308218",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d52f5b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.account.Account._audit",
+        "hash": "sh_03cb096d94308218",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.account.Account._audit` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
         "summary": "Delete `settle_invoices` from src/ledger/clones_settlement.py if nothing outside the repository uses it, or import src/ledger/clones_settlement.py where `settle_invoices` is meant to be called."
       },
       "check": "static.dead-code",
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle_invoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/clones_settlement.py",
         "module": "ledger.clones_settlement",
         "module_files": [
           "src/ledger/clones_settlement.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_f60f33",
@@ -113,11 +205,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcile_payments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/clones_settlement.py",
         "module": "ledger.clones_settlement",
         "module_files": [
           "src/ledger/clones_settlement.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_f60f33",
@@ -153,11 +247,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `order_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/clones_settlement.py",
         "module": "ledger.clones_settlement",
         "module_files": [
           "src/ledger/clones_settlement.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_e9c8a4",
@@ -193,11 +289,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/clones_settlement.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refund_lines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/clones_settlement.py",
         "module": "ledger.clones_settlement",
         "module_files": [
           "src/ledger/clones_settlement.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_ed3d1f",
@@ -233,11 +331,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/crap_scores.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `overdue` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/crap_scores.py",
         "module": "ledger.crap_scores",
         "module_files": [
           "src/ledger/crap_scores.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_92445d",
@@ -273,11 +373,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/crap_scores.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `clamp` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/crap_scores.py",
         "module": "ledger.crap_scores",
         "module_files": [
           "src/ledger/crap_scores.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_13315f",
@@ -313,11 +415,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/crap_scores.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `to_cents` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/crap_scores.py",
         "module": "ledger.crap_scores",
         "module_files": [
           "src/ledger/crap_scores.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_bc039e",
@@ -353,11 +457,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/dead_export.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unused_total` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/dead_export.py",
         "module": "ledger.dead_export",
         "module_files": [
           "src/ledger/dead_export.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_31c7aa",
@@ -393,11 +499,13 @@
       "confidence": 0.8,
       "detail": "No import in the repository resolves to src/ledger/dead_helpers.py or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `_forgotten_rate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/dead_helpers.py",
         "module": "ledger.dead_helpers",
         "module_files": [
           "src/ledger/dead_helpers.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_29c1cd",
@@ -427,17 +535,107 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
+        "summary": "Delete `_tiered_rate` from src/ledger/references.py if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `_tiered_rate` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/ledger/references.py:26 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/ledger/references.py:26"
+        ],
+        "file": "src/ledger/references.py",
+        "module": "ledger.references",
+        "module_files": [
+          "src/ledger/references.py"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_185ee0",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 18,
+        "file": "src/ledger/references.py",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6c225234f2f5758d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_185ee0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.references._tiered_rate",
+        "hash": "sh_6c225234f2f5758d",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.references._tiered_rate` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `_orphan_rate` from src/ledger/references.py if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `_orphan_rate` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/ledger/references.py:26 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/ledger/references.py:26"
+        ],
+        "file": "src/ledger/references.py",
+        "module": "ledger.references",
+        "module_files": [
+          "src/ledger/references.py"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_4671cb",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 22,
+        "file": "src/ledger/references.py",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_91302862c746c738",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_4671cb --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.references._orphan_rate",
+        "hash": "sh_91302862c746c738",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`ledger.references._orphan_rate` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
         "summary": "Delete `summary` from src/ledger/report/__init__.py if nothing outside the repository uses it, or import src/ledger/report/__init__.py where `summary` is meant to be called."
       },
       "check": "static.dead-code",
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/report/__init__.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `summary` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/report/__init__.py",
         "module": "ledger.report",
         "module_files": [
           "src/ledger/report/__init__.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_1d35f1",
@@ -473,11 +671,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/twins.py",
         "module": "ledger.twins",
         "module_files": [
           "src/ledger/twins.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_ff8e35",
@@ -513,11 +713,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `sum_after_charge` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/twins.py",
         "module": "ledger.twins",
         "module_files": [
           "src/ledger/twins.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_ff8e35",
@@ -553,11 +755,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_floor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/twins.py",
         "module": "ledger.twins",
         "module_files": [
           "src/ledger/twins.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_ff8e35",
@@ -593,11 +797,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_laid_out` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/twins.py",
         "module": "ledger.twins",
         "module_files": [
           "src/ledger/twins.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_ff8e35",
@@ -633,11 +839,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_plus` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/twins.py",
         "module": "ledger.twins",
         "module_files": [
           "src/ledger/twins.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_290010",
@@ -673,11 +881,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_capped` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/twins.py",
         "module": "ledger.twins",
         "module_files": [
           "src/ledger/twins.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_382b6d",
@@ -713,11 +923,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger/twins.py or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net_total_product` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger/twins.py",
         "module": "ledger.twins",
         "module_files": [
           "src/ledger/twins.py"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_362db2",

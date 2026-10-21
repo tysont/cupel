@@ -1423,6 +1423,99 @@
       "decisions": [],
       "symbol": {
         "col": 5,
+        "file": "src/main/java/ledger/Rates.java",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Rates.java",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 24,
+            "line": 22
+          },
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 31,
+            "end_line": 23,
+            "line": 23
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 32
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
         "file": "src/main/java/ledger/Twins.java",
         "line": 5
       }
@@ -2090,7 +2183,7 @@
       "symbol": {
         "col": 5,
         "file": "src/test/java/ledger/LedgerTest.java",
-        "line": 71
+        "line": 72
       }
     },
     {

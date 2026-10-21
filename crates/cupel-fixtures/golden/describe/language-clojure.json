@@ -109,6 +109,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "references",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.clojure",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "clojure",

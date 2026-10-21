@@ -267,6 +267,54 @@
     {
       "reason": "export",
       "symbol": {
+        "col": 8,
+        "file": "src/rates.js",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/references.js",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/references.js",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/references.js",
+        "line": 25
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/references.js",
+        "line": 29
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/references.js",
+        "line": 38
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
         "col": 1,
         "file": "src/report.cjs",
         "line": 3
@@ -557,7 +605,7 @@
       "symbol": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       }
     },
     {

@@ -172,3 +172,9 @@
     field: (field_identifier) @_cleanup)
   (#any-of? @_t "t" "b" "tb")
   (#eq? @_cleanup "Cleanup")) @test.setup
+
+; Doc comments (ADR-134): the `//` lines directly above a test function. It documents only a
+; case the patterns above found.
+((comment)+ @test.doc
+  .
+  (function_declaration) @doc.target)

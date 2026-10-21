@@ -15,6 +15,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "doubles",
           "property": null,
@@ -46,6 +47,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "classifies overdrawn balances",
           "property": null,
@@ -70,6 +72,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "does not call an empty balance rich",
           "property": null,
@@ -94,6 +97,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -128,6 +132,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "waits for the ledger server",
           "property": null,
@@ -167,6 +172,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "shows two decimals",
           "property": null,
@@ -191,6 +197,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -232,6 +239,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "adds exactly",
           "property": null,
@@ -256,6 +264,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "rejects blank amounts",
           "property": null,
@@ -280,6 +289,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "returns something",
           "property": null,
@@ -293,6 +303,7 @@
         },
         {
           "assertions": [],
+          "doc": null,
           "mocks": [],
           "name": "runs without checking",
           "property": null,
@@ -317,6 +328,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -369,6 +381,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "counts every value in a range",
           "property": null,
@@ -393,6 +406,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "adds every pair in the table",
           "property": null,
@@ -417,6 +431,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "keeps values in order",
           "property": null,
@@ -441,6 +456,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "ends with the last sum",
           "property": null,
@@ -472,6 +488,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -506,6 +523,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -540,6 +558,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -574,6 +593,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -608,6 +628,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -639,6 +660,7 @@
         },
         {
           "assertions": [],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -673,6 +695,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -707,6 +730,7 @@
               "strength": "weak"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -741,6 +765,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -769,12 +794,13 @@
               "span": {
                 "col": 5,
                 "end_col": 42,
-                "end_line": 55,
-                "line": 55
+                "end_line": 56,
+                "line": 56
               },
               "strength": "strong"
             }
           ],
+          "doc": "/** Parsing reports the cents it parsed (REQ-1). */",
           "mocks": [
             {
               "span": {
@@ -789,8 +815,8 @@
               "span": {
                 "col": 17,
                 "end_col": 24,
-                "end_line": 53,
-                "line": 53
+                "end_line": 54,
+                "line": 54
               },
               "target": "vi.fn"
             }
@@ -801,8 +827,8 @@
           "span": {
             "col": 32,
             "end_col": 4,
-            "end_line": 56,
-            "line": 52
+            "end_line": 57,
+            "line": 53
           }
         }
       ],
@@ -842,6 +868,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [],
           "name": "sums do not depend on the order",
           "property": "fast-check",
@@ -873,6 +900,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {
@@ -907,6 +935,7 @@
               "strength": "strong"
             }
           ],
+          "doc": null,
           "mocks": [
             {
               "span": {

@@ -68,6 +68,7 @@ class LedgerTest {
         assertEquals(42, Decide.parseCents(" 42 "));
     }
 
+    /** An account opens without a deposit (REQ-1). */
     @Test
     void openingAnAccountDoesNotThrow() {
         Ledger.open("ada");

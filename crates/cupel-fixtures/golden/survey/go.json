@@ -9,7 +9,7 @@
   "oracles": null,
   "plan": null,
   "rankings": {
-    "recommended": 19,
+    "recommended": 18,
     "targets": [
       {
         "findings": [
@@ -38,13 +38,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 58,
+            "rank": 60,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 58,
+            "rank": 60,
             "value": 0.0
           },
           {
@@ -132,7 +132,7 @@
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 30,
+            "rank": 31,
             "value": 1.0
           },
           {
@@ -176,7 +176,7 @@
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 31,
+            "rank": 32,
             "value": 1.0
           },
           {
@@ -220,7 +220,7 @@
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 32,
+            "rank": 33,
             "value": 1.0
           },
           {
@@ -248,9 +248,9 @@
           "location": {
             "col": 1,
             "end_col": 2,
-            "end_line": 87,
+            "end_line": 88,
             "file": "ledger_test.go",
-            "line": 85
+            "line": 86
           },
           "symbol": "sh_8d0bf23821b2d110"
         },
@@ -258,13 +258,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 66,
+            "rank": 68,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 66,
+            "rank": 68,
             "value": 0.0
           },
           {
@@ -308,7 +308,7 @@
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 33,
+            "rank": 34,
             "value": 1.0
           },
           {
@@ -346,13 +346,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 69,
+            "rank": 71,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 69,
+            "rank": 71,
             "value": 0.0
           },
           {
@@ -486,7 +486,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 21,
+      "files": 23,
       "languages": [
         "go"
       ],
@@ -494,7 +494,7 @@
       "roots": [
         "."
       ],
-      "symbols": 80
+      "symbols": 84
     },
     "seed": "<seed>",
     "started": "<timestamp>",

@@ -332,6 +332,38 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/ledger/rates.clj",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 21
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/ledger/report.clj",
         "line": 4
       }
@@ -525,7 +557,7 @@
       "symbol": {
         "col": 1,
         "file": "test/ledger/core_test.clj",
-        "line": 33
+        "line": 34
       }
     },
     {
@@ -533,7 +565,7 @@
       "symbol": {
         "col": 1,
         "file": "test/ledger/core_test.clj",
-        "line": 33
+        "line": 34
       }
     },
     {
