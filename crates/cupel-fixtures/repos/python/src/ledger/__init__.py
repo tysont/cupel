@@ -20,3 +20,6 @@ def audit_limit(entries):
 
 def _scale(count):
     return count * 2
+
+
+from .rates import doubled

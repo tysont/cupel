@@ -98,6 +98,28 @@
           "specifier": "example.com/ledger",
           "target": {
             "kind": "file",
+            "path": "rates.go"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
+            "path": "references.go"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "cmd/ledger/main.go",
+          "line": 7,
+          "relative": false,
+          "specifier": "example.com/ledger",
+          "target": {
+            "kind": "file",
             "path": "twins.go"
           }
         },

@@ -3542,6 +3542,255 @@
       "sites": [],
       "symbol": {
         "col": 1,
+        "file": "src/rates.rs",
+        "line": 5
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "8a8f6411ebcb0bcf",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "16382587999e94df",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "81ca511bb0663573",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 13
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount > 100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "d59e50da1af178be",
+          "span": {
+            "col": 8,
+            "end_col": 20,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "!(amount > 100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "2627e78aab624908",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "eeca1cdbf6ccbae5",
+          "span": {
+            "col": 17,
+            "end_col": 20,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "d0ce3cb336487967",
+          "span": {
+            "col": 17,
+            "end_col": 20,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "100 + 1",
+            "100 - 1"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "0662a9e666ed3aed",
+          "span": {
+            "col": 30,
+            "end_col": 31,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "df5e5608366e84f9",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 17
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "23638fafdcdf4096",
+          "span": {
+            "col": 12,
+            "end_col": 13,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "/",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "c1726290a46bea77",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "1edd5cc6813de9b7",
+          "span": {
+            "col": 23,
+            "end_col": 24,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "==",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "d2af52f71fbf844e",
+          "span": {
+            "col": 33,
+            "end_col": 35,
+            "end_line": 29,
+            "line": 29
+          },
+          "to": [
+            "!="
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 26
+      }
+    },
+    {
+      "sites": [],
+      "symbol": {
+        "col": 1,
         "file": "src/report/format.rs",
         "line": 1
       }

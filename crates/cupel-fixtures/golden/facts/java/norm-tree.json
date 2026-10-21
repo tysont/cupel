@@ -7616,6 +7616,590 @@
       },
       "symbol": {
         "col": 5,
+        "file": "src/main/java/ledger/Rates.java",
+        "line": 5
+      }
+    },
+    {
+      "hash": "sh_bf234a11f8d05793",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "integral_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "formal_parameter"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "importedRate"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "method_invocation"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "method_declaration"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Rates.java",
+        "line": 8
+      }
+    },
+    {
+      "hash": "sh_181d7b3e28a51040",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [],
+            "label": "constructor_body"
+          }
+        ],
+        "label": "constructor_declaration"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 10
+      }
+    },
+    {
+      "hash": "sh_35de341e6c392326",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "integral_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "formal_parameter"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "*"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "method_declaration"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 13
+      }
+    },
+    {
+      "hash": "sh_d7bfb0c8cc0b9ffb",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "integral_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "formal_parameter"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "+"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "method_declaration"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 17
+      }
+    },
+    {
+      "hash": "sh_d12d0985df99ac97",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "integral_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "formal_parameter"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      }
+                    ],
+                    "label": "parenthesized_expression"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "return_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "if_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "method_declaration"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 21
+      }
+    },
+    {
+      "hash": "sh_37eb472d059f88a2",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "integral_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "formal_parameter"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "-"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "/"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "method_declaration"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 28
+      }
+    },
+    {
+      "hash": "sh_99175aeca9ac7388",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "integral_type"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "formal_parameter"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "formal_parameter"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "throws"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "="
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "class_literal"
+                          },
+                          {
+                            "children": [],
+                            "label": "getDeclaredMethod"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "+"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "binary_expression"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "integral_type"
+                                  }
+                                ],
+                                "label": "class_literal"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "method_invocation"
+                      }
+                    ],
+                    "label": "variable_declarator"
+                  }
+                ],
+                "label": "local_variable_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "integral_type"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "invoke"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "method_invocation"
+                      }
+                    ],
+                    "label": "cast_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "method_declaration"
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 32
+      }
+    },
+    {
+      "hash": "sh_181d7b3e28a51040",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [],
+            "label": "constructor_body"
+          }
+        ],
+        "label": "constructor_declaration"
+      },
+      "symbol": {
+        "col": 5,
         "file": "src/main/java/ledger/Twins.java",
         "line": 5
       }

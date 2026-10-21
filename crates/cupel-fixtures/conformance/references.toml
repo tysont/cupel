@@ -1,0 +1,43 @@
+# ABOUTME: Conformance inventory for the `references` fact: kinds of reference a References producer must
+# ABOUTME: record. `file` is the referencing file; `name` is the reference's name or a dynamic access's text.
+fact = "references"
+
+[[constructs]]
+id = "local"
+summary = "A plain name resolved to a function defined in the same file."
+expect = { kind = "name", target = { kind = "local" } }
+
+[[constructs]]
+id = "imported"
+summary = "A plain name an import of the file binds, resolved to the function in the imported file."
+expect = { kind = "name", target = { kind = "imported" } }
+
+[[constructs]]
+id = "member"
+summary = "A name reached through a value, type, module, or namespace (a method call, a qualified path), unresolved."
+expect = { kind = "member", target = { kind = "unresolved" } }
+
+[[constructs]]
+id = "text"
+summary = "A string literal whose text is a name or a path of names."
+expect = { kind = "text", target = { kind = "unresolved" } }
+
+[[constructs]]
+id = "attribute"
+summary = "An attribute, decorator, or annotation on a definition, resolved to that definition."
+expect = { kind = "attribute", target = { kind = "local" } }
+
+[[constructs]]
+id = "implicit"
+summary = "A method the runtime calls by a name the language fixes (a constructor), resolved to itself."
+expect = { kind = "implicit", target = { kind = "local" } }
+
+[[constructs]]
+id = "dynamic-member"
+summary = "A member access by a name computed at run time (a computed subscript, reflection by name)."
+expect = { reach = "members" }
+
+[[constructs]]
+id = "dynamic-name"
+summary = "A lookup by a name computed at run time in a module or namespace, or code evaluated from text."
+expect = { reach = "names" }

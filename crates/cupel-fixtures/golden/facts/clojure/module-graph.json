@@ -179,6 +179,17 @@
         },
         {
           "edge_kind": "import",
+          "from": "src/ledger/rates.clj",
+          "line": 3,
+          "relative": false,
+          "specifier": "ledger.references",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/references.clj"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "test/ledger/core_test.clj",
           "line": 2,
           "relative": false,

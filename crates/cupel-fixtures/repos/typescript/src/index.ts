@@ -10,3 +10,5 @@ export enum Currency {
   Eur = "EUR",
   Usd = "USD",
 }
+
+export { doubled } from "./rates";

@@ -8030,6 +8030,504 @@
       }
     },
     {
+      "hash": "sh_387d79af69905e34",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "importedRate"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/rates.ts",
+        "line": 3
+      }
+    },
+    {
+      "hash": "sh_8d7d82f9ae2ba092",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "*"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 6
+      }
+    },
+    {
+      "hash": "sh_860706397aa50dc5",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "+"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 10
+      }
+    },
+    {
+      "hash": "sh_e4c389e1097e928c",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      }
+                    ],
+                    "label": "parenthesized_expression"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "return_statement"
+                      }
+                    ],
+                    "label": "statement_block"
+                  }
+                ],
+                "label": "if_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/references.ts",
+        "line": 14
+      }
+    },
+    {
+      "hash": "sh_6a4c204a0e284162",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "-"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "/"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/references.ts",
+        "line": 21
+      }
+    },
+    {
+      "hash": "sh_3153c9b11fbdcb92",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "kind"
+                          }
+                        ],
+                        "label": "subscript_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 25
+      }
+    },
+    {
+      "hash": "sh_423c67d90a74bb13",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "eval"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 29
+      }
+    },
+    {
+      "hash": "sh_2a54ba4eda94ed07",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/references.ts",
+        "line": 33
+      }
+    },
+    {
+      "hash": "sh_68d88cbb91616d76",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "+"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "method_definition"
+      },
+      "symbol": {
+        "col": 3,
+        "file": "src/references.ts",
+        "line": 39
+      }
+    },
+    {
       "hash": "sh_4260e2f62ac83652",
       "root": {
         "children": [

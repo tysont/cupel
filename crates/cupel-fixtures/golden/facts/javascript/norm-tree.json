@@ -5785,6 +5785,504 @@
       }
     },
     {
+      "hash": "sh_2a689a2c73c749b8",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "importedRate"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/rates.js",
+        "line": 3
+      }
+    },
+    {
+      "hash": "sh_18b9845384f58f60",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "*"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/references.js",
+        "line": 6
+      }
+    },
+    {
+      "hash": "sh_7c7afc8b3a23f40c",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "+"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/references.js",
+        "line": 10
+      }
+    },
+    {
+      "hash": "sh_3ce5b93a5ba224c6",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      }
+                    ],
+                    "label": "parenthesized_expression"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "/"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "return_statement"
+                      }
+                    ],
+                    "label": "statement_block"
+                  }
+                ],
+                "label": "if_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/references.js",
+        "line": 14
+      }
+    },
+    {
+      "hash": "sh_7555e3ddac8779a9",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "-"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "/"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/references.js",
+        "line": 21
+      }
+    },
+    {
+      "hash": "sh_13282a02175c59ab",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "kind"
+                          }
+                        ],
+                        "label": "subscript_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/references.js",
+        "line": 25
+      }
+    },
+    {
+      "hash": "sh_f4f9f85ff63d5df7",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "eval"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "arguments"
+                      }
+                    ],
+                    "label": "call_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 8,
+        "file": "src/references.js",
+        "line": 29
+      }
+    },
+    {
+      "hash": "sh_7c9a2d9191aa7656",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/references.js",
+        "line": 33
+      }
+    },
+    {
+      "hash": "sh_564b4a80d58ce01d",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "formal_parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "+"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_expression"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "statement_block"
+          }
+        ],
+        "label": "method_definition"
+      },
+      "symbol": {
+        "col": 3,
+        "file": "src/references.js",
+        "line": 38
+      }
+    },
+    {
       "hash": "sh_9d854abfec7574c5",
       "root": {
         "children": [

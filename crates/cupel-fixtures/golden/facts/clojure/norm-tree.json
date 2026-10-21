@@ -4567,6 +4567,354 @@
       }
     },
     {
+      "hash": "sh_ba369f2d1d72839d",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn"
+          },
+          {
+            "children": [],
+            "label": "$lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "vec_lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "references/imported-rate"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "list_lit"
+          }
+        ],
+        "label": "list_lit"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/rates.clj",
+        "line": 5
+      }
+    },
+    {
+      "hash": "sh_a7034c5e1ec554a8",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn"
+          },
+          {
+            "children": [],
+            "label": "$lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "vec_lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "*"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$lit"
+              }
+            ],
+            "label": "list_lit"
+          }
+        ],
+        "label": "list_lit"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 5
+      }
+    },
+    {
+      "hash": "sh_bfdf16620853da3f",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn"
+          },
+          {
+            "children": [],
+            "label": "$lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "vec_lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "+"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "list_lit"
+          }
+        ],
+        "label": "list_lit"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 10
+      }
+    },
+    {
+      "hash": "sh_3da4a193ce7516a1",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn-"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "vec_lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "if"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": ">"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$lit"
+                  }
+                ],
+                "label": "list_lit"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "quot"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$lit"
+                  }
+                ],
+                "label": "list_lit"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "list_lit"
+          }
+        ],
+        "label": "list_lit"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 15
+      }
+    },
+    {
+      "hash": "sh_e070a762a52a6955",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn-"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "vec_lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "-"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "quot"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$lit"
+                  }
+                ],
+                "label": "list_lit"
+              }
+            ],
+            "label": "list_lit"
+          }
+        ],
+        "label": "list_lit"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 18
+      }
+    },
+    {
+      "hash": "sh_2e488a95e3fc94f0",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "defn"
+          },
+          {
+            "children": [],
+            "label": "$lit"
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "vec_lit"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "resolve"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "symbol"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "str"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "list_lit"
+                      }
+                    ],
+                    "label": "list_lit"
+                  }
+                ],
+                "label": "list_lit"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "list_lit"
+          }
+        ],
+        "label": "list_lit"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 21
+      }
+    },
+    {
       "hash": "sh_73a9ad926e3d9b8c",
       "root": {
         "children": [

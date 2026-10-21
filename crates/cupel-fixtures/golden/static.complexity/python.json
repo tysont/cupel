@@ -15,7 +15,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 81,
+        "n": 87,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -256,7 +256,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 28,
+      "files": 30,
       "languages": [
         "python"
       ],
@@ -264,7 +264,7 @@
       "roots": [
         "."
       ],
-      "symbols": 81
+      "symbols": 87
     },
     "seed": "<seed>",
     "started": "<timestamp>",

@@ -5952,6 +5952,391 @@
       }
     },
     {
+      "hash": "sh_22007d206a7f7ccc",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "_imported_rate"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/rates.py",
+        "line": 6
+      }
+    },
+    {
+      "hash": "sh_2ce1e4c9a3630464",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "*"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "binary_operator"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 7
+      }
+    },
+    {
+      "hash": "sh_92f24cedef50ddf4",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "+"
+                      },
+                      {
+                        "children": [],
+                        "label": "$id"
+                      }
+                    ],
+                    "label": "binary_operator"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 11
+      }
+    },
+    {
+      "hash": "sh_6c225234f2f5758d",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": ">"
+                      },
+                      {
+                        "children": [],
+                        "label": "$lit"
+                      }
+                    ],
+                    "label": "comparison_operator"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "//"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_operator"
+                          }
+                        ],
+                        "label": "return_statement"
+                      }
+                    ],
+                    "label": "block"
+                  }
+                ],
+                "label": "if_statement"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 15
+      }
+    },
+    {
+      "hash": "sh_91302862c746c738",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id"
+                      },
+                      {
+                        "children": [],
+                        "label": "-"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": "//"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "binary_operator"
+                      }
+                    ],
+                    "label": "binary_operator"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 21
+      }
+    },
+    {
+      "hash": "sh_089542af1b45f531",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id"
+              },
+              {
+                "children": [],
+                "label": "$id"
+              }
+            ],
+            "label": "parameters"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "getattr"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id"
+                                      }
+                                    ],
+                                    "label": "attribute"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "subscript"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "argument_list"
+                          }
+                        ],
+                        "label": "call"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "argument_list"
+                      }
+                    ],
+                    "label": "call"
+                  }
+                ],
+                "label": "return_statement"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_definition"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 25
+      }
+    },
+    {
       "hash": "sh_8bd52f2f637ab4c7",
       "root": {
         "children": [

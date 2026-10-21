@@ -13779,6 +13779,526 @@
       }
     },
     {
+      "hash": "sh_15abb56d5a3baf37",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "importedRate"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  }
+                                ],
+                                "label": "argument_list"
+                              }
+                            ],
+                            "label": "call_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "rates.go",
+        "line": 4
+      }
+    },
+    {
+      "hash": "sh_55a0e89ca4588e0a",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "*"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 9
+      }
+    },
+    {
+      "hash": "sh_cadb50310aea2deb",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "+"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 13
+      }
+    },
+    {
+      "hash": "sh_1e08a97e00a46b40",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          },
+                          {
+                            "children": [],
+                            "label": ">"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit"
+                          }
+                        ],
+                        "label": "binary_expression"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "/"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$lit"
+                                          }
+                                        ],
+                                        "label": "binary_expression"
+                                      }
+                                    ],
+                                    "label": "expression_list"
+                                  }
+                                ],
+                                "label": "return_statement"
+                              }
+                            ],
+                            "label": "statement_list"
+                          }
+                        ],
+                        "label": "block"
+                      }
+                    ],
+                    "label": "if_statement"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 17
+      }
+    },
+    {
+      "hash": "sh_057881ff21c5da08",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id"
+                              },
+                              {
+                                "children": [],
+                                "label": "-"
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "/"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit"
+                                  }
+                                ],
+                                "label": "binary_expression"
+                              }
+                            ],
+                            "label": "binary_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 24
+      }
+    },
+    {
+      "hash": "sh_65757883cb94c5f6",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id"
+                  }
+                ],
+                "label": "parameter_declaration"
+              }
+            ],
+            "label": "parameter_list"
+          },
+          {
+            "children": [],
+            "label": "$id"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id"
+                                          }
+                                        ],
+                                        "label": "type_elem"
+                                      }
+                                    ],
+                                    "label": "type_arguments"
+                                  }
+                                ],
+                                "label": "generic_type"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id"
+                              }
+                            ],
+                            "label": "type_conversion_expression"
+                          }
+                        ],
+                        "label": "expression_list"
+                      }
+                    ],
+                    "label": "return_statement"
+                  }
+                ],
+                "label": "statement_list"
+              }
+            ],
+            "label": "block"
+          }
+        ],
+        "label": "function_declaration"
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 29
+      }
+    },
+    {
       "hash": "sh_33d83f95cc3845ce",
       "root": {
         "children": [

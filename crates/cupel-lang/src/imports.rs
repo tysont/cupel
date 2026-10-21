@@ -136,7 +136,8 @@ fn edge_kind(m: &Match<'_, '_>, names: &[String], reexported: &BTreeSet<&str>) -
     }
 }
 
-fn unquote(text: &str) -> &str {
+/// `text` without one pair of surrounding quotes.
+pub(crate) fn unquote(text: &str) -> &str {
     for quote in ['"', '\'', '`'] {
         if let Some(inner) = text.strip_prefix(quote).and_then(|t| t.strip_suffix(quote)) {
             return inner;
@@ -170,6 +171,24 @@ enum Entry {
 struct Listing {
     files: BTreeSet<String>,
     dirs: BTreeSet<String>,
+}
+
+impl<'a> Imports<'a> {
+    /// What a resolver of `language` sees when it resolves the imports of `scope`.
+    pub(crate) fn new(
+        root: &'a Path,
+        language: &'a dyn Language,
+        cache: &'a ParseCache,
+        scope: Vec<String>,
+    ) -> Self {
+        Self {
+            root,
+            language,
+            cache,
+            scope,
+            listings: Mutex::new(HashMap::new()),
+        }
+    }
 }
 
 impl Imports<'_> {
@@ -410,18 +429,17 @@ impl Producer<ModuleGraph> for ImportGraph {
         sink: &mut dyn EventSink,
     ) -> Result<ModuleGraph> {
         parse_scope(&self.cache, ctx, scope, self.language.as_ref(), sink)?;
-        let imports = Imports {
-            root: &ctx.ctx.root,
-            language: self.language.as_ref(),
-            cache: &self.cache,
-            scope: scope
+        let imports = Imports::new(
+            &ctx.ctx.root,
+            self.language.as_ref(),
+            &self.cache,
+            scope
                 .files
                 .iter()
                 .filter(|file| owns(self.language.as_ref(), file))
                 .cloned()
                 .collect(),
-            listings: Mutex::new(HashMap::new()),
-        };
+        );
         let graph = (self.resolve)(&imports);
         ctx.cancel.checkpoint()?;
         Ok(graph)

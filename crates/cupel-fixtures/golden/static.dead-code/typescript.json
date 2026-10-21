@@ -4,17 +4,17 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 26,
+      "findings": 30,
       "id": "static.dead-code",
       "metrics": {
         "dead_exports": 25.0,
-        "dead_symbols": 1.0
+        "dead_symbols": 5.0
       },
       "oracle": null,
       "score": {
-        "n": 74,
+        "n": 83,
         "unit": "dead_symbols",
-        "value": 1.0
+        "value": 5.0
       },
       "skipped": null,
       "status": "fail",
@@ -40,11 +40,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settleInvoices` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.ts",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_94d863",
@@ -80,11 +82,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `reconcilePayments` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.ts",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_94d863",
@@ -120,11 +124,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `orderLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.ts",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_600b6d",
@@ -160,11 +166,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/clones_settlement.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `refundLines` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/clones_settlement.ts",
         "module": "clones_settlement",
         "module_files": [
           "src/clones_settlement.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_932338",
@@ -200,11 +208,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `label` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.ts",
         "module": "complexity",
         "module_files": [
           "src/complexity.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_45aa29",
@@ -240,11 +250,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `settle` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.ts",
         "module": "complexity",
         "module_files": [
           "src/complexity.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_61fd12",
@@ -280,11 +292,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `openAccount` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.ts",
         "module": "complexity",
         "module_files": [
           "src/complexity.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_9da0ce",
@@ -320,11 +334,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `statementTemplate` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.ts",
         "module": "complexity",
         "module_files": [
           "src/complexity.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_081666",
@@ -360,11 +376,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `net` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.ts",
         "module": "complexity",
         "module_files": [
           "src/complexity.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_fe644a",
@@ -400,11 +418,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `constructor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.ts",
         "module": "complexity",
         "module_files": [
           "src/complexity.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_21c390",
@@ -440,11 +460,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `line` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.ts",
         "module": "complexity",
         "module_files": [
           "src/complexity.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_7dc904",
@@ -480,11 +502,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/complexity.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `month` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/complexity.ts",
         "module": "complexity",
         "module_files": [
           "src/complexity.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_4119bc",
@@ -520,11 +544,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `overdue` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.ts",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_452a2b",
@@ -560,11 +586,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `clamp` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.ts",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_7f8f65",
@@ -600,11 +628,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/crap_scores.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `toCents` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/crap_scores.ts",
         "module": "crap_scores",
         "module_files": [
           "src/crap_scores.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_e2b775",
@@ -640,11 +670,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/dead_export.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unusedTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/dead_export.ts",
         "module": "dead_export",
         "module_files": [
           "src/dead_export.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_7d5bb0",
@@ -680,11 +712,13 @@
       "confidence": 0.8,
       "detail": "No import in the repository resolves to src/dead_helpers.ts or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgottenRate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
       "evidence": {
+        "dynamic": [],
         "file": "src/dead_helpers.ts",
         "module": "dead_helpers",
         "module_files": [
           "src/dead_helpers.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_b6a705",
@@ -720,11 +754,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/ledger.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `load` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/ledger.ts",
         "module": "ledger",
         "module_files": [
           "src/ledger.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_d12ae1",
@@ -760,11 +796,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/legacy.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `round` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/legacy.ts",
         "module": "legacy.Legacy",
         "module_files": [
           "src/legacy.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_611c3c",
@@ -794,17 +832,205 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
+        "summary": "Delete `orphanRate` from src/references.ts if nothing outside the repository uses it, or import src/references.ts where `orphanRate` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `orphanRate` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/references.ts:30 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/references.ts:30"
+        ],
+        "file": "src/references.ts",
+        "module": "references",
+        "module_files": [
+          "src/references.ts"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_a1d27b",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "file": "src/references.ts",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6a4c204a0e284162",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_a1d27b --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "references.orphanRate",
+        "hash": "sh_6a4c204a0e284162",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`references.orphanRate` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `isValid` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `isValid` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `isValid` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/clones_settlement.ts:39 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/clones_settlement.ts:39",
+          "src/clones_settlement.ts:42",
+          "src/clones_settlement.ts:55",
+          "src/clones_settlement.ts:58",
+          "src/references.ts:26",
+          "src/references.ts:30"
+        ],
+        "file": "src/shapes/geometry.ts",
+        "module": "shapes.geometry",
+        "module_files": [
+          "src/shapes/geometry.ts"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_d015aa",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 24,
+        "file": "src/shapes/geometry.ts",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_6366617a9de5165d",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_d015aa --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shapes.geometry.Circle.isValid",
+        "hash": "sh_6366617a9de5165d",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`shapes.geometry.Circle.isValid` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `#cache` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `#cache` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `#cache` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/clones_settlement.ts:39 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/clones_settlement.ts:39",
+          "src/clones_settlement.ts:42",
+          "src/clones_settlement.ts:55",
+          "src/clones_settlement.ts:58",
+          "src/references.ts:26",
+          "src/references.ts:30"
+        ],
+        "file": "src/shapes/geometry.ts",
+        "module": "shapes.geometry",
+        "module_files": [
+          "src/shapes/geometry.ts"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_4b4283",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 3,
+        "end_col": 20,
+        "end_line": 26,
+        "file": "src/shapes/geometry.ts",
+        "line": 26
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_e61940a1979a4e21",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_4b4283 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shapes.geometry.Circle.#cache",
+        "hash": "sh_e61940a1979a4e21",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`shapes.geometry.Circle.#cache` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `perimeter` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `perimeter` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `perimeter` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/references.ts:30 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/references.ts:30"
+        ],
+        "file": "src/shapes/geometry.ts",
+        "module": "shapes.geometry",
+        "module_files": [
+          "src/shapes/geometry.ts"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_f43298",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 37,
+        "file": "src/shapes/geometry.ts",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_ae4c549213ee85f7",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f43298 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shapes.geometry.perimeter",
+        "hash": "sh_ae4c549213ee85f7",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`shapes.geometry.perimeter` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
         "summary": "Delete `netTotal` from src/twins.ts if nothing outside the repository uses it, or import src/twins.ts where `netTotal` is meant to be called."
       },
       "check": "static.dead-code",
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.ts",
         "module": "twins",
         "module_files": [
           "src/twins.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_aeeb14",
@@ -840,11 +1066,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `sumAfterCharge` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.ts",
         "module": "twins",
         "module_files": [
           "src/twins.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_aeeb14",
@@ -880,11 +1108,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalFloor` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.ts",
         "module": "twins",
         "module_files": [
           "src/twins.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_aeeb14",
@@ -920,11 +1150,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalLaidOut` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.ts",
         "module": "twins",
         "module_files": [
           "src/twins.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_aeeb14",
@@ -960,11 +1192,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalPlus` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.ts",
         "module": "twins",
         "module_files": [
           "src/twins.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_48dcbc",
@@ -1000,11 +1234,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalCapped` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.ts",
         "module": "twins",
         "module_files": [
           "src/twins.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_0e778d",
@@ -1040,11 +1276,13 @@
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/twins.ts or another file of its module, and nothing in it is an entry point, test, or framework hook. If `netTotalProduct` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/twins.ts",
         "module": "twins",
         "module_files": [
           "src/twins.ts"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_48e112",
@@ -1080,66 +1318,66 @@
     },
     {
       "command": null,
-      "finding": "fnd_94d863",
+      "finding": "fnd_a1d27b",
       "kind": "review",
       "priority": 2,
+      "summary": "Delete `orphanRate` from src/references.ts if nothing outside the repository uses it, or import src/references.ts where `orphanRate` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_d015aa",
+      "kind": "review",
+      "priority": 3,
+      "summary": "Delete `isValid` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `isValid` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_4b4283",
+      "kind": "review",
+      "priority": 4,
+      "summary": "Delete `#cache` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `#cache` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_f43298",
+      "kind": "review",
+      "priority": 5,
+      "summary": "Delete `perimeter` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `perimeter` is meant to be called."
+    },
+    {
+      "command": null,
+      "finding": "fnd_94d863",
+      "kind": "review",
+      "priority": 6,
       "summary": "Delete `settleInvoices` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `settleInvoices` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_94d863",
       "kind": "review",
-      "priority": 3,
+      "priority": 7,
       "summary": "Delete `reconcilePayments` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `reconcilePayments` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_600b6d",
       "kind": "review",
-      "priority": 4,
+      "priority": 8,
       "summary": "Delete `orderLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `orderLines` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_932338",
       "kind": "review",
-      "priority": 5,
+      "priority": 9,
       "summary": "Delete `refundLines` from src/clones_settlement.ts if nothing outside the repository uses it, or import src/clones_settlement.ts where `refundLines` is meant to be called."
     },
     {
       "command": null,
       "finding": "fnd_45aa29",
       "kind": "review",
-      "priority": 6,
-      "summary": "Delete `label` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `label` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_61fd12",
-      "kind": "review",
-      "priority": 7,
-      "summary": "Delete `settle` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `settle` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_9da0ce",
-      "kind": "review",
-      "priority": 8,
-      "summary": "Delete `openAccount` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `openAccount` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_081666",
-      "kind": "review",
-      "priority": 9,
-      "summary": "Delete `statementTemplate` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `statementTemplate` is meant to be called."
-    },
-    {
-      "command": null,
-      "finding": "fnd_fe644a",
-      "kind": "review",
       "priority": 10,
-      "summary": "Delete `net` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `net` is meant to be called."
+      "summary": "Delete `label` from src/complexity.ts if nothing outside the repository uses it, or import src/complexity.ts where `label` is meant to be called."
     }
   ],
   "oracles": null,
@@ -1189,7 +1427,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 30,
+      "files": 32,
       "languages": [
         "typescript"
       ],
@@ -1197,7 +1435,7 @@
       "roots": [
         "."
       ],
-      "symbols": 74
+      "symbols": 83
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -1209,7 +1447,7 @@
     "findings": {
       "fail": 0,
       "info": 25,
-      "warn": 1
+      "warn": 5
     },
     "gate": null,
     "new": 0,
@@ -1217,6 +1455,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 26,
+  "total_findings": 30,
   "truncated": false
 }

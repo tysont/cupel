@@ -323,3 +323,32 @@ expect = { skip_dirs = ["target", ".cpcache"] }
 
 [project-info.packages]
 not-applicable = "The Clojure CLI runs by alias and namespace, not by path patterns."
+
+# The `references` fact (ADR-135): the reference cases live in references.* and rates.*.
+[references.local]
+file = "src/ledger/core.clj"
+name = "scale"
+
+[references.imported]
+not-applicable = "A `:require` binds a namespace or its alias, and calls through it are qualified symbols, members; `:refer` lists are not read."
+
+[references.member]
+file = "src/ledger/rates.clj"
+name = "imported-rate"
+
+[references.text]
+file = "src/ledger/references.clj"
+name = "references"
+
+[references.attribute]
+not-applicable = "Clojure has no attribute syntax; metadata on a var is data that no processor applies to it."
+
+[references.implicit]
+not-applicable = "Clojure has no constructors or methods the runtime calls by a fixed name; protocol and record methods are public."
+
+[references.dynamic-member]
+not-applicable = "Clojure looks vars up by name in a namespace (`resolve`), which is recorded as a lookup by name."
+
+[references.dynamic-name]
+file = "src/ledger/references.clj"
+name = "(resolve (symbol \"ledger.references\" (str kind \"-rate\")))"

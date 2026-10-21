@@ -750,6 +750,204 @@
     },
     {
       "body": {
+        "col": 33,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "display": "rates.doubled",
+      "file": "src/rates.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "doubled",
+      "namespace": "rates",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 5,
+        "line": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 6
+      },
+      "display": "references.exportedRate",
+      "file": "src/references.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "exportedRate",
+      "namespace": "references",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 8,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 38,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 10
+      },
+      "display": "references.importedRate",
+      "file": "src/references.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "importedRate",
+      "namespace": "references",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 12,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 14
+      },
+      "display": "references.tieredRate",
+      "file": "src/references.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "tieredRate",
+      "namespace": "references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 19,
+        "line": 14
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 29,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 21
+      },
+      "display": "references.orphanRate",
+      "file": "src/references.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "orphanRate",
+      "namespace": "references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 21
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 41,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 25
+      },
+      "display": "references.rateNamed",
+      "file": "src/references.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "rateNamed",
+      "namespace": "references",
+      "parameters": 2,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 27,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 29
+      },
+      "display": "references.evaluate",
+      "file": "src/references.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "evaluate",
+      "namespace": "references",
+      "parameters": 1,
+      "span": {
+        "col": 8,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 29
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 25,
+        "end_col": 2,
+        "end_line": 35,
+        "line": 33
+      },
+      "display": "references.logged",
+      "file": "src/references.js",
+      "kind": "function",
+      "lang": "javascript",
+      "name": "logged",
+      "namespace": "references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 35,
+        "line": 33
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 18,
+        "end_col": 4,
+        "end_line": 41,
+        "line": 39
+      },
+      "display": "references.Tariff.charge",
+      "file": "src/references.js",
+      "kind": "method",
+      "lang": "javascript",
+      "name": "charge",
+      "namespace": "references.Tariff",
+      "parameters": 1,
+      "span": {
+        "col": 3,
+        "end_col": 4,
+        "end_line": 41,
+        "line": 38
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 27,
         "end_col": 2,
         "end_line": 5,

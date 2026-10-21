@@ -999,6 +999,71 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "src/ledger/rates.py",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 11
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "src/ledger/report/__init__.py",
         "line": 6
       }

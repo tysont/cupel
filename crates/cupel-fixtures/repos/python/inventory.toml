@@ -335,3 +335,34 @@ expect = { skip_dirs = [".venv", "venv", "__pycache__", ".tox"] }
 
 [project-info.packages]
 not-applicable = "Python runners collect tests from the project directory; their commands take no package patterns."
+
+# The `references` fact (ADR-135): the reference cases live in references.* and rates.*.
+[references.local]
+file = "src/ledger/__init__.py"
+name = "_scale"
+
+[references.imported]
+file = "src/ledger/rates.py"
+name = "_imported_rate"
+
+[references.member]
+file = "src/ledger/references.py"
+name = "modules"
+
+[references.text]
+file = "src/ledger/references.py"
+name = "_rate"
+
+[references.attribute]
+file = "tests/conftest.py"
+name = "fixture"
+
+[references.implicit]
+not-applicable = "The methods Python calls implicitly are dunder methods, which are public roots."
+
+[references.dynamic-member]
+not-applicable = "Python reaches an attribute by a computed name through `getattr`, which reaches a module's functions too, so it is recorded as a lookup by name."
+
+[references.dynamic-name]
+file = "src/ledger/references.py"
+name = "getattr(sys.modules[__name__], f\"_{kind}_rate\")"

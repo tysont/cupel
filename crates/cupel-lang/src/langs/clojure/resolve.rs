@@ -24,7 +24,7 @@ use std::sync::Arc;
 use cupel_core::ProducerRegistry;
 use cupel_core::syntax::{ImportEdge, ImportTarget, ModuleGraph, RootImports};
 
-use crate::imports::{ImportGraph, Imports, join};
+use crate::imports::{Imports, join};
 use crate::language::Language;
 use crate::parse::ParseCache;
 
@@ -40,10 +40,10 @@ const GENERATED: [&str; 3] = ["target", ".cpcache", "node_modules"];
 /// How deep below the repository root `deps.edn` files are searched for.
 const SEARCH_DEPTH: usize = 6;
 
-/// Registers the module graph, which reads the file system, since which file defines a namespace
-/// depends on the classpath's roots.
+/// Registers the module graph and the references resolved through it, which read the file
+/// system, since which file defines a namespace depends on the classpath's roots.
 pub fn register(language: Arc<dyn Language>, cache: &Arc<ParseCache>, reg: &mut ProducerRegistry) {
-    reg.register::<ModuleGraph, _>(ImportGraph::new(language, Arc::clone(cache), graph));
+    crate::references::register_resolved(language, cache, graph, reg);
 }
 
 /// Resolves every import in scope.

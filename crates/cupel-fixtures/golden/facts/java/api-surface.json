@@ -385,6 +385,66 @@
       }
     },
     {
+      "file": "src/main/java/ledger/Rates.java",
+      "kind": "type",
+      "path": "ledger.Rates",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 4
+      }
+    },
+    {
+      "file": "src/main/java/ledger/Rates.java",
+      "kind": "method",
+      "path": "ledger.Rates.doubled",
+      "signature": "long doubled(long _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/main/java/ledger/References.java",
+      "kind": "type",
+      "path": "ledger.References",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 36,
+        "line": 9
+      }
+    },
+    {
+      "file": "src/main/java/ledger/References.java",
+      "kind": "method",
+      "path": "ledger.References.exportedRate",
+      "signature": "long exportedRate(long _)",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 13
+      }
+    },
+    {
+      "file": "src/main/java/ledger/References.java",
+      "kind": "method",
+      "path": "ledger.References.rateNamed",
+      "signature": "long rateNamed(String _, long _) throws ReflectiveOperationException",
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 35,
+        "line": 32
+      }
+    },
+    {
       "file": "src/main/java/ledger/cmd/Main.java",
       "kind": "type",
       "path": "ledger.cmd.Main",

@@ -49,6 +49,7 @@
 //! | `project-info` | roots whose `path` is `file` |
 //! | `histories` | histories whose `name` is `file` |
 //! | `simulation-results` | harnesses defined in `file` whose `name` is `name` |
+//! | `references` | references from `file` whose `name` is `name`, and its dynamic accesses whose `text` is `name` |
 //!
 //! An execution fact in [`execution`] has an inventory too (ADR-119): its producers' real-tool
 //! tests produce it over their own fixture repository (`repos/<check>/<lang>/`), whose
@@ -432,6 +433,15 @@ fn locate(
         FactKind::Histories => list(value, "histories")
             .into_iter()
             .filter(|history| is(history, "name", file))
+            .collect(),
+        FactKind::References => list(value, "references")
+            .into_iter()
+            .filter(|reference| is(reference, "file", file) && name_is(reference, "name"))
+            .chain(
+                list(value, "dynamic")
+                    .into_iter()
+                    .filter(|access| is(access, "file", file) && name_is(access, "text")),
+            )
             .collect(),
         FactKind::SimulationResults => list(value, "harnesses")
             .into_iter()

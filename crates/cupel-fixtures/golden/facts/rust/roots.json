@@ -292,6 +292,30 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/rates.rs",
+        "line": 5
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 8
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 26
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/report/format.rs",
         "line": 1
       }

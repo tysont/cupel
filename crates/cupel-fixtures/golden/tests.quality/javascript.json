@@ -734,7 +734,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 30,
+      "files": 32,
       "languages": [
         "javascript"
       ],
@@ -742,7 +742,7 @@
       "roots": [
         "."
       ],
-      "symbols": 77
+      "symbols": 86
     },
     "seed": "<seed>",
     "started": "<timestamp>",

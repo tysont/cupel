@@ -589,6 +589,54 @@
       }
     },
     {
+      "file": "src/ledger/rates.clj",
+      "kind": "function",
+      "path": "ledger.rates/doubled",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 37,
+        "end_line": 8,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/ledger/references.clj",
+      "kind": "function",
+      "path": "ledger.references/exported-rate",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 8,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/ledger/references.clj",
+      "kind": "function",
+      "path": "ledger.references/imported-rate",
+      "signature": "[_]",
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 13,
+        "line": 10
+      }
+    },
+    {
+      "file": "src/ledger/references.clj",
+      "kind": "function",
+      "path": "ledger.references/rate-named",
+      "signature": "[_ _]",
+      "span": {
+        "col": 1,
+        "end_col": 70,
+        "end_line": 24,
+        "line": 21
+      }
+    },
+    {
       "file": "src/ledger/report.clj",
       "kind": "function",
       "path": "ledger.report/render",

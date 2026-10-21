@@ -1041,6 +1041,182 @@
         "end_line": 6,
         "line": 5
       },
+      "display": "ledger.Rates.Rates",
+      "file": "src/main/java/ledger/Rates.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "Rates",
+      "namespace": "ledger.Rates",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 45,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "ledger.Rates.doubled",
+      "file": "src/main/java/ledger/Rates.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "doubled",
+      "namespace": "ledger.Rates",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 26,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 10
+      },
+      "display": "ledger.References.References",
+      "file": "src/main/java/ledger/References.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "References",
+      "namespace": "ledger.References",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 11,
+        "line": 10
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 50,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "ledger.References.exportedRate",
+      "file": "src/main/java/ledger/References.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "exportedRate",
+      "namespace": "ledger.References",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 13
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 43,
+        "end_col": 6,
+        "end_line": 19,
+        "line": 17
+      },
+      "display": "ledger.References.importedRate",
+      "file": "src/main/java/ledger/References.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "importedRate",
+      "namespace": "ledger.References",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 19,
+        "line": 17
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 6,
+        "end_line": 26,
+        "line": 21
+      },
+      "display": "ledger.References.tieredRate",
+      "file": "src/main/java/ledger/References.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "tieredRate",
+      "namespace": "ledger.References",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 26,
+        "line": 21
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 6,
+        "end_line": 30,
+        "line": 28
+      },
+      "display": "ledger.References.orphanRate",
+      "file": "src/main/java/ledger/References.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "orphanRate",
+      "namespace": "ledger.References",
+      "parameters": 1,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 30,
+        "line": 28
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 96,
+        "end_col": 6,
+        "end_line": 35,
+        "line": 32
+      },
+      "display": "ledger.References.rateNamed",
+      "file": "src/main/java/ledger/References.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "rateNamed",
+      "namespace": "ledger.References",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 35,
+        "line": 32
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 21,
+        "end_col": 6,
+        "end_line": 6,
+        "line": 5
+      },
       "display": "ledger.Twins.Twins",
       "file": "src/main/java/ledger/Twins.java",
       "kind": "method",
