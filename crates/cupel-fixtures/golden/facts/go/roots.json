@@ -564,6 +564,30 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "rates.go",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 29
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "report/format.go",
         "line": 6
       }

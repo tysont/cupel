@@ -121,6 +121,52 @@
       }
     },
     {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 3,
+            "end_line": 75,
+            "line": 72
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 69
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 3,
+            "end_line": 87,
+            "line": 84
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 79
+      }
+    },
+    {
       "decisions": [],
       "symbol": {
         "col": 1,
@@ -1833,6 +1879,83 @@
         "col": 1,
         "file": "pricing_test.go",
         "line": 42
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "rates.go",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 3,
+            "end_line": 20,
+            "line": 18
+          },
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "span": {
+            "col": 3,
+            "end_col": 20,
+            "end_line": 19,
+            "line": 19
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 24
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 29
       }
     },
     {

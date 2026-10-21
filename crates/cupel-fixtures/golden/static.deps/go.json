@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 19,
+        "n": 21,
         "unit": "cycles",
         "value": 1.0
       },
@@ -230,7 +230,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 21,
+      "files": 23,
       "languages": [
         "go"
       ],
@@ -238,7 +238,7 @@
       "roots": [
         "."
       ],
-      "symbols": 78
+      "symbols": 86
     },
     "seed": "<seed>",
     "started": "<timestamp>",

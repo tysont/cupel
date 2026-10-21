@@ -39,6 +39,7 @@ const JAVASCRIPT_EDGES: &[Edge<'static>] = &[
         "src/shapes/geometry.js",
         true,
     ),
+    ("src/index.js", 7, "./rates.js", "src/rates.js", true),
     (
         "src/ledger.js",
         1,
@@ -72,6 +73,13 @@ const JAVASCRIPT_EDGES: &[Edge<'static>] = &[
     ),
     ("src/ledger.js", 8, "./generated.js", "unresolved", true),
     ("src/ledger.js", 12, "./report.cjs", "src/report.cjs", true),
+    (
+        "src/rates.js",
+        1,
+        "./references.js",
+        "src/references.js",
+        true,
+    ),
     ("src/report.cjs", 1, "./format.cjs", "src/format.cjs", true),
     (
         "test/decide.test.js",
@@ -228,6 +236,7 @@ const TYPESCRIPT_EDGES: &[Edge<'static>] = &[
         "src/shapes/geometry.ts",
         true,
     ),
+    ("src/index.ts", 14, "./rates", "src/rates.ts", true),
     ("src/ledger.ts", 1, "node:fs", "external:node:fs", false),
     ("src/ledger.ts", 2, "zod", "external:zod", false),
     ("src/ledger.ts", 3, "fs", "external:node:fs", false),
@@ -259,6 +268,7 @@ const TYPESCRIPT_EDGES: &[Edge<'static>] = &[
     ("src/math.quality.test.ts", 2, "./math", "src/math.ts", true),
     ("src/math.test.ts", 1, "vitest", "external:vitest", false),
     ("src/math.test.ts", 2, "./math", "src/math.ts", true),
+    ("src/rates.ts", 1, "./references", "src/references.ts", true),
     (
         "src/shapes/index.ts",
         1,

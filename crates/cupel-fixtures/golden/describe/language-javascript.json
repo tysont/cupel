@@ -111,6 +111,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "references",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.javascript",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "ecma",

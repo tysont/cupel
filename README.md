@@ -236,7 +236,7 @@ would run
   static.clones      4 targets · est 4 ms · needs symbols, norm-tree
   static.complexity  4 targets · est 4 ms · needs symbols, decisions, norm-tree
   static.crap        4 targets · est 4 ms · needs symbols, decisions, norm-tree, coverage-map, test-conventions, coverage-map(run)
-  static.dead-code   4 targets · est 4 ms · needs symbols, norm-tree, module-graph, roots
+  static.dead-code   4 targets · est 4 ms · needs symbols, norm-tree, module-graph, roots, references
   static.deps        4 targets · est 4 ms · needs module-graph, api-surface
   tests.coverage     4 targets · est 30400 ms · needs symbols, coverage-map, norm-tree, test-conventions, coverage-map(run)
   tests.quality      4 targets · est 20 ms · needs test-frames, symbols, norm-tree, decisions
@@ -760,7 +760,7 @@ What each check looks for:
 
 - **`static.complexity`** measures every function's cyclomatic and cognitive complexity, nesting depth, parameter count, and length against configurable limits. A `match` or `switch` counts as one decision however many arms it has.
 - **`static.crap`** scores each function by complexity weighted by missing test coverage, from the language's coverage report (see [Coverage](#coverage)); without one it passes with a null score and no findings rather than guess.
-- **`static.clones`** finds functions whose normalized syntax trees are mostly the same, so renamed variables and reformatting do not hide a copy. Two members are a `clone.pair`; three or more are a `clone.cluster`.
+- **`static.clones`** finds functions whose normalized syntax trees are mostly the same, so renamed variables and reformatting do not hide a copy. Two members are a `clone.pair`; three or more are a `clone.cluster`. Each says its `clone_type`: 1 for the same tokens (only layout, comments, or the function's name differ), 2 for the same tree with identifiers or literals renamed (listed in `renamed`, one text per member), 3 for statements inserted, removed, or changed (listed in `edits`, with where each is).
 - **`static.deps`** builds the module graph from resolved imports. It reports import cycles, modules that are both unstable and abstract, and imports that break the layering you configure.
 - **`static.dead-code`** reports symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive. Reachability is decided per module, not per call, so an export of a module nothing imports is reported as `info` with low confidence: it may be public API.
 - **`tests.quality`** reads every test: tests with no assertions or only weak ones (truthiness, presence, inequality), heavy mocking, loops and branches inside tests, and duplicated setup.
@@ -791,7 +791,7 @@ What each check looks for:
 
 ## Languages
 
-Cupel understands **JavaScript, TypeScript, Rust, Go, Python, Java, and Clojure**. Each language is a tree-sitter grammar plus a declarative spec (queries and tables), and produces the same language-neutral facts: `symbols`, `decisions`, `norm-tree` (the structural hash that gives every function an identity surviving rename, move, and reformat), `mutation-sites`, `test-frames`, `test-conventions`, `module-graph` (imports resolved to files, with Node, `tsconfig` `paths`, Go module, Rust `mod`, Python package, Java source-root, and Clojure classpath resolution), `api-surface`, `roots`, and `project-info`. Checks consume facts and never see a language, so every check works in every language that produces what it needs.
+Cupel understands **JavaScript, TypeScript, Rust, Go, Python, Java, and Clojure**. Each language is a tree-sitter grammar plus a declarative spec (queries and tables), and produces the same language-neutral facts: `symbols`, `decisions`, `norm-tree` (the structural hash that gives every function an identity surviving rename, move, and reformat), `mutation-sites`, `test-frames`, `test-conventions`, `module-graph` (imports resolved to files, with Node, `tsconfig` `paths`, Go module, Rust `mod`, Python package, Java source-root, and Clojure classpath resolution), `api-surface`, `roots`, `references` (every place that may name a function, resolved within its file or through its imports, and where names are computed at run time), and `project-info`. Checks consume facts and never see a language, so every check works in every language that produces what it needs.
 
 The support matrix, from `cupel describe matrix`:
 

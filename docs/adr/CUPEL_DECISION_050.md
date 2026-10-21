@@ -1,6 +1,6 @@
 # CUPEL_DECISION_050: `static.clones`: bounded-depth subtree fingerprints, MinHash and LSH parameters, pairs versus clusters
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.4
+**Date:** 2026-10-13 · **Status:** accepted; the Type bullet amended by [136](CUPEL_DECISION_136.md) (types 1, 2, and 3 from a token digest, with what differs in evidence) · **Phase:** P2.4
 
 ## Context
 

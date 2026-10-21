@@ -233,6 +233,52 @@
       }
     },
     {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 80,
+            "line": 77
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 76,
+            "end_line": 89,
+            "line": 89
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      }
+    },
+    {
       "decisions": [],
       "symbol": {
         "col": 5,
@@ -1371,6 +1417,99 @@
         "col": 5,
         "file": "src/main/java/ledger/Pricing.java",
         "line": 42
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Rates.java",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/Rates.java",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 24,
+            "line": 22
+          },
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 0,
+          "kind": "early-return",
+          "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 31,
+            "end_line": 23,
+            "line": 23
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 28
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/References.java",
+        "line": 32
       }
     },
     {

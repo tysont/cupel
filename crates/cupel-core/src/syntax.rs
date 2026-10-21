@@ -31,6 +31,14 @@ pub struct Span {
     pub end_col: u32,
 }
 
+impl Span {
+    /// Whether `inner` lies within this span, its ends included.
+    pub fn contains(&self, inner: &Span) -> bool {
+        (self.line, self.col) <= (inner.line, inner.col)
+            && (inner.end_line, inner.end_col) <= (self.end_line, self.end_col)
+    }
+}
+
 /// Identifies a symbol within one run by where it starts. Not stable across edits; anything
 /// persisted across runs uses `SymbolHash` (ADR-014).
 #[derive(
@@ -522,4 +530,90 @@ pub struct ProjectRoot {
     pub packages: Vec<String>,
     /// Directory names the ecosystem generates, skipped below the root.
     pub skip_dirs: Vec<String>,
+}
+
+/// Where each symbol is named, in every file of the language in the repository (not only the
+/// scope, so callers outside a narrowed scope count), and where a name is computed at run time
+/// (ADR-135).
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct References {
+    pub references: Vec<Reference>,
+    pub dynamic: Vec<DynamicAccess>,
+}
+fact!(References, References, "references");
+
+/// One place that names a symbol, or may.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct Reference {
+    pub file: String,
+    pub span: Span,
+    /// The name as written; a string's last segment; an attribute's name.
+    pub name: String,
+    pub kind: ReferenceKind,
+    /// The innermost symbol containing the reference; `None` at module level.
+    pub from: Option<SymbolKey>,
+    pub target: ReferenceTarget,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum ReferenceKind {
+    /// A plain identifier, resolved within its file or through its file's imports.
+    Name,
+    /// A name reached through a value, type, module, or namespace (`x.f`, `T::f`, `m/f`).
+    Member,
+    /// A string literal whose text is a name or a path of names.
+    Text,
+    /// An attribute, decorator, or annotation that hands the definition it is on to whatever
+    /// processes it.
+    Attribute,
+    /// A method the runtime calls by a name the language fixes (a JavaScript `constructor`).
+    Implicit,
+}
+
+/// What a reference resolves to; it is never guessed.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "kebab-case")]
+pub enum ReferenceTarget {
+    /// Definitions in the reference's own file.
+    Local { symbols: Vec<SymbolKey> },
+    /// Definitions in the file an import of the reference's file binds the name from.
+    Imported {
+        file: String,
+        symbols: Vec<SymbolKey>,
+    },
+    /// Any symbol of the language with the reference's name.
+    Unresolved,
+}
+
+impl ReferenceTarget {
+    /// The definitions the reference resolves to; empty when unresolved.
+    pub fn symbols(&self) -> &[SymbolKey] {
+        match self {
+            Self::Local { symbols } | Self::Imported { symbols, .. } => symbols,
+            Self::Unresolved => &[],
+        }
+    }
+}
+
+/// A place where a name is decided at run time.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct DynamicAccess {
+    pub file: String,
+    pub span: Span,
+    /// The innermost symbol containing the access; `None` at module level.
+    pub from: Option<SymbolKey>,
+    pub reach: DynamicReach,
+    /// The accessor as written, such as `getattr` or `rates[kind]`, at most 80 characters.
+    pub text: String,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum DynamicReach {
+    /// A computed member access: reaches methods.
+    Members,
+    /// A lookup by a run-time name in a module or namespace, or code evaluated from text:
+    /// reaches any symbol.
+    Names,
 }

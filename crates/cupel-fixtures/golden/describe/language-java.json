@@ -108,6 +108,16 @@
             "needs": []
           }
         ]
+      },
+      {
+        "kind": "references",
+        "producers": [
+          {
+            "cost": "quick",
+            "id": "lang.java",
+            "needs": []
+          }
+        ]
       }
     ],
     "family": "java",

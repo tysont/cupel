@@ -733,6 +733,108 @@
     },
     {
       "body": null,
+      "display": "ledger.rates/doubled",
+      "file": "src/ledger/rates.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "doubled",
+      "namespace": "ledger.rates",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 37,
+        "end_line": 8,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.references/exported-rate",
+      "file": "src/ledger/references.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "exported-rate",
+      "namespace": "ledger.references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 8,
+        "line": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.references/imported-rate",
+      "file": "src/ledger/references.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "imported-rate",
+      "namespace": "ledger.references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 21,
+        "end_line": 13,
+        "line": 10
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
+      "display": "ledger.references/tiered-rate",
+      "file": "src/ledger/references.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "tiered-rate",
+      "namespace": "ledger.references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 46,
+        "end_line": 16,
+        "line": 15
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.references/orphan-rate",
+      "file": "src/ledger/references.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "orphan-rate",
+      "namespace": "ledger.references",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 19,
+        "line": 18
+      },
+      "visibility": "private"
+    },
+    {
+      "body": null,
+      "display": "ledger.references/rate-named",
+      "file": "src/ledger/references.clj",
+      "kind": "function",
+      "lang": "clojure",
+      "name": "rate-named",
+      "namespace": "ledger.references",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 70,
+        "end_line": 24,
+        "line": 21
+      },
+      "visibility": "public"
+    },
+    {
+      "body": null,
       "display": "ledger.report/render",
       "file": "src/ledger/report.clj",
       "kind": "function",

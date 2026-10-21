@@ -1,6 +1,6 @@
 # CUPEL_DECISION_058: `static.dead-code` reachability: files and modules, not calls
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.8
+**Date:** 2026-10-13 · **Status:** superseded by [135](CUPEL_DECISION_135.md) · **Phase:** P2.8
 
 ## Context
 

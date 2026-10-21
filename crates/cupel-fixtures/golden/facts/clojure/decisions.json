@@ -977,6 +977,69 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "src/ledger/rates.clj",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 10
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 45,
+            "end_line": 16,
+            "line": 16
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.clj",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "src/ledger/report.clj",
         "line": 4
       }

@@ -4812,6 +4812,346 @@
     {
       "sites": [
         {
+          "from": "_imported_rate(amount)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "746768f05b0b8e55",
+          "span": {
+            "col": 12,
+            "end_col": 34,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/rates.py",
+        "line": 6
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount * 3",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f38c549949b0b827",
+          "span": {
+            "col": 12,
+            "end_col": 22,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "*",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "99e4e0005559a2ca",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "/"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "35633e40b47a49c0",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount + amount",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f38c549949b0b827",
+          "span": {
+            "col": 12,
+            "end_col": 27,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "+",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "7de8efb30f8b73d4",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "-"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 11
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount > 100",
+          "operator": "negation",
+          "set": "extended",
+          "site_hash": "83a3ecc936af0c56",
+          "span": {
+            "col": 8,
+            "end_col": 20,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "not (amount > 100)"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "5ec531ccd36676ab",
+          "span": {
+            "col": 15,
+            "end_col": 16,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "cec58f0ac6088f80",
+          "span": {
+            "col": 17,
+            "end_col": 20,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "100",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "013ead286a10ea73",
+          "span": {
+            "col": 17,
+            "end_col": 20,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "100 + 1",
+            "100 - 1"
+          ]
+        },
+        {
+          "from": "amount // 3",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "77de4c9a709150f1",
+          "span": {
+            "col": 16,
+            "end_col": 27,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "//",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "563a143920d74a0f",
+          "span": {
+            "col": 23,
+            "end_col": 25,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2ff746d4b55cf04b",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 17,
+            "line": 17
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "amount",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b95e59cf7d8b5d92",
+          "span": {
+            "col": 12,
+            "end_col": 18,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 15
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "amount - amount // 4",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "f38c549949b0b827",
+          "span": {
+            "col": 12,
+            "end_col": 32,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "None"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "1c3bfe022b91cc80",
+          "span": {
+            "col": 19,
+            "end_col": 20,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "//",
+          "operator": "arith-mul-div",
+          "set": "default",
+          "site_hash": "5ed0463b7fa36197",
+          "span": {
+            "col": 28,
+            "end_col": 30,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "*"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ab61883c81b925fa",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 21
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "getattr(sys.modules[__name__], f\"_{kind}_rate\")(amount)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "746768f05b0b8e55",
+          "span": {
+            "col": 12,
+            "end_col": 67,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/ledger/references.py",
+        "line": 25
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "format.render(cents(amount))",
           "operator": "return-value",
           "set": "extended",

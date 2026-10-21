@@ -411,6 +411,54 @@
     {
       "reason": "export",
       "symbol": {
+        "col": 8,
+        "file": "src/rates.ts",
+        "line": 3
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 10
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 25
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 8,
+        "file": "src/references.ts",
+        "line": 29
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 3,
+        "file": "src/references.ts",
+        "line": 39
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
         "col": 3,
         "file": "src/shapes/geometry.ts",
         "line": 4

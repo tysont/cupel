@@ -343,3 +343,33 @@ expect = { skip_dirs = ["target"] }
 
 [project-info.packages]
 not-applicable = "Cargo commands select packages with `--workspace`, not path patterns."
+
+# The `references` fact (ADR-135): the reference cases live in references.* and rates.*.
+[references.local]
+file = "src/references.rs"
+name = "tiered_rate"
+
+[references.imported]
+file = "src/rates.rs"
+name = "imported_rate"
+
+[references.member]
+file = "src/references.rs"
+name = "iter"
+
+[references.text]
+file = "src/references.rs"
+name = "tiered"
+
+[references.attribute]
+file = "src/pricing.rs"
+name = "test"
+
+[references.implicit]
+not-applicable = "The methods Rust calls implicitly (`drop`, `deref`) implement traits, and trait-impl methods are public roots."
+
+[references.dynamic-member]
+not-applicable = "Rust has no reflection and no member access by a computed name."
+
+[references.dynamic-name]
+not-applicable = "Rust cannot look a function up by a name computed at run time."

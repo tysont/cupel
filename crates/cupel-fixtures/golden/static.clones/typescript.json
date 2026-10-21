@@ -42,6 +42,7 @@
       "detail": null,
       "evidence": {
         "clone_type": 2,
+        "edits": [],
         "jaccard": 1.0,
         "left": {
           "col": 8,
@@ -55,6 +56,64 @@
           "nodes": 58,
           "symbol": "clones_settlement.settleInvoices"
         },
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "invoices",
+              "payments"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "credit",
+              "allowance"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "owed",
+              "due"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "open",
+              "pending"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "invoice",
+              "payment"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "balance",
+              "remainder"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "0",
+              "10"
+            ]
+          }
+        ],
         "right": {
           "col": 8,
           "end_col": 2,
@@ -103,6 +162,20 @@
       "detail": null,
       "evidence": {
         "clone_type": 3,
+        "edits": [
+          {
+            "change": "inserted",
+            "location": {
+              "col": 3,
+              "end_col": 16,
+              "end_line": 60,
+              "file": "src/clones_settlement.ts",
+              "line": 60
+            },
+            "nodes": 6,
+            "symbol": "clones_settlement.refundLines"
+          }
+        ],
         "jaccard": 0.857,
         "left": {
           "col": 8,
@@ -116,6 +189,7 @@
           "nodes": 93,
           "symbol": "clones_settlement.orderLines"
         },
+        "renamed": [],
         "right": {
           "col": 8,
           "end_col": 2,
@@ -279,6 +353,8 @@
       "confidence": 1.0,
       "detail": null,
       "evidence": {
+        "clone_type": 2,
+        "edits": [],
         "max_jaccard": 1.0,
         "members": [
           {
@@ -332,6 +408,78 @@
         ],
         "min_jaccard": 1.0,
         "pairs": 6,
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "entries",
+              "items",
+              "entries",
+              "entries"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "fee",
+              "charge",
+              "fee",
+              "fee"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "gross",
+              "total",
+              "gross",
+              "gross"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "sum",
+              "acc",
+              "sum",
+              "sum"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "entry",
+              "item",
+              "entry",
+              "entry"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "0",
+              "0",
+              "100",
+              "0"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "2",
+              "2",
+              "3",
+              "2"
+            ]
+          }
+        ],
         "threshold": 0.82
       },
       "id": "fnd_ba5dbd",
@@ -427,7 +575,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 30,
+      "files": 32,
       "languages": [
         "typescript"
       ],
@@ -435,7 +583,7 @@
       "roots": [
         "."
       ],
-      "symbols": 74
+      "symbols": 83
     },
     "seed": "<seed>",
     "started": "<timestamp>",

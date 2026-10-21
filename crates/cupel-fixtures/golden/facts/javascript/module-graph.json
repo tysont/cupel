@@ -70,6 +70,20 @@
           }
         },
         {
+          "edge_kind": "re-export",
+          "from": "src/index.js",
+          "line": 7,
+          "names": [
+            "doubled"
+          ],
+          "relative": true,
+          "specifier": "./rates.js",
+          "target": {
+            "kind": "file",
+            "path": "src/rates.js"
+          }
+        },
+        {
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 1,
@@ -189,6 +203,20 @@
           "target": {
             "kind": "file",
             "path": "src/report.cjs"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/rates.js",
+          "line": 1,
+          "names": [
+            "importedRate"
+          ],
+          "relative": true,
+          "specifier": "./references.js",
+          "target": {
+            "kind": "file",
+            "path": "src/references.js"
           }
         },
         {

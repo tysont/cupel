@@ -433,6 +433,42 @@
       }
     },
     {
+      "file": "rates.go",
+      "kind": "function",
+      "path": "ledger.Doubled",
+      "signature": "(_ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      }
+    },
+    {
+      "file": "references.go",
+      "kind": "function",
+      "path": "ledger.ExportedRate",
+      "signature": "(_ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      }
+    },
+    {
+      "file": "references.go",
+      "kind": "function",
+      "path": "ledger.RateNamed",
+      "signature": "(_ string, _ int64) int64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 29
+      }
+    },
+    {
       "file": "report/format.go",
       "kind": "function",
       "path": "report.Render",

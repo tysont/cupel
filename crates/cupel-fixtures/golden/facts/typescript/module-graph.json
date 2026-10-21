@@ -116,6 +116,20 @@
           }
         },
         {
+          "edge_kind": "re-export",
+          "from": "src/index.ts",
+          "line": 14,
+          "names": [
+            "doubled"
+          ],
+          "relative": true,
+          "specifier": "./rates",
+          "target": {
+            "kind": "file",
+            "path": "src/rates.ts"
+          }
+        },
+        {
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 1,
@@ -300,6 +314,20 @@
           "target": {
             "kind": "file",
             "path": "src/math.ts"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/rates.ts",
+          "line": 1,
+          "names": [
+            "importedRate"
+          ],
+          "relative": true,
+          "specifier": "./references",
+          "target": {
+            "kind": "file",
+            "path": "src/references.ts"
           }
         },
         {

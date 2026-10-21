@@ -4431,6 +4431,1460 @@
       }
     },
     {
+      "hash": "sh_e557c73a47cc94fa",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 21,
+                      "end_col": 28,
+                      "end_line": 69,
+                      "line": 69
+                    },
+                    "text": "refunds"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 31,
+                          "end_col": 36,
+                          "end_line": 69,
+                          "line": 69
+                        },
+                        "text": "int64"
+                      }
+                    ],
+                    "label": "slice_type",
+                    "span": {
+                      "col": 29,
+                      "end_col": 36,
+                      "end_line": 69,
+                      "line": 69
+                    }
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 21,
+                  "end_col": 36,
+                  "end_line": 69,
+                  "line": 69
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 38,
+                      "end_col": 43,
+                      "end_line": 69,
+                      "line": 69
+                    },
+                    "text": "start"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 44,
+                      "end_col": 49,
+                      "end_line": 69,
+                      "line": 69
+                    },
+                    "text": "int64"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 38,
+                  "end_col": 49,
+                  "end_line": 69,
+                  "line": 69
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 20,
+              "end_col": 50,
+              "end_line": 69,
+              "line": 69
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 53,
+                  "end_col": 58,
+                  "end_line": 69,
+                  "line": 69
+                },
+                "text": "int64"
+              }
+            ],
+            "label": "slice_type",
+            "span": {
+              "col": 51,
+              "end_col": 58,
+              "end_line": 69,
+              "line": 69
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 2,
+                              "end_col": 8,
+                              "end_line": 70,
+                              "line": 70
+                            },
+                            "text": "totals"
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 2,
+                          "end_col": 8,
+                          "end_line": 70,
+                          "line": 70
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "make",
+                                "span": {
+                                  "col": 12,
+                                  "end_col": 16,
+                                  "end_line": 70,
+                                  "line": 70
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 19,
+                                          "end_col": 24,
+                                          "end_line": 70,
+                                          "line": 70
+                                        },
+                                        "text": "int64"
+                                      }
+                                    ],
+                                    "label": "slice_type",
+                                    "span": {
+                                      "col": 17,
+                                      "end_col": 24,
+                                      "end_line": 70,
+                                      "line": 70
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit",
+                                    "span": {
+                                      "col": 26,
+                                      "end_col": 27,
+                                      "end_line": 70,
+                                      "line": 70
+                                    },
+                                    "text": "0"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "len",
+                                        "span": {
+                                          "col": 29,
+                                          "end_col": 32,
+                                          "end_line": 70,
+                                          "line": 70
+                                        }
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id",
+                                            "span": {
+                                              "col": 33,
+                                              "end_col": 40,
+                                              "end_line": 70,
+                                              "line": 70
+                                            },
+                                            "text": "refunds"
+                                          }
+                                        ],
+                                        "label": "argument_list",
+                                        "span": {
+                                          "col": 32,
+                                          "end_col": 41,
+                                          "end_line": 70,
+                                          "line": 70
+                                        }
+                                      }
+                                    ],
+                                    "label": "call_expression",
+                                    "span": {
+                                      "col": 29,
+                                      "end_col": 41,
+                                      "end_line": 70,
+                                      "line": 70
+                                    }
+                                  }
+                                ],
+                                "label": "argument_list",
+                                "span": {
+                                  "col": 16,
+                                  "end_col": 42,
+                                  "end_line": 70,
+                                  "line": 70
+                                }
+                              }
+                            ],
+                            "label": "call_expression",
+                            "span": {
+                              "col": 12,
+                              "end_col": 42,
+                              "end_line": 70,
+                              "line": 70
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 12,
+                          "end_col": 42,
+                          "end_line": 70,
+                          "line": 70
+                        }
+                      }
+                    ],
+                    "label": "short_var_declaration",
+                    "span": {
+                      "col": 2,
+                      "end_col": 42,
+                      "end_line": 70,
+                      "line": 70
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 2,
+                              "end_col": 7,
+                              "end_line": 71,
+                              "line": 71
+                            },
+                            "text": "spent"
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 2,
+                          "end_col": 7,
+                          "end_line": 71,
+                          "line": 71
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 11,
+                              "end_col": 16,
+                              "end_line": 71,
+                              "line": 71
+                            },
+                            "text": "start"
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 11,
+                          "end_col": 16,
+                          "end_line": 71,
+                          "line": 71
+                        }
+                      }
+                    ],
+                    "label": "short_var_declaration",
+                    "span": {
+                      "col": 2,
+                      "end_col": 16,
+                      "end_line": 71,
+                      "line": 71
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 6,
+                                  "end_col": 7,
+                                  "end_line": 72,
+                                  "line": 72
+                                },
+                                "text": "_"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 15,
+                                  "end_line": 72,
+                                  "line": 72
+                                },
+                                "text": "refund"
+                              }
+                            ],
+                            "label": "expression_list",
+                            "span": {
+                              "col": 6,
+                              "end_col": 15,
+                              "end_line": 72,
+                              "line": 72
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 25,
+                              "end_col": 32,
+                              "end_line": 72,
+                              "line": 72
+                            },
+                            "text": "refunds"
+                          }
+                        ],
+                        "label": "range_clause",
+                        "span": {
+                          "col": 6,
+                          "end_col": 32,
+                          "end_line": 72,
+                          "line": 72
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 3,
+                                          "end_col": 8,
+                                          "end_line": 73,
+                                          "line": 73
+                                        },
+                                        "text": "spent"
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 3,
+                                      "end_col": 8,
+                                      "end_line": 73,
+                                      "line": 73
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "+=",
+                                    "span": {
+                                      "col": 9,
+                                      "end_col": 11,
+                                      "end_line": 73,
+                                      "line": 73
+                                    }
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 12,
+                                          "end_col": 18,
+                                          "end_line": 73,
+                                          "line": 73
+                                        },
+                                        "text": "refund"
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 12,
+                                      "end_col": 18,
+                                      "end_line": 73,
+                                      "line": 73
+                                    }
+                                  }
+                                ],
+                                "label": "assignment_statement",
+                                "span": {
+                                  "col": 3,
+                                  "end_col": 18,
+                                  "end_line": 73,
+                                  "line": 73
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 3,
+                                          "end_col": 9,
+                                          "end_line": 74,
+                                          "line": 74
+                                        },
+                                        "text": "totals"
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 3,
+                                      "end_col": 9,
+                                      "end_line": 74,
+                                      "line": 74
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "=",
+                                    "span": {
+                                      "col": 10,
+                                      "end_col": 11,
+                                      "end_line": 74,
+                                      "line": 74
+                                    }
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "append",
+                                            "span": {
+                                              "col": 12,
+                                              "end_col": 18,
+                                              "end_line": 74,
+                                              "line": 74
+                                            }
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id",
+                                                "span": {
+                                                  "col": 19,
+                                                  "end_col": 25,
+                                                  "end_line": 74,
+                                                  "line": 74
+                                                },
+                                                "text": "totals"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$id",
+                                                "span": {
+                                                  "col": 27,
+                                                  "end_col": 32,
+                                                  "end_line": 74,
+                                                  "line": 74
+                                                },
+                                                "text": "spent"
+                                              }
+                                            ],
+                                            "label": "argument_list",
+                                            "span": {
+                                              "col": 18,
+                                              "end_col": 33,
+                                              "end_line": 74,
+                                              "line": 74
+                                            }
+                                          }
+                                        ],
+                                        "label": "call_expression",
+                                        "span": {
+                                          "col": 12,
+                                          "end_col": 33,
+                                          "end_line": 74,
+                                          "line": 74
+                                        }
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 12,
+                                      "end_col": 33,
+                                      "end_line": 74,
+                                      "line": 74
+                                    }
+                                  }
+                                ],
+                                "label": "assignment_statement",
+                                "span": {
+                                  "col": 3,
+                                  "end_col": 33,
+                                  "end_line": 74,
+                                  "line": 74
+                                }
+                              }
+                            ],
+                            "label": "statement_list",
+                            "span": {
+                              "col": 3,
+                              "end_col": 1,
+                              "end_line": 75,
+                              "line": 73
+                            }
+                          }
+                        ],
+                        "label": "block",
+                        "span": {
+                          "col": 33,
+                          "end_col": 3,
+                          "end_line": 75,
+                          "line": 72
+                        }
+                      }
+                    ],
+                    "label": "for_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 3,
+                      "end_line": 75,
+                      "line": 72
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "append",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 15,
+                                  "end_line": 76,
+                                  "line": 76
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 16,
+                                      "end_col": 22,
+                                      "end_line": 76,
+                                      "line": 76
+                                    },
+                                    "text": "totals"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 24,
+                                          "end_col": 29,
+                                          "end_line": 76,
+                                          "line": 76
+                                        },
+                                        "text": "spent"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "-",
+                                        "span": {
+                                          "col": 29,
+                                          "end_col": 30,
+                                          "end_line": 76,
+                                          "line": 76
+                                        }
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 30,
+                                          "end_col": 35,
+                                          "end_line": 76,
+                                          "line": 76
+                                        },
+                                        "text": "start"
+                                      }
+                                    ],
+                                    "label": "binary_expression",
+                                    "span": {
+                                      "col": 24,
+                                      "end_col": 35,
+                                      "end_line": 76,
+                                      "line": 76
+                                    }
+                                  }
+                                ],
+                                "label": "argument_list",
+                                "span": {
+                                  "col": 15,
+                                  "end_col": 36,
+                                  "end_line": 76,
+                                  "line": 76
+                                }
+                              }
+                            ],
+                            "label": "call_expression",
+                            "span": {
+                              "col": 9,
+                              "end_col": 36,
+                              "end_line": 76,
+                              "line": 76
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 9,
+                          "end_col": 36,
+                          "end_line": 76,
+                          "line": 76
+                        }
+                      }
+                    ],
+                    "label": "return_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 36,
+                      "end_line": 76,
+                      "line": 76
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 77,
+                  "line": 70
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 59,
+              "end_col": 2,
+              "end_line": 77,
+              "line": 69
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 77,
+          "line": 69
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 69
+      }
+    },
+    {
+      "hash": "sh_e557c73a47cc94fa",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 26,
+                      "end_col": 33,
+                      "end_line": 79,
+                      "line": 79
+                    },
+                    "text": "refunds"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 36,
+                          "end_col": 41,
+                          "end_line": 79,
+                          "line": 79
+                        },
+                        "text": "int64"
+                      }
+                    ],
+                    "label": "slice_type",
+                    "span": {
+                      "col": 34,
+                      "end_col": 41,
+                      "end_line": 79,
+                      "line": 79
+                    }
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 26,
+                  "end_col": 41,
+                  "end_line": 79,
+                  "line": 79
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 43,
+                      "end_col": 48,
+                      "end_line": 79,
+                      "line": 79
+                    },
+                    "text": "start"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 49,
+                      "end_col": 54,
+                      "end_line": 79,
+                      "line": 79
+                    },
+                    "text": "int64"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 43,
+                  "end_col": 54,
+                  "end_line": 79,
+                  "line": 79
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 25,
+              "end_col": 55,
+              "end_line": 79,
+              "line": 79
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 58,
+                  "end_col": 63,
+                  "end_line": 79,
+                  "line": 79
+                },
+                "text": "int64"
+              }
+            ],
+            "label": "slice_type",
+            "span": {
+              "col": 56,
+              "end_col": 63,
+              "end_line": 79,
+              "line": 79
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 2,
+                              "end_col": 8,
+                              "end_line": 81,
+                              "line": 81
+                            },
+                            "text": "totals"
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 2,
+                          "end_col": 8,
+                          "end_line": 81,
+                          "line": 81
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "make",
+                                "span": {
+                                  "col": 12,
+                                  "end_col": 16,
+                                  "end_line": 81,
+                                  "line": 81
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 19,
+                                          "end_col": 24,
+                                          "end_line": 81,
+                                          "line": 81
+                                        },
+                                        "text": "int64"
+                                      }
+                                    ],
+                                    "label": "slice_type",
+                                    "span": {
+                                      "col": 17,
+                                      "end_col": 24,
+                                      "end_line": 81,
+                                      "line": 81
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit",
+                                    "span": {
+                                      "col": 26,
+                                      "end_col": 27,
+                                      "end_line": 81,
+                                      "line": 81
+                                    },
+                                    "text": "0"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "len",
+                                        "span": {
+                                          "col": 29,
+                                          "end_col": 32,
+                                          "end_line": 81,
+                                          "line": 81
+                                        }
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id",
+                                            "span": {
+                                              "col": 33,
+                                              "end_col": 40,
+                                              "end_line": 81,
+                                              "line": 81
+                                            },
+                                            "text": "refunds"
+                                          }
+                                        ],
+                                        "label": "argument_list",
+                                        "span": {
+                                          "col": 32,
+                                          "end_col": 41,
+                                          "end_line": 81,
+                                          "line": 81
+                                        }
+                                      }
+                                    ],
+                                    "label": "call_expression",
+                                    "span": {
+                                      "col": 29,
+                                      "end_col": 41,
+                                      "end_line": 81,
+                                      "line": 81
+                                    }
+                                  }
+                                ],
+                                "label": "argument_list",
+                                "span": {
+                                  "col": 16,
+                                  "end_col": 42,
+                                  "end_line": 81,
+                                  "line": 81
+                                }
+                              }
+                            ],
+                            "label": "call_expression",
+                            "span": {
+                              "col": 12,
+                              "end_col": 42,
+                              "end_line": 81,
+                              "line": 81
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 12,
+                          "end_col": 42,
+                          "end_line": 81,
+                          "line": 81
+                        }
+                      }
+                    ],
+                    "label": "short_var_declaration",
+                    "span": {
+                      "col": 2,
+                      "end_col": 42,
+                      "end_line": 81,
+                      "line": 81
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 2,
+                              "end_col": 7,
+                              "end_line": 82,
+                              "line": 82
+                            },
+                            "text": "spent"
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 2,
+                          "end_col": 7,
+                          "end_line": 82,
+                          "line": 82
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 11,
+                              "end_col": 16,
+                              "end_line": 82,
+                              "line": 82
+                            },
+                            "text": "start"
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 11,
+                          "end_col": 16,
+                          "end_line": 82,
+                          "line": 82
+                        }
+                      }
+                    ],
+                    "label": "short_var_declaration",
+                    "span": {
+                      "col": 2,
+                      "end_col": 16,
+                      "end_line": 82,
+                      "line": 82
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 6,
+                                  "end_col": 7,
+                                  "end_line": 84,
+                                  "line": 84
+                                },
+                                "text": "_"
+                              },
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 15,
+                                  "end_line": 84,
+                                  "line": 84
+                                },
+                                "text": "refund"
+                              }
+                            ],
+                            "label": "expression_list",
+                            "span": {
+                              "col": 6,
+                              "end_col": 15,
+                              "end_line": 84,
+                              "line": 84
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 25,
+                              "end_col": 32,
+                              "end_line": 84,
+                              "line": 84
+                            },
+                            "text": "refunds"
+                          }
+                        ],
+                        "label": "range_clause",
+                        "span": {
+                          "col": 6,
+                          "end_col": 32,
+                          "end_line": 84,
+                          "line": 84
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 3,
+                                          "end_col": 8,
+                                          "end_line": 85,
+                                          "line": 85
+                                        },
+                                        "text": "spent"
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 3,
+                                      "end_col": 8,
+                                      "end_line": 85,
+                                      "line": 85
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "+=",
+                                    "span": {
+                                      "col": 9,
+                                      "end_col": 11,
+                                      "end_line": 85,
+                                      "line": 85
+                                    }
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 12,
+                                          "end_col": 18,
+                                          "end_line": 85,
+                                          "line": 85
+                                        },
+                                        "text": "refund"
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 12,
+                                      "end_col": 18,
+                                      "end_line": 85,
+                                      "line": 85
+                                    }
+                                  }
+                                ],
+                                "label": "assignment_statement",
+                                "span": {
+                                  "col": 3,
+                                  "end_col": 18,
+                                  "end_line": 85,
+                                  "line": 85
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 3,
+                                          "end_col": 9,
+                                          "end_line": 86,
+                                          "line": 86
+                                        },
+                                        "text": "totals"
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 3,
+                                      "end_col": 9,
+                                      "end_line": 86,
+                                      "line": 86
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "=",
+                                    "span": {
+                                      "col": 10,
+                                      "end_col": 11,
+                                      "end_line": 86,
+                                      "line": 86
+                                    }
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "append",
+                                            "span": {
+                                              "col": 12,
+                                              "end_col": 18,
+                                              "end_line": 86,
+                                              "line": 86
+                                            }
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id",
+                                                "span": {
+                                                  "col": 19,
+                                                  "end_col": 25,
+                                                  "end_line": 86,
+                                                  "line": 86
+                                                },
+                                                "text": "totals"
+                                              },
+                                              {
+                                                "children": [],
+                                                "label": "$id",
+                                                "span": {
+                                                  "col": 27,
+                                                  "end_col": 32,
+                                                  "end_line": 86,
+                                                  "line": 86
+                                                },
+                                                "text": "spent"
+                                              }
+                                            ],
+                                            "label": "argument_list",
+                                            "span": {
+                                              "col": 18,
+                                              "end_col": 33,
+                                              "end_line": 86,
+                                              "line": 86
+                                            }
+                                          }
+                                        ],
+                                        "label": "call_expression",
+                                        "span": {
+                                          "col": 12,
+                                          "end_col": 33,
+                                          "end_line": 86,
+                                          "line": 86
+                                        }
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 12,
+                                      "end_col": 33,
+                                      "end_line": 86,
+                                      "line": 86
+                                    }
+                                  }
+                                ],
+                                "label": "assignment_statement",
+                                "span": {
+                                  "col": 3,
+                                  "end_col": 33,
+                                  "end_line": 86,
+                                  "line": 86
+                                }
+                              }
+                            ],
+                            "label": "statement_list",
+                            "span": {
+                              "col": 3,
+                              "end_col": 1,
+                              "end_line": 87,
+                              "line": 85
+                            }
+                          }
+                        ],
+                        "label": "block",
+                        "span": {
+                          "col": 33,
+                          "end_col": 3,
+                          "end_line": 87,
+                          "line": 84
+                        }
+                      }
+                    ],
+                    "label": "for_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 3,
+                      "end_line": 87,
+                      "line": 84
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "append",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 15,
+                                  "end_line": 89,
+                                  "line": 89
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 16,
+                                      "end_col": 22,
+                                      "end_line": 89,
+                                      "line": 89
+                                    },
+                                    "text": "totals"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 24,
+                                          "end_col": 29,
+                                          "end_line": 89,
+                                          "line": 89
+                                        },
+                                        "text": "spent"
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "-",
+                                        "span": {
+                                          "col": 29,
+                                          "end_col": 30,
+                                          "end_line": 89,
+                                          "line": 89
+                                        }
+                                      },
+                                      {
+                                        "children": [],
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 30,
+                                          "end_col": 35,
+                                          "end_line": 89,
+                                          "line": 89
+                                        },
+                                        "text": "start"
+                                      }
+                                    ],
+                                    "label": "binary_expression",
+                                    "span": {
+                                      "col": 24,
+                                      "end_col": 35,
+                                      "end_line": 89,
+                                      "line": 89
+                                    }
+                                  }
+                                ],
+                                "label": "argument_list",
+                                "span": {
+                                  "col": 15,
+                                  "end_col": 36,
+                                  "end_line": 89,
+                                  "line": 89
+                                }
+                              }
+                            ],
+                            "label": "call_expression",
+                            "span": {
+                              "col": 9,
+                              "end_col": 36,
+                              "end_line": 89,
+                              "line": 89
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 9,
+                          "end_col": 36,
+                          "end_line": 89,
+                          "line": 89
+                        }
+                      }
+                    ],
+                    "label": "return_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 36,
+                      "end_line": 89,
+                      "line": 89
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 90,
+                  "line": 81
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 64,
+              "end_col": 2,
+              "end_line": 90,
+              "line": 79
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 90,
+          "line": 79
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 79
+      }
+    },
+    {
       "hash": "sh_984cc16609d6109f",
       "root": {
         "children": [
@@ -32145,6 +33599,1180 @@
         "col": 1,
         "file": "pricing_test.go",
         "line": 42
+      }
+    },
+    {
+      "hash": "sh_15abb56d5a3baf37",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 14,
+                      "end_col": 20,
+                      "end_line": 4,
+                      "line": 4
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 21,
+                      "end_col": 26,
+                      "end_line": 4,
+                      "line": 4
+                    },
+                    "text": "int64"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 14,
+                  "end_col": 26,
+                  "end_line": 4,
+                  "line": 4
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 13,
+              "end_col": 27,
+              "end_line": 4,
+              "line": 4
+            }
+          },
+          {
+            "children": [],
+            "label": "$id",
+            "span": {
+              "col": 28,
+              "end_col": 33,
+              "end_line": 4,
+              "line": 4
+            },
+            "text": "int64"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "importedRate",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 21,
+                                  "end_line": 5,
+                                  "line": 5
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 22,
+                                      "end_col": 28,
+                                      "end_line": 5,
+                                      "line": 5
+                                    },
+                                    "text": "amount"
+                                  }
+                                ],
+                                "label": "argument_list",
+                                "span": {
+                                  "col": 21,
+                                  "end_col": 29,
+                                  "end_line": 5,
+                                  "line": 5
+                                }
+                              }
+                            ],
+                            "label": "call_expression",
+                            "span": {
+                              "col": 9,
+                              "end_col": 29,
+                              "end_line": 5,
+                              "line": 5
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 9,
+                          "end_col": 29,
+                          "end_line": 5,
+                          "line": 5
+                        }
+                      }
+                    ],
+                    "label": "return_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 29,
+                      "end_line": 5,
+                      "line": 5
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 6,
+                  "line": 5
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 34,
+              "end_col": 2,
+              "end_line": 6,
+              "line": 4
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 6,
+          "line": 4
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "rates.go",
+        "line": 4
+      }
+    },
+    {
+      "hash": "sh_55a0e89ca4588e0a",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 19,
+                      "end_col": 25,
+                      "end_line": 9,
+                      "line": 9
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 26,
+                      "end_col": 31,
+                      "end_line": 9,
+                      "line": 9
+                    },
+                    "text": "int64"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 19,
+                  "end_col": 31,
+                  "end_line": 9,
+                  "line": 9
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 18,
+              "end_col": 32,
+              "end_line": 9,
+              "line": 9
+            }
+          },
+          {
+            "children": [],
+            "label": "$id",
+            "span": {
+              "col": 33,
+              "end_col": 38,
+              "end_line": 9,
+              "line": 9
+            },
+            "text": "int64"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 15,
+                                  "end_line": 10,
+                                  "line": 10
+                                },
+                                "text": "amount"
+                              },
+                              {
+                                "children": [],
+                                "label": "*",
+                                "span": {
+                                  "col": 16,
+                                  "end_col": 17,
+                                  "end_line": 10,
+                                  "line": 10
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit",
+                                "span": {
+                                  "col": 18,
+                                  "end_col": 19,
+                                  "end_line": 10,
+                                  "line": 10
+                                },
+                                "text": "3"
+                              }
+                            ],
+                            "label": "binary_expression",
+                            "span": {
+                              "col": 9,
+                              "end_col": 19,
+                              "end_line": 10,
+                              "line": 10
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 9,
+                          "end_col": 19,
+                          "end_line": 10,
+                          "line": 10
+                        }
+                      }
+                    ],
+                    "label": "return_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 19,
+                      "end_line": 10,
+                      "line": 10
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 11,
+                  "line": 10
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 39,
+              "end_col": 2,
+              "end_line": 11,
+              "line": 9
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 11,
+          "line": 9
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 9
+      }
+    },
+    {
+      "hash": "sh_cadb50310aea2deb",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 19,
+                      "end_col": 25,
+                      "end_line": 13,
+                      "line": 13
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 26,
+                      "end_col": 31,
+                      "end_line": 13,
+                      "line": 13
+                    },
+                    "text": "int64"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 19,
+                  "end_col": 31,
+                  "end_line": 13,
+                  "line": 13
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 18,
+              "end_col": 32,
+              "end_line": 13,
+              "line": 13
+            }
+          },
+          {
+            "children": [],
+            "label": "$id",
+            "span": {
+              "col": 33,
+              "end_col": 38,
+              "end_line": 13,
+              "line": 13
+            },
+            "text": "int64"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 15,
+                                  "end_line": 14,
+                                  "line": 14
+                                },
+                                "text": "amount"
+                              },
+                              {
+                                "children": [],
+                                "label": "+",
+                                "span": {
+                                  "col": 16,
+                                  "end_col": 17,
+                                  "end_line": 14,
+                                  "line": 14
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 18,
+                                  "end_col": 24,
+                                  "end_line": 14,
+                                  "line": 14
+                                },
+                                "text": "amount"
+                              }
+                            ],
+                            "label": "binary_expression",
+                            "span": {
+                              "col": 9,
+                              "end_col": 24,
+                              "end_line": 14,
+                              "line": 14
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 9,
+                          "end_col": 24,
+                          "end_line": 14,
+                          "line": 14
+                        }
+                      }
+                    ],
+                    "label": "return_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 24,
+                      "end_line": 14,
+                      "line": 14
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 15,
+                  "line": 14
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 39,
+              "end_col": 2,
+              "end_line": 15,
+              "line": 13
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 15,
+          "line": 13
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 13
+      }
+    },
+    {
+      "hash": "sh_1e08a97e00a46b40",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 17,
+                      "end_col": 23,
+                      "end_line": 17,
+                      "line": 17
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 24,
+                      "end_col": 29,
+                      "end_line": 17,
+                      "line": 17
+                    },
+                    "text": "int64"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 17,
+                  "end_col": 29,
+                  "end_line": 17,
+                  "line": 17
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 16,
+              "end_col": 30,
+              "end_line": 17,
+              "line": 17
+            }
+          },
+          {
+            "children": [],
+            "label": "$id",
+            "span": {
+              "col": 31,
+              "end_col": 36,
+              "end_line": 17,
+              "line": 17
+            },
+            "text": "int64"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 5,
+                              "end_col": 11,
+                              "end_line": 18,
+                              "line": 18
+                            },
+                            "text": "amount"
+                          },
+                          {
+                            "children": [],
+                            "label": ">",
+                            "span": {
+                              "col": 12,
+                              "end_col": 13,
+                              "end_line": 18,
+                              "line": 18
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit",
+                            "span": {
+                              "col": 14,
+                              "end_col": 17,
+                              "end_line": 18,
+                              "line": 18
+                            },
+                            "text": "100"
+                          }
+                        ],
+                        "label": "binary_expression",
+                        "span": {
+                          "col": 5,
+                          "end_col": 17,
+                          "end_line": 18,
+                          "line": 18
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id",
+                                            "span": {
+                                              "col": 10,
+                                              "end_col": 16,
+                                              "end_line": 19,
+                                              "line": 19
+                                            },
+                                            "text": "amount"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "/",
+                                            "span": {
+                                              "col": 17,
+                                              "end_col": 18,
+                                              "end_line": 19,
+                                              "line": 19
+                                            }
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$lit",
+                                            "span": {
+                                              "col": 19,
+                                              "end_col": 20,
+                                              "end_line": 19,
+                                              "line": 19
+                                            },
+                                            "text": "3"
+                                          }
+                                        ],
+                                        "label": "binary_expression",
+                                        "span": {
+                                          "col": 10,
+                                          "end_col": 20,
+                                          "end_line": 19,
+                                          "line": 19
+                                        }
+                                      }
+                                    ],
+                                    "label": "expression_list",
+                                    "span": {
+                                      "col": 10,
+                                      "end_col": 20,
+                                      "end_line": 19,
+                                      "line": 19
+                                    }
+                                  }
+                                ],
+                                "label": "return_statement",
+                                "span": {
+                                  "col": 3,
+                                  "end_col": 20,
+                                  "end_line": 19,
+                                  "line": 19
+                                }
+                              }
+                            ],
+                            "label": "statement_list",
+                            "span": {
+                              "col": 3,
+                              "end_col": 1,
+                              "end_line": 20,
+                              "line": 19
+                            }
+                          }
+                        ],
+                        "label": "block",
+                        "span": {
+                          "col": 18,
+                          "end_col": 3,
+                          "end_line": 20,
+                          "line": 18
+                        }
+                      }
+                    ],
+                    "label": "if_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 3,
+                      "end_line": 20,
+                      "line": 18
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 9,
+                              "end_col": 15,
+                              "end_line": 21,
+                              "line": 21
+                            },
+                            "text": "amount"
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 9,
+                          "end_col": 15,
+                          "end_line": 21,
+                          "line": 21
+                        }
+                      }
+                    ],
+                    "label": "return_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 15,
+                      "end_line": 21,
+                      "line": 21
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 22,
+                  "line": 18
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 37,
+              "end_col": 2,
+              "end_line": 22,
+              "line": 17
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 22,
+          "line": 17
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 17
+      }
+    },
+    {
+      "hash": "sh_057881ff21c5da08",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 17,
+                      "end_col": 23,
+                      "end_line": 24,
+                      "line": 24
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 24,
+                      "end_col": 29,
+                      "end_line": 24,
+                      "line": 24
+                    },
+                    "text": "int64"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 17,
+                  "end_col": 29,
+                  "end_line": 24,
+                  "line": 24
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 16,
+              "end_col": 30,
+              "end_line": 24,
+              "line": 24
+            }
+          },
+          {
+            "children": [],
+            "label": "$id",
+            "span": {
+              "col": 31,
+              "end_col": 36,
+              "end_line": 24,
+              "line": 24
+            },
+            "text": "int64"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 15,
+                                  "end_line": 25,
+                                  "line": 25
+                                },
+                                "text": "amount"
+                              },
+                              {
+                                "children": [],
+                                "label": "-",
+                                "span": {
+                                  "col": 16,
+                                  "end_col": 17,
+                                  "end_line": 25,
+                                  "line": 25
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 18,
+                                      "end_col": 24,
+                                      "end_line": 25,
+                                      "line": 25
+                                    },
+                                    "text": "amount"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "/",
+                                    "span": {
+                                      "col": 24,
+                                      "end_col": 25,
+                                      "end_line": 25,
+                                      "line": 25
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit",
+                                    "span": {
+                                      "col": 25,
+                                      "end_col": 26,
+                                      "end_line": 25,
+                                      "line": 25
+                                    },
+                                    "text": "4"
+                                  }
+                                ],
+                                "label": "binary_expression",
+                                "span": {
+                                  "col": 18,
+                                  "end_col": 26,
+                                  "end_line": 25,
+                                  "line": 25
+                                }
+                              }
+                            ],
+                            "label": "binary_expression",
+                            "span": {
+                              "col": 9,
+                              "end_col": 26,
+                              "end_line": 25,
+                              "line": 25
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 9,
+                          "end_col": 26,
+                          "end_line": 25,
+                          "line": 25
+                        }
+                      }
+                    ],
+                    "label": "return_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 26,
+                      "end_line": 25,
+                      "line": 25
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 26,
+                  "line": 25
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 37,
+              "end_col": 2,
+              "end_line": 26,
+              "line": 24
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 26,
+          "line": 24
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 24
+      }
+    },
+    {
+      "hash": "sh_65757883cb94c5f6",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 16,
+                      "end_col": 20,
+                      "end_line": 29,
+                      "line": 29
+                    },
+                    "text": "kind"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 21,
+                      "end_col": 27,
+                      "end_line": 29,
+                      "line": 29
+                    },
+                    "text": "string"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 16,
+                  "end_col": 27,
+                  "end_line": 29,
+                  "line": 29
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 29,
+                      "end_col": 35,
+                      "end_line": 29,
+                      "line": 29
+                    },
+                    "text": "amount"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 36,
+                      "end_col": 41,
+                      "end_line": 29,
+                      "line": 29
+                    },
+                    "text": "int64"
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 29,
+                  "end_col": 41,
+                  "end_line": 29,
+                  "line": 29
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 15,
+              "end_col": 42,
+              "end_line": 29,
+              "line": 29
+            }
+          },
+          {
+            "children": [],
+            "label": "$id",
+            "span": {
+              "col": 43,
+              "end_col": 48,
+              "end_line": 29,
+              "line": 29
+            },
+            "text": "int64"
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 9,
+                                      "end_col": 14,
+                                      "end_line": 30,
+                                      "line": 30
+                                    },
+                                    "text": "rates"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id",
+                                            "span": {
+                                              "col": 15,
+                                              "end_col": 19,
+                                              "end_line": 30,
+                                              "line": 30
+                                            },
+                                            "text": "kind"
+                                          }
+                                        ],
+                                        "label": "type_elem",
+                                        "span": {
+                                          "col": 15,
+                                          "end_col": 19,
+                                          "end_line": 30,
+                                          "line": 30
+                                        }
+                                      }
+                                    ],
+                                    "label": "type_arguments",
+                                    "span": {
+                                      "col": 14,
+                                      "end_col": 20,
+                                      "end_line": 30,
+                                      "line": 30
+                                    }
+                                  }
+                                ],
+                                "label": "generic_type",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 20,
+                                  "end_line": 30,
+                                  "line": 30
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 21,
+                                  "end_col": 27,
+                                  "end_line": 30,
+                                  "line": 30
+                                },
+                                "text": "amount"
+                              }
+                            ],
+                            "label": "type_conversion_expression",
+                            "span": {
+                              "col": 9,
+                              "end_col": 28,
+                              "end_line": 30,
+                              "line": 30
+                            }
+                          }
+                        ],
+                        "label": "expression_list",
+                        "span": {
+                          "col": 9,
+                          "end_col": 28,
+                          "end_line": 30,
+                          "line": 30
+                        }
+                      }
+                    ],
+                    "label": "return_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 28,
+                      "end_line": 30,
+                      "line": 30
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 31,
+                  "line": 30
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 49,
+              "end_col": 2,
+              "end_line": 31,
+              "line": 29
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 31,
+          "line": 29
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "references.go",
+        "line": 29
       }
     },
     {

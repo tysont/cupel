@@ -8,9 +8,16 @@ use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::{Map, Value};
 
-/// A finding kind mapped to `action`, whose evidence is `T`'s JSON Schema (ADR-012).
+/// A finding kind mapped to `action`, whose evidence is `T`'s JSON Schema (ADR-012), with every
+/// type it refers to written in place, since the evidence validator reads no `$defs` (ADR-043).
 pub fn kind<T: JsonSchema>(kind: &str, action: ActionKind, summary: &str) -> FindingKindSpec {
-    let schema = match schemars::schema_for!(T).to_value() {
+    let mut settings = schemars::generate::SchemaSettings::default();
+    settings.inline_subschemas = true;
+    let schema = match settings
+        .into_generator()
+        .into_root_schema_for::<T>()
+        .to_value()
+    {
         Value::Object(schema) => schema,
         _ => Map::new(),
     };

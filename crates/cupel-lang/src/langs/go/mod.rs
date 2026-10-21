@@ -6,10 +6,8 @@ mod resolve;
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::ModuleGraph;
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
-use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::project::Ecosystem;
@@ -27,6 +25,10 @@ static SPEC: LazyLock<LanguageSpec> = LazyLock::new(|| {
             (QueryFile::Tests, include_str!("queries/tests.scm")),
             (QueryFile::Imports, include_str!("queries/imports.scm")),
             (QueryFile::Api, include_str!("queries/api.scm")),
+            (
+                QueryFile::References,
+                include_str!("queries/references.scm"),
+            ),
         ],
         include_str!("tables.toml"),
     )
@@ -76,10 +78,6 @@ impl Language for Go {
         let language: Arc<dyn Language> = Arc::new(self.clone());
         crate::generic::register(&language, &self.cache, reg);
         // Module resolution needs go.mod and go.work, which queries cannot see.
-        reg.register::<ModuleGraph, _>(ImportGraph::new(
-            language,
-            Arc::clone(&self.cache),
-            resolve::graph,
-        ));
+        crate::references::register_resolved(language, &self.cache, resolve::graph, reg);
     }
 }

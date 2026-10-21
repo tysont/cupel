@@ -649,6 +649,42 @@
       }
     },
     {
+      "file": "src/rates.rs",
+      "kind": "function",
+      "path": "rates::doubled",
+      "signature": "(_: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 7,
+        "line": 5
+      }
+    },
+    {
+      "file": "src/references.rs",
+      "kind": "function",
+      "path": "references::exported_rate",
+      "signature": "(_: i64) -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 10,
+        "line": 8
+      }
+    },
+    {
+      "file": "src/references.rs",
+      "kind": "function",
+      "path": "references::rate_named",
+      "signature": "(_: &str, _: i64) -> Option<i64>",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 26
+      }
+    },
+    {
       "file": "src/report/format.rs",
       "kind": "function",
       "path": "report::format::render",

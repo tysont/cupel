@@ -199,6 +199,20 @@
         },
         {
           "edge_kind": "import",
+          "from": "src/main/java/ledger/References.java",
+          "line": 3,
+          "names": [
+            "Method"
+          ],
+          "relative": false,
+          "specifier": "java.lang.reflect.Method",
+          "target": {
+            "kind": "external",
+            "package": "jdk"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "src/main/java/ledger/cmd/Main.java",
           "line": 3,
           "names": [

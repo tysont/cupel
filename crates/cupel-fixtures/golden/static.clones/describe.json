@@ -16,11 +16,88 @@
             "description": "Evidence of `clone.pair`.",
             "properties": {
               "clone_type": {
-                "description": "2 when the normalized trees are identical (type 1 and type 2 clones: only names,\nliterals, types, layout, or comments differ); 3 when they differ (statements added,\nremoved, or changed).",
+                "description": "1 when the normalized trees and their identifier and literal texts are equal (only\nlayout, comments, or what normalization erases differ); 2 when the trees are equal and\ntexts differ (renamed identifiers or changed literals, in `renamed`); 3 when the trees\ndiffer (statements inserted, removed, or changed, in `edits`).",
                 "format": "uint8",
                 "maximum": 255,
                 "minimum": 0,
                 "type": "integer"
+              },
+              "edits": {
+                "description": "For type 3, the subtrees one side has and the other lacks; empty otherwise.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "A subtree one member has and the first member lacks, or the reverse (ADR-136).",
+                  "properties": {
+                    "change": {
+                      "description": "`removed`: in the first member and not in `symbol`; `inserted`: in `symbol` and not in\nthe first member.",
+                      "enum": [
+                        "removed",
+                        "inserted"
+                      ],
+                      "type": "string"
+                    },
+                    "location": {
+                      "description": "The subtree in the member that holds it; absent when its producer gave it no span.",
+                      "properties": {
+                        "col": {
+                          "format": "uint32",
+                          "minimum": 0,
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "end_col": {
+                          "format": "uint32",
+                          "minimum": 0,
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "end_line": {
+                          "format": "uint32",
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "file": {
+                          "type": "string"
+                        },
+                        "line": {
+                          "format": "uint32",
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "file",
+                        "line",
+                        "end_line"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
+                    "nodes": {
+                      "description": "Nodes of the subtree's normalized tree.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "symbol": {
+                      "description": "The member compared with the first.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "change",
+                    "symbol",
+                    "nodes"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
               },
               "jaccard": {
                 "description": "Jaccard similarity of the two symbols' subtree fingerprint sets, to three decimals.",
@@ -91,6 +168,42 @@
                   "nodes"
                 ],
                 "type": "object"
+              },
+              "renamed": {
+                "description": "For type 2, each identifier or literal whose text differs: `values` is the left text\nthen the right; empty otherwise.",
+                "items": {
+                  "description": "One position of the shared subtree whose text differs between members.",
+                  "properties": {
+                    "kind": {
+                      "description": "What a differing position is.",
+                      "enum": [
+                        "identifier",
+                        "literal"
+                      ],
+                      "type": "string"
+                    },
+                    "occurrences": {
+                      "description": "How many positions in the subtree have these values.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "values": {
+                      "description": "The text in each member, the first member's first.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "values",
+                    "occurrences"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
               },
               "right": {
                 "additionalProperties": false,
@@ -165,6 +278,8 @@
             "required": [
               "jaccard",
               "clone_type",
+              "renamed",
+              "edits",
               "threshold",
               "left",
               "right"
@@ -182,6 +297,90 @@
             "additionalProperties": false,
             "description": "Evidence of `clone.cluster`.",
             "properties": {
+              "clone_type": {
+                "description": "1 when every member's normalized tree and texts equal the first member's, 2 when every\ntree equals the first's, 3 otherwise.",
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "edits": {
+                "description": "For type 3, each member's subtrees that it has and the first member lacks or the\nreverse; empty otherwise.",
+                "items": {
+                  "additionalProperties": false,
+                  "description": "A subtree one member has and the first member lacks, or the reverse (ADR-136).",
+                  "properties": {
+                    "change": {
+                      "description": "`removed`: in the first member and not in `symbol`; `inserted`: in `symbol` and not in\nthe first member.",
+                      "enum": [
+                        "removed",
+                        "inserted"
+                      ],
+                      "type": "string"
+                    },
+                    "location": {
+                      "description": "The subtree in the member that holds it; absent when its producer gave it no span.",
+                      "properties": {
+                        "col": {
+                          "format": "uint32",
+                          "minimum": 0,
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "end_col": {
+                          "format": "uint32",
+                          "minimum": 0,
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "end_line": {
+                          "format": "uint32",
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "file": {
+                          "type": "string"
+                        },
+                        "line": {
+                          "format": "uint32",
+                          "minimum": 0,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "file",
+                        "line",
+                        "end_line"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
+                    "nodes": {
+                      "description": "Nodes of the subtree's normalized tree.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "symbol": {
+                      "description": "The member compared with the first.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "change",
+                    "symbol",
+                    "nodes"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
               "max_jaccard": {
                 "format": "double",
                 "type": "number"
@@ -265,6 +464,42 @@
                 "minimum": 0,
                 "type": "integer"
               },
+              "renamed": {
+                "description": "For type 2, each identifier or literal whose text differs: `values` holds one text per\nmember, in `members` order; empty otherwise.",
+                "items": {
+                  "description": "One position of the shared subtree whose text differs between members.",
+                  "properties": {
+                    "kind": {
+                      "description": "What a differing position is.",
+                      "enum": [
+                        "identifier",
+                        "literal"
+                      ],
+                      "type": "string"
+                    },
+                    "occurrences": {
+                      "description": "How many positions in the subtree have these values.",
+                      "format": "uint32",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "values": {
+                      "description": "The text in each member, the first member's first.",
+                      "items": {
+                        "type": "string"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "values",
+                    "occurrences"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
               "threshold": {
                 "format": "double",
                 "type": "number"
@@ -275,6 +510,9 @@
               "pairs",
               "min_jaccard",
               "max_jaccard",
+              "clone_type",
+              "renamed",
+              "edits",
               "threshold"
             ],
             "title": "CloneCluster",
@@ -469,7 +707,7 @@
         }
       ],
       "stability": "experimental",
-      "summary": "Type 1, 2, and 3 clones: functions whose normalized syntax trees share most subtree fingerprints, compared within a language family. Limitation: type 1 is reported as type 2, because NormTree keeps no identifier or literal text, so two functions that differ only in literals (two lookup tables of the same shape) are reported as clones (ADR-050; a raw-token digest is a P3 follow-up).",
+      "summary": "Type 1, 2, and 3 clones: functions whose normalized syntax trees share most subtree fingerprints, compared within a language family. Type 1 has the same tokens; type 2 the same tree with identifiers or literals renamed, listed in `renamed`; type 3 statements inserted, removed, or changed, listed in `edits`. Limitation: what normalization erases (layout, comments, the function's own name, and the annotations, attributes, or modifiers a language's normalizer drops) is not compared, so a copy that differs only there is type 1, and two functions that differ only in literals (two lookup tables of the same shape) are type-2 clones (ADR-136).",
       "tier": 0,
       "version": 1,
       "wants": []

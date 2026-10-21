@@ -4,17 +4,17 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 3,
+      "findings": 25,
       "id": "static.dead-code",
       "metrics": {
         "dead_exports": 1.0,
-        "dead_symbols": 2.0
+        "dead_symbols": 24.0
       },
       "oracle": null,
       "score": {
-        "n": 98,
+        "n": 108,
         "unit": "dead_symbols",
-        "value": 2.0
+        "value": 24.0
       },
       "skipped": null,
       "status": "fail",
@@ -34,17 +34,1239 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
+        "summary": "Delete `scaled` from shapes/src/main/java/shapes/Geometry.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `scaled` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "module": "shapes",
+        "module_files": [
+          "shapes/src/main/java/shapes/Geometry.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_0865b1",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 23,
+        "file": "shapes/src/main/java/shapes/Geometry.java",
+        "line": 20
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_033df2b56abada86",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0865b1 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shapes.Geometry.Circle.scaled",
+        "hash": "sh_033df2b56abada86",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`shapes.Geometry.Circle.scaled` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `audited` from src/main/java/ledger/Account.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `audited` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Account.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_23a2b2",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 48,
+        "file": "src/main/java/ledger/Account.java",
+        "line": 46
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_2f0545542b2482f4",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_23a2b2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Account.audited",
+        "hash": "sh_2f0545542b2482f4",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Account.audited` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `settleInvoices` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `settleInvoices` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_6b6f36",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 26,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_c996d7c2eb741998",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_6b6f36 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.settleInvoices",
+        "hash": "sh_c996d7c2eb741998",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.settleInvoices` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `reconcilePayments` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `reconcilePayments` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_6b6f36",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 39,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_c996d7c2eb741998",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_6b6f36 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.reconcilePayments",
+        "hash": "sh_c996d7c2eb741998",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.reconcilePayments` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orderLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `orderLines` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_38e9c8",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 55,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 41
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_188e8eeb7a893f41",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_38e9c8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.orderLines",
+        "hash": "sh_188e8eeb7a893f41",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.orderLines` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `refundLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `refundLines` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_0fede1",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 72,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 57
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_4301451066ed1804",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0fede1 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.refundLines",
+        "hash": "sh_4301451066ed1804",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.refundLines` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `runningRefunds` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `runningRefunds` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_fdee00",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 83,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_3904a83873202846",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_fdee00 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.runningRefunds",
+        "hash": "sh_3904a83873202846",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.runningRefunds` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `runningRefundsAgain` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `runningRefundsAgain` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_fdee00",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 92,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_3904a83873202846",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_fdee00 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.runningRefundsAgain",
+        "hash": "sh_3904a83873202846",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.runningRefundsAgain` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `firstOverdraft` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `firstOverdraft` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Decide.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_8958dc",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 25,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 18
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_0d81ac1dca6f99fa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_8958dc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Decide.firstOverdraft",
+        "hash": "sh_0d81ac1dca6f99fa",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Decide.firstOverdraft` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `describe` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `describe` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Decide.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_b563d2",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 49,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 39
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_1dcf65a24aabf691",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b563d2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Decide.describe",
+        "hash": "sh_1dcf65a24aabf691",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Decide.describe` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `sign` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `sign` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Decide.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_ff8922",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 53,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 51
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_57f1552bb826e3b3",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ff8922 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Decide.sign",
+        "hash": "sh_57f1552bb826e3b3",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Decide.sign` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `size` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `size` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Decide.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_fee931",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 61,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 55
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_f05be5f4febf5b25",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_fee931 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Decide.size",
+        "hash": "sh_f05be5f4febf5b25",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Decide.size` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `drain` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `drain` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Decide.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_37fc3e",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 72,
+        "file": "src/main/java/ledger/Decide.java",
+        "line": 63
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_d740c23497f6e5a2",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_37fc3e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Decide.drain",
+        "hash": "sh_d740c23497f6e5a2",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Decide.drain` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `tieredRate` from src/main/java/ledger/References.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `tieredRate` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/References.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_25ef46",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 26,
+        "file": "src/main/java/ledger/References.java",
+        "line": 21
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_d12d0985df99ac97",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_25ef46 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.References.tieredRate",
+        "hash": "sh_d12d0985df99ac97",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.References.tieredRate` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `orphanRate` from src/main/java/ledger/References.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `orphanRate` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/References.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_f47fe0",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 30,
+        "file": "src/main/java/ledger/References.java",
+        "line": 28
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_37eb472d059f88a2",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f47fe0 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.References.orphanRate",
+        "hash": "sh_37eb472d059f88a2",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.References.orphanRate` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotal` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `netTotal` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Twins.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_408cf2",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 14,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_912eec08ffc85fe9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_408cf2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Twins.netTotal",
+        "hash": "sh_912eec08ffc85fe9",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Twins.netTotal` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `sumAfterCharge` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `sumAfterCharge` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Twins.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_408cf2",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 22,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 16
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_912eec08ffc85fe9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_408cf2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Twins.sumAfterCharge",
+        "hash": "sh_912eec08ffc85fe9",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Twins.sumAfterCharge` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalFloor` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `netTotalFloor` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Twins.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_408cf2",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 30,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 24
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_912eec08ffc85fe9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_408cf2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Twins.netTotalFloor",
+        "hash": "sh_912eec08ffc85fe9",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Twins.netTotalFloor` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalLaidOut` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `netTotalLaidOut` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Twins.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_408cf2",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 42,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 32
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_912eec08ffc85fe9",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_408cf2 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Twins.netTotalLaidOut",
+        "hash": "sh_912eec08ffc85fe9",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Twins.netTotalLaidOut` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalPlus` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `netTotalPlus` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Twins.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_e217f3",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 50,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 44
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_d659a907fc305395",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_e217f3 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Twins.netTotalPlus",
+        "hash": "sh_d659a907fc305395",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Twins.netTotalPlus` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalCapped` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `netTotalCapped` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Twins.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_ba0215",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 60,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 52
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_2ff8ad7db35d2855",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_ba0215 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Twins.netTotalCapped",
+        "hash": "sh_2ff8ad7db35d2855",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Twins.netTotalCapped` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `netTotalProduct` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `netTotalProduct` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/Twins.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_173de8",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 68,
+        "file": "src/main/java/ledger/Twins.java",
+        "line": 62
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_377d3ce888b6a339",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_173de8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.Twins.netTotalProduct",
+        "hash": "sh_377d3ce888b6a339",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.Twins.netTotalProduct` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
         "summary": "Delete `unusedTotal` from src/main/java/ledger/deadexport/DeadExport.java if nothing outside the repository uses it, or import src/main/java/ledger/deadexport/DeadExport.java where `unusedTotal` is meant to be called."
       },
       "check": "static.dead-code",
       "confidence": 0.4,
       "detail": "No import in the repository resolves to src/main/java/ledger/deadexport/DeadExport.java or another file of its module, and nothing in it is an entry point, test, or framework hook. If `unusedTotal` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
       "evidence": {
+        "dynamic": [],
         "file": "src/main/java/ledger/deadexport/DeadExport.java",
         "module": "ledger.deadexport",
         "module_files": [
           "src/main/java/ledger/deadexport/DeadExport.java"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_2c291d",
@@ -80,11 +1302,13 @@
       "confidence": 0.8,
       "detail": "No import in the repository resolves to src/main/java/ledger/deadhelpers/DeadHelpers.java or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `DeadHelpers`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
       "evidence": {
+        "dynamic": [],
         "file": "src/main/java/ledger/deadhelpers/DeadHelpers.java",
         "module": "ledger.deadhelpers",
         "module_files": [
           "src/main/java/ledger/deadhelpers/DeadHelpers.java"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_7d4676",
@@ -120,11 +1344,13 @@
       "confidence": 0.8,
       "detail": "No import in the repository resolves to src/main/java/ledger/deadhelpers/DeadHelpers.java or another file of its module, and nothing in it is an entry point, test, framework hook, or export, so no root reaches `forgottenRate`. Cupel sees imports between files, not calls, so this holds for the whole file; module-level code, a script run directly, or loading by computed name (reflection, `getattr`, string-keyed registries, dynamic imports) could still reach it.",
       "evidence": {
+        "dynamic": [],
         "file": "src/main/java/ledger/deadhelpers/DeadHelpers.java",
         "module": "ledger.deadhelpers",
         "module_files": [
           "src/main/java/ledger/deadhelpers/DeadHelpers.java"
         ],
+        "reach": "module",
         "suspect_imports": []
       },
       "id": "fnd_23b1dc",
@@ -153,24 +1379,73 @@
   "next_actions": [
     {
       "command": null,
-      "finding": "fnd_7d4676",
+      "finding": "fnd_0865b1",
       "kind": "review",
       "priority": 1,
-      "summary": "Delete `DeadHelpers` from src/main/java/ledger/deadhelpers/DeadHelpers.java if nothing outside the repository uses it, or import src/main/java/ledger/deadhelpers/DeadHelpers.java where `DeadHelpers` is meant to be called."
+      "summary": "Delete `scaled` from shapes/src/main/java/shapes/Geometry.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
-      "finding": "fnd_23b1dc",
+      "finding": "fnd_23a2b2",
       "kind": "review",
       "priority": 2,
-      "summary": "Delete `forgottenRate` from src/main/java/ledger/deadhelpers/DeadHelpers.java if nothing outside the repository uses it, or import src/main/java/ledger/deadhelpers/DeadHelpers.java where `forgottenRate` is meant to be called."
+      "summary": "Delete `audited` from src/main/java/ledger/Account.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
-      "finding": "fnd_2c291d",
+      "finding": "fnd_6b6f36",
       "kind": "review",
       "priority": 3,
-      "summary": "Delete `unusedTotal` from src/main/java/ledger/deadexport/DeadExport.java if nothing outside the repository uses it, or import src/main/java/ledger/deadexport/DeadExport.java where `unusedTotal` is meant to be called."
+      "summary": "Delete `settleInvoices` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_6b6f36",
+      "kind": "review",
+      "priority": 4,
+      "summary": "Delete `reconcilePayments` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_38e9c8",
+      "kind": "review",
+      "priority": 5,
+      "summary": "Delete `orderLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_0fede1",
+      "kind": "review",
+      "priority": 6,
+      "summary": "Delete `refundLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_fdee00",
+      "kind": "review",
+      "priority": 7,
+      "summary": "Delete `runningRefunds` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_fdee00",
+      "kind": "review",
+      "priority": 8,
+      "summary": "Delete `runningRefundsAgain` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_8958dc",
+      "kind": "review",
+      "priority": 9,
+      "summary": "Delete `firstOverdraft` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_b563d2",
+      "kind": "review",
+      "priority": 10,
+      "summary": "Delete `describe` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
     }
   ],
   "oracles": null,
@@ -220,7 +1495,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 24,
+      "files": 26,
       "languages": [
         "java"
       ],
@@ -228,7 +1503,7 @@
       "roots": [
         "."
       ],
-      "symbols": 98
+      "symbols": 108
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -240,7 +1515,7 @@
     "findings": {
       "fail": 0,
       "info": 1,
-      "warn": 2
+      "warn": 24
     },
     "gate": null,
     "new": 0,
@@ -248,6 +1523,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 3,
+  "total_findings": 25,
   "truncated": false
 }

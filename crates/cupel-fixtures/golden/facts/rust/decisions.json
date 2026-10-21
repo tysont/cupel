@@ -1139,6 +1139,69 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "src/rates.rs",
+        "line": 5
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 13
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 51,
+            "end_line": 18,
+            "line": 18
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 17
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 21
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "src/references.rs",
+        "line": 26
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "src/report/format.rs",
         "line": 1
       }

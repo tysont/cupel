@@ -21,7 +21,8 @@
           "api-surface",
           "roots",
           "test-conventions",
-          "project-info"
+          "project-info",
+          "references"
         ],
         "family": "clojure",
         "id": "clojure",
@@ -41,7 +42,8 @@
           "api-surface",
           "roots",
           "test-conventions",
-          "project-info"
+          "project-info",
+          "references"
         ],
         "family": "go",
         "id": "go",
@@ -61,7 +63,8 @@
           "api-surface",
           "roots",
           "test-conventions",
-          "project-info"
+          "project-info",
+          "references"
         ],
         "family": "java",
         "id": "java",
@@ -84,7 +87,8 @@
           "api-surface",
           "roots",
           "test-conventions",
-          "project-info"
+          "project-info",
+          "references"
         ],
         "family": "ecma",
         "id": "javascript",
@@ -104,7 +108,8 @@
           "api-surface",
           "roots",
           "test-conventions",
-          "project-info"
+          "project-info",
+          "references"
         ],
         "family": "python",
         "id": "python",
@@ -124,7 +129,8 @@
           "api-surface",
           "roots",
           "test-conventions",
-          "project-info"
+          "project-info",
+          "references"
         ],
         "family": "rust",
         "id": "rust",
@@ -147,7 +153,8 @@
           "api-surface",
           "roots",
           "test-conventions",
-          "project-info"
+          "project-info",
+          "references"
         ],
         "family": "ecma",
         "id": "typescript",

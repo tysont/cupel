@@ -142,6 +142,10 @@ template = "**/src/test/java/{module}Tests.java"
 [api]
 tight_after = ["@"]
 
+# Annotations for the compiler: not references to what they annotate (ADR-135).
+[references]
+inert = ["Override", "Deprecated", "SuppressWarnings", "SafeVarargs"]
+
 # The runtime calls these serialization hooks by name.
 [roots]
 entry_points = []

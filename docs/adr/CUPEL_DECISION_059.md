@@ -1,6 +1,6 @@
 # CUPEL_DECISION_059: `static.dead-code` findings: severities, confidence, needs, and score
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.8
+**Date:** 2026-10-13 · **Status:** accepted; its needs, evidence, and the confidence of a symbol-level `dead.symbol` amended by [135](CUPEL_DECISION_135.md) · **Phase:** P2.8
 
 ## Context
 

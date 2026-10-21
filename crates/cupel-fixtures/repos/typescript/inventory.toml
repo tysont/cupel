@@ -340,3 +340,35 @@ expect = { skip_dirs = ["node_modules", "dist", "coverage"] }
 
 [project-info.packages]
 not-applicable = "npm, pnpm, and yarn run a project's scripts and runners from the root; commands take no package patterns."
+
+# The `references` fact (ADR-135): the reference cases live in references.* and rates.*.
+[references.local]
+file = "src/references.ts"
+name = "tieredRate"
+
+[references.imported]
+not-applicable = "An ES import's names are not its specifier's segments, and the queries read none, so imported names stay unresolved and match by name."
+
+[references.member]
+file = "src/ledger.ts"
+name = "parse"
+
+[references.text]
+file = "src/complexity.ts"
+name = "jan"
+
+[references.attribute]
+file = "src/references.ts"
+name = "logged"
+
+[references.implicit]
+file = "src/complexity.ts"
+name = "constructor"
+
+[references.dynamic-member]
+file = "src/references.ts"
+name = "RATES[kind]"
+
+[references.dynamic-name]
+file = "src/references.ts"
+name = "eval(source)"

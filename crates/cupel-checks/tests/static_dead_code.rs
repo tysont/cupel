@@ -1,14 +1,14 @@
-// ABOUTME: static.dead-code over synthetic facts: modules from namespaces, entry by import, roots, the
-// ABOUTME: two finding kinds with their confidence and evidence, scope filtering, and the score (ADR-058/059).
+// ABOUTME: static.dead-code over synthetic facts: modules from namespaces, entry by import, roots, symbols
+// ABOUTME: nothing references, the finding kinds' confidence and evidence, scope, and the score (ADR-058/059/135).
 mod support;
 
 use std::collections::BTreeSet;
 
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
-    EdgeKind, ImportEdge, ImportTarget, LiveRoot, ModuleGraph, NormNode, NormTree,
-    NormalizedSymbol, RootImports, RootReason, Roots, Span, SymbolDef, SymbolKind, Symbols,
-    Visibility,
+    DynamicAccess, DynamicReach, EdgeKind, ImportEdge, ImportTarget, LiveRoot, ModuleGraph,
+    NormNode, NormTree, NormalizedSymbol, Reference, ReferenceKind, ReferenceTarget, References,
+    RootImports, RootReason, Roots, Span, SymbolDef, SymbolKind, Symbols, Visibility,
 };
 use cupel_core::{
     ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts,
@@ -88,6 +88,44 @@ fn edge(from: &str, specifier: &str, target: ImportTarget) -> ImportEdge {
     }
 }
 
+/// A reference to `name` on `line` of `file`, resolved to `target`.
+fn reference(file: &str, line: u32, name: &str, target: ReferenceTarget) -> Reference {
+    Reference {
+        file: file.to_owned(),
+        span: Span {
+            line,
+            col: 5,
+            end_line: line,
+            end_col: 9,
+        },
+        name: name.to_owned(),
+        kind: ReferenceKind::Name,
+        from: None,
+        target,
+    }
+}
+
+/// An unresolved reference to `name` on `line` of `file`.
+fn named(file: &str, line: u32, name: &str) -> Reference {
+    reference(file, line, name, ReferenceTarget::Unresolved)
+}
+
+/// A dynamic access on `line` of `file`.
+fn dynamic(file: &str, line: u32, reach: DynamicReach) -> DynamicAccess {
+    DynamicAccess {
+        file: file.to_owned(),
+        span: Span {
+            line,
+            col: 1,
+            end_line: line,
+            end_col: 20,
+        },
+        from: None,
+        reach,
+        text: "lookup(name)".to_owned(),
+    }
+}
+
 /// A hash unique to the symbol's position.
 fn hash_of(def: &SymbolDef) -> SymbolHash {
     let mut digest = 0u64;
@@ -100,12 +138,13 @@ fn hash_of(def: &SymbolDef) -> SymbolHash {
     format!("sh_{digest:016x}").parse().unwrap()
 }
 
-/// The facts the check needs: symbols, their roots by reason, and import edges.
+/// The facts the check needs: symbols, their roots by reason, import edges, and references.
 #[derive(Default)]
 struct World {
     symbols: Vec<SymbolDef>,
     roots: Vec<(usize, RootReason)>,
     edges: Vec<ImportEdge>,
+    references: References,
 }
 
 impl World {
@@ -120,7 +159,13 @@ impl World {
             symbols,
             roots,
             edges: Vec::new(),
+            references: References::default(),
         }
+    }
+
+    fn refer(mut self, reference: Reference) -> Self {
+        self.references.references.push(reference);
+        self
     }
 
     fn root(mut self, index: usize, reason: RootReason) -> Self {
@@ -178,6 +223,7 @@ impl World {
                     .collect(),
             })
             .unwrap();
+        facts.insert(self.references.clone()).unwrap();
         facts
     }
 
@@ -212,10 +258,10 @@ fn the_manifest_states_its_known_limitation() {
     assert_eq!(
         limitation,
         Some(
-            "no fact carries references, so reachability is decided per module, never per call: \
-             an unused function in an imported module is not reported, and an export of an \
-             unimported module is only `dead.export` (info, low confidence) (ADR-058; a \
-             References fact is a P3 follow-up)."
+            "references match by name, not by type, so any same-named reference keeps a symbol \
+             alive, and a function only dead code calls is reported once that code is gone; an \
+             export of an unimported module is only `dead.export` (info, low confidence) \
+             (ADR-058, ADR-135)."
         )
     );
 }
@@ -230,7 +276,8 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
                 FactKind::Symbols,
                 FactKind::NormTree,
                 FactKind::ModuleGraph,
-                FactKind::Roots
+                FactKind::Roots,
+                FactKind::References
             ],
             wants: vec![],
             tier: 0,
@@ -264,7 +311,10 @@ fn of_a_root_an_export_an_imported_item_and_an_unreferenced_private_only_the_las
         "main.x",
         "util::helper",
         support::imported_file("util.x"),
-    ));
+    ))
+    .refer(named("main.x", 2, "assist"))
+    .refer(named("api.x", 2, "check"))
+    .refer(named("main.x", 2, "helper"));
     let (result, findings) = run(&world);
     assert_eq!(
         support::kinds(&findings),
@@ -319,6 +369,8 @@ fn a_finding_is_identified_located_explained_and_reproducible() {
             "module": "lost",
             "module_files": ["lost.x"],
             "suspect_imports": [],
+            "reach": "module",
+            "dynamic": [],
         })
         .as_object()
         .unwrap()
@@ -330,7 +382,8 @@ fn an_unimported_export_is_an_info_finding_and_its_private_neighbors_are_kept() 
     let world = World::with(vec![
         public("api.x", "api", "open", 1),
         private("api.x", "api", "check", 5),
-    ]);
+    ])
+    .refer(named("api.x", 2, "check"));
     let (result, findings) = run(&world);
     assert_eq!(
         support::kinds(&findings),
@@ -370,7 +423,9 @@ fn files_sharing_a_module_namespace_keep_each_other_alive() {
         )),
         symbol("other/d.x", "other", ".", "stray", Visibility::Internal),
     ])
-    .root(0, RootReason::EntryPoint);
+    .root(0, RootReason::EntryPoint)
+    .refer(named("cmd/a.x", 2, "helper"))
+    .refer(named("cmd/a.x", 2, "serve"));
     let (_, findings) = run(&world);
     assert_eq!(
         support::kinds(&findings),
@@ -413,7 +468,9 @@ fn tests_and_framework_hooks_root_their_files_but_exports_alone_do_not() {
         public("e.x", "e", "api", 1),
     ])
     .root(0, RootReason::Test)
-    .root(2, RootReason::FrameworkHook);
+    .root(2, RootReason::FrameworkHook)
+    .refer(named("t.x", 2, "fixture"))
+    .refer(named("h.x", 2, "helper"));
     let (_, findings) = run(&world);
     assert_eq!(
         support::kinds(&findings),
@@ -431,7 +488,8 @@ fn only_imports_from_other_modules_enter_one() {
     ])
     .import(edge("self.x", "self", support::imported_file("self.x")))
     .import(edge("pkg/a.x", "pkg/b", support::imported_file("pkg/b.x")))
-    .import(edge("index.x", "./used", support::imported_file("used.x")));
+    .import(edge("index.x", "./used", support::imported_file("used.x")))
+    .refer(named("index.x", 1, "kept"));
     let (_, findings) = run(&world);
     assert_eq!(
         support::kinds(&findings),
@@ -513,7 +571,8 @@ fn only_symbols_in_scope_are_reported_but_every_fact_is_read() {
         private("caller.x", "caller", "main", 1),
     ])
     .root(3, RootReason::EntryPoint)
-    .import(edge("caller.x", "lib", support::imported_file("lib.x")));
+    .import(edge("caller.x", "lib", support::imported_file("lib.x")))
+    .refer(named("caller.x", 2, "used"));
     let scope = Scope {
         files: vec!["in.x".to_owned(), "lib.x".to_owned()],
         symbols: Some(BTreeSet::from([
@@ -601,4 +660,208 @@ fn plans_count_the_symbols_in_scope_at_quick_cost() {
             est_ms: 2
         }
     );
+}
+
+/// A reached module whose entry point calls `helper` and names nothing else in it.
+fn reached() -> World {
+    World::with(vec![
+        private("app.x", "app", "main", 1),
+        private("app.x", "app", "helper", 5),
+        private("app.x", "app", "orphan", 9),
+    ])
+    .root(0, RootReason::EntryPoint)
+    .refer(named("app.x", 2, "helper"))
+}
+
+#[test]
+fn a_symbol_nothing_names_in_a_reached_module_is_dead_by_references() {
+    let (result, findings) = run(&reached());
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("app::orphan", "dead.symbol")])
+    );
+    let finding = &findings[0];
+    assert_eq!(finding.severity, Severity::Warn);
+    assert!((finding.confidence - 0.6).abs() < f64::EPSILON);
+    assert_eq!(finding.title, "`app::orphan` is never referenced");
+    let detail = finding.detail.as_deref().unwrap();
+    assert!(
+        detail.contains("names `orphan` outside its own body"),
+        "{detail}"
+    );
+    assert!(detail.contains("by name, not by type"), "{detail}");
+    assert_eq!(
+        finding.evidence.0,
+        *json!({
+            "file": "app.x",
+            "module": "app",
+            "module_files": ["app.x"],
+            "suspect_imports": [],
+            "reach": "references",
+            "dynamic": [],
+        })
+        .as_object()
+        .unwrap()
+    );
+    assert_eq!(result.status, CheckStatus::Fail);
+    assert!((result.metrics["dead_symbols"] - 1.0).abs() < f64::EPSILON);
+}
+
+#[test]
+fn a_reference_resolved_to_one_symbol_does_not_keep_its_namesakes_alive() {
+    let world = World::with(vec![
+        private("a.x", "a", "main", 1),
+        private("a.x", "a", "parse", 5),
+        private("b.x", "b", "parse", 1),
+        private("c.x", "c", "parse", 1),
+    ])
+    .root(0, RootReason::EntryPoint)
+    .import(edge("a.x", "b", support::imported_file("b.x")))
+    .import(edge("a.x", "c", support::imported_file("c.x")))
+    .refer(reference(
+        "a.x",
+        2,
+        "parse",
+        ReferenceTarget::Local {
+            symbols: vec![private("a.x", "a", "parse", 5).key()],
+        },
+    ))
+    .refer(reference(
+        "a.x",
+        3,
+        "parse",
+        ReferenceTarget::Imported {
+            file: "c.x".to_owned(),
+            symbols: vec![private("c.x", "c", "parse", 1).key()],
+        },
+    ));
+    let (_, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("b::parse", "dead.symbol")])
+    );
+}
+
+#[test]
+fn an_unresolved_reference_keeps_every_symbol_of_its_name_alive() {
+    let world = World::with(vec![
+        private("a.x", "a", "main", 1),
+        method(private("b.x", "b::T", "len", 1)),
+        method(private("c.x", "c::U", "len", 1)),
+    ])
+    .root(0, RootReason::EntryPoint)
+    .import(edge("a.x", "b", support::imported_file("b.x")))
+    .import(edge("a.x", "c", support::imported_file("c.x")))
+    .refer(named("a.x", 2, "len"));
+    let (_, findings) = run(&world);
+    assert_eq!(support::kinds(&findings), support::pairs(&[]));
+}
+
+#[test]
+fn a_reference_inside_its_own_body_is_recursion_but_one_in_its_signature_counts() {
+    let mut recursive = private("app.x", "app", "recursive", 20);
+    recursive.body = Some(Span {
+        line: 21,
+        col: 1,
+        end_line: 22,
+        end_col: 2,
+    });
+    let mut decorated = private("app.x", "app", "decorated", 30);
+    decorated.body = Some(Span {
+        line: 31,
+        col: 1,
+        end_line: 32,
+        end_col: 2,
+    });
+    let decorated_key = decorated.key();
+    let mut world = reached();
+    world.symbols.extend([recursive, decorated]);
+    let world = world
+        .refer(named("app.x", 21, "recursive"))
+        .refer(Reference {
+            kind: ReferenceKind::Attribute,
+            ..reference(
+                "app.x",
+                30,
+                "route",
+                ReferenceTarget::Local {
+                    symbols: vec![decorated_key],
+                },
+            )
+        });
+    let (_, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[
+            ("app::orphan", "dead.symbol"),
+            ("app::recursive", "dead.symbol")
+        ])
+    );
+}
+
+#[test]
+fn roots_nested_symbols_and_constructors_are_never_reported_by_references() {
+    let mut world = reached();
+    let mut outer = private("app.x", "app", "outer", 20);
+    outer.span.end_line = 30;
+    let mut inner = private("app.x", "app::outer", "inner", 22);
+    inner.kind = SymbolKind::Closure;
+    world.symbols.extend([
+        outer,
+        inner,
+        method(private("app.x", "app::Ledger", "Ledger", 40)),
+        method(private("app.x", "app::Ledger", "close", 45)),
+        private("app.x", "app", "hook", 50),
+        private("app.x", "app", "case", 55),
+    ]);
+    let world = world
+        .refer(named("app.x", 2, "outer"))
+        .root(7, RootReason::FrameworkHook)
+        .root(8, RootReason::Test);
+    let (_, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[
+            ("app::orphan", "dead.symbol"),
+            ("app::Ledger::close", "dead.symbol")
+        ])
+    );
+}
+
+#[test]
+fn a_lookup_by_name_lowers_every_finding_and_a_computed_member_only_methods() {
+    let mut world = reached();
+    world
+        .symbols
+        .push(method(private("app.x", "app::Ledger", "close", 20)));
+    world
+        .references
+        .dynamic
+        .push(dynamic("app.x", 30, DynamicReach::Members));
+    let by_member = world;
+    let (_, findings) = run(&by_member);
+    let confidence = |findings: &[Finding], display: &str| {
+        let finding = findings
+            .iter()
+            .find(|f| f.symbol.as_ref().unwrap().display == display)
+            .unwrap();
+        (finding.confidence, finding.evidence.0["dynamic"].clone())
+    };
+    assert_eq!(confidence(&findings, "app::orphan"), (0.6, json!([])));
+    assert_eq!(
+        confidence(&findings, "app::Ledger::close"),
+        (0.3, json!(["app.x:30"]))
+    );
+    let mut by_name = by_member;
+    by_name
+        .references
+        .dynamic
+        .push(dynamic("lib.x", 7, DynamicReach::Names));
+    let (_, findings) = run(&by_name);
+    assert_eq!(
+        confidence(&findings, "app::orphan"),
+        (0.3, json!(["lib.x:7"]))
+    );
+    let detail = findings[0].detail.as_deref().unwrap();
+    assert!(detail.contains("computes names at run time"), "{detail}");
 }

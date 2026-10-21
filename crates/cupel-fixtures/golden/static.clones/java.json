@@ -4,18 +4,18 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 3,
+      "findings": 4,
       "id": "static.clones",
       "metrics": {
         "clusters": 1.0,
         "max_jaccard": 1.0,
-        "pairs": 8.0
+        "pairs": 9.0
       },
       "oracle": null,
       "score": {
-        "n": 41,
+        "n": 45,
         "unit": "pairs",
-        "value": 8.0
+        "value": 9.0
       },
       "skipped": null,
       "status": "fail",
@@ -42,6 +42,7 @@
       "detail": null,
       "evidence": {
         "clone_type": 2,
+        "edits": [],
         "jaccard": 1.0,
         "left": {
           "col": 5,
@@ -55,6 +56,64 @@
           "nodes": 76,
           "symbol": "ledger.ClonesSettlement.settleInvoices"
         },
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "invoices",
+              "payments"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "credit",
+              "allowance"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "owed",
+              "due"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "open",
+              "pending"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "invoice",
+              "payment"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "balance",
+              "remainder"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "0",
+              "10"
+            ]
+          }
+        ],
         "right": {
           "col": 5,
           "end_col": 6,
@@ -103,6 +162,20 @@
       "detail": null,
       "evidence": {
         "clone_type": 3,
+        "edits": [
+          {
+            "change": "inserted",
+            "location": {
+              "col": 9,
+              "end_col": 26,
+              "end_line": 67,
+              "file": "src/main/java/ledger/ClonesSettlement.java",
+              "line": 67
+            },
+            "nodes": 6,
+            "symbol": "ledger.ClonesSettlement.refundLines"
+          }
+        ],
         "jaccard": 0.881,
         "left": {
           "col": 5,
@@ -116,6 +189,7 @@
           "nodes": 130,
           "symbol": "ledger.ClonesSettlement.orderLines"
         },
+        "renamed": [],
         "right": {
           "col": 5,
           "end_col": 6,
@@ -151,6 +225,69 @@
       },
       "tier": 0,
       "title": "`ledger.ClonesSettlement.orderLines` and `ledger.ClonesSettlement.refundLines` (src/main/java/ledger/ClonesSettlement.java:57) are type-3 clones (jaccard 0.88)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `runningRefunds` and `runningRefundsAgain` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 1,
+        "edits": [],
+        "jaccard": 1.0,
+        "left": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 83,
+          "file": "src/main/java/ledger/ClonesSettlement.java",
+          "hash": "sh_3904a83873202846",
+          "lang": "java",
+          "line": 74,
+          "lines": 10,
+          "nodes": 67,
+          "symbol": "ledger.ClonesSettlement.runningRefunds"
+        },
+        "renamed": [],
+        "right": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 92,
+          "file": "src/main/java/ledger/ClonesSettlement.java",
+          "hash": "sh_3904a83873202846",
+          "lang": "java",
+          "line": 85,
+          "lines": 8,
+          "nodes": 67,
+          "symbol": "ledger.ClonesSettlement.runningRefundsAgain"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_f605db",
+      "kind": "clone.pair",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 83,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_3904a83873202846",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_f605db --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.runningRefunds",
+        "hash": "sh_3904a83873202846",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.runningRefunds` and `ledger.ClonesSettlement.runningRefundsAgain` (src/main/java/ledger/ClonesSettlement.java:85) are type-1 clones (jaccard 1.00)"
     },
     {
       "action": {
@@ -249,6 +386,8 @@
       "confidence": 1.0,
       "detail": null,
       "evidence": {
+        "clone_type": 2,
+        "edits": [],
         "max_jaccard": 1.0,
         "members": [
           {
@@ -302,6 +441,48 @@
         ],
         "min_jaccard": 1.0,
         "pairs": 6,
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "items",
+              "values",
+              "items",
+              "items"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "fee",
+              "charge",
+              "fee",
+              "fee"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "gross",
+              "subtotal",
+              "gross",
+              "gross"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "0",
+              "0",
+              "100",
+              "0"
+            ]
+          }
+        ],
         "threshold": 0.82
       },
       "id": "fnd_75487a",
@@ -344,9 +525,16 @@
     },
     {
       "command": null,
-      "finding": "fnd_75487a",
+      "finding": "fnd_f605db",
       "kind": "refactor_extract",
       "priority": 3,
+      "summary": "Extract what `runningRefunds` and `runningRefundsAgain` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_75487a",
+      "kind": "refactor_extract",
+      "priority": 4,
       "summary": "Extract the structure `netTotal` shares with 3 other symbols into one function and call it from each."
     }
   ],
@@ -397,7 +585,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 24,
+      "files": 26,
       "languages": [
         "java"
       ],
@@ -405,7 +593,7 @@
       "roots": [
         "."
       ],
-      "symbols": 98
+      "symbols": 108
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -417,7 +605,7 @@
     "findings": {
       "fail": 0,
       "info": 0,
-      "warn": 3
+      "warn": 4
     },
     "gate": null,
     "new": 0,
@@ -425,6 +613,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 3,
+  "total_findings": 4,
   "truncated": false
 }

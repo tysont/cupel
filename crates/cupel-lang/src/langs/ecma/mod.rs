@@ -6,10 +6,8 @@ mod resolve;
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::syntax::ModuleGraph;
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
-use crate::imports::ImportGraph;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::project::Ecosystem;
@@ -25,6 +23,10 @@ const SHARED: &[(QueryFile, &str)] = &[
     (QueryFile::Tests, include_str!("queries/tests.scm")),
     (QueryFile::Imports, include_str!("queries/imports.scm")),
     (QueryFile::Api, include_str!("queries/api.scm")),
+    (
+        QueryFile::References,
+        include_str!("queries/references.scm"),
+    ),
 ];
 
 /// JavaScript-only queries: patterns the TypeScript grammars reject, such as a bare identifier
@@ -143,10 +145,6 @@ impl Language for Ecma {
             Dialect::JavaScript => resolve::javascript,
             Dialect::TypeScript => resolve::typescript,
         };
-        reg.register::<ModuleGraph, _>(ImportGraph::new(
-            language,
-            Arc::clone(&self.cache),
-            resolve,
-        ));
+        crate::references::register_resolved(language, &self.cache, resolve, reg);
     }
 }

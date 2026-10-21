@@ -82,6 +82,14 @@ pub mod capture {
     pub const API_LOCAL: &str = "api.local";
     pub const ROOT_ENTRY_POINT: &str = "root.entry-point";
     pub const ROOT_HOOK: &str = "root.hook";
+    // references.scm
+    pub const REFERENCE_NAME: &str = "reference.name";
+    pub const REFERENCE_MEMBER: &str = "reference.member";
+    pub const REFERENCE_TEXT: &str = "reference.text";
+    pub const REFERENCE_ATTRIBUTE: &str = "reference.attribute";
+    pub const ATTRIBUTE_NAME: &str = "attribute.name";
+    pub const DYNAMIC_MEMBERS: &str = "dynamic.members";
+    pub const DYNAMIC_NAMES: &str = "dynamic.names";
 }
 
 use capture as c;
@@ -255,6 +263,19 @@ const API: Contract = Contract {
     open: &[],
 };
 
+const REFERENCES: Contract = Contract {
+    file: QueryFile::References,
+    required: &[&[c::REFERENCE_NAME], &[c::REFERENCE_MEMBER]],
+    optional: &[
+        c::REFERENCE_TEXT,
+        c::REFERENCE_ATTRIBUTE,
+        c::ATTRIBUTE_NAME,
+        c::DYNAMIC_MEMBERS,
+        c::DYNAMIC_NAMES,
+    ],
+    open: &[],
+};
+
 /// The contract for `file`.
 pub fn contract(file: QueryFile) -> &'static Contract {
     match file {
@@ -264,5 +285,6 @@ pub fn contract(file: QueryFile) -> &'static Contract {
         QueryFile::Tests => &TESTS,
         QueryFile::Imports => &IMPORTS,
         QueryFile::Api => &API,
+        QueryFile::References => &REFERENCES,
     }
 }

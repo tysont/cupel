@@ -90,6 +90,50 @@
     },
     {
       "body": {
+        "col": 59,
+        "end_col": 2,
+        "end_line": 77,
+        "line": 69
+      },
+      "display": "ledger.runningRefunds",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "runningRefunds",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 77,
+        "line": 69
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 64,
+        "end_col": 2,
+        "end_line": 90,
+        "line": 79
+      },
+      "display": "ledger.runningRefundsAgain",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "runningRefundsAgain",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 90,
+        "line": 79
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
         "col": 13,
         "end_col": 2,
         "end_line": 14,
@@ -1383,6 +1427,138 @@
         "end_col": 2,
         "end_line": 47,
         "line": 42
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 34,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "display": "ledger.Doubled",
+      "file": "rates.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "Doubled",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 6,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "display": "ledger.ExportedRate",
+      "file": "references.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "ExportedRate",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 11,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 39,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "ledger.importedRate",
+      "file": "references.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "importedRate",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 15,
+        "line": 13
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 22,
+        "line": 17
+      },
+      "display": "ledger.tieredRate",
+      "file": "references.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "tieredRate",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 22,
+        "line": 17
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 24
+      },
+      "display": "ledger.orphanRate",
+      "file": "references.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "orphanRate",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 26,
+        "line": 24
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 29
+      },
+      "display": "ledger.RateNamed",
+      "file": "references.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "RateNamed",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 31,
+        "line": 29
       },
       "visibility": "public"
     },

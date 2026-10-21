@@ -35,6 +35,7 @@
       "detail": null,
       "evidence": {
         "clone_type": 2,
+        "edits": [],
         "jaccard": 1.0,
         "left": {
           "col": 1,
@@ -48,6 +49,64 @@
           "nodes": 46,
           "symbol": "ledger.clones-settlement/settle-invoices"
         },
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "invoices",
+              "payments"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "credit",
+              "allowance"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "unpaid",
+              "pending-payments"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "owed",
+              "due"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 4,
+            "values": [
+              "open",
+              "pending"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "balance",
+              "remainder"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "0",
+              "10"
+            ]
+          }
+        ],
         "right": {
           "col": 1,
           "end_col": 26,
@@ -181,6 +240,8 @@
       "confidence": 1.0,
       "detail": null,
       "evidence": {
+        "clone_type": 2,
+        "edits": [],
         "max_jaccard": 1.0,
         "members": [
           {
@@ -234,6 +295,48 @@
         ],
         "min_jaccard": 1.0,
         "pairs": 6,
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "items",
+              "values",
+              "items",
+              "items"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "fee",
+              "charge",
+              "fee",
+              "fee"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "gross",
+              "subtotal",
+              "gross",
+              "gross"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "0",
+              "0",
+              "100",
+              "0"
+            ]
+          }
+        ],
         "threshold": 0.82
       },
       "id": "fnd_e41f6a",

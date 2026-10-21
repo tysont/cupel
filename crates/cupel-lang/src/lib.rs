@@ -13,7 +13,7 @@
 //! src/langs/<dir>/
 //! ├── mod.rs        # the `Language` impl: identity, grammars, `register()`, hand-written producers
 //! ├── project.rs    # its build ecosystem for `ProjectInfo` (see `project`)
-//! ├── queries/      # symbols.scm decisions.scm mutations.scm tests.scm imports.scm api.scm
+//! ├── queries/      # symbols.scm decisions.scm mutations.scm tests.scm imports.scm api.scm references.scm
 //! └── tables.toml   # data the generic producers read (see `Tables`)
 //! ```
 //!
@@ -43,6 +43,7 @@
 //! | `tests.scm` | `@test.case`; `@test.name` | `@test.assertion` `@assertion.name` `@assertion.idiom.<key>` `@test.mock` `@mock.target` `@test.skip` `@skip.reason` `@test.setup` `@framework.<name>` |
 //! | `imports.scm` | `@import`; `@import.specifier` | `@import.name` `@import.module` `@import.reexport` `@reexport.name` `@scope` `@scope.name` |
 //! | `api.scm` | one of `@api.function` `.method` `.type` `.interface` `.constant` `.variable` `.module`; `@api.name` | `@api.signature` `@api.local` `@root.entry-point` `@root.hook` `@scope` `@scope.name` `@namespace.name` |
+//! | `references.scm` | `@reference.name`; `@reference.member` | `@reference.text` `@reference.attribute` `@attribute.name` `@dynamic.members` `@dynamic.names` |
 //!
 //! The meaning of each capture and the `tables.toml` keys each producer reads are documented
 //! on the producer that reads them.
@@ -63,6 +64,7 @@ mod producer;
 pub mod project;
 mod property_stubs;
 mod query;
+mod references;
 pub mod roots;
 mod spec;
 pub mod symbols;

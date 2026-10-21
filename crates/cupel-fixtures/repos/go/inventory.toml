@@ -331,3 +331,31 @@ expect = { skip_dirs = ["vendor"] }
 [project-info.packages]
 file = "."
 expect = { packages = ["./...", "./shapes/..."] }
+
+# The `references` fact (ADR-135): the reference cases live in references.* and rates.*.
+[references.local]
+file = "references.go"
+name = "tieredRate"
+
+[references.imported]
+not-applicable = "A Go import binds a package: its functions are called through it as members (`ledger.NewAccount`), and a function of the same package is an unresolved plain name."
+
+[references.member]
+file = "cmd/ledger/main.go"
+name = "NewAccount"
+
+[references.text]
+file = "references.go"
+name = "tiered"
+
+[references.attribute]
+not-applicable = "Go has no attributes; compiler directives are comments."
+
+[references.implicit]
+not-applicable = "Go has no constructors, and the methods the runtime calls by name (`String`, `Error`) are exported, so roots."
+
+[references.dynamic-member]
+not-applicable = "`reflect` reaches only exported names, which are roots."
+
+[references.dynamic-name]
+not-applicable = "`reflect` reaches only exported names, which are roots."
