@@ -9,7 +9,7 @@
   "oracles": null,
   "plan": null,
   "rankings": {
-    "recommended": 17,
+    "recommended": 18,
     "targets": [
       {
         "findings": [
@@ -38,13 +38,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 55,
+            "rank": 57,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 55,
+            "rank": 57,
             "value": 0.0
           },
           {
@@ -82,13 +82,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 60,
+            "rank": 62,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 60,
+            "rank": 62,
             "value": 0.0
           },
           {
@@ -126,13 +126,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 63,
+            "rank": 65,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 63,
+            "rank": 65,
             "value": 0.0
           },
           {
@@ -170,13 +170,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 64,
+            "rank": 66,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 64,
+            "rank": 66,
             "value": 0.0
           },
           {
@@ -214,13 +214,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 65,
+            "rank": 67,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 65,
+            "rank": 67,
             "value": 0.0
           },
           {
@@ -258,13 +258,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 67,
+            "rank": 69,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 67,
+            "rank": 69,
             "value": 0.0
           },
           {
@@ -302,13 +302,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 69,
+            "rank": 71,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 69,
+            "rank": 71,
             "value": 0.0
           },
           {
@@ -346,13 +346,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 70,
+            "rank": 72,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 70,
+            "rank": 72,
             "value": 0.0
           },
           {
@@ -494,7 +494,7 @@
       "roots": [
         "."
       ],
-      "symbols": 106
+      "symbols": 108
     },
     "seed": "<seed>",
     "started": "<timestamp>",

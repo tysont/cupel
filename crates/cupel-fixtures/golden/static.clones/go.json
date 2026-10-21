@@ -4,18 +4,18 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 4,
+      "findings": 5,
       "id": "static.clones",
       "metrics": {
         "clusters": 1.0,
         "max_jaccard": 1.0,
-        "pairs": 17.0
+        "pairs": 18.0
       },
       "oracle": null,
       "score": {
-        "n": 54,
+        "n": 56,
         "unit": "pairs",
-        "value": 17.0
+        "value": 18.0
       },
       "skipped": null,
       "status": "fail",
@@ -42,6 +42,7 @@
       "detail": null,
       "evidence": {
         "clone_type": 2,
+        "edits": [],
         "jaccard": 1.0,
         "left": {
           "col": 1,
@@ -55,6 +56,64 @@
           "nodes": 72,
           "symbol": "ledger.settleInvoices"
         },
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "invoices",
+              "payments"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "credit",
+              "allowance"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "owed",
+              "due"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "open",
+              "pending"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 3,
+            "values": [
+              "invoice",
+              "payment"
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 2,
+            "values": [
+              "balance",
+              "remainder"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "0",
+              "10"
+            ]
+          }
+        ],
         "right": {
           "col": 1,
           "end_col": 2,
@@ -103,6 +162,20 @@
       "detail": null,
       "evidence": {
         "clone_type": 3,
+        "edits": [
+          {
+            "change": "inserted",
+            "location": {
+              "col": 2,
+              "end_col": 30,
+              "end_line": 62,
+              "file": "clones_settlement.go",
+              "line": 62
+            },
+            "nodes": 10,
+            "symbol": "ledger.refundLines"
+          }
+        ],
         "jaccard": 0.88,
         "left": {
           "col": 1,
@@ -116,6 +189,7 @@
           "nodes": 125,
           "symbol": "ledger.orderLines"
         },
+        "renamed": [],
         "right": {
           "col": 1,
           "end_col": 2,
@@ -157,6 +231,69 @@
         "hints": {},
         "kind": "refactor_extract",
         "priority": 2,
+        "summary": "Extract what `runningRefunds` and `runningRefundsAgain` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 1,
+        "edits": [],
+        "jaccard": 1.0,
+        "left": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 77,
+          "file": "clones_settlement.go",
+          "hash": "sh_e557c73a47cc94fa",
+          "lang": "go",
+          "line": 69,
+          "lines": 9,
+          "nodes": 66,
+          "symbol": "ledger.runningRefunds"
+        },
+        "renamed": [],
+        "right": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 90,
+          "file": "clones_settlement.go",
+          "hash": "sh_e557c73a47cc94fa",
+          "lang": "go",
+          "line": 79,
+          "lines": 12,
+          "nodes": 66,
+          "symbol": "ledger.runningRefundsAgain"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_460c97",
+      "kind": "clone.pair",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 77,
+        "file": "clones_settlement.go",
+        "line": 69
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_e557c73a47cc94fa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_460c97 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.runningRefunds",
+        "hash": "sh_e557c73a47cc94fa",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.runningRefunds` and `ledger.runningRefundsAgain` (clones_settlement.go:79) are type-1 clones (jaccard 1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
         "summary": "Extract what `TestBlankAmountsAreRejected` and `TestParseCentsRejectsBlanks` share into one function and call it from both."
       },
       "check": "static.clones",
@@ -164,6 +301,7 @@
       "detail": null,
       "evidence": {
         "clone_type": 2,
+        "edits": [],
         "jaccard": 1.0,
         "left": {
           "col": 1,
@@ -177,6 +315,16 @@
           "nodes": 29,
           "symbol": "ledger.TestBlankAmountsAreRejected"
         },
+        "renamed": [
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "\"\"",
+              "\"  \""
+            ]
+          }
+        ],
         "right": {
           "col": 1,
           "end_col": 2,
@@ -314,6 +462,57 @@
       "confidence": 1.0,
       "detail": null,
       "evidence": {
+        "clone_type": 3,
+        "edits": [
+          {
+            "change": "removed",
+            "location": {
+              "col": 16,
+              "end_col": 17,
+              "end_line": 8,
+              "file": "twins.go",
+              "line": 8
+            },
+            "nodes": 1,
+            "symbol": "ledger.netTotalPlus"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 16,
+              "end_col": 17,
+              "end_line": 44,
+              "file": "twins.go",
+              "line": 44
+            },
+            "nodes": 1,
+            "symbol": "ledger.netTotalPlus"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 11,
+              "end_col": 14,
+              "end_line": 6,
+              "file": "twins.go",
+              "line": 6
+            },
+            "nodes": 1,
+            "symbol": "ledger.netTotalProduct"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 11,
+              "end_col": 18,
+              "end_line": 60,
+              "file": "twins.go",
+              "line": 60
+            },
+            "nodes": 1,
+            "symbol": "ledger.netTotalProduct"
+          }
+        ],
         "max_jaccard": 1.0,
         "members": [
           {
@@ -391,6 +590,7 @@
         ],
         "min_jaccard": 0.826,
         "pairs": 14,
+        "renamed": [],
         "threshold": 0.82
       },
       "id": "fnd_3514a9",
@@ -433,16 +633,23 @@
     },
     {
       "command": null,
-      "finding": "fnd_258580",
+      "finding": "fnd_460c97",
       "kind": "refactor_extract",
       "priority": 3,
+      "summary": "Extract what `runningRefunds` and `runningRefundsAgain` share into one function and call it from both."
+    },
+    {
+      "command": null,
+      "finding": "fnd_258580",
+      "kind": "refactor_extract",
+      "priority": 4,
       "summary": "Extract what `TestBlankAmountsAreRejected` and `TestParseCentsRejectsBlanks` share into one function and call it from both."
     },
     {
       "command": null,
       "finding": "fnd_3514a9",
       "kind": "refactor_extract",
-      "priority": 4,
+      "priority": 5,
       "summary": "Extract the structure `netTotal` shares with 5 other symbols into one function and call it from each."
     }
   ],
@@ -501,7 +708,7 @@
       "roots": [
         "."
       ],
-      "symbols": 84
+      "symbols": 86
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -513,7 +720,7 @@
     "findings": {
       "fail": 0,
       "info": 0,
-      "warn": 4
+      "warn": 5
     },
     "gate": null,
     "new": 0,
@@ -521,6 +728,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 4,
+  "total_findings": 5,
   "truncated": false
 }
