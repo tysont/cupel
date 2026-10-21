@@ -14,7 +14,8 @@ use cupel_core::{
 
 use crate::execute::{Execution, FileRun};
 use crate::history::History;
-use crate::overlay::{Slot, claim, slot_dir};
+use crate::overlay::Slot;
+use crate::slots::{Claim, claim, slot_dir};
 use crate::plan::{Inputs, Planned, digest, plan};
 use crate::schemata::{self, Rewriter};
 use crate::settings::{Settings, Strategy};
@@ -189,7 +190,7 @@ impl<'a> Running<'a> {
         }
         let order = history.order(planned, &to_run);
         let widest = order.iter().map(|(_, indexes)| indexes.len()).max();
-        let slots = self.slots(widest.unwrap_or(1))?;
+        let (_claim, slots) = self.slots(widest.unwrap_or(1))?;
         let execution = Execution {
             ctx: self.ctx,
             runner: self.runner,
@@ -208,7 +209,13 @@ impl<'a> Running<'a> {
                 importers: &importers,
                 mutants: indexes.iter().map(|index| &planned[*index]).collect(),
             };
-            let found = schemata::run_file(&execution, self.rewriter, &run)?;
+            let found = match schemata::run_file(&execution, self.rewriter, &run) {
+                Ok(found) => found,
+                Err(error) => {
+                    execution.restore(&run);
+                    return Err(error);
+                }
+            };
             for (index, ran) in indexes.iter().zip(found) {
                 let mutant = &mut planned[*index].mutant;
                 mutant.outcome = ran.outcome;
@@ -223,23 +230,25 @@ impl<'a> Running<'a> {
     }
 
     /// The slots for files of at most `widest` mutants, each synced with the tree: as many as
-    /// the settings allow, no more than the run's `--jobs` (ADR-086 §11).
-    fn slots(&self, widest: usize) -> Result<Vec<Slot>> {
+    /// the settings allow, no more than the run's `--jobs` (ADR-086 §11); held by the claim
+    /// until the production ends (ADR-141 §3).
+    fn slots(&self, widest: usize) -> Result<(Claim, Vec<Slot>)> {
         let root = &self.ctx.ctx.root;
-        claim(root).map_err(|error| io(root, "", &error))?;
+        let claim = claim(root).map_err(|error| io(root, "", &error))?;
         let jobs = self
             .ctx
             .focus
             .jobs
             .map_or(self.settings.jobs, |cap| self.settings.jobs.min(cap.get()));
-        (0..jobs.min(widest))
+        let slots = (0..jobs.min(widest))
             .map(|index| {
                 let slot = Slot::at(slot_dir(root, &self.lang, index));
                 slot.sync(root, self.runner.outputs())
                     .map_err(|error| io(slot.root(), "", &error))?;
                 Ok(slot)
             })
-            .collect()
+            .collect::<Result<_>>()?;
+        Ok((claim, slots))
     }
 
     /// Each file that imports `file` by a relative path, with its text (ADR-080 §8).

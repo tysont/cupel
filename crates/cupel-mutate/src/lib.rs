@@ -15,5 +15,6 @@ pub mod overlay;
 mod plan;
 pub mod schemata;
 pub mod settings;
+pub mod slots;
 
 pub use engine::{ID, MutationEngine, register};

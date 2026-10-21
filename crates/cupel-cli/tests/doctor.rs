@@ -284,3 +284,61 @@ fn a_configured_runner_that_is_not_installed_warns_without_failing() {
         doctor_id("doctor.tool-missing", "cupel-test-no-such-runner")
     );
 }
+
+/// Writes the slot directory `name` under `tmp`'s `cupel-mutate/` for the repository at
+/// `repository`, holding `bytes` in one slot.
+fn slots(tmp: &std::path::Path, name: &str, repository: &str, bytes: usize) {
+    let dir = tmp.join("cupel-mutate").join(name);
+    std::fs::create_dir_all(dir.join("python/0")).unwrap();
+    std::fs::write(dir.join("repository"), repository).unwrap();
+    std::fs::write(dir.join("python/0/build.out"), vec![b'x'; bytes]).unwrap();
+}
+
+#[test]
+fn doctor_reports_the_mutation_slots_and_the_repositories_they_belong_to() {
+    let tmp = tempfile::tempdir().unwrap();
+    let repo = Repo::new();
+    let kept = repo.root().display().to_string();
+    slots(tmp.path(), "a", &kept, 2_048);
+    slots(tmp.path(), "b", "/no/such/repository", 1_000);
+    let outcome = repo.run_with(cupel().env("TMPDIR", tmp.path()), &["doctor"]);
+    let envelope = outcome.envelope();
+    let finding = envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|finding| finding["kind"] == "doctor.mutation-slots")
+        .unwrap_or_else(|| panic!("{envelope}"));
+    assert_eq!(finding["severity"], "info");
+    let evidence = &finding["evidence"];
+    let total = evidence["bytes"].as_u64().unwrap();
+    assert!((3_048..3_048 + 1_024).contains(&total), "{evidence}");
+    let mut repositories: Vec<(Value, Value)> = evidence["repositories"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|slots| (slots["repository"].clone(), slots["exists"].clone()))
+        .collect();
+    repositories.sort_by_key(|(path, _)| path.to_string());
+    assert_eq!(
+        repositories,
+        [
+            (json!("/no/such/repository"), json!(false)),
+            (json!(kept), json!(true))
+        ]
+    );
+    let title = finding["title"].as_str().unwrap();
+    assert!(
+        title.starts_with("Mutation slots hold 3.") && title.contains(" KiB for 2 repositories under "),
+        "{title}"
+    );
+}
+
+#[test]
+fn doctor_says_nothing_of_mutation_slots_when_there_are_none() {
+    let tmp = tempfile::tempdir().unwrap();
+    let repo = Repo::new();
+    let outcome = repo.run_with(cupel().env("TMPDIR", tmp.path()), &["doctor"]);
+    let kinds = support::finding_fields(&outcome.envelope(), "kind");
+    assert!(!kinds.contains(&"doctor.mutation-slots".to_owned()), "{kinds:?}");
+}

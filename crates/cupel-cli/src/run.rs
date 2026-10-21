@@ -266,7 +266,7 @@ pub(crate) fn shell_quote(arg: &str) -> String {
 }
 
 /// `time` as RFC 3339 in UTC with second precision, such as `2026-10-10T16:31:04Z`.
-fn rfc3339(time: SystemTime) -> String {
+pub(crate) fn rfc3339(time: SystemTime) -> String {
     let seconds = time
         .duration_since(UNIX_EPOCH)
         .map_or(0, |since| since.as_secs());

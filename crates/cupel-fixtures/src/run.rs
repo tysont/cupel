@@ -111,6 +111,10 @@ fn run(args: &[&str], cwd: &Path, parity: bool) -> Outcome {
         }
     }
     command.env("CUPEL_NO_DAEMON", "1");
+    // Mutation slots and `doctor`'s report of them live under the temporary directory, so each
+    // run gets its own: no golden sees another run's slots or the machine's.
+    let tmp = tempfile::tempdir().expect("a temporary directory for the run");
+    command.env("TMPDIR", tmp.path());
     let output = command
         .output()
         .unwrap_or_else(|error| panic!("cannot run cupel {args:?} in {}: {error}", cwd.display()));

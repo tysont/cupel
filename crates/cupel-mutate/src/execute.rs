@@ -76,6 +76,8 @@ pub enum Validation {
 #[derive(PartialEq, Eq)]
 enum Holds {
     Original,
+    /// The original with one more trailing newline, as a reference run leaves it.
+    Renewed,
     Schemata,
 }
 
@@ -152,6 +154,16 @@ impl Execution<'_> {
         Ok(found.into_iter().flatten().collect())
     }
 
+    /// Writes `run`'s original file back into every slot it uses, after its mutants ended in an
+    /// error (the budget, a cancellation, a reference that is not green), so no slot keeps a
+    /// mutant or a schemata build of it (ADR-141 §3). A slot that cannot be written is made
+    /// whole by its next sync.
+    pub fn restore(&self, run: &FileRun<'_>) {
+        for slot in &self.slots[..self.workers(run)] {
+            let _ = slot.write(run.file, run.original);
+        }
+    }
+
     /// The slots `run` uses: one per mutant, at most all of them.
     fn workers(&self, run: &FileRun<'_>) -> usize {
         self.slots.len().min(run.mutants.len())
@@ -167,7 +179,7 @@ impl Execution<'_> {
                 for (importer, text) in run.importers {
                     write(slot, importer, text)?;
                 }
-                (self.reference(slot, &ctx, run)?, Holds::Original)
+                (self.reference(slot, &ctx, run)?, Holds::Renewed)
             }
             Build::Schemata { limits, .. } => (limits[index], Holds::Schemata),
         };

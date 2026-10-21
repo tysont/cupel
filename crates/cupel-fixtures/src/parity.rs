@@ -149,7 +149,8 @@ struct Daemon {
 }
 
 impl Daemon {
-    /// Starts a daemon whose root is `dir` (not the copy, so the copy has no daemon of its own).
+    /// Starts a daemon whose root is `dir` (not the copy, so the copy has no daemon of its own),
+    /// with `dir` as its temporary directory, as a cold run has its own.
     fn start(dir: &Path) -> Self {
         let socket = dir.join("d.sock");
         let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
@@ -163,6 +164,7 @@ impl Daemon {
                 "3600s",
             ])
             .current_dir(dir)
+            .env("TMPDIR", dir)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null());
