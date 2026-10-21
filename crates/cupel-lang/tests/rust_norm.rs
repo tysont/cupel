@@ -194,10 +194,8 @@ fn nodes(node: &NormNode) -> Vec<&NormNode> {
 
 #[test]
 fn every_node_carries_its_span_and_a_marker_its_source_text() {
-    let dir = tree(&[(
-        "src/lib.rs",
-        "pub fn f(rate: i64) -> i64 {\n    rate.max(1) + 20\n}\n",
-    )]);
+    let source = "pub fn f(rate: i64) -> i64 {\n    rate.max(1) + 20\n}\n";
+    let dir = tree(&[("src/lib.rs", source)]);
     let symbols: Symbols = produce("rust", dir.path());
     let norm: NormTree = produce("rust", dir.path());
     let root = &norm.symbols[0].root;
