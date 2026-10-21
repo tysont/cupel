@@ -4,12 +4,17 @@ mod support;
 
 use support::assert_imported_names;
 
-/// A Rust path names the item it takes from the module it resolves to; a Python `from` import
-/// names what it takes unless that is a submodule or a wildcard; a JavaScript import or
-/// re-export names its bindings as the module spells them, and `default` for a default import.
-#[test]
-fn each_edge_names_what_its_statement_takes_from_the_module() {
-    assert_imported_names(
+/// Each case: a language, its files, the importing file, and that file's edges as
+/// (specifier, names) in edge order.
+type Case = (
+    &'static str,
+    &'static [(&'static str, &'static str)],
+    &'static str,
+    &'static [(&'static str, &'static [&'static str])],
+);
+
+const CASES: &[Case] = &[
+    (
         "rust",
         &[
             ("Cargo.toml", "[package]\nname = \"app\"\n"),
@@ -31,8 +36,8 @@ fn each_edge_names_what_its_statement_takes_from_the_module() {
             ("crate::b::*", &[]),
             ("super::b::E::V", &["E"]),
         ],
-    );
-    assert_imported_names(
+    ),
+    (
         "python",
         &[
             ("pkg/__init__.py", ""),
@@ -50,8 +55,8 @@ fn each_edge_names_what_its_statement_takes_from_the_module() {
             (".b.*", &[]),
             ("pkg.b", &[]),
         ],
-    );
-    assert_imported_names(
+    ),
+    (
         "javascript",
         &[
             ("package.json", "{\"name\": \"app\"}"),
@@ -72,5 +77,15 @@ fn each_edge_names_what_its_statement_takes_from_the_module() {
             ("./b.js", &[]),
             ("./b.js", &[]),
         ],
-    );
+    ),
+];
+
+/// A Rust path names the item it takes from the module it resolves to; a Python `from` import
+/// names what it takes unless that is a submodule or a wildcard; a JavaScript import or
+/// re-export names its bindings as the module spells them, and `default` for a default import.
+#[test]
+fn each_edge_names_what_its_statement_takes_from_the_module() {
+    for (lang, files, from, expected) in CASES {
+        assert_imported_names(lang, files, from, expected);
+    }
 }
