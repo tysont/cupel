@@ -6426,7 +6426,15 @@
         "line": 6
       },
       "target": {
-        "kind": "unresolved"
+        "file": "packages/shapes/lib/square.js",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "packages/shapes/lib/square.js",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -6441,7 +6449,15 @@
         "line": 7
       },
       "target": {
-        "kind": "unresolved"
+        "file": "packages/shapes/lib/square.js",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "packages/shapes/lib/square.js",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -6904,7 +6920,15 @@
         "line": 14
       },
       "target": {
-        "kind": "unresolved"
+        "file": "packages/shapes/lib/square.js",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 8,
+            "file": "packages/shapes/lib/square.js",
+            "line": 1
+          }
+        ]
       }
     },
     {
@@ -14330,8 +14354,8 @@
       "span": {
         "col": 3,
         "end_col": 5,
-        "end_line": 52,
-        "line": 52
+        "end_line": 53,
+        "line": 53
       },
       "target": {
         "kind": "unresolved"
@@ -14342,15 +14366,15 @@
       "from": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "kind": "name",
       "name": "log",
       "span": {
         "col": 11,
         "end_col": 14,
-        "end_line": 53,
-        "line": 53
+        "end_line": 54,
+        "line": 54
       },
       "target": {
         "kind": "unresolved"
@@ -14361,15 +14385,15 @@
       "from": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "kind": "name",
       "name": "vi",
       "span": {
         "col": 17,
         "end_col": 19,
-        "end_line": 53,
-        "line": 53
+        "end_line": 54,
+        "line": 54
       },
       "target": {
         "kind": "unresolved"
@@ -14380,15 +14404,15 @@
       "from": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "kind": "member",
       "name": "fn",
       "span": {
         "col": 20,
         "end_col": 22,
-        "end_line": 53,
-        "line": 53
+        "end_line": 54,
+        "line": 54
       },
       "target": {
         "kind": "unresolved"
@@ -14399,15 +14423,15 @@
       "from": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "kind": "name",
       "name": "log",
       "span": {
         "col": 5,
         "end_col": 8,
-        "end_line": 54,
-        "line": 54
+        "end_line": 55,
+        "line": 55
       },
       "target": {
         "kind": "unresolved"
@@ -14418,15 +14442,15 @@
       "from": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "kind": "name",
       "name": "parseCents",
       "span": {
         "col": 9,
         "end_col": 19,
-        "end_line": 54,
-        "line": 54
+        "end_line": 55,
+        "line": 55
       },
       "target": {
         "kind": "unresolved"
@@ -14437,15 +14461,15 @@
       "from": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "kind": "name",
       "name": "expect",
       "span": {
         "col": 5,
         "end_col": 11,
-        "end_line": 55,
-        "line": 55
+        "end_line": 56,
+        "line": 56
       },
       "target": {
         "kind": "unresolved"
@@ -14456,15 +14480,15 @@
       "from": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "kind": "name",
       "name": "log",
       "span": {
         "col": 12,
         "end_col": 15,
-        "end_line": 55,
-        "line": 55
+        "end_line": 56,
+        "line": 56
       },
       "target": {
         "kind": "unresolved"
@@ -14475,15 +14499,15 @@
       "from": {
         "col": 32,
         "file": "test/math.test.js",
-        "line": 52
+        "line": 53
       },
       "kind": "member",
       "name": "toHaveBeenCalledWith",
       "span": {
         "col": 17,
         "end_col": 37,
-        "end_line": 55,
-        "line": 55
+        "end_line": 56,
+        "line": 56
       },
       "target": {
         "kind": "unresolved"

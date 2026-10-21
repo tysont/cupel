@@ -73,6 +73,9 @@
           "edge_kind": "re-export",
           "from": "src/index.js",
           "line": 7,
+          "names": [
+            "doubled"
+          ],
           "relative": true,
           "specifier": "./rates.js",
           "target": {
@@ -206,6 +209,9 @@
           "edge_kind": "import",
           "from": "src/rates.js",
           "line": 1,
+          "names": [
+            "importedRate"
+          ],
           "relative": true,
           "specifier": "./references.js",
           "target": {

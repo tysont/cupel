@@ -12033,15 +12033,15 @@
       "from": {
         "col": 1,
         "file": "ledger_test.go",
-        "line": 85
+        "line": 86
       },
       "kind": "name",
       "name": "t",
       "span": {
         "col": 39,
         "end_col": 40,
-        "end_line": 85,
-        "line": 85
+        "end_line": 86,
+        "line": 86
       },
       "target": {
         "kind": "unresolved"
@@ -12052,15 +12052,15 @@
       "from": {
         "col": 1,
         "file": "ledger_test.go",
-        "line": 85
+        "line": 86
       },
       "kind": "name",
       "name": "NewAccount",
       "span": {
         "col": 2,
         "end_col": 12,
-        "end_line": 86,
-        "line": 86
+        "end_line": 87,
+        "line": 87
       },
       "target": {
         "kind": "unresolved"
@@ -12071,15 +12071,15 @@
       "from": {
         "col": 1,
         "file": "ledger_test.go",
-        "line": 85
+        "line": 86
       },
       "kind": "text",
       "name": "ada",
       "span": {
         "col": 14,
         "end_col": 17,
-        "end_line": 86,
-        "line": 86
+        "end_line": 87,
+        "line": 87
       },
       "target": {
         "kind": "unresolved"

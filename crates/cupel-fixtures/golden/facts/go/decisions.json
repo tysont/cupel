@@ -1867,6 +1867,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 3,
+            "end_line": 20,
+            "line": 18
+          },
           "table": false
         },
         {
@@ -1875,6 +1881,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 3,
+            "end_col": 20,
+            "end_line": 19,
+            "line": 19
+          },
           "table": false
         }
       ],

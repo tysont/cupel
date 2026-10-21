@@ -10074,8 +10074,8 @@
       "span": {
         "col": 3,
         "end_col": 5,
-        "end_line": 43,
-        "line": 43
+        "end_line": 44,
+        "line": 44
       },
       "target": {
         "kind": "unresolved"
@@ -10086,15 +10086,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "name",
       "name": "consume",
       "span": {
         "col": 11,
         "end_col": 18,
-        "end_line": 44,
-        "line": 44
+        "end_line": 45,
+        "line": 45
       },
       "target": {
         "kind": "unresolved"
@@ -10105,15 +10105,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "name",
       "name": "vi",
       "span": {
         "col": 21,
         "end_col": 23,
-        "end_line": 44,
-        "line": 44
+        "end_line": 45,
+        "line": 45
       },
       "target": {
         "kind": "unresolved"
@@ -10124,15 +10124,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "member",
       "name": "fn",
       "span": {
         "col": 24,
         "end_col": 26,
-        "end_line": 44,
-        "line": 44
+        "end_line": 45,
+        "line": 45
       },
       "target": {
         "kind": "unresolved"
@@ -10143,15 +10143,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "name",
       "name": "values",
       "span": {
         "col": 28,
         "end_col": 34,
-        "end_line": 44,
-        "line": 44
+        "end_line": 45,
+        "line": 45
       },
       "target": {
         "kind": "unresolved"
@@ -10162,15 +10162,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "name",
       "name": "consume",
       "span": {
         "col": 5,
         "end_col": 12,
-        "end_line": 45,
-        "line": 45
+        "end_line": 46,
+        "line": 46
       },
       "target": {
         "kind": "unresolved"
@@ -10181,15 +10181,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "name",
       "name": "range",
       "span": {
         "col": 17,
         "end_col": 22,
-        "end_line": 45,
-        "line": 45
+        "end_line": 46,
+        "line": 46
       },
       "target": {
         "kind": "unresolved"
@@ -10200,15 +10200,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "name",
       "name": "expect",
       "span": {
         "col": 5,
         "end_col": 11,
-        "end_line": 46,
-        "line": 46
+        "end_line": 47,
+        "line": 47
       },
       "target": {
         "kind": "unresolved"
@@ -10219,15 +10219,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "name",
       "name": "consume",
       "span": {
         "col": 12,
         "end_col": 19,
-        "end_line": 46,
-        "line": 46
+        "end_line": 47,
+        "line": 47
       },
       "target": {
         "kind": "unresolved"
@@ -10238,15 +10238,15 @@
       "from": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       },
       "kind": "member",
       "name": "toHaveBeenCalledTimes",
       "span": {
         "col": 21,
         "end_col": 42,
-        "end_line": 46,
-        "line": 46
+        "end_line": 47,
+        "line": 47
       },
       "target": {
         "kind": "unresolved"

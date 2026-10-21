@@ -15387,15 +15387,15 @@
       "from": {
         "col": 1,
         "file": "test/ledger/core_test.clj",
-        "line": 33
+        "line": 34
       },
       "kind": "name",
       "name": "deftest",
       "span": {
         "col": 2,
         "end_col": 9,
-        "end_line": 33,
-        "line": 33
+        "end_line": 34,
+        "line": 34
       },
       "target": {
         "kind": "unresolved"
@@ -15406,15 +15406,15 @@
       "from": {
         "col": 1,
         "file": "test/ledger/core_test.clj",
-        "line": 33
+        "line": 34
       },
       "kind": "member",
       "name": "open-account",
       "span": {
         "col": 9,
         "end_col": 21,
-        "end_line": 34,
-        "line": 34
+        "end_line": 35,
+        "line": 35
       },
       "target": {
         "kind": "unresolved"
@@ -15425,15 +15425,15 @@
       "from": {
         "col": 1,
         "file": "test/ledger/core_test.clj",
-        "line": 33
+        "line": 34
       },
       "kind": "text",
       "name": "ada",
       "span": {
         "col": 22,
         "end_col": 27,
-        "end_line": 34,
-        "line": 34
+        "end_line": 35,
+        "line": 35
       },
       "target": {
         "kind": "unresolved"

@@ -18868,15 +18868,15 @@
       "from": {
         "col": 5,
         "file": "src/test/java/ledger/LedgerTest.java",
-        "line": 71
+        "line": 72
       },
       "kind": "attribute",
       "name": "Test",
       "span": {
         "col": 5,
         "end_col": 10,
-        "end_line": 71,
-        "line": 71
+        "end_line": 72,
+        "line": 72
       },
       "target": {
         "kind": "local",
@@ -18884,7 +18884,7 @@
           {
             "col": 5,
             "file": "src/test/java/ledger/LedgerTest.java",
-            "line": 71
+            "line": 72
           }
         ]
       }
@@ -18894,15 +18894,15 @@
       "from": {
         "col": 5,
         "file": "src/test/java/ledger/LedgerTest.java",
-        "line": 71
+        "line": 72
       },
       "kind": "name",
       "name": "Test",
       "span": {
         "col": 6,
         "end_col": 10,
-        "end_line": 71,
-        "line": 71
+        "end_line": 72,
+        "line": 72
       },
       "target": {
         "kind": "unresolved"
@@ -18913,15 +18913,15 @@
       "from": {
         "col": 5,
         "file": "src/test/java/ledger/LedgerTest.java",
-        "line": 71
+        "line": 72
       },
       "kind": "name",
       "name": "Ledger",
       "span": {
         "col": 9,
         "end_col": 15,
-        "end_line": 73,
-        "line": 73
+        "end_line": 74,
+        "line": 74
       },
       "target": {
         "kind": "unresolved"
@@ -18932,15 +18932,15 @@
       "from": {
         "col": 5,
         "file": "src/test/java/ledger/LedgerTest.java",
-        "line": 71
+        "line": 72
       },
       "kind": "member",
       "name": "open",
       "span": {
         "col": 16,
         "end_col": 20,
-        "end_line": 73,
-        "line": 73
+        "end_line": 74,
+        "line": 74
       },
       "target": {
         "kind": "unresolved"
@@ -18951,15 +18951,15 @@
       "from": {
         "col": 5,
         "file": "src/test/java/ledger/LedgerTest.java",
-        "line": 71
+        "line": 72
       },
       "kind": "text",
       "name": "ada",
       "span": {
         "col": 22,
         "end_col": 25,
-        "end_line": 73,
-        "line": 73
+        "end_line": 74,
+        "line": 74
       },
       "target": {
         "kind": "unresolved"

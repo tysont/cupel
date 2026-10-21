@@ -12085,8 +12085,8 @@
       "span": {
         "col": 1,
         "end_col": 8,
-        "end_line": 41,
-        "line": 41
+        "end_line": 42,
+        "line": 42
       },
       "target": {
         "kind": "local",
@@ -12094,7 +12094,7 @@
           {
             "col": 1,
             "file": "tests/ledger.rs",
-            "line": 42
+            "line": 43
           }
         ]
       }
@@ -12107,8 +12107,8 @@
       "span": {
         "col": 3,
         "end_col": 7,
-        "end_line": 41,
-        "line": 41
+        "end_line": 42,
+        "line": 42
       },
       "target": {
         "kind": "unresolved"
@@ -12119,15 +12119,15 @@
       "from": {
         "col": 1,
         "file": "tests/ledger.rs",
-        "line": 42
+        "line": 43
       },
       "kind": "name",
       "name": "Account",
       "span": {
         "col": 5,
         "end_col": 12,
-        "end_line": 43,
-        "line": 43
+        "end_line": 44,
+        "line": 44
       },
       "target": {
         "kind": "unresolved"
@@ -12138,15 +12138,15 @@
       "from": {
         "col": 1,
         "file": "tests/ledger.rs",
-        "line": 42
+        "line": 43
       },
       "kind": "member",
       "name": "new",
       "span": {
         "col": 14,
         "end_col": 17,
-        "end_line": 43,
-        "line": 43
+        "end_line": 44,
+        "line": 44
       },
       "target": {
         "kind": "unresolved"
@@ -12157,15 +12157,15 @@
       "from": {
         "col": 1,
         "file": "tests/ledger.rs",
-        "line": 42
+        "line": 43
       },
       "kind": "text",
       "name": "dee",
       "span": {
         "col": 19,
         "end_col": 22,
-        "end_line": 43,
-        "line": 43
+        "end_line": 44,
+        "line": 44
       },
       "target": {
         "kind": "unresolved"

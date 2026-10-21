@@ -68,13 +68,15 @@ fn a_plain_name_an_import_binds_resolves_to_the_function_in_the_imported_file() 
     }
 }
 
+/// An ES import binds the names its statement lists (ADR-133's `ImportEdge.names`), never its
+/// specifier's last segment: `square` resolves through `import { square } from "@ledger/shapes"`.
 #[test]
-fn an_es_import_binds_no_name_by_its_specifier_so_the_name_stays_unresolved() {
+fn an_es_import_binds_the_names_it_lists_not_its_specifiers_last_segment() {
     let fact = of("javascript", &fixture("javascript"));
     assert_eq!(
         shapes(&named(&fact, "src/ledger.js", "square")),
-        HashSet::from([(ReferenceKind::Name, "unresolved")]),
-        "`@ledger/shapes/square` ends in `square` but binds `side`"
+        HashSet::from([(ReferenceKind::Name, "imported")]),
+        "`import {{ square }} from \"@ledger/shapes\"` binds `square`"
     );
     assert_eq!(
         named(&fact, "src/rates.js", "importedRate"),

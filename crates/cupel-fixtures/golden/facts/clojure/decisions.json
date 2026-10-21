@@ -1005,6 +1005,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 45,
+            "end_line": 16,
+            "line": 16
+          },
           "table": false
         }
       ],

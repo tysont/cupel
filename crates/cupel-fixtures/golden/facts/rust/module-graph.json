@@ -387,6 +387,9 @@
           "edge_kind": "import",
           "from": "src/rates.rs",
           "line": 2,
+          "names": [
+            "imported_rate"
+          ],
           "relative": false,
           "specifier": "crate::references::imported_rate",
           "target": {

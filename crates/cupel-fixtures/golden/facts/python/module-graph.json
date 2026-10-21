@@ -114,6 +114,9 @@
           "edge_kind": "import",
           "from": "src/ledger/__init__.py",
           "line": 25,
+          "names": [
+            "doubled"
+          ],
           "relative": true,
           "specifier": ".rates.doubled",
           "target": {
@@ -178,6 +181,9 @@
           "edge_kind": "import",
           "from": "src/ledger/rates.py",
           "line": 3,
+          "names": [
+            "_imported_rate"
+          ],
           "relative": true,
           "specifier": ".references._imported_rate",
           "target": {

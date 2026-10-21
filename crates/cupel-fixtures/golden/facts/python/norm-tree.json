@@ -13895,10 +13895,23 @@
             "children": [
               {
                 "children": [],
-                "label": "$id"
+                "label": "$id",
+                "span": {
+                  "col": 13,
+                  "end_col": 19,
+                  "end_line": 6,
+                  "line": 6
+                },
+                "text": "amount"
               }
             ],
-            "label": "parameters"
+            "label": "parameters",
+            "span": {
+              "col": 12,
+              "end_col": 20,
+              "end_line": 6,
+              "line": 6
+            }
           },
           {
             "children": [
@@ -13908,28 +13921,71 @@
                     "children": [
                       {
                         "children": [],
-                        "label": "_imported_rate"
+                        "label": "_imported_rate",
+                        "span": {
+                          "col": 12,
+                          "end_col": 26,
+                          "end_line": 7,
+                          "line": 7
+                        }
                       },
                       {
                         "children": [
                           {
                             "children": [],
-                            "label": "$id"
+                            "label": "$id",
+                            "span": {
+                              "col": 27,
+                              "end_col": 33,
+                              "end_line": 7,
+                              "line": 7
+                            },
+                            "text": "amount"
                           }
                         ],
-                        "label": "argument_list"
+                        "label": "argument_list",
+                        "span": {
+                          "col": 26,
+                          "end_col": 34,
+                          "end_line": 7,
+                          "line": 7
+                        }
                       }
                     ],
-                    "label": "call"
+                    "label": "call",
+                    "span": {
+                      "col": 12,
+                      "end_col": 34,
+                      "end_line": 7,
+                      "line": 7
+                    }
                   }
                 ],
-                "label": "return_statement"
+                "label": "return_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 34,
+                  "end_line": 7,
+                  "line": 7
+                }
               }
             ],
-            "label": "block"
+            "label": "block",
+            "span": {
+              "col": 5,
+              "end_col": 34,
+              "end_line": 7,
+              "line": 7
+            }
           }
         ],
-        "label": "function_definition"
+        "label": "function_definition",
+        "span": {
+          "col": 1,
+          "end_col": 34,
+          "end_line": 7,
+          "line": 6
+        }
       },
       "symbol": {
         "col": 1,
@@ -13945,10 +14001,23 @@
             "children": [
               {
                 "children": [],
-                "label": "$id"
+                "label": "$id",
+                "span": {
+                  "col": 19,
+                  "end_col": 25,
+                  "end_line": 7,
+                  "line": 7
+                },
+                "text": "amount"
               }
             ],
-            "label": "parameters"
+            "label": "parameters",
+            "span": {
+              "col": 18,
+              "end_col": 26,
+              "end_line": 7,
+              "line": 7
+            }
           },
           {
             "children": [
@@ -13958,27 +14027,71 @@
                     "children": [
                       {
                         "children": [],
-                        "label": "$id"
+                        "label": "$id",
+                        "span": {
+                          "col": 12,
+                          "end_col": 18,
+                          "end_line": 8,
+                          "line": 8
+                        },
+                        "text": "amount"
                       },
                       {
                         "children": [],
-                        "label": "*"
+                        "label": "*",
+                        "span": {
+                          "col": 19,
+                          "end_col": 20,
+                          "end_line": 8,
+                          "line": 8
+                        }
                       },
                       {
                         "children": [],
-                        "label": "$lit"
+                        "label": "$lit",
+                        "span": {
+                          "col": 21,
+                          "end_col": 22,
+                          "end_line": 8,
+                          "line": 8
+                        },
+                        "text": "3"
                       }
                     ],
-                    "label": "binary_operator"
+                    "label": "binary_operator",
+                    "span": {
+                      "col": 12,
+                      "end_col": 22,
+                      "end_line": 8,
+                      "line": 8
+                    }
                   }
                 ],
-                "label": "return_statement"
+                "label": "return_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 22,
+                  "end_line": 8,
+                  "line": 8
+                }
               }
             ],
-            "label": "block"
+            "label": "block",
+            "span": {
+              "col": 5,
+              "end_col": 22,
+              "end_line": 8,
+              "line": 8
+            }
           }
         ],
-        "label": "function_definition"
+        "label": "function_definition",
+        "span": {
+          "col": 1,
+          "end_col": 22,
+          "end_line": 8,
+          "line": 7
+        }
       },
       "symbol": {
         "col": 1,
@@ -13994,10 +14107,23 @@
             "children": [
               {
                 "children": [],
-                "label": "$id"
+                "label": "$id",
+                "span": {
+                  "col": 20,
+                  "end_col": 26,
+                  "end_line": 11,
+                  "line": 11
+                },
+                "text": "amount"
               }
             ],
-            "label": "parameters"
+            "label": "parameters",
+            "span": {
+              "col": 19,
+              "end_col": 27,
+              "end_line": 11,
+              "line": 11
+            }
           },
           {
             "children": [
@@ -14007,27 +14133,71 @@
                     "children": [
                       {
                         "children": [],
-                        "label": "$id"
+                        "label": "$id",
+                        "span": {
+                          "col": 12,
+                          "end_col": 18,
+                          "end_line": 12,
+                          "line": 12
+                        },
+                        "text": "amount"
                       },
                       {
                         "children": [],
-                        "label": "+"
+                        "label": "+",
+                        "span": {
+                          "col": 19,
+                          "end_col": 20,
+                          "end_line": 12,
+                          "line": 12
+                        }
                       },
                       {
                         "children": [],
-                        "label": "$id"
+                        "label": "$id",
+                        "span": {
+                          "col": 21,
+                          "end_col": 27,
+                          "end_line": 12,
+                          "line": 12
+                        },
+                        "text": "amount"
                       }
                     ],
-                    "label": "binary_operator"
+                    "label": "binary_operator",
+                    "span": {
+                      "col": 12,
+                      "end_col": 27,
+                      "end_line": 12,
+                      "line": 12
+                    }
                   }
                 ],
-                "label": "return_statement"
+                "label": "return_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 27,
+                  "end_line": 12,
+                  "line": 12
+                }
               }
             ],
-            "label": "block"
+            "label": "block",
+            "span": {
+              "col": 5,
+              "end_col": 27,
+              "end_line": 12,
+              "line": 12
+            }
           }
         ],
-        "label": "function_definition"
+        "label": "function_definition",
+        "span": {
+          "col": 1,
+          "end_col": 27,
+          "end_line": 12,
+          "line": 11
+        }
       },
       "symbol": {
         "col": 1,
@@ -14043,10 +14213,23 @@
             "children": [
               {
                 "children": [],
-                "label": "$id"
+                "label": "$id",
+                "span": {
+                  "col": 18,
+                  "end_col": 24,
+                  "end_line": 15,
+                  "line": 15
+                },
+                "text": "amount"
               }
             ],
-            "label": "parameters"
+            "label": "parameters",
+            "span": {
+              "col": 17,
+              "end_col": 25,
+              "end_line": 15,
+              "line": 15
+            }
           },
           {
             "children": [
@@ -14056,18 +14239,44 @@
                     "children": [
                       {
                         "children": [],
-                        "label": "$id"
+                        "label": "$id",
+                        "span": {
+                          "col": 8,
+                          "end_col": 14,
+                          "end_line": 16,
+                          "line": 16
+                        },
+                        "text": "amount"
                       },
                       {
                         "children": [],
-                        "label": ">"
+                        "label": ">",
+                        "span": {
+                          "col": 15,
+                          "end_col": 16,
+                          "end_line": 16,
+                          "line": 16
+                        }
                       },
                       {
                         "children": [],
-                        "label": "$lit"
+                        "label": "$lit",
+                        "span": {
+                          "col": 17,
+                          "end_col": 20,
+                          "end_line": 16,
+                          "line": 16
+                        },
+                        "text": "100"
                       }
                     ],
-                    "label": "comparison_operator"
+                    "label": "comparison_operator",
+                    "span": {
+                      "col": 8,
+                      "end_col": 20,
+                      "end_line": 16,
+                      "line": 16
+                    }
                   },
                   {
                     "children": [
@@ -14077,42 +14286,111 @@
                             "children": [
                               {
                                 "children": [],
-                                "label": "$id"
+                                "label": "$id",
+                                "span": {
+                                  "col": 16,
+                                  "end_col": 22,
+                                  "end_line": 17,
+                                  "line": 17
+                                },
+                                "text": "amount"
                               },
                               {
                                 "children": [],
-                                "label": "//"
+                                "label": "//",
+                                "span": {
+                                  "col": 23,
+                                  "end_col": 25,
+                                  "end_line": 17,
+                                  "line": 17
+                                }
                               },
                               {
                                 "children": [],
-                                "label": "$lit"
+                                "label": "$lit",
+                                "span": {
+                                  "col": 26,
+                                  "end_col": 27,
+                                  "end_line": 17,
+                                  "line": 17
+                                },
+                                "text": "3"
                               }
                             ],
-                            "label": "binary_operator"
+                            "label": "binary_operator",
+                            "span": {
+                              "col": 16,
+                              "end_col": 27,
+                              "end_line": 17,
+                              "line": 17
+                            }
                           }
                         ],
-                        "label": "return_statement"
+                        "label": "return_statement",
+                        "span": {
+                          "col": 9,
+                          "end_col": 27,
+                          "end_line": 17,
+                          "line": 17
+                        }
                       }
                     ],
-                    "label": "block"
+                    "label": "block",
+                    "span": {
+                      "col": 9,
+                      "end_col": 27,
+                      "end_line": 17,
+                      "line": 17
+                    }
                   }
                 ],
-                "label": "if_statement"
+                "label": "if_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 27,
+                  "end_line": 17,
+                  "line": 16
+                }
               },
               {
                 "children": [
                   {
                     "children": [],
-                    "label": "$id"
+                    "label": "$id",
+                    "span": {
+                      "col": 12,
+                      "end_col": 18,
+                      "end_line": 18,
+                      "line": 18
+                    },
+                    "text": "amount"
                   }
                 ],
-                "label": "return_statement"
+                "label": "return_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 18,
+                  "end_line": 18,
+                  "line": 18
+                }
               }
             ],
-            "label": "block"
+            "label": "block",
+            "span": {
+              "col": 5,
+              "end_col": 18,
+              "end_line": 18,
+              "line": 16
+            }
           }
         ],
-        "label": "function_definition"
+        "label": "function_definition",
+        "span": {
+          "col": 1,
+          "end_col": 18,
+          "end_line": 18,
+          "line": 15
+        }
       },
       "symbol": {
         "col": 1,
@@ -14128,10 +14406,23 @@
             "children": [
               {
                 "children": [],
-                "label": "$id"
+                "label": "$id",
+                "span": {
+                  "col": 18,
+                  "end_col": 24,
+                  "end_line": 21,
+                  "line": 21
+                },
+                "text": "amount"
               }
             ],
-            "label": "parameters"
+            "label": "parameters",
+            "span": {
+              "col": 17,
+              "end_col": 25,
+              "end_line": 21,
+              "line": 21
+            }
           },
           {
             "children": [
@@ -14141,40 +14432,103 @@
                     "children": [
                       {
                         "children": [],
-                        "label": "$id"
+                        "label": "$id",
+                        "span": {
+                          "col": 12,
+                          "end_col": 18,
+                          "end_line": 22,
+                          "line": 22
+                        },
+                        "text": "amount"
                       },
                       {
                         "children": [],
-                        "label": "-"
+                        "label": "-",
+                        "span": {
+                          "col": 19,
+                          "end_col": 20,
+                          "end_line": 22,
+                          "line": 22
+                        }
                       },
                       {
                         "children": [
                           {
                             "children": [],
-                            "label": "$id"
+                            "label": "$id",
+                            "span": {
+                              "col": 21,
+                              "end_col": 27,
+                              "end_line": 22,
+                              "line": 22
+                            },
+                            "text": "amount"
                           },
                           {
                             "children": [],
-                            "label": "//"
+                            "label": "//",
+                            "span": {
+                              "col": 28,
+                              "end_col": 30,
+                              "end_line": 22,
+                              "line": 22
+                            }
                           },
                           {
                             "children": [],
-                            "label": "$lit"
+                            "label": "$lit",
+                            "span": {
+                              "col": 31,
+                              "end_col": 32,
+                              "end_line": 22,
+                              "line": 22
+                            },
+                            "text": "4"
                           }
                         ],
-                        "label": "binary_operator"
+                        "label": "binary_operator",
+                        "span": {
+                          "col": 21,
+                          "end_col": 32,
+                          "end_line": 22,
+                          "line": 22
+                        }
                       }
                     ],
-                    "label": "binary_operator"
+                    "label": "binary_operator",
+                    "span": {
+                      "col": 12,
+                      "end_col": 32,
+                      "end_line": 22,
+                      "line": 22
+                    }
                   }
                 ],
-                "label": "return_statement"
+                "label": "return_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 32,
+                  "end_line": 22,
+                  "line": 22
+                }
               }
             ],
-            "label": "block"
+            "label": "block",
+            "span": {
+              "col": 5,
+              "end_col": 32,
+              "end_line": 22,
+              "line": 22
+            }
           }
         ],
-        "label": "function_definition"
+        "label": "function_definition",
+        "span": {
+          "col": 1,
+          "end_col": 32,
+          "end_line": 22,
+          "line": 21
+        }
       },
       "symbol": {
         "col": 1,
@@ -14190,14 +14544,34 @@
             "children": [
               {
                 "children": [],
-                "label": "$id"
+                "label": "$id",
+                "span": {
+                  "col": 16,
+                  "end_col": 20,
+                  "end_line": 25,
+                  "line": 25
+                },
+                "text": "kind"
               },
               {
                 "children": [],
-                "label": "$id"
+                "label": "$id",
+                "span": {
+                  "col": 22,
+                  "end_col": 28,
+                  "end_line": 25,
+                  "line": 25
+                },
+                "text": "amount"
               }
             ],
-            "label": "parameters"
+            "label": "parameters",
+            "span": {
+              "col": 15,
+              "end_col": 29,
+              "end_line": 25,
+              "line": 25
+            }
           },
           {
             "children": [
@@ -14209,7 +14583,13 @@
                         "children": [
                           {
                             "children": [],
-                            "label": "getattr"
+                            "label": "getattr",
+                            "span": {
+                              "col": 12,
+                              "end_col": 19,
+                              "end_line": 26,
+                              "line": 26
+                            }
                           },
                           {
                             "children": [
@@ -14219,52 +14599,141 @@
                                     "children": [
                                       {
                                         "children": [],
-                                        "label": "$id"
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 20,
+                                          "end_col": 23,
+                                          "end_line": 26,
+                                          "line": 26
+                                        },
+                                        "text": "sys"
                                       },
                                       {
                                         "children": [],
-                                        "label": "$id"
+                                        "label": "$id",
+                                        "span": {
+                                          "col": 24,
+                                          "end_col": 31,
+                                          "end_line": 26,
+                                          "line": 26
+                                        },
+                                        "text": "modules"
                                       }
                                     ],
-                                    "label": "attribute"
+                                    "label": "attribute",
+                                    "span": {
+                                      "col": 20,
+                                      "end_col": 31,
+                                      "end_line": 26,
+                                      "line": 26
+                                    }
                                   },
                                   {
                                     "children": [],
-                                    "label": "$id"
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 32,
+                                      "end_col": 40,
+                                      "end_line": 26,
+                                      "line": 26
+                                    },
+                                    "text": "__name__"
                                   }
                                 ],
-                                "label": "subscript"
+                                "label": "subscript",
+                                "span": {
+                                  "col": 20,
+                                  "end_col": 41,
+                                  "end_line": 26,
+                                  "line": 26
+                                }
                               },
                               {
                                 "children": [],
-                                "label": "$lit"
+                                "label": "$lit",
+                                "span": {
+                                  "col": 43,
+                                  "end_col": 58,
+                                  "end_line": 26,
+                                  "line": 26
+                                },
+                                "text": "f\"_{kind}_rate\""
                               }
                             ],
-                            "label": "argument_list"
+                            "label": "argument_list",
+                            "span": {
+                              "col": 19,
+                              "end_col": 59,
+                              "end_line": 26,
+                              "line": 26
+                            }
                           }
                         ],
-                        "label": "call"
+                        "label": "call",
+                        "span": {
+                          "col": 12,
+                          "end_col": 59,
+                          "end_line": 26,
+                          "line": 26
+                        }
                       },
                       {
                         "children": [
                           {
                             "children": [],
-                            "label": "$id"
+                            "label": "$id",
+                            "span": {
+                              "col": 60,
+                              "end_col": 66,
+                              "end_line": 26,
+                              "line": 26
+                            },
+                            "text": "amount"
                           }
                         ],
-                        "label": "argument_list"
+                        "label": "argument_list",
+                        "span": {
+                          "col": 59,
+                          "end_col": 67,
+                          "end_line": 26,
+                          "line": 26
+                        }
                       }
                     ],
-                    "label": "call"
+                    "label": "call",
+                    "span": {
+                      "col": 12,
+                      "end_col": 67,
+                      "end_line": 26,
+                      "line": 26
+                    }
                   }
                 ],
-                "label": "return_statement"
+                "label": "return_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 67,
+                  "end_line": 26,
+                  "line": 26
+                }
               }
             ],
-            "label": "block"
+            "label": "block",
+            "span": {
+              "col": 5,
+              "end_col": 67,
+              "end_line": 26,
+              "line": 26
+            }
           }
         ],
-        "label": "function_definition"
+        "label": "function_definition",
+        "span": {
+          "col": 1,
+          "end_col": 67,
+          "end_line": 26,
+          "line": 25
+        }
       },
       "symbol": {
         "col": 1,

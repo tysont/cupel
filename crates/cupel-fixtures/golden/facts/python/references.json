@@ -11737,8 +11737,8 @@
       "span": {
         "col": 5,
         "end_col": 12,
-        "end_line": 57,
-        "line": 57
+        "end_line": 58,
+        "line": 58
       },
       "target": {
         "kind": "unresolved"
@@ -11756,8 +11756,8 @@
       "span": {
         "col": 14,
         "end_col": 17,
-        "end_line": 57,
-        "line": 57
+        "end_line": 58,
+        "line": 58
       },
       "target": {
         "kind": "unresolved"
