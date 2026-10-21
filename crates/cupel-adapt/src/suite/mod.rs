@@ -6,8 +6,10 @@
 //! coverage reports every test's outcome and the coverage of the whole suite, and, where the
 //! tool can attribute each line to the tests that ran it, the per-test map too. A joint producer
 //! stands in for the per-kind producers that would each run the suite (`cupel_core::JointProducer`);
-//! the fact store decides when it saves a run. Each root's facts are cached with the record of
-//! the tree they describe, so an unchanged tree runs nothing, a red baseline included.
+//! the fact store decides when it saves a run. Each root's green run is cached with the record of
+//! the tree it describes, so an unchanged tree runs nothing; a red or incomplete run is never
+//! cached, since what made it red may lie outside the tree (a full disk), and runs again
+//! (ADR-141 §2).
 
 mod go_test_cover;
 mod llvm_cov_nextest;
@@ -30,8 +32,9 @@ use crate::runner::{placed, roots, under};
 /// The kind of cache the joint producers keep under `.cupel/cache/`.
 const CACHE: &str = "suite";
 
-/// Bumped when what a cache entry holds changes, so older entries are run again rather than read.
-const VERSION: u32 = 1;
+/// Bumped when what a cache entry holds changes, so older entries are run again rather than read:
+/// 2 since entries hold only green runs (ADR-141 §2).
+const VERSION: u32 = 2;
 
 /// The `[lang.<id>]` key holding the coverage command a joint must reproduce.
 const COVERAGE: &str = "coverage";
@@ -194,7 +197,8 @@ impl Suite {
     }
 
     /// Runs the suite in the root of `site` and caches what it made in `entry` with the record
-    /// of the tree after the run, unless the run did not complete or made a fact short.
+    /// of the tree after the run, unless the run did not complete, made a fact short, or had a
+    /// test fail or error.
     fn run(&self, site: &Site<'_>, entry: &Path) -> Result<SuiteRun> {
         let ctx = site.ctx;
         let skip = skip_dirs(ctx, site.dir, self.0.outputs);
@@ -207,6 +211,7 @@ impl Suite {
         let before = Sources::record(&tree, &site.path, &[]);
         let run = (self.0.run)(site)?;
         let whole = run.invocation.completed
+            && !run.tests.iter().any(|test| test.outcome.is_failure())
             && run.coverage.is_some()
             && (self.0.per_test.is_none() || run.per_test.is_some());
         if whole {

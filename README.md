@@ -870,7 +870,7 @@ The baseline, the coverage report, and the per-test map each need the suite to r
 | Python (runner `pytest`) | `pytest --cov --cov-context=test` | baseline, coverage, per-test map |
 | Go | `go test -json -coverprofile` | baseline, coverage (the per-test map stays one run per test) |
 
-What the run made is cached in `.cupel/cache/suite/` with the hash of every file under the project root. While nothing there changes, the next run reuses it and runs no test, the baseline included: a cached red baseline still refuses the run with exit 4. Any change runs the suite again, so the mutation and flakiness engines always start from a real baseline of the tree they test. A customized coverage command, another runner (`cargo test`, `unittest`), or a pin on one keeps separate runs. `cupel check --dry-run` says which in each check's `needs`:
+A green run is cached in `.cupel/cache/suite/` with the hash of every file under the project root. While nothing there changes, the next run reuses it and runs no test, the baseline included. A red or incomplete run is never cached: it refuses the run with exit 4 and runs again next time, since what made it red may lie outside the tree (a full disk, a missing service). Any change runs the suite again, so the mutation and flakiness engines always start from a real baseline of the tree they test. A customized coverage command, another runner (`cargo test`, `unittest`), or a pin on one keeps separate runs. `cupel check --dry-run` says which in each check's `needs`:
 
 ```console
 $ cupel check --only tests.mutation --dry-run    # pytest, with the default coverage command

@@ -1,5 +1,5 @@
 // ABOUTME: One suite run through the binary on the Python per-test fixture (ADR-084): a dry run plans one joint run
-// ABOUTME: where it would plan three, an unchanged tree reuses the cached baseline, and a cached red one still exits 4.
+// ABOUTME: where it would plan three, an unchanged tree reuses the cached baseline, and a red run is never cached.
 mod support;
 
 use std::time::SystemTime;
@@ -95,7 +95,7 @@ fn an_unchanged_tree_reuses_the_baseline_and_a_source_change_runs_the_suite_agai
 }
 
 #[test]
-fn a_cached_red_baseline_still_refuses_the_run_with_exit_4() {
+fn a_red_baseline_is_not_cached_and_refuses_every_run_with_exit_4() {
     let Some(repo) = fixture(DEFAULT) else { return };
     repo.write(
         "tests/test_red.py",
@@ -115,6 +115,28 @@ fn a_cached_red_baseline_still_refuses_the_run_with_exit_4() {
         (4, 4, vec!["baseline.test-failed"]),
         "{envelope}"
     );
-    assert!(made.is_some());
-    assert_eq!(written(&repo), made, "the red baseline came from the cache");
+    assert_eq!(made, None, "a red baseline is not cached");
+    assert_eq!(written(&repo), None, "nor when it is run again");
+}
+
+/// A suite that failed for a reason outside the tree (a file it reads elsewhere, as a full disk
+/// or a missing service would) passes once the reason is gone, though the tree is unchanged.
+#[test]
+fn a_suite_that_failed_once_runs_again_and_passes_on_an_unchanged_tree() {
+    let Some(repo) = fixture(DEFAULT) else { return };
+    let outside = tempfile::tempdir().unwrap();
+    let flag = outside.path().join("disk-full");
+    std::fs::write(&flag, "").unwrap();
+    repo.write(
+        "tests/test_environment.py",
+        &format!(
+            "import os\n\n\ndef test_the_environment_is_healthy():\n    assert not os.path.exists({:?})\n",
+            flag.display().to_string()
+        ),
+    );
+    let (failed, _) = check(&repo, &[]);
+    std::fs::remove_file(&flag).unwrap();
+    let (passed, envelope) = check(&repo, &[]);
+    assert_eq!((failed, passed), (4, 0), "{envelope}");
+    assert!(written(&repo).is_some(), "the green run is cached");
 }
