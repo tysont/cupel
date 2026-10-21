@@ -167,10 +167,7 @@ impl Check for StaticDeadCode {
         let roots = facts.get::<Roots>()?;
         let reachability = Reachability::of(&symbols.symbols, roots, facts.get::<ModuleGraph>()?);
         let usage = Usage::of(facts.get::<References>()?, roots);
-        let mut in_scope = 0;
-        let mut dead_symbols = 0;
-        let mut dead_exports = 0;
-        let mut findings = 0;
+        let mut tally = Tally::default();
         let mut ordered: Vec<&SymbolDef> = symbols.symbols.iter().collect();
         ordered.sort_by_key(|symbol| symbol.key());
         for symbol in ordered {
@@ -179,40 +176,31 @@ impl Check for StaticDeadCode {
                 continue;
             }
             ctx.cancel.checkpoint()?;
-            in_scope += 1;
-            let Some(verdict) = reachability
-                .verdict(symbol)
-                .or_else(|| reachability.unreferenced(symbol, &usage))
-            else {
-                continue;
-            };
+            tally.in_scope += 1;
             // A symbol without a structural hash cannot be identified; every language
             // producing NormTree hashes every symbol.
-            let Some(hash) = hashes.get(&key) else {
-                continue;
-            };
-            match verdict.kind {
-                DeadKind::Symbol => dead_symbols += 1,
-                DeadKind::Export => dead_exports += 1,
+            if let (Some(verdict), Some(hash)) =
+                (reachability.judge(symbol, &usage), hashes.get(&key))
+            {
+                tally.count(verdict.kind);
+                sink.emit(Event::Finding(Box::new(
+                    self.report(symbol, hash, &verdict),
+                )));
             }
-            findings += 1;
-            sink.emit(Event::Finding(Box::new(
-                self.report(symbol, hash, &verdict),
-            )));
         }
         Ok(outcome::result(
             &self.manifest,
-            outcome::status(dead_symbols > 0),
+            outcome::status(tally.dead_symbols > 0),
             Some(Score {
-                value: f64::from(dead_symbols),
+                value: f64::from(tally.dead_symbols),
                 unit: "dead_symbols".to_owned(),
-                n: in_scope,
+                n: tally.in_scope,
             }),
             BTreeMap::from([
-                ("dead_symbols".to_owned(), f64::from(dead_symbols)),
-                ("dead_exports".to_owned(), f64::from(dead_exports)),
+                ("dead_symbols".to_owned(), f64::from(tally.dead_symbols)),
+                ("dead_exports".to_owned(), f64::from(tally.dead_exports)),
             ]),
-            findings,
+            tally.findings(),
         ))
     }
 
@@ -229,81 +217,113 @@ impl Check for StaticDeadCode {
 
 impl StaticDeadCode {
     fn report(&self, symbol: &SymbolDef, hash: &SymbolHash, verdict: &Verdict<'_>) -> Finding {
-        let file = &symbol.file;
-        let name = &symbol.name;
-        let (kind, severity, title, detail) = match (verdict.kind, verdict.reach) {
-            (DeadKind::Symbol, Reach::References) => (
-                "dead.symbol",
-                Severity::Warn,
-                format!("`{}` is never referenced", symbol.display),
-                format!(
-                    "Nothing in the repository's files names `{name}` outside its own body: no \
-                     call, value, import, string, or attribute refers to it, and it is not an \
-                     entry point, test, framework hook, or export. Cupel matches references by \
-                     name, not by type, so any reference with this name would keep it; code \
-                     generated at build time, a file in another language, or a framework that \
-                     finds it by naming convention could still reach it.{}",
-                    dynamism(verdict)
-                ),
-            ),
-            (DeadKind::Symbol, Reach::Module) => (
-                "dead.symbol",
-                Severity::Warn,
-                format!(
-                    "`{}` is unreachable: no import resolves to {file}",
-                    symbol.display
-                ),
-                format!(
-                    "No import in the repository resolves to {file} or another file of its \
-                     module, and nothing in it is an entry point, test, framework hook, or \
-                     export, so no root reaches `{name}`. Cupel sees imports between files, \
-                     not calls, so this holds for the whole file; module-level code, a script \
-                     run directly, or loading by computed name (reflection, `getattr`, \
-                     string-keyed registries, dynamic imports) could still reach it.{}",
-                    suspicion(verdict)
-                ),
-            ),
-            (DeadKind::Export, _) => (
-                "dead.export",
-                Severity::Info,
-                format!(
-                    "`{}` is exported but no import resolves to {file}",
-                    symbol.display
-                ),
-                format!(
-                    "No import in the repository resolves to {file} or another file of its \
-                     module, and nothing in it is an entry point, test, or framework hook. If \
-                     `{name}` is part of a library's public API this is expected; in an \
-                     application it is dead, along with whatever only it calls.{}",
-                    suspicion(verdict)
-                ),
-            ),
-        };
+        let (kind, severity, title, detail) = wording(symbol, verdict);
         let evidence = Unreachable {
-            file: file.clone(),
+            file: symbol.file.clone(),
             module: verdict.module.to_owned(),
             module_files: verdict.files.iter().map(|f| (*f).to_owned()).collect(),
             suspect_imports: verdict.suspects.clone(),
             reach: verdict.reach,
             dynamic: verdict.dynamic.clone(),
         };
-        let summary = match verdict.reach {
-            Reach::Module => format!(
-                "Delete `{name}` from {file} if nothing outside the repository uses it, or \
-                 import {file} where `{name}` is meant to be called."
-            ),
-            Reach::References => format!(
-                "Delete `{name}` from {file} if nothing outside the repository uses it, or call \
-                 it where it is meant to be used."
-            ),
-        };
         let mut finding = SymbolFinding::new(&self.manifest, kind, symbol, hash, evidence)
-            .described(title, summary)
+            .described(title, action(symbol, verdict))
             .at(severity)
             .finding();
         finding.confidence = verdict.confidence();
         finding.detail = Some(detail);
         finding
+    }
+}
+
+/// How many symbols were in scope and how many of each kind were reported.
+#[derive(Default)]
+struct Tally {
+    in_scope: u64,
+    dead_symbols: u32,
+    dead_exports: u32,
+}
+
+impl Tally {
+    fn count(&mut self, kind: DeadKind) {
+        match kind {
+            DeadKind::Symbol => self.dead_symbols += 1,
+            DeadKind::Export => self.dead_exports += 1,
+        }
+    }
+
+    fn findings(&self) -> u64 {
+        u64::from(self.dead_symbols) + u64::from(self.dead_exports)
+    }
+}
+
+/// A finding's kind, severity, title, and detail.
+fn wording(symbol: &SymbolDef, verdict: &Verdict<'_>) -> (&'static str, Severity, String, String) {
+    let file = &symbol.file;
+    let name = &symbol.name;
+    match (verdict.kind, verdict.reach) {
+        (DeadKind::Symbol, Reach::References) => (
+            "dead.symbol",
+            Severity::Warn,
+            format!("`{}` is never referenced", symbol.display),
+            format!(
+                "Nothing in the repository's files names `{name}` outside its own body: no \
+                 call, value, import, string, or attribute refers to it, and it is not an \
+                 entry point, test, framework hook, or export. Cupel matches references by \
+                 name, not by type, so any reference with this name would keep it; code \
+                 generated at build time, a file in another language, or a framework that \
+                 finds it by naming convention could still reach it.{}",
+                dynamism(verdict)
+            ),
+        ),
+        (DeadKind::Symbol, Reach::Module) => (
+            "dead.symbol",
+            Severity::Warn,
+            format!(
+                "`{}` is unreachable: no import resolves to {file}",
+                symbol.display
+            ),
+            format!(
+                "No import in the repository resolves to {file} or another file of its \
+                 module, and nothing in it is an entry point, test, framework hook, or \
+                 export, so no root reaches `{name}`. Cupel sees imports between files, \
+                 not calls, so this holds for the whole file; module-level code, a script \
+                 run directly, or loading by computed name (reflection, `getattr`, \
+                 string-keyed registries, dynamic imports) could still reach it.{}",
+                suspicion(verdict)
+            ),
+        ),
+        (DeadKind::Export, _) => (
+            "dead.export",
+            Severity::Info,
+            format!(
+                "`{}` is exported but no import resolves to {file}",
+                symbol.display
+            ),
+            format!(
+                "No import in the repository resolves to {file} or another file of its \
+                 module, and nothing in it is an entry point, test, or framework hook. If \
+                 `{name}` is part of a library's public API this is expected; in an \
+                 application it is dead, along with whatever only it calls.{}",
+                suspicion(verdict)
+            ),
+        ),
+    }
+}
+
+/// What to do about the symbol: delete it, or use it where it was meant to be.
+fn action(symbol: &SymbolDef, verdict: &Verdict<'_>) -> String {
+    let file = &symbol.file;
+    let name = &symbol.name;
+    match verdict.reach {
+        Reach::Module => format!(
+            "Delete `{name}` from {file} if nothing outside the repository uses it, or import \
+             {file} where `{name}` is meant to be called."
+        ),
+        Reach::References => format!(
+            "Delete `{name}` from {file} if nothing outside the repository uses it, or call it \
+             where it is meant to be used."
+        ),
     }
 }
 
@@ -468,6 +488,12 @@ impl<'a> Reachability<'a> {
             suspects: self.suspects(&symbol.file),
             dynamic: Vec::new(),
         })
+    }
+
+    /// Whether `symbol` is reported, by the module pass or else by references.
+    fn judge(&self, symbol: &SymbolDef, usage: &Usage<'_>) -> Option<Verdict<'_>> {
+        self.verdict(symbol)
+            .or_else(|| self.unreferenced(symbol, usage))
     }
 
     /// Whether `symbol`, which the module pass keeps, is reported because nothing names it

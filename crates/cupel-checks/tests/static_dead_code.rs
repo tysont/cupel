@@ -167,11 +167,6 @@ impl World {
         self
     }
 
-    fn computing(mut self, access: DynamicAccess) -> Self {
-        self.references.dynamic.push(access);
-        self
-    }
-
     fn root(mut self, index: usize, reason: RootReason) -> Self {
         self.roots.push((index, reason));
         self
@@ -836,7 +831,11 @@ fn a_lookup_by_name_lowers_every_finding_and_a_computed_member_only_methods() {
     world
         .symbols
         .push(method(private("app.x", "app::Ledger", "close", 20)));
-    let by_member = world.computing(dynamic("app.x", 30, DynamicReach::Members));
+    world
+        .references
+        .dynamic
+        .push(dynamic("app.x", 30, DynamicReach::Members));
+    let by_member = world;
     let (_, findings) = run(&by_member);
     let confidence = |findings: &[Finding], display: &str| {
         let finding = findings
@@ -850,7 +849,11 @@ fn a_lookup_by_name_lowers_every_finding_and_a_computed_member_only_methods() {
         confidence(&findings, "app::Ledger::close"),
         (0.3, json!(["app.x:30"]))
     );
-    let by_name = by_member.computing(dynamic("lib.x", 7, DynamicReach::Names));
+    let mut by_name = by_member;
+    by_name
+        .references
+        .dynamic
+        .push(dynamic("lib.x", 7, DynamicReach::Names));
     let (_, findings) = run(&by_name);
     assert_eq!(
         confidence(&findings, "app::orphan"),

@@ -67,7 +67,11 @@ pub fn register_resolved(
         Arc::clone(cache),
         resolve,
     ));
-    reg.register::<References, _>(ReferenceGraph::new(language, Arc::clone(cache), resolve));
+    reg.register::<References, _>(ReferenceGraph {
+        language,
+        cache: Arc::clone(cache),
+        resolve,
+    });
 }
 
 /// The `References` producer of one language.
@@ -75,16 +79,6 @@ pub struct ReferenceGraph {
     language: Arc<dyn Language>,
     cache: Arc<ParseCache>,
     resolve: Resolve,
-}
-
-impl ReferenceGraph {
-    pub fn new(language: Arc<dyn Language>, cache: Arc<ParseCache>, resolve: Resolve) -> Self {
-        Self {
-            language,
-            cache,
-            resolve,
-        }
-    }
 }
 
 impl Producer<References> for ReferenceGraph {

@@ -2,6 +2,7 @@
 // ABOUTME: attributes, implicit constructors, dynamic access, and coverage of every file of the language (ADR-135).
 mod support;
 
+use std::collections::HashSet;
 use std::path::Path;
 
 use cupel_core::syntax::{DynamicReach, ReferenceKind, References};
@@ -39,34 +40,46 @@ fn a_plain_name_resolves_to_the_function_of_that_name_in_its_own_file() {
     assert_eq!(found, [(ReferenceKind::Name, "local".to_owned(), vec![17])]);
 }
 
+/// `count` references resolved to the definition on `line`, by `kind` of target.
+fn resolved(count: usize, target: &str, line: u32) -> Vec<(ReferenceKind, String, Vec<u32>)> {
+    vec![(ReferenceKind::Name, target.to_owned(), vec![line]); count]
+}
+
+/// The distinct (kind, target kind) pairs of `found`.
+fn shapes(found: &[(ReferenceKind, String, Vec<u32>)]) -> HashSet<(ReferenceKind, &str)> {
+    found
+        .iter()
+        .map(|(kind, target, _)| (*kind, target.as_str()))
+        .collect()
+}
+
 #[test]
 fn a_plain_name_an_import_binds_resolves_to_the_function_in_the_imported_file() {
-    let rust = of("rust", &fixture("rust"));
-    let python = of("python", &fixture("python"));
-    for (fact, file, name, line) in [
-        (&rust, "src/rates.rs", "imported_rate", 13),
-        (&python, "src/ledger/rates.py", "_imported_rate", 11),
+    for (lang, file, name, line) in [
+        ("rust", "src/rates.rs", "imported_rate", 13),
+        ("python", "src/ledger/rates.py", "_imported_rate", 11),
     ] {
-        let found = named(fact, file, name);
-        assert!(!found.is_empty(), "{file} names {name}");
-        for (kind, target, lines) in found {
-            assert_eq!(
-                (kind, target.as_str(), lines),
-                (ReferenceKind::Name, "imported", vec![line])
-            );
-        }
+        let fact = of(lang, &fixture(lang));
+        assert_eq!(
+            named(&fact, file, name),
+            resolved(2, "imported", line),
+            "{lang}: the import and the call"
+        );
     }
 }
 
 #[test]
 fn an_es_import_binds_no_name_by_its_specifier_so_the_name_stays_unresolved() {
     let fact = of("javascript", &fixture("javascript"));
-    for (_, target, _) in named(&fact, "src/ledger.js", "square") {
-        assert_eq!(target, "unresolved");
-    }
-    let found = named(&fact, "src/rates.js", "importedRate");
-    assert_eq!(found.len(), 2, "{found:?}");
-    assert!(found.iter().all(|(_, target, _)| target == "unresolved"));
+    assert_eq!(
+        shapes(&named(&fact, "src/ledger.js", "square")),
+        HashSet::from([(ReferenceKind::Name, "unresolved")]),
+        "`@ledger/shapes/square` ends in `square` but binds `side`"
+    );
+    assert_eq!(
+        named(&fact, "src/rates.js", "importedRate"),
+        vec![(ReferenceKind::Name, "unresolved".to_owned(), vec![]); 2]
+    );
 }
 
 #[test]
@@ -81,14 +94,10 @@ fn a_name_reached_through_a_value_type_or_package_is_an_unresolved_member() {
     ];
     for (lang, file, name) in cases {
         let fact = of(lang, &fixture(lang));
-        let found = named(&fact, file, name);
-        assert!(
-            !found.is_empty()
-                && found
-                    .iter()
-                    .all(|(kind, target, _)| *kind == ReferenceKind::Member
-                        && target == "unresolved"),
-            "{lang} {file} {name}: {found:?}"
+        assert_eq!(
+            shapes(&named(&fact, file, name)),
+            HashSet::from([(ReferenceKind::Member, "unresolved")]),
+            "{lang} {file} {name}"
         );
     }
 }
@@ -158,10 +167,14 @@ fn a_decorator_names_the_function_or_method_it_decorates() {
     );
     let java = fixture("java");
     let fact = of("java", &java);
-    let found = named(&fact, "src/test/java/ledger/LedgerTest.java", "BeforeEach");
-    assert!(
-        found.contains(&(ReferenceKind::Attribute, "local".to_owned(), vec![16])),
-        "{found:?}"
+    assert_eq!(
+        named(&fact, "src/test/java/ledger/LedgerTest.java", "BeforeEach"),
+        [
+            (ReferenceKind::Member, "unresolved".to_owned(), vec![]),
+            (ReferenceKind::Attribute, "local".to_owned(), vec![16]),
+            (ReferenceKind::Name, "unresolved".to_owned(), vec![])
+        ],
+        "the import's last segment, the annotation on `setUp`, and its name"
     );
 }
 
@@ -188,13 +201,10 @@ fn identifiers_in_a_macro_are_members_since_the_token_tree_does_not_say_what_the
         "fn len() -> usize { 0 }\nfn check(v: &[u8]) { assert!(v.len() == len()); }\n",
     )]);
     let fact = of("rust", dir.path());
-    let found = named(&fact, "src/lib.rs", "len");
-    assert_eq!(found.len(), 2, "{found:?}");
-    assert!(
-        found
-            .iter()
-            .all(|(kind, target, _)| *kind == ReferenceKind::Member && target == "unresolved"),
-        "{found:?}"
+    assert_eq!(
+        named(&fact, "src/lib.rs", "len"),
+        vec![(ReferenceKind::Member, "unresolved".to_owned(), vec![]); 2],
+        "`v.len` and `len()` inside `assert!` are both members"
     );
 }
 
@@ -246,9 +256,9 @@ fn a_name_computed_at_run_time_is_a_dynamic_access_with_what_it_can_reach() {
 #[test]
 fn references_come_from_every_file_of_the_language_whatever_the_scope() {
     let fact: References = produce_scoped("rust", &fixture("rust"), &["src/references.rs"]);
-    let found = named(&fact, "src/rates.rs", "imported_rate");
-    assert!(
-        found.iter().any(|(_, target, _)| target == "imported"),
-        "a caller outside the scope is read: {found:?}"
+    assert_eq!(
+        named(&fact, "src/rates.rs", "imported_rate"),
+        resolved(2, "imported", 13),
+        "a caller outside the scope is read and resolved"
     );
 }
