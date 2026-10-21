@@ -455,13 +455,8 @@ fn an_endpoint_that_cannot_be_made_is_an_io_error_naming_it() {
         &Cancellation::new(),
         &mut |_| panic!("a daemon with no endpoint must not start"),
     );
-    let Err(error @ ServeError::Io { .. }) = refused else {
+    let Err(ServeError::Io { socket: at, .. }) = refused else {
         panic!("not an I/O error: {refused:?}")
     };
-    assert!(
-        error
-            .to_string()
-            .starts_with(&format!("cannot serve at {}: ", socket.display())),
-        "{error}"
-    );
+    assert_eq!(at, socket);
 }
