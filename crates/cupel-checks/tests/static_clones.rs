@@ -348,16 +348,20 @@ fn a_copy_with_an_extra_statement_is_a_type_3_pair() {
     assert!((0.82..1.0).contains(&jaccard), "{jaccard}");
 }
 
-#[test]
-fn three_similar_symbols_are_one_cluster_and_no_pairs() {
+/// Three similar symbols: two equal trees and one with its first statement changed.
+fn three_similar() -> [Def; 3] {
     let mut changed = body(&OPERATORS);
     changed[0] = statement("<<");
-    let defs = [
+    [
         def("a.x", "one", 1, function(body(&OPERATORS))),
         def("a.x", "two", 20, function(body(&OPERATORS))),
         def("c.x", "three", 1, function(changed)),
-    ];
-    let (result, findings) = run(&defs);
+    ]
+}
+
+#[test]
+fn three_similar_symbols_are_one_cluster_and_no_pairs() {
+    let (result, findings) = run(&three_similar());
     assert_eq!(findings.len(), 1, "{findings:#?}");
     let finding = &findings[0];
     assert_eq!(finding.kind, "clone.cluster");
@@ -771,15 +775,10 @@ fn line_of(def: &Def, label: &str) -> u32 {
 }
 
 /// A member of the hint's cluster: the common body, the shared loop, and a last statement of
-/// its own, so no two members' whole trees are equal.
-fn member(
-    file: &'static str,
-    name: &'static str,
-    line: u32,
-    own: &str,
-    operand: &str,
-    literal: &str,
-) -> Def {
+/// its own, so no two members' whole trees are equal. `varying` is that statement's operator,
+/// then the shared loop's operand and literal.
+fn member(file: &'static str, name: &'static str, line: u32, varying: [&str; 3]) -> Def {
+    let [own, operand, literal] = varying;
     let mut statements = body(&OPERATORS);
     statements.insert(4, shared(operand, literal));
     statements.push(statement(own));
@@ -804,9 +803,9 @@ fn located(file: &str, line: u32) -> Location {
 #[test]
 fn a_cluster_names_the_largest_subtree_its_members_share_and_the_parameters_that_differ() {
     let defs = [
-        member("a.x", "one", 1, "<<", "rate", "1"),
-        member("a.x", "two", 200, ">>", "fee", "2"),
-        member("c.x", "three", 1, "^", "tax", "3"),
+        member("a.x", "one", 1, ["<<", "rate", "1"]),
+        member("a.x", "two", 200, [">>", "fee", "2"]),
+        member("c.x", "three", 1, ["^", "tax", "3"]),
     ];
     let (_, findings) = run(&defs);
     assert_eq!(findings.len(), 1, "{findings:#?}");
@@ -848,14 +847,7 @@ fn a_cluster_names_the_largest_subtree_its_members_share_and_the_parameters_that
 
 #[test]
 fn a_cluster_whose_trees_carry_no_spans_has_no_common_subtree_hint() {
-    let mut changed = body(&OPERATORS);
-    changed[0] = statement("<<");
-    let defs = [
-        def("a.x", "one", 1, function(body(&OPERATORS))),
-        def("a.x", "two", 20, function(body(&OPERATORS))),
-        def("c.x", "three", 1, function(changed)),
-    ];
-    let (_, findings) = run(&defs);
+    let (_, findings) = run(&three_similar());
     assert_eq!(findings[0].kind, "clone.cluster");
     assert!(
         findings[0].action.hints.is_empty(),
@@ -867,8 +859,8 @@ fn a_cluster_whose_trees_carry_no_spans_has_no_common_subtree_hint() {
 #[test]
 fn a_pair_carries_no_common_subtree_hint() {
     let defs = [
-        member("a.x", "one", 1, "<<", "rate", "1"),
-        member("a.x", "two", 200, ">>", "fee", "2"),
+        member("a.x", "one", 1, ["<<", "rate", "1"]),
+        member("a.x", "two", 200, [">>", "fee", "2"]),
     ];
     let (_, findings) = run(&defs);
     assert_eq!(findings[0].kind, "clone.pair");

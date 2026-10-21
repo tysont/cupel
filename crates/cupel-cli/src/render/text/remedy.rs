@@ -46,7 +46,12 @@ pub fn line(key: &str, value: &Value) -> Option<String> {
 
 /// Every remediation hint in `hints`, in full, under a `remedy` label.
 pub fn block(out: &mut String, hints: &Map<String, Value>, paint: &Paint) {
-    let mut remedy = |summary: String, rows: Vec<(String, String)>| {
+    let found = [
+        hint::read::<CommonSubtree>(hints).map(|common| common_subtree(&common)),
+        hint::read::<DeepestBlock>(hints).map(|block| deepest_block(&block)),
+        hint::read::<CheapestCut>(hints).map(|cut| cheapest_cut(&cut)),
+    ];
+    for (summary, rows) in found.into_iter().flatten() {
         let _ = writeln!(
             out,
             "  {}{summary}",
@@ -55,72 +60,74 @@ pub fn block(out: &mut String, hints: &Map<String, Value>, paint: &Paint) {
         for (key, value) in rows {
             let _ = writeln!(out, "    {key:<ROW$}  {value}");
         }
-    };
-    if let Some(common) = hint::read::<CommonSubtree>(hints) {
-        let mut rows = vec![("here".to_owned(), location(&common.location))];
-        rows.extend(
-            common
-                .others
-                .iter()
-                .map(|other| (other.symbol.clone(), location(&other.location))),
-        );
-        rows.extend(common.parameters.iter().map(|parameter| {
-            let places = if parameter.occurrences > 1 {
-                format!(" ({} places)", parameter.occurrences)
-            } else {
-                String::new()
-            };
-            (
-                "parameter".to_owned(),
-                format!(
-                    "{} {}{places}",
-                    name(parameter.kind),
-                    parameter.values.join(" | ")
-                ),
-            )
-        }));
-        remedy(
-            format!(
-                "extract the {}-node subtree the cluster shares ({} of this symbol)",
-                common.nodes, common.share
-            ),
-            rows,
-        );
     }
-    if let Some(block) = hint::read::<DeepestBlock>(hints) {
-        remedy(
-            format!(
-                "extract the deepest block, {} at nesting {}, which carries cyclomatic {} and \
-                 cognitive {}",
-                path(&block),
-                block.nesting,
-                block.cyclomatic,
-                block.cognitive
-            ),
-            vec![("here".to_owned(), location(&block.location))],
-        );
-    }
-    if let Some(cut) = hint::read::<CheapestCut>(hints) {
-        let breaks = if cut.breaks_component {
-            "breaks every cycle among these modules"
+}
+
+/// A remedy's summary and its rows of named values.
+type Remedy = (String, Vec<(String, String)>);
+
+fn common_subtree(common: &CommonSubtree) -> Remedy {
+    let mut rows = vec![("here".to_owned(), location(&common.location))];
+    rows.extend(
+        common
+            .others
+            .iter()
+            .map(|other| (other.symbol.clone(), location(&other.location))),
+    );
+    rows.extend(common.parameters.iter().map(|parameter| {
+        let places = if parameter.occurrences > 1 {
+            format!(" ({} places)", parameter.occurrences)
         } else {
-            "breaks this cycle, though others among these modules remain"
+            String::new()
         };
-        let mut rows = vec![("imports".to_owned(), cut.specifiers.join(", "))];
-        if !cut.names.is_empty() {
-            rows.push(("names".to_owned(), cut.names.join(", ")));
-        }
-        if cut.unnamed > 0 {
-            rows.push(("whole-module".to_owned(), cut.unnamed.to_string()));
-        }
-        remedy(
+        (
+            "parameter".to_owned(),
             format!(
-                "cut the imports of {} from {} (line {}), which {breaks}",
-                cut.to, cut.from, cut.line
+                "{} {}{places}",
+                name(parameter.kind),
+                parameter.values.join(" | ")
             ),
-            rows,
-        );
+        )
+    }));
+    let summary = format!(
+        "extract the {}-node subtree the cluster shares ({} of this symbol)",
+        common.nodes, common.share
+    );
+    (summary, rows)
+}
+
+fn deepest_block(block: &DeepestBlock) -> Remedy {
+    let summary = format!(
+        "extract the deepest block, {} at nesting {}, which carries cyclomatic {} and cognitive {}",
+        path(block),
+        block.nesting,
+        block.cyclomatic,
+        block.cognitive
+    );
+    (
+        summary,
+        vec![("here".to_owned(), location(&block.location))],
+    )
+}
+
+fn cheapest_cut(cut: &CheapestCut) -> Remedy {
+    let breaks = if cut.breaks_component {
+        "breaks every cycle among these modules"
+    } else {
+        "breaks this cycle, though others among these modules remain"
+    };
+    let mut rows = vec![("imports".to_owned(), cut.specifiers.join(", "))];
+    if !cut.names.is_empty() {
+        rows.push(("names".to_owned(), cut.names.join(", ")));
     }
+    if cut.unnamed > 0 {
+        rows.push(("whole-module".to_owned(), cut.unnamed.to_string()));
+    }
+    let summary = format!(
+        "cut the imports of {} from {} (line {}), which {breaks}",
+        cut.to, cut.from, cut.line
+    );
+    (summary, rows)
 }
 
 /// The construct kinds from the outermost block to the deepest, as `branch > loop > branch`.

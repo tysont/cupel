@@ -198,8 +198,8 @@ fn every_node_carries_its_span_and_a_marker_its_source_text() {
         "src/lib.rs",
         "pub fn f(rate: i64) -> i64 {\n    rate.max(1) + 20\n}\n",
     )]);
-    let norm: NormTree = produce("rust", dir.path());
     let symbols: Symbols = produce("rust", dir.path());
+    let norm: NormTree = produce("rust", dir.path());
     let root = &norm.symbols[0].root;
     assert_eq!(root.span, Some(symbols.symbols[0].span));
     let all = nodes(root);

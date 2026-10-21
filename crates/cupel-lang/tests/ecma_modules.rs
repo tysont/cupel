@@ -3,9 +3,7 @@
 mod support;
 
 use cupel_core::syntax::{EdgeKind, ModuleGraph};
-use support::{
-    Edge, edge_rows, fixture, imported_names, kind, kinds, names_rows, produce, tree, under,
-};
+use support::{Edge, assert_imported_names, edge_rows, fixture, kind, kinds, produce, tree, under};
 
 fn roots(graph: &ModuleGraph) -> Vec<&str> {
     graph.roots.iter().map(|r| r.root.as_str()).collect()
@@ -484,26 +482,26 @@ fn export_from_statements_are_re_exports_and_imports_are_imports() {
 
 #[test]
 fn an_edge_names_the_bindings_an_import_or_re_export_takes_and_default_for_a_default_import() {
-    let dir = tree(&[
-        ("package.json", "{\"name\": \"app\"}"),
-        (
-            "src/a.js",
-            "import d, { b, c as e } from './b.js';\nimport * as ns from './b.js';\nexport { f } from './b.js';\nconst r = require('./b.js');\nimport './b.js';\n",
-        ),
-        (
-            "src/b.js",
-            "export default 1;\nexport const b = 2, c = 3, f = 4;\n",
-        ),
-    ]);
-    let graph: ModuleGraph = produce("javascript", dir.path());
-    assert_eq!(
-        imported_names(&graph, "src/a.js"),
-        names_rows(&[
+    assert_imported_names(
+        "javascript",
+        &[
+            ("package.json", "{\"name\": \"app\"}"),
+            (
+                "src/a.js",
+                "import d, { b, c as e } from './b.js';\nimport * as ns from './b.js';\nexport { f } from './b.js';\nconst r = require('./b.js');\nimport './b.js';\n",
+            ),
+            (
+                "src/b.js",
+                "export default 1;\nexport const b = 2, c = 3, f = 4;\n",
+            ),
+        ],
+        "src/a.js",
+        &[
             ("./b.js", &["default", "b", "c"]),
             ("./b.js", &[]),
             ("./b.js", &["f"]),
             ("./b.js", &[]),
             ("./b.js", &[]),
-        ])
+        ],
     );
 }

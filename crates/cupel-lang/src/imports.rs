@@ -101,19 +101,7 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
         .filter_map(|m| {
             let statement = m.node(capture::IMPORT)?;
             let specifier = m.node(capture::IMPORT_SPECIFIER)?;
-            let names: Vec<String> = m
-                .has(capture::IMPORT_DEFAULT)
-                .then(|| "default".to_owned())
-                .into_iter()
-                .chain(
-                    m.nodes(capture::IMPORT_NAME)
-                        .map(|n| parsed.text(n).to_owned()),
-                )
-                .chain(
-                    m.nodes(capture::IMPORT_NAMES)
-                        .flat_map(|list| listed(parsed, list)),
-                )
-                .collect();
+            let names = imported(parsed, m);
             Some(RawImport {
                 specifier: unquote(parsed.text(specifier)).to_owned(),
                 kind: edge_kind(m, &names, &reexported),
@@ -133,6 +121,23 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
         })
         .collect();
     FileImports { imports, modules }
+}
+
+/// The names the import `m` matched takes from its module: `default` for a default import, then
+/// each `@import.name`, then each name an `@import.names` list holds.
+fn imported(parsed: &Parsed, m: &Match<'_, '_>) -> Vec<String> {
+    m.has(capture::IMPORT_DEFAULT)
+        .then(|| "default".to_owned())
+        .into_iter()
+        .chain(
+            m.nodes(capture::IMPORT_NAME)
+                .map(|n| parsed.text(n).to_owned()),
+        )
+        .chain(
+            m.nodes(capture::IMPORT_NAMES)
+                .flat_map(|list| listed(parsed, list)),
+        )
+        .collect()
 }
 
 /// The names a list of imported names holds: each named child's `name` field, or the child.
