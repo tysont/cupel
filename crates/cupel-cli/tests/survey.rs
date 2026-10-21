@@ -173,7 +173,8 @@ fn a_standard_survey_protects_the_untested_function_before_simplifying_the_compl
             &score["worst"],
             &score["entries"][0]["value"]
         ),
-        (&json!("tests.mutation"), &json!("lowest"), &json!(0.75))
+        (&json!("tests.mutation"), &json!("lowest"), &json!(0.0)),
+        "`refund`'s uncovered mutant ranks it lowest"
     );
     assert_eq!(
         first_actions(&envelope, 3),
