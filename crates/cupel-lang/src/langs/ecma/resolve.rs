@@ -165,6 +165,7 @@ impl Resolver<'_, '_> {
             line: import.line,
             edge_kind: import.kind,
             names: import.names.clone(),
+            aliases: import.aliases.clone(),
         }
     }
 

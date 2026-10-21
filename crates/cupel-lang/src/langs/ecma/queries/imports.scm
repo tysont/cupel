@@ -1,7 +1,8 @@
 ; JavaScript and TypeScript imports: ESM `import … from`, side-effect imports, re-exports
 ; (`export … from`), CommonJS `require("…")`, and dynamic `import("…")`. Only string
 ; literals are specifiers; computed ones cannot be resolved. A default import imports `default`;
-; named imports and re-exports name what they take as the module spells it.
+; named imports and re-exports name what they take as the module spells it, and an import
+; specifier's `alias` is the local name it is bound under.
 
 (import_statement
   (import_clause

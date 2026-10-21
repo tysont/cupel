@@ -80,10 +80,17 @@ fn edge(imports: &Imports<'_>, roots: &[String], file: &str, import: &RawImport)
     };
     let target = resolve(name);
     // A name that leads somewhere its module alone does not is a submodule, imported whole.
-    let names = name
+    let names: Vec<String> = name
         .filter(|name| *name != "*" && target == resolve(None))
         .map(str::to_owned)
         .into_iter()
+        .collect();
+    // A submodule imported under another name binds a module, not a name of one.
+    let aliases = import
+        .aliases
+        .iter()
+        .filter(|alias| names.contains(&alias.name))
+        .cloned()
         .collect();
     ImportEdge {
         from: file.to_owned(),
@@ -93,6 +100,7 @@ fn edge(imports: &Imports<'_>, roots: &[String], file: &str, import: &RawImport)
         line: import.line,
         edge_kind: import.kind,
         names,
+        aliases,
     }
 }
 

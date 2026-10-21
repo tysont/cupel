@@ -69,7 +69,8 @@ fn a_plain_name_an_import_binds_resolves_to_the_function_in_the_imported_file() 
 }
 
 /// An ES import binds the names its statement lists (ADR-133's `ImportEdge.names`), never its
-/// specifier's last segment: `square` resolves through `import { square } from "@ledger/shapes"`.
+/// specifier's last segment: `square` resolves through `import { square } from "@ledger/shapes"`,
+/// and `importedRate` through `import { importedRate } from "./references.js"` (ADR-141).
 #[test]
 fn an_es_import_binds_the_names_it_lists_not_its_specifiers_last_segment() {
     let fact = of("javascript", &fixture("javascript"));
@@ -80,8 +81,26 @@ fn an_es_import_binds_the_names_it_lists_not_its_specifiers_last_segment() {
     );
     assert_eq!(
         named(&fact, "src/rates.js", "importedRate"),
-        vec![(ReferenceKind::Name, "unresolved".to_owned(), vec![]); 2]
+        resolved(2, "imported", 10),
+        "the import and the call"
     );
+}
+
+/// An aliased import binds its local name to the imported one (ADR-141): ES `import { square as
+/// side }` and Python `from .references import exported_rate as tripled`.
+#[test]
+fn an_aliased_import_binds_its_local_name_to_the_imported_function() {
+    for (lang, file, local, line) in [
+        ("javascript", "src/ledger.js", "side", 1),
+        ("python", "src/ledger/rates.py", "tripled", 7),
+    ] {
+        let fact = of(lang, &fixture(lang));
+        assert_eq!(
+            named(&fact, file, local),
+            resolved(2, "imported", line),
+            "{lang}: the alias and its use"
+        );
+    }
 }
 
 #[test]
