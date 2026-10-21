@@ -538,7 +538,7 @@ mod tests {
     use super::{last_segment, path_name};
 
     #[test]
-    fn a_string_names_a_symbol_only_when_it_is_a_name_or_a_path_of_names() {
+    fn strings_and_attributes_name_their_last_segment_and_a_sentence_names_nothing() {
         assert_eq!(path_name("default_port"), Some("default_port"));
         assert_eq!(path_name("Option::is_none"), Some("is_none"));
         assert_eq!(path_name("ledger.rates"), Some("rates"));
@@ -550,10 +550,6 @@ mod tests {
         assert_eq!(path_name("1st"), None);
         assert_eq!(path_name(""), None);
         assert_eq!(path_name("a b"), None);
-    }
-
-    #[test]
-    fn an_attribute_is_named_by_its_last_segment() {
         assert_eq!(last_segment("functools.cache"), "cache");
         assert_eq!(last_segment("tokio::main"), "main");
         assert_eq!(last_segment("Override"), "Override");

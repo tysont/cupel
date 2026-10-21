@@ -31,6 +31,14 @@ pub struct Span {
     pub end_col: u32,
 }
 
+impl Span {
+    /// Whether `inner` lies within this span, its ends included.
+    pub fn contains(&self, inner: &Span) -> bool {
+        (self.line, self.col) <= (inner.line, inner.col)
+            && (inner.end_line, inner.end_col) <= (self.end_line, self.end_col)
+    }
+}
+
 /// Identifies a symbol within one run by where it starts. Not stable across edits; anything
 /// persisted across runs uses `SymbolHash` (ADR-014).
 #[derive(

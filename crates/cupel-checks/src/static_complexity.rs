@@ -498,7 +498,7 @@ fn deepest_block(symbol: &SymbolDef, decisions: &[Decision]) -> Option<DeepestBl
     let within = |outer: &Span| -> Vec<&Decision> {
         placed
             .iter()
-            .filter(|(_, inner)| contains(outer, inner))
+            .filter(|(_, inner)| outer.contains(inner))
             .map(|(decision, _)| *decision)
             .collect()
     };
@@ -516,7 +516,7 @@ fn deepest_block(symbol: &SymbolDef, decisions: &[Decision]) -> Option<DeepestBl
                 .iter()
                 .rev()
                 .find(|(d, outer)| {
-                    structural(d.kind) && d.nesting == level && contains(outer, &span)
+                    structural(d.kind) && d.nesting == level && outer.contains(&span)
                 })
                 .map(|(d, _)| d.kind)
         })
@@ -534,12 +534,6 @@ fn deepest_block(symbol: &SymbolDef, decisions: &[Decision]) -> Option<DeepestBl
             .sum(),
         cognitive: held.iter().map(|d| cognitive(d)).sum(),
     })
-}
-
-/// Whether `inner` lies within `outer`, ends included.
-fn contains(outer: &Span, inner: &Span) -> bool {
-    (outer.line, outer.col) <= (inner.line, inner.col)
-        && (inner.end_line, inner.end_col) <= (outer.end_line, outer.end_col)
 }
 
 /// Kinds that structure control flow: they nest what they contain and carry the nesting

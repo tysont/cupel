@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::syntax::{
     DynamicAccess, DynamicReach, ImportTarget, ModuleGraph, NormTree, Reference, References,
-    RootReason, Roots, Span, SymbolDef, SymbolKey, SymbolKind, Symbols,
+    RootReason, Roots, SymbolDef, SymbolKey, SymbolKind, Symbols,
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
@@ -580,7 +580,7 @@ impl<'a> Usage<'a> {
     fn referenced(&self, symbol: &SymbolDef) -> bool {
         let own = symbol.body.unwrap_or(symbol.span);
         let outside = |reference: &&Reference| {
-            reference.file != symbol.file || !within(&reference.span, &own)
+            reference.file != symbol.file || !own.contains(&reference.span)
         };
         let key = symbol.key();
         self.resolved
@@ -604,12 +604,6 @@ impl<'a> Usage<'a> {
             .map(|access| format!("{}:{}", access.file, access.span.line))
             .collect()
     }
-}
-
-/// Whether `inner` lies within `outer`.
-fn within(inner: &Span, outer: &Span) -> bool {
-    (outer.line, outer.col) <= (inner.line, inner.col)
-        && (inner.end_line, inner.end_col) <= (outer.end_line, outer.end_col)
 }
 
 /// A method named like the type that encloses it: a constructor, which a private declaration
