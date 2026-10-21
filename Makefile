@@ -16,7 +16,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood parity install dist installers dev-setup dev-env
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers dev-setup dev-env
 
 build:
 	$(CARGO) build --workspace
@@ -93,8 +93,21 @@ DOGFOOD_BUDGET ?= 30m
 # scripts/dogfood.sh holds a machine-wide lock while the gate runs, so dogfoods from every checkout
 # on the machine run one at a time (the mutation engine's slots default to half the cores, at most
 # four), and it refuses to start from a working tree that was deleted under the invoking shell.
+# The tree gate's `base` rules compare with the committed baseline, `.cupel/baseline.json`, a
+# tree run on `main` (ADR-140); it is imported first so a fresh store (a CI runner's, or one just
+# deleted) has the reference. `make baseline` refreshes it from the last tree run here.
+CUPEL = $(CARGO) run --quiet --package cupel-cli --
+BASELINE = .cupel/baseline.json
+
 dogfood:
+	$(if $(filter tree,$(DOGFOOD_SCOPE)),$(CUPEL) baseline import $(BASELINE) --write --format text >/dev/null)
 	scripts/dogfood.sh $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep $(if $(DOGFOOD_BUDGET),--budget $(DOGFOOD_BUDGET) )--gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
+
+# After a green `make dogfood DOGFOOD_SCOPE=tree`: the store's baseline becomes that run and is
+# exported to the committed file, so the ratchets move with the commit that lowered them.
+baseline:
+	$(CUPEL) baseline set --write --format text >/dev/null
+	$(CUPEL) baseline export $(BASELINE) --write --format text >/dev/null
 
 install:
 	$(CARGO) install --path crates/cupel-cli
