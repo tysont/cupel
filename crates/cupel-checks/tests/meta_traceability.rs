@@ -162,7 +162,12 @@ fn an_id_matches_whole_tokens_in_any_case_and_separator() {
         "tests/test_dates.py",
         &["test_req_120_other", "TestREQ1Camel"],
     );
-    let (_, findings) = traced(head, frames("x.py", &[]), requirements(&["REQ-1"]));
+    let (result, findings) = traced(head, frames("x.py", &[]), requirements(&["REQ-1"]));
+    assert_eq!(
+        result.status,
+        CheckStatus::Fail,
+        "one untested requirement fails the check"
+    );
     let kinds: Vec<(&str, &str)> = findings
         .iter()
         .map(|f| (f.kind.as_str(), f.title.split(' ').nth(1).unwrap()))
