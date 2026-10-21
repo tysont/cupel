@@ -55,12 +55,16 @@ pub mod capture {
     pub const TEST_SKIP: &str = "test.skip";
     pub const SKIP_REASON: &str = "skip.reason";
     pub const TEST_SETUP: &str = "test.setup";
+    pub const TEST_DOC: &str = "test.doc";
+    pub const DOC_TARGET: &str = "doc.target";
     pub const FRAMEWORK_PREFIX: &str = "framework.";
     pub const PROPERTY_PREFIX: &str = "property.";
     // imports.scm
     pub const IMPORT: &str = "import";
     pub const IMPORT_SPECIFIER: &str = "import.specifier";
     pub const IMPORT_NAME: &str = "import.name";
+    pub const IMPORT_DEFAULT: &str = "import.default";
+    pub const IMPORT_NAMES: &str = "import.names";
     pub const IMPORT_MODULE: &str = "import.module";
     pub const IMPORT_REEXPORT: &str = "import.reexport";
     pub const REEXPORT_NAME: &str = "reexport.name";
@@ -207,6 +211,8 @@ const TESTS: Contract = Contract {
         c::TEST_SKIP,
         c::SKIP_REASON,
         c::TEST_SETUP,
+        c::TEST_DOC,
+        c::DOC_TARGET,
     ],
     open: &[
         c::ASSERTION_IDIOM_PREFIX,
@@ -220,6 +226,8 @@ const IMPORTS: Contract = Contract {
     required: &[&[c::IMPORT], &[c::IMPORT_SPECIFIER]],
     optional: &[
         c::IMPORT_NAME,
+        c::IMPORT_DEFAULT,
+        c::IMPORT_NAMES,
         c::IMPORT_MODULE,
         c::IMPORT_REEXPORT,
         c::REEXPORT_NAME,

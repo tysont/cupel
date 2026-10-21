@@ -701,14 +701,14 @@ fn setup_groups<'c, 's>(
     candidates: &'c [(Subject<'s>, &'s [NormNode])],
     min: usize,
 ) -> Vec<Vec<&'c (Subject<'s>, &'s [NormNode])>> {
-    let mut groups: BTreeMap<String, Vec<&(Subject<'_>, &[NormNode])>> = BTreeMap::new();
+    let mut groups: BTreeMap<Vec<u8>, Vec<&(Subject<'_>, &[NormNode])>> = BTreeMap::new();
     for candidate in candidates {
         let body = candidate.1;
         // Something must follow the repeated part, and an empty prefix repeats trivially.
         if min == 0 || body.len() <= min {
             continue;
         }
-        let prefix = serde_json::to_string(&body[..min]).unwrap_or_default();
+        let prefix: Vec<u8> = body[..min].iter().flat_map(NormNode::shape_json).collect();
         groups.entry(prefix).or_default().push(candidate);
     }
     let mut groups: Vec<_> = groups

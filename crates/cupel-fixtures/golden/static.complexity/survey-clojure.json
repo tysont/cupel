@@ -27,7 +27,23 @@
   "findings": [
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "deepest_block": {
+            "cognitive": 1,
+            "cyclomatic": 1,
+            "location": {
+              "col": 5,
+              "end_col": 17,
+              "end_line": 8,
+              "file": "src/ledger/complexity.clj",
+              "line": 8
+            },
+            "nesting": 0,
+            "path": [
+              "branch"
+            ]
+          }
+        },
         "kind": "reduce_complexity",
         "priority": 2,
         "summary": "Split `label` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."

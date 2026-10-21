@@ -124,6 +124,7 @@ pub fn finding_kinds() -> Vec<FindingKindSpec> {
              at tier {CAP}."
         ),
         evidence: Map::from_iter(evidence),
+        hints: Map::new(),
     }]
 }
 

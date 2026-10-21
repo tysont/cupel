@@ -30,5 +30,6 @@
 (deftest parse-cents-trims-spaces
   (is (= 42 (decide/parse-cents " 42 "))))
 
+;; An account opens without a deposit (REQ-1).
 (deftest opening-an-account-does-not-throw
   (core/open-account "ada"))

@@ -6,6 +6,7 @@ use tree_sitter::Node;
 
 use crate::parse::Parsed;
 use crate::producer::{QueryProducer, Source};
+use crate::query::span;
 use crate::spec::QueryFile;
 use crate::symbols::definitions;
 use crate::tables::NormalizeRules;
@@ -47,7 +48,8 @@ pub fn extract(source: &Source<'_>) -> NormTree {
     }
 }
 
-/// `sh_` plus the first 64 bits of `blake3(lang ∥ 0x00 ∥ json(root))`, as hex (ADR-025).
+/// `sh_` plus the first 64 bits of `blake3(lang ∥ 0x00 ∥ json(shape of root))`, as hex (ADR-025);
+/// spans and texts are not part of the shape (ADR-133).
 ///
 /// # Panics
 ///
@@ -56,7 +58,7 @@ pub fn structural_hash(lang: &LangId, root: &NormNode) -> SymbolHash {
     let mut hasher = blake3::Hasher::new();
     hasher.update(lang.as_str().as_bytes());
     hasher.update(&[0]);
-    hasher.update(&serde_json::to_vec(root).unwrap_or_default());
+    hasher.update(&root.shape_json());
     format!("sh_{}", hex16(hasher.finalize().as_bytes()))
         .parse()
         .expect("sixteen hex digits make a valid symbol hash")
@@ -92,7 +94,7 @@ impl Normalizer<'_> {
         if nodes.len() == 1 {
             nodes.remove(0)
         } else {
-            NormNode::new(node.kind(), nodes)
+            NormNode::new(node.kind(), nodes).at(span(node))
         }
     }
 
@@ -119,7 +121,7 @@ impl Normalizer<'_> {
         if self.rules.flatten.iter().any(|k| k == kind) {
             return children;
         }
-        vec![NormNode::new(kind, children)]
+        vec![NormNode::new(kind, children).at(span(node))]
     }
 }
 
@@ -138,18 +140,26 @@ impl Normalizer<'_> {
             let operator = !text.is_empty() && text.chars().all(|c| OPERATOR_CHARS.contains(c));
             let kept = operator || self.rules.operators.iter().any(|o| o == text);
             return Some(if kept {
-                vec![NormNode::leaf(text)]
+                vec![NormNode::leaf(text).at(span(node))]
             } else {
                 Vec::new()
             });
         }
         if has(&self.rules.identifiers) {
             return Some(vec![match mode {
-                Mode::Callee => NormNode::leaf(self.parsed.text(node)),
-                Mode::Plain => NormNode::leaf("$id"),
+                Mode::Callee => NormNode::leaf(self.parsed.text(node)).at(span(node)),
+                Mode::Plain => self.marker("$id", node),
             }]);
         }
-        has(&self.rules.literals).then(|| vec![NormNode::leaf("$lit")])
+        has(&self.rules.literals).then(|| vec![self.marker("$lit", node)])
+    }
+
+    /// The leaf `label` stands for `node`'s text, keeping that text (ADR-133).
+    fn marker(&self, label: &str, node: Node<'_>) -> NormNode {
+        NormNode {
+            text: Some(self.parsed.text(node).to_owned()),
+            ..NormNode::leaf(label).at(span(node))
+        }
     }
 
     /// How the child in `field` of a node normalized in `mode` normalizes, where `callee` is the

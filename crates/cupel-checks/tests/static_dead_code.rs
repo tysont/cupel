@@ -78,6 +78,7 @@ fn method(mut def: SymbolDef) -> SymbolDef {
 
 fn edge(from: &str, specifier: &str, target: ImportTarget) -> ImportEdge {
     ImportEdge {
+        names: Vec::new(),
         from: from.to_owned(),
         specifier: specifier.to_owned(),
         target,
@@ -193,6 +194,8 @@ impl World {
                         symbol: def.key(),
                         hash: hash_of(def),
                         root: NormNode {
+                            span: None,
+                            text: None,
                             label: "fn".to_owned(),
                             children: Vec::new(),
                         },

@@ -99,12 +99,30 @@ fn decisions_payload_shape() {
                 cognitive: 3,
                 table: false,
                 continues: false,
+                span: None,
             }],
         }],
     });
     assert_eq!(
         json["symbols"][0]["decisions"][0],
         json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3, "table": false, "continues": false})
+    );
+}
+
+#[test]
+fn a_decision_carries_its_span_when_known() {
+    let json = assert_round_trip(&Decision {
+        kind: DecisionKind::Loop,
+        nesting: 1,
+        cyclomatic: 1,
+        cognitive: 1,
+        table: false,
+        continues: false,
+        span: Some(span(4)),
+    });
+    assert_eq!(
+        json["span"],
+        json!({"line": 4, "col": 1, "end_line": 6, "end_col": 2})
     );
 }
 
@@ -127,13 +145,7 @@ fn norm_tree_payload_carries_symbol_hash() {
         symbols: vec![NormalizedSymbol {
             symbol: key(),
             hash: "sh_4b1d9e0c4b1d9e0c".parse().unwrap(),
-            root: NormNode {
-                label: "function".into(),
-                children: vec![NormNode {
-                    label: "$local".into(),
-                    children: vec![],
-                }],
-            },
+            root: NormNode::new("function", vec![NormNode::leaf("$local")]),
         }],
     });
     assert_eq!(json["symbols"][0]["hash"], json!("sh_4b1d9e0c4b1d9e0c"));
@@ -210,11 +222,13 @@ fn test_frames_payload_shape() {
                     span: span(7),
                 }),
                 property: Some("proptest".into()),
+                doc: Some("/// Sorting pushes through. REQ-4".into()),
             }],
         }],
     });
     let case = &json["files"][0]["cases"][0];
     assert_eq!(case["property"], json!("proptest"));
+    assert_eq!(case["doc"], json!("/// Sorting pushes through. REQ-4"));
     assert_eq!(case["assertions"][0]["kind"], json!("equality"));
     assert_eq!(case["assertions"][0]["strength"], json!("weak"));
     assert_eq!(case["skip"]["reason"], json!("flaky on CI"));
@@ -245,6 +259,7 @@ fn module_graph_edges_are_tagged_by_target_kind() {
         relative: true,
         line: 1,
         edge_kind: EdgeKind::ReExport,
+        names: Vec::new(),
     };
     let json = assert_round_trip(&ModuleGraph {
         roots: vec![RootImports {
@@ -381,7 +396,7 @@ fn each_payload_declares_its_own_kind_and_version() {
             (FactKind::Decisions, 2),
             (FactKind::NormTree, 1),
             (FactKind::MutationSites, 1),
-            (FactKind::TestFrames, 2),
+            (FactKind::TestFrames, 3),
             (FactKind::ModuleGraph, 2),
             (FactKind::ApiSurface, 1),
             (FactKind::Roots, 1),
@@ -411,4 +426,60 @@ fn test_conventions_answer_is_test_and_test_files_for() {
         ["tests/ledger.rs"]
     );
     assert!(conventions.test_files_for("src/other.rs").is_empty());
+}
+
+#[test]
+fn a_normalized_node_carries_its_span_and_a_marker_its_text_only_when_known() {
+    let bare = NormNode::new("call", vec![NormNode::leaf("$id")]);
+    assert_eq!(
+        serde_json::to_value(&bare).unwrap(),
+        json!({"label": "call", "children": [{"label": "$id", "children": []}]})
+    );
+    let mut placed = bare.clone();
+    placed.span = Some(span(3));
+    placed.children[0].span = Some(span(3));
+    placed.children[0].text = Some("rate".into());
+    let json = assert_round_trip(&placed);
+    assert_eq!(json["span"]["line"], json!(3));
+    assert_eq!(json["children"][0]["text"], json!("rate"));
+}
+
+#[test]
+fn a_node_shape_is_its_labels_and_children_without_spans_or_texts() {
+    let bare = NormNode::new("call", vec![NormNode::leaf("$id")]);
+    let mut placed = bare.clone();
+    placed.span = Some(span(3));
+    placed.children[0].text = Some("rate".into());
+    assert!(bare.same_shape(&placed));
+    assert_eq!(bare.shape_json(), placed.shape_json());
+    // The shape serializes exactly as a node did before spans and texts existed, so every
+    // structural hash taken over it is unchanged (ADR-133).
+    assert_eq!(
+        String::from_utf8(placed.shape_json()).unwrap(),
+        r#"{"label":"call","children":[{"label":"$id","children":[]}]}"#
+    );
+    assert!(!bare.same_shape(&NormNode::new("call", vec![NormNode::leaf("$lit")])));
+    assert!(!bare.same_shape(&NormNode::new("call", Vec::new())));
+}
+
+#[test]
+fn an_import_edge_lists_the_names_it_imports_when_the_statement_names_them() {
+    let edge = ImportEdge {
+        from: "src/a.rs".into(),
+        specifier: "super::beta::BETA".into(),
+        target: ImportTarget::File {
+            path: "src/beta.rs".into(),
+        },
+        relative: true,
+        line: 1,
+        edge_kind: EdgeKind::Import,
+        names: vec!["BETA".into()],
+    };
+    let json = assert_round_trip(&edge);
+    assert_eq!(json["names"], json!(["BETA"]));
+    let whole = ImportEdge {
+        names: Vec::new(),
+        ..edge
+    };
+    assert!(assert_round_trip(&whole).get("names").is_none());
 }

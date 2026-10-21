@@ -288,6 +288,8 @@ pub fn decided_facts(check: &dyn Check, symbols: &[(SymbolDef, Vec<Decision>)]) 
                     symbol: s.key(),
                     hash: hash_of_line(s.span.line),
                     root: NormNode {
+                        span: None,
+                        text: None,
                         label: "fn".to_owned(),
                         children: Vec::new(),
                     },

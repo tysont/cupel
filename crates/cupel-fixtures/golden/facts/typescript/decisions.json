@@ -40,6 +40,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 16,
+            "line": 11
+          },
           "table": false
         },
         {
@@ -48,6 +54,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 15,
+            "line": 12
+          },
           "table": false
         }
       ],
@@ -65,6 +77,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 29,
+            "line": 24
+          },
           "table": false
         },
         {
@@ -73,6 +91,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 28,
+            "line": 25
+          },
           "table": false
         }
       ],
@@ -106,6 +130,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 5
+          },
           "table": false
         },
         {
@@ -114,6 +144,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 7
+          },
           "table": false
         },
         {
@@ -122,6 +158,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 9
+          },
           "table": false
         },
         {
@@ -130,6 +172,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 11
+          },
           "table": false
         },
         {
@@ -138,6 +186,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 13
+          },
           "table": false
         },
         {
@@ -146,6 +200,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 15
+          },
           "table": false
         },
         {
@@ -154,6 +214,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 17
+          },
           "table": false
         },
         {
@@ -162,6 +228,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 19
+          },
           "table": false
         },
         {
@@ -170,6 +242,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 21
+          },
           "table": false
         },
         {
@@ -178,6 +256,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 23
+          },
           "table": false
         }
       ],
@@ -195,6 +279,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 43,
+            "line": 33
+          },
           "table": false
         },
         {
@@ -203,6 +293,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 42,
+            "line": 34
+          },
           "table": false
         },
         {
@@ -211,6 +307,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 2,
+          "span": {
+            "col": 7,
+            "end_col": 8,
+            "end_line": 41,
+            "line": 35
+          },
           "table": false
         },
         {
@@ -219,6 +321,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 3,
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 40,
+            "line": 36
+          },
           "table": false
         },
         {
@@ -227,6 +335,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 4,
+          "span": {
+            "col": 11,
+            "end_col": 12,
+            "end_line": 39,
+            "line": 37
+          },
           "table": false
         }
       ],
@@ -284,6 +398,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 144,
+            "line": 143
+          },
           "table": false
         },
         {
@@ -292,6 +412,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 144,
+            "line": 144
+          },
           "table": false
         },
         {
@@ -300,6 +426,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 146,
+            "line": 145
+          },
           "table": false
         },
         {
@@ -308,6 +440,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 146,
+            "line": 146
+          },
           "table": false
         },
         {
@@ -316,6 +454,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 148,
+            "line": 147
+          },
           "table": false
         },
         {
@@ -324,6 +468,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 148,
+            "line": 148
+          },
           "table": false
         },
         {
@@ -332,6 +482,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 150,
+            "line": 149
+          },
           "table": false
         },
         {
@@ -340,6 +496,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 150,
+            "line": 150
+          },
           "table": false
         },
         {
@@ -348,6 +510,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 152,
+            "line": 151
+          },
           "table": false
         },
         {
@@ -356,6 +524,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 152,
+            "line": 152
+          },
           "table": false
         },
         {
@@ -364,6 +538,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 154,
+            "line": 153
+          },
           "table": false
         },
         {
@@ -372,6 +552,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 154,
+            "line": 154
+          },
           "table": false
         },
         {
@@ -380,6 +566,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 156,
+            "line": 155
+          },
           "table": false
         },
         {
@@ -388,6 +580,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 156,
+            "line": 156
+          },
           "table": false
         },
         {
@@ -396,6 +594,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 158,
+            "line": 157
+          },
           "table": false
         },
         {
@@ -404,6 +608,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 158,
+            "line": 158
+          },
           "table": false
         },
         {
@@ -412,6 +622,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 160,
+            "line": 159
+          },
           "table": false
         },
         {
@@ -420,6 +636,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 160,
+            "line": 160
+          },
           "table": false
         },
         {
@@ -428,6 +650,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 162,
+            "line": 161
+          },
           "table": false
         },
         {
@@ -436,6 +664,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 162,
+            "line": 162
+          },
           "table": false
         },
         {
@@ -444,6 +678,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 164,
+            "line": 163
+          },
           "table": false
         },
         {
@@ -452,6 +692,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 164,
+            "line": 164
+          },
           "table": false
         },
         {
@@ -460,6 +706,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 166,
+            "line": 165
+          },
           "table": false
         },
         {
@@ -468,6 +720,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 166,
+            "line": 166
+          },
           "table": false
         }
       ],
@@ -485,6 +743,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 16,
+            "line": 8
+          },
           "table": false
         },
         {
@@ -493,6 +757,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 15,
+            "line": 9
+          },
           "table": false
         },
         {
@@ -501,6 +771,12 @@
           "cyclomatic": 1,
           "kind": "boolean-op",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 32,
+            "end_line": 9,
+            "line": 9
+          },
           "table": false
         },
         {
@@ -509,6 +785,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 12,
+            "end_col": 6,
+            "end_line": 15,
+            "line": 11
+          },
           "table": false
         },
         {
@@ -517,6 +799,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 12,
+            "end_col": 6,
+            "end_line": 15,
+            "line": 13
+          },
           "table": false
         }
       ],
@@ -534,6 +822,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 24,
+            "line": 22
+          },
           "table": false
         },
         {
@@ -542,6 +836,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 16,
+            "end_line": 23,
+            "line": 23
+          },
           "table": false
         },
         {
@@ -550,6 +850,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 27,
+            "line": 25
+          },
           "table": false
         },
         {
@@ -558,6 +864,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 17,
+            "end_line": 26,
+            "line": 26
+          },
           "table": false
         }
       ],
@@ -599,6 +911,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 10,
+            "line": 6
+          },
           "table": false
         },
         {
@@ -607,6 +925,12 @@
           "cyclomatic": 1,
           "kind": "boolean-op",
           "nesting": 0,
+          "span": {
+            "col": 7,
+            "end_col": 31,
+            "end_line": 6,
+            "line": 6
+          },
           "table": false
         },
         {
@@ -615,6 +939,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 7,
+            "line": 7
+          },
           "table": false
         },
         {
@@ -623,6 +953,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 4,
+            "end_line": 10,
+            "line": 8
+          },
           "table": false
         },
         {
@@ -631,6 +967,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 9,
+            "line": 9
+          },
           "table": false
         },
         {
@@ -639,6 +981,12 @@
           "cyclomatic": 1,
           "kind": "ternary",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 41,
+            "end_line": 11,
+            "line": 11
+          },
           "table": false
         }
       ],
@@ -656,6 +1004,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 19,
+            "line": 15
+          },
           "table": false
         },
         {
@@ -664,6 +1018,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 18,
+            "line": 16
+          },
           "table": false
         },
         {
@@ -672,6 +1032,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 2,
+          "span": {
+            "col": 7,
+            "end_col": 20,
+            "end_line": 17,
+            "line": 17
+          },
           "table": false
         }
       ],
@@ -689,6 +1055,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 26,
+            "line": 25
+          },
           "table": false
         },
         {
@@ -697,6 +1069,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 25,
+            "end_line": 26,
+            "line": 26
+          },
           "table": false
         },
         {
@@ -705,6 +1083,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 26,
+            "end_line": 28,
+            "line": 27
+          },
           "table": false
         },
         {
@@ -713,6 +1097,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 7,
+            "end_col": 26,
+            "end_line": 28,
+            "line": 28
+          },
           "table": false
         }
       ],
@@ -730,6 +1120,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 37,
+            "line": 35
+          },
           "table": false
         },
         {
@@ -738,6 +1134,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 37,
+            "end_line": 36,
+            "line": 36
+          },
           "table": false
         },
         {
@@ -746,6 +1148,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 54,
+            "end_line": 39,
+            "line": 39
+          },
           "table": false
         },
         {
@@ -754,6 +1162,12 @@
           "cyclomatic": 1,
           "kind": "catch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 4,
+            "end_line": 42,
+            "line": 40
+          },
           "table": false
         }
       ],
@@ -787,6 +1201,12 @@
           "cyclomatic": 1,
           "kind": "ternary",
           "nesting": 0,
+          "span": {
+            "col": 16,
+            "end_col": 70,
+            "end_line": 14,
+            "line": 14
+          },
           "table": false
         }
       ],
@@ -852,6 +1272,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 31,
+            "line": 29
+          },
           "table": false
         }
       ],
@@ -869,6 +1295,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 37,
+            "line": 35
+          },
           "table": true
         }
       ],
@@ -955,7 +1387,7 @@
       "symbol": {
         "col": 30,
         "file": "src/math.test.ts",
-        "line": 43
+        "line": 44
       }
     },
     {
@@ -974,6 +1406,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 8,
+            "line": 6
+          },
           "table": false
         }
       ],
@@ -999,6 +1437,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 5,
+            "line": 3
+          },
           "table": false
         },
         {
@@ -1007,6 +1451,12 @@
           "cyclomatic": 1,
           "kind": "boolean-op",
           "nesting": 0,
+          "span": {
+            "col": 7,
+            "end_col": 26,
+            "end_line": 3,
+            "line": 3
+          },
           "table": false
         },
         {
@@ -1015,6 +1465,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 4,
+            "line": 4
+          },
           "table": false
         }
       ],
@@ -1032,6 +1488,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 17,
+            "line": 12
+          },
           "table": false
         },
         {
@@ -1040,6 +1502,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 16,
+            "line": 14
+          },
           "table": false
         }
       ],
@@ -1057,6 +1525,12 @@
           "cyclomatic": 1,
           "kind": "ternary",
           "nesting": 0,
+          "span": {
+            "col": 15,
+            "end_col": 45,
+            "end_line": 23,
+            "line": 23
+          },
           "table": false
         }
       ],
@@ -1275,6 +1749,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 3,
+            "end_col": 4,
+            "end_line": 37,
+            "line": 35
+          },
           "table": false
         },
         {
@@ -1283,6 +1763,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 5,
+            "end_col": 17,
+            "end_line": 36,
+            "line": 36
+          },
           "table": false
         }
       ],
@@ -1316,6 +1802,12 @@
           "cyclomatic": 1,
           "kind": "ternary",
           "nesting": 0,
+          "span": {
+            "col": 35,
+            "end_col": 76,
+            "end_line": 2,
+            "line": 2
+          },
           "table": false
         }
       ],

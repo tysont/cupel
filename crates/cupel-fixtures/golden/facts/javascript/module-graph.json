@@ -6,6 +6,9 @@
           "edge_kind": "import",
           "from": "bin/cli.js",
           "line": 2,
+          "names": [
+            "add"
+          ],
           "relative": true,
           "specifier": "../src/math.js",
           "target": {
@@ -17,6 +20,9 @@
           "edge_kind": "import",
           "from": "src/deps_cycle/alpha.js",
           "line": 1,
+          "names": [
+            "BETA"
+          ],
           "relative": true,
           "specifier": "./beta.js",
           "target": {
@@ -28,6 +34,9 @@
           "edge_kind": "import",
           "from": "src/deps_cycle/beta.js",
           "line": 1,
+          "names": [
+            "ALPHA"
+          ],
           "relative": true,
           "specifier": "./alpha.js",
           "target": {
@@ -39,6 +48,9 @@
           "edge_kind": "import",
           "from": "src/deps_layers/domain/order.js",
           "line": 1,
+          "names": [
+            "EMPTY_STORE"
+          ],
           "relative": true,
           "specifier": "../infra/store.js",
           "target": {
@@ -72,6 +84,9 @@
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 1,
+          "names": [
+            "readFile"
+          ],
           "relative": false,
           "specifier": "node:fs/promises",
           "target": {
@@ -83,6 +98,9 @@
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 2,
+          "names": [
+            "default"
+          ],
           "relative": false,
           "specifier": "path",
           "target": {
@@ -94,6 +112,9 @@
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 3,
+          "names": [
+            "default"
+          ],
           "relative": false,
           "specifier": "lodash/fp",
           "target": {
@@ -105,6 +126,9 @@
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 4,
+          "names": [
+            "add"
+          ],
           "relative": true,
           "specifier": "./math.js",
           "target": {
@@ -116,6 +140,9 @@
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 5,
+          "names": [
+            "toCents"
+          ],
           "relative": false,
           "specifier": "#money/cents",
           "target": {
@@ -127,6 +154,9 @@
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 6,
+          "names": [
+            "square"
+          ],
           "relative": false,
           "specifier": "@ledger/shapes",
           "target": {
@@ -138,6 +168,9 @@
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 7,
+          "names": [
+            "square"
+          ],
           "relative": false,
           "specifier": "@ledger/shapes/square",
           "target": {
@@ -149,6 +182,9 @@
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 8,
+          "names": [
+            "generated"
+          ],
           "relative": true,
           "specifier": "./generated.js",
           "target": {
@@ -192,6 +228,9 @@
           "edge_kind": "import",
           "from": "test/decide.test.js",
           "line": 1,
+          "names": [
+            "default"
+          ],
           "relative": false,
           "specifier": "node:assert/strict",
           "target": {
@@ -203,6 +242,10 @@
           "edge_kind": "import",
           "from": "test/decide.test.js",
           "line": 2,
+          "names": [
+            "mock",
+            "test"
+          ],
           "relative": false,
           "specifier": "node:test",
           "target": {
@@ -214,6 +257,10 @@
           "edge_kind": "import",
           "from": "test/decide.test.js",
           "line": 3,
+          "names": [
+            "classify",
+            "label"
+          ],
           "relative": true,
           "specifier": "../src/decide.js",
           "target": {
@@ -258,6 +305,12 @@
           "edge_kind": "import",
           "from": "test/math.quality.test.js",
           "line": 1,
+          "names": [
+            "describe",
+            "expect",
+            "it",
+            "vi"
+          ],
           "relative": false,
           "specifier": "vitest",
           "target": {
@@ -269,6 +322,10 @@
           "edge_kind": "import",
           "from": "test/math.quality.test.js",
           "line": 2,
+          "names": [
+            "add",
+            "range"
+          ],
           "relative": true,
           "specifier": "../src/math.js",
           "target": {
@@ -280,6 +337,9 @@
           "edge_kind": "import",
           "from": "test/math.quality.test.js",
           "line": 3,
+          "names": [
+            "parseCents"
+          ],
           "relative": true,
           "specifier": "../src/decide.js",
           "target": {
@@ -291,6 +351,13 @@
           "edge_kind": "import",
           "from": "test/math.test.js",
           "line": 1,
+          "names": [
+            "beforeEach",
+            "describe",
+            "expect",
+            "it",
+            "vi"
+          ],
           "relative": false,
           "specifier": "vitest",
           "target": {
@@ -302,6 +369,10 @@
           "edge_kind": "import",
           "from": "test/math.test.js",
           "line": 2,
+          "names": [
+            "add",
+            "range"
+          ],
           "relative": true,
           "specifier": "../src/math.js",
           "target": {
@@ -313,6 +384,9 @@
           "edge_kind": "import",
           "from": "test/math.test.js",
           "line": 3,
+          "names": [
+            "parseCents"
+          ],
           "relative": true,
           "specifier": "../src/decide.js",
           "target": {
@@ -324,6 +398,9 @@
           "edge_kind": "import",
           "from": "test/properties.test.js",
           "line": 1,
+          "names": [
+            "default"
+          ],
           "relative": false,
           "specifier": "fast-check",
           "target": {
@@ -335,6 +412,10 @@
           "edge_kind": "import",
           "from": "test/properties.test.js",
           "line": 2,
+          "names": [
+            "expect",
+            "test"
+          ],
           "relative": false,
           "specifier": "vitest",
           "target": {
@@ -346,6 +427,9 @@
           "edge_kind": "import",
           "from": "test/properties.test.js",
           "line": 3,
+          "names": [
+            "add"
+          ],
           "relative": true,
           "specifier": "../src/math.js",
           "target": {
@@ -373,6 +457,9 @@
           "edge_kind": "re-export",
           "from": "packages/shapes/lib/index.js",
           "line": 1,
+          "names": [
+            "square"
+          ],
           "relative": true,
           "specifier": "./square.js",
           "target": {

@@ -154,7 +154,93 @@
     },
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "common_subtree": {
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 14,
+              "file": "src/main/java/ledger/Twins.java",
+              "line": 8
+            },
+            "nodes": 35,
+            "others": [
+              {
+                "location": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 22,
+                  "file": "src/main/java/ledger/Twins.java",
+                  "line": 16
+                },
+                "symbol": "ledger.Twins.sumAfterCharge"
+              },
+              {
+                "location": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 30,
+                  "file": "src/main/java/ledger/Twins.java",
+                  "line": 24
+                },
+                "symbol": "ledger.Twins.netTotalFloor"
+              },
+              {
+                "location": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 42,
+                  "file": "src/main/java/ledger/Twins.java",
+                  "line": 32
+                },
+                "symbol": "ledger.Twins.netTotalLaidOut"
+              }
+            ],
+            "parameters": [
+              {
+                "kind": "identifier",
+                "occurrences": 2,
+                "values": [
+                  "items",
+                  "values",
+                  "items",
+                  "items"
+                ]
+              },
+              {
+                "kind": "identifier",
+                "occurrences": 3,
+                "values": [
+                  "fee",
+                  "charge",
+                  "fee",
+                  "fee"
+                ]
+              },
+              {
+                "kind": "identifier",
+                "occurrences": 3,
+                "values": [
+                  "gross",
+                  "subtotal",
+                  "gross",
+                  "gross"
+                ]
+              },
+              {
+                "kind": "literal",
+                "occurrences": 1,
+                "values": [
+                  "0",
+                  "0",
+                  "100",
+                  "0"
+                ]
+              }
+            ],
+            "share": 1.0
+          }
+        },
         "kind": "refactor_extract",
         "priority": 2,
         "summary": "Extract the structure `netTotal` shares with 3 other symbols into one function and call it from each."

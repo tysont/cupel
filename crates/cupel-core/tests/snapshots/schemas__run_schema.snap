@@ -141,9 +141,37 @@ expression: pretty(&schema)
       "type": "object",
       "properties": {
         "hints": {
-          "description": "Kind-specific pointers, such as `nearest_test_file` or `covering_tests`.",
+          "description": "Kind-specific pointers, such as `nearest_test_file` or `covering_tests`, and the\nremediation hints of `crate::hint` (ADR-133).",
           "type": "object",
-          "additionalProperties": true
+          "properties": {
+            "cheapest_cut": {
+              "$ref": "#/$defs/CheapestCut",
+              "x-cupel-optional": true
+            },
+            "common_subtree": {
+              "$ref": "#/$defs/CommonSubtree",
+              "x-cupel-optional": true
+            },
+            "covering_tests": {
+              "description": "Tests that cover the finding's site.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "x-cupel-optional": true
+            },
+            "deepest_block": {
+              "$ref": "#/$defs/DeepestBlock",
+              "x-cupel-optional": true
+            },
+            "nearest_test_file": {
+              "description": "The test file nearest to the finding's site.",
+              "type": "string",
+              "x-cupel-optional": true
+            }
+          },
+          "additionalProperties": true,
+          "required": []
         },
         "kind": {
           "$ref": "#/$defs/ActionKind"
@@ -332,6 +360,59 @@ expression: pretty(&schema)
       "required": [
         "id",
         "name"
+      ]
+    },
+    "CheapestCut": {
+      "description": "The import to remove to break an import cycle, on `dep.cycle`.",
+      "type": "object",
+      "properties": {
+        "breaks_component": {
+          "description": "Whether removing every import from `from` to `to` leaves the cycle's modules with no\ncycle at all.",
+          "type": "boolean"
+        },
+        "from": {
+          "description": "The importing module.",
+          "type": "string"
+        },
+        "line": {
+          "description": "The line of the first import statement.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "names": {
+          "description": "The names the statements import, sorted: what to move.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "specifiers": {
+          "description": "The import statements' specifiers, as written.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "to": {
+          "description": "The imported module.",
+          "type": "string"
+        },
+        "unnamed": {
+          "description": "Statements that import the module whole or name nothing.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "breaks_component",
+        "from",
+        "line",
+        "names",
+        "specifiers",
+        "to",
+        "unnamed"
       ]
     },
     "CheckDescription": {
@@ -659,6 +740,48 @@ expression: pretty(&schema)
         "runner"
       ]
     },
+    "CommonSubtree": {
+      "description": "The largest normalized subtree every member of a clone cluster shares: the extraction\ncandidate, on `clone.cluster`.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "description": "Where it is in the finding's symbol, the cluster's first member.",
+          "$ref": "#/$defs/Location"
+        },
+        "nodes": {
+          "description": "Nodes of the shared normalized subtree.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "others": {
+          "description": "Where it is in each other member, in the evidence's member order.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PlacedSubtree"
+          }
+        },
+        "parameters": {
+          "description": "The identifiers and literals whose text differs between members: what the extracted\nfunction takes as parameters.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Parameter"
+          }
+        },
+        "share": {
+          "description": "Its share of the first member's normalized nodes, to three decimals.",
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "location",
+        "nodes",
+        "others",
+        "parameters",
+        "share"
+      ]
+    },
     "ConfigEcho": {
       "description": "The effective configuration and the layers it came from.",
       "type": "object",
@@ -714,6 +837,59 @@ expression: pretty(&schema)
       "required": [
         "schema",
         "version"
+      ]
+    },
+    "DecisionKind": {
+      "type": "string",
+      "enum": [
+        "branch",
+        "loop",
+        "boolean-op",
+        "case",
+        "catch",
+        "early-return",
+        "ternary"
+      ]
+    },
+    "DeepestBlock": {
+      "description": "The function's most deeply nested block: the extraction candidate, on `complexity.high`.",
+      "type": "object",
+      "properties": {
+        "cognitive": {
+          "description": "What they add to its cognitive complexity, nesting increments included.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "cyclomatic": {
+          "description": "What the decisions inside the block add to the function's cyclomatic complexity.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "location": {
+          "$ref": "#/$defs/Location"
+        },
+        "nesting": {
+          "description": "Enclosing blocks that nest it, 0 at the top of the body.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "path": {
+          "description": "The construct kinds from the outermost enclosing block to this block.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/DecisionKind"
+          }
+        }
+      },
+      "required": [
+        "cognitive",
+        "cyclomatic",
+        "location",
+        "nesting",
+        "path"
       ]
     },
     "Delta": {
@@ -1289,6 +1465,12 @@ expression: pretty(&schema)
           "type": "object",
           "additionalProperties": true
         },
+        "hints": {
+          "description": "The remediation hints this kind's action carries, by `action.hints` key, each with its\nJSON Schema (ADR-133). Absent when the kind carries none.",
+          "type": "object",
+          "additionalProperties": true,
+          "x-cupel-optional": true
+        },
         "kind": {
           "type": "string"
         },
@@ -1324,6 +1506,12 @@ expression: pretty(&schema)
           "description": "JSON Schema of this kind's `evidence` object.",
           "type": "object",
           "additionalProperties": true
+        },
+        "hints": {
+          "description": "The remediation hints this kind's action carries, each key of `action.hints` with its\nJSON Schema (ADR-133). Absent when the kind carries none.",
+          "type": "object",
+          "additionalProperties": true,
+          "x-cupel-optional": true
         },
         "kind": {
           "type": "string"
@@ -2177,6 +2365,58 @@ expression: pretty(&schema)
           "type": "string",
           "const": "unreachable"
         }
+      ]
+    },
+    "Parameter": {
+      "description": "One position of the shared subtree whose text differs between members.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "$ref": "#/$defs/ParameterKind"
+        },
+        "occurrences": {
+          "description": "How many positions in the subtree have these values.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "values": {
+          "description": "The text in each member, the first member's first.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kind",
+        "occurrences",
+        "values"
+      ]
+    },
+    "ParameterKind": {
+      "description": "What a differing position is.",
+      "type": "string",
+      "enum": [
+        "identifier",
+        "literal"
+      ]
+    },
+    "PlacedSubtree": {
+      "description": "The shared subtree in one member of a clone cluster.",
+      "type": "object",
+      "properties": {
+        "location": {
+          "$ref": "#/$defs/Location"
+        },
+        "symbol": {
+          "description": "The member's display name.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "location",
+        "symbol"
       ]
     },
     "PlannedCheck": {

@@ -62,9 +62,22 @@ pub struct FindingKindSpec {
     pub summary: String,
     /// JSON Schema of this kind's `evidence` object.
     pub evidence: Map<String, Value>,
+    /// The remediation hints this kind's action carries, each key of `action.hints` with its
+    /// JSON Schema (ADR-133). Absent when the kind carries none.
+    #[serde(default, skip_serializing_if = "Map::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub hints: Map<String, Value>,
 }
 
 impl FindingKindSpec {
+    /// This kind, declaring that its action carries the hint `H`.
+    #[must_use]
+    pub fn with_hint<H: crate::hint::Hint>(mut self) -> Self {
+        self.hints
+            .insert(H::KEY.to_owned(), Value::Object(crate::hint::schema::<H>()));
+        self
+    }
+
     /// Whether this spec is a *template* such as `analyze.<tool>.<rule>`, whose reported kinds
     /// are only known when a tool reports them (ADR-102 §3).
     pub fn is_template(&self) -> bool {

@@ -1,6 +1,7 @@
 // ABOUTME: The text renderer (design §7.3): what a person reads from `--format text`.
 // ABOUTME: Every value in the envelope is shown except evidence bodies, which are summarized (ADR-019).
 mod description;
+mod remedy;
 
 use std::fmt::Write as _;
 
@@ -607,8 +608,8 @@ fn rows(out: &mut String, heading: &str, rows: Vec<(String, String)>, paint: &Pa
 }
 
 /// What `explain` adds: where it came from, the source excerpt with the location's lines marked,
-/// the full evidence of the explained finding (the one place evidence bodies are printed),
-/// test hints, and metrics.
+/// the full evidence of the explained finding (the one place evidence bodies are printed), its
+/// remediation hints in full (ADR-133), test hints, and metrics.
 fn explanation_block(explanation: &Explanation, findings: &[Finding], paint: &Paint) -> String {
     let mut out = String::new();
     labeled(
@@ -634,6 +635,9 @@ fn explanation_block(explanation: &Explanation, findings: &[Finding], paint: &Pa
         for line in evidence.lines() {
             let _ = writeln!(out, "    {line}");
         }
+    }
+    if let Some(finding) = explained {
+        remedy::block(&mut out, &finding.action.hints, paint);
     }
     if !explanation.covering_tests.is_empty() {
         let _ = writeln!(
@@ -831,10 +835,11 @@ fn evidence_summary(evidence: &Map<String, Value>) -> Option<String> {
     (!parts.is_empty()).then(|| parts.join(" · "))
 }
 
-/// Each present entry of an open map as `key: value`, indented.
+/// Each present entry of an open map as `key: value`, indented; a remediation hint on one line.
 fn hints(out: &mut String, map: &Map<String, Value>, indent: usize) {
     for (key, value) in map.iter().filter(|(_, value)| present(value)) {
-        let _ = writeln!(out, "{}{key}: {}", " ".repeat(indent), scalar(value));
+        let shown = remedy::line(key, value).unwrap_or_else(|| scalar(value));
+        let _ = writeln!(out, "{}{key}: {shown}", " ".repeat(indent));
     }
 }
 

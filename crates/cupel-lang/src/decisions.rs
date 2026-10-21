@@ -30,7 +30,7 @@ use tree_sitter::Node;
 
 use crate::contract::capture;
 use crate::producer::{QueryProducer, Source};
-use crate::query::matches;
+use crate::query::{matches, span};
 use crate::spec::QueryFile;
 use crate::symbols::{Definition, definitions};
 use crate::tables::DecisionRules;
@@ -135,6 +135,7 @@ fn weigh(
                 cognitive: if first_case { weight.cognitive } else { 0 },
                 table: *kind == DecisionKind::Loop && tables.contains(&node.id()),
                 continues: !first_case,
+                span: Some(span(*node)),
             }
         })
         .collect()

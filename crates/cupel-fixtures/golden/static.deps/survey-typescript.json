@@ -25,7 +25,21 @@
   "findings": [
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "cheapest_cut": {
+            "breaks_component": true,
+            "from": "src/deps_cycle/alpha.ts",
+            "line": 1,
+            "names": [
+              "BETA"
+            ],
+            "specifiers": [
+              "./beta"
+            ],
+            "to": "src/deps_cycle/beta.ts",
+            "unnamed": 0
+          }
+        },
         "kind": "break_cycle",
         "priority": 2,
         "summary": "Break the cycle src/deps_cycle/alpha.ts → src/deps_cycle/beta.ts → src/deps_cycle/alpha.ts: move what the modules share into a module that imports none of them, or invert one import through an interface."

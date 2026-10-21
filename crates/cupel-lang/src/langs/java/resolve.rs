@@ -65,6 +65,17 @@ pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
         let edges = grouped.entry(project_of(imports, file)).or_default();
         for import in imports.of(file).imports {
             let on_demand = import.names.iter().any(|name| name == "*");
+            // A single import names one type or static member: its last segment.
+            let names: Vec<String> = if on_demand {
+                Vec::new()
+            } else {
+                import
+                    .specifier
+                    .rsplit('.')
+                    .take(1)
+                    .map(str::to_owned)
+                    .collect()
+            };
             for target in resolve(imports, &roots, &import.specifier, on_demand) {
                 edges.push(ImportEdge {
                     from: file.clone(),
@@ -73,6 +84,7 @@ pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
                     relative: false,
                     line: import.line,
                     edge_kind: import.kind,
+                    names: names.clone(),
                 });
             }
         }

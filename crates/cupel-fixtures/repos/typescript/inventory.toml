@@ -230,6 +230,11 @@ file = "test/properties.test.ts"
 name = "sums do not depend on the order"
 expect = { property = "fast-check" }
 
+[test-frames.doc]
+file = "src/math.test.ts"
+name = "is consumed by a spy"
+expect = { doc = "/** A range is consumed whole (REQ-1). */" }
+
 [test-conventions.separate-test-file]
 file = "src/math.ts"
 name = "src/math.test.ts"

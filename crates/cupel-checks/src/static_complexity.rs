@@ -1,8 +1,9 @@
 // ABOUTME: `static.complexity`: per-symbol cyclomatic and cognitive complexity, nesting depth, parameter
-// ABOUTME: count, and length from Symbols, Decisions, and NormTree, against configurable limits (ADR-042).
+// ABOUTME: count, and length from Symbols, Decisions, and NormTree, against configurable limits (ADR-042, ADR-133).
 use std::collections::BTreeMap;
 
-use cupel_core::syntax::{Decision, DecisionKind, Decisions, NormTree, SymbolDef, Symbols};
+use cupel_core::hint::{self, DeepestBlock};
+use cupel_core::syntax::{Decision, DecisionKind, Decisions, NormTree, Span, SymbolDef, Symbols};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
     Facts, Finding, FindingKindSpec, Manifest, Measurement, MetricPer, MetricSpec, Plan, Result,
@@ -127,7 +128,8 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
             ActionKind::ReduceComplexity,
             "Cyclomatic or cognitive complexity exceeds its limit \
              (cyclomatic_max, cognitive_max).",
-        ),
+        )
+        .with_hint::<DeepestBlock>(),
         kind::<NestingDeep>(
             "nesting.deep",
             ActionKind::ReduceComplexity,
@@ -206,7 +208,8 @@ impl Check for StaticComplexity {
                 continue;
             }
             ctx.cancel.checkpoint()?;
-            let metrics = Metrics::of(symbol, decisions.get(&key).copied().unwrap_or_default());
+            let decided = decisions.get(&key).copied().unwrap_or_default();
+            let metrics = Metrics::of(symbol, decided);
             measured += 1;
             worst.include(symbol, &metrics);
             measure(sink, symbol, hashes.get(&key).copied(), &metrics);
@@ -218,6 +221,7 @@ impl Check for StaticComplexity {
             let subject = Subject {
                 symbol,
                 hash,
+                decisions: decided,
                 limits: &limits,
             };
             for finding in self.findings(&subject, &metrics) {
@@ -248,6 +252,7 @@ impl Check for StaticComplexity {
 struct Subject<'a> {
     symbol: &'a SymbolDef,
     hash: &'a SymbolHash,
+    decisions: &'a [Decision],
     limits: &'a BTreeMap<&'static str, u32>,
 }
 
@@ -276,7 +281,7 @@ impl StaticComplexity {
             subject.limit("cognitive_max"),
         );
         (metrics.cyclomatic > cyclomatic_max || metrics.cognitive > cognitive_max).then(|| {
-            self.report(
+            let mut finding = self.report(
                 subject,
                 "complexity.high",
                 format!(
@@ -296,7 +301,11 @@ impl StaticComplexity {
                      {cognitive_max}.",
                     subject.symbol.name
                 ),
-            )
+            );
+            if let Some(block) = deepest_block(subject.symbol, subject.decisions) {
+                hint::insert(&mut finding.action.hints, &block);
+            }
+            finding
         })
     }
 
@@ -401,13 +410,7 @@ impl Metrics {
             .filter(|d| !d.continues)
             .map(|d| d.cyclomatic)
             .sum::<u32>();
-        let cognitive = decisions
-            .iter()
-            .map(|d| {
-                let increment = structural(d.kind) && d.cognitive > 0;
-                d.cognitive + if increment { d.nesting } else { 0 }
-            })
-            .sum();
+        let cognitive = decisions.iter().map(cognitive).sum();
         let depth = decisions
             .iter()
             .filter(|d| structural(d.kind))
@@ -474,6 +477,69 @@ fn measure(
             target: symbol_target(symbol, hash),
         });
     }
+}
+
+/// What `decision` adds to cognitive complexity: its weight, increased by its nesting when it
+/// structures control flow (ADR-024, ADR-042).
+fn cognitive(decision: &Decision) -> u32 {
+    let increment = structural(decision.kind) && decision.cognitive > 0;
+    decision.cognitive + if increment { decision.nesting } else { 0 }
+}
+
+/// The function's most deeply nested block (ADR-133): among its structural decisions with a
+/// span, the greatest nesting, then the most decisions inside, then the first in source order;
+/// the path to it holds, per nesting level above it, the last structural decision at that level
+/// whose span contains it. `None` when no structural decision has a span.
+fn deepest_block(symbol: &SymbolDef, decisions: &[Decision]) -> Option<DeepestBlock> {
+    let placed: Vec<(&Decision, Span)> = decisions
+        .iter()
+        .filter_map(|decision| Some((decision, decision.span?)))
+        .collect();
+    let within = |outer: &Span| -> Vec<&Decision> {
+        placed
+            .iter()
+            .filter(|(_, inner)| contains(outer, inner))
+            .map(|(decision, _)| *decision)
+            .collect()
+    };
+    let mut best: Option<(&Decision, Span, usize)> = None;
+    for (decision, span) in placed.iter().filter(|(d, _)| structural(d.kind)) {
+        let held = within(span).len();
+        if best.is_none_or(|(chosen, _, most)| (decision.nesting, held) > (chosen.nesting, most)) {
+            best = Some((decision, *span, held));
+        }
+    }
+    let (block, span, _) = best?;
+    let mut path: Vec<DecisionKind> = (0..block.nesting)
+        .filter_map(|level| {
+            placed
+                .iter()
+                .rev()
+                .find(|(d, outer)| {
+                    structural(d.kind) && d.nesting == level && contains(outer, &span)
+                })
+                .map(|(d, _)| d.kind)
+        })
+        .collect();
+    path.push(block.kind);
+    let held = within(&span);
+    Some(DeepestBlock {
+        location: crate::finding::located(&symbol.file, &span),
+        nesting: block.nesting,
+        path,
+        cyclomatic: held
+            .iter()
+            .filter(|d| !d.continues)
+            .map(|d| d.cyclomatic)
+            .sum(),
+        cognitive: held.iter().map(|d| cognitive(d)).sum(),
+    })
+}
+
+/// Whether `inner` lies within `outer`, ends included.
+fn contains(outer: &Span, inner: &Span) -> bool {
+    (outer.line, outer.col) <= (inner.line, inner.col)
+        && (inner.end_line, inner.end_col) <= (outer.end_line, outer.end_col)
 }
 
 /// Kinds that structure control flow: they nest what they contain and carry the nesting

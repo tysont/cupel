@@ -100,6 +100,7 @@ fn spec(kind: &str) -> FindingKindSpec {
         action: ActionKind::FixBug,
         summary: String::new(),
         evidence: Map::new(),
+        hints: Map::new(),
     }
 }
 

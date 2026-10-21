@@ -1588,7 +1588,7 @@
       "body": {
         "col": 5,
         "end_col": 19,
-        "end_line": 57,
+        "end_line": 58,
         "line": 57
       },
       "display": "tests.test_ledger.test_opening_an_account_does_not_raise",
@@ -1601,7 +1601,7 @@
       "span": {
         "col": 1,
         "end_col": 19,
-        "end_line": 57,
+        "end_line": 58,
         "line": 56
       },
       "visibility": "public"

@@ -1,14 +1,15 @@
 // ABOUTME: static.clones over synthetic facts: pairs, clusters, clone types, settings, scope, family-wide
-// ABOUTME: comparison, finding identity, and deterministic order (ADR-050).
+// ABOUTME: comparison, finding identity, deterministic order (ADR-050), and the common-subtree hint (ADR-133).
 mod support;
 
 use cupel_core::config::ConfigError;
+use cupel_core::hint::{self, CommonSubtree, Parameter, ParameterKind, PlacedSubtree};
 use cupel_core::syntax::{
     NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, Visibility,
 };
 use cupel_core::{
     ActionKind, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding, FindingId,
-    LangId, MetricPer, Scope, SiteHash, SymbolHash,
+    LangId, Location, MetricPer, Scope, SiteHash, SymbolHash,
 };
 use serde_json::{Value, json};
 use support::{Recorded, combined, language};
@@ -347,16 +348,20 @@ fn a_copy_with_an_extra_statement_is_a_type_3_pair() {
     assert!((0.82..1.0).contains(&jaccard), "{jaccard}");
 }
 
-#[test]
-fn three_similar_symbols_are_one_cluster_and_no_pairs() {
+/// Three similar symbols: two equal trees and one with its first statement changed.
+fn three_similar() -> [Def; 3] {
     let mut changed = body(&OPERATORS);
     changed[0] = statement("<<");
-    let defs = [
+    [
         def("a.x", "one", 1, function(body(&OPERATORS))),
         def("a.x", "two", 20, function(body(&OPERATORS))),
         def("c.x", "three", 1, function(changed)),
-    ];
-    let (result, findings) = run(&defs);
+    ]
+}
+
+#[test]
+fn three_similar_symbols_are_one_cluster_and_no_pairs() {
+    let (result, findings) = run(&three_similar());
     assert_eq!(findings.len(), 1, "{findings:#?}");
     let finding = &findings[0];
     assert_eq!(finding.kind, "clone.cluster");
@@ -695,4 +700,187 @@ fn counts_add_up_across_families_and_similarity_takes_the_largest() {
     assert_eq!(combined(check, "pairs", &results), Some(5.0));
     assert_eq!(combined(check, "clusters", &results), Some(1.0));
     assert_eq!(combined(check, "max_jaccard", &results), Some(1.0));
+}
+
+// ---------------------------------------------------------------- the common-subtree hint
+
+/// `$id = $id <operator> $lit` with its markers' texts: `total = <operand> <operator> 100`.
+fn named_statement(operator: &str, operand: &str) -> NormNode {
+    texts(statement(operator), &["total", operand, "100"])
+}
+
+/// `node` with the given texts on its marker leaves (`$id`, `$lit`), in pre-order.
+fn texts(mut node: NormNode, values: &[&str]) -> NormNode {
+    fn fill(node: &mut NormNode, values: &mut std::slice::Iter<'_, &str>) {
+        if node.label.starts_with('$') {
+            node.text = values.next().map(|value| (*value).to_owned());
+        }
+        for child in &mut node.children {
+            fill(child, values);
+        }
+    }
+    fill(&mut node, &mut values.iter());
+    node
+}
+
+/// The loop every member of the hint's cluster shares: `for items { three statements; audit }`,
+/// its operand and the audit's literal differing per member.
+fn shared(operand: &str, literal: &str) -> NormNode {
+    NormNode::new(
+        "batch",
+        vec![
+            texts(NormNode::leaf("$id"), &["items"]),
+            NormNode::new(
+                "block",
+                vec![
+                    named_statement("+", operand),
+                    named_statement("-", operand),
+                    named_statement("*", operand),
+                    texts(call("audit"), &["total", literal]),
+                ],
+            ),
+        ],
+    )
+}
+
+/// Every node of `root` placed on its own line from `first`, in pre-order, each spanning its
+/// line from column 1 to 9.
+fn placed(mut root: NormNode, first: u32) -> NormNode {
+    fn place(node: &mut NormNode, line: &mut u32) {
+        node.span = Some(Span {
+            line: *line,
+            col: 1,
+            end_line: *line,
+            end_col: 9,
+        });
+        *line += 1;
+        for child in &mut node.children {
+            place(child, line);
+        }
+    }
+    let mut line = first;
+    place(&mut root, &mut line);
+    root
+}
+
+/// The line `label`'s first node is placed on in `def`'s tree.
+fn line_of(def: &Def, label: &str) -> u32 {
+    fn find(node: &NormNode, label: &str) -> Option<u32> {
+        if node.label == label {
+            return node.span.map(|span| span.line);
+        }
+        node.children.iter().find_map(|child| find(child, label))
+    }
+    find(&def.root, label).unwrap()
+}
+
+/// A member of the hint's cluster: the common body, the shared loop, and a last statement of
+/// its own, so no two members' whole trees are equal. `varying` is that statement's operator,
+/// then the shared loop's operand and literal.
+fn member(file: &'static str, name: &'static str, line: u32, varying: [&str; 3]) -> Def {
+    let [own, operand, literal] = varying;
+    let mut statements = body(&OPERATORS);
+    statements.insert(4, shared(operand, literal));
+    statements.push(statement(own));
+    def(file, name, line, placed(function(statements), line))
+}
+
+/// How many nodes the tree rooted at `node` has.
+fn size(node: &NormNode) -> u32 {
+    1 + node.children.iter().map(size).sum::<u32>()
+}
+
+fn located(file: &str, line: u32) -> Location {
+    Location {
+        file: file.to_owned(),
+        line,
+        col: Some(1),
+        end_line: line,
+        end_col: Some(9),
+    }
+}
+
+#[test]
+fn a_cluster_names_the_largest_subtree_its_members_share_and_the_parameters_that_differ() {
+    let defs = [
+        member("a.x", "one", 1, ["<<", "rate", "1"]),
+        member("a.x", "two", 200, [">>", "fee", "2"]),
+        member("c.x", "three", 1, ["^", "tax", "3"]),
+    ];
+    let (_, findings) = run(&defs);
+    assert_eq!(findings.len(), 1, "{findings:#?}");
+    assert_eq!(findings[0].kind, "clone.cluster");
+    let found: CommonSubtree = hint::read(&findings[0].action.hints).unwrap();
+    let nodes = size(&shared("x", "y"));
+    let share = (f64::from(nodes) / f64::from(size(&defs[0].root)) * 1000.0).round() / 1000.0;
+    assert_eq!(
+        found,
+        CommonSubtree {
+            nodes,
+            share,
+            location: located("a.x", line_of(&defs[0], "batch")),
+            others: vec![
+                PlacedSubtree {
+                    symbol: "m::two".to_owned(),
+                    location: located("a.x", line_of(&defs[1], "batch")),
+                },
+                PlacedSubtree {
+                    symbol: "m::three".to_owned(),
+                    location: located("c.x", line_of(&defs[2], "batch")),
+                },
+            ],
+            parameters: vec![
+                Parameter {
+                    kind: ParameterKind::Identifier,
+                    values: vec!["rate".to_owned(), "fee".to_owned(), "tax".to_owned()],
+                    occurrences: 3,
+                },
+                Parameter {
+                    kind: ParameterKind::Literal,
+                    values: vec!["1".to_owned(), "2".to_owned(), "3".to_owned()],
+                    occurrences: 1,
+                },
+            ],
+        }
+    );
+}
+
+#[test]
+fn a_cluster_whose_trees_carry_no_spans_has_no_common_subtree_hint() {
+    let (_, findings) = run(&three_similar());
+    assert_eq!(findings[0].kind, "clone.cluster");
+    assert!(
+        findings[0].action.hints.is_empty(),
+        "{:?}",
+        findings[0].action.hints
+    );
+}
+
+#[test]
+fn a_pair_carries_no_common_subtree_hint() {
+    let defs = [
+        member("a.x", "one", 1, ["<<", "rate", "1"]),
+        member("a.x", "two", 200, [">>", "fee", "2"]),
+    ];
+    let (_, findings) = run(&defs);
+    assert_eq!(findings[0].kind, "clone.pair");
+    assert!(findings[0].action.hints.is_empty());
+}
+
+#[test]
+fn the_cluster_kind_declares_its_common_subtree_hint() {
+    let manifest = support::check(ID).manifest().clone();
+    let hints = |kind: &str| -> Vec<String> {
+        manifest
+            .findings
+            .iter()
+            .find(|spec| spec.kind == kind)
+            .unwrap()
+            .hints
+            .keys()
+            .cloned()
+            .collect()
+    };
+    assert_eq!(hints("clone.cluster"), ["common_subtree"]);
+    assert!(hints("clone.pair").is_empty());
 }

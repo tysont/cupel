@@ -128,6 +128,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 30,
+            "end_col": 45,
+            "end_line": 7,
+            "line": 7
+          },
           "table": false
         }
       ],
@@ -153,6 +159,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 28,
+            "end_line": 10,
+            "line": 7
+          },
           "table": false
         },
         {
@@ -161,6 +173,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 28,
+            "end_line": 10,
+            "line": 8
+          },
           "table": false
         }
       ],
@@ -178,6 +196,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 21,
+            "line": 18
+          },
           "table": false
         },
         {
@@ -186,6 +210,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 21,
+            "line": 19
+          },
           "table": false
         }
       ],
@@ -203,6 +233,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 55,
+            "end_line": 34,
+            "line": 30
+          },
           "table": false
         }
       ],
@@ -220,6 +256,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 55,
+            "end_line": 49,
+            "line": 45
+          },
           "table": false
         }
       ],
@@ -237,6 +279,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 26,
+            "line": 5
+          },
           "table": false
         },
         {
@@ -245,6 +293,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 8,
+            "line": 7
+          },
           "table": false
         },
         {
@@ -253,6 +307,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 10,
+            "line": 9
+          },
           "table": false
         },
         {
@@ -261,6 +321,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 12,
+            "line": 11
+          },
           "table": false
         },
         {
@@ -269,6 +335,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 14,
+            "line": 13
+          },
           "table": false
         },
         {
@@ -277,6 +349,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 26,
+            "end_line": 16,
+            "line": 15
+          },
           "table": false
         },
         {
@@ -285,6 +363,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 18,
+            "line": 17
+          },
           "table": false
         },
         {
@@ -293,6 +377,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 20,
+            "line": 19
+          },
           "table": false
         },
         {
@@ -301,6 +391,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 21,
+            "end_line": 22,
+            "line": 21
+          },
           "table": false
         },
         {
@@ -309,6 +405,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 24,
+            "line": 23
+          },
           "table": false
         }
       ],
@@ -326,6 +428,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 42,
+            "end_line": 37,
+            "line": 32
+          },
           "table": false
         },
         {
@@ -334,6 +442,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 42,
+            "end_line": 37,
+            "line": 33
+          },
           "table": false
         },
         {
@@ -342,6 +456,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 2,
+          "span": {
+            "col": 13,
+            "end_col": 42,
+            "end_line": 37,
+            "line": 34
+          },
           "table": false
         },
         {
@@ -350,6 +470,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 3,
+          "span": {
+            "col": 17,
+            "end_col": 42,
+            "end_line": 37,
+            "line": 35
+          },
           "table": false
         },
         {
@@ -358,6 +484,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 4,
+          "span": {
+            "col": 21,
+            "end_col": 42,
+            "end_line": 37,
+            "line": 36
+          },
           "table": false
         }
       ],
@@ -415,6 +547,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 127,
+            "line": 126
+          },
           "table": false
         },
         {
@@ -423,6 +561,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 127,
+            "line": 127
+          },
           "table": false
         },
         {
@@ -431,6 +575,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 129,
+            "line": 128
+          },
           "table": false
         },
         {
@@ -439,6 +589,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 129,
+            "line": 129
+          },
           "table": false
         },
         {
@@ -447,6 +603,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 131,
+            "line": 130
+          },
           "table": false
         },
         {
@@ -455,6 +617,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 131,
+            "line": 131
+          },
           "table": false
         },
         {
@@ -463,6 +631,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 133,
+            "line": 132
+          },
           "table": false
         },
         {
@@ -471,6 +645,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 133,
+            "line": 133
+          },
           "table": false
         },
         {
@@ -479,6 +659,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 135,
+            "line": 134
+          },
           "table": false
         },
         {
@@ -487,6 +673,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 135,
+            "line": 135
+          },
           "table": false
         },
         {
@@ -495,6 +687,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 137,
+            "line": 136
+          },
           "table": false
         },
         {
@@ -503,6 +701,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 137,
+            "line": 137
+          },
           "table": false
         },
         {
@@ -511,6 +715,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 139,
+            "line": 138
+          },
           "table": false
         },
         {
@@ -519,6 +729,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 139,
+            "line": 139
+          },
           "table": false
         },
         {
@@ -527,6 +743,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 141,
+            "line": 140
+          },
           "table": false
         },
         {
@@ -535,6 +757,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 141,
+            "line": 141
+          },
           "table": false
         },
         {
@@ -543,6 +771,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 143,
+            "line": 142
+          },
           "table": false
         },
         {
@@ -551,6 +785,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 143,
+            "line": 143
+          },
           "table": false
         },
         {
@@ -559,6 +799,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 145,
+            "line": 144
+          },
           "table": false
         },
         {
@@ -567,6 +813,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 145,
+            "line": 145
+          },
           "table": false
         },
         {
@@ -575,6 +827,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 147,
+            "line": 146
+          },
           "table": false
         },
         {
@@ -583,6 +841,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 147,
+            "line": 147
+          },
           "table": false
         },
         {
@@ -591,6 +855,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 149,
+            "line": 148
+          },
           "table": false
         },
         {
@@ -599,6 +869,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 149,
+            "line": 149
+          },
           "table": false
         }
       ],
@@ -616,6 +892,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 20,
+            "line": 14
+          },
           "table": false
         },
         {
@@ -624,6 +906,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 20,
+            "line": 15
+          },
           "table": false
         },
         {
@@ -632,6 +920,12 @@
           "cyclomatic": 1,
           "kind": "boolean-op",
           "nesting": 1,
+          "span": {
+            "col": 12,
+            "end_col": 36,
+            "end_line": 15,
+            "line": 15
+          },
           "table": false
         },
         {
@@ -640,6 +934,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 18,
+            "line": 17
+          },
           "table": false
         },
         {
@@ -648,6 +948,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 23,
+            "end_line": 20,
+            "line": 19
+          },
           "table": false
         }
       ],
@@ -665,6 +971,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 27,
+            "line": 26
+          },
           "table": false
         },
         {
@@ -673,6 +985,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 19,
+            "end_line": 27,
+            "line": 27
+          },
           "table": false
         },
         {
@@ -681,6 +999,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 29,
+            "line": 28
+          },
           "table": false
         },
         {
@@ -689,6 +1013,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 20,
+            "end_line": 29,
+            "line": 29
+          },
           "table": false
         }
       ],
@@ -730,6 +1060,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 7,
+            "line": 2
+          },
           "table": false
         },
         {
@@ -738,6 +1074,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 5,
+            "line": 4
+          },
           "table": false
         },
         {
@@ -746,6 +1088,12 @@
           "cyclomatic": 1,
           "kind": "boolean-op",
           "nesting": 0,
+          "span": {
+            "col": 10,
+            "end_col": 37,
+            "end_line": 4,
+            "line": 4
+          },
           "table": false
         }
       ],
@@ -763,6 +1111,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 16,
+            "line": 13
+          },
           "table": false
         },
         {
@@ -771,6 +1125,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 25,
+            "end_line": 16,
+            "line": 15
+          },
           "table": false
         },
         {
@@ -779,6 +1139,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 2,
+          "span": {
+            "col": 13,
+            "end_col": 25,
+            "end_line": 16,
+            "line": 16
+          },
           "table": false
         }
       ],
@@ -796,6 +1162,12 @@
           "cyclomatic": 1,
           "kind": "catch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 24,
+            "line": 23
+          },
           "table": false
         },
         {
@@ -804,6 +1176,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 20,
+            "end_line": 24,
+            "line": 24
+          },
           "table": false
         }
       ],
@@ -821,6 +1199,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 51,
+            "end_line": 30,
+            "line": 29
+          },
           "table": false
         },
         {
@@ -829,6 +1213,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 51,
+            "end_line": 30,
+            "line": 30
+          },
           "table": false
         }
       ],
@@ -846,6 +1236,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 30,
+            "end_line": 37,
+            "line": 36
+          },
           "table": false
         },
         {
@@ -854,6 +1250,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 30,
+            "end_line": 37,
+            "line": 37
+          },
           "table": false
         },
         {
@@ -862,6 +1264,12 @@
           "cyclomatic": 1,
           "kind": "case",
           "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 31,
+            "end_line": 39,
+            "line": 38
+          },
           "table": false
         },
         {
@@ -870,6 +1278,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 13,
+            "end_col": 31,
+            "end_line": 39,
+            "line": 39
+          },
           "table": false
         }
       ],
@@ -887,6 +1301,12 @@
           "cyclomatic": 1,
           "kind": "ternary",
           "nesting": 0,
+          "span": {
+            "col": 12,
+            "end_col": 37,
+            "end_line": 45,
+            "line": 45
+          },
           "table": false
         }
       ],
@@ -904,6 +1324,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 19,
+            "end_col": 39,
+            "end_line": 49,
+            "line": 49
+          },
           "table": false
         },
         {
@@ -912,6 +1338,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 40,
+            "end_col": 52,
+            "end_line": 49,
+            "line": 49
+          },
           "table": false
         }
       ],
@@ -929,6 +1361,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 27,
+            "end_line": 4,
+            "line": 3
+          },
           "table": false
         },
         {
@@ -937,6 +1375,12 @@
           "cyclomatic": 1,
           "kind": "boolean-op",
           "nesting": 0,
+          "span": {
+            "col": 8,
+            "end_col": 27,
+            "end_line": 3,
+            "line": 3
+          },
           "table": false
         },
         {
@@ -945,6 +1389,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 4,
+            "line": 4
+          },
           "table": false
         }
       ],
@@ -962,6 +1412,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 29,
+            "end_line": 14,
+            "line": 11
+          },
           "table": false
         },
         {
@@ -970,6 +1426,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 29,
+            "end_line": 14,
+            "line": 13
+          },
           "table": false
         }
       ],
@@ -1092,6 +1554,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 27,
+            "end_line": 4,
+            "line": 3
+          },
           "table": false
         },
         {
@@ -1100,6 +1568,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 4,
+            "line": 4
+          },
           "table": false
         }
       ],
@@ -1117,6 +1591,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 11,
+            "line": 10
+          },
           "table": false
         },
         {
@@ -1125,6 +1605,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 31,
+            "end_line": 11,
+            "line": 11
+          },
           "table": false
         }
       ],
@@ -1142,6 +1628,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 27,
+            "end_line": 18,
+            "line": 17
+          },
           "table": false
         },
         {
@@ -1150,6 +1642,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 18,
+            "line": 18
+          },
           "table": false
         }
       ],
@@ -1167,6 +1665,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 29,
+            "line": 28
+          },
           "table": false
         },
         {
@@ -1175,6 +1679,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 31,
+            "end_line": 29,
+            "line": 29
+          },
           "table": false
         }
       ],
@@ -1192,6 +1702,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 27,
+            "end_line": 36,
+            "line": 35
+          },
           "table": false
         },
         {
@@ -1200,6 +1716,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 36,
+            "line": 36
+          },
           "table": false
         }
       ],
@@ -1217,6 +1739,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 17,
+            "end_line": 45,
+            "line": 42
+          },
           "table": false
         },
         {
@@ -1225,6 +1753,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 43,
+            "line": 43
+          },
           "table": false
         },
         {
@@ -1233,6 +1767,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 17,
+            "end_line": 45,
+            "line": 44
+          },
           "table": false
         },
         {
@@ -1241,6 +1781,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 17,
+            "end_line": 45,
+            "line": 45
+          },
           "table": false
         }
       ],
@@ -1258,6 +1804,12 @@
           "cyclomatic": 1,
           "kind": "branch",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 27,
+            "end_line": 52,
+            "line": 51
+          },
           "table": false
         },
         {
@@ -1266,6 +1818,12 @@
           "cyclomatic": 0,
           "kind": "early-return",
           "nesting": 1,
+          "span": {
+            "col": 9,
+            "end_col": 27,
+            "end_line": 52,
+            "line": 52
+          },
           "table": false
         }
       ],
@@ -1459,6 +2017,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 41,
+            "end_line": 34,
+            "line": 33
+          },
           "table": true
         }
       ],
@@ -1476,6 +2040,12 @@
           "cyclomatic": 1,
           "kind": "loop",
           "nesting": 0,
+          "span": {
+            "col": 5,
+            "end_col": 41,
+            "end_line": 39,
+            "line": 38
+          },
           "table": false
         }
       ],

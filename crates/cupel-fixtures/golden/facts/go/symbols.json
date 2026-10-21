@@ -1148,8 +1148,8 @@
       "body": {
         "col": 53,
         "end_col": 2,
-        "end_line": 87,
-        "line": 85
+        "end_line": 88,
+        "line": 86
       },
       "display": "ledger.TestOpeningAnAccountDoesNotPanic",
       "file": "ledger_test.go",
@@ -1161,8 +1161,8 @@
       "span": {
         "col": 1,
         "end_col": 2,
-        "end_line": 87,
-        "line": 85
+        "end_line": 88,
+        "line": 86
       },
       "visibility": "public"
     },

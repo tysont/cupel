@@ -19,6 +19,7 @@ pub fn kind<T: JsonSchema>(kind: &str, action: ActionKind, summary: &str) -> Fin
         action,
         summary: summary.to_owned(),
         evidence: schema,
+        hints: Map::new(),
     }
 }
 

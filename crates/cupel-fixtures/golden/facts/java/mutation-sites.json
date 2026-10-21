@@ -6488,8 +6488,8 @@
           "span": {
             "col": 9,
             "end_col": 28,
-            "end_line": 73,
-            "line": 73
+            "end_line": 74,
+            "line": 74
           },
           "to": [
             ""
@@ -6499,7 +6499,7 @@
       "symbol": {
         "col": 5,
         "file": "src/test/java/ledger/LedgerTest.java",
-        "line": 71
+        "line": 72
       }
     },
     {

@@ -231,6 +231,11 @@ file = "tests/test_properties.py"
 name = "test_parsed_cents_round_trip"
 expect = { property = "hypothesis" }
 
+[test-frames.doc]
+file = "tests/test_ledger.py"
+name = "test_opening_an_account_does_not_raise"
+expect = { doc = "\"\"\"An account opens without a deposit (REQ-1).\"\"\"" }
+
 [test-conventions.separate-test-file]
 file = "src/ledger/pricing.py"
 name = "tests/test_pricing.py"

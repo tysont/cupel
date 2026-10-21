@@ -284,6 +284,8 @@ fn symbol_selectors_match_display_names_either_separator_and_hashes() {
                 symbol: symbol.key(),
                 hash: hash(n),
                 root: NormNode {
+                    span: None,
+                    text: None,
                     label: "fn".to_owned(),
                     children: Vec::new(),
                 },

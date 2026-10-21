@@ -442,7 +442,7 @@ On the tree, `survey` finds the clone the changed-scope `check` above did not: `
 
 ### `cupel explain`
 
-`explain` reads the fact store and never re-runs anything. Given a finding ID it returns the stored finding with a source excerpt and its full evidence. Given a check ID it returns that check's result, findings, and metrics from the last run that included it.
+`explain` reads the fact store and never re-runs anything. Given a finding ID it returns the stored finding with a source excerpt, its full evidence, and its remediation hint in full: for `clone.cluster` the largest subtree every member shares (its place in each member and the names and literals that differ, the extracted function's parameters), for `complexity.high` the most deeply nested block (its place, the constructs on the path to it, and the complexity it carries), and for `dep.cycle` the cheapest import to cut (the names it carries, and whether removing it breaks every cycle among the modules). The checks compute these hints when they report the finding, so `check` and `survey` carry them in `action.hints` too. Given a check ID it returns that check's result, findings, and metrics from the last run that included it.
 
 ```console
 $ cupel explain fnd_c5c4da --format text
@@ -735,7 +735,7 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 | `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
 | `meta.oracle-independence` | 2 | quick | `evidence.self-authored-only` | `independent`, `self_authored_only` | — | clojure, go, java, javascript, python, rust, typescript |
-| `meta.traceability` | 2 | standard | `spec.untested-requirement` | `untested` | — | clojure, go, java, javascript, python, rust, typescript |
+| `meta.traceability` | 2 | standard | `spec.untested-requirement`, `spec.unlisted-requirement` | `untested` | — | clojure, go, java, javascript, python, rust, typescript |
 | `perf.bench` | 0 | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, python, rust |
 | `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
 | `spec.contracts` | 5 | standard | `contract.violated` | `violations` | — | python, rust |
@@ -784,7 +784,7 @@ What each check looks for:
 - **`conc.model-check`** model-checks the project's proof harnesses (Kani's `#[kani::proof]` functions for Rust) over every input within their bounds, and reports each property an input breaks (an assertion, an overflow, an out-of-bounds access) as `model.counterexample`, with the values that break it and a test that replays them. See [Model checking](#model-checking).
 - **`spec.prove`** verifies the project's Dafny proofs, and reports each proof obligation the verifier could not prove (`proof.failed`) and each the proofs assume instead of proving or leave undecided in the verifier's budget (`proof.obligation-open`, `warn`). See [Proofs](#proofs).
 - **`spec.contracts`** runs the tests again with every contract the project's contract library checks turned on, the debug-only and slow ones too, and its property tests at the case budget, and reports each precondition, postcondition, and invariant a test violated (`contract.violated`), at the contract. See [Contracts](#contracts).
-- **`meta.traceability`** maps each requirement ID you list to the tests the range added whose names carry it (`test_req_12_parses`, `parses week dates #REQ-12`), and reports each requirement no such test names (`spec.untested-requirement`). It needs `--changed` or `--base`. See [Requirements and test provenance](#requirements-and-test-provenance).
+- **`meta.traceability`** maps each requirement ID you list to the tests the range added whose names or doc comments carry it (`test_req_12_parses`, `parses week dates #REQ-12`, `/// Parses week dates (REQ-12).`), and reports each requirement no such test names (`spec.untested-requirement`); a `REQ-<n>` marker on an added test that names no listed requirement is listed as one (`spec.unlisted-requirement`, `info`). It needs `--changed` or `--base`. See [Requirements and test provenance](#requirements-and-test-provenance).
 - **`meta.oracle-independence`** labels each changed function the tests exercise by whether a test that existed before the change runs it, and reports one only the change's own tests run (`evidence.self-authored-only`, `warn`): the only evidence it works was written with it. It needs `--changed` or `--base` and a per-test coverage map. See [Requirements and test provenance](#requirements-and-test-provenance).
 
 `cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
@@ -1367,7 +1367,9 @@ The evidence holds the `tool`, the contract's `kind` (`precondition`, `postcondi
 requirements = ["REQ-12", "REQ-13"]
 ```
 
-A test traces a requirement when the range added it (no test of that name in that file at the base commit) and its name carries the ID as whole words, in any case and with any separator: `test_req_12_parses`, `it("parses week dates #REQ-12")`, but not `test_req_120` or `testReq12`. A test that existed before the change passed without it, so it cannot show the change meets the requirement; the finding lists such tests with `added: false`. With no requirements configured the check passes with a note. The gate keys are `meta.traceability` (none untested) and `meta.traceability.untested`.
+A test traces a requirement when the range added it (no test of that name in that file at the base commit) and its name or its doc comment carries the ID as whole words, in any case and with any separator: `test_req_12_parses`, `it("parses week dates #REQ-12")`, `/// Parses week dates (REQ-12).`, but not `test_req_120` or `testReq12`. The doc comment is the language's: Rust's `///` lines or `/** */` above the test's attributes, Go's `//` lines above the function, a Python docstring, a JSDoc or Javadoc `/** */` block above the test, and Clojure's `;` lines above `deftest`. A test's body is not read. A test that existed before the change passed without it, so it cannot show the change meets the requirement; the finding lists such tests with `added: false`.
+
+A `REQ-<n>` marker (`req` followed by a number as its own word, as in `#REQ-7`, `req_7`, `TestParse_REQ_7`) on a test the range added is a requirement too, when no listed ID matches it: the test traces it, and the check lists it as `spec.unlisted-requirement` (`info`, so no gate fails on it), whose evidence says `source: marker` where a listed requirement's says `source: config`. So a repository that writes requirement IDs only into its tests gets them traced without configuration, and one that lists them hears of a marker the task does not name (often a mistyped ID). Markers on tests that existed before the change add nothing. With no requirement listed or marked the check passes with a note. The gate keys are `meta.traceability` (none untested) and `meta.traceability.untested`.
 
 `meta.oracle-independence` asks who wrote the evidence. Under a range, with a per-test coverage map (made at `--depth standard` for Rust, Go, and Python; see [Coverage](#coverage)), it finds the tests that run each changed function. A function a test from before the change runs is `independent`; one only tests the range added run is `evidence.self-authored-only`: worth checking those tests' expectations against the task rather than the code. Without a map, it labels nothing and says why. A registered oracle's independence is its verification: a result against an unverified oracle is already capped at tier 3 with an `oracle.unverified` finding (see [`cupel oracle`](#cupel-oracle)). The gate keys are `meta.oracle-independence.independent` and `self_authored_only`.
 
@@ -1465,7 +1467,7 @@ cyclomatic_max = 15
 order = ["domain", "app", "infra"]
 map = { domain = "src/domain/**", app = "src/app/**", infra = "src/infra/**" }
 
-[checks."meta.traceability"]       # the task's requirement IDs, traced by the names of added tests
+[checks."meta.traceability"]       # the task's requirement IDs, traced by the names and docs of added tests
 requirements = ["REQ-12", "REQ-13"]
 
 [oracles.release]                  # what checks compare against; see cupel oracle

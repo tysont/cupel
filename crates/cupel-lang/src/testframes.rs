@@ -19,6 +19,10 @@
 //!   pattern that matched, else `[tests].framework`.
 //! - `@property.<framework>` on any node: the case is a property test whose inputs `<framework>`
 //!   generates (ADR-095); the earliest pattern wins per case.
+//! - `@test.doc` on a comment or docstring, with `@doc.target` on the node it documents
+//!   (ADR-134): when that node is a case, the doc is the case's. A doc pattern may match any
+//!   function; it documents only cases other patterns found. A case's doc is its doc nodes' texts
+//!   in document order, one per line.
 //!
 //! An assertion, mock, skip, or property captured in the same match as a `@test.case` belongs to that
 //! case (attributes and decorators sit outside the function they mark); otherwise it belongs
@@ -46,6 +50,8 @@ struct Case<'t> {
     skip: Option<SkipMarker>,
     /// The property framework, with the pattern that named it.
     property: Option<(usize, String)>,
+    /// The doc comment or docstring nodes, by node ID.
+    docs: BTreeMap<usize, Node<'t>>,
 }
 
 /// Cases by node ID.
@@ -80,6 +86,7 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
     attach_mocks(&mut cases, parsed, &found);
     attach_skips(&mut cases, parsed, &found);
     attach_properties(&mut cases, &found);
+    attach_docs(&mut cases, &found);
 
     let mut setup: Vec<(usize, Span)> = found
         .iter()
@@ -105,6 +112,7 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
                     mocks: case.mocks,
                     skip: case.skip,
                     property: case.property.map(|(_, framework)| framework),
+                    doc: doc(parsed, &case.docs),
                 })
                 .collect(),
         }],
@@ -125,6 +133,7 @@ fn collect_cases<'t>(parsed: &'t Parsed, found: &[Match<'_, 't>]) -> Cases<'t> {
             mocks: Vec::new(),
             skip: None,
             property: None,
+            docs: BTreeMap::new(),
         });
         if let Some(name) = m.node(capture::TEST_NAME)
             && case
@@ -268,6 +277,32 @@ fn attach_properties(cases: &mut Cases<'_>, found: &[Match<'_, '_>]) {
             case.property = Some((m.pattern, framework.to_owned()));
         }
     }
+}
+
+/// Attaches each `@test.doc` node to the case its match's `@doc.target` is, if any.
+fn attach_docs<'t>(cases: &mut Cases<'t>, found: &[Match<'_, 't>]) {
+    for m in found {
+        let Some(case) = m
+            .node(capture::DOC_TARGET)
+            .and_then(|node| cases.get_mut(&node.id()))
+        else {
+            continue;
+        };
+        for doc in m.nodes(capture::TEST_DOC) {
+            case.docs.insert(doc.id(), doc);
+        }
+    }
+}
+
+/// The texts of `docs` in document order, one per line, each without trailing whitespace.
+fn doc(parsed: &Parsed, docs: &BTreeMap<usize, Node<'_>>) -> Option<String> {
+    let mut nodes: Vec<&Node<'_>> = docs.values().collect();
+    nodes.sort_by_key(|node| node.start_byte());
+    let lines: Vec<&str> = nodes
+        .into_iter()
+        .map(|node| parsed.text(*node).trim_end())
+        .collect();
+    (!lines.is_empty()).then(|| lines.join("\n"))
 }
 
 /// The framework named by the earliest pattern with a `@framework.<name>` capture.

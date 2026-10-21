@@ -311,6 +311,7 @@ fn manifest_round_trips_with_kebab_fact_kinds() {
         action: ActionKind::WriteTest,
         summary: "A mutant no test killed.".into(),
         evidence: serde_json::Map::from_iter([("type".to_owned(), json!("object"))]),
+        hints: serde_json::Map::new(),
     });
     m.metrics.push(MetricSpec {
         name: "score".into(),

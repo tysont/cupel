@@ -1,9 +1,12 @@
-// ABOUTME: `static.deps`: file-level import cycles (Tarjan SCC), Martin's coupling, instability,
-// ABOUTME: abstractness, and distance, and layering rules from config, over ModuleGraph and ApiSurface.
+// ABOUTME: `static.deps`: file-level import cycles (Tarjan SCC) with the cheapest import to cut, Martin's coupling,
+// ABOUTME: instability, abstractness, and distance, and layering rules from config, over ModuleGraph and ApiSurface.
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use cupel_core::config::{ConfigError, Table};
-use cupel_core::syntax::{ApiItemKind, ApiSurface, EdgeKind, ImportTarget, ModuleGraph};
+use cupel_core::hint::{self, CheapestCut};
+use cupel_core::syntax::{
+    ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph,
+};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
@@ -129,7 +132,8 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
             "dep.cycle",
             ActionKind::BreakCycle,
             "Modules that import each other, directly or through others.",
-        ),
+        )
+        .with_hint::<CheapestCut>(),
         kind::<LayerViolation>(
             "dep.layer-violation",
             ActionKind::Review,
@@ -306,7 +310,7 @@ impl StaticDeps {
             .map(String::as_str)
             .collect::<Vec<_>>()
             .join(" → ");
-        let finding = self.report(Report {
+        let mut finding = self.report(Report {
             kind: "dep.cycle",
             subject: members.join("\n"),
             file: cycle[0].clone(),
@@ -319,9 +323,12 @@ impl StaticDeps {
             evidence: evidence(&ImportCycle {
                 size: members.len(),
                 modules: members.to_vec(),
-                cycle,
+                cycle: cycle.clone(),
             }),
         });
+        if let Some(cut) = graph.cheapest_cut(members, &cycle) {
+            hint::insert(&mut finding.action.hints, &cut);
+        }
         let size = Measurement {
             metric: "cycle_size".to_owned(),
             value: as_value(members.len()),
@@ -474,12 +481,54 @@ struct Report {
     evidence: Value,
 }
 
-/// The first import of one module by another.
+/// The imports of one module by another.
 struct Import {
+    /// The line of the first import.
     line: u32,
+    /// The first import's specifier.
     specifier: String,
     /// Some edge between the two uses the module rather than only declaring it (ADR-068).
     uses: bool,
+    /// The line of the first edge that uses the module.
+    first_use: u32,
+    /// The specifiers of the edges that use the module, in line order, without repeats.
+    specifiers: Vec<String>,
+    /// The names those edges import (ADR-133).
+    names: BTreeSet<String>,
+    /// Those edges that name nothing: a whole-module import, or a language that names none.
+    unnamed: u32,
+}
+
+impl Import {
+    fn first(edge: &ImportEdge) -> Self {
+        Self {
+            line: edge.line,
+            specifier: edge.specifier.clone(),
+            uses: false,
+            first_use: edge.line,
+            specifiers: Vec::new(),
+            names: BTreeSet::new(),
+            unnamed: 0,
+        }
+    }
+
+    /// Adds `edge`, another import of the same module.
+    fn add(&mut self, edge: &ImportEdge) {
+        if edge.edge_kind == EdgeKind::Declaration {
+            return;
+        }
+        if !self.uses {
+            self.uses = true;
+            self.first_use = edge.line;
+        }
+        if !self.specifiers.contains(&edge.specifier) {
+            self.specifiers.push(edge.specifier.clone());
+        }
+        if edge.names.is_empty() {
+            self.unnamed += 1;
+        }
+        self.names.extend(edge.names.iter().cloned());
+    }
 }
 
 /// One language's file-level import graph (ADR-052).
@@ -511,12 +560,8 @@ impl Graph {
                             .entry(edge.from.clone())
                             .or_default()
                             .entry(path.clone())
-                            .or_insert_with(|| Import {
-                                line: edge.line,
-                                specifier: edge.specifier.clone(),
-                                uses: false,
-                            })
-                            .uses |= edge.edge_kind != EdgeKind::Declaration;
+                            .or_insert_with(|| Import::first(edge))
+                            .add(edge);
                     }
                 }
                 ImportTarget::External { package } => {
@@ -592,6 +637,51 @@ impl Graph {
             .collect();
         cycles.sort();
         cycles
+    }
+
+    /// The import to remove to break `cycle`, a cycle of the component `members` (ADR-133):
+    /// among its edges, one whose removal leaves the component without a cycle first, then the
+    /// fewest edges naming nothing, then the fewest names, then the first in cycle order.
+    fn cheapest_cut(&self, members: &[String], cycle: &[String]) -> Option<CheapestCut> {
+        let next = cycle.iter().cycle().skip(1);
+        let (from, to, import, breaks) = cycle
+            .iter()
+            .zip(next)
+            .filter_map(|(from, to)| {
+                let import = self.imports.get(from)?.get(to)?;
+                Some((from, to, import, !self.cyclic_without(members, from, to)))
+            })
+            .min_by_key(|(_, _, import, breaks)| (!breaks, import.unnamed, import.names.len()))?;
+        Some(CheapestCut {
+            from: from.clone(),
+            to: to.clone(),
+            line: import.first_use,
+            specifiers: import.specifiers.clone(),
+            names: import.names.iter().cloned().collect(),
+            unnamed: import.unnamed,
+            breaks_component: breaks,
+        })
+    }
+
+    /// Whether `members` still hold a cycle once `from` no longer imports `to`.
+    fn cyclic_without(&self, members: &[String], from: &str, to: &str) -> bool {
+        let index: BTreeMap<&String, usize> = members
+            .iter()
+            .enumerate()
+            .map(|(position, module)| (module, position))
+            .collect();
+        let successors: Vec<Vec<usize>> = members
+            .iter()
+            .map(|module| {
+                self.used(module)
+                    .filter(|target| !(module == from && *target == to))
+                    .filter_map(|target| index.get(target).copied())
+                    .collect()
+            })
+            .collect();
+        strongly_connected(&successors)
+            .iter()
+            .any(|component| component.len() > 1)
     }
 
     /// The shortest cycle through `members[0]` (the smallest) that stays inside `members`,

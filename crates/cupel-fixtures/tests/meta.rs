@@ -1,11 +1,11 @@
-// ABOUTME: `meta.traceability` and `meta.oracle-independence` end to end: a Python history whose range adds a function,
-// ABOUTME: its test, and a requirement's test, checked with --base by the real binary (ADR-114, ADR-115).
+// ABOUTME: `meta.traceability` and `meta.oracle-independence` end to end by the real binary with --base: a Python history,
+// ABOUTME: and every language's fixture with a marked test added (ADR-114, ADR-115, ADR-134).
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 
 use cupel_core::{Envelope, SkipReason};
-use cupel_fixtures::run_cupel;
+use cupel_fixtures::{copy_repo, run_cupel};
 use serde_json::{Value, json};
 
 const BASE_SOURCE: &str = "def parse(text):\n    return int(text)\n";
@@ -103,6 +103,7 @@ fn a_requirement_only_a_pre_existing_test_names_is_untested_and_one_the_range_te
                 .to_owned(),
             json!({
                 "requirement": "REQ-1",
+                "source": "config",
                 "base": base,
                 "tests": [{"file": "tests/test_dates.py", "name": "test_req_1_parses", "line": 4, "added": false}],
             }),
@@ -168,4 +169,175 @@ fn a_changed_function_only_the_added_test_runs_is_self_authored_and_one_an_old_t
     );
     assert_eq!(result.metrics.get("independent"), Some(&1.0));
     assert_eq!(result.metrics.get("self_authored_only"), Some(&1.0));
+}
+
+/// A language's fixture test file, whose test `documented` has a doc naming REQ-1, and a test to
+/// add to it whose doc names REQ-2 and whose name carries the marker REQ-3.
+struct Marked {
+    lang: &'static str,
+    file: &'static str,
+    documented: &'static str,
+    added: &'static str,
+    test: &'static str,
+}
+
+const MARKED: [Marked; 7] = [
+    Marked {
+        lang: "rust",
+        file: "tests/ledger.rs",
+        documented: "opening_an_account_does_not_panic",
+        added: "names_the_holder_req_3",
+        test: "\n/// Statements name the holder (REQ-2).\n#[test]\nfn names_the_holder_req_3() {\n    \
+               assert_eq!(1, 1);\n}\n",
+    },
+    Marked {
+        lang: "go",
+        file: "ledger_test.go",
+        documented: "TestOpeningAnAccountDoesNotPanic",
+        added: "TestNamesTheHolder_REQ_3",
+        test: "\n// TestNamesTheHolder_REQ_3 covers REQ-2.\nfunc TestNamesTheHolder_REQ_3(t *testing.T) \
+               {\n\tif 1 != 1 {\n\t\tt.Fatal(\"no\")\n\t}\n}\n",
+    },
+    Marked {
+        lang: "python",
+        file: "tests/test_ledger.py",
+        documented: "test_opening_an_account_does_not_raise",
+        added: "test_req_3_names_the_holder",
+        test: "\n\ndef test_req_3_names_the_holder():\n    \"\"\"Statements name the holder \
+               (REQ-2).\"\"\"\n    assert 1 == 1\n",
+    },
+    Marked {
+        lang: "javascript",
+        file: "test/math.test.js",
+        documented: "reports what it parsed",
+        added: "names the holder #REQ-3",
+        test: "\n/** Statements name the holder (REQ-2). */\nit(\"names the holder #REQ-3\", () => \
+               {\n  expect(1).toBe(1);\n});\n",
+    },
+    Marked {
+        lang: "typescript",
+        file: "src/math.test.ts",
+        documented: "is consumed by a spy",
+        added: "names the holder #REQ-3",
+        test: "\n/** Statements name the holder (REQ-2). */\nit(\"names the holder #REQ-3\", () => \
+               {\n  expect(1).toBe(1);\n});\n",
+    },
+    Marked {
+        lang: "java",
+        file: "src/test/java/ledger/LedgerTest.java",
+        documented: "openingAnAccountDoesNotThrow",
+        added: "namesTheHolder_REQ_3",
+        test: "\n    /** Statements name the holder (REQ-2). */\n    @Test\n    void \
+               namesTheHolder_REQ_3() {\n        assertEquals(1, 1);\n    }\n",
+    },
+    Marked {
+        lang: "clojure",
+        file: "test/ledger/core_test.clj",
+        documented: "opening-an-account-does-not-throw",
+        added: "names-the-holder-req-3",
+        test: "\n;; Statements name the holder (REQ-2).\n(deftest names-the-holder-req-3\n  \
+               (is (= 1 1)))\n",
+    },
+];
+
+/// `source` with `case` added as its last test: inside the last closing brace for Java, whose
+/// tests are a class's methods, else at the end.
+fn with_test(lang: &str, source: &str, case: &str) -> String {
+    if lang == "java" {
+        let close = source.rfind('}').expect("a class");
+        format!("{}{case}{}", &source[..close], &source[close..])
+    } else {
+        format!("{source}{case}")
+    }
+}
+
+/// A finding as (kind, title, source, [(test name, added)]).
+type Traced = (String, String, Value, Vec<(String, bool)>);
+
+/// Each finding, by kind.
+fn traced(envelope: &Envelope) -> Vec<Traced> {
+    let mut traced: Vec<_> = envelope
+        .findings
+        .iter()
+        .map(|finding| {
+            let evidence = serde_json::to_value(&finding.evidence).unwrap();
+            let tests = evidence["tests"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|test| {
+                    (
+                        test["name"].as_str().unwrap().to_owned(),
+                        test["added"].as_bool().unwrap(),
+                    )
+                })
+                .collect();
+            (
+                finding.kind.clone(),
+                finding.title.clone(),
+                evidence["source"].clone(),
+                tests,
+            )
+        })
+        .collect();
+    traced.sort_by(|a, b| b.0.cmp(&a.0));
+    traced
+}
+
+#[test]
+fn every_language_traces_a_doc_marker_lists_a_name_marker_and_reads_a_fixture_doc() {
+    for marked in &MARKED {
+        let repo = tempfile::tempdir().unwrap();
+        let dir = repo.path();
+        copy_repo(marked.lang, dir);
+        let config = dir.join("cupel.toml");
+        let mut toml = fs::read_to_string(&config).unwrap_or_default();
+        toml.push_str("\n[checks.\"meta.traceability\"]\nrequirements = [\"REQ-1\", \"REQ-2\"]\n");
+        fs::write(&config, toml).unwrap();
+        git(dir, &["init", "--quiet", "--initial-branch", "main"]);
+        git(dir, &["add", "--all"]);
+        git(dir, &["commit", "--quiet", "-m", "fixture"]);
+        let base = git(dir, &["rev-parse", "HEAD"]);
+        let file = dir.join(marked.file);
+        let text = fs::read_to_string(&file).unwrap();
+        fs::write(&file, with_test(marked.lang, &text, marked.test)).unwrap();
+
+        let envelope = check(dir, &["--only", "meta.traceability", "--base", &base]);
+
+        assert_eq!(
+            traced(&envelope),
+            [
+                (
+                    "spec.untested-requirement".to_owned(),
+                    "requirement REQ-1 has no test the change added; 1 test that existed before \
+                     names it"
+                        .to_owned(),
+                    json!("config"),
+                    vec![(marked.documented.to_owned(), false)],
+                ),
+                (
+                    "spec.unlisted-requirement".to_owned(),
+                    "requirement REQ-3 is named by 1 test the change added, but not configured"
+                        .to_owned(),
+                    json!("marker"),
+                    vec![(marked.added.to_owned(), true)],
+                ),
+            ],
+            "{}",
+            marked.lang
+        );
+        let result = &envelope.checks[0];
+        assert_eq!(
+            result.metrics.get("untested"),
+            Some(&1.0),
+            "{}",
+            marked.lang
+        );
+        assert_eq!(
+            result.score.as_ref().map(|score| score.n),
+            Some(3),
+            "{}",
+            marked.lang
+        );
+    }
 }

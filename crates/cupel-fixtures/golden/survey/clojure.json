@@ -160,9 +160,9 @@
           "location": {
             "col": 1,
             "end_col": 29,
-            "end_line": 34,
+            "end_line": 35,
             "file": "test/ledger/core_test.clj",
-            "line": 33
+            "line": 34
           },
           "symbol": "sh_552f51a88ec35760"
         },

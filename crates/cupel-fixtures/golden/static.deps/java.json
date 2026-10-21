@@ -32,7 +32,21 @@
   "findings": [
     {
       "action": {
-        "hints": {},
+        "hints": {
+          "cheapest_cut": {
+            "breaks_component": true,
+            "from": "src/main/java/ledger/depscycle/alpha/Alpha.java",
+            "line": 3,
+            "names": [
+              "Beta"
+            ],
+            "specifiers": [
+              "ledger.depscycle.beta.Beta"
+            ],
+            "to": "src/main/java/ledger/depscycle/beta/Beta.java",
+            "unnamed": 0
+          }
+        },
         "kind": "break_cycle",
         "priority": 2,
         "summary": "Break the cycle src/main/java/ledger/depscycle/alpha/Alpha.java → src/main/java/ledger/depscycle/beta/Beta.java → src/main/java/ledger/depscycle/alpha/Alpha.java: move what the modules share into a module that imports none of them, or invert one import through an interface."

@@ -134,7 +134,7 @@ fn section(out: &mut String, heading: &str, rows: &[(String, String)], paint: &P
 
 fn render_finding(finding: &FindingDescription, paint: &Paint) -> String {
     let body = serde_json::to_string_pretty(&finding.evidence).unwrap_or_default();
-    format!(
+    let mut out = format!(
         "{} · from {} · action {} · {}
   {}
 
@@ -147,7 +147,12 @@ fn render_finding(finding: &FindingDescription, paint: &Paint) -> String {
         name(finding.stability),
         finding.summary,
         paint.bold("evidence")
-    )
+    );
+    for (key, schema) in &finding.hints {
+        let schema = serde_json::to_string_pretty(schema).unwrap_or_default();
+        let _ = write!(out, "\n{}\n{schema}\n", paint.bold(&format!("hint {key}")));
+    }
+    out
 }
 
 fn render_languages(languages: &LanguagesDescription, paint: &Paint) -> String {

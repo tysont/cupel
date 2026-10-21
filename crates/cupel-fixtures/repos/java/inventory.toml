@@ -230,6 +230,11 @@ file = "src/test/java/ledger/LedgerPropertyTest.java"
 name = "balanceOfOneEntryIsTheEntry"
 expect = { property = "jqwik" }
 
+[test-frames.doc]
+file = "src/test/java/ledger/LedgerTest.java"
+name = "openingAnAccountDoesNotThrow"
+expect = { doc = "/** An account opens without a deposit (REQ-1). */" }
+
 [test-conventions.separate-test-file]
 file = "src/main/java/ledger/Ledger.java"
 name = "src/test/java/ledger/LedgerTest.java"

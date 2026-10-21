@@ -6,6 +6,9 @@
           "edge_kind": "import",
           "from": "bin/cli.ts",
           "line": 2,
+          "names": [
+            "add"
+          ],
           "relative": true,
           "specifier": "../src/math",
           "target": {
@@ -17,6 +20,12 @@
           "edge_kind": "import",
           "from": "src/__tests__/pricing.test.ts",
           "line": 1,
+          "names": [
+            "describe",
+            "expect",
+            "jest",
+            "test"
+          ],
           "relative": false,
           "specifier": "@jest/globals",
           "target": {
@@ -28,6 +37,10 @@
           "edge_kind": "import",
           "from": "src/__tests__/pricing.test.ts",
           "line": 2,
+          "names": [
+            "discounted",
+            "tally"
+          ],
           "relative": true,
           "specifier": "../pricing",
           "target": {
@@ -39,6 +52,9 @@
           "edge_kind": "import",
           "from": "src/deps_cycle/alpha.ts",
           "line": 1,
+          "names": [
+            "BETA"
+          ],
           "relative": true,
           "specifier": "./beta",
           "target": {
@@ -50,6 +66,9 @@
           "edge_kind": "import",
           "from": "src/deps_cycle/beta.ts",
           "line": 1,
+          "names": [
+            "ALPHA"
+          ],
           "relative": true,
           "specifier": "./alpha",
           "target": {
@@ -61,6 +80,9 @@
           "edge_kind": "import",
           "from": "src/deps_layers/domain/order.ts",
           "line": 1,
+          "names": [
+            "Store"
+          ],
           "relative": true,
           "specifier": "../infra/store",
           "target": {
@@ -72,6 +94,9 @@
           "edge_kind": "import",
           "from": "src/deps_layers/port.ts",
           "line": 1,
+          "names": [
+            "Order"
+          ],
           "relative": true,
           "specifier": "./domain/order",
           "target": {
@@ -105,6 +130,9 @@
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 1,
+          "names": [
+            "readFileSync"
+          ],
           "relative": false,
           "specifier": "node:fs",
           "target": {
@@ -116,6 +144,9 @@
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 2,
+          "names": [
+            "z"
+          ],
           "relative": false,
           "specifier": "zod",
           "target": {
@@ -138,6 +169,9 @@
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 4,
+          "names": [
+            "add"
+          ],
           "relative": true,
           "specifier": "./math",
           "target": {
@@ -149,6 +183,9 @@
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 5,
+          "names": [
+            "Circle"
+          ],
           "relative": false,
           "specifier": "@app/shapes/geometry",
           "target": {
@@ -160,6 +197,9 @@
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 6,
+          "names": [
+            "scale"
+          ],
           "relative": true,
           "specifier": "./shapes",
           "target": {
@@ -171,6 +211,9 @@
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 7,
+          "names": [
+            "Registry"
+          ],
           "relative": true,
           "specifier": "./plugin.js",
           "target": {
@@ -182,6 +225,9 @@
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 8,
+          "names": [
+            "square"
+          ],
           "relative": false,
           "specifier": "@ledger/shapes",
           "target": {
@@ -193,6 +239,9 @@
           "edge_kind": "import",
           "from": "src/ledger.ts",
           "line": 9,
+          "names": [
+            "generated"
+          ],
           "relative": true,
           "specifier": "./generated",
           "target": {
@@ -203,6 +252,12 @@
           "edge_kind": "import",
           "from": "src/math.quality.test.ts",
           "line": 1,
+          "names": [
+            "describe",
+            "expect",
+            "it",
+            "vi"
+          ],
           "relative": false,
           "specifier": "vitest",
           "target": {
@@ -214,6 +269,10 @@
           "edge_kind": "import",
           "from": "src/math.quality.test.ts",
           "line": 2,
+          "names": [
+            "add",
+            "range"
+          ],
           "relative": true,
           "specifier": "./math",
           "target": {
@@ -225,6 +284,13 @@
           "edge_kind": "import",
           "from": "src/math.test.ts",
           "line": 1,
+          "names": [
+            "beforeEach",
+            "describe",
+            "expect",
+            "it",
+            "vi"
+          ],
           "relative": false,
           "specifier": "vitest",
           "target": {
@@ -236,6 +302,10 @@
           "edge_kind": "import",
           "from": "src/math.test.ts",
           "line": 2,
+          "names": [
+            "add",
+            "range"
+          ],
           "relative": true,
           "specifier": "./math",
           "target": {
@@ -280,6 +350,10 @@
           "edge_kind": "import",
           "from": "src/widget.test.tsx",
           "line": 1,
+          "names": [
+            "expect",
+            "it"
+          ],
           "relative": false,
           "specifier": "vitest",
           "target": {
@@ -291,6 +365,9 @@
           "edge_kind": "import",
           "from": "src/widget.test.tsx",
           "line": 2,
+          "names": [
+            "Badge"
+          ],
           "relative": true,
           "specifier": "./widget",
           "target": {
@@ -302,6 +379,9 @@
           "edge_kind": "import",
           "from": "test/decide.test.ts",
           "line": 1,
+          "names": [
+            "default"
+          ],
           "relative": false,
           "specifier": "node:assert/strict",
           "target": {
@@ -313,6 +393,9 @@
           "edge_kind": "import",
           "from": "test/decide.test.ts",
           "line": 2,
+          "names": [
+            "test"
+          ],
           "relative": false,
           "specifier": "node:test",
           "target": {
@@ -324,6 +407,10 @@
           "edge_kind": "import",
           "from": "test/decide.test.ts",
           "line": 3,
+          "names": [
+            "classify",
+            "parseCents"
+          ],
           "relative": true,
           "specifier": "../src/decide",
           "target": {
@@ -335,6 +422,9 @@
           "edge_kind": "import",
           "from": "test/properties.test.ts",
           "line": 1,
+          "names": [
+            "default"
+          ],
           "relative": false,
           "specifier": "fast-check",
           "target": {
@@ -346,6 +436,10 @@
           "edge_kind": "import",
           "from": "test/properties.test.ts",
           "line": 2,
+          "names": [
+            "expect",
+            "test"
+          ],
           "relative": false,
           "specifier": "vitest",
           "target": {
@@ -357,6 +451,9 @@
           "edge_kind": "import",
           "from": "test/properties.test.ts",
           "line": 3,
+          "names": [
+            "add"
+          ],
           "relative": true,
           "specifier": "../src/math",
           "target": {

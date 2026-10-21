@@ -6,6 +6,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Account.java",
           "line": 3,
+          "names": [
+            "List"
+          ],
           "relative": false,
           "specifier": "java.util.List",
           "target": {
@@ -17,6 +20,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Audited.java",
           "line": 3,
+          "names": [
+            "List"
+          ],
           "relative": false,
           "specifier": "java.util.List",
           "target": {
@@ -28,6 +34,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/ClonesSettlement.java",
           "line": 3,
+          "names": [
+            "ArrayList"
+          ],
           "relative": false,
           "specifier": "java.util.ArrayList",
           "target": {
@@ -39,6 +48,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/ClonesSettlement.java",
           "line": 4,
+          "names": [
+            "List"
+          ],
           "relative": false,
           "specifier": "java.util.List",
           "target": {
@@ -50,6 +62,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Complexity.java",
           "line": 3,
+          "names": [
+            "List"
+          ],
           "relative": false,
           "specifier": "java.util.List",
           "target": {
@@ -61,6 +76,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Ledger.java",
           "line": 3,
+          "names": [
+            "HashMap"
+          ],
           "relative": false,
           "specifier": "java.util.HashMap",
           "target": {
@@ -72,6 +90,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Ledger.java",
           "line": 4,
+          "names": [
+            "Map"
+          ],
           "relative": false,
           "specifier": "java.util.Map",
           "target": {
@@ -83,6 +104,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Ledger.java",
           "line": 5,
+          "names": [
+            "UUID"
+          ],
           "relative": false,
           "specifier": "java.util.UUID",
           "target": {
@@ -94,6 +118,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Ledger.java",
           "line": 6,
+          "names": [
+            "Function"
+          ],
           "relative": false,
           "specifier": "java.util.function.Function",
           "target": {
@@ -105,6 +132,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Ledger.java",
           "line": 8,
+          "names": [
+            "Strings"
+          ],
           "relative": false,
           "specifier": "com.google.common.base.Strings",
           "target": {
@@ -116,6 +146,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Ledger.java",
           "line": 10,
+          "names": [
+            "Version"
+          ],
           "relative": false,
           "specifier": "ledger.gen.Version",
           "target": {
@@ -126,6 +159,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Ledger.java",
           "line": 11,
+          "names": [
+            "Format"
+          ],
           "relative": false,
           "specifier": "ledger.report.Format",
           "target": {
@@ -137,6 +173,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Ledger.java",
           "line": 12,
+          "names": [
+            "Geometry"
+          ],
           "relative": false,
           "specifier": "shapes.Geometry",
           "target": {
@@ -148,6 +187,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/Pricing.java",
           "line": 3,
+          "names": [
+            "Logger"
+          ],
           "relative": false,
           "specifier": "java.util.logging.Logger",
           "target": {
@@ -170,6 +212,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/cmd/Main.java",
           "line": 3,
+          "names": [
+            "Account"
+          ],
           "relative": false,
           "specifier": "ledger.Account",
           "target": {
@@ -181,6 +226,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/cmd/Main.java",
           "line": 4,
+          "names": [
+            "Ledger"
+          ],
           "relative": false,
           "specifier": "ledger.Ledger",
           "target": {
@@ -192,6 +240,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/depscycle/alpha/Alpha.java",
           "line": 3,
+          "names": [
+            "Beta"
+          ],
           "relative": false,
           "specifier": "ledger.depscycle.beta.Beta",
           "target": {
@@ -203,6 +254,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/depscycle/beta/Beta.java",
           "line": 3,
+          "names": [
+            "Alpha"
+          ],
           "relative": false,
           "specifier": "ledger.depscycle.alpha.Alpha",
           "target": {
@@ -214,6 +268,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/depslayers/domain/Order.java",
           "line": 3,
+          "names": [
+            "Store"
+          ],
           "relative": false,
           "specifier": "ledger.depslayers.infra.Store",
           "target": {
@@ -225,6 +282,9 @@
           "edge_kind": "import",
           "from": "src/main/java/ledger/depslayers/port/Port.java",
           "line": 3,
+          "names": [
+            "Order"
+          ],
           "relative": false,
           "specifier": "ledger.depslayers.domain.Order",
           "target": {
@@ -236,6 +296,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerPropertyTest.java",
           "line": 3,
+          "names": [
+            "ForAll"
+          ],
           "relative": false,
           "specifier": "net.jqwik.api.ForAll",
           "target": {
@@ -247,6 +310,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerPropertyTest.java",
           "line": 4,
+          "names": [
+            "Property"
+          ],
           "relative": false,
           "specifier": "net.jqwik.api.Property",
           "target": {
@@ -258,6 +324,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerQualityTest.java",
           "line": 3,
+          "names": [
+            "assertEquals"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertEquals",
           "target": {
@@ -269,6 +338,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerQualityTest.java",
           "line": 4,
+          "names": [
+            "assertFalse"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertFalse",
           "target": {
@@ -280,6 +352,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerQualityTest.java",
           "line": 5,
+          "names": [
+            "assertNull"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertNull",
           "target": {
@@ -291,6 +366,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerQualityTest.java",
           "line": 6,
+          "names": [
+            "assertThrows"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertThrows",
           "target": {
@@ -302,6 +380,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerQualityTest.java",
           "line": 7,
+          "names": [
+            "mock"
+          ],
           "relative": false,
           "specifier": "org.mockito.Mockito.mock",
           "target": {
@@ -313,6 +394,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerQualityTest.java",
           "line": 9,
+          "names": [
+            "Test"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Test",
           "target": {
@@ -324,6 +408,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerTest.java",
           "line": 3,
+          "names": [
+            "assertEquals"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertEquals",
           "target": {
@@ -335,6 +422,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerTest.java",
           "line": 4,
+          "names": [
+            "assertNotEquals"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertNotEquals",
           "target": {
@@ -346,6 +436,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerTest.java",
           "line": 5,
+          "names": [
+            "assertNotNull"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertNotNull",
           "target": {
@@ -357,6 +450,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerTest.java",
           "line": 6,
+          "names": [
+            "assertTrue"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertTrue",
           "target": {
@@ -368,6 +464,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerTest.java",
           "line": 8,
+          "names": [
+            "AfterEach"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.AfterEach",
           "target": {
@@ -379,6 +478,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerTest.java",
           "line": 9,
+          "names": [
+            "BeforeEach"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.BeforeEach",
           "target": {
@@ -390,6 +492,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerTest.java",
           "line": 10,
+          "names": [
+            "Disabled"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Disabled",
           "target": {
@@ -401,6 +506,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerTest.java",
           "line": 11,
+          "names": [
+            "Test"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Test",
           "target": {
@@ -412,6 +520,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 3,
+          "names": [
+            "assertEquals"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertEquals",
           "target": {
@@ -423,6 +534,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 4,
+          "names": [
+            "assertThrows"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertThrows",
           "target": {
@@ -434,6 +548,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 5,
+          "names": [
+            "assertTrue"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Assertions.assertTrue",
           "target": {
@@ -445,6 +562,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 6,
+          "names": [
+            "anyString"
+          ],
           "relative": false,
           "specifier": "org.mockito.ArgumentMatchers.anyString",
           "target": {
@@ -456,6 +576,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 7,
+          "names": [
+            "eq"
+          ],
           "relative": false,
           "specifier": "org.mockito.ArgumentMatchers.eq",
           "target": {
@@ -467,6 +590,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 8,
+          "names": [
+            "mock"
+          ],
           "relative": false,
           "specifier": "org.mockito.Mockito.mock",
           "target": {
@@ -478,6 +604,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 9,
+          "names": [
+            "verify"
+          ],
           "relative": false,
           "specifier": "org.mockito.Mockito.verify",
           "target": {
@@ -489,6 +618,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 10,
+          "names": [
+            "when"
+          ],
           "relative": false,
           "specifier": "org.mockito.Mockito.when",
           "target": {
@@ -500,6 +632,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 12,
+          "names": [
+            "Expect"
+          ],
           "relative": false,
           "specifier": "au.com.origin.snapshots.Expect",
           "target": {
@@ -511,6 +646,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 13,
+          "names": [
+            "SnapshotExtension"
+          ],
           "relative": false,
           "specifier": "au.com.origin.snapshots.junit5.SnapshotExtension",
           "target": {
@@ -522,6 +660,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 14,
+          "names": [
+            "Test"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.Test",
           "target": {
@@ -533,6 +674,9 @@
           "edge_kind": "import",
           "from": "src/test/java/ledger/PricingTest.java",
           "line": 15,
+          "names": [
+            "ExtendWith"
+          ],
           "relative": false,
           "specifier": "org.junit.jupiter.api.extension.ExtendWith",
           "target": {

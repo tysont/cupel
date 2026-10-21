@@ -89,6 +89,7 @@ fn frames(file: &str, property: Option<&str>) -> Produced {
                 mocks: Vec::new(),
                 skip: None,
                 property: property.map(str::to_owned),
+                doc: None,
             }],
         }],
     })

@@ -82,6 +82,7 @@ func TestParseCentsTrimsSpaces(t *testing.T) {
 	}
 }
 
+// TestOpeningAnAccountDoesNotPanic covers REQ-1: an account opens without a deposit.
 func TestOpeningAnAccountDoesNotPanic(t *testing.T) {
 	NewAccount("ada")
 }

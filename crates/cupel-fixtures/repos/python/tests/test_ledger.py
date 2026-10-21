@@ -54,4 +54,5 @@ def test_rendering_can_be_replaced(monkeypatch):
 
 
 def test_opening_an_account_does_not_raise():
+    """An account opens without a deposit (REQ-1)."""
     Account("ada")
