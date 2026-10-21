@@ -332,3 +332,37 @@ fn a_simulation_harness_is_located_by_its_file_and_name() {
         1
     );
 }
+
+#[test]
+fn a_reference_is_located_by_its_file_and_name_and_a_dynamic_access_by_its_text() {
+    let facts = [inventory(
+        "references",
+        "[[constructs]]\nid = \"local\"\nsummary = \"A local name.\"\nexpect = { kind = \"name\" }\n\n[[constructs]]\nid = \"dynamic-name\"\nsummary = \"A lookup by name.\"\nexpect = { reach = \"names\" }\n",
+    )];
+    let lang = LanguageInventory::parse(
+        &LangId::from("python"),
+        "[references.local]\nfile = \"a.py\"\nname = \"helper\"\n\n[references.dynamic-name]\nfile = \"a.py\"\nname = \"getattr(m, kind)\"\n",
+    )
+    .unwrap();
+    let checked = |references: serde_json::Value, dynamic: serde_json::Value| {
+        let fact = json!({ "references": references, "dynamic": dynamic });
+        check_language(&facts, &lang, &[FactKind::References], |_| Ok(fact.clone()))
+    };
+    let access = |file: &str| json!({ "file": file, "text": "getattr(m, kind)", "reach": "names" });
+
+    assert_eq!(
+        checked(
+            json!([{ "file": "a.py", "name": "helper", "kind": "name" }]),
+            json!([access("a.py")])
+        ),
+        []
+    );
+    assert_eq!(
+        checked(
+            json!([{ "file": "b.py", "name": "helper", "kind": "name" }]),
+            json!([access("b.py")])
+        )
+        .len(),
+        2
+    );
+}

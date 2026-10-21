@@ -137,7 +137,7 @@ impl Producer<References> for ReferenceGraph {
         ctx.cancel.checkpoint()?;
         let graph = (self.resolve)(&Imports::new(root, language, &self.cache, files));
         ctx.cancel.checkpoint()?;
-        Ok(resolve(parts, &graph))
+        Ok(resolve(&parts, &graph))
     }
 }
 
@@ -157,36 +157,15 @@ struct FileReferences {
 
 /// Every file's references, each plain name its file does not define resolved through the
 /// file's imports.
-fn resolve(parts: Vec<FileReferences>, graph: &ModuleGraph) -> References {
-    let callable: HashMap<&str, &BTreeMap<String, Vec<SymbolKey>>> = parts
-        .iter()
-        .map(|part| (part.file.as_str(), &part.callable))
-        .collect();
-    let statements: HashMap<&str, &FileReferences> = parts
+fn resolve(parts: &[FileReferences], graph: &ModuleGraph) -> References {
+    let by_file: HashMap<&str, &FileReferences> = parts
         .iter()
         .map(|part| (part.file.as_str(), part))
         .collect();
-    let mut bindings: HashMap<&str, Vec<(&str, &str)>> = HashMap::new();
-    for edge in graph.roots.iter().flat_map(|root| &root.edges) {
-        let ImportTarget::File { path } = &edge.target else {
-            continue;
-        };
-        let name = edge.specifier.rsplit(SEPARATORS).next().unwrap_or_default();
-        let binds = edge.edge_kind != EdgeKind::Declaration
-            && statements.get(edge.from.as_str()).is_some_and(|part| {
-                part.paths.contains(&edge.line)
-                    || part.bound.contains(&(edge.line, name.to_owned()))
-            });
-        if binds {
-            bindings
-                .entry(edge.from.as_str())
-                .or_default()
-                .push((name, path.as_str()));
-        }
-    }
+    let bindings = bindings(&by_file, graph);
     let imported = |file: &str, name: &str| -> Option<ReferenceTarget> {
         bindings.get(file)?.iter().find_map(|(bound, target)| {
-            let symbols = callable.get(target)?.get(name)?;
+            let symbols = by_file.get(target)?.callable.get(name)?;
             (*bound == name).then(|| ReferenceTarget::Imported {
                 file: (*target).to_owned(),
                 symbols: symbols.clone(),
@@ -194,7 +173,7 @@ fn resolve(parts: Vec<FileReferences>, graph: &ModuleGraph) -> References {
         })
     };
     let mut fact = References::default();
-    for part in &parts {
+    for part in parts {
         for reference in &part.references {
             let mut reference = reference.clone();
             if reference.kind == ReferenceKind::Name
@@ -208,6 +187,40 @@ fn resolve(parts: Vec<FileReferences>, graph: &ModuleGraph) -> References {
         fact.dynamic.extend(part.dynamic.iter().cloned());
     }
     fact
+}
+
+/// For each importing file, the names its imports bind and the files they bind them from: an
+/// edge to a file, not declaring a module, whose specifier's last segment its statement lists
+/// (or whose statement binds its paths' last segments).
+fn bindings<'a>(
+    by_file: &HashMap<&str, &FileReferences>,
+    graph: &'a ModuleGraph,
+) -> HashMap<&'a str, Vec<(&'a str, &'a str)>> {
+    let mut bindings: HashMap<&str, Vec<(&str, &str)>> = HashMap::new();
+    for edge in graph.roots.iter().flat_map(|root| &root.edges) {
+        let ImportTarget::File { path } = &edge.target else {
+            continue;
+        };
+        let name = edge.specifier.rsplit(SEPARATORS).next().unwrap_or_default();
+        let binds = edge.edge_kind != EdgeKind::Declaration
+            && by_file
+                .get(edge.from.as_str())
+                .is_some_and(|part| part.binds(edge.line, name));
+        if binds {
+            bindings
+                .entry(edge.from.as_str())
+                .or_default()
+                .push((name, path.as_str()));
+        }
+    }
+    bindings
+}
+
+impl FileReferences {
+    /// Whether the import statement on `line` binds `name`.
+    fn binds(&self, line: u32, name: &str) -> bool {
+        self.paths.contains(&line) || self.bound.contains(&(line, name.to_owned()))
+    }
 }
 
 /// What one capture of `references.scm` is.
@@ -229,16 +242,43 @@ fn captured(name: &str) -> Option<Captured> {
     })
 }
 
+/// One node `references.scm` captured, by its earliest pattern, with its match's attribute name.
+#[derive(Clone, Copy)]
+struct Capture<'t> {
+    pattern: usize,
+    kind: Captured,
+    node: Node<'t>,
+    attribute: Option<Node<'t>>,
+}
+
 /// One file's references, resolved within the file.
-///
-/// # Panics
-///
-/// When the language's `references.scm` does not compile; a test compiles every query.
 fn extract(parsed: &Parsed, language: &dyn Language) -> FileReferences {
-    let spec = language.spec();
     let defined = definitions(parsed, language);
+    let rules = &language.spec().tables().references;
+    let (bound, paths) = statement_bindings(parsed, language, rules.path_imports);
+    let mut part = FileReferences {
+        file: parsed.file.clone(),
+        callable: callable(&defined),
+        bound,
+        paths,
+        references: implicit(&defined, &rules.implicit),
+        dynamic: Vec::new(),
+    };
+    let file = Within {
+        parsed,
+        defined: &defined,
+        inert: &rules.inert,
+    };
+    for capture in captures(parsed, language) {
+        part.record(&file, capture);
+    }
+    part
+}
+
+/// The file's functions and closures by name: what a plain name may call.
+fn callable(defined: &[Definition<'_>]) -> BTreeMap<String, Vec<SymbolKey>> {
     let mut callable: BTreeMap<String, Vec<SymbolKey>> = BTreeMap::new();
-    for definition in &defined {
+    for definition in defined {
         if definition.symbol.kind != SymbolKind::Method {
             callable
                 .entry(definition.symbol.name.clone())
@@ -246,138 +286,176 @@ fn extract(parsed: &Parsed, language: &dyn Language) -> FileReferences {
                 .push(definition.symbol.key());
         }
     }
-    let rules = &spec.tables().references;
+    callable
+}
+
+/// The `(line, name)` of each name an import statement lists, and the lines of statements that
+/// list none but bind their paths' last segments.
+fn statement_bindings(
+    parsed: &Parsed,
+    language: &dyn Language,
+    path_imports: bool,
+) -> (BTreeSet<(u32, String)>, BTreeSet<u32>) {
     let mut bound = BTreeSet::new();
     let mut paths = BTreeSet::new();
     for import in file_imports(parsed, language).imports {
-        if import.names.is_empty() {
-            if rules.path_imports {
-                paths.insert(import.line);
-            }
-        } else {
+        if !import.names.is_empty() {
             bound.extend(import.names.into_iter().map(|name| (import.line, name)));
+        } else if path_imports {
+            paths.insert(import.line);
         }
     }
-    let mut part = FileReferences {
-        file: parsed.file.clone(),
-        callable,
-        bound,
-        paths,
-        references: Vec::new(),
-        dynamic: Vec::new(),
-    };
-    for definition in &defined {
-        let symbol = &definition.symbol;
-        if symbol.kind == SymbolKind::Method && rules.implicit.contains(&symbol.name) {
-            part.references.push(Reference {
-                file: parsed.file.clone(),
-                span: span(definition.name),
-                name: symbol.name.clone(),
-                kind: ReferenceKind::Implicit,
-                from: None,
-                target: ReferenceTarget::Local {
-                    symbols: vec![symbol.key()],
-                },
-            });
-        }
-    }
+    (bound, paths)
+}
+
+/// An `implicit` reference to each method named in `names`.
+fn implicit(defined: &[Definition<'_>], names: &[String]) -> Vec<Reference> {
+    defined
+        .iter()
+        .filter(|definition| {
+            definition.symbol.kind == SymbolKind::Method && names.contains(&definition.symbol.name)
+        })
+        .map(|definition| Reference {
+            file: definition.symbol.file.clone(),
+            span: span(definition.name),
+            name: definition.symbol.name.clone(),
+            kind: ReferenceKind::Implicit,
+            from: None,
+            target: ReferenceTarget::Local {
+                symbols: vec![definition.symbol.key()],
+            },
+        })
+        .collect()
+}
+
+/// Each node of `parsed` that `references.scm` captures, once, in document order.
+///
+/// # Panics
+///
+/// When the language's `references.scm` does not compile; a test compiles every query.
+fn captures<'t>(parsed: &'t Parsed, language: &dyn Language) -> Vec<Capture<'t>> {
+    let spec = language.spec();
     if !spec.has(QueryFile::References) {
-        return part;
+        return Vec::new();
     }
     let query = spec
         .query(QueryFile::References, &parsed.grammar)
         .unwrap_or_else(|error| panic!("{} references.scm: {error}", language.id()));
-    // The earliest pattern's capture of each node, with its match's attribute name.
-    let mut chosen: BTreeMap<(usize, usize), (usize, Captured, Node<'_>, Option<Node<'_>>)> =
-        BTreeMap::new();
+    let mut chosen: BTreeMap<(usize, usize), Capture<'t>> = BTreeMap::new();
     for m in matches(&query, parsed) {
-        let attribute_name = m.node(capture::ATTRIBUTE_NAME);
+        let attribute = m.node(capture::ATTRIBUTE_NAME);
         for (name, node) in &m.captures {
             let Some(kind) = captured(name) else {
                 continue;
             };
             let dynamic = matches!(kind, Captured::Dynamic(_));
-            let key = (node.start_byte(), node.id() * 2 + usize::from(dynamic));
+            let found = Capture {
+                pattern: m.pattern,
+                kind,
+                node: *node,
+                attribute,
+            };
             let entry = chosen
-                .entry(key)
-                .or_insert((m.pattern, kind, *node, attribute_name));
-            if m.pattern < entry.0 {
-                *entry = (m.pattern, kind, *node, attribute_name);
+                .entry((node.start_byte(), node.id() * 2 + usize::from(dynamic)))
+                .or_insert(found);
+            if found.pattern < entry.pattern {
+                *entry = found;
             }
         }
     }
-    let names: Vec<(usize, usize)> = defined
-        .iter()
-        .map(|definition| definition.name.byte_range())
-        .map(|range| (range.start, range.end))
-        .collect();
-    let within_name = |node: Node<'_>| {
-        names
+    chosen.into_values().collect()
+}
+
+/// What recording a capture reads besides the capture.
+struct Within<'w, 't> {
+    parsed: &'t Parsed,
+    defined: &'w [Definition<'t>],
+    inert: &'w [String],
+}
+
+impl Within<'_, '_> {
+    /// The key of the innermost definition containing `node`.
+    fn from(&self, node: Node<'_>) -> Option<SymbolKey> {
+        innermost(self.defined, node).map(|definition| definition.symbol.key())
+    }
+
+    /// Whether `node` lies within a definition's own name.
+    fn naming(&self, node: Node<'_>) -> bool {
+        self.defined
             .iter()
-            .any(|(start, end)| *start <= node.start_byte() && node.end_byte() <= *end)
-    };
-    for (_, kind, node, attribute_name) in chosen.into_values() {
-        let from = innermost(&defined, node).map(|definition| definition.symbol.key());
-        match kind {
-            Captured::Dynamic(reach) => part.dynamic.push(DynamicAccess {
-                file: parsed.file.clone(),
+            .any(|definition| contains(definition.name, node))
+    }
+}
+
+impl FileReferences {
+    /// Adds what `capture` records: a dynamic access, an attribute's reference to its
+    /// definition, or a reference resolved within the file where it can be.
+    fn record(&mut self, file: &Within<'_, '_>, capture: Capture<'_>) {
+        let node = capture.node;
+        match capture.kind {
+            Captured::Dynamic(reach) => self.dynamic.push(DynamicAccess {
+                file: self.file.clone(),
                 span: span(node),
-                from,
+                from: file.from(node),
                 reach,
-                text: access_text(parsed.text(node)),
+                text: access_text(file.parsed.text(node)),
             }),
             Captured::Reference(ReferenceKind::Attribute) => {
-                let Some(name) = attribute_name.map(|n| last_segment(parsed.text(n))) else {
-                    continue;
+                let Some(name) = capture.attribute.map(|n| last_segment(file.parsed.text(n)))
+                else {
+                    return;
                 };
-                if rules.inert.iter().any(|inert| inert == name) {
-                    continue;
+                if file.inert.iter().any(|inert| inert == name) {
+                    return;
                 }
-                let Some(owner) = attributed(&defined, node) else {
-                    continue;
+                let Some(owner) = attributed(file.defined, node) else {
+                    return;
                 };
-                part.references.push(Reference {
-                    file: parsed.file.clone(),
+                self.references.push(Reference {
+                    file: self.file.clone(),
                     span: span(node),
                     name: name.to_owned(),
                     kind: ReferenceKind::Attribute,
-                    from,
+                    from: file.from(node),
                     target: ReferenceTarget::Local {
                         symbols: vec![owner.symbol.key()],
                     },
                 });
             }
-            Captured::Reference(kind) => {
-                if within_name(node) {
-                    continue;
-                }
-                let text = parsed.text(node);
-                let name = if kind == ReferenceKind::Text {
-                    match path_name(unquote(text)) {
-                        Some(name) => name,
-                        None => continue,
-                    }
-                } else {
-                    text
-                };
-                let target = match (kind, part.callable.get(name)) {
-                    (ReferenceKind::Name, Some(symbols)) => ReferenceTarget::Local {
-                        symbols: symbols.clone(),
-                    },
-                    _ => ReferenceTarget::Unresolved,
-                };
-                part.references.push(Reference {
-                    file: parsed.file.clone(),
-                    span: span(node),
-                    name: name.to_owned(),
-                    kind,
-                    from,
-                    target,
-                });
-            }
+            Captured::Reference(kind) => self.named(file, kind, node),
         }
     }
-    part
+
+    /// Adds the plain name, member, or text reference `node` makes, unless it is a
+    /// definition's own name or text that names nothing.
+    fn named(&mut self, file: &Within<'_, '_>, kind: ReferenceKind, node: Node<'_>) {
+        if file.naming(node) {
+            return;
+        }
+        let text = file.parsed.text(node);
+        let name = if kind == ReferenceKind::Text {
+            match path_name(unquote(text)) {
+                Some(name) => name,
+                None => return,
+            }
+        } else {
+            text
+        };
+        let target = match (kind, self.callable.get(name)) {
+            (ReferenceKind::Name, Some(symbols)) => ReferenceTarget::Local {
+                symbols: symbols.clone(),
+            },
+            _ => ReferenceTarget::Unresolved,
+        };
+        self.references.push(Reference {
+            file: self.file.clone(),
+            span: span(node),
+            name: name.to_owned(),
+            kind,
+            from: file.from(node),
+            target,
+        });
+    }
 }
 
 /// The innermost definition whose node contains `node`.

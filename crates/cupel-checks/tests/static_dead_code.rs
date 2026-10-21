@@ -706,7 +706,7 @@ fn a_symbol_nothing_names_in_a_reached_module_is_dead_by_references() {
         .unwrap()
     );
     assert_eq!(result.status, CheckStatus::Fail);
-    assert_eq!(result.metrics["dead_symbols"], 1.0);
+    assert!((result.metrics["dead_symbols"] - 1.0).abs() < f64::EPSILON);
 }
 
 #[test]
