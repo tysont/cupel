@@ -215,7 +215,7 @@ fn a_surviving_mutant_is_a_failing_finding_at_its_site_naming_the_tests_that_mis
 }
 
 #[test]
-fn the_score_is_killed_over_killed_and_surviving() {
+fn the_score_is_killed_over_killed_surviving_and_uncovered() {
     let (result, _) = run(vec![
         mutant(6, 14, ">=", ">", MutantOutcome::Survived),
         mutant(6, 20, "and", "or", MutantOutcome::Killed),
@@ -225,7 +225,7 @@ fn the_score_is_killed_over_killed_and_surviving() {
         mutant(8, 14, "1", "0", MutantOutcome::Unviable),
     ]);
     let score = result.score.unwrap();
-    assert_eq!((score.value, score.n), (2.0 / 3.0, 3));
+    assert_eq!((score.value, score.n), (2.0 / 4.0, 4));
     let metric = |name: &str| result.metrics.get(name).copied();
     assert_eq!(
         [
@@ -323,6 +323,18 @@ fn timeouts_and_uncovered_mutants_are_notes_and_unviable_ones_are_not_reported()
     );
     assert_eq!(result.status, CheckStatus::Pass);
     let score = result.score.unwrap();
+    assert_eq!((score.value, score.n), (0.0, 1), "the uncovered mutant is missed");
+}
+
+/// Timeouts and unviable mutants are left out of the score, so a scope of only those has
+/// nothing scored and scores 1.
+#[test]
+fn a_scope_of_only_timeouts_and_unviable_mutants_scores_one() {
+    let (result, _) = run(vec![
+        mutant(7, 24, "10", "11", MutantOutcome::Timeout),
+        mutant(8, 14, "1", "0", MutantOutcome::Unviable),
+    ]);
+    let score = result.score.unwrap();
     assert_eq!((score.value, score.n), (1.0, 0));
 }
 
@@ -414,6 +426,22 @@ fn each_function_is_measured_for_its_killed_ratio_and_the_tests_run_against_it()
 
 #[test]
 fn a_function_with_no_scored_mutant_has_no_killed_ratio() {
+    let mut timeout = mutant(6, 14, ">=", ">", MutantOutcome::Timeout);
+    timeout.tests.clear();
+    let (_, recorded) = run(vec![timeout]);
+    assert_eq!(
+        recorded.measured(),
+        [
+            ("survivors", "discount.discount", 0.0),
+            ("tests", "discount.discount", 0.0),
+        ]
+    );
+}
+
+/// A function no test runs is unprotected: its uncovered mutants are missed, so it scores 0
+/// and ranks first for protection (ADR-132).
+#[test]
+fn a_function_whose_mutants_no_test_runs_has_a_killed_ratio_of_zero() {
     let mut uncovered = mutant(6, 14, ">=", ">", MutantOutcome::Uncovered);
     uncovered.tests.clear();
     let (_, recorded) = run(vec![uncovered]);
@@ -421,6 +449,7 @@ fn a_function_with_no_scored_mutant_has_no_killed_ratio() {
         recorded.measured(),
         [
             ("survivors", "discount.discount", 0.0),
+            ("mutation_score", "discount.discount", 0.0),
             ("tests", "discount.discount", 0.0),
         ]
     );

@@ -118,8 +118,8 @@ fn manifest() -> Manifest {
         stability: Stability::Experimental,
         summary: "Mutates the code in scope and runs the tests that cover each mutant; a \
                   mutant every test passes against survived. Score: killed / (killed + \
-                  survived). Uncovered sites are not run; outcomes of unchanged code and \
-                  tests are reused from earlier runs."
+                  survived + uncovered): a site no test runs is not run and counts as missed \
+                  (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
             .to_owned(),
     }
 }
@@ -129,7 +129,7 @@ fn metrics() -> Vec<MetricSpec> {
     let mut metrics: Vec<MetricSpec> = [
         (
             "score",
-            "Killed / (killed + survived), the score; 1 when nothing was scored.",
+            "Killed / (killed + survived + uncovered), the score; 1 when nothing was scored.",
         ),
         ("killed", "Mutants a test failed against."),
         (
@@ -166,7 +166,7 @@ fn metrics() -> Vec<MetricSpec> {
         protection(
             "mutation_score",
             ProtectionMetric::MutationScore,
-            "Killed / (killed + survived) over the function's mutants; absent when none was scored.",
+            "Killed / (killed + survived + uncovered) over the function's mutants; absent when none was scored.",
         ),
         protection(
             "tests",
@@ -258,6 +258,7 @@ struct Protection<'a> {
     hash: Option<&'a SymbolHash>,
     killed: u32,
     survived: u32,
+    uncovered: u32,
     tests: BTreeSet<&'a str>,
 }
 
@@ -268,6 +269,7 @@ impl<'a> Protection<'a> {
             hash,
             killed: 0,
             survived: 0,
+            uncovered: 0,
             tests: BTreeSet::new(),
         }
     }
@@ -275,12 +277,14 @@ impl<'a> Protection<'a> {
     fn count(&mut self, mutant: &'a Mutant) {
         self.survived += u32::from(surviving(mutant));
         self.killed += u32::from(mutant.outcome == MutantOutcome::Killed);
+        self.uncovered += u32::from(mutant.outcome == MutantOutcome::Uncovered);
         self.tests.extend(mutant.tests.iter().map(String::as_str));
     }
 
-    /// Reports its survivors, its killed ratio when a mutant was scored, and its tests.
+    /// Reports its survivors, its killed ratio when a mutant was scored (killed, survived, or
+    /// uncovered), and its tests.
     fn measure(&self, sink: &mut dyn EventSink) {
-        let scored = self.killed + self.survived;
+        let scored = self.killed + self.survived + self.uncovered;
         let tests = u32::try_from(self.tests.len()).unwrap_or(u32::MAX);
         let values = [
             ("survivors", Some(f64::from(self.survived))),
@@ -348,13 +352,14 @@ impl Tally {
         self.by_outcome.get(outcome.as_str()).copied().unwrap_or(0)
     }
 
-    /// The language's result: `fail` with a survivor, scored by the killed ratio.
+    /// The language's result: `fail` with a survivor, scored by the killed ratio over the
+    /// killed, surviving, and uncovered mutants (ADR-141).
     fn result(&self, manifest: &Manifest) -> CheckResult {
         let (killed, survived) = (
             self.of(MutantOutcome::Killed),
             self.of(MutantOutcome::Survived),
         );
-        let scored = killed + survived;
+        let scored = killed + survived + self.of(MutantOutcome::Uncovered);
         let score = if scored == 0 {
             1.0
         } else {

@@ -38,6 +38,7 @@ impl World {
         };
         self.edges.push(ImportEdge {
             names: Vec::new(),
+            aliases: Vec::new(),
             from: from.to_owned(),
             specifier,
             target,
@@ -52,6 +53,7 @@ impl World {
     fn named(mut self, from: &str, to: &str, line: u32, specifier: &str, names: &[&str]) -> Self {
         self.edges.push(ImportEdge {
             names: names.iter().map(|name| (*name).to_owned()).collect(),
+            aliases: Vec::new(),
             from: from.to_owned(),
             specifier: specifier.to_owned(),
             target: imported_file(to),

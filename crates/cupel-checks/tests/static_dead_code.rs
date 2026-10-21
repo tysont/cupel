@@ -79,6 +79,7 @@ fn method(mut def: SymbolDef) -> SymbolDef {
 fn edge(from: &str, specifier: &str, target: ImportTarget) -> ImportEdge {
     ImportEdge {
         names: Vec::new(),
+        aliases: Vec::new(),
         from: from.to_owned(),
         specifier: specifier.to_owned(),
         target,
