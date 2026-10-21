@@ -34,7 +34,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `settleInvoices` from clones_settlement.go if nothing outside the repository uses it, or import clones_settlement.go where `settleInvoices` is meant to be called."
+        "summary": "Delete `settleInvoices` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -88,7 +88,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `reconcilePayments` from clones_settlement.go if nothing outside the repository uses it, or import clones_settlement.go where `reconcilePayments` is meant to be called."
+        "summary": "Delete `reconcilePayments` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -142,7 +142,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `orderLines` from clones_settlement.go if nothing outside the repository uses it, or import clones_settlement.go where `orderLines` is meant to be called."
+        "summary": "Delete `orderLines` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -196,7 +196,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `refundLines` from clones_settlement.go if nothing outside the repository uses it, or import clones_settlement.go where `refundLines` is meant to be called."
+        "summary": "Delete `refundLines` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -334,7 +334,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `firstOverdraft` from decide.go if nothing outside the repository uses it, or import decide.go where `firstOverdraft` is meant to be called."
+        "summary": "Delete `firstOverdraft` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -388,7 +388,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `describe` from decide.go if nothing outside the repository uses it, or import decide.go where `describe` is meant to be called."
+        "summary": "Delete `describe` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -442,7 +442,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `kindOf` from decide.go if nothing outside the repository uses it, or import decide.go where `kindOf` is meant to be called."
+        "summary": "Delete `kindOf` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -496,7 +496,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `drain` from decide.go if nothing outside the repository uses it, or import decide.go where `drain` is meant to be called."
+        "summary": "Delete `drain` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -550,7 +550,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `audited` from ledger.go if nothing outside the repository uses it, or import ledger.go where `audited` is meant to be called."
+        "summary": "Delete `audited` from ledger.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -604,7 +604,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `orphanRate` from references.go if nothing outside the repository uses it, or import references.go where `orphanRate` is meant to be called."
+        "summary": "Delete `orphanRate` from references.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -658,7 +658,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `scaled` from shapes/geometry.go if nothing outside the repository uses it, or import shapes/geometry.go where `scaled` is meant to be called."
+        "summary": "Delete `scaled` from shapes/geometry.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -700,7 +700,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotal` from twins.go if nothing outside the repository uses it, or import twins.go where `netTotal` is meant to be called."
+        "summary": "Delete `netTotal` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -754,7 +754,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `sumAfterCharge` from twins.go if nothing outside the repository uses it, or import twins.go where `sumAfterCharge` is meant to be called."
+        "summary": "Delete `sumAfterCharge` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -808,7 +808,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalFloor` from twins.go if nothing outside the repository uses it, or import twins.go where `netTotalFloor` is meant to be called."
+        "summary": "Delete `netTotalFloor` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -862,7 +862,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalLaidOut` from twins.go if nothing outside the repository uses it, or import twins.go where `netTotalLaidOut` is meant to be called."
+        "summary": "Delete `netTotalLaidOut` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -916,7 +916,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalPlus` from twins.go if nothing outside the repository uses it, or import twins.go where `netTotalPlus` is meant to be called."
+        "summary": "Delete `netTotalPlus` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -970,7 +970,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalCapped` from twins.go if nothing outside the repository uses it, or import twins.go where `netTotalCapped` is meant to be called."
+        "summary": "Delete `netTotalCapped` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -1024,7 +1024,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalProduct` from twins.go if nothing outside the repository uses it, or import twins.go where `netTotalProduct` is meant to be called."
+        "summary": "Delete `netTotalProduct` from twins.go if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -1080,28 +1080,28 @@
       "finding": "fnd_2b23b3",
       "kind": "review",
       "priority": 1,
-      "summary": "Delete `settleInvoices` from clones_settlement.go if nothing outside the repository uses it, or import clones_settlement.go where `settleInvoices` is meant to be called."
+      "summary": "Delete `settleInvoices` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_2b23b3",
       "kind": "review",
       "priority": 2,
-      "summary": "Delete `reconcilePayments` from clones_settlement.go if nothing outside the repository uses it, or import clones_settlement.go where `reconcilePayments` is meant to be called."
+      "summary": "Delete `reconcilePayments` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_aa2cb4",
       "kind": "review",
       "priority": 3,
-      "summary": "Delete `orderLines` from clones_settlement.go if nothing outside the repository uses it, or import clones_settlement.go where `orderLines` is meant to be called."
+      "summary": "Delete `orderLines` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_a79783",
       "kind": "review",
       "priority": 4,
-      "summary": "Delete `refundLines` from clones_settlement.go if nothing outside the repository uses it, or import clones_settlement.go where `refundLines` is meant to be called."
+      "summary": "Delete `refundLines` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
@@ -1115,35 +1115,35 @@
       "finding": "fnd_d6a95e",
       "kind": "review",
       "priority": 6,
-      "summary": "Delete `firstOverdraft` from decide.go if nothing outside the repository uses it, or import decide.go where `firstOverdraft` is meant to be called."
+      "summary": "Delete `firstOverdraft` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_333d0e",
       "kind": "review",
       "priority": 7,
-      "summary": "Delete `describe` from decide.go if nothing outside the repository uses it, or import decide.go where `describe` is meant to be called."
+      "summary": "Delete `describe` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_46c712",
       "kind": "review",
       "priority": 8,
-      "summary": "Delete `kindOf` from decide.go if nothing outside the repository uses it, or import decide.go where `kindOf` is meant to be called."
+      "summary": "Delete `kindOf` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_1e1454",
       "kind": "review",
       "priority": 9,
-      "summary": "Delete `drain` from decide.go if nothing outside the repository uses it, or import decide.go where `drain` is meant to be called."
+      "summary": "Delete `drain` from decide.go if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_0529eb",
       "kind": "review",
       "priority": 10,
-      "summary": "Delete `audited` from ledger.go if nothing outside the repository uses it, or import ledger.go where `audited` is meant to be called."
+      "summary": "Delete `audited` from ledger.go if nothing outside the repository uses it, or call it where it is meant to be used."
     }
   ],
   "oracles": null,

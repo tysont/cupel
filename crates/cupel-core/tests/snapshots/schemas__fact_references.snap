@@ -1,0 +1,271 @@
+---
+source: crates/cupel-core/tests/schemas.rs
+expression: pretty(&schema)
+---
+{
+  "$id": "https://tysont.github.io/cupel/schema/v1/fact/references.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "References",
+  "description": "Where each symbol is named, in every file of the language in the repository (not only the\nscope, so callers outside a narrowed scope count), and where a name is computed at run time\n(ADR-135).",
+  "type": "object",
+  "properties": {
+    "dynamic": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DynamicAccess"
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Reference"
+      }
+    }
+  },
+  "required": [
+    "dynamic",
+    "references"
+  ],
+  "x-cupel-fact-version": 1,
+  "$defs": {
+    "DynamicAccess": {
+      "description": "A place where a name is decided at run time.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "from": {
+          "description": "The innermost symbol containing the access; `None` at module level.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolKey"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reach": {
+          "$ref": "#/$defs/DynamicReach"
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        },
+        "text": {
+          "description": "The accessor as written, such as `getattr` or `rates[kind]`, at most 80 characters.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file",
+        "from",
+        "reach",
+        "span",
+        "text"
+      ]
+    },
+    "DynamicReach": {
+      "oneOf": [
+        {
+          "description": "A computed member access: reaches methods.",
+          "type": "string",
+          "const": "members"
+        },
+        {
+          "description": "A lookup by a run-time name in a module or namespace, or code evaluated from text:\nreaches any symbol.",
+          "type": "string",
+          "const": "names"
+        }
+      ]
+    },
+    "Reference": {
+      "description": "One place that names a symbol, or may.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "type": "string"
+        },
+        "from": {
+          "description": "The innermost symbol containing the reference; `None` at module level.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SymbolKey"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "kind": {
+          "$ref": "#/$defs/ReferenceKind"
+        },
+        "name": {
+          "description": "The name as written; a string's last segment; an attribute's name.",
+          "type": "string"
+        },
+        "span": {
+          "$ref": "#/$defs/Span"
+        },
+        "target": {
+          "$ref": "#/$defs/ReferenceTarget"
+        }
+      },
+      "required": [
+        "file",
+        "from",
+        "kind",
+        "name",
+        "span",
+        "target"
+      ]
+    },
+    "ReferenceKind": {
+      "oneOf": [
+        {
+          "description": "A plain identifier, resolved within its file or through its file's imports.",
+          "type": "string",
+          "const": "name"
+        },
+        {
+          "description": "A name reached through a value, type, module, or namespace (`x.f`, `T::f`, `m/f`).",
+          "type": "string",
+          "const": "member"
+        },
+        {
+          "description": "A string literal whose text is a name or a path of names.",
+          "type": "string",
+          "const": "text"
+        },
+        {
+          "description": "An attribute, decorator, or annotation that hands the definition it is on to whatever\nprocesses it.",
+          "type": "string",
+          "const": "attribute"
+        },
+        {
+          "description": "A method the runtime calls by a name the language fixes (a JavaScript `constructor`).",
+          "type": "string",
+          "const": "implicit"
+        }
+      ]
+    },
+    "ReferenceTarget": {
+      "description": "What a reference resolves to; it is never guessed.",
+      "oneOf": [
+        {
+          "description": "Definitions in the reference's own file.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "local"
+            },
+            "symbols": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SymbolKey"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "symbols"
+          ]
+        },
+        {
+          "description": "Definitions in the file an import of the reference's file binds the name from.",
+          "type": "object",
+          "properties": {
+            "file": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string",
+              "const": "imported"
+            },
+            "symbols": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/SymbolKey"
+              }
+            }
+          },
+          "required": [
+            "file",
+            "kind",
+            "symbols"
+          ]
+        },
+        {
+          "description": "Any symbol of the language with the reference's name.",
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "unresolved"
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        }
+      ]
+    },
+    "Span": {
+      "description": "A 1-based range within one file.",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "end_line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "end_col",
+        "end_line",
+        "line"
+      ]
+    },
+    "SymbolKey": {
+      "description": "Identifies a symbol within one run by where it starts. Not stable across edits; anything\npersisted across runs uses `SymbolHash` (ADR-014).",
+      "type": "object",
+      "properties": {
+        "col": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "file": {
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "col",
+        "file",
+        "line"
+      ]
+    }
+  }
+}

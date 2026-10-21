@@ -832,7 +832,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `orphanRate` from src/references.ts if nothing outside the repository uses it, or import src/references.ts where `orphanRate` is meant to be called."
+        "summary": "Delete `orphanRate` from src/references.ts if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -876,7 +876,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `isValid` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `isValid` is meant to be called."
+        "summary": "Delete `isValid` from src/shapes/geometry.ts if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -925,7 +925,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `#cache` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `#cache` is meant to be called."
+        "summary": "Delete `#cache` from src/shapes/geometry.ts if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -974,7 +974,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `perimeter` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `perimeter` is meant to be called."
+        "summary": "Delete `perimeter` from src/shapes/geometry.ts if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -1321,28 +1321,28 @@
       "finding": "fnd_a1d27b",
       "kind": "review",
       "priority": 2,
-      "summary": "Delete `orphanRate` from src/references.ts if nothing outside the repository uses it, or import src/references.ts where `orphanRate` is meant to be called."
+      "summary": "Delete `orphanRate` from src/references.ts if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_d015aa",
       "kind": "review",
       "priority": 3,
-      "summary": "Delete `isValid` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `isValid` is meant to be called."
+      "summary": "Delete `isValid` from src/shapes/geometry.ts if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_4b4283",
       "kind": "review",
       "priority": 4,
-      "summary": "Delete `#cache` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `#cache` is meant to be called."
+      "summary": "Delete `#cache` from src/shapes/geometry.ts if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_f43298",
       "kind": "review",
       "priority": 5,
-      "summary": "Delete `perimeter` from src/shapes/geometry.ts if nothing outside the repository uses it, or import src/shapes/geometry.ts where `perimeter` is meant to be called."
+      "summary": "Delete `perimeter` from src/shapes/geometry.ts if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,

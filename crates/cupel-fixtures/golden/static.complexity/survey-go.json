@@ -15,7 +15,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 78,
+        "n": 84,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -337,7 +337,7 @@
           "value": 3.0
         }
       ],
-      "measured": 78,
+      "measured": 84,
       "metric": "cyclomatic",
       "per": "symbol",
       "summary": "Modified cyclomatic complexity per function (a match counts once).",
@@ -507,7 +507,7 @@
           "value": 3.0
         }
       ],
-      "measured": 78,
+      "measured": 84,
       "metric": "cognitive",
       "per": "symbol",
       "summary": "Cognitive complexity per function.",

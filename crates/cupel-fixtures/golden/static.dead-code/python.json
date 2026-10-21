@@ -76,7 +76,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `audit_limit` from src/ledger/__init__.py if nothing outside the repository uses it, or import src/ledger/__init__.py where `audit_limit` is meant to be called."
+        "summary": "Delete `audit_limit` from src/ledger/__init__.py if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -120,7 +120,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `_audit` from src/ledger/account.py if nothing outside the repository uses it, or import src/ledger/account.py where `_audit` is meant to be called."
+        "summary": "Delete `_audit` from src/ledger/account.py if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -542,7 +542,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `_tiered_rate` from src/ledger/references.py if nothing outside the repository uses it, or import src/ledger/references.py where `_tiered_rate` is meant to be called."
+        "summary": "Delete `_tiered_rate` from src/ledger/references.py if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -586,7 +586,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `_orphan_rate` from src/ledger/references.py if nothing outside the repository uses it, or import src/ledger/references.py where `_orphan_rate` is meant to be called."
+        "summary": "Delete `_orphan_rate` from src/ledger/references.py if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -968,14 +968,14 @@
       "finding": "fnd_59c553",
       "kind": "review",
       "priority": 1,
-      "summary": "Delete `audit_limit` from src/ledger/__init__.py if nothing outside the repository uses it, or import src/ledger/__init__.py where `audit_limit` is meant to be called."
+      "summary": "Delete `audit_limit` from src/ledger/__init__.py if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_d52f5b",
       "kind": "review",
       "priority": 2,
-      "summary": "Delete `_audit` from src/ledger/account.py if nothing outside the repository uses it, or import src/ledger/account.py where `_audit` is meant to be called."
+      "summary": "Delete `_audit` from src/ledger/account.py if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
@@ -989,14 +989,14 @@
       "finding": "fnd_185ee0",
       "kind": "review",
       "priority": 4,
-      "summary": "Delete `_tiered_rate` from src/ledger/references.py if nothing outside the repository uses it, or import src/ledger/references.py where `_tiered_rate` is meant to be called."
+      "summary": "Delete `_tiered_rate` from src/ledger/references.py if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_4671cb",
       "kind": "review",
       "priority": 5,
-      "summary": "Delete `_orphan_rate` from src/ledger/references.py if nothing outside the repository uses it, or import src/ledger/references.py where `_orphan_rate` is meant to be called."
+      "summary": "Delete `_orphan_rate` from src/ledger/references.py if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,

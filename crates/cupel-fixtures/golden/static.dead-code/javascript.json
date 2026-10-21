@@ -874,7 +874,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `orphanRate` from src/references.js if nothing outside the repository uses it, or import src/references.js where `orphanRate` is meant to be called."
+        "summary": "Delete `orphanRate` from src/references.js if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -918,7 +918,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `#isValid` from src/shapes/geometry.js if nothing outside the repository uses it, or import src/shapes/geometry.js where `#isValid` is meant to be called."
+        "summary": "Delete `#isValid` from src/shapes/geometry.js if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -967,7 +967,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `perimeter` from src/shapes/geometry.js if nothing outside the repository uses it, or import src/shapes/geometry.js where `perimeter` is meant to be called."
+        "summary": "Delete `perimeter` from src/shapes/geometry.js if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -1314,21 +1314,21 @@
       "finding": "fnd_843f6d",
       "kind": "review",
       "priority": 2,
-      "summary": "Delete `orphanRate` from src/references.js if nothing outside the repository uses it, or import src/references.js where `orphanRate` is meant to be called."
+      "summary": "Delete `orphanRate` from src/references.js if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_1983be",
       "kind": "review",
       "priority": 3,
-      "summary": "Delete `#isValid` from src/shapes/geometry.js if nothing outside the repository uses it, or import src/shapes/geometry.js where `#isValid` is meant to be called."
+      "summary": "Delete `#isValid` from src/shapes/geometry.js if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_8f8098",
       "kind": "review",
       "priority": 4,
-      "summary": "Delete `perimeter` from src/shapes/geometry.js if nothing outside the repository uses it, or import src/shapes/geometry.js where `perimeter` is meant to be called."
+      "summary": "Delete `perimeter` from src/shapes/geometry.js if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,

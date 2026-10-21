@@ -34,7 +34,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `scaled` from shapes/src/main/java/shapes/Geometry.java if nothing outside the repository uses it, or import shapes/src/main/java/shapes/Geometry.java where `scaled` is meant to be called."
+        "summary": "Delete `scaled` from shapes/src/main/java/shapes/Geometry.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -78,7 +78,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `audited` from src/main/java/ledger/Account.java if nothing outside the repository uses it, or import src/main/java/ledger/Account.java where `audited` is meant to be called."
+        "summary": "Delete `audited` from src/main/java/ledger/Account.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -134,7 +134,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `settleInvoices` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or import src/main/java/ledger/ClonesSettlement.java where `settleInvoices` is meant to be called."
+        "summary": "Delete `settleInvoices` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -190,7 +190,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `reconcilePayments` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or import src/main/java/ledger/ClonesSettlement.java where `reconcilePayments` is meant to be called."
+        "summary": "Delete `reconcilePayments` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -246,7 +246,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `orderLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or import src/main/java/ledger/ClonesSettlement.java where `orderLines` is meant to be called."
+        "summary": "Delete `orderLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -302,7 +302,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `refundLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or import src/main/java/ledger/ClonesSettlement.java where `refundLines` is meant to be called."
+        "summary": "Delete `refundLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -358,7 +358,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `firstOverdraft` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `firstOverdraft` is meant to be called."
+        "summary": "Delete `firstOverdraft` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -414,7 +414,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `describe` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `describe` is meant to be called."
+        "summary": "Delete `describe` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -470,7 +470,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `sign` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `sign` is meant to be called."
+        "summary": "Delete `sign` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -526,7 +526,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `size` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `size` is meant to be called."
+        "summary": "Delete `size` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -582,7 +582,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `drain` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `drain` is meant to be called."
+        "summary": "Delete `drain` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -638,7 +638,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `tieredRate` from src/main/java/ledger/References.java if nothing outside the repository uses it, or import src/main/java/ledger/References.java where `tieredRate` is meant to be called."
+        "summary": "Delete `tieredRate` from src/main/java/ledger/References.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -694,7 +694,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `orphanRate` from src/main/java/ledger/References.java if nothing outside the repository uses it, or import src/main/java/ledger/References.java where `orphanRate` is meant to be called."
+        "summary": "Delete `orphanRate` from src/main/java/ledger/References.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -750,7 +750,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotal` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or import src/main/java/ledger/Twins.java where `netTotal` is meant to be called."
+        "summary": "Delete `netTotal` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -806,7 +806,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `sumAfterCharge` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or import src/main/java/ledger/Twins.java where `sumAfterCharge` is meant to be called."
+        "summary": "Delete `sumAfterCharge` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -862,7 +862,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalFloor` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or import src/main/java/ledger/Twins.java where `netTotalFloor` is meant to be called."
+        "summary": "Delete `netTotalFloor` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -918,7 +918,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalLaidOut` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or import src/main/java/ledger/Twins.java where `netTotalLaidOut` is meant to be called."
+        "summary": "Delete `netTotalLaidOut` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -974,7 +974,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalPlus` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or import src/main/java/ledger/Twins.java where `netTotalPlus` is meant to be called."
+        "summary": "Delete `netTotalPlus` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -1030,7 +1030,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalCapped` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or import src/main/java/ledger/Twins.java where `netTotalCapped` is meant to be called."
+        "summary": "Delete `netTotalCapped` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -1086,7 +1086,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `netTotalProduct` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or import src/main/java/ledger/Twins.java where `netTotalProduct` is meant to be called."
+        "summary": "Delete `netTotalProduct` from src/main/java/ledger/Twins.java if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -1270,70 +1270,70 @@
       "finding": "fnd_0865b1",
       "kind": "review",
       "priority": 1,
-      "summary": "Delete `scaled` from shapes/src/main/java/shapes/Geometry.java if nothing outside the repository uses it, or import shapes/src/main/java/shapes/Geometry.java where `scaled` is meant to be called."
+      "summary": "Delete `scaled` from shapes/src/main/java/shapes/Geometry.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_23a2b2",
       "kind": "review",
       "priority": 2,
-      "summary": "Delete `audited` from src/main/java/ledger/Account.java if nothing outside the repository uses it, or import src/main/java/ledger/Account.java where `audited` is meant to be called."
+      "summary": "Delete `audited` from src/main/java/ledger/Account.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_6b6f36",
       "kind": "review",
       "priority": 3,
-      "summary": "Delete `settleInvoices` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or import src/main/java/ledger/ClonesSettlement.java where `settleInvoices` is meant to be called."
+      "summary": "Delete `settleInvoices` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_6b6f36",
       "kind": "review",
       "priority": 4,
-      "summary": "Delete `reconcilePayments` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or import src/main/java/ledger/ClonesSettlement.java where `reconcilePayments` is meant to be called."
+      "summary": "Delete `reconcilePayments` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_38e9c8",
       "kind": "review",
       "priority": 5,
-      "summary": "Delete `orderLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or import src/main/java/ledger/ClonesSettlement.java where `orderLines` is meant to be called."
+      "summary": "Delete `orderLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_0fede1",
       "kind": "review",
       "priority": 6,
-      "summary": "Delete `refundLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or import src/main/java/ledger/ClonesSettlement.java where `refundLines` is meant to be called."
+      "summary": "Delete `refundLines` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_8958dc",
       "kind": "review",
       "priority": 7,
-      "summary": "Delete `firstOverdraft` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `firstOverdraft` is meant to be called."
+      "summary": "Delete `firstOverdraft` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_b563d2",
       "kind": "review",
       "priority": 8,
-      "summary": "Delete `describe` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `describe` is meant to be called."
+      "summary": "Delete `describe` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_ff8922",
       "kind": "review",
       "priority": 9,
-      "summary": "Delete `sign` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `sign` is meant to be called."
+      "summary": "Delete `sign` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_fee931",
       "kind": "review",
       "priority": 10,
-      "summary": "Delete `size` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or import src/main/java/ledger/Decide.java where `size` is meant to be called."
+      "summary": "Delete `size` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
     }
   ],
   "oracles": null,

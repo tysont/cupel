@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 22,
+        "n": 24,
         "unit": "cycles",
         "value": 1.0
       },
@@ -181,6 +181,22 @@
           "lang": "typescript",
           "rank": 3,
           "target": {
+            "display": "src/references.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/references.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 4,
+          "target": {
             "display": "src/shapes/geometry.ts",
             "location": {
               "col": null,
@@ -195,7 +211,7 @@
         },
         {
           "lang": "typescript",
-          "rank": 4,
+          "rank": 5,
           "target": {
             "display": "src/deps_layers/domain/order.ts",
             "location": {
@@ -211,7 +227,7 @@
         },
         {
           "lang": "typescript",
-          "rank": 5,
+          "rank": 6,
           "target": {
             "display": "src/decide.ts",
             "location": {
@@ -227,7 +243,7 @@
         },
         {
           "lang": "typescript",
-          "rank": 6,
+          "rank": 7,
           "target": {
             "display": "src/index.ts",
             "location": {
@@ -243,7 +259,7 @@
         },
         {
           "lang": "typescript",
-          "rank": 7,
+          "rank": 8,
           "target": {
             "display": "src/plugin.ts",
             "location": {
@@ -258,7 +274,7 @@
           "value": 0.0
         }
       ],
-      "measured": 7,
+      "measured": 8,
       "metric": "distance",
       "per": "module",
       "summary": "Distance from the main sequence per module that declares a type and has a coupling.",
@@ -383,6 +399,38 @@
           "lang": "typescript",
           "rank": 8,
           "target": {
+            "display": "src/index.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/index.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 9,
+          "target": {
+            "display": "src/rates.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/rates.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 2.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 10,
+          "target": {
             "display": "bin/cli.ts",
             "location": {
               "col": null,
@@ -394,41 +442,9 @@
             "symbol": null
           },
           "value": 1.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 9,
-          "target": {
-            "display": "packages/shapes/src/index.ts",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "packages/shapes/src/index.ts",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 1.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 10,
-          "target": {
-            "display": "src/__tests__/pricing.test.ts",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "src/__tests__/pricing.test.ts",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 1.0
         }
       ],
-      "measured": 22,
+      "measured": 24,
       "metric": "coupling",
       "per": "module",
       "summary": "Afferent plus efferent coupling per module.",

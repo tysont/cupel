@@ -34,7 +34,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `scaled` from shapes/src/shapes/geometry.clj if nothing outside the repository uses it, or import shapes/src/shapes/geometry.clj where `scaled` is meant to be called."
+        "summary": "Delete `scaled` from shapes/src/shapes/geometry.clj if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -204,7 +204,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `tiered-rate` from src/ledger/references.clj if nothing outside the repository uses it, or import src/ledger/references.clj where `tiered-rate` is meant to be called."
+        "summary": "Delete `tiered-rate` from src/ledger/references.clj if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -248,7 +248,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `orphan-rate` from src/ledger/references.clj if nothing outside the repository uses it, or import src/ledger/references.clj where `orphan-rate` is meant to be called."
+        "summary": "Delete `orphan-rate` from src/ledger/references.clj if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.3,
@@ -294,7 +294,7 @@
       "finding": "fnd_f68eba",
       "kind": "review",
       "priority": 1,
-      "summary": "Delete `scaled` from shapes/src/shapes/geometry.clj if nothing outside the repository uses it, or import shapes/src/shapes/geometry.clj where `scaled` is meant to be called."
+      "summary": "Delete `scaled` from shapes/src/shapes/geometry.clj if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
@@ -308,14 +308,14 @@
       "finding": "fnd_5ce736",
       "kind": "review",
       "priority": 3,
-      "summary": "Delete `tiered-rate` from src/ledger/references.clj if nothing outside the repository uses it, or import src/ledger/references.clj where `tiered-rate` is meant to be called."
+      "summary": "Delete `tiered-rate` from src/ledger/references.clj if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_d9917d",
       "kind": "review",
       "priority": 4,
-      "summary": "Delete `orphan-rate` from src/ledger/references.clj if nothing outside the repository uses it, or import src/ledger/references.clj where `orphan-rate` is meant to be called."
+      "summary": "Delete `orphan-rate` from src/ledger/references.clj if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,

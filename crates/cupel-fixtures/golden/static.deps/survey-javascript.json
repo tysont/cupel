@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 21,
+        "n": 23,
         "unit": "cycles",
         "value": 1.0
       },
@@ -110,6 +110,22 @@
           "lang": "javascript",
           "rank": 1,
           "target": {
+            "display": "src/references.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/references.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 2,
+          "target": {
             "display": "src/shapes/geometry.js",
             "location": {
               "col": null,
@@ -123,7 +139,7 @@
           "value": 1.0
         }
       ],
-      "measured": 1,
+      "measured": 2,
       "metric": "distance",
       "per": "module",
       "summary": "Distance from the main sequence per module that declares a type and has a coupling.",
@@ -280,12 +296,12 @@
           "lang": "javascript",
           "rank": 10,
           "target": {
-            "display": "test/math.quality.test.js",
+            "display": "src/index.js",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "test/math.quality.test.js",
+              "file": "src/index.js",
               "line": 1
             },
             "symbol": null
@@ -293,7 +309,7 @@
           "value": 2.0
         }
       ],
-      "measured": 21,
+      "measured": 23,
       "metric": "coupling",
       "per": "module",
       "summary": "Afferent plus efferent coupling per module.",

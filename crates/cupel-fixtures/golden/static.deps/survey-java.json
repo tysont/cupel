@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 18,
+        "n": 19,
         "unit": "cycles",
         "value": 1.0
       },
@@ -476,7 +476,7 @@
           "value": 1.0
         }
       ],
-      "measured": 18,
+      "measured": 19,
       "metric": "coupling",
       "per": "module",
       "summary": "Afferent plus efferent coupling per module.",

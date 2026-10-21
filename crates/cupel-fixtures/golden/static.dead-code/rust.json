@@ -706,7 +706,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `audit_limit` from src/lib.rs if nothing outside the repository uses it, or import src/lib.rs where `audit_limit` is meant to be called."
+        "summary": "Delete `audit_limit` from src/lib.rs if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -750,7 +750,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `scale` from src/lib.rs if nothing outside the repository uses it, or import src/lib.rs where `scale` is meant to be called."
+        "summary": "Delete `scale` from src/lib.rs if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -794,7 +794,7 @@
         "hints": {},
         "kind": "review",
         "priority": 2,
-        "summary": "Delete `orphan_rate` from src/references.rs if nothing outside the repository uses it, or import src/references.rs where `orphan_rate` is meant to be called."
+        "summary": "Delete `orphan_rate` from src/references.rs if nothing outside the repository uses it, or call it where it is meant to be used."
       },
       "check": "static.dead-code",
       "confidence": 0.6,
@@ -845,21 +845,21 @@
       "finding": "fnd_8ac4c7",
       "kind": "review",
       "priority": 2,
-      "summary": "Delete `audit_limit` from src/lib.rs if nothing outside the repository uses it, or import src/lib.rs where `audit_limit` is meant to be called."
+      "summary": "Delete `audit_limit` from src/lib.rs if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_567eda",
       "kind": "review",
       "priority": 3,
-      "summary": "Delete `scale` from src/lib.rs if nothing outside the repository uses it, or import src/lib.rs where `scale` is meant to be called."
+      "summary": "Delete `scale` from src/lib.rs if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_3d2242",
       "kind": "review",
       "priority": 4,
-      "summary": "Delete `orphan_rate` from src/references.rs if nothing outside the repository uses it, or import src/references.rs where `orphan_rate` is meant to be called."
+      "summary": "Delete `orphan_rate` from src/references.rs if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,

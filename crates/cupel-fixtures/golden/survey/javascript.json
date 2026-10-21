@@ -38,13 +38,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 53,
+            "rank": 62,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 53,
+            "rank": 62,
             "value": 0.0
           },
           {
@@ -82,13 +82,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 48,
+            "rank": 57,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 48,
+            "rank": 57,
             "value": 0.0
           },
           {
@@ -126,13 +126,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 50,
+            "rank": 59,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 50,
+            "rank": 59,
             "value": 0.0
           },
           {
@@ -170,13 +170,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 54,
+            "rank": 63,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 54,
+            "rank": 63,
             "value": 0.0
           },
           {
@@ -214,13 +214,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 56,
+            "rank": 65,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 56,
+            "rank": 65,
             "value": 0.0
           },
           {
@@ -258,13 +258,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 57,
+            "rank": 66,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 57,
+            "rank": 66,
             "value": 0.0
           },
           {
@@ -302,13 +302,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 61,
+            "rank": 70,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 61,
+            "rank": 70,
             "value": 0.0
           },
           {
@@ -346,13 +346,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 47,
+            "rank": 56,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 47,
+            "rank": 56,
             "value": 0.0
           },
           {
@@ -390,13 +390,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 67,
+            "rank": 76,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 67,
+            "rank": 76,
             "value": 0.0
           },
           {
@@ -434,13 +434,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 68,
+            "rank": 77,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 68,
+            "rank": 77,
             "value": 0.0
           },
           {
@@ -498,7 +498,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 30,
+      "files": 32,
       "languages": [
         "javascript"
       ],
@@ -506,7 +506,7 @@
       "roots": [
         "."
       ],
-      "symbols": 77
+      "symbols": 86
     },
     "seed": "<seed>",
     "started": "<timestamp>",

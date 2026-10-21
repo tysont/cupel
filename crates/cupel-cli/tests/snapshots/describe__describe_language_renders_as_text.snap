@@ -17,6 +17,7 @@ facts
   roots               lang.typescript (quick)
   test-conventions    lang.typescript (quick)
   project-info        lang.typescript (quick)
+  references          lang.typescript (quick)
 
 checks
 
