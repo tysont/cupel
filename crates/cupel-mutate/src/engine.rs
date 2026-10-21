@@ -15,10 +15,10 @@ use cupel_core::{
 use crate::execute::{Execution, FileRun};
 use crate::history::History;
 use crate::overlay::Slot;
-use crate::slots::{Claim, claim, slot_dir};
 use crate::plan::{Inputs, Planned, digest, plan};
 use crate::schemata::{self, Rewriter};
 use crate::settings::{Settings, Strategy};
+use crate::slots::{Claim, claim, slot_dir};
 
 /// The engine's producer ID.
 pub const ID: &str = "engine.mutation";

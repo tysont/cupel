@@ -214,11 +214,14 @@ impl<'a> Defining<'a> {
             return Some((file, symbols));
         }
         seen.push(file);
-        self.reexports.get(file)?.iter().find_map(|(exported, from)| {
-            (*exported == name && !seen.contains(from))
-                .then(|| self.find(from, name, seen))
-                .flatten()
-        })
+        self.reexports
+            .get(file)?
+            .iter()
+            .find_map(|(exported, from)| {
+                (*exported == name && !seen.contains(from))
+                    .then(|| self.find(from, name, seen))
+                    .flatten()
+            })
     }
 }
 

@@ -323,7 +323,11 @@ fn timeouts_and_uncovered_mutants_are_notes_and_unviable_ones_are_not_reported()
     );
     assert_eq!(result.status, CheckStatus::Pass);
     let score = result.score.unwrap();
-    assert_eq!((score.value, score.n), (0.0, 1), "the uncovered mutant is missed");
+    assert_eq!(
+        (score.value, score.n),
+        (0.0, 1),
+        "the uncovered mutant is missed"
+    );
 }
 
 /// Timeouts and unviable mutants are left out of the score, so a scope of only those has

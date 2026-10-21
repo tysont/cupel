@@ -329,7 +329,8 @@ fn doctor_reports_the_mutation_slots_and_the_repositories_they_belong_to() {
     );
     let title = finding["title"].as_str().unwrap();
     assert!(
-        title.starts_with("Mutation slots hold 3.") && title.contains(" KiB for 2 repositories under "),
+        title.starts_with("Mutation slots hold 3.")
+            && title.contains(" KiB for 2 repositories under "),
         "{title}"
     );
 }
@@ -340,5 +341,8 @@ fn doctor_says_nothing_of_mutation_slots_when_there_are_none() {
     let repo = Repo::new();
     let outcome = repo.run_with(cupel().env("TMPDIR", tmp.path()), &["doctor"]);
     let kinds = support::finding_fields(&outcome.envelope(), "kind");
-    assert!(!kinds.contains(&"doctor.mutation-slots".to_owned()), "{kinds:?}");
+    assert!(
+        !kinds.contains(&"doctor.mutation-slots".to_owned()),
+        "{kinds:?}"
+    );
 }

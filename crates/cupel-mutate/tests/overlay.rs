@@ -135,7 +135,11 @@ fn a_sync_replaces_a_file_left_mutated_with_a_copy_dated_now() {
     {
         use std::os::unix::fs::MetadataExt;
         let (ours, theirs) = (fs::metadata(&path).unwrap(), fs::metadata(&tree).unwrap());
-        assert_ne!(ours.ino(), theirs.ino(), "a copy, not a link to the tree's file");
+        assert_ne!(
+            ours.ino(),
+            theirs.ino(),
+            "a copy, not a link to the tree's file"
+        );
     }
 }
 

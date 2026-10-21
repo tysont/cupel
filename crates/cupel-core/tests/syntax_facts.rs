@@ -2,9 +2,9 @@
 // ABOUTME: Enum spellings match the construct names used by the per-fact conformance inventories.
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, Assertion, AssertionKind, AssertionStrength, Decision,
-    DecisionKind, Decisions, EdgeKind, ImportAlias, ImportEdge, ImportTarget, LiveRoot, Mock, ModuleGraph,
-    MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol, OperatorSet,
-    ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
+    DecisionKind, Decisions, EdgeKind, ImportAlias, ImportEdge, ImportTarget, LiveRoot, Mock,
+    ModuleGraph, MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol,
+    OperatorSet, ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
     SymbolDecisions, SymbolDef, SymbolKey, SymbolKind, SymbolSites, Symbols, TestCase,
     TestConventions, TestFile, TestFrames, TestPairing, Visibility,
 };
@@ -504,7 +504,10 @@ fn an_import_edge_lists_the_names_its_statement_binds_under_another_local_name()
         }],
     };
     let json = assert_round_trip(&edge);
-    assert_eq!(json["aliases"], json!([{"name": "square", "local": "side"}]));
+    assert_eq!(
+        json["aliases"],
+        json!([{"name": "square", "local": "side"}])
+    );
     let unaliased = ImportEdge {
         aliases: Vec::new(),
         ..edge

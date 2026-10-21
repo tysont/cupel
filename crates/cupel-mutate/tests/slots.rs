@@ -75,7 +75,9 @@ fn slots_unused_for_longer_than_the_idle_time_are_removed() {
         tempfile::tempdir().unwrap(),
         tempfile::tempdir().unwrap(),
     );
-    let stale_slots = claimed(root.path(), stale.path(), rule, 1).dir().to_path_buf();
+    let stale_slots = claimed(root.path(), stale.path(), rule, 1)
+        .dir()
+        .to_path_buf();
     let recent_slots = claimed(root.path(), recent.path(), rule, 1)
         .dir()
         .to_path_buf();
@@ -109,7 +111,11 @@ fn beyond_the_total_size_the_least_recently_used_slots_of_other_repositories_go_
     drop(claimed(root.path(), own.path(), LENIENT, 2_000));
     let own_slots = claim_in(root.path(), own.path(), rule).unwrap();
     assert_eq!(
-        (older_slots.exists(), newer_slots.exists(), own_slots.dir().exists()),
+        (
+            older_slots.exists(),
+            newer_slots.exists(),
+            own_slots.dir().exists()
+        ),
         (false, true, true)
     );
 }
@@ -213,7 +219,10 @@ fn slots_with_no_lock_file_are_removed_only_when_gone_or_idle() {
         .to_path_buf();
     fs::remove_file(slots.join("lock")).unwrap();
     drop(claim_in(root.path(), own.path(), rule).unwrap());
-    assert!(slots.join("python/0/build.out").exists(), "kept over the size");
+    assert!(
+        slots.join("python/0/build.out").exists(),
+        "kept over the size"
+    );
     assert!(!slots.join("lock").exists(), "and left as it was");
     last_used(&slots, 8 * DAY);
     drop(claim_in(root.path(), own.path(), rule).unwrap());
