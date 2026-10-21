@@ -1,5 +1,5 @@
-// ABOUTME: `cupel check --only static.clones` over mixed trees: JavaScript and TypeScript symbols are
-// ABOUTME: compared within the `ecma` family, while Go and Python symbols never meet (ADR-051).
+// ABOUTME: `cupel check --only static.clones` over fixture trees: JavaScript and TypeScript are compared within
+// ABOUTME: the `ecma` family, Go and Python never meet (ADR-051), and Go and Java show all three clone types (ADR-136).
 use std::collections::BTreeSet;
 use std::fs;
 
@@ -61,4 +61,53 @@ fn go_and_python_clones_stay_within_their_own_language() {
     let langs = member_langs(&envelope);
     assert!(!langs.is_empty());
     assert!(langs.iter().all(|set| set.len() == 1), "{langs:?}");
+}
+
+/// Each pair's clone type with its symbols, and whether it lists renamed texts and edits.
+fn typed_pairs(envelope: &Envelope) -> Vec<(u64, String, bool, bool)> {
+    envelope
+        .findings
+        .iter()
+        .filter(|finding| finding.kind == "clone.pair")
+        .map(|finding| {
+            let evidence = &finding.evidence.0;
+            let listed = |key: &str| !evidence[key].as_array().unwrap().is_empty();
+            (
+                evidence["clone_type"].as_u64().unwrap(),
+                evidence["left"]["symbol"].as_str().unwrap().to_owned(),
+                listed("renamed"),
+                listed("edits"),
+            )
+        })
+        .collect()
+}
+
+#[test]
+fn go_and_java_fixtures_hold_a_clone_of_each_type_with_what_differs() {
+    for (lang, exact, renamed, extended) in [
+        (
+            "go",
+            "ledger.runningRefunds",
+            "ledger.settleInvoices",
+            "ledger.orderLines",
+        ),
+        (
+            "java",
+            "ledger.ClonesSettlement.runningRefunds",
+            "ledger.ClonesSettlement.settleInvoices",
+            "ledger.ClonesSettlement.orderLines",
+        ),
+    ] {
+        let pairs = typed_pairs(&clones(&[lang]));
+        for expected in [
+            (1, exact.to_owned(), false, false),
+            (2, renamed.to_owned(), true, false),
+            (3, extended.to_owned(), false, true),
+        ] {
+            assert!(
+                pairs.contains(&expected),
+                "{lang}: {expected:?} in {pairs:?}"
+            );
+        }
+    }
 }

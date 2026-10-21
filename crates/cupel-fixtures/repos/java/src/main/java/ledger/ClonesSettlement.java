@@ -3,7 +3,7 @@ package ledger;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Functions that repeat one another, for clone detection: a renamed copy and an extended copy. */
+/** Functions that repeat one another, for clone detection: renamed, extended, and exact copies. */
 final class ClonesSettlement {
     /** An amount owed and whether it is paid. */
     record Invoice(long amount, boolean paid) {
@@ -69,5 +69,25 @@ final class ClonesSettlement {
         lines.add(total);
         lines.add(average);
         return lines;
+    }
+
+    static List<Long> runningRefunds(long[] refunds, long start) {
+        List<Long> totals = new ArrayList<>();
+        long spent = start;
+        for (long refund : refunds) {
+            spent += refund;
+            totals.add(spent);
+        }
+        totals.add(spent - start);
+        return totals;
+    }
+
+    static List<Long> runningRefundsAgain(long[] refunds, long start) {
+        // The same body as runningRefunds, laid out differently.
+        List<Long> totals = new ArrayList<>();
+        long spent = start;
+        for (long refund : refunds) { spent += refund; totals.add(spent); }
+        totals.add(spent - start);
+        return totals;
     }
 }

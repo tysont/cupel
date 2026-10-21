@@ -834,6 +834,204 @@
     {
       "sites": [
         {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "603b2e2a8fd401fb",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 70,
+            "line": 70
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "spent += refund",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "cf03babe5b86b8b5",
+          "span": {
+            "col": 3,
+            "end_col": 18,
+            "end_line": 73,
+            "line": 73
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "cfaaf490d56547df",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 73,
+            "line": 73
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "totals = append(totals, spent)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d04ab4c025759f89",
+          "span": {
+            "col": 3,
+            "end_col": 33,
+            "end_line": 74,
+            "line": 74
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "append(totals, spent-start)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "15e6535b53e3545f",
+          "span": {
+            "col": 9,
+            "end_col": 36,
+            "end_line": 76,
+            "line": 76
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "3d955eec2344fae2",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 76,
+            "line": 76
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 69
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "603b2e2a8fd401fb",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 81,
+            "line": 81
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "spent += refund",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "cf03babe5b86b8b5",
+          "span": {
+            "col": 3,
+            "end_col": 18,
+            "end_line": 85,
+            "line": 85
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "cfaaf490d56547df",
+          "span": {
+            "col": 9,
+            "end_col": 11,
+            "end_line": 85,
+            "line": 85
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "totals = append(totals, spent)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d04ab4c025759f89",
+          "span": {
+            "col": 3,
+            "end_col": 33,
+            "end_line": 86,
+            "line": 86
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "append(totals, spent-start)",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "15e6535b53e3545f",
+          "span": {
+            "col": 9,
+            "end_col": 36,
+            "end_line": 89,
+            "line": 89
+          },
+          "to": [
+            "nil"
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "3d955eec2344fae2",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 89,
+            "line": 89
+          },
+          "to": [
+            "+"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 79
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "account.Deposit(1250)",
           "operator": "statement-deletion",
           "set": "extended",

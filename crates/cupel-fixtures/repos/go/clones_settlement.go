@@ -1,6 +1,6 @@
 package ledger
 
-// Functions that repeat one another, for clone detection: a renamed copy and an extended copy.
+// Functions that repeat one another, for clone detection: renamed, extended, and exact copies.
 
 type Invoice struct {
 	Amount int64
@@ -64,4 +64,27 @@ func refundLines(quantities []int64, prices []int64, discount int64) []int64 {
 	lines = append(lines, total)
 	lines = append(lines, average)
 	return lines
+}
+
+func runningRefunds(refunds []int64, start int64) []int64 {
+	totals := make([]int64, 0, len(refunds))
+	spent := start
+	for _, refund := range refunds {
+		spent += refund
+		totals = append(totals, spent)
+	}
+	return append(totals, spent-start)
+}
+
+func runningRefundsAgain(refunds []int64, start int64) []int64 {
+	// The same body as runningRefunds, laid out differently.
+	totals := make([]int64, 0, len(refunds))
+	spent := start
+
+	for _, refund := range refunds {
+		spent += refund // the total so far
+		totals = append(totals, spent)
+	}
+
+	return append(totals, spent-start)
 }

@@ -1241,6 +1241,204 @@
       }
     },
     {
+      "sites": [
+        {
+          "from": "spent += refund;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "2da023a1f4a5f322",
+          "span": {
+            "col": 13,
+            "end_col": 29,
+            "end_line": 78,
+            "line": 78
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "abb6db8555abe39f",
+          "span": {
+            "col": 19,
+            "end_col": 21,
+            "end_line": 78,
+            "line": 78
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "totals.add(spent);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "53179522f8d54bdc",
+          "span": {
+            "col": 13,
+            "end_col": 31,
+            "end_line": 79,
+            "line": 79
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "totals.add(spent - start);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "28903e4d345660ea",
+          "span": {
+            "col": 9,
+            "end_col": 35,
+            "end_line": 81,
+            "line": 81
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "3e03c3210e51ddea",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 81,
+            "line": 81
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "totals",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "4db92de490b1875b",
+          "span": {
+            "col": 16,
+            "end_col": 22,
+            "end_line": 82,
+            "line": 82
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "spent += refund;",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "2da023a1f4a5f322",
+          "span": {
+            "col": 39,
+            "end_col": 55,
+            "end_line": 89,
+            "line": 89
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "abb6db8555abe39f",
+          "span": {
+            "col": 45,
+            "end_col": 47,
+            "end_line": 89,
+            "line": 89
+          },
+          "to": [
+            "-="
+          ]
+        },
+        {
+          "from": "totals.add(spent);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "53179522f8d54bdc",
+          "span": {
+            "col": 56,
+            "end_col": 74,
+            "end_line": 89,
+            "line": 89
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "totals.add(spent - start);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "28903e4d345660ea",
+          "span": {
+            "col": 9,
+            "end_col": 35,
+            "end_line": 90,
+            "line": 90
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "-",
+          "operator": "arith-add-sub",
+          "set": "default",
+          "site_hash": "3e03c3210e51ddea",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 90,
+            "line": 90
+          },
+          "to": [
+            "+"
+          ]
+        },
+        {
+          "from": "totals",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "4db92de490b1875b",
+          "span": {
+            "col": 16,
+            "end_col": 22,
+            "end_line": 91,
+            "line": 91
+          },
+          "to": [
+            "null"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      }
+    },
+    {
       "sites": [],
       "symbol": {
         "col": 5,

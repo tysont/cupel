@@ -127,13 +127,12 @@ struct Member {
     nodes: u32,
 }
 
-/// Whether an edited subtree is in the first member only or in the other member only.
+/// Whether an edited subtree is in the first member only (`removed`) or in the other member
+/// only (`inserted`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 enum Change {
-    /// In the first member and not in `symbol`.
     Removed,
-    /// In `symbol` and not in the first member.
     Inserted,
 }
 
@@ -142,6 +141,8 @@ enum Change {
 #[schemars(inline)]
 #[serde(deny_unknown_fields)]
 struct Edit {
+    /// `removed`: in the first member and not in `symbol`; `inserted`: in `symbol` and not in
+    /// the first member.
     change: Change,
     /// The member compared with the first.
     symbol: String,
