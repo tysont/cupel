@@ -435,3 +435,33 @@ fn the_watcher_hands_changed_files_to_the_handler() {
         (true, true, true)
     );
 }
+
+#[test]
+fn an_endpoint_that_cannot_be_made_is_an_io_error_naming_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let blocker = dir.path().join("not-a-directory");
+    std::fs::write(&blocker, "").unwrap();
+    let socket = blocker.join("serve.sock");
+    let daemon = Daemon {
+        root: dir.path().to_path_buf(),
+        socket: socket.clone(),
+        build: build(),
+        path: None,
+        watch: false,
+    };
+    let refused = serve(
+        &daemon,
+        Arc::new(Script::default()),
+        &Cancellation::new(),
+        &mut |_| panic!("a daemon with no endpoint must not start"),
+    );
+    let Err(error @ ServeError::Io { .. }) = refused else {
+        panic!("not an I/O error: {refused:?}")
+    };
+    assert!(
+        error
+            .to_string()
+            .starts_with(&format!("cannot serve at {}: ", socket.display())),
+        "{error}"
+    );
+}

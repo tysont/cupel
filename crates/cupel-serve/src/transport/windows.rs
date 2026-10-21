@@ -22,7 +22,7 @@ use windows_sys::Win32::System::Pipes::{
     SetNamedPipeHandleState,
 };
 
-use super::pipe_name;
+use super::pipe::pipe_name;
 
 /// Each instance's input and output buffer size, in bytes.
 const BUFFER: u32 = 64 * 1024;
