@@ -1,6 +1,249 @@
 {
   "symbols": [
     {
+      "hash": "sh_ad0742e9ad0eb974",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters",
+            "span": {
+              "col": 20,
+              "end_col": 22,
+              "end_line": 12,
+              "line": 12
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "std",
+                                "span": {
+                                  "col": 5,
+                                  "end_col": 8,
+                                  "end_line": 13,
+                                  "line": 13
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "hint",
+                                "span": {
+                                  "col": 10,
+                                  "end_col": 14,
+                                  "end_line": 13,
+                                  "line": 13
+                                }
+                              }
+                            ],
+                            "label": "scoped_identifier",
+                            "span": {
+                              "col": 5,
+                              "end_col": 14,
+                              "end_line": 13,
+                              "line": 13
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "black_box",
+                            "span": {
+                              "col": 16,
+                              "end_col": 25,
+                              "end_line": 13,
+                              "line": 13
+                            }
+                          }
+                        ],
+                        "label": "scoped_identifier",
+                        "span": {
+                          "col": 5,
+                          "end_col": 25,
+                          "end_line": 13,
+                          "line": 13
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "ledger",
+                                    "span": {
+                                      "col": 26,
+                                      "end_col": 32,
+                                      "end_line": 13,
+                                      "line": 13
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "balance",
+                                    "span": {
+                                      "col": 34,
+                                      "end_col": 41,
+                                      "end_line": 13,
+                                      "line": 13
+                                    }
+                                  }
+                                ],
+                                "label": "scoped_identifier",
+                                "span": {
+                                  "col": 26,
+                                  "end_col": 41,
+                                  "end_line": 13,
+                                  "line": 13
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "&",
+                                        "span": {
+                                          "col": 42,
+                                          "end_col": 43,
+                                          "end_line": 13,
+                                          "line": 13
+                                        }
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$lit",
+                                            "span": {
+                                              "col": 44,
+                                              "end_col": 45,
+                                              "end_line": 13,
+                                              "line": 13
+                                            },
+                                            "text": "1"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$lit",
+                                            "span": {
+                                              "col": 47,
+                                              "end_col": 48,
+                                              "end_line": 13,
+                                              "line": 13
+                                            },
+                                            "text": "2"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$lit",
+                                            "span": {
+                                              "col": 50,
+                                              "end_col": 51,
+                                              "end_line": 13,
+                                              "line": 13
+                                            },
+                                            "text": "3"
+                                          }
+                                        ],
+                                        "label": "array_expression",
+                                        "span": {
+                                          "col": 43,
+                                          "end_col": 52,
+                                          "end_line": 13,
+                                          "line": 13
+                                        }
+                                      }
+                                    ],
+                                    "label": "reference_expression",
+                                    "span": {
+                                      "col": 42,
+                                      "end_col": 52,
+                                      "end_line": 13,
+                                      "line": 13
+                                    }
+                                  }
+                                ],
+                                "label": "arguments",
+                                "span": {
+                                  "col": 41,
+                                  "end_col": 53,
+                                  "end_line": 13,
+                                  "line": 13
+                                }
+                              }
+                            ],
+                            "label": "call_expression",
+                            "span": {
+                              "col": 26,
+                              "end_col": 53,
+                              "end_line": 13,
+                              "line": 13
+                            }
+                          }
+                        ],
+                        "label": "arguments",
+                        "span": {
+                          "col": 25,
+                          "end_col": 54,
+                          "end_line": 13,
+                          "line": 13
+                        }
+                      }
+                    ],
+                    "label": "call_expression",
+                    "span": {
+                      "col": 5,
+                      "end_col": 54,
+                      "end_line": 13,
+                      "line": 13
+                    }
+                  }
+                ],
+                "label": "expression_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 55,
+                  "end_line": 13,
+                  "line": 13
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 23,
+              "end_col": 2,
+              "end_line": 14,
+              "line": 12
+            }
+          }
+        ],
+        "label": "function_item",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 14,
+          "line": 12
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      }
+    },
+    {
       "hash": "sh_6f23320d34e5fc0d",
       "root": {
         "children": [

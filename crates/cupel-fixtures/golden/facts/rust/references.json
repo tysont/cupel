@@ -2,6 +2,161 @@
   "dynamic": [],
   "references": [
     {
+      "file": "benches/balance.rs",
+      "from": null,
+      "kind": "name",
+      "name": "bench_main",
+      "span": {
+        "col": 14,
+        "end_col": 24,
+        "end_line": 4,
+        "line": 4
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": null,
+      "kind": "member",
+      "name": "main",
+      "span": {
+        "col": 12,
+        "end_col": 16,
+        "end_line": 6,
+        "line": 6
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "name",
+      "name": "std",
+      "span": {
+        "col": 5,
+        "end_col": 8,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "member",
+      "name": "hint",
+      "span": {
+        "col": 10,
+        "end_col": 14,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "member",
+      "name": "black_box",
+      "span": {
+        "col": 16,
+        "end_col": 25,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "name",
+      "name": "ledger",
+      "span": {
+        "col": 26,
+        "end_col": 32,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "member",
+      "name": "balance",
+      "span": {
+        "col": 34,
+        "end_col": 41,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": null,
+      "kind": "name",
+      "name": "bench_main",
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 16,
+        "line": 16
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": null,
+      "kind": "member",
+      "name": "balance_of_three",
+      "span": {
+        "col": 13,
+        "end_col": 29,
+        "end_line": 16,
+        "line": 16
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
       "file": "shapes/src/lib.rs",
       "from": {
         "col": 1,

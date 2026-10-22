@@ -7,15 +7,15 @@
       "findings": 11,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 1.125,
+        "assertion_density": 1.1153846153846154,
         "no_assertion": 2.0,
-        "weak_ratio": 0.4074074074074074
+        "weak_ratio": 0.3793103448275862
       },
       "oracle": null,
       "score": {
-        "n": 24,
+        "n": 26,
         "unit": "assertion_density",
-        "value": 1.125
+        "value": 1.1153846153846154
       },
       "skipped": null,
       "status": "fail",
@@ -607,7 +607,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 23,
+      "files": 24,
       "languages": [
         "go"
       ],
@@ -615,7 +615,7 @@
       "roots": [
         "."
       ],
-      "symbols": 86
+      "symbols": 89
     },
     "seed": "<seed>",
     "started": "<timestamp>",

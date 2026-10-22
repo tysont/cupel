@@ -2,6 +2,28 @@
   "symbols": [
     {
       "body": {
+        "col": 23,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 12
+      },
+      "display": "benches::balance::balance_of_three",
+      "file": "benches/balance.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "balance_of_three",
+      "namespace": "benches::balance",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 12
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 33,
         "end_col": 2,
         "end_line": 3,

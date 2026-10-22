@@ -151,7 +151,9 @@
       "summary": "Symbols and exports in modules that no import reaches and no entry point, test, or framework hook keeps alive, then symbols that nothing outside their own body names. Limitation: references match by name, not by type, so any same-named reference keeps a symbol alive, and a function only dead code calls is reported once that code is gone; an export of an unimported module is only `dead.export` (info, low confidence) (ADR-058, ADR-135).",
       "tier": 0,
       "version": 2,
-      "wants": []
+      "wants": [
+        "test-conventions"
+      ]
     },
     "subject": "check"
   },

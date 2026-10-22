@@ -97,9 +97,12 @@ not-equal = { kind = "equality", strength = "weak" }
 not-nil = { kind = "not-null", strength = "weak" }
 no-error = { kind = "not-null", strength = "weak" }
 error = { kind = "throws", strength = "weak" }
+error-is = { kind = "throws", strength = "strong" }
 fails = { kind = "truthiness", strength = "weak" }
 # A property check (`quick.Check(…)`) returns the failing input as its error (ADR-095).
 property = { kind = "custom", strength = "strong" }
+# A helper the test hands its `t`, or a subtest run from a named function, asserts elsewhere.
+helper = { kind = "custom", strength = "strong" }
 # testify, by function name (assert and require alike).
 Equal = { kind = "equality", strength = "strong" }
 Equalf = { kind = "equality", strength = "strong" }

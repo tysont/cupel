@@ -4,6 +4,14 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "shapes/src/lib.rs",
         "line": 1
       }

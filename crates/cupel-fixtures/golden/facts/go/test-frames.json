@@ -7,6 +7,63 @@
             {
               "kind": "custom",
               "span": {
+                "col": 2,
+                "end_col": 36,
+                "end_line": 16,
+                "line": 16
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "TestAHelperHandedTheTestAsserts",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 17,
+            "line": 15
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 33,
+                "end_line": 21,
+                "line": 21
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "TestEachBalanceIsListed",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 23,
+            "line": 19
+          }
+        }
+      ],
+      "file": "ledger_helpers_test.go",
+      "framework": "go-test",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "custom",
+              "span": {
                 "col": 12,
                 "end_col": 33,
                 "end_line": 10,

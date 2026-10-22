@@ -3,6 +3,75 @@
     {
       "sites": [
         {
+          "from": "std::hint::black_box(ledger::balance(&[1, 2, 3]));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 55,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2912e2f6163b4bfa",
+          "span": {
+            "col": 44,
+            "end_col": 45,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4be55181fb0c05e8",
+          "span": {
+            "col": 47,
+            "end_col": 48,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ecff7cbb47a2202b",
+          "span": {
+            "col": 50,
+            "end_col": 51,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "*",
           "operator": "arith-mul-div",
           "set": "default",

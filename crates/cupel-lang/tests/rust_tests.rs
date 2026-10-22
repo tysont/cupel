@@ -120,6 +120,9 @@ fn conventions_pair_sources_with_integration_and_inline_tests() {
     let conventions: TestConventions = produce("rust", &fixture("rust"));
     assert!(conventions.is_test("tests/ledger.rs"));
     assert!(conventions.is_test("crates/foo/tests/it.rs"));
+    // Cargo builds each bench as its own crate that only `cargo bench` runs, beside the tests.
+    assert!(conventions.is_test("benches/combinations.rs"));
+    assert!(conventions.is_test("crates/foo/benches/parse.rs"));
     assert!(!conventions.is_test("src/pricing.rs"));
     assert_eq!(
         conventions.test_files_for("src/lib.rs"),

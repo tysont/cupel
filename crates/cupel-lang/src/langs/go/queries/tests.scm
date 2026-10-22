@@ -91,6 +91,105 @@
   (#any-of? @_t "t" "b" "tb")
   (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow"))
 
+; `if !reflect.DeepEqual(got, want) { t.Errorf(…) }` and `bytes`, `slices`, `maps`, and go-cmp's
+; `Equal`: the standard library's equality pins the value.
+(if_statement
+  condition: (unary_expression
+    operator: "!"
+    operand: (call_expression
+      function: (selector_expression
+        operand: (identifier) @_package
+        field: (field_identifier) @_equal)))
+  consequence: (block
+    (statement_list
+      (expression_statement
+        (call_expression
+          function: (selector_expression
+            operand: (identifier) @_t
+            field: (field_identifier) @_fail)) @test.assertion @assertion.idiom.equal)))
+  (#any-of? @_package "reflect" "bytes" "slices" "maps" "cmp")
+  (#any-of? @_equal "DeepEqual" "Equal")
+  (#any-of? @_t "t" "b" "tb")
+  (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow"))
+
+; `if !errors.Is(err, ErrX) { t.Errorf(…) }`: the error must be that one.
+(if_statement
+  condition: (unary_expression
+    operator: "!"
+    operand: (call_expression
+      function: (selector_expression
+        operand: (identifier) @_errors
+        field: (field_identifier) @_is)))
+  consequence: (block
+    (statement_list
+      (expression_statement
+        (call_expression
+          function: (selector_expression
+            operand: (identifier) @_t
+            field: (field_identifier) @_fail)) @test.assertion @assertion.idiom.error-is)))
+  (#eq? @_errors "errors")
+  (#any-of? @_is "Is" "As")
+  (#any-of? @_t "t" "b" "tb")
+  (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow"))
+
+; `if ok && got != want { t.Errorf(…) }`: a compound condition pinning a value.
+(if_statement
+  condition: (binary_expression
+    operator: ["&&" "||"]
+    (binary_expression
+      operator: "!="
+      right: (_) @_want))
+  consequence: (block
+    (statement_list
+      (expression_statement
+        (call_expression
+          function: (selector_expression
+            operand: (identifier) @_t
+            field: (field_identifier) @_fail)) @test.assertion @assertion.idiom.equal)))
+  (#not-eq? @_want "nil")
+  (#any-of? @_t "t" "b" "tb")
+  (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow"))
+
+; `switch { case got != want: t.Errorf(…) }`, alone or in a compound condition, and
+; `case err != nil:`, the same idioms as the `if` forms.
+(expression_case
+  value: (expression_list
+    [
+      (binary_expression
+        operator: "!="
+        right: (_) @_want)
+      (binary_expression
+        operator: ["&&" "||"]
+        (binary_expression
+          operator: "!="
+          right: (_) @_want))
+    ])
+  (statement_list
+    (expression_statement
+      (call_expression
+        function: (selector_expression
+          operand: (identifier) @_t
+          field: (field_identifier) @_fail)) @test.assertion @assertion.idiom.equal))
+  (#not-eq? @_want "nil")
+  (#any-of? @_t "t" "b" "tb")
+  (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow"))
+
+(expression_case
+  value: (expression_list
+    (binary_expression
+      left: (identifier) @_err
+      operator: "!="
+      right: (nil)))
+  (statement_list
+    (expression_statement
+      (call_expression
+        function: (selector_expression
+          operand: (identifier) @_t
+          field: (field_identifier) @_fail)) @test.assertion @assertion.idiom.no-error))
+  (#match? @_err "^err")
+  (#any-of? @_t "t" "b" "tb")
+  (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow"))
+
 ; `if got == unwanted { t.Errorf(…) }`: one value is ruled out.
 (if_statement
   condition: (binary_expression
@@ -130,6 +229,30 @@
     operand: (identifier) @_package
     field: (field_identifier) @assertion.name)
   (#any-of? @_package "assert" "require" "snaps")) @test.assertion
+
+; Helpers: a call that hands the test's `t` to a function of the package (`expectSuccess(t,
+; err)`, `check(t, got, want)`) delegates its assertions to it, as `t.Helper()` marks; a
+; constructor (`newServer(t)`) sets up. A subtest run from a named function (`t.Run(name,
+; tc.test)`) asserts in that function; one run from a literal is part of its case already.
+(call_expression
+  function: (identifier) @_helper
+  arguments: (argument_list
+    (identifier) @_t)
+  (#any-of? @_t "t" "b" "tb")
+  (#not-match? @_helper "^[Nn]ew")) @test.assertion @assertion.idiom.helper
+
+(call_expression
+  function: (selector_expression
+    operand: (identifier) @_t
+    field: (field_identifier) @_run)
+  arguments: (argument_list
+    (_)
+    [
+      (identifier)
+      (selector_expression)
+    ] .)
+  (#any-of? @_t "t" "b" "tb")
+  (#eq? @_run "Run")) @test.assertion @assertion.idiom.helper
 
 ; testify mock expectations.
 (call_expression

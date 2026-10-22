@@ -114,8 +114,10 @@ should-panic = { kind = "throws", strength = "strong" }
 # the shrunk counterexample (ADR-095).
 property = { kind = "custom", strength = "strong" }
 
+# Integration tests and benches: Cargo builds each file in `tests/` and `benches/` as a crate of its
+# own that only `cargo test` or `cargo bench` runs.
 [conventions]
-test_globs = ["**/tests/**/*.rs"]
+test_globs = ["**/tests/**/*.rs", "**/benches/**/*.rs"]
 
 # An integration test named after the module it tests.
 [[conventions.tests_for]]

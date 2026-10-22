@@ -8,7 +8,8 @@ use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     DynamicAccess, DynamicReach, EdgeKind, ImportEdge, ImportTarget, LiveRoot, ModuleGraph,
     NormNode, NormTree, NormalizedSymbol, Reference, ReferenceKind, ReferenceTarget, References,
-    RootImports, RootReason, Roots, Span, SymbolDef, SymbolKind, Symbols, Visibility,
+    RootImports, RootReason, Roots, Span, SymbolDef, SymbolKind, Symbols, TestConventions,
+    Visibility,
 };
 use cupel_core::{
     ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts,
@@ -146,6 +147,8 @@ struct World {
     roots: Vec<(usize, RootReason)>,
     edges: Vec<ImportEdge>,
     references: References,
+    /// The globs of test files; no `TestConventions` fact when empty.
+    test_globs: Vec<String>,
 }
 
 impl World {
@@ -161,7 +164,13 @@ impl World {
             roots,
             edges: Vec::new(),
             references: References::default(),
+            test_globs: Vec::new(),
         }
+    }
+
+    fn tests(mut self, globs: &[&str]) -> Self {
+        self.test_globs = globs.iter().map(|glob| (*glob).to_owned()).collect();
+        self
     }
 
     fn refer(mut self, reference: Reference) -> Self {
@@ -225,6 +234,14 @@ impl World {
             })
             .unwrap();
         facts.insert(self.references.clone()).unwrap();
+        if !self.test_globs.is_empty() {
+            facts
+                .insert(TestConventions {
+                    test_globs: self.test_globs.clone(),
+                    pairs: Vec::new(),
+                })
+                .unwrap();
+        }
         facts
     }
 
@@ -280,7 +297,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
                 FactKind::Roots,
                 FactKind::References
             ],
-            wants: vec![],
+            wants: vec![FactKind::TestConventions],
             tier: 0,
             cost: CostClass::Quick,
             kinds: vec![
@@ -476,6 +493,26 @@ fn tests_and_framework_hooks_root_their_files_but_exports_alone_do_not() {
     assert_eq!(
         support::kinds(&findings),
         support::pairs(&[("e::api", "dead.export")])
+    );
+}
+
+#[test]
+fn a_test_file_roots_its_module_though_no_case_in_it_is_a_test() {
+    // The runner reaches a test file by its path, not by an import: Cargo builds each
+    // `tests/*.rs` and `benches/*.rs` as its own crate, and a macro may write its cases.
+    let world = World::with(vec![
+        method(public("tests/laziness.x", "laziness", "next", 1)),
+        private("tests/laziness.x", "laziness", "helper", 5),
+        private("benches/combinations.x", "combinations", "comb_for1", 1),
+        private("src/orphan.x", "orphan", "lonely", 1),
+    ])
+    .tests(&["tests/**", "benches/**"])
+    .refer(named("tests/laziness.x", 9, "helper"))
+    .refer(named("benches/combinations.x", 9, "comb_for1"));
+    let (_, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("orphan::lonely", "dead.symbol")])
     );
 }
 

@@ -69,6 +69,20 @@ const PACKAGE_EDGES: &[Edge<'static>] = &[
         false,
     ),
     (
+        "ledger_helpers_test.go",
+        4,
+        "reflect",
+        "external:std",
+        false,
+    ),
+    (
+        "ledger_helpers_test.go",
+        5,
+        "testing",
+        "external:std",
+        false,
+    ),
+    (
         "ledger_property_test.go",
         4,
         "testing",
@@ -280,5 +294,5 @@ fn every_go_import_is_an_import_edge() {
         Vec::<&(String, String, EdgeKind)>::new(),
         "Go has neither module declarations nor re-exports"
     );
-    assert_eq!(edges.len(), 38, "every fixture import is listed");
+    assert_eq!(edges.len(), 40, "every fixture import is listed");
 }

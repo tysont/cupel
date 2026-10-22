@@ -148,6 +148,38 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 15
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 15
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 19
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 19
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "ledger_property_test.go",
         "line": 8
       }
