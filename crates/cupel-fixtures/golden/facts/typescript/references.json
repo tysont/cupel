@@ -97,6 +97,485 @@
       "text": "eval(source)"
     }
   ],
+  "imports": [
+    {
+      "edge_kind": "import",
+      "from": "bin/cli.ts",
+      "line": 2,
+      "names": [
+        "add"
+      ],
+      "relative": true,
+      "specifier": "../src/math",
+      "target": {
+        "kind": "file",
+        "path": "src/math.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/__tests__/pricing.test.ts",
+      "line": 1,
+      "names": [
+        "describe",
+        "expect",
+        "jest",
+        "test"
+      ],
+      "relative": false,
+      "specifier": "@jest/globals",
+      "target": {
+        "kind": "external",
+        "package": "@jest/globals"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/__tests__/pricing.test.ts",
+      "line": 2,
+      "names": [
+        "discounted",
+        "tally"
+      ],
+      "relative": true,
+      "specifier": "../pricing",
+      "target": {
+        "kind": "file",
+        "path": "src/pricing.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_cycle/alpha.ts",
+      "line": 1,
+      "names": [
+        "BETA"
+      ],
+      "relative": true,
+      "specifier": "./beta",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_cycle/beta.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_cycle/beta.ts",
+      "line": 1,
+      "names": [
+        "ALPHA"
+      ],
+      "relative": true,
+      "specifier": "./alpha",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_cycle/alpha.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_layers/domain/order.ts",
+      "line": 1,
+      "names": [
+        "Store"
+      ],
+      "relative": true,
+      "specifier": "../infra/store",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_layers/infra/store.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_layers/port.ts",
+      "line": 1,
+      "names": [
+        "Order"
+      ],
+      "relative": true,
+      "specifier": "./domain/order",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_layers/domain/order.ts"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "src/index.ts",
+      "line": 1,
+      "relative": true,
+      "specifier": "./shapes/geometry",
+      "target": {
+        "kind": "file",
+        "path": "src/shapes/geometry.ts"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "src/index.ts",
+      "line": 14,
+      "names": [
+        "doubled"
+      ],
+      "relative": true,
+      "specifier": "./rates",
+      "target": {
+        "kind": "file",
+        "path": "src/rates.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 1,
+      "names": [
+        "readFileSync"
+      ],
+      "relative": false,
+      "specifier": "node:fs",
+      "target": {
+        "kind": "external",
+        "package": "node:fs"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 2,
+      "names": [
+        "z"
+      ],
+      "relative": false,
+      "specifier": "zod",
+      "target": {
+        "kind": "external",
+        "package": "zod"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 3,
+      "relative": false,
+      "specifier": "fs",
+      "target": {
+        "kind": "external",
+        "package": "node:fs"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 4,
+      "names": [
+        "add"
+      ],
+      "relative": true,
+      "specifier": "./math",
+      "target": {
+        "kind": "file",
+        "path": "src/math.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 5,
+      "names": [
+        "Circle"
+      ],
+      "relative": false,
+      "specifier": "@app/shapes/geometry",
+      "target": {
+        "kind": "file",
+        "path": "src/shapes/geometry.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 6,
+      "names": [
+        "scale"
+      ],
+      "relative": true,
+      "specifier": "./shapes",
+      "target": {
+        "kind": "file",
+        "path": "src/shapes/index.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 7,
+      "names": [
+        "Registry"
+      ],
+      "relative": true,
+      "specifier": "./plugin.js",
+      "target": {
+        "kind": "file",
+        "path": "src/plugin.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 8,
+      "names": [
+        "square"
+      ],
+      "relative": false,
+      "specifier": "@ledger/shapes",
+      "target": {
+        "kind": "file",
+        "path": "packages/shapes/src/index.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.ts",
+      "line": 9,
+      "names": [
+        "generated"
+      ],
+      "relative": true,
+      "specifier": "./generated",
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/math.quality.test.ts",
+      "line": 1,
+      "names": [
+        "describe",
+        "expect",
+        "it",
+        "vi"
+      ],
+      "relative": false,
+      "specifier": "vitest",
+      "target": {
+        "kind": "external",
+        "package": "vitest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/math.quality.test.ts",
+      "line": 2,
+      "names": [
+        "add",
+        "range"
+      ],
+      "relative": true,
+      "specifier": "./math",
+      "target": {
+        "kind": "file",
+        "path": "src/math.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/math.test.ts",
+      "line": 1,
+      "names": [
+        "beforeEach",
+        "describe",
+        "expect",
+        "it",
+        "vi"
+      ],
+      "relative": false,
+      "specifier": "vitest",
+      "target": {
+        "kind": "external",
+        "package": "vitest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/math.test.ts",
+      "line": 2,
+      "names": [
+        "add",
+        "range"
+      ],
+      "relative": true,
+      "specifier": "./math",
+      "target": {
+        "kind": "file",
+        "path": "src/math.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/rates.ts",
+      "line": 1,
+      "names": [
+        "importedRate"
+      ],
+      "relative": true,
+      "specifier": "./references",
+      "target": {
+        "kind": "file",
+        "path": "src/references.ts"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "src/shapes/index.ts",
+      "line": 1,
+      "relative": true,
+      "specifier": "./geometry",
+      "target": {
+        "kind": "file",
+        "path": "src/shapes/geometry.ts"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "src/shapes/index.ts",
+      "line": 2,
+      "relative": true,
+      "specifier": "../math",
+      "target": {
+        "kind": "file",
+        "path": "src/math.ts"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/widget.test.tsx",
+      "line": 1,
+      "names": [
+        "expect",
+        "it"
+      ],
+      "relative": false,
+      "specifier": "vitest",
+      "target": {
+        "kind": "external",
+        "package": "vitest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/widget.test.tsx",
+      "line": 2,
+      "names": [
+        "Badge"
+      ],
+      "relative": true,
+      "specifier": "./widget",
+      "target": {
+        "kind": "file",
+        "path": "src/widget.tsx"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "assert",
+          "name": "default"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "test/decide.test.ts",
+      "line": 1,
+      "names": [
+        "default"
+      ],
+      "relative": false,
+      "specifier": "node:assert/strict",
+      "target": {
+        "kind": "external",
+        "package": "node:assert"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/decide.test.ts",
+      "line": 2,
+      "names": [
+        "test"
+      ],
+      "relative": false,
+      "specifier": "node:test",
+      "target": {
+        "kind": "external",
+        "package": "node:test"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/decide.test.ts",
+      "line": 3,
+      "names": [
+        "classify",
+        "parseCents"
+      ],
+      "relative": true,
+      "specifier": "../src/decide",
+      "target": {
+        "kind": "file",
+        "path": "src/decide.ts"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "fc",
+          "name": "default"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "test/properties.test.ts",
+      "line": 1,
+      "names": [
+        "default"
+      ],
+      "relative": false,
+      "specifier": "fast-check",
+      "target": {
+        "kind": "external",
+        "package": "fast-check"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/properties.test.ts",
+      "line": 2,
+      "names": [
+        "expect",
+        "test"
+      ],
+      "relative": false,
+      "specifier": "vitest",
+      "target": {
+        "kind": "external",
+        "package": "vitest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/properties.test.ts",
+      "line": 3,
+      "names": [
+        "add"
+      ],
+      "relative": true,
+      "specifier": "../src/math",
+      "target": {
+        "kind": "file",
+        "path": "src/math.ts"
+      }
+    }
+  ],
   "references": [
     {
       "file": "bin/cli.ts",

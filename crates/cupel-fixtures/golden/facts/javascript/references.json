@@ -97,6 +97,504 @@
       "text": "eval(source)"
     }
   ],
+  "imports": [
+    {
+      "edge_kind": "import",
+      "from": "bin/cli.js",
+      "line": 2,
+      "names": [
+        "add"
+      ],
+      "relative": true,
+      "specifier": "../src/math.js",
+      "target": {
+        "kind": "file",
+        "path": "src/math.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_cycle/alpha.js",
+      "line": 1,
+      "names": [
+        "BETA"
+      ],
+      "relative": true,
+      "specifier": "./beta.js",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_cycle/beta.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_cycle/beta.js",
+      "line": 1,
+      "names": [
+        "ALPHA"
+      ],
+      "relative": true,
+      "specifier": "./alpha.js",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_cycle/alpha.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_layers/domain/order.js",
+      "line": 1,
+      "names": [
+        "EMPTY_STORE"
+      ],
+      "relative": true,
+      "specifier": "../infra/store.js",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_layers/infra/store.js"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "src/index.js",
+      "line": 1,
+      "relative": true,
+      "specifier": "./shapes/geometry.js",
+      "target": {
+        "kind": "file",
+        "path": "src/shapes/geometry.js"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "src/index.js",
+      "line": 7,
+      "names": [
+        "doubled"
+      ],
+      "relative": true,
+      "specifier": "./rates.js",
+      "target": {
+        "kind": "file",
+        "path": "src/rates.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 1,
+      "names": [
+        "readFile"
+      ],
+      "relative": false,
+      "specifier": "node:fs/promises",
+      "target": {
+        "kind": "external",
+        "package": "node:fs"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "path",
+          "name": "default"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 2,
+      "names": [
+        "default"
+      ],
+      "relative": false,
+      "specifier": "path",
+      "target": {
+        "kind": "external",
+        "package": "node:path"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "fp",
+          "name": "default"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 3,
+      "names": [
+        "default"
+      ],
+      "relative": false,
+      "specifier": "lodash/fp",
+      "target": {
+        "kind": "external",
+        "package": "lodash"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 4,
+      "names": [
+        "add"
+      ],
+      "relative": true,
+      "specifier": "./math.js",
+      "target": {
+        "kind": "file",
+        "path": "src/math.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 5,
+      "names": [
+        "toCents"
+      ],
+      "relative": false,
+      "specifier": "#money/cents",
+      "target": {
+        "kind": "file",
+        "path": "src/money/cents.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 6,
+      "names": [
+        "square"
+      ],
+      "relative": false,
+      "specifier": "@ledger/shapes",
+      "target": {
+        "kind": "file",
+        "path": "packages/shapes/lib/index.js"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "side",
+          "name": "square"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 7,
+      "names": [
+        "square"
+      ],
+      "relative": false,
+      "specifier": "@ledger/shapes/square",
+      "target": {
+        "kind": "file",
+        "path": "packages/shapes/lib/square.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 8,
+      "names": [
+        "generated"
+      ],
+      "relative": true,
+      "specifier": "./generated.js",
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger.js",
+      "line": 12,
+      "relative": true,
+      "specifier": "./report.cjs",
+      "target": {
+        "kind": "file",
+        "path": "src/report.cjs"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/rates.js",
+      "line": 1,
+      "names": [
+        "importedRate"
+      ],
+      "relative": true,
+      "specifier": "./references.js",
+      "target": {
+        "kind": "file",
+        "path": "src/references.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/report.cjs",
+      "line": 1,
+      "relative": true,
+      "specifier": "./format.cjs",
+      "target": {
+        "kind": "file",
+        "path": "src/format.cjs"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "assert",
+          "name": "default"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "test/decide.test.js",
+      "line": 1,
+      "names": [
+        "default"
+      ],
+      "relative": false,
+      "specifier": "node:assert/strict",
+      "target": {
+        "kind": "external",
+        "package": "node:assert"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/decide.test.js",
+      "line": 2,
+      "names": [
+        "mock",
+        "test"
+      ],
+      "relative": false,
+      "specifier": "node:test",
+      "target": {
+        "kind": "external",
+        "package": "node:test"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/decide.test.js",
+      "line": 3,
+      "names": [
+        "classify",
+        "label"
+      ],
+      "relative": true,
+      "specifier": "../src/decide.js",
+      "target": {
+        "kind": "file",
+        "path": "src/decide.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/format.spec.js",
+      "line": 1,
+      "relative": false,
+      "specifier": "chai",
+      "target": {
+        "kind": "external",
+        "package": "chai"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/format.spec.js",
+      "line": 2,
+      "relative": false,
+      "specifier": "sinon",
+      "target": {
+        "kind": "external",
+        "package": "sinon"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/format.spec.js",
+      "line": 3,
+      "relative": true,
+      "specifier": "../src/format.cjs",
+      "target": {
+        "kind": "file",
+        "path": "src/format.cjs"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/math.quality.test.js",
+      "line": 1,
+      "names": [
+        "describe",
+        "expect",
+        "it",
+        "vi"
+      ],
+      "relative": false,
+      "specifier": "vitest",
+      "target": {
+        "kind": "external",
+        "package": "vitest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/math.quality.test.js",
+      "line": 2,
+      "names": [
+        "add",
+        "range"
+      ],
+      "relative": true,
+      "specifier": "../src/math.js",
+      "target": {
+        "kind": "file",
+        "path": "src/math.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/math.quality.test.js",
+      "line": 3,
+      "names": [
+        "parseCents"
+      ],
+      "relative": true,
+      "specifier": "../src/decide.js",
+      "target": {
+        "kind": "file",
+        "path": "src/decide.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/math.test.js",
+      "line": 1,
+      "names": [
+        "beforeEach",
+        "describe",
+        "expect",
+        "it",
+        "vi"
+      ],
+      "relative": false,
+      "specifier": "vitest",
+      "target": {
+        "kind": "external",
+        "package": "vitest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/math.test.js",
+      "line": 2,
+      "names": [
+        "add",
+        "range"
+      ],
+      "relative": true,
+      "specifier": "../src/math.js",
+      "target": {
+        "kind": "file",
+        "path": "src/math.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/math.test.js",
+      "line": 3,
+      "names": [
+        "parseCents"
+      ],
+      "relative": true,
+      "specifier": "../src/decide.js",
+      "target": {
+        "kind": "file",
+        "path": "src/decide.js"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "fc",
+          "name": "default"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "test/properties.test.js",
+      "line": 1,
+      "names": [
+        "default"
+      ],
+      "relative": false,
+      "specifier": "fast-check",
+      "target": {
+        "kind": "external",
+        "package": "fast-check"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/properties.test.js",
+      "line": 2,
+      "names": [
+        "expect",
+        "test"
+      ],
+      "relative": false,
+      "specifier": "vitest",
+      "target": {
+        "kind": "external",
+        "package": "vitest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/properties.test.js",
+      "line": 3,
+      "names": [
+        "add"
+      ],
+      "relative": true,
+      "specifier": "../src/math.js",
+      "target": {
+        "kind": "file",
+        "path": "src/math.js"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "test/report.test.js",
+      "line": 1,
+      "relative": true,
+      "specifier": "../src/report.cjs",
+      "target": {
+        "kind": "file",
+        "path": "src/report.cjs"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "packages/shapes/lib/index.js",
+      "line": 1,
+      "names": [
+        "square"
+      ],
+      "relative": true,
+      "specifier": "./square.js",
+      "target": {
+        "kind": "file",
+        "path": "packages/shapes/lib/square.js"
+      }
+    }
+  ],
   "references": [
     {
       "file": "bin/cli.js",
