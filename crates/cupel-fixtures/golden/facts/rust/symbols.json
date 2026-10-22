@@ -2,6 +2,28 @@
   "symbols": [
     {
       "body": {
+        "col": 23,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 12
+      },
+      "display": "benches::balance::balance_of_three",
+      "file": "benches/balance.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "balance_of_three",
+      "namespace": "benches::balance",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 14,
+        "line": 12
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
         "col": 33,
         "end_col": 2,
         "end_line": 3,
@@ -926,6 +948,28 @@
     },
     {
       "body": {
+        "col": 23,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 2
+      },
+      "display": "rate_table::first",
+      "file": "src/rate_table.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "first",
+      "namespace": "rate_table",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 2
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 36,
         "end_col": 2,
         "end_line": 7,
@@ -1757,6 +1801,94 @@
         "end_col": 2,
         "end_line": 97,
         "line": 95
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 51,
+        "end_col": 2,
+        "end_line": 101,
+        "line": 99
+      },
+      "display": "tests::quality_signals::expect_balance",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "expect_balance",
+      "namespace": "tests::quality_signals",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 101,
+        "line": 99
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 2,
+        "end_line": 106,
+        "line": 104
+      },
+      "display": "tests::quality_signals::a_helper_of_this_file_that_asserts_is_an_assertion",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "a_helper_of_this_file_that_asserts_is_an_assertion",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 106,
+        "line": 104
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 55,
+        "end_col": 2,
+        "end_line": 120,
+        "line": 116
+      },
+      "display": "tests::quality_signals::an_assertion_in_a_macro_argument_is_an_assertion",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "an_assertion_in_a_macro_argument_is_an_assertion",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 120,
+        "line": 116
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 2,
+        "end_line": 132,
+        "line": 123
+      },
+      "display": "tests::quality_signals::an_assertion_in_a_macro_repetition_is_an_assertion",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "an_assertion_in_a_macro_repetition_is_an_assertion",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 132,
+        "line": 123
       },
       "visibility": "private"
     }

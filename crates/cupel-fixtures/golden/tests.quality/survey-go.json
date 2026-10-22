@@ -7,15 +7,15 @@
       "findings": 11,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 1.125,
+        "assertion_density": 1.1111111111111112,
         "no_assertion": 2.0,
-        "weak_ratio": 0.4074074074074074
+        "weak_ratio": 0.36666666666666664
       },
       "oracle": null,
       "score": {
-        "n": 24,
+        "n": 27,
         "unit": "assertion_density",
-        "value": 1.125
+        "value": 1.1111111111111112
       },
       "skipped": null,
       "status": "fail",
@@ -521,6 +521,38 @@
           "lang": "go",
           "rank": 3,
           "target": {
+            "display": "ledger.TestABalanceCheckedInASwitch",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 30,
+              "file": "ledger_helpers_test.go",
+              "line": 25
+            },
+            "symbol": "sh_ca12b4adc6ecd32e"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 4,
+          "target": {
+            "display": "ledger.TestAHelperHandedTheTestAsserts",
+            "location": {
+              "col": 1,
+              "end_col": 2,
+              "end_line": 17,
+              "file": "ledger_helpers_test.go",
+              "line": 15
+            },
+            "symbol": "sh_23adac990187697c"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "go",
+          "rank": 5,
+          "target": {
             "display": "ledger.TestBalanceOfOneEntryIsTheEntry",
             "location": {
               "col": 1,
@@ -535,7 +567,7 @@
         },
         {
           "lang": "go",
-          "rank": 4,
+          "rank": 6,
           "target": {
             "display": "ledger.TestBlankAmountsAreRejected",
             "location": {
@@ -551,7 +583,7 @@
         },
         {
           "lang": "go",
-          "rank": 5,
+          "rank": 7,
           "target": {
             "display": "ledger.TestClassify",
             "location": {
@@ -567,7 +599,7 @@
         },
         {
           "lang": "go",
-          "rank": 6,
+          "rank": 8,
           "target": {
             "display": "ledger.TestClassifyingRuns",
             "location": {
@@ -583,7 +615,7 @@
         },
         {
           "lang": "go",
-          "rank": 7,
+          "rank": 9,
           "target": {
             "display": "ledger.TestComputedEntriesCountTowardTheBalance",
             "location": {
@@ -599,7 +631,7 @@
         },
         {
           "lang": "go",
-          "rank": 8,
+          "rank": 10,
           "target": {
             "display": "ledger.TestDepositAddsToTheBalance",
             "location": {
@@ -612,41 +644,9 @@
             "symbol": "sh_bd5d9bc2c5699215"
           },
           "value": 0.0
-        },
-        {
-          "lang": "go",
-          "rank": 9,
-          "target": {
-            "display": "ledger.TestDepositsAccumulate",
-            "location": {
-              "col": 1,
-              "end_col": 2,
-              "end_line": 59,
-              "file": "ledger_quality_test.go",
-              "line": 53
-            },
-            "symbol": "sh_64f25c365ab1b44d"
-          },
-          "value": 0.0
-        },
-        {
-          "lang": "go",
-          "rank": 10,
-          "target": {
-            "display": "ledger.TestDepositsKeepTheOwner",
-            "location": {
-              "col": 1,
-              "end_col": 2,
-              "end_line": 51,
-              "file": "ledger_quality_test.go",
-              "line": 46
-            },
-            "symbol": "sh_009a1b16914c5764"
-          },
-          "value": 0.0
         }
       ],
-      "measured": 24,
+      "measured": 27,
       "metric": "mock_density",
       "per": "symbol",
       "summary": "Test doubles per test as a percentage of its doubles plus assertions.",

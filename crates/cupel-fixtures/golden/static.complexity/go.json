@@ -15,7 +15,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 86,
+        "n": 90,
         "unit": "cyclomatic_max",
         "value": 11.0
       },
@@ -272,7 +272,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 23,
+      "files": 24,
       "languages": [
         "go"
       ],
@@ -280,7 +280,7 @@
       "roots": [
         "."
       ],
-      "symbols": 86
+      "symbols": 90
     },
     "seed": "<seed>",
     "started": "<timestamp>",

@@ -16,6 +16,7 @@
     }
   ],
   "test_globs": [
-    "**/tests/**/*.rs"
+    "**/tests/**/*.rs",
+    "**/benches/**/*.rs"
   ]
 }

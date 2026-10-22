@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::syntax::{
     DynamicAccess, DynamicReach, ImportTarget, ModuleGraph, NormTree, Reference, References,
-    RootReason, Roots, SymbolDef, SymbolKey, SymbolKind, Symbols,
+    RootReason, Roots, SymbolDef, SymbolKey, SymbolKind, Symbols, TestConventions,
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
@@ -92,7 +92,7 @@ impl StaticDeadCode {
                     FactKind::Roots,
                     FactKind::References,
                 ],
-                wants: vec![],
+                wants: vec![FactKind::TestConventions],
                 findings: finding_kinds(),
                 metrics: metrics(),
                 settings: SETTINGS.specs(),
@@ -165,7 +165,12 @@ impl Check for StaticDeadCode {
         let symbols = facts.get::<Symbols>()?;
         let hashes = hashes_by_symbol(facts.get::<NormTree>()?);
         let roots = facts.get::<Roots>()?;
-        let reachability = Reachability::of(&symbols.symbols, roots, facts.get::<ModuleGraph>()?);
+        let reachability = Reachability::of(
+            &symbols.symbols,
+            roots,
+            facts.get::<ModuleGraph>()?,
+            facts.get::<TestConventions>().ok(),
+        );
         let usage = Usage::of(facts.get::<References>()?, roots);
         let mut tally = Tally::default();
         let mut ordered: Vec<&SymbolDef> = symbols.symbols.iter().collect();
@@ -408,11 +413,22 @@ struct Reachability<'a> {
 }
 
 impl<'a> Reachability<'a> {
-    fn of(symbols: &'a [SymbolDef], roots: &Roots, graph: &'a ModuleGraph) -> Self {
+    fn of(
+        symbols: &'a [SymbolDef],
+        roots: &Roots,
+        graph: &'a ModuleGraph,
+        conventions: Option<&TestConventions>,
+    ) -> Self {
         let module_of = module_namespaces(symbols);
         let mut modules: BTreeMap<&str, Module<'_>> = BTreeMap::new();
         for (file, namespace) in &module_of {
-            modules.entry(namespace).or_default().files.insert(file);
+            let module = modules.entry(namespace).or_default();
+            module.files.insert(file);
+            // A test runner reaches a test file by its path, whether or not a case in it is
+            // one the facts name (a macro may write them).
+            if conventions.is_some_and(|conventions| conventions.is_test(file)) {
+                module.rooted = true;
+            }
         }
         let by_key: HashMap<SymbolKey, &SymbolDef> = symbols
             .iter()

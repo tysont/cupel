@@ -161,7 +161,7 @@ fn main_init_test_main_exports_and_tests_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixture_is_a_test_root() {
-    assert_every_case_is_a_test_root("go", 24);
+    assert_every_case_is_a_test_root("go", 27);
 }
 
 #[test]

@@ -85,7 +85,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 23,
+      "files": 24,
       "languages": [
         "go"
       ],
@@ -93,7 +93,7 @@
       "roots": [
         "."
       ],
-      "symbols": 86
+      "symbols": 90
     },
     "seed": "<seed>",
     "started": "<timestamp>",

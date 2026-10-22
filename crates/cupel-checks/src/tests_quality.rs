@@ -127,9 +127,9 @@ struct TestLogic {
     loops: u32,
     /// Loops over a table of cases written in place: parametrization, not logic (ADR-069).
     tables: u32,
-    /// `if` and `else if` branches.
+    /// `if` and `else if` branches and switch or match arms.
     branches: u32,
-    /// Switch cases, conditional expressions, and exception handlers.
+    /// Conditional expressions and exception handlers.
     alternatives: u32,
     /// Branches that may be guarded failure calls or skips: one per assertion and skip marker.
     guards: u32,
@@ -411,12 +411,10 @@ impl LogicCount {
         Self {
             loops: loops(false),
             tables: loops(true),
-            branches: of_kinds(&[DecisionKind::Branch]),
-            alternatives: of_kinds(&[
-                DecisionKind::Case,
-                DecisionKind::Ternary,
-                DecisionKind::Catch,
-            ]),
+            // A case arm, like an `if`, may be the guard of one failure call
+            // (`case got != want: t.Errorf(…)`).
+            branches: of_kinds(&[DecisionKind::Branch, DecisionKind::Case]),
+            alternatives: of_kinds(&[DecisionKind::Ternary, DecisionKind::Catch]),
             guards: count(case.assertions.iter()) + u32::from(case.skip.is_some()),
         }
     }

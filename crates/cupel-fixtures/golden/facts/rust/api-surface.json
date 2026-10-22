@@ -649,6 +649,18 @@
       }
     },
     {
+      "file": "src/rate_table.rs",
+      "kind": "function",
+      "path": "rate_table::first",
+      "signature": "() -> i64",
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 2
+      }
+    },
+    {
       "file": "src/rates.rs",
       "kind": "function",
       "path": "rates::doubled",

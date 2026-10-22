@@ -2,6 +2,161 @@
   "dynamic": [],
   "references": [
     {
+      "file": "benches/balance.rs",
+      "from": null,
+      "kind": "name",
+      "name": "bench_main",
+      "span": {
+        "col": 14,
+        "end_col": 24,
+        "end_line": 4,
+        "line": 4
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": null,
+      "kind": "member",
+      "name": "main",
+      "span": {
+        "col": 12,
+        "end_col": 16,
+        "end_line": 6,
+        "line": 6
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "name",
+      "name": "std",
+      "span": {
+        "col": 5,
+        "end_col": 8,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "member",
+      "name": "hint",
+      "span": {
+        "col": 10,
+        "end_col": 14,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "member",
+      "name": "black_box",
+      "span": {
+        "col": 16,
+        "end_col": 25,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "name",
+      "name": "ledger",
+      "span": {
+        "col": 26,
+        "end_col": 32,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      },
+      "kind": "member",
+      "name": "balance",
+      "span": {
+        "col": 34,
+        "end_col": 41,
+        "end_line": 13,
+        "line": 13
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": null,
+      "kind": "name",
+      "name": "bench_main",
+      "span": {
+        "col": 1,
+        "end_col": 11,
+        "end_line": 16,
+        "line": 16
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "benches/balance.rs",
+      "from": null,
+      "kind": "member",
+      "name": "balance_of_three",
+      "span": {
+        "col": 13,
+        "end_col": 29,
+        "end_line": 16,
+        "line": 16
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
       "file": "shapes/src/lib.rs",
       "from": {
         "col": 1,
@@ -7213,6 +7368,51 @@
         "end_col": 15,
         "end_line": 36,
         "line": 36
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "from": null,
+      "kind": "name",
+      "name": "path",
+      "span": {
+        "col": 3,
+        "end_col": 7,
+        "end_line": 37,
+        "line": 37
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "from": null,
+      "kind": "text",
+      "name": "rs",
+      "span": {
+        "col": 11,
+        "end_col": 24,
+        "end_line": 37,
+        "line": 37
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "from": null,
+      "kind": "name",
+      "name": "table",
+      "span": {
+        "col": 5,
+        "end_col": 10,
+        "end_line": 38,
+        "line": 38
       },
       "target": {
         "kind": "unresolved"
@@ -14932,6 +15132,443 @@
             "line": 89
           }
         ]
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 99
+      },
+      "kind": "name",
+      "name": "entries",
+      "span": {
+        "col": 19,
+        "end_col": 26,
+        "end_line": 99,
+        "line": 99
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 99
+      },
+      "kind": "name",
+      "name": "expected",
+      "span": {
+        "col": 36,
+        "end_col": 44,
+        "end_line": 99,
+        "line": 99
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 99
+      },
+      "kind": "name",
+      "name": "assert_eq",
+      "span": {
+        "col": 5,
+        "end_col": 14,
+        "end_line": 100,
+        "line": 100
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 99
+      },
+      "kind": "member",
+      "name": "balance",
+      "span": {
+        "col": 16,
+        "end_col": 23,
+        "end_line": 100,
+        "line": 100
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 99
+      },
+      "kind": "member",
+      "name": "entries",
+      "span": {
+        "col": 24,
+        "end_col": 31,
+        "end_line": 100,
+        "line": 100
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 99
+      },
+      "kind": "member",
+      "name": "expected",
+      "span": {
+        "col": 34,
+        "end_col": 42,
+        "end_line": 100,
+        "line": 100
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "attribute",
+      "name": "test",
+      "span": {
+        "col": 1,
+        "end_col": 8,
+        "end_line": 103,
+        "line": 103
+      },
+      "target": {
+        "kind": "local",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "tests/quality_signals.rs",
+            "line": 104
+          }
+        ]
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "name",
+      "name": "test",
+      "span": {
+        "col": 3,
+        "end_col": 7,
+        "end_line": 103,
+        "line": 103
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 104
+      },
+      "kind": "name",
+      "name": "expect_balance",
+      "span": {
+        "col": 5,
+        "end_col": 19,
+        "end_line": 105,
+        "line": 105
+      },
+      "target": {
+        "kind": "local",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "tests/quality_signals.rs",
+            "line": 99
+          }
+        ]
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "name",
+      "name": "with_entries",
+      "span": {
+        "col": 14,
+        "end_col": 26,
+        "end_line": 108,
+        "line": 108
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "attribute",
+      "name": "test",
+      "span": {
+        "col": 1,
+        "end_col": 8,
+        "end_line": 115,
+        "line": 115
+      },
+      "target": {
+        "kind": "local",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "tests/quality_signals.rs",
+            "line": 116
+          }
+        ]
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "name",
+      "name": "test",
+      "span": {
+        "col": 3,
+        "end_col": 7,
+        "end_line": 115,
+        "line": 115
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      },
+      "kind": "name",
+      "name": "with_entries",
+      "span": {
+        "col": 5,
+        "end_col": 17,
+        "end_line": 117,
+        "line": 117
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      },
+      "kind": "member",
+      "name": "entries",
+      "span": {
+        "col": 29,
+        "end_col": 36,
+        "end_line": 117,
+        "line": 117
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      },
+      "kind": "member",
+      "name": "assert_eq",
+      "span": {
+        "col": 9,
+        "end_col": 18,
+        "end_line": 118,
+        "line": 118
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      },
+      "kind": "member",
+      "name": "balance",
+      "span": {
+        "col": 20,
+        "end_col": 27,
+        "end_line": 118,
+        "line": 118
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      },
+      "kind": "member",
+      "name": "entries",
+      "span": {
+        "col": 28,
+        "end_col": 35,
+        "end_line": 118,
+        "line": 118
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "attribute",
+      "name": "test",
+      "span": {
+        "col": 1,
+        "end_col": 8,
+        "end_line": 122,
+        "line": 122
+      },
+      "target": {
+        "kind": "local",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "tests/quality_signals.rs",
+            "line": 123
+          }
+        ]
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "name",
+      "name": "test",
+      "span": {
+        "col": 3,
+        "end_col": 7,
+        "end_line": 122,
+        "line": 122
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      },
+      "kind": "name",
+      "name": "balanced",
+      "span": {
+        "col": 18,
+        "end_col": 26,
+        "end_line": 124,
+        "line": 124
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      },
+      "kind": "name",
+      "name": "assert_eq",
+      "span": {
+        "col": 17,
+        "end_col": 26,
+        "end_line": 127,
+        "line": 127
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      },
+      "kind": "member",
+      "name": "balance",
+      "span": {
+        "col": 28,
+        "end_col": 35,
+        "end_line": 127,
+        "line": 127
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      },
+      "kind": "name",
+      "name": "balanced",
+      "span": {
+        "col": 5,
+        "end_col": 13,
+        "end_line": 131,
+        "line": 131
+      },
+      "target": {
+        "kind": "unresolved"
       }
     }
   ]

@@ -3,6 +3,75 @@
     {
       "sites": [
         {
+          "from": "std::hint::black_box(ledger::balance(&[1, 2, 3]));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 55,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "2912e2f6163b4bfa",
+          "span": {
+            "col": 44,
+            "end_col": 45,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "4be55181fb0c05e8",
+          "span": {
+            "col": 47,
+            "end_col": 48,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ecff7cbb47a2202b",
+          "span": {
+            "col": 50,
+            "end_col": 51,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "*",
           "operator": "arith-mul-div",
           "set": "default",
@@ -3539,6 +3608,30 @@
       }
     },
     {
+      "sites": [
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7f4e0e5b535f669b",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/rate_table.rs",
+        "line": 2
+      }
+    },
+    {
       "sites": [],
       "symbol": {
         "col": 1,
@@ -5526,6 +5619,267 @@
         "col": 1,
         "file": "tests/quality_signals.rs",
         "line": 95
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "assert_eq!(balance(entries), expected);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 44,
+            "end_line": 100,
+            "line": 100
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 99
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "expect_balance(&[4, 5], 9);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 32,
+            "end_line": 105,
+            "line": 105
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "849e71c4b3852f05",
+          "span": {
+            "col": 22,
+            "end_col": 23,
+            "end_line": 105,
+            "line": 105
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e00317a6c5bddd0b",
+          "span": {
+            "col": 25,
+            "end_col": 26,
+            "end_line": 105,
+            "line": 105
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "9",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "45640e75cc4c0eb2",
+          "span": {
+            "col": 29,
+            "end_col": 30,
+            "end_line": 105,
+            "line": 105
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 104
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "with_entries!(&[1, 1], |entries| {\n        assert_eq!(balance(entries), 2);\n    });",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "632d868e8cf5fd24",
+          "span": {
+            "col": 5,
+            "end_col": 8,
+            "end_line": 119,
+            "line": 117
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "953b6ec82b51b42e",
+          "span": {
+            "col": 21,
+            "end_col": 22,
+            "end_line": 117,
+            "line": 117
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d110af0f58b775a7",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 117,
+            "line": 117
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "897048cafdd8f878",
+          "span": {
+            "col": 38,
+            "end_col": 39,
+            "end_line": 118,
+            "line": 118
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "balanced!(&[1, 2] => 3, &[4] => 4);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "4f2a10b82fd2b1e6",
+          "span": {
+            "col": 5,
+            "end_col": 40,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "89c50cd70b1f5232",
+          "span": {
+            "col": 17,
+            "end_col": 18,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f72dd14c9bc5e140",
+          "span": {
+            "col": 20,
+            "end_col": 21,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b1cdefbc0c7e7192",
+          "span": {
+            "col": 26,
+            "end_col": 27,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "36782066e4a4fa2a",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3dd435bfa1212dbc",
+          "span": {
+            "col": 37,
+            "end_col": 38,
+            "end_line": 131,
+            "line": 131
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
       }
     }
   ]

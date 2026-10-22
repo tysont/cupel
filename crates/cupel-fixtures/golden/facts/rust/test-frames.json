@@ -652,6 +652,81 @@
             "end_line": 97,
             "line": 95
           }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 5,
+                "end_col": 19,
+                "end_line": 105,
+                "line": 105
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "a_helper_of_this_file_that_asserts_is_an_assertion",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 106,
+            "line": 104
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 18,
+                "end_line": 118,
+                "line": 118
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "an_assertion_in_a_macro_argument_is_an_assertion",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 120,
+            "line": 116
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 17,
+                "end_col": 26,
+                "end_line": 127,
+                "line": 127
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "an_assertion_in_a_macro_repetition_is_an_assertion",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 132,
+            "line": 123
+          }
         }
       ],
       "file": "tests/quality_signals.rs",

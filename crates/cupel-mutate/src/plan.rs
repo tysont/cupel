@@ -92,7 +92,11 @@ pub fn plan(inputs: &Inputs<'_>, read: &dyn Fn(&str) -> Option<String>) -> Vec<P
             hash: hashes.get(&entry.symbol).map(|hash| (*hash).clone()),
             source_hash: source_hash(source, symbol),
         };
-        for site in entry.sites.iter().filter(|site| wanted(inputs, site)) {
+        for site in entry
+            .sites
+            .iter()
+            .filter(|site| wanted(inputs, site) && executable(inputs.coverage, symbol, site))
+        {
             found.extend(planner.mutants(&at, site, source));
         }
     }
@@ -143,6 +147,17 @@ fn in_focus(inputs: &Inputs<'_>, symbol: &SymbolDef) -> bool {
                     })
                 })
             }))
+}
+
+/// Whether `site` is on code the build runs: a file the coverage map instruments but whose
+/// instrumented lines miss the site's (a `cfg` or build tag left it out, or a constant the
+/// compiler evaluates) holds no mutant a test can reach. A file the map does not hold may be
+/// one no test loads, so its sites stay.
+fn executable(coverage: &CoverageMap, symbol: &SymbolDef, site: &Site) -> bool {
+    !coverage.instruments(&symbol.file)
+        || !coverage
+            .line_hits(&symbol.file, site.span.line, site.span.end_line)
+            .is_empty()
 }
 
 /// Whether the configured operator set mutates `site`.
@@ -283,4 +298,110 @@ pub fn digest(parts: &[&str]) -> String {
         hasher.update(&[0]);
     }
     hasher.finalize().to_hex().to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use cupel_core::coverage::{FileCoverage, LineHits};
+    use cupel_core::syntax::{MutationOperator, Site, Span, SymbolKind, SymbolSites, Visibility};
+    use cupel_core::{Focus, LangId};
+
+    use super::*;
+
+    const SOURCE: &str = "fn f(a: i64) -> bool {\n    let ran = a > 1;\n    #[cfg(feature = \"off\")]\n    let off = a > 2;\n    ran\n}\n";
+
+    fn symbol(file: &str) -> SymbolDef {
+        SymbolDef {
+            name: "f".to_owned(),
+            namespace: String::new(),
+            display: "f".to_owned(),
+            kind: SymbolKind::Function,
+            visibility: Visibility::Private,
+            lang: LangId::from("rust"),
+            file: file.to_owned(),
+            span: Span {
+                line: 1,
+                col: 1,
+                end_line: 6,
+                end_col: 2,
+            },
+            body: None,
+            parameters: 1,
+        }
+    }
+
+    /// The `>` of `a > 1` (line 2) or `a > 2` (line 4).
+    fn site(line: u32) -> Site {
+        Site {
+            operator: MutationOperator::Relational,
+            set: OperatorSet::Default,
+            from: ">".to_owned(),
+            to: vec![">=".to_owned()],
+            site_hash: format!("{line:016x}").parse().unwrap(),
+            span: Span {
+                line,
+                col: 17,
+                end_line: line,
+                end_col: 18,
+            },
+        }
+    }
+
+    /// The lines of `file`'s mutants with `coverage`: line 2 instrumented and never run.
+    fn planned_lines(file: &str, coverage: &CoverageMap) -> Vec<(u32, bool)> {
+        let symbols = Symbols {
+            symbols: vec![symbol(file)],
+        };
+        let sites = MutationSites {
+            symbols: vec![SymbolSites {
+                symbol: symbol(file).key(),
+                sites: vec![site(2), site(4)],
+            }],
+        };
+        let inputs = Inputs {
+            sites: &sites,
+            symbols: &symbols,
+            coverage,
+            norm: None,
+            conventions: None,
+            frames: None,
+            per_test: None,
+            focus: &Focus::default(),
+            scope: &Scope::of_files(vec![file.to_owned()]),
+            operators: OperatorSet::Default,
+            suite_hash: "suite",
+            toolchain_hash: "toolchain",
+        };
+        plan(&inputs, &|_| Some(SOURCE.to_owned()))
+            .iter()
+            .map(|planned| (planned.mutant.span.line, planned.covered))
+            .collect()
+    }
+
+    #[test]
+    fn a_site_on_a_line_the_coverage_map_does_not_instrument_is_not_a_mutant() {
+        // The coverage tool instruments the file's executable lines; line 4 is not one in this
+        // build (a `cfg` left it out), so no test can reach its mutant.
+        let coverage = CoverageMap::new(vec![FileCoverage {
+            file: "src/lib.rs".to_owned(),
+            lines: vec![
+                LineHits { line: 1, hits: 1 },
+                LineHits { line: 2, hits: 0 },
+                LineHits { line: 5, hits: 1 },
+            ],
+            branches: None,
+        }]);
+        assert_eq!(planned_lines("src/lib.rs", &coverage), [(2, false)]);
+    }
+
+    #[test]
+    fn every_site_of_a_file_the_coverage_map_does_not_hold_is_an_uncovered_mutant() {
+        // A file no test loads is absent from some tools' reports (V8, coverage.py): its
+        // mutants are uncovered, not left out.
+        let coverage = CoverageMap::new(Vec::new());
+        assert_eq!(
+            planned_lines("src/lib.rs", &coverage),
+            [(2, false), (4, false)]
+        );
+    }
 }

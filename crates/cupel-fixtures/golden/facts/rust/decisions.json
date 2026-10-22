@@ -4,6 +4,14 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "benches/balance.rs",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "shapes/src/lib.rs",
         "line": 1
       }
@@ -1139,6 +1147,14 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "src/rate_table.rs",
+        "line": 2
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "src/rates.rs",
         "line": 5
       }
@@ -1616,6 +1632,38 @@
         "col": 1,
         "file": "tests/quality_signals.rs",
         "line": 95
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 99
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 104
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
       }
     }
   ]

@@ -10,8 +10,8 @@
 //!   `src/bin/*/main.rs`, `tests/*.rs`, `benches/*.rs`, `examples/*.rs`, and `build.rs`. A file
 //!   no root reaches through `mod` declarations is treated as a crate root of its own.
 //! - **`mod a;`** resolves to `a.rs` or `a/mod.rs` next to the declaring file (inside `x/` for
-//!   a non-root, non-`mod.rs` file `x.rs`, and inside the inline modules around it). `#[path]`
-//!   attributes are not read.
+//!   a non-root, non-`mod.rs` file `x.rs`, and inside the inline modules around it); with a
+//!   `#[path = "f.rs"]` attribute, to `f.rs` in the declaring file's directory.
 //! - **`use` paths** start at `crate`, `self`, `super`, a child module (2018 uniform paths), a
 //!   dependency (a path dependency resolves into its crate, any other is `External`), the
 //!   package's own library (from tests and binaries), a workspace package, or the standard
@@ -142,7 +142,7 @@ impl Tree {
                 .iter()
                 .filter(|import| import.kind == EdgeKind::Declaration)
             {
-                let Some(child) = child_file(imports, &location.children_dir, import) else {
+                let Some(child) = child_file(imports, &file, &location.children_dir, import) else {
                     continue;
                 };
                 if self.files.contains_key(&child) {
@@ -188,7 +188,7 @@ impl Tree {
             aliases: Vec::new(),
         };
         if import.kind == EdgeKind::Declaration {
-            let target = child_file(from.imports, &location.children_dir, import)
+            let target = child_file(from.imports, from.file, &location.children_dir, import)
                 .map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path });
             return vec![edge(
                 import.specifier.clone(),
@@ -365,8 +365,18 @@ fn children_dir(file: &str, is_root: bool) -> String {
     }
 }
 
-/// The file a `mod` declaration names, if it exists.
-fn child_file(imports: &Imports<'_>, children_dir: &str, import: &RawImport) -> Option<String> {
+/// The file a `mod` declaration of `file` names, if it exists.
+fn child_file(
+    imports: &Imports<'_>,
+    file: &str,
+    children_dir: &str,
+    import: &RawImport,
+) -> Option<String> {
+    if let Some(path) = &import.path {
+        let dir = file.rsplit_once('/').map_or("", |(dir, _)| dir);
+        let candidate = join(dir, path);
+        return imports.is_file(&candidate).then_some(candidate);
+    }
     let base = import
         .scope
         .iter()

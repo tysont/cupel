@@ -1373,6 +1373,83 @@
       ],
       "symbol": {
         "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 8
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 15
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 3,
+            "end_line": 22,
+            "line": 20
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 19
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "case",
+          "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 1,
+            "end_line": 29,
+            "line": 27
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 25
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 3,
+            "end_line": 12,
+            "line": 10
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
         "file": "ledger_property_test.go",
         "line": 8
       }

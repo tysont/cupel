@@ -750,6 +750,94 @@
     },
     {
       "body": {
+        "col": 63,
+        "end_col": 2,
+        "end_line": 13,
+        "line": 8
+      },
+      "display": "ledger.expectBalance",
+      "file": "ledger_helpers_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "expectBalance",
+      "namespace": "ledger",
+      "parameters": 3,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 13,
+        "line": 8
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 52,
+        "end_col": 2,
+        "end_line": 17,
+        "line": 15
+      },
+      "display": "ledger.TestAHelperHandedTheTestAsserts",
+      "file": "ledger_helpers_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestAHelperHandedTheTestAsserts",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 17,
+        "line": 15
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 44,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 19
+      },
+      "display": "ledger.TestEachBalanceIsListed",
+      "file": "ledger_helpers_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestEachBalanceIsListed",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 23,
+        "line": 19
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 49,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 25
+      },
+      "display": "ledger.TestABalanceCheckedInASwitch",
+      "file": "ledger_helpers_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestABalanceCheckedInASwitch",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 52,
         "end_col": 2,
         "end_line": 13,

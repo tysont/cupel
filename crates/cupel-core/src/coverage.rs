@@ -119,6 +119,11 @@ impl CoverageMap {
         self.files.iter().any(|file| file.branches.is_some())
     }
 
+    /// Whether the producer reported `file`: its instrumented lines are its executable code.
+    pub fn instruments(&self, file: &str) -> bool {
+        self.files.iter().any(|coverage| coverage.file == file)
+    }
+
     /// The instrumented lines from `start` to `end` (inclusive) of `file`, in order.
     pub fn line_hits(&self, file: &str, start: u32, end: u32) -> Vec<&LineHits> {
         self.files

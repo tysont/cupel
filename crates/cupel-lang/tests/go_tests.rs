@@ -5,7 +5,8 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
 use support::{
-    assert_framework, assert_test_file, case, fixture, produce, properties, property, rows, tree,
+    assert_framework, assert_test_file, case, file, fixture, produce, properties, property, rows,
+    tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -121,6 +122,7 @@ fn files_without_test_cases_have_no_frames() {
     assert_eq!(
         files,
         [
+            "ledger_helpers_test.go",
             "ledger_property_test.go",
             "ledger_quality_test.go",
             "ledger_test.go",
@@ -227,5 +229,202 @@ func TestExample(t *testing.T) {
             ),
             property("TestExample", None, &[(Equality, Strong)]),
         ]
+    );
+}
+
+#[test]
+fn a_helper_handed_the_test_and_a_subtest_run_from_a_named_function_are_assertions() {
+    let dir = tree(&[(
+        "cli_test.go",
+        r#"package cli
+
+import (
+	"testing"
+
+	"go.uber.org/mock/gomock"
+)
+
+func expectSuccess(output string, err error, t *testing.T) {
+	t.Helper()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestRuns(t *testing.T) {
+	output, err := Run()
+	expectSuccess(output, err, t)
+}
+
+func TestTable(t *testing.T) {
+	for name, tc := range cases {
+		t.Run(name, tc.test)
+	}
+}
+
+func TestInlineSubtestAssertsNothing(t *testing.T) {
+	t.Run("runs", func(t *testing.T) {
+		Run()
+	})
+}
+
+func TestSetupIsNoAssertion(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	server := newServer(t)
+	Run(ctrl, server)
+}
+"#,
+    )]);
+    let frames: TestFrames = produce("go", dir.path());
+    let cli = &assert_framework(&frames, "cli_test.go", "go-test");
+    assert_eq!(
+        rows(cli),
+        [
+            case("TestRuns", &[(NotNull, Weak)], Runs, &[], 16),
+            case("TestTable", &[(Custom, Strong)], Runs, &[], 21),
+            case("TestInlineSubtestAssertsNothing", &[], Runs, &[], 27),
+            case("TestSetupIsNoAssertion", &[], Runs, &[], 33),
+        ]
+    );
+}
+
+#[test]
+fn standard_library_equality_calls_compound_conditions_and_switch_cases_pin_values() {
+    let dir = tree(&[(
+        "flags_test.go",
+        r#"package flags
+
+import (
+	"bytes"
+	"errors"
+	"os"
+	"reflect"
+	"testing"
+)
+
+func TestDeepEqual(t *testing.T) {
+	if got := Strip(args); !reflect.DeepEqual(got, want) {
+		t.Errorf("got %v", got)
+	}
+}
+
+func TestBytes(t *testing.T) {
+	if !bytes.Equal(Render(), []byte("out")) {
+		t.Fatal("render")
+	}
+}
+
+func TestErrorIs(t *testing.T) {
+	if err := Write(); !errors.Is(err, os.ErrPermission) {
+		t.Errorf("got %v", err)
+	}
+}
+
+func TestCompound(t *testing.T) {
+	if c.Name() == "" || c.Name() != "renamed" {
+		t.Error("not renamed")
+	}
+}
+
+func TestSwitch(t *testing.T) {
+	output, err := Run()
+	switch {
+	case err == nil && output != want:
+		t.Errorf("got %q", output)
+	case err != nil:
+		t.Errorf("unexpected %v", err)
+	}
+}
+"#,
+    )]);
+    let frames: TestFrames = produce("go", dir.path());
+    let flags = &assert_framework(&frames, "flags_test.go", "go-test");
+    assert_eq!(
+        rows(flags),
+        [
+            case("TestDeepEqual", &[(Equality, Strong)], Runs, &[], 11),
+            case("TestBytes", &[(Equality, Strong)], Runs, &[], 17),
+            case("TestErrorIs", &[(Throws, Strong)], Runs, &[], 23),
+            case("TestCompound", &[(Equality, Strong)], Runs, &[], 29),
+            case(
+                "TestSwitch",
+                &[(Equality, Strong), (NotNull, Weak)],
+                Runs,
+                &[],
+                35
+            ),
+        ]
+    );
+}
+
+#[test]
+fn a_helper_of_another_test_file_of_the_package_asserts_as_it_does() {
+    let dir = tree(&[
+        (
+            "helpers_test.go",
+            r#"package cli
+
+import (
+	"strings"
+	"testing"
+)
+
+func check(t *testing.T, found, expected string) {
+	t.Helper()
+	if !strings.Contains(found, expected) {
+		t.Errorf("expecting to contain %q", expected)
+	}
+}
+
+func checkExact(t *testing.T, got, want string) {
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+"#,
+        ),
+        (
+            "cli_test.go",
+            r#"package cli
+
+import "testing"
+
+func TestOutputMentionsTheName(t *testing.T) {
+	check(t, Run(), "name")
+}
+
+func TestOutputIsExact(t *testing.T) {
+	checkExact(t, Run(), "name\n")
+}
+
+func TestUnknownHelper(t *testing.T) {
+	verify(t, Run())
+}
+"#,
+        ),
+        (
+            "other/other_test.go",
+            "package other\n\nimport \"testing\"\n\nfunc TestElsewhere(t *testing.T) {\n\tcheck(t, \"a\", \"a\")\n}\n",
+        ),
+    ]);
+    let frames: TestFrames = produce("go", dir.path());
+    assert_eq!(
+        rows(file(&frames, "cli_test.go")),
+        [
+            case(
+                "TestOutputMentionsTheName",
+                &[(Truthiness, Weak)],
+                Runs,
+                &[],
+                5
+            ),
+            case("TestOutputIsExact", &[(Equality, Strong)], Runs, &[], 9),
+            case("TestUnknownHelper", &[(Custom, Strong)], Runs, &[], 13),
+        ],
+        "a helper of another package's directory is not this one's"
+    );
+    assert_eq!(
+        rows(file(&frames, "other/other_test.go")),
+        [case("TestElsewhere", &[(Custom, Strong)], Runs, &[], 5)]
     );
 }

@@ -348,6 +348,17 @@
           }
         },
         {
+          "edge_kind": "declaration",
+          "from": "src/lib.rs",
+          "line": 38,
+          "relative": true,
+          "specifier": "table",
+          "target": {
+            "kind": "file",
+            "path": "src/rate_table.rs"
+          }
+        },
+        {
           "edge_kind": "import",
           "from": "src/main.rs",
           "line": 1,

@@ -124,7 +124,7 @@ fn main_exports_tests_and_linker_hooks_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixture_is_a_test_root() {
-    assert_every_case_but_these_is_a_test_root("rust", 24, &["discounts_never_raise_the_price"]);
+    assert_every_case_but_these_is_a_test_root("rust", 27, &["discounts_never_raise_the_price"]);
 }
 
 #[test]

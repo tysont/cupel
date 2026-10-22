@@ -292,6 +292,14 @@
       "reason": "export",
       "symbol": {
         "col": 1,
+        "file": "src/rate_table.rs",
+        "line": 2
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
         "file": "src/rates.rs",
         "line": 5
       }
@@ -550,6 +558,30 @@
         "col": 1,
         "file": "tests/quality_signals.rs",
         "line": 95
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 104
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
       }
     }
   ]
