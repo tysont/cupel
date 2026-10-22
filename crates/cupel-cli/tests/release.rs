@@ -548,6 +548,7 @@ fn ci_compiles_and_tests_the_windows_target() {
         "run: make windows-test".to_owned(),
     ];
     assert_eq!(missing(&lines, expected), Vec::<String>::new());
+}
 
 /// The files a release's version is written in, relative to the repository root.
 const VERSIONED: [&str; 4] = [
