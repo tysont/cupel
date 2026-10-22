@@ -628,7 +628,10 @@ fn version_set_rewrites_the_version_in_every_file_that_names_it() {
         })
         .collect();
     assert_eq!(changed.len(), 13, "{changed:?}");
-    assert!(changed.iter().all(|line| line.ends_with(": true")), "{changed:?}");
+    assert!(
+        changed.iter().all(|line| line.ends_with(": true")),
+        "{changed:?}"
+    );
     let shown = release_in(dir.path(), &["version"]);
     assert_eq!(stdout(&shown), "9.8.7\n");
 }
@@ -671,7 +674,9 @@ fn make_version_sets_the_version_through_the_release_script() {
     assert_eq!(stdout(&output), "scripts/release.sh version --set 9.8.7\n");
     let readme = fs::read_to_string(repository().join("README.md")).unwrap();
     assert!(
-        readme.lines().any(|line| line.starts_with("| `make version V=X.Y.Z` |")),
+        readme
+            .lines()
+            .any(|line| line.starts_with("| `make version V=X.Y.Z` |")),
         "the README's Makefile table lists `make version`"
     );
 }

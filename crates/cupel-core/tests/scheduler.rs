@@ -937,7 +937,10 @@ fn scoped_files(ctx: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<Chec
 
 #[test]
 fn under_a_range_the_symbols_in_scope_are_those_its_changed_lines_touch() {
-    let world = World::new(vec![check("t.scoped", &[FactKind::Symbols], scoped_files)], "");
+    let world = World::new(
+        vec![check("t.scoped", &[FactKind::Symbols], scoped_files)],
+        "",
+    );
     let scoped = |changed: &[(&str, (u32, u32))], selectors: &[&str]| {
         let changed: BTreeMap<String, Vec<(u32, u32)>> = changed
             .iter()
@@ -969,7 +972,10 @@ fn under_a_range_the_symbols_in_scope_are_those_its_changed_lines_touch() {
         scoped(&[("a.x", (1, 1)), ("b.x", (1, 1))], &["b"]),
         (1, vec!["b.x (rust)".to_owned()])
     );
-    assert_eq!(scoped(&[("a.x", (1, 1)), ("b.x", (4, 4))], &["b"]), (0, vec![]));
+    assert_eq!(
+        scoped(&[("a.x", (1, 1)), ("b.x", (4, 4))], &["b"]),
+        (0, vec![])
+    );
 }
 
 #[test]
