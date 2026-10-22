@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 use crate::error::{ArgumentError, Result};
 use crate::git::{Change, Git};
 use crate::hash::SymbolHash;
+use crate::producer::ChangedLines;
 use crate::syntax::{NormTree, SymbolDef, SymbolKey, Symbols};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
@@ -356,6 +357,17 @@ impl SymbolSelector {
 
 fn normalized(name: &str) -> String {
     name.replace("::", ".")
+}
+
+/// Whether a range whose changed lines are `changed` touched `symbol` (ADR-142): one of its
+/// file's changed lines falls within its span, or its file has no changed lines because git
+/// does not track it yet, so every line of it is new.
+pub fn touched(changed: &ChangedLines, symbol: &SymbolDef) -> bool {
+    changed.get(&symbol.file).is_none_or(|lines| {
+        lines
+            .iter()
+            .any(|&(start, end)| start <= symbol.span.end_line && symbol.span.line <= end)
+    })
 }
 
 /// The symbols of `symbols` that some selector matches, and for each selector whether it
