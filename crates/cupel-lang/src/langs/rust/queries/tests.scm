@@ -184,12 +184,19 @@
   ]
   (#match? @assertion.name "^assert_")) @test.assertion
 
-; An assertion written inside a macro's arguments (`test_stream!(data, |s| { assert_eq!(…) })`):
-; the grammar leaves a macro's arguments as tokens, so the name and its `!(…)` are siblings.
-(token_tree
-  (identifier) @assertion.name @test.assertion
-  .
-  (token_tree)
+; An assertion written inside a macro's arguments (`test_stream!(data, |s| { assert_eq!(…) })`)
+; or a `macro_rules!` repetition (`$( assert_eq!(value, $n); )*`): the grammar leaves them as
+; tokens, so the name and its `!(…)` are siblings.
+([
+  (token_tree
+    (identifier) @assertion.name @test.assertion
+    .
+    (token_tree))
+  (token_repetition
+    (identifier) @assertion.name @test.assertion
+    .
+    (token_tree))
+]
   (#match? @assertion.name "^(debug_|prop_)?assert"))
 
 ; A call by plain name, which asserts when it names a helper of this file that asserts

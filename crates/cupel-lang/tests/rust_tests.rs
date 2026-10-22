@@ -316,6 +316,18 @@ fn stream_newlines() {
         assert_eq!(stream.byte_offset(), 0);
     });
 }
+
+#[test]
+fn numbers_compare() {
+    macro_rules! compare {
+        ($($n:expr)*) => {
+            $(
+                assert_eq!(to_value($n).unwrap(), $n);
+            )*
+        };
+    }
+    compare!(0 1 100);
+}
 "#,
     )]);
     let frames: TestFrames = produce("rust", dir.path());
@@ -326,6 +338,7 @@ fn stream_newlines() {
             case("ready_values", &[(Truthiness, Weak)], Runs, &[], 28),
             case("only_values", &[], Runs, &[], 33),
             case("stream_newlines", &[(Equality, Strong)], Runs, &[], 38),
+            case("numbers_compare", &[(Equality, Strong)], Runs, &[], 45),
         ]
     );
 }

@@ -49,12 +49,17 @@ merge_list!(TestFrames, files);
 merge_list!(ApiSurface, items);
 merge_list!(Roots, roots);
 
+/// Completes a merged fact with what only the files together say (a helper one file defines
+/// and another calls), given every parsed file of the scope.
+pub type Finish<F> = fn(&mut F, &[Parsed], &dyn Language);
+
 /// A producer that runs `extract` over every file of its language in scope. Every generic
 /// producer (`QuerySymbols`, `QueryDecisions`, …) is one of these with its own extractor.
 pub struct QueryProducer<F> {
     language: Arc<dyn Language>,
     cache: Arc<ParseCache>,
     extract: Extract<F>,
+    finish: Option<Finish<F>>,
 }
 
 impl<F> QueryProducer<F> {
@@ -63,7 +68,15 @@ impl<F> QueryProducer<F> {
             language,
             cache,
             extract,
+            finish: None,
         }
+    }
+
+    /// The producer that runs `finish` over the merged fact.
+    #[must_use]
+    pub fn finishing(mut self, finish: Finish<F>) -> Self {
+        self.finish = Some(finish);
+        self
     }
 }
 
@@ -101,6 +114,9 @@ impl<F: Fact + Merge + Clone> Producer<F> for QueryProducer<F> {
         let mut fact = F::default();
         for part in parts {
             fact.merge(part);
+        }
+        if let Some(finish) = self.finish {
+            finish(&mut fact, &parsed, language);
         }
         Ok(fact)
     }

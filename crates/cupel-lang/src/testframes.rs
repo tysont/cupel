@@ -12,8 +12,12 @@
 //!   patterns match one assertion node, the earliest wins, so idioms come first.
 //! - `@assertion.helper` on the name a call is made by: when that name is a function of the
 //!   same file that is not a case and holds an assertion (a helper such as
-//!   `test_encode_ok(&cases)`), the call is an assertion of the class of the helper's first
-//!   strong assertion, else its first. One level: a helper's own calls of helpers are not followed.
+//!   `test_encode_ok(&cases)`), the call asserts with the class of the helper's first strong
+//!   assertion, else its first: an assertion a pattern already captured at the call takes that
+//!   class, else one is added. When the file defines no such function, a call that is already
+//!   an assertion takes the class of an asserting function of that name in another file of the
+//!   same directory in scope (a Go package's shared `_test.go` helpers). One level: a helper's
+//!   own calls of helpers are not followed.
 //! - `@test.mock` on a test double's creation, with optional `@mock.target` naming what it
 //!   replaces (else the mock node's text).
 //! - `@test.skip` on a skip marker, with optional `@skip.reason` (the reason's text, without
@@ -36,11 +40,13 @@ use std::collections::{BTreeMap, HashSet};
 
 use cupel_core::FactKind;
 use cupel_core::syntax::{
-    Assertion, AssertionStrength, Mock, SkipMarker, Span, TestCase, TestFile, TestFrames,
+    Assertion, AssertionKind, AssertionStrength, Mock, SkipMarker, Span, TestCase, TestFile,
+    TestFrames,
 };
 use tree_sitter::Node;
 
 use crate::contract::capture;
+use crate::language::Language;
 use crate::parse::Parsed;
 use crate::producer::{QueryProducer, Source};
 use crate::query::{Match, matches, span};
@@ -68,7 +74,9 @@ inventory::submit!(crate::generic::GenericProducer {
     kind: FactKind::TestFrames,
     drives: |spec| spec.has(QueryFile::Tests),
     attach: |language, cache, reg| {
-        reg.register::<TestFrames, _>(QueryProducer::new(language, cache, extract));
+        reg.register::<TestFrames, _>(
+            QueryProducer::new(language, cache, extract).finishing(resolve_helpers),
+        );
     },
 });
 
@@ -89,7 +97,13 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
     if cases.is_empty() {
         return TestFrames::default();
     }
-    attach_assertions(&mut cases, source, &found, rules);
+    let loose = attach_assertions(&mut cases, parsed, &found, rules);
+    let helpers = file_helpers(source, &cases, &loose);
+    for (case, node) in helper_calls(&cases, &found) {
+        if let (Some(class), Some(case)) = (helpers.get(parsed.text(node)), cases.get_mut(&case)) {
+            assert_through(&mut case.assertions, *class, span(node));
+        }
+    }
     attach_mocks(&mut cases, parsed, &found);
     attach_skips(&mut cases, parsed, &found);
     attach_properties(&mut cases, &found);
@@ -167,15 +181,14 @@ fn owner(cases: &Cases<'_>, m: &Match<'_, '_>, node: Node<'_>) -> Option<usize> 
         })
 }
 
-/// Classifies every assertion; the earliest pattern wins per assertion node. A call of a helper
-/// that asserts is an assertion too (`@assertion.helper`).
+/// Classifies every assertion and attaches it to its case; the earliest pattern wins per
+/// assertion node. The assertions outside every case are returned: a helper's.
 fn attach_assertions(
     cases: &mut Cases<'_>,
-    source: &Source<'_>,
+    parsed: &Parsed,
     found: &[Match<'_, '_>],
     rules: &TestRules,
-) {
-    let parsed = source.parsed;
+) -> Vec<Assertion> {
     let mut assertions: BTreeMap<usize, (usize, Option<usize>, Assertion)> = BTreeMap::new();
     for m in found {
         let Some(node) = m.node(capture::TEST_ASSERTION) else {
@@ -213,59 +226,137 @@ fn attach_assertions(
             None => loose.push(assertion),
         }
     }
-    attach_helper_calls(cases, source, found, &loose);
+    loose
 }
 
-/// Adds an assertion to each case for each call it makes of a helper of this file: a function
-/// that is not a case and holds one of the `loose` assertions (those outside every case).
-fn attach_helper_calls(
-    cases: &mut Cases<'_>,
+/// How an assertion is classified, as a helper passes it on.
+#[derive(Debug, Clone, Copy)]
+struct Class {
+    kind: AssertionKind,
+    strength: AssertionStrength,
+}
+
+/// The asserting helpers of `source`: each function that is not a case and holds one of the
+/// `loose` assertions, with the class of its first strong assertion, else its first.
+fn file_helpers(
     source: &Source<'_>,
-    found: &[Match<'_, '_>],
+    cases: &Cases<'_>,
     loose: &[Assertion],
-) {
-    let calls: Vec<(usize, Node<'_>)> = found
+) -> BTreeMap<String, Class> {
+    if loose.is_empty() {
+        return BTreeMap::new();
+    }
+    definitions(source.parsed, source.language)
+        .iter()
+        .filter(|definition| !cases.contains_key(&definition.node.id()))
+        .filter_map(|definition| {
+            let within = |assertion: &&Assertion| {
+                let (outer, inner) = (definition.symbol.span, assertion.span);
+                (outer.line, outer.col) <= (inner.line, inner.col)
+                    && (inner.end_line, inner.end_col) <= (outer.end_line, outer.end_col)
+            };
+            let held: Vec<&Assertion> = loose.iter().filter(within).collect();
+            let first = held
+                .iter()
+                .find(|assertion| assertion.strength == AssertionStrength::Strong)
+                .or_else(|| held.first())?;
+            Some((
+                definition.symbol.name.clone(),
+                Class {
+                    kind: first.kind,
+                    strength: first.strength,
+                },
+            ))
+        })
+        .collect()
+}
+
+/// Each `@assertion.helper` node inside a case, with its case.
+fn helper_calls<'t>(cases: &Cases<'t>, found: &[Match<'_, 't>]) -> Vec<(usize, Node<'t>)> {
+    found
         .iter()
         .filter_map(|m| {
             let node = m.node(capture::ASSERTION_HELPER)?;
             Some((owner(cases, m, node)?, node))
         })
-        .collect();
-    if calls.is_empty() || loose.is_empty() {
+        .collect()
+}
+
+/// Makes the call at `at` an assertion of `class`: the assertion a convention already captured
+/// there takes the class, else one is added.
+fn assert_through(assertions: &mut Vec<Assertion>, class: Class, at: Span) {
+    let starts =
+        |assertion: &Assertion| (assertion.span.line, assertion.span.col) == (at.line, at.col);
+    if let Some(assertion) = assertions.iter_mut().find(|assertion| starts(assertion)) {
+        assertion.kind = class.kind;
+        assertion.strength = class.strength;
         return;
     }
-    let parsed = source.parsed;
-    let helpers: BTreeMap<String, &Assertion> = definitions(parsed, source.language)
-        .iter()
-        .filter(|definition| !cases.contains_key(&definition.node.id()))
-        .filter_map(|definition| {
-            let within = |assertion: &&Assertion| {
-                let (start, end) = (definition.symbol.span, assertion.span);
-                (start.line, start.col) <= (end.line, end.col)
-                    && (end.end_line, end.end_col) <= (start.end_line, start.end_col)
-            };
-            let held: Vec<&Assertion> = loose.iter().filter(within).collect();
-            let class = held
-                .iter()
-                .find(|assertion| assertion.strength == AssertionStrength::Strong)
-                .or_else(|| held.first())?;
-            Some((definition.symbol.name.clone(), *class))
-        })
-        .collect();
-    for (case, node) in calls {
-        let Some(helper) = helpers.get(parsed.text(node)) else {
-            continue;
-        };
-        if let Some(case) = cases.get_mut(&case) {
-            case.assertions.push(Assertion {
-                kind: helper.kind,
-                strength: helper.strength,
-                span: span(node),
+    assertions.push(Assertion {
+        kind: class.kind,
+        strength: class.strength,
+        span: at,
+    });
+    assertions.sort_by_key(|assertion| (assertion.span.line, assertion.span.col));
+}
+
+/// Gives each helper call that is already an assertion (a convention such as Go's call handing
+/// `t` to a function) and names no helper of its own file the class of an asserting helper of
+/// that name in another file of the same directory, a Go package's shared `_test.go` helpers.
+fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn Language) {
+    let spec = language.spec();
+    if !spec.has(QueryFile::Tests) {
+        return;
+    }
+    let rules = &spec.tables().tests;
+    let mut shared: BTreeMap<(String, String), Class> = BTreeMap::new();
+    let mut unresolved: Vec<(String, Span, String)> = Vec::new();
+    for parsed in parsed {
+        let source = Source { parsed, language };
+        let query = spec
+            .query(QueryFile::Tests, &parsed.grammar)
+            .unwrap_or_else(|error| panic!("{} tests.scm: {error}", language.id()));
+        let found = matches(&query, parsed);
+        let mut cases = collect_cases(parsed, &found);
+        let loose = attach_assertions(&mut cases, parsed, &found, rules);
+        let helpers = file_helpers(&source, &cases, &loose);
+        let dir = directory(&parsed.file);
+        for (case, node) in helper_calls(&cases, &found) {
+            let name = parsed.text(node);
+            let asserts = cases.get(&case).is_some_and(|case| {
+                case.assertions
+                    .iter()
+                    .any(|a| a.span.line == span(node).line && a.span.col == span(node).col)
             });
-            case.assertions
-                .sort_by_key(|assertion| (assertion.span.line, assertion.span.col));
+            if asserts && !helpers.contains_key(name) {
+                unresolved.push((parsed.file.clone(), span(node), name.to_owned()));
+            }
+        }
+        for (name, class) in helpers {
+            shared.entry((dir.to_owned(), name)).or_insert(class);
         }
     }
+    for (file, at, name) in unresolved {
+        let Some(class) = shared.get(&(directory(&file).to_owned(), name)) else {
+            continue;
+        };
+        for test_file in frames
+            .files
+            .iter_mut()
+            .filter(|test_file| test_file.file == file)
+        {
+            for case in &mut test_file.cases {
+                if case.span.line <= at.line && at.line <= case.span.end_line {
+                    assert_through(&mut case.assertions, *class, at);
+                }
+            }
+        }
+    }
+}
+
+/// The directory of `file`, `""` at the root.
+fn directory(file: &str) -> &str {
+    file.rsplit_once('/').map_or("", |(dir, _)| dir)
 }
 
 /// Attaches mocks to their case, or to every case when outside all of them.

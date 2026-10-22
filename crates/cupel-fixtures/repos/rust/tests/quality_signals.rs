@@ -118,3 +118,15 @@ fn an_assertion_in_a_macro_argument_is_an_assertion() {
         assert_eq!(balance(entries), 2);
     });
 }
+
+#[test]
+fn an_assertion_in_a_macro_repetition_is_an_assertion() {
+    macro_rules! balanced {
+        ($($entries:expr => $expected:expr),*) => {
+            $(
+                assert_eq!(balance($entries), $expected);
+            )*
+        };
+    }
+    balanced!(&[1, 2] => 3, &[4] => 4);
+}

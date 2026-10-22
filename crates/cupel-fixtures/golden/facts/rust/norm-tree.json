@@ -29986,6 +29986,469 @@
         "file": "tests/quality_signals.rs",
         "line": 116
       }
+    },
+    {
+      "hash": "sh_a47303b84ce4d38b",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters",
+            "span": {
+              "col": 54,
+              "end_col": 56,
+              "end_line": 123,
+              "line": 123
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 18,
+                      "end_col": 26,
+                      "end_line": 124,
+                      "line": 124
+                    },
+                    "text": "balanced"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "metavariable",
+                                    "span": {
+                                      "col": 12,
+                                      "end_col": 20,
+                                      "end_line": 125,
+                                      "line": 125
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "fragment_specifier",
+                                    "span": {
+                                      "col": 21,
+                                      "end_col": 25,
+                                      "end_line": 125,
+                                      "line": 125
+                                    }
+                                  }
+                                ],
+                                "label": "token_binding_pattern",
+                                "span": {
+                                  "col": 12,
+                                  "end_col": 25,
+                                  "end_line": 125,
+                                  "line": 125
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "=>",
+                                "span": {
+                                  "col": 26,
+                                  "end_col": 28,
+                                  "end_line": 125,
+                                  "line": 125
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "metavariable",
+                                    "span": {
+                                      "col": 29,
+                                      "end_col": 38,
+                                      "end_line": 125,
+                                      "line": 125
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "fragment_specifier",
+                                    "span": {
+                                      "col": 39,
+                                      "end_col": 43,
+                                      "end_line": 125,
+                                      "line": 125
+                                    }
+                                  }
+                                ],
+                                "label": "token_binding_pattern",
+                                "span": {
+                                  "col": 29,
+                                  "end_col": 43,
+                                  "end_line": 125,
+                                  "line": 125
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "*",
+                                "span": {
+                                  "col": 45,
+                                  "end_col": 46,
+                                  "end_line": 125,
+                                  "line": 125
+                                }
+                              }
+                            ],
+                            "label": "token_repetition_pattern",
+                            "span": {
+                              "col": 10,
+                              "end_col": 46,
+                              "end_line": 125,
+                              "line": 125
+                            }
+                          }
+                        ],
+                        "label": "token_tree_pattern",
+                        "span": {
+                          "col": 9,
+                          "end_col": 47,
+                          "end_line": 125,
+                          "line": 125
+                        }
+                      },
+                      {
+                        "children": [],
+                        "label": "=>",
+                        "span": {
+                          "col": 48,
+                          "end_col": 50,
+                          "end_line": 125,
+                          "line": 125
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 17,
+                                  "end_col": 26,
+                                  "end_line": 127,
+                                  "line": 127
+                                },
+                                "text": "assert_eq"
+                              },
+                              {
+                                "children": [],
+                                "label": "!",
+                                "span": {
+                                  "col": 26,
+                                  "end_col": 27,
+                                  "end_line": 127,
+                                  "line": 127
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 28,
+                                      "end_col": 35,
+                                      "end_line": 127,
+                                      "line": 127
+                                    },
+                                    "text": "balance"
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [],
+                                        "label": "metavariable",
+                                        "span": {
+                                          "col": 36,
+                                          "end_col": 44,
+                                          "end_line": 127,
+                                          "line": 127
+                                        }
+                                      }
+                                    ],
+                                    "label": "token_tree",
+                                    "span": {
+                                      "col": 35,
+                                      "end_col": 45,
+                                      "end_line": 127,
+                                      "line": 127
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "metavariable",
+                                    "span": {
+                                      "col": 47,
+                                      "end_col": 56,
+                                      "end_line": 127,
+                                      "line": 127
+                                    }
+                                  }
+                                ],
+                                "label": "token_tree",
+                                "span": {
+                                  "col": 27,
+                                  "end_col": 57,
+                                  "end_line": 127,
+                                  "line": 127
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "*",
+                                "span": {
+                                  "col": 14,
+                                  "end_col": 15,
+                                  "end_line": 128,
+                                  "line": 128
+                                }
+                              }
+                            ],
+                            "label": "token_repetition",
+                            "span": {
+                              "col": 13,
+                              "end_col": 15,
+                              "end_line": 128,
+                              "line": 126
+                            }
+                          }
+                        ],
+                        "label": "token_tree",
+                        "span": {
+                          "col": 51,
+                          "end_col": 10,
+                          "end_line": 129,
+                          "line": 125
+                        }
+                      }
+                    ],
+                    "label": "macro_rule",
+                    "span": {
+                      "col": 9,
+                      "end_col": 10,
+                      "end_line": 129,
+                      "line": 125
+                    }
+                  }
+                ],
+                "label": "macro_definition",
+                "span": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 130,
+                  "line": 124
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "balanced",
+                        "span": {
+                          "col": 5,
+                          "end_col": 13,
+                          "end_line": 131,
+                          "line": 131
+                        }
+                      },
+                      {
+                        "children": [],
+                        "label": "!",
+                        "span": {
+                          "col": 13,
+                          "end_col": 14,
+                          "end_line": 131,
+                          "line": 131
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "&",
+                            "span": {
+                              "col": 15,
+                              "end_col": 16,
+                              "end_line": 131,
+                              "line": 131
+                            }
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit",
+                                "span": {
+                                  "col": 17,
+                                  "end_col": 18,
+                                  "end_line": 131,
+                                  "line": 131
+                                },
+                                "text": "1"
+                              },
+                              {
+                                "children": [],
+                                "label": "$lit",
+                                "span": {
+                                  "col": 20,
+                                  "end_col": 21,
+                                  "end_line": 131,
+                                  "line": 131
+                                },
+                                "text": "2"
+                              }
+                            ],
+                            "label": "token_tree",
+                            "span": {
+                              "col": 16,
+                              "end_col": 22,
+                              "end_line": 131,
+                              "line": 131
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "=>",
+                            "span": {
+                              "col": 23,
+                              "end_col": 25,
+                              "end_line": 131,
+                              "line": 131
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit",
+                            "span": {
+                              "col": 26,
+                              "end_col": 27,
+                              "end_line": 131,
+                              "line": 131
+                            },
+                            "text": "3"
+                          },
+                          {
+                            "children": [],
+                            "label": "&",
+                            "span": {
+                              "col": 29,
+                              "end_col": 30,
+                              "end_line": 131,
+                              "line": 131
+                            }
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$lit",
+                                "span": {
+                                  "col": 31,
+                                  "end_col": 32,
+                                  "end_line": 131,
+                                  "line": 131
+                                },
+                                "text": "4"
+                              }
+                            ],
+                            "label": "token_tree",
+                            "span": {
+                              "col": 30,
+                              "end_col": 33,
+                              "end_line": 131,
+                              "line": 131
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "=>",
+                            "span": {
+                              "col": 34,
+                              "end_col": 36,
+                              "end_line": 131,
+                              "line": 131
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit",
+                            "span": {
+                              "col": 37,
+                              "end_col": 38,
+                              "end_line": 131,
+                              "line": 131
+                            },
+                            "text": "4"
+                          }
+                        ],
+                        "label": "token_tree",
+                        "span": {
+                          "col": 14,
+                          "end_col": 39,
+                          "end_line": 131,
+                          "line": 131
+                        }
+                      }
+                    ],
+                    "label": "macro_invocation",
+                    "span": {
+                      "col": 5,
+                      "end_col": 39,
+                      "end_line": 131,
+                      "line": 131
+                    }
+                  }
+                ],
+                "label": "expression_statement",
+                "span": {
+                  "col": 5,
+                  "end_col": 40,
+                  "end_line": 131,
+                  "line": 131
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 57,
+              "end_col": 2,
+              "end_line": 132,
+              "line": 123
+            }
+          }
+        ],
+        "label": "function_item",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 132,
+          "line": 123
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      }
     }
   ]
 }

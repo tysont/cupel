@@ -1657,6 +1657,14 @@
         "file": "tests/quality_signals.rs",
         "line": 116
       }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      }
     }
   ]
 }

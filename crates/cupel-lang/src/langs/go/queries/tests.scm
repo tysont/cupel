@@ -231,15 +231,16 @@
   (#any-of? @_package "assert" "require" "snaps")) @test.assertion
 
 ; Helpers: a call that hands the test's `t` to a function of the package (`expectSuccess(t,
-; err)`, `check(t, got, want)`) delegates its assertions to it, as `t.Helper()` marks; a
-; constructor (`newServer(t)`) sets up. A subtest run from a named function (`t.Run(name,
+; err)`, `check(t, got, want)`) delegates its assertions to it, as `t.Helper()` marks, and
+; asserts as the helper does when the package's test files in scope define it (else custom,
+; strong); a constructor (`newServer(t)`) sets up. A subtest run from a named function (`t.Run(name,
 ; tc.test)`) asserts in that function; one run from a literal is part of its case already.
 (call_expression
-  function: (identifier) @_helper
+  function: (identifier) @assertion.helper
   arguments: (argument_list
     (identifier) @_t)
   (#any-of? @_t "t" "b" "tb")
-  (#not-match? @_helper "^[Nn]ew")) @test.assertion @assertion.idiom.helper
+  (#not-match? @assertion.helper "^[Nn]ew")) @test.assertion @assertion.idiom.helper
 
 (call_expression
   function: (selector_expression

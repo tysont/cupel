@@ -5,7 +5,8 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
 use support::{
-    assert_framework, assert_test_file, case, fixture, produce, properties, property, rows, tree,
+    assert_framework, assert_test_file, case, file, fixture, produce, properties, property, rows,
+    tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -279,7 +280,7 @@ func TestSetupIsNoAssertion(t *testing.T) {
     assert_eq!(
         rows(cli),
         [
-            case("TestRuns", &[(Custom, Strong)], Runs, &[], 16),
+            case("TestRuns", &[(NotNull, Weak)], Runs, &[], 16),
             case("TestTable", &[(Custom, Strong)], Runs, &[], 21),
             case("TestInlineSubtestAssertsNothing", &[], Runs, &[], 27),
             case("TestSetupIsNoAssertion", &[], Runs, &[], 33),
@@ -353,5 +354,77 @@ func TestSwitch(t *testing.T) {
                 35
             ),
         ]
+    );
+}
+
+#[test]
+fn a_helper_of_another_test_file_of_the_package_asserts_as_it_does() {
+    let dir = tree(&[
+        (
+            "helpers_test.go",
+            r#"package cli
+
+import (
+	"strings"
+	"testing"
+)
+
+func check(t *testing.T, found, expected string) {
+	t.Helper()
+	if !strings.Contains(found, expected) {
+		t.Errorf("expecting to contain %q", expected)
+	}
+}
+
+func checkExact(t *testing.T, got, want string) {
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+"#,
+        ),
+        (
+            "cli_test.go",
+            r#"package cli
+
+import "testing"
+
+func TestOutputMentionsTheName(t *testing.T) {
+	check(t, Run(), "name")
+}
+
+func TestOutputIsExact(t *testing.T) {
+	checkExact(t, Run(), "name\n")
+}
+
+func TestUnknownHelper(t *testing.T) {
+	verify(t, Run())
+}
+"#,
+        ),
+        (
+            "other/other_test.go",
+            "package other\n\nimport \"testing\"\n\nfunc TestElsewhere(t *testing.T) {\n\tcheck(t, \"a\", \"a\")\n}\n",
+        ),
+    ]);
+    let frames: TestFrames = produce("go", dir.path());
+    assert_eq!(
+        rows(file(&frames, "cli_test.go")),
+        [
+            case(
+                "TestOutputMentionsTheName",
+                &[(Truthiness, Weak)],
+                Runs,
+                &[],
+                5
+            ),
+            case("TestOutputIsExact", &[(Equality, Strong)], Runs, &[], 9),
+            case("TestUnknownHelper", &[(Custom, Strong)], Runs, &[], 13),
+        ],
+        "a helper of another package's directory is not this one's"
+    );
+    assert_eq!(
+        rows(file(&frames, "other/other_test.go")),
+        [case("TestElsewhere", &[(Custom, Strong)], Runs, &[], 5)]
     );
 }

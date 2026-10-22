@@ -15457,6 +15457,119 @@
       "target": {
         "kind": "unresolved"
       }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "attribute",
+      "name": "test",
+      "span": {
+        "col": 1,
+        "end_col": 8,
+        "end_line": 122,
+        "line": 122
+      },
+      "target": {
+        "kind": "local",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "tests/quality_signals.rs",
+            "line": 123
+          }
+        ]
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": null,
+      "kind": "name",
+      "name": "test",
+      "span": {
+        "col": 3,
+        "end_col": 7,
+        "end_line": 122,
+        "line": 122
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      },
+      "kind": "name",
+      "name": "balanced",
+      "span": {
+        "col": 18,
+        "end_col": 26,
+        "end_line": 124,
+        "line": 124
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      },
+      "kind": "name",
+      "name": "assert_eq",
+      "span": {
+        "col": 17,
+        "end_col": 26,
+        "end_line": 127,
+        "line": 127
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      },
+      "kind": "member",
+      "name": "balance",
+      "span": {
+        "col": 28,
+        "end_col": 35,
+        "end_line": 127,
+        "line": 127
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/quality_signals.rs",
+      "from": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 123
+      },
+      "kind": "name",
+      "name": "balanced",
+      "span": {
+        "col": 5,
+        "end_col": 13,
+        "end_line": 131,
+        "line": 131
+      },
+      "target": {
+        "kind": "unresolved"
+      }
     }
   ]
 }

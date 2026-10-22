@@ -1869,6 +1869,28 @@
         "line": 116
       },
       "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 57,
+        "end_col": 2,
+        "end_line": 132,
+        "line": 123
+      },
+      "display": "tests::quality_signals::an_assertion_in_a_macro_repetition_is_an_assertion",
+      "file": "tests/quality_signals.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "an_assertion_in_a_macro_repetition_is_an_assertion",
+      "namespace": "tests::quality_signals",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 132,
+        "line": 123
+      },
+      "visibility": "private"
     }
   ]
 }

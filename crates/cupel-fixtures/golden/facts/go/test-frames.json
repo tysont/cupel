@@ -5,7 +5,7 @@
         {
           "assertions": [
             {
-              "kind": "custom",
+              "kind": "equality",
               "span": {
                 "col": 2,
                 "end_col": 36,
