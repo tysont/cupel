@@ -23,12 +23,10 @@ use crate::matching::{self, SymbolMatch};
 use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
 use crate::oracle::RunOracle;
-use crate::producer::{
-    Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, Upstream,
-};
+use crate::producer::{Availability, Ctx, Focus, ProduceCtx, ProducerRegistry, Upstream};
 use crate::rank::{Measured, Measurement};
 use crate::result::{CheckResult, CheckStatus, SkipReason, Skipped};
-use crate::scope::{Scope, SymbolSelector, select_symbols, touched};
+use crate::scope::{ChangedLines, Scope, SymbolSelector, select_symbols, touched};
 use crate::syntax::{NormTree, Symbols};
 use crate::test_results::{TestResults, Unevaluable};
 use crate::writer::Writer;

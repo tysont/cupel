@@ -21,7 +21,7 @@ use crate::grade::CostClass;
 use crate::id::{LangId, ProducerId, ToolId};
 use crate::lang::{Lang, Langs};
 use crate::oracle::RunOracle;
-use crate::scope::Scope;
+use crate::scope::{ChangedLines, Scope};
 use crate::syntax::SymbolKey;
 use crate::test_results::TestResults;
 use crate::writer::Writer;
@@ -103,9 +103,6 @@ pub struct Focus {
     /// default, or [`case_budget`](Self::case_budget)'s for the depth.
     pub cases: Option<u64>,
 }
-
-/// Per file, the 1-based inclusive line ranges a change touched.
-pub type ChangedLines = BTreeMap<String, Vec<(u32, u32)>>;
 
 impl Default for Focus {
     /// The default depth, every symbol, no range.
