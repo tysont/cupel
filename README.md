@@ -184,7 +184,7 @@ Each schema's `$id` is the URL it is published at, under [`https://tysont.github
 | `--paths P` | Files, directories, or globs (gitignore-aware); repeatable |
 | `--symbols S` | Symbols by qualified name (`shop.shipping.shipping_cost`) or structural hash (`sh_c7dca337c9ad7dd1`); repeatable |
 
-A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weakening` compares tests between two revisions, so it runs only with `--changed` or `--base` and is reported as skipped on a tree.
+Under `--changed` or `--base` the symbols in scope are the functions and methods the range's changed lines touch (a file git does not track yet counts whole): a clone group is reported when one of its members was touched, every other per-symbol finding when its symbol was, so the changed gate rules on what the change wrote, and the tree gate grades the rest ([ADR-142](docs/adr/CUPEL_DECISION_142.md)). Facts are still produced for whole files, so a touched function's clone elsewhere in its file is found. A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weakening` compares tests between two revisions, so it runs only with `--changed` or `--base` and is reported as skipped on a tree.
 
 **Selection** decides which checks run.
 
@@ -981,7 +981,7 @@ Without a `coverage` command a language's `tests.coverage` is skipped as `unconf
 
 The score `tests.mutation.score` is killed / (killed + survived), 1 when nothing was scored. The other gate keys count mutants by outcome (`killed`, `survived`, `timeout`, `uncovered`, `unviable` for one that did not build, `equivalent`) and say how many ran this time (`executed`) or were reused (`reused`), and how many of those ran behind a schemata build (`schemata`) or fell back to file copies (`fallback`).
 
-How much is mutated follows the depth: at `standard` with `--changed` or `--base`, the functions the change touched; at `deep` and `exhaustive`, every function of the files in scope (the touched files with `--changed`, the tree without). Test code is never mutated. Only the `default` operators run unless the language asks for more:
+How much is mutated follows the depth: at `standard` with `--changed` or `--base`, the functions the change touched; at `deep` and `exhaustive`, every function of the files in scope (the touched files with `--changed`, the tree without). Under a range, `tests.mutation` scores only the mutants in the functions the change touched (ADR-142). Test code is never mutated. Only the `default` operators run unless the language asks for more:
 
 ```toml
 [lang.python]
@@ -1565,13 +1565,14 @@ Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the 
 
 ## The gate
 
-`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base. `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
+`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base (`--against baseline|REF|run:ID` names another reference). `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
 
 ## Depth
 
 - `--depth quick|standard|deep|exhaustive`, default `standard`. How much evidence to gather.
 - `--budget DURATION`. A wall-clock budget: run the most valuable checks that fit and skip the rest.
-- Scope flags (`--changed`, `--base`, `--paths`, `--symbols`) intersect; `--only` and `--skip` select checks by ID or group.
+- Scope flags (`--changed`, `--base` with `--head`, `--paths`, `--symbols`) intersect; under `--changed` or `--base` the checks rule on the functions the change touched. `--only` and `--skip` select checks by ID or group, `--tier N+` by tier; `--jobs N` caps the threads and test processes.
+- `--oracle NAME` picks the reference implementation `gen.differential` compares with and `--cases N` the inputs generative checks try; `check --scaffold --write` writes a property stub for each `property.missing` finding.
 
 | Depth | Adds |
 | --- | --- |
@@ -1591,7 +1592,7 @@ Stdout is one JSON envelope; diagnostics go to stderr. Read:
 
 ## MCP
 
-A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints.
+A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints. Without `--mcp`, `cupel serve` keeps facts warm for every command run in the repository, and `--watch` reparses files as they change.
 
 ## More
 
@@ -1619,6 +1620,7 @@ All automation goes through `make`.
 | `make dogfood` | Cupel grades itself at `--depth deep`: `cupel check --changed --depth deep --gate` against `main`, which mutates every function of every changed file; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`, whose clone ratchets read `<= base` against the committed `.cupel/baseline.json` it imports first, and skips `tests.mutation`. Both skip `tests.flaky`, whose engine reruns the whole suite one test at a time and does not rerun cargo-nextest, and `conc.race`, which Miri cannot run on tests that spawn processes ([ADR-129](docs/adr/CUPEL_DECISION_129.md)). A local run is bounded by `--budget 30m` (`DOGFOOD_BUDGET`), lists what the budget left out, and exits 5 when it left anything out; CI runs both with `DOGFOOD_BUDGET=`, which runs every check. They need cargo-nextest and cargo-llvm-cov on `PATH`; one dogfood runs at a time on a machine |
 | `make install` | `cargo install --path crates/cupel-cli` |
 | `make dist` | build the stripped release binary and package it as `target/dist/cupel-<version>-<target>.tar.gz` (`.zip` on Windows) with `LICENSE` and this README; `TARGET=<triple>` builds another target, the Linux musl targets through `cargo-zigbuild` with `zig` on PATH ([ADR-124](docs/adr/CUPEL_DECISION_124.md)) |
+| `make version V=X.Y.Z` | write the release version into every file that names it: the workspace `Cargo.toml`, the workspace crates in `Cargo.lock`, `dist/npm/package.json`, and `dist/pipx/cupel.py`; a test holds them equal |
 | `make installers` | the tests of `dist/`'s installers against a fake release on a local HTTP server ([ADR-125](docs/adr/CUPEL_DECISION_125.md)); `make test` runs them too, skipping a test whose tool (ShellCheck, Ruby, Node, npm, Python) is missing |
 
 The generated README sections sit between `<!-- generated:NAME -->` and `<!-- end:NAME -->` markers. A test in `crates/cupel-cli/tests/readme.rs` renders them from the binary's `describe` output and fails when the committed text differs, so `make check` catches a stale table. Run `make readme` and review the diff.

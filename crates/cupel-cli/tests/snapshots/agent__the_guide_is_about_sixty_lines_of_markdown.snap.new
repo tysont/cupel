@@ -1,0 +1,69 @@
+---
+source: crates/cupel-cli/tests/agent.rs
+assertion_line: 71
+expression: guide
+---
+# Cupel
+
+Cupel grades what a coding agent produced. It measures structure and test strength over a change or a whole tree and returns one JSON envelope: findings with stable IDs, ranked `next_actions`, and a gate verdict. It never edits code; you fix, it grades.
+
+## The loop
+
+1. Run `cupel check --changed --format json`.
+2. If `exit_code` is 0, stop: the gate passed, or there is no gate.
+3. Otherwise take `next_actions[0]`, fix what it names, and rerun its finding's `repro` to confirm.
+4. Go back to 1. Do not stop until it exits 0.
+
+- `cupel explain <finding-id>` shows a finding's source, covering tests, and a test skeleton.
+- `cupel tests --impacted --changed` lists the tests the change affects and the command that runs them.
+- `cupel describe <check-id>` and `cupel describe finding <kind>` explain any check or finding kind.
+- `--dry-run` shows what any command would run or write; `<verb> --describe` lists its flags.
+
+## Exit codes
+
+| Code | Name | Meaning |
+| --- | --- | --- |
+| 0 | pass | Ran fully; gate passed or no gate. |
+| 1 | fail | Ran fully; gate failed. |
+| 2 | usage | Bad flags or config; the envelope names the fix. |
+| 3 | environment | Missing tool, oracle, or toolchain; doctor findings attached. |
+| 4 | unevaluable | Baseline test suite fails or build broken; scoring refused. |
+| 5 | partial | Timeout or budget hit; the envelope has valid partial results. |
+| 6 | internal | Cupel bug; the envelope includes a bug-report payload. |
+
+Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the fix. On exit 3 run `cupel doctor` and follow its `install_tool` and `configure` actions. On exit 4 make the test suite pass first.
+
+## The gate
+
+`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base (`--against baseline|REF|run:ID` names another reference). `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
+
+## Depth
+
+- `--depth quick|standard|deep|exhaustive`, default `standard`. How much evidence to gather.
+- `--budget DURATION`. A wall-clock budget: run the most valuable checks that fit and skip the rest.
+- Scope flags (`--changed`, `--base` with `--head`, `--paths`, `--symbols`) intersect; under `--changed` or `--base` the checks rule on the functions the change touched. `--only` and `--skip` select checks by ID or group, `--tier N+` by tier; `--jobs N` caps the threads and test processes.
+- `--oracle NAME` picks the reference implementation `gen.differential` compares with and `--cases N` the inputs generative checks try; `check --scaffold --write` writes a property stub for each `property.missing` finding.
+
+| Depth | Adds |
+| --- | --- |
+| `quick` | `meta.oracle-independence`, `perf.footprint`, `static.api-surface`, `static.clones`, `static.complexity`, `static.crap`, `static.dead-code`, `static.deps`, `tests.assertion-density`, `tests.quality`, `tests.weakening` |
+| `standard` | `conc.race`, `gen.property`, `meta.traceability`, `spec.contracts`, `static.analyze`, `tests.coverage`, `tests.flaky`, `tests.mutation` |
+| `deep` | `conc.linearizability`, `gen.differential`, `gen.fuzz`, `gen.metamorphic`, `perf.bench` |
+| `exhaustive` | `conc.dst`, `conc.model-check`, `spec.prove`, `spec.trace` |
+
+## The envelope
+
+Stdout is one JSON envelope; diagnostics go to stderr. Read:
+
+- `status`: `pass`, `fail`, `partial`, `error`, `plan`; `exit_code` always equals the process's.
+- `findings[]`: `id`, `check`, `kind`, `severity`, `location`, `title`, `action`, and `repro`, the command that reruns only that check on only that symbol.
+- `next_actions[]`: what to fix, most important first; each has a `kind`, a `summary`, and its `finding`.
+- `summary.gate`: the verdict and each rule's result; `truncated` says `--limit` cut the findings.
+
+## MCP
+
+A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints. Without `--mcp`, `cupel serve` keeps facts warm for every command run in the repository, and `--watch` reparses files as they change.
+
+## More
+
+The verbs are `init`, `doctor`, `describe`, `check`, `survey`, `explain`, `baseline`, `oracle`, `tests`, `suppress`, `serve`. `cupel describe --all` is every verb, flag, exit code, and schema as one JSON document.
