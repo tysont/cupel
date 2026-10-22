@@ -498,6 +498,14 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
             .deciding(&[Branch, Branch]),
         case("branches_beyond_guards", 30).deciding(&[Branch, Branch]),
         case("alternatives", 40).deciding(&[Switch, Ternary, Catch]),
+        // `switch { case got != want: t.Errorf(…); case err != nil: t.Fatal(err) }`: each arm
+        // guards one failure call, as an `if` does.
+        case("guarded_cases", 45)
+            .asserting(&[
+                (AssertionKind::Equality, AssertionStrength::Strong),
+                (AssertionKind::NotNull, AssertionStrength::Weak),
+            ])
+            .deciding(&[Switch, Switch]),
         case("operators_and_returns", 50).deciding(&[BooleanOp, EarlyReturn]),
         // `for (input, want) in [(1, 2), (3, 4)] { assert_eq!(…) }`: a table of cases.
         case("table_driven", 60).iterating_tables(2),
@@ -531,7 +539,15 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
         .as_object()
         .unwrap()
     );
-    assert_eq!(findings[2].evidence.0["logic"], json!(3));
+    assert_eq!(
+        (
+            &findings[2].evidence.0["logic"],
+            &findings[2].evidence.0["branches"],
+            &findings[2].evidence.0["alternatives"]
+        ),
+        (&json!(2), &json!(1), &json!(2)),
+        "a case arm is a branch its assertion can guard; a ternary and a catch are not"
+    );
     assert_eq!(
         (
             &findings[3].evidence.0["logic"],

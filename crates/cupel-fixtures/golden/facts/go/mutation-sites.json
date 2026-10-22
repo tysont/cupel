@@ -3960,6 +3960,90 @@
     {
       "sites": [
         {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "6df4de6df934f7a5",
+          "span": {
+            "col": 32,
+            "end_col": 33,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "a97b5c186704c391",
+          "span": {
+            "col": 35,
+            "end_col": 36,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "!=",
+          "operator": "equality",
+          "set": "default",
+          "site_hash": "c53d02ac7e23b4c7",
+          "span": {
+            "col": 11,
+            "end_col": 13,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "=="
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d9d0545fbbc990d5",
+          "span": {
+            "col": 14,
+            "end_col": 15,
+            "end_line": 27,
+            "line": 27
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "t.Errorf(\"balance = %d, want 3\", got)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ef30e6c8fe155a01",
+          "span": {
+            "col": 3,
+            "end_col": 40,
+            "end_line": 28,
+            "line": 28
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 25
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "err != nil",
           "operator": "negation",
           "set": "extended",

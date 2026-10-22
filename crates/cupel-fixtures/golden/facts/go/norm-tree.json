@@ -20571,6 +20571,472 @@
       }
     },
     {
+      "hash": "sh_ca12b4adc6ecd32e",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 35,
+                      "end_col": 36,
+                      "end_line": 25,
+                      "line": 25
+                    },
+                    "text": "t"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "*",
+                        "span": {
+                          "col": 37,
+                          "end_col": 38,
+                          "end_line": 25,
+                          "line": 25
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 38,
+                              "end_col": 45,
+                              "end_line": 25,
+                              "line": 25
+                            },
+                            "text": "testing"
+                          },
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 46,
+                              "end_col": 47,
+                              "end_line": 25,
+                              "line": 25
+                            },
+                            "text": "T"
+                          }
+                        ],
+                        "label": "qualified_type",
+                        "span": {
+                          "col": 38,
+                          "end_col": 47,
+                          "end_line": 25,
+                          "line": 25
+                        }
+                      }
+                    ],
+                    "label": "pointer_type",
+                    "span": {
+                      "col": 37,
+                      "end_col": 47,
+                      "end_line": 25,
+                      "line": 25
+                    }
+                  }
+                ],
+                "label": "parameter_declaration",
+                "span": {
+                  "col": 35,
+                  "end_col": 47,
+                  "end_line": 25,
+                  "line": 25
+                }
+              }
+            ],
+            "label": "parameter_list",
+            "span": {
+              "col": 34,
+              "end_col": 48,
+              "end_line": 25,
+              "line": 25
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 9,
+                                  "end_col": 12,
+                                  "end_line": 26,
+                                  "line": 26
+                                },
+                                "text": "got"
+                              }
+                            ],
+                            "label": "expression_list",
+                            "span": {
+                              "col": 9,
+                              "end_col": 12,
+                              "end_line": 26,
+                              "line": 26
+                            }
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "Balance",
+                                    "span": {
+                                      "col": 16,
+                                      "end_col": 23,
+                                      "end_line": 26,
+                                      "line": 26
+                                    }
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [],
+                                                "label": "$id",
+                                                "span": {
+                                                  "col": 26,
+                                                  "end_col": 31,
+                                                  "end_line": 26,
+                                                  "line": 26
+                                                },
+                                                "text": "int64"
+                                              }
+                                            ],
+                                            "label": "slice_type",
+                                            "span": {
+                                              "col": 24,
+                                              "end_col": 31,
+                                              "end_line": 26,
+                                              "line": 26
+                                            }
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [],
+                                                    "label": "$lit",
+                                                    "span": {
+                                                      "col": 32,
+                                                      "end_col": 33,
+                                                      "end_line": 26,
+                                                      "line": 26
+                                                    },
+                                                    "text": "1"
+                                                  }
+                                                ],
+                                                "label": "literal_element",
+                                                "span": {
+                                                  "col": 32,
+                                                  "end_col": 33,
+                                                  "end_line": 26,
+                                                  "line": 26
+                                                }
+                                              },
+                                              {
+                                                "children": [
+                                                  {
+                                                    "children": [],
+                                                    "label": "$lit",
+                                                    "span": {
+                                                      "col": 35,
+                                                      "end_col": 36,
+                                                      "end_line": 26,
+                                                      "line": 26
+                                                    },
+                                                    "text": "2"
+                                                  }
+                                                ],
+                                                "label": "literal_element",
+                                                "span": {
+                                                  "col": 35,
+                                                  "end_col": 36,
+                                                  "end_line": 26,
+                                                  "line": 26
+                                                }
+                                              }
+                                            ],
+                                            "label": "literal_value",
+                                            "span": {
+                                              "col": 31,
+                                              "end_col": 37,
+                                              "end_line": 26,
+                                              "line": 26
+                                            }
+                                          }
+                                        ],
+                                        "label": "composite_literal",
+                                        "span": {
+                                          "col": 24,
+                                          "end_col": 37,
+                                          "end_line": 26,
+                                          "line": 26
+                                        }
+                                      }
+                                    ],
+                                    "label": "argument_list",
+                                    "span": {
+                                      "col": 23,
+                                      "end_col": 38,
+                                      "end_line": 26,
+                                      "line": 26
+                                    }
+                                  }
+                                ],
+                                "label": "call_expression",
+                                "span": {
+                                  "col": 16,
+                                  "end_col": 38,
+                                  "end_line": 26,
+                                  "line": 26
+                                }
+                              }
+                            ],
+                            "label": "expression_list",
+                            "span": {
+                              "col": 16,
+                              "end_col": 38,
+                              "end_line": 26,
+                              "line": 26
+                            }
+                          }
+                        ],
+                        "label": "short_var_declaration",
+                        "span": {
+                          "col": 9,
+                          "end_col": 38,
+                          "end_line": 26,
+                          "line": 26
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 7,
+                                      "end_col": 10,
+                                      "end_line": 27,
+                                      "line": 27
+                                    },
+                                    "text": "got"
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "!=",
+                                    "span": {
+                                      "col": 11,
+                                      "end_col": 13,
+                                      "end_line": 27,
+                                      "line": 27
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": "$lit",
+                                    "span": {
+                                      "col": 14,
+                                      "end_col": 15,
+                                      "end_line": 27,
+                                      "line": 27
+                                    },
+                                    "text": "3"
+                                  }
+                                ],
+                                "label": "binary_expression",
+                                "span": {
+                                  "col": 7,
+                                  "end_col": 15,
+                                  "end_line": 27,
+                                  "line": 27
+                                }
+                              }
+                            ],
+                            "label": "expression_list",
+                            "span": {
+                              "col": 7,
+                              "end_col": 15,
+                              "end_line": 27,
+                              "line": 27
+                            }
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [
+                                  {
+                                    "children": [
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$id",
+                                            "span": {
+                                              "col": 3,
+                                              "end_col": 4,
+                                              "end_line": 28,
+                                              "line": 28
+                                            },
+                                            "text": "t"
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "Errorf",
+                                            "span": {
+                                              "col": 5,
+                                              "end_col": 11,
+                                              "end_line": 28,
+                                              "line": 28
+                                            }
+                                          }
+                                        ],
+                                        "label": "selector_expression",
+                                        "span": {
+                                          "col": 3,
+                                          "end_col": 11,
+                                          "end_line": 28,
+                                          "line": 28
+                                        }
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [],
+                                            "label": "$lit",
+                                            "span": {
+                                              "col": 12,
+                                              "end_col": 34,
+                                              "end_line": 28,
+                                              "line": 28
+                                            },
+                                            "text": "\"balance = %d, want 3\""
+                                          },
+                                          {
+                                            "children": [],
+                                            "label": "$id",
+                                            "span": {
+                                              "col": 36,
+                                              "end_col": 39,
+                                              "end_line": 28,
+                                              "line": 28
+                                            },
+                                            "text": "got"
+                                          }
+                                        ],
+                                        "label": "argument_list",
+                                        "span": {
+                                          "col": 11,
+                                          "end_col": 40,
+                                          "end_line": 28,
+                                          "line": 28
+                                        }
+                                      }
+                                    ],
+                                    "label": "call_expression",
+                                    "span": {
+                                      "col": 3,
+                                      "end_col": 40,
+                                      "end_line": 28,
+                                      "line": 28
+                                    }
+                                  }
+                                ],
+                                "label": "expression_statement",
+                                "span": {
+                                  "col": 3,
+                                  "end_col": 40,
+                                  "end_line": 28,
+                                  "line": 28
+                                }
+                              }
+                            ],
+                            "label": "statement_list",
+                            "span": {
+                              "col": 3,
+                              "end_col": 1,
+                              "end_line": 29,
+                              "line": 28
+                            }
+                          }
+                        ],
+                        "label": "expression_case",
+                        "span": {
+                          "col": 2,
+                          "end_col": 1,
+                          "end_line": 29,
+                          "line": 27
+                        }
+                      }
+                    ],
+                    "label": "expression_switch_statement",
+                    "span": {
+                      "col": 2,
+                      "end_col": 3,
+                      "end_line": 29,
+                      "line": 26
+                    }
+                  }
+                ],
+                "label": "statement_list",
+                "span": {
+                  "col": 2,
+                  "end_col": 1,
+                  "end_line": 30,
+                  "line": 26
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 49,
+              "end_col": 2,
+              "end_line": 30,
+              "line": 25
+            }
+          }
+        ],
+        "label": "function_declaration",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 30,
+          "line": 25
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "ledger_helpers_test.go",
+        "line": 25
+      }
+    },
+    {
       "hash": "sh_d0d1d42bda20fc23",
       "root": {
         "children": [

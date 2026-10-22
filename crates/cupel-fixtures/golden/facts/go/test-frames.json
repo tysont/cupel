@@ -51,6 +51,31 @@
             "end_line": 23,
             "line": 19
           }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 3,
+                "end_col": 40,
+                "end_line": 28,
+                "line": 28
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "TestABalanceCheckedInASwitch",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 30,
+            "line": 25
+          }
         }
       ],
       "file": "ledger_helpers_test.go",

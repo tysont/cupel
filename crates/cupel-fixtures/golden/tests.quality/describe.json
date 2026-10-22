@@ -212,13 +212,13 @@
                 "type": "string"
               },
               "alternatives": {
-                "description": "Switch cases, conditional expressions, and exception handlers.",
+                "description": "Conditional expressions and exception handlers.",
                 "format": "uint32",
                 "minimum": 0,
                 "type": "integer"
               },
               "branches": {
-                "description": "`if` and `else if` branches.",
+                "description": "`if` and `else if` branches and switch or match arms.",
                 "format": "uint32",
                 "minimum": 0,
                 "type": "integer"

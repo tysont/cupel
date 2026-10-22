@@ -816,6 +816,28 @@
     },
     {
       "body": {
+        "col": 49,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 25
+      },
+      "display": "ledger.TestABalanceCheckedInASwitch",
+      "file": "ledger_helpers_test.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "TestABalanceCheckedInASwitch",
+      "namespace": "ledger",
+      "parameters": 1,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 30,
+        "line": 25
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 52,
         "end_col": 2,
         "end_line": 13,

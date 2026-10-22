@@ -21,3 +21,10 @@ func TestEachBalanceIsListed(t *testing.T) {
 		t.Errorf("balances = %v", got)
 	}
 }
+
+func TestABalanceCheckedInASwitch(t *testing.T) {
+	switch got := Balance([]int64{1, 2}); {
+	case got != 3:
+		t.Errorf("balance = %d, want 3", got)
+	}
+}
