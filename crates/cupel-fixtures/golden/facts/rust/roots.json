@@ -551,6 +551,22 @@
         "file": "tests/quality_signals.rs",
         "line": 95
       }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 104
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 1,
+        "file": "tests/quality_signals.rs",
+        "line": 116
+      }
     }
   ]
 }

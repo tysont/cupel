@@ -10,6 +10,10 @@
 //!   `@assertion.name` (a node whose text, whitespace removed, is the key). The key is looked
 //!   up in `[tests.assertions]`; unknown keys get `[tests].unknown_assertion`. When several
 //!   patterns match one assertion node, the earliest wins, so idioms come first.
+//! - `@assertion.helper` on the name a call is made by: when that name is a function of the
+//!   same file that is not a case and holds an assertion (a helper such as
+//!   `test_encode_ok(&cases)`), the call is an assertion of the class of the helper's first
+//!   strong assertion, else its first. One level: a helper's own calls of helpers are not followed.
 //! - `@test.mock` on a test double's creation, with optional `@mock.target` naming what it
 //!   replaces (else the mock node's text).
 //! - `@test.skip` on a skip marker, with optional `@skip.reason` (the reason's text, without
@@ -31,7 +35,9 @@
 use std::collections::{BTreeMap, HashSet};
 
 use cupel_core::FactKind;
-use cupel_core::syntax::{Assertion, Mock, SkipMarker, Span, TestCase, TestFile, TestFrames};
+use cupel_core::syntax::{
+    Assertion, AssertionStrength, Mock, SkipMarker, Span, TestCase, TestFile, TestFrames,
+};
 use tree_sitter::Node;
 
 use crate::contract::capture;
@@ -39,6 +45,7 @@ use crate::parse::Parsed;
 use crate::producer::{QueryProducer, Source};
 use crate::query::{Match, matches, span};
 use crate::spec::QueryFile;
+use crate::symbols::definitions;
 use crate::tables::TestRules;
 
 /// Everything gathered for one case node.
@@ -82,7 +89,7 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
     if cases.is_empty() {
         return TestFrames::default();
     }
-    attach_assertions(&mut cases, parsed, &found, rules);
+    attach_assertions(&mut cases, source, &found, rules);
     attach_mocks(&mut cases, parsed, &found);
     attach_skips(&mut cases, parsed, &found);
     attach_properties(&mut cases, &found);
@@ -160,13 +167,15 @@ fn owner(cases: &Cases<'_>, m: &Match<'_, '_>, node: Node<'_>) -> Option<usize> 
         })
 }
 
-/// Classifies every assertion; the earliest pattern wins per assertion node.
+/// Classifies every assertion; the earliest pattern wins per assertion node. A call of a helper
+/// that asserts is an assertion too (`@assertion.helper`).
 fn attach_assertions(
     cases: &mut Cases<'_>,
-    parsed: &Parsed,
+    source: &Source<'_>,
     found: &[Match<'_, '_>],
     rules: &TestRules,
 ) {
+    let parsed = source.parsed;
     let mut assertions: BTreeMap<usize, (usize, Option<usize>, Assertion)> = BTreeMap::new();
     for m in found {
         let Some(node) = m.node(capture::TEST_ASSERTION) else {
@@ -197,9 +206,64 @@ fn attach_assertions(
     }
     let mut sorted: Vec<(usize, Option<usize>, Assertion)> = assertions.into_values().collect();
     sorted.sort_by_key(|(_, _, a)| (a.span.line, a.span.col));
+    let mut loose = Vec::new();
     for (_, owner, assertion) in sorted {
-        if let Some(case) = owner.and_then(|id| cases.get_mut(&id)) {
-            case.assertions.push(assertion);
+        match owner.and_then(|id| cases.get_mut(&id)) {
+            Some(case) => case.assertions.push(assertion),
+            None => loose.push(assertion),
+        }
+    }
+    attach_helper_calls(cases, source, found, &loose);
+}
+
+/// Adds an assertion to each case for each call it makes of a helper of this file: a function
+/// that is not a case and holds one of the `loose` assertions (those outside every case).
+fn attach_helper_calls(
+    cases: &mut Cases<'_>,
+    source: &Source<'_>,
+    found: &[Match<'_, '_>],
+    loose: &[Assertion],
+) {
+    let calls: Vec<(usize, Node<'_>)> = found
+        .iter()
+        .filter_map(|m| {
+            let node = m.node(capture::ASSERTION_HELPER)?;
+            Some((owner(cases, m, node)?, node))
+        })
+        .collect();
+    if calls.is_empty() || loose.is_empty() {
+        return;
+    }
+    let parsed = source.parsed;
+    let helpers: BTreeMap<String, &Assertion> = definitions(parsed, source.language)
+        .iter()
+        .filter(|definition| !cases.contains_key(&definition.node.id()))
+        .filter_map(|definition| {
+            let within = |assertion: &&Assertion| {
+                let (start, end) = (definition.symbol.span, assertion.span);
+                (start.line, start.col) <= (end.line, end.col)
+                    && (end.end_line, end.end_col) <= (start.end_line, start.end_col)
+            };
+            let held: Vec<&Assertion> = loose.iter().filter(within).collect();
+            let class = held
+                .iter()
+                .find(|assertion| assertion.strength == AssertionStrength::Strong)
+                .or_else(|| held.first())?;
+            Some((definition.symbol.name.clone(), *class))
+        })
+        .collect();
+    for (case, node) in calls {
+        let Some(helper) = helpers.get(parsed.text(node)) else {
+            continue;
+        };
+        if let Some(case) = cases.get_mut(&case) {
+            case.assertions.push(Assertion {
+                kind: helper.kind,
+                strength: helper.strength,
+                span: span(node),
+            });
+            case.assertions
+                .sort_by_key(|assertion| (assertion.span.line, assertion.span.col));
         }
     }
 }

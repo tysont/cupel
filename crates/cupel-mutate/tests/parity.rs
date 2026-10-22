@@ -167,7 +167,7 @@ fn a_mutant_that_does_not_type_check_leaves_the_schemata_and_runs_as_a_file_copy
     let greet: Vec<String> = schemata
         .mutants
         .iter()
-        .filter(|m| m.span.line == 18)
+        .filter(|m| m.span.line == 24)
         .map(|m| {
             format!(
                 "{}→{} {} {:?} {:?}",
@@ -177,12 +177,12 @@ fn a_mutant_that_does_not_type_check_leaves_the_schemata_and_runs_as_a_file_copy
         .collect();
     assert_eq!(
         greet,
-        ["+→- unviable Some(FileCopy) Some(\"did not compile under schemata (line 18)\")"]
+        ["+→- unviable Some(FileCopy) Some(\"did not compile under schemata (line 24)\")"]
     );
     let others = schemata
         .mutants
         .iter()
-        .filter(|m| m.span.line != 18 && m.outcome != MutantOutcome::Uncovered);
+        .filter(|m| m.span.line != 24 && m.outcome != MutantOutcome::Uncovered);
     assert!(others.clone().count() == 5);
     assert!(
         others

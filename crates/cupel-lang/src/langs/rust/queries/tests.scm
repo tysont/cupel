@@ -184,6 +184,24 @@
   ]
   (#match? @assertion.name "^assert_")) @test.assertion
 
+; An assertion written inside a macro's arguments (`test_stream!(data, |s| { assert_eq!(…) })`):
+; the grammar leaves a macro's arguments as tokens, so the name and its `!(…)` are siblings.
+(token_tree
+  (identifier) @assertion.name @test.assertion
+  .
+  (token_tree)
+  (#match? @assertion.name "^(debug_|prop_)?assert"))
+
+; A call by plain name, which asserts when it names a helper of this file that asserts
+; (`test_encode_ok(&cases)`); `assert_…` calls are assertions above.
+(call_expression
+  function: [
+    (identifier) @assertion.helper
+    (generic_function
+      function: (identifier) @assertion.helper)
+  ]
+  (#not-match? @assertion.helper "^assert_"))
+
 ; assert_cmd: `Command::assert()` checks the process outcome its chained calls describe.
 (call_expression
   function: (field_expression

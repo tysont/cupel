@@ -12,3 +12,9 @@ pub fn discount(total: i64, member: bool) -> i64 {
 pub fn refund(total: i64) -> i64 {
     total - 5
 }
+
+/// What a loyalty order costs; this suite never builds the feature, so no line of it is code.
+#[cfg(feature = "loyalty")]
+pub fn loyalty(total: i64) -> i64 {
+    total - 1
+}

@@ -5,3 +5,6 @@ edition = "2021"
 
 # A workspace of its own, so cargo never looks for one above the fixture.
 [workspace]
+
+[features]
+loyalty = []

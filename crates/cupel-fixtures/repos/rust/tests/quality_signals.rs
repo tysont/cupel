@@ -95,3 +95,26 @@ fn assert_balance_of<T: Into<i64> + Copy>(entries: &[T], expected: i64) {
 fn an_assertion_helper_called_with_a_turbofish_is_an_assertion() {
     assert_balance_of::<i32>(&[2, 3], 5);
 }
+
+fn expect_balance(entries: &[i64], expected: i64) {
+    assert_eq!(balance(entries), expected);
+}
+
+#[test]
+fn a_helper_of_this_file_that_asserts_is_an_assertion() {
+    expect_balance(&[4, 5], 9);
+}
+
+macro_rules! with_entries {
+    ($entries:expr, |$name:ident| $body:block) => {{
+        let $name: &[i64] = $entries;
+        $body
+    }};
+}
+
+#[test]
+fn an_assertion_in_a_macro_argument_is_an_assertion() {
+    with_entries!(&[1, 1], |entries| {
+        assert_eq!(balance(entries), 2);
+    });
+}

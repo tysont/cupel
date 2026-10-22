@@ -269,3 +269,63 @@ fn property_tests_name_their_framework_and_proptest_blocks_hold_cases() {
         ]
     );
 }
+
+#[test]
+fn a_call_of_a_helper_in_the_file_that_asserts_and_an_assertion_in_a_macro_argument_count() {
+    let dir = tree(&[(
+        "tests/encode.rs",
+        r#"fn test_encode_ok<T: Serialize>(tests: &[(T, &str)]) {
+    for (value, expected) in tests {
+        assert_eq!(to_string(value).unwrap(), *expected);
+    }
+}
+
+fn check_ready(x: u32) {
+    assert!(ready(x));
+}
+
+fn values() -> Vec<u32> {
+    vec![1, 2]
+}
+
+macro_rules! test_stream {
+    ($data:expr, |$stream:ident| $test:block) => {{
+        let mut $stream = stream($data);
+        $test
+    }};
+}
+
+#[test]
+fn write_null() {
+    test_encode_ok(&[((), "null")]);
+}
+
+#[test]
+fn ready_values() {
+    check_ready::<u32>(1);
+}
+
+#[test]
+fn only_values() {
+    values();
+}
+
+#[test]
+fn stream_newlines() {
+    test_stream!("{} {}", |stream| {
+        assert_eq!(stream.byte_offset(), 0);
+    });
+}
+"#,
+    )]);
+    let frames: TestFrames = produce("rust", dir.path());
+    assert_eq!(
+        rows(file(&frames, "tests/encode.rs")),
+        [
+            case("write_null", &[(Equality, Strong)], Runs, &[], 23),
+            case("ready_values", &[(Truthiness, Weak)], Runs, &[], 28),
+            case("only_values", &[], Runs, &[], 33),
+            case("stream_newlines", &[(Equality, Strong)], Runs, &[], 38),
+        ]
+    );
+}

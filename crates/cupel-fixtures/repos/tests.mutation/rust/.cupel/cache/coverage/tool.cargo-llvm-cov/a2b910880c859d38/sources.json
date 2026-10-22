@@ -1,15 +1,15 @@
 {
   "dir": ".",
-  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/p34/regen/rust",
+  "ran_in": "/Users/tysont/Workspace/cupel/.claude/worktrees/p9-dogfood-rust-go/crates/cupel-fixtures/repos/tests.mutation/rust",
   "skip_dirs": [
     "target"
   ],
-  "report": "2e2ff35af0881d31fa9d48c2885799e5dc3e1a72bfcbd3288251686c216abf14",
+  "report": "782f9b3d6324f4afe30464cfadd2cf00e8d0253d96f34af60fe7a9c0ff691368",
   "files": {
     "Cargo.lock": "737f756c1a1135a1e6e305959a1f0d57b6fe15103b0c91fcfe5c65b681201fae",
-    "Cargo.toml": "268cf1ebe1487f2808276db30b2e843211e5ac7f215464bd3dcc300c8370fc79",
+    "Cargo.toml": "6f9148b6324ea7f271031721c257d557220a0d5e151cbac96a30928cfe4f4ec1",
     "cupel.toml": "c1a72e0c8b8b207c045916e7c00204d3c520647711a1f55913e4cb3e724667db",
-    "src/lib.rs": "ee3058551160bdba275eb961ec1498510cfcfde2ca384049d074efad5b4ed3cb",
+    "src/lib.rs": "131666319398f56f3258902670a0423b354d1abd6a3ecb2c267f4e2d66f0d6d5",
     "tests/large.rs": "e14253ceb38cfbfc5c30e4de29e71dbcbf8019a11317b29783c1be6318aba5fd",
     "tests/small.rs": "620ac7e2f84cbd0d52947451c36ea404aea551db3b234c707627a2e3b20ac599"
   }

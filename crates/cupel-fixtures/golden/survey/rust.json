@@ -302,19 +302,19 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 75,
+            "rank": 77,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 75,
+            "rank": 77,
             "value": 0.0
           },
           {
             "check": "tests.quality",
             "metric": "mock_density",
-            "rank": 15,
+            "rank": 17,
             "value": 0.0
           }
         ]
@@ -346,19 +346,19 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 79,
+            "rank": 82,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 79,
+            "rank": 82,
             "value": 0.0
           },
           {
             "check": "tests.quality",
             "metric": "mock_density",
-            "rank": 22,
+            "rank": 24,
             "value": 0.0
           }
         ]
@@ -494,7 +494,7 @@
       "roots": [
         "."
       ],
-      "symbols": 81
+      "symbols": 84
     },
     "seed": "<seed>",
     "started": "<timestamp>",

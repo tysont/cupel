@@ -7,17 +7,17 @@
       "findings": 0,
       "id": "tests.assertion-density",
       "metrics": {
-        "assertions_per_public_function": 7.333333333333333,
-        "assertions_per_test": 0.9130434782608696,
+        "assertions_per_public_function": 8.0,
+        "assertions_per_test": 0.92,
         "sparse_files": 0.0,
         "sparse_tests": 0.0,
         "tested_public_functions": 3.0
       },
       "oracle": null,
       "score": {
-        "n": 23,
+        "n": 25,
         "unit": "assertions_per_test",
-        "value": 0.9130434782608696
+        "value": 0.92
       },
       "skipped": null,
       "status": "pass",

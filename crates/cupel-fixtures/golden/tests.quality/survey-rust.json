@@ -7,15 +7,15 @@
       "findings": 11,
       "id": "tests.quality",
       "metrics": {
-        "assertion_density": 0.9130434782608696,
+        "assertion_density": 0.92,
         "no_assertion": 3.0,
-        "weak_ratio": 0.2857142857142857
+        "weak_ratio": 0.2608695652173913
       },
       "oracle": null,
       "score": {
-        "n": 23,
+        "n": 25,
         "unit": "assertion_density",
-        "value": 0.9130434782608696
+        "value": 0.92
       },
       "skipped": null,
       "status": "fail",
@@ -643,7 +643,7 @@
           "value": 0.0
         }
       ],
-      "measured": 23,
+      "measured": 25,
       "metric": "mock_density",
       "per": "symbol",
       "summary": "Test doubles per test as a percentage of its doubles plus assertions.",
