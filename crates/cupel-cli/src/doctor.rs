@@ -1,5 +1,5 @@
-// ABOUTME: The `doctor` verb: checks configuration, `required_version`, write access to `.cupel/`, and the
-// ABOUTME: tools the configuration needs, installing them with `--fix` (ADR-022, ADR-081); exit 3 for any `fail`.
+// ABOUTME: The `doctor` verb: checks configuration, `required_version`, write access to `.cupel/`, the tools the
+// ABOUTME: configuration needs (installed with `--fix`, ADR-081), and reports mutation slots; exit 3 for any `fail`.
 use std::path::Path;
 
 use cupel_core::config::Config;
@@ -18,7 +18,7 @@ use crate::install::{self, Planned, probe};
 use crate::problem::Problem;
 use crate::project;
 use crate::routes;
-use crate::run::Invocation;
+use crate::run::{Invocation, rfc3339};
 use crate::serve;
 use crate::suppress;
 
@@ -57,6 +57,7 @@ pub fn run(invocation: &Invocation<'_>, fix: bool) -> Envelope {
     }
     problems.extend(cupel_dir(writer));
     problems.extend(daemon(writer.root()));
+    problems.extend(mutation_slots(&cupel_mutate::slots::root()));
     let (requirements, unresolved) = needed(config, writer);
     problems.extend(unresolved);
     let mut probed = probe_all(&requirements);
@@ -496,6 +497,68 @@ fn daemon(root: &Path) -> Option<Problem> {
         },
         fix: fix.to_owned(),
     })
+}
+
+/// The mutation slots under `root` (ADR-141 §3), when there are any: how much they hold in all,
+/// and each repository's path, whether it still exists, its size, and its last use.
+fn mutation_slots(root: &Path) -> Option<Problem> {
+    let slots = cupel_mutate::slots::usage(root);
+    if slots.is_empty() {
+        return None;
+    }
+    let total: u64 = slots.iter().map(|slots| slots.bytes).sum();
+    let shown = root.display().to_string();
+    let repositories: Vec<serde_json::Value> = slots
+        .iter()
+        .map(|slots| {
+            json!({
+                "repository": slots.repository.as_ref().map(|path| path.display().to_string()),
+                "exists": slots.exists,
+                "bytes": slots.bytes,
+                "last_used": rfc3339(slots.used),
+            })
+        })
+        .collect();
+    let count = match slots.len() {
+        1 => "1 repository".to_owned(),
+        n => format!("{n} repositories"),
+    };
+    Some(Problem {
+        check: "doctor",
+        kind: "doctor.mutation-slots",
+        subject: shown.clone(),
+        severity: Severity::Info,
+        title: format!(
+            "Mutation slots hold {} for {count} under {shown}",
+            bytes_shown(total)
+        ),
+        detail: Some(
+            "Mutation runs keep their slots between runs so builds are incremental. A run \
+             removes the slots of repositories that are gone or unused for 7 days, and the \
+             least recently used while all slots hold more than 32 GiB."
+                .to_owned(),
+        ),
+        evidence: json!({"root": shown, "bytes": total, "repositories": repositories}),
+        action: ActionKind::Review,
+        fix: "Nothing to do; removing the directory frees the space now, and the next mutation \
+              run rebuilds what it needs."
+            .to_owned(),
+    })
+}
+
+/// `bytes` in the largest binary unit that keeps a whole number before the point.
+fn bytes_shown(bytes: u64) -> String {
+    #[allow(
+        clippy::cast_precision_loss,
+        reason = "a size shown to one decimal place needs no more than f64 holds"
+    )]
+    let value = bytes as f64;
+    match bytes {
+        0..1_024 => format!("{bytes} B"),
+        1_024..1_048_576 => format!("{:.1} KiB", value / 1_024.0),
+        1_048_576..1_073_741_824 => format!("{:.1} MiB", value / 1_048_576.0),
+        _ => format!("{:.1} GiB", value / 1_073_741_824.0),
+    }
 }
 
 /// The report on a daemon at `shown` that answered with `status`: running, or another build.

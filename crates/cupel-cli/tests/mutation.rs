@@ -109,3 +109,56 @@ fn text_names_the_surviving_mutant_at_its_site() {
         text.stdout
     );
 }
+
+/// Writes slots for the repository at `owner` under `root`, last used `ago`.
+fn slots_of(root: &std::path::Path, name: &str, owner: &str, ago: std::time::Duration) {
+    let dir = root.join(name);
+    std::fs::create_dir_all(dir.join("python/0")).unwrap();
+    std::fs::write(dir.join("python/0/build.out"), "built\n").unwrap();
+    std::fs::write(dir.join("lock"), "").unwrap();
+    std::fs::write(dir.join("repository"), owner).unwrap();
+    std::fs::File::options()
+        .write(true)
+        .open(dir.join("repository"))
+        .unwrap()
+        .set_modified(std::time::SystemTime::now() - ago)
+        .unwrap();
+}
+
+/// A mutation run claims its slots: it removes those of a repository that is gone and those
+/// unused for more than seven days, keeps those used recently, and records its own repository,
+/// lock, and size (ADR-141 §3).
+#[test]
+fn a_mutation_run_removes_the_slots_of_gone_and_idle_repositories_and_records_its_own() {
+    let Some(repo) = fixture() else { return };
+    let tmp = tempfile::tempdir().unwrap();
+    let root = tmp.path().join("cupel-mutate");
+    let (idle, recent) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+    let day = std::time::Duration::from_secs(24 * 60 * 60);
+    slots_of(&root, "gone", "/no/such/repository", day);
+    slots_of(&root, "idle", &idle.path().display().to_string(), 8 * day);
+    slots_of(&root, "recent", &recent.path().display().to_string(), day);
+    let outcome = repo.run_with(
+        support::cupel().env("TMPDIR", tmp.path()),
+        &["check", "--only", "tests.mutation"],
+    );
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let mut left: Vec<String> = std::fs::read_dir(&root)
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    left.sort();
+    assert_eq!(left.len(), 2, "{left:?}");
+    assert!(left.contains(&"recent".to_owned()), "{left:?}");
+    let own = root.join(left.iter().find(|name| *name != "recent").unwrap());
+    assert_eq!(
+        std::fs::read_to_string(own.join("repository")).unwrap(),
+        repo.root().display().to_string()
+    );
+    assert!(own.join("lock").exists());
+    let size: u64 = std::fs::read_to_string(own.join("size"))
+        .unwrap()
+        .parse()
+        .unwrap();
+    assert!(size > 0);
+}

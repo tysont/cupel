@@ -1,5 +1,6 @@
 // ABOUTME: Integration tests for `cupel serve` and auto-connect (ADR-085) with the real binary: answers, bypass,
 // ABOUTME: stale sockets, other builds, concurrency, streamed events, stop, watch-and-reparse, and doctor's report.
+#![cfg(unix)]
 mod support;
 
 use std::path::{Path, PathBuf};

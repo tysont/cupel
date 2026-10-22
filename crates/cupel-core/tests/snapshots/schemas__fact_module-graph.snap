@@ -41,9 +41,35 @@ expression: pretty(&schema)
         }
       ]
     },
+    "ImportAlias": {
+      "description": "A name an import statement binds under another local name.",
+      "type": "object",
+      "properties": {
+        "local": {
+          "description": "The name the importing file uses.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name as the module spells it.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "local",
+        "name"
+      ]
+    },
     "ImportEdge": {
       "type": "object",
       "properties": {
+        "aliases": {
+          "description": "Each name of `names` the statement binds under another local name (`import { a as b }`,\na default import's local name, Python's `from x import a as b`); empty when it binds\nevery name as itself (ADR-141).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ImportAlias"
+          },
+          "x-cupel-optional": true
+        },
         "edge_kind": {
           "description": "What the statement does with the module (ADR-068).",
           "$ref": "#/$defs/EdgeKind"

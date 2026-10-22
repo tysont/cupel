@@ -8367,6 +8367,44 @@
     },
     {
       "file": "src/ledger/rates.py",
+      "from": null,
+      "kind": "name",
+      "name": "exported_rate",
+      "span": {
+        "col": 41,
+        "end_col": 54,
+        "end_line": 3,
+        "line": 3
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/ledger/rates.py",
+      "from": null,
+      "kind": "name",
+      "name": "tripled",
+      "span": {
+        "col": 58,
+        "end_col": 65,
+        "end_line": 3,
+        "line": 3
+      },
+      "target": {
+        "file": "src/ledger/references.py",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "src/ledger/references.py",
+            "line": 7
+          }
+        ]
+      }
+    },
+    {
+      "file": "src/ledger/rates.py",
       "from": {
         "col": 1,
         "file": "src/ledger/rates.py",
@@ -8428,6 +8466,44 @@
       },
       "target": {
         "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/ledger/rates.py",
+      "from": null,
+      "kind": "name",
+      "name": "TRIPLED",
+      "span": {
+        "col": 1,
+        "end_col": 8,
+        "end_line": 10,
+        "line": 10
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/ledger/rates.py",
+      "from": null,
+      "kind": "name",
+      "name": "tripled",
+      "span": {
+        "col": 11,
+        "end_col": 18,
+        "end_line": 10,
+        "line": 10
+      },
+      "target": {
+        "file": "src/ledger/references.py",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "src/ledger/references.py",
+            "line": 7
+          }
+        ]
       }
     },
     {

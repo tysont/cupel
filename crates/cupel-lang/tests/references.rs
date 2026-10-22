@@ -53,11 +53,16 @@ fn shapes(found: &[(ReferenceKind, String, Vec<u32>)]) -> HashSet<(ReferenceKind
         .collect()
 }
 
+/// A plain name an import binds, as itself or under an alias (ADR-141: ES `import { square as
+/// side }`, Python `from .references import exported_rate as tripled`), resolves to the function
+/// the import names.
 #[test]
 fn a_plain_name_an_import_binds_resolves_to_the_function_in_the_imported_file() {
     for (lang, file, name, line) in [
         ("rust", "src/rates.rs", "imported_rate", 13),
         ("python", "src/ledger/rates.py", "_imported_rate", 11),
+        ("javascript", "src/ledger.js", "side", 1),
+        ("python", "src/ledger/rates.py", "tripled", 7),
     ] {
         let fact = of(lang, &fixture(lang));
         assert_eq!(
@@ -69,7 +74,8 @@ fn a_plain_name_an_import_binds_resolves_to_the_function_in_the_imported_file() 
 }
 
 /// An ES import binds the names its statement lists (ADR-133's `ImportEdge.names`), never its
-/// specifier's last segment: `square` resolves through `import { square } from "@ledger/shapes"`.
+/// specifier's last segment: `square` resolves through `import { square } from "@ledger/shapes"`,
+/// and `importedRate` through `import { importedRate } from "./references.js"` (ADR-141).
 #[test]
 fn an_es_import_binds_the_names_it_lists_not_its_specifiers_last_segment() {
     let fact = of("javascript", &fixture("javascript"));
@@ -80,7 +86,8 @@ fn an_es_import_binds_the_names_it_lists_not_its_specifiers_last_segment() {
     );
     assert_eq!(
         named(&fact, "src/rates.js", "importedRate"),
-        vec![(ReferenceKind::Name, "unresolved".to_owned(), vec![]); 2]
+        resolved(2, "imported", 10),
+        "the import and the call"
     );
 }
 

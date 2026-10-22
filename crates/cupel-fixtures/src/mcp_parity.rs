@@ -152,12 +152,14 @@ struct Server {
 }
 
 impl Server {
-    /// Starts a server in `root` with the environment of a cold `run_cupel`.
+    /// Starts a server in `root` with the environment of a cold `run_cupel`: its own temporary
+    /// directory, the twin's beside `root`.
     fn start(root: &Path) -> Self {
         let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
         command
             .args(["serve", "--mcp", "--quiet"])
             .current_dir(root)
+            .env("TMPDIR", root.parent().unwrap_or(root))
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null());

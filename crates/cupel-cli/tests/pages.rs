@@ -1,5 +1,6 @@
 // ABOUTME: Tests for scripts/schemas.sh, which writes every published JSON Schema for GitHub Pages (ADR-127): each
 // ABOUTME: `$id` the binary emits maps to a file served at that URL, nothing else is written, and an index lists them.
+#![cfg(unix)]
 use std::collections::BTreeSet;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;

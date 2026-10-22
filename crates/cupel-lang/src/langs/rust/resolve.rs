@@ -185,6 +185,7 @@ impl Tree {
             line: import.line,
             edge_kind: import.kind,
             names: target.name.into_iter().collect(),
+            aliases: Vec::new(),
         };
         if import.kind == EdgeKind::Declaration {
             let target = child_file(from.imports, &location.children_dir, import)

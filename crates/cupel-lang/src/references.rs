@@ -8,9 +8,11 @@
 //!
 //! - `@reference.name` on a plain identifier: resolved to the same file's functions and closures
 //!   of that name, else through an import of the file that binds the name, else unresolved. An
-//!   import binds the names its statement lists (`@import.name` in imports.scm), or, where
-//!   `[references] path_imports` is set, its specifier's last segment when it lists none; the
-//!   name must be its edge's specifier's last segment, and the edge must lead to a file.
+//!   import edge that leads to a file binds each name it imports (`ImportEdge.names`) under its
+//!   local name (`ImportEdge.aliases`, else the name itself), resolved to the target's functions
+//!   of the imported name (ADR-141); an edge importing no name binds its specifier's last
+//!   segment when its statement lists it, or, where `[references] path_imports` is set, when it
+//!   lists none.
 //! - `@reference.member` on a name reached through a value, type, module, or namespace
 //!   (`x.f`, `T::f`, `m/f`): unresolved, so it matches every symbol of that name.
 //! - `@reference.text` on a string literal's text: when it is a name or a path of names
@@ -157,11 +159,18 @@ fn resolve(parts: &[FileReferences], graph: &ModuleGraph) -> References {
         .map(|part| (part.file.as_str(), part))
         .collect();
     let bindings = bindings(&by_file, graph);
-    let imported = |file: &str, name: &str| -> Option<ReferenceTarget> {
-        bindings.get(file)?.iter().find_map(|(bound, target)| {
-            let symbols = by_file.get(target)?.callable.get(name)?;
-            (*bound == name).then(|| ReferenceTarget::Imported {
-                file: (*target).to_owned(),
+    let defining = Defining {
+        by_file: &by_file,
+        reexports: reexports(graph),
+    };
+    let imported = |file: &str, local: &str| -> Option<ReferenceTarget> {
+        bindings.get(file)?.iter().find_map(|binding| {
+            if binding.local != local {
+                return None;
+            }
+            let (file, symbols) = defining.find(binding.target, binding.name, &mut Vec::new())?;
+            Some(ReferenceTarget::Imported {
+                file: file.to_owned(),
                 symbols: symbols.clone(),
             })
         })
@@ -183,28 +192,101 @@ fn resolve(parts: &[FileReferences], graph: &ModuleGraph) -> References {
     fact
 }
 
-/// For each importing file, the names its imports bind and the files they bind them from: an
-/// edge to a file, not declaring a module, whose specifier's last segment its statement lists
-/// (or whose statement binds its paths' last segments).
+/// Where a file's functions are found by name: in the file, or in the file it re-exports the
+/// name from (`export { square } from "./square.js"`, a Python `__init__` import listed in
+/// `__all__`, Rust `pub use`), followed until a file defines it (ADR-141).
+struct Defining<'a> {
+    by_file: &'a HashMap<&'a str, &'a FileReferences>,
+    /// For each file, the names it re-exports and the file each comes from.
+    reexports: HashMap<&'a str, Vec<(&'a str, &'a str)>>,
+}
+
+impl<'a> Defining<'a> {
+    /// The file that defines `name` as reached from `file`, and its functions of that name;
+    /// `seen` holds the files already followed, so a re-export cycle ends.
+    fn find(
+        &self,
+        file: &'a str,
+        name: &str,
+        seen: &mut Vec<&'a str>,
+    ) -> Option<(&'a str, &'a Vec<SymbolKey>)> {
+        if let Some(symbols) = self.by_file.get(file)?.callable.get(name) {
+            return Some((file, symbols));
+        }
+        seen.push(file);
+        self.reexports
+            .get(file)?
+            .iter()
+            .find_map(|(exported, from)| {
+                (*exported == name && !seen.contains(from))
+                    .then(|| self.find(from, name, seen))
+                    .flatten()
+            })
+    }
+}
+
+/// For each file, the names its re-export edges to files name, with the file each leads to.
+fn reexports(graph: &ModuleGraph) -> HashMap<&str, Vec<(&str, &str)>> {
+    let mut reexports: HashMap<&str, Vec<(&str, &str)>> = HashMap::new();
+    for edge in graph.roots.iter().flat_map(|root| &root.edges) {
+        if let (EdgeKind::ReExport, ImportTarget::File { path }) = (edge.edge_kind, &edge.target) {
+            let named = reexports.entry(edge.from.as_str()).or_default();
+            named.extend(edge.names.iter().map(|name| (name.as_str(), path.as_str())));
+        }
+    }
+    reexports
+}
+
+/// A name an import binds in its file: the local name, the name the target file defines, and
+/// the target file.
+struct Binding<'a> {
+    local: &'a str,
+    name: &'a str,
+    target: &'a str,
+}
+
+/// For each importing file, the names its imports bind (ADR-141). An edge to a file, not
+/// declaring a module, binds each name it imports under its local name (its alias, or itself);
+/// one that imports no name binds its specifier's last segment when its statement lists it
+/// (or binds its paths' last segments).
 fn bindings<'a>(
     by_file: &HashMap<&str, &FileReferences>,
     graph: &'a ModuleGraph,
-) -> HashMap<&'a str, Vec<(&'a str, &'a str)>> {
-    let mut bindings: HashMap<&str, Vec<(&str, &str)>> = HashMap::new();
+) -> HashMap<&'a str, Vec<Binding<'a>>> {
+    let mut bindings: HashMap<&str, Vec<Binding<'a>>> = HashMap::new();
     for edge in graph.roots.iter().flat_map(|root| &root.edges) {
         let ImportTarget::File { path } = &edge.target else {
             continue;
         };
-        let name = edge.specifier.rsplit(SEPARATORS).next().unwrap_or_default();
-        let binds = edge.edge_kind != EdgeKind::Declaration
-            && by_file
+        if edge.edge_kind == EdgeKind::Declaration {
+            continue;
+        }
+        let bound = bindings.entry(edge.from.as_str()).or_default();
+        if edge.names.is_empty() {
+            let name = edge.specifier.rsplit(SEPARATORS).next().unwrap_or_default();
+            if by_file
                 .get(edge.from.as_str())
-                .is_some_and(|part| part.binds(edge.line, name));
-        if binds {
-            bindings
-                .entry(edge.from.as_str())
-                .or_default()
-                .push((name, path.as_str()));
+                .is_some_and(|part| part.binds(edge.line, name))
+            {
+                bound.push(Binding {
+                    local: name,
+                    name,
+                    target: path,
+                });
+            }
+            continue;
+        }
+        for name in &edge.names {
+            let local = edge
+                .aliases
+                .iter()
+                .find(|alias| alias.name == *name)
+                .map_or(name.as_str(), |alias| alias.local.as_str());
+            bound.push(Binding {
+                local,
+                name,
+                target: path,
+            });
         }
     }
     bindings

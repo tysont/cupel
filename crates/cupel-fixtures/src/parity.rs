@@ -149,7 +149,8 @@ struct Daemon {
 }
 
 impl Daemon {
-    /// Starts a daemon whose root is `dir` (not the copy, so the copy has no daemon of its own).
+    /// Starts a daemon whose root is `dir` (not the copy, so the copy has no daemon of its own),
+    /// with `dir` as its temporary directory, as a cold run has its own.
     fn start(dir: &Path) -> Self {
         let socket = dir.join("d.sock");
         let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
@@ -163,6 +164,7 @@ impl Daemon {
                 "3600s",
             ])
             .current_dir(dir)
+            .env("TMPDIR", dir)
             .stdin(Stdio::null())
             .stdout(Stdio::null())
             .stderr(Stdio::null());
@@ -269,11 +271,28 @@ fn copy(from: &Path, into: &Path) -> io::Result<()> {
 /// Copies one symlink or regular file; anything else (a socket, a pipe) is left out.
 fn copy_entry(kind: fs::FileType, path: &Path, target: &Path) -> io::Result<()> {
     if kind.is_symlink() {
-        std::os::unix::fs::symlink(fs::read_link(path)?, target)
+        symlink(&fs::read_link(path)?, path, target)
     } else if kind.is_file() {
         fs::copy(path, target).map(|_| ())
     } else {
         Ok(())
+    }
+}
+
+/// Makes `target` a symbolic link to `link`, the target of the link at `path`.
+#[cfg(unix)]
+fn symlink(link: &Path, _path: &Path, target: &Path) -> io::Result<()> {
+    std::os::unix::fs::symlink(link, target)
+}
+
+/// Makes `target` a symbolic link to `link`, the target of the link at `path`: a directory link
+/// when `path` leads to a directory, as Windows tells the two apart.
+#[cfg(windows)]
+fn symlink(link: &Path, path: &Path, target: &Path) -> io::Result<()> {
+    if fs::metadata(path).is_ok_and(|metadata| metadata.is_dir()) {
+        std::os::windows::fs::symlink_dir(link, target)
+    } else {
+        std::os::windows::fs::symlink_file(link, target)
     }
 }
 

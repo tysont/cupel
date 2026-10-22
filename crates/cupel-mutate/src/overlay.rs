@@ -21,51 +21,6 @@ pub struct Slot {
     root: PathBuf,
 }
 
-/// Where slot `index` of `lang` for the repository at `repo` lives: under the system temporary
-/// directory, so no runner in the repository ever discovers it, and the same on every run, so
-/// its builds are incremental.
-pub fn slot_dir(repo: &Path, lang: &str, index: usize) -> PathBuf {
-    slots_of(repo).join(lang).join(index.to_string())
-}
-
-/// Every repository's slots live under this directory.
-fn slots_root() -> PathBuf {
-    std::env::temp_dir().join("cupel-mutate")
-}
-
-/// The directory of the slots of the repository at `repo`.
-fn slots_of(repo: &Path) -> PathBuf {
-    let repo = canonical(repo);
-    let digest = blake3::hash(repo.to_string_lossy().as_bytes()).to_hex();
-    slots_root().join(&digest[..16])
-}
-
-fn canonical(path: &Path) -> PathBuf {
-    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
-}
-
-/// The file in a repository's slot directory naming the repository.
-const OWNER: &str = "repository";
-
-/// Records `repo` as the owner of its slots and removes the slots of every repository that no
-/// longer exists (a removed checkout, a test's temporary repository), so slots do not pile up.
-pub fn claim(repo: &Path) -> io::Result<()> {
-    let own = slots_of(repo);
-    fs::create_dir_all(&own)?;
-    fs::write(
-        own.join(OWNER),
-        canonical(repo).to_string_lossy().as_bytes(),
-    )?;
-    for entry in fs::read_dir(slots_root())?.flatten() {
-        let owner = fs::read_to_string(entry.path().join(OWNER)).unwrap_or_default();
-        if entry.path() != own && !Path::new(&owner).is_dir() {
-            // Another run may be removing it too; what is left goes next time.
-            let _ = remove(&entry.path());
-        }
-    }
-    Ok(())
-}
-
 impl Slot {
     pub fn at(root: PathBuf) -> Self {
         Self { root }
@@ -77,7 +32,8 @@ impl Slot {
 
     /// Makes the slot mirror `tree`: what the tree's `.gitignore`s ignore becomes a symlink to
     /// the original, every other file a clone or hard link unless the slot already holds its
-    /// bytes, and what the tree no longer has is removed. `.git`, `.cupel`, and directories named
+    /// bytes (a copy dated now where it held other bytes), and what the tree no longer has is
+    /// removed. `.git`, `.cupel`, and directories named
     /// in `outputs` (a runner's build directories) are left out of the mirror; the slot's own
     /// are kept, so its builds are its own and incremental.
     pub fn sync(&self, tree: &Path, outputs: &[&str]) -> io::Result<()> {
@@ -114,8 +70,13 @@ impl Slot {
                 if same_file(source, &at) {
                     return Ok(());
                 }
+                let replaced = fs::symlink_metadata(&at).is_ok();
                 remove(&at)?;
-                mirror(source, &at)
+                if replaced {
+                    copy_now(source, &at)
+                } else {
+                    mirror(source, &at)
+                }
             }
         }
     }
@@ -245,13 +206,20 @@ fn same_inode(_: &fs::Metadata, _: &fs::Metadata) -> bool {
 /// file and its time.
 fn mirror(source: &Path, at: &Path) -> io::Result<()> {
     if cfg!(target_os = "macos") || fs::hard_link(source, at).is_err() {
-        fs::copy(source, at)?;
-        fs::File::options()
-            .write(true)
-            .open(at)?
-            .set_modified(std::time::SystemTime::now())?;
+        copy_now(source, at)?;
     }
     Ok(())
+}
+
+/// Places a copy of `source` at `at` (a clone on macOS) dated now: what replaces a slot file
+/// that held something else, such as a mutant a stopped run left, so a build that saw that
+/// rebuilds (ADR-141 §3); a hard link would carry the tree's older time.
+fn copy_now(source: &Path, at: &Path) -> io::Result<()> {
+    fs::copy(source, at)?;
+    fs::File::options()
+        .write(true)
+        .open(at)?
+        .set_modified(std::time::SystemTime::now())
 }
 
 #[cfg(unix)]

@@ -1,6 +1,7 @@
 ; Python imports: one match per imported module (`import a.b, c`) and per imported name
 ; (`from .a import b, c`); the resolver joins a `from` import's module and name. Relative
 ; modules keep their leading dots. `from __future__` is a compiler directive, not an import.
+; `from .a import b as c` binds `b` under the local name `c`.
 
 (import_statement
   name: [
@@ -12,7 +13,9 @@
   module_name: (_) @import.specifier
   name: [
     (dotted_name) @import.name
-    (aliased_import name: (dotted_name) @import.name)
+    (aliased_import
+      name: (dotted_name) @import.name
+      alias: (identifier) @import.alias)
   ]) @import
 
 (import_from_statement

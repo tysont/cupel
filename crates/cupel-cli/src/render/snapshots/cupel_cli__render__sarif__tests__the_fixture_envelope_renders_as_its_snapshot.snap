@@ -814,7 +814,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
           "rules": [
             {
               "fullDescription": {
-                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived). Uncovered sites are not run; outcomes of unchanged code and tests are reused from earlier runs."
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
               },
               "help": {
                 "text": "Every test that ran against the mutant passed: no test tells the mutated code from the original.\n\nAction: write_test. `cupel describe finding mutant.survived` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
@@ -833,7 +833,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
             },
             {
               "fullDescription": {
-                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived). Uncovered sites are not run; outcomes of unchanged code and tests are reused from earlier runs."
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
               },
               "help": {
                 "text": "The tests ran past their timeout against the mutant, which usually means it loops.\n\nAction: review. `cupel describe finding mutant.timeout` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
@@ -852,7 +852,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
             },
             {
               "fullDescription": {
-                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived). Uncovered sites are not run; outcomes of unchanged code and tests are reused from earlier runs."
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
               },
               "help": {
                 "text": "No test runs the site, so its mutant was not run.\n\nAction: write_test. `cupel describe finding mutant.uncovered` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
@@ -871,7 +871,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
             },
             {
               "fullDescription": {
-                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived). Uncovered sites are not run; outcomes of unchanged code and tests are reused from earlier runs."
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
               },
               "help": {
                 "text": "The mutant survived and may behave exactly as the original (ADR-004).\n\nAction: review. `cupel describe finding mutant.equivalent?` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."

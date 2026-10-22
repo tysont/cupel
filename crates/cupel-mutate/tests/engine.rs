@@ -83,3 +83,32 @@ fn an_uncovered_mutant_is_never_run() {
         .collect();
     assert_eq!(uncovered, [(0, None)]);
 }
+
+/// A file's mutants that end in an error leave every slot holding the original file, not the
+/// reference's copy or a mutant (ADR-141 §3): here the reference run is red, since a test fails
+/// wherever it runs from a mutation slot, as a cancelled or budget-stopped run would leave it.
+#[test]
+fn mutants_that_end_in_an_error_leave_the_slots_holding_the_original_file() {
+    if !support::installed("pytest", "the Python mutation fixture") {
+        return;
+    }
+    let dir = support::fixture("tests.mutation/python");
+    std::fs::write(
+        dir.path().join("tests/test_place.py"),
+        "def test_runs_outside_a_mutation_slot():\n    assert \"cupel-mutate\" not in __file__\n",
+    )
+    .unwrap();
+    let produced = support::produce(dir.path(), "python", &support::Run::default());
+    assert!(produced.is_err(), "the reference run is red in a slot");
+    let original = std::fs::read_to_string(dir.path().join("discount.py")).unwrap();
+    let held: Vec<String> = (0..8)
+        .map(|index| cupel_mutate::slots::slot_dir(dir.path(), "python", index))
+        .filter_map(|slot| std::fs::read_to_string(slot.join("discount.py")).ok())
+        .collect();
+    let used = held.len().max(1);
+    assert_eq!(
+        held,
+        vec![original; used],
+        "every slot used holds the original"
+    );
+}

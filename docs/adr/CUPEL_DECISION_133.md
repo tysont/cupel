@@ -1,6 +1,6 @@
 # CUPEL_DECISION_133: Remediation hints for `clone.cluster`, `complexity.high`, and `dep.cycle`
 
-**Date:** 2026-10-20 · **Status:** accepted · **Phase:** P9.4
+**Date:** 2026-10-20 · **Status:** accepted; `ImportEdge` gains `aliases`, the local names of imported names, by [141](CUPEL_DECISION_141.md) §4 · **Phase:** P9.4
 
 ## Context
 

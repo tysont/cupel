@@ -146,8 +146,9 @@ fn a_standard_survey_protects_the_untested_function_before_simplifying_the_compl
     let Some(envelope) = standard_survey() else {
         return;
     };
-    // `refund` no test runs; `discount` is tested, but one mutant of four survives, and it is
-    // more complex than the limit.
+    // `refund` no test runs, so its mutant is uncovered and it scores 0 (ADR-141 §1);
+    // `discount` is tested, but one mutant of four survives, and it is more complex than the
+    // limit.
     assert_eq!(
         targets(&envelope),
         [
@@ -155,7 +156,7 @@ fn a_standard_survey_protects_the_untested_function_before_simplifying_the_compl
                 1,
                 "discount.refund",
                 "protect",
-                json!({"mutation_score": null, "coverage": 0.0, "tests": 0})
+                json!({"mutation_score": 0.0, "coverage": 0.0, "tests": 0})
             ),
             (
                 2,
@@ -172,7 +173,8 @@ fn a_standard_survey_protects_the_untested_function_before_simplifying_the_compl
             &score["worst"],
             &score["entries"][0]["value"]
         ),
-        (&json!("tests.mutation"), &json!("lowest"), &json!(0.75))
+        (&json!("tests.mutation"), &json!("lowest"), &json!(0.0)),
+        "`refund`'s uncovered mutant ranks it lowest"
     );
     assert_eq!(
         first_actions(&envelope, 3),

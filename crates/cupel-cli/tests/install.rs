@@ -1,5 +1,6 @@
 // ABOUTME: Integration tests for installing tools (ADR-081): `doctor --fix` with `--install`, `--no-install`,
 // ABOUTME: and neither on a pipe; failed installs; dry runs' `would_install`; and a real pip install into a venv.
+#![cfg(unix)]
 mod support;
 
 use std::fs;

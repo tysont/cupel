@@ -2,9 +2,9 @@
 // ABOUTME: Enum spellings match the construct names used by the per-fact conformance inventories.
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, Assertion, AssertionKind, AssertionStrength, Decision,
-    DecisionKind, Decisions, EdgeKind, ImportEdge, ImportTarget, LiveRoot, Mock, ModuleGraph,
-    MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol, OperatorSet,
-    ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
+    DecisionKind, Decisions, EdgeKind, ImportAlias, ImportEdge, ImportTarget, LiveRoot, Mock,
+    ModuleGraph, MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol,
+    OperatorSet, ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
     SymbolDecisions, SymbolDef, SymbolKey, SymbolKind, SymbolSites, Symbols, TestCase,
     TestConventions, TestFile, TestFrames, TestPairing, Visibility,
 };
@@ -260,6 +260,7 @@ fn module_graph_edges_are_tagged_by_target_kind() {
         line: 1,
         edge_kind: EdgeKind::ReExport,
         names: Vec::new(),
+        aliases: Vec::new(),
     };
     let json = assert_round_trip(&ModuleGraph {
         roots: vec![RootImports {
@@ -474,6 +475,7 @@ fn an_import_edge_lists_the_names_it_imports_when_the_statement_names_them() {
         line: 1,
         edge_kind: EdgeKind::Import,
         names: vec!["BETA".into()],
+        aliases: Vec::new(),
     };
     let json = assert_round_trip(&edge);
     assert_eq!(json["names"], json!(["BETA"]));
@@ -482,4 +484,33 @@ fn an_import_edge_lists_the_names_it_imports_when_the_statement_names_them() {
         ..edge
     };
     assert!(assert_round_trip(&whole).get("names").is_none());
+}
+
+#[test]
+fn an_import_edge_lists_the_names_its_statement_binds_under_another_local_name() {
+    let edge = ImportEdge {
+        from: "src/ledger.js".into(),
+        specifier: "@ledger/shapes/square".into(),
+        target: ImportTarget::File {
+            path: "packages/shapes/lib/square.js".into(),
+        },
+        relative: false,
+        line: 7,
+        edge_kind: EdgeKind::Import,
+        names: vec!["square".into()],
+        aliases: vec![ImportAlias {
+            name: "square".into(),
+            local: "side".into(),
+        }],
+    };
+    let json = assert_round_trip(&edge);
+    assert_eq!(
+        json["aliases"],
+        json!([{"name": "square", "local": "side"}])
+    );
+    let unaliased = ImportEdge {
+        aliases: Vec::new(),
+        ..edge
+    };
+    assert!(assert_round_trip(&unaliased).get("aliases").is_none());
 }

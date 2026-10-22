@@ -91,12 +91,16 @@ fn tools_action() -> String {
     fs::read_to_string(workspace().join(".github/actions/tools/action.yml")).unwrap()
 }
 
-/// Every pin the development environment mirrors: all of ci.yml and its tools action, and the steps of release.yml's
-/// `build` job that run on Linux or macOS (`make dist` is the local route to them). The Windows-only
-/// step (`choco install make`) and the publish jobs, which only CI runs, are not mirrored.
+/// Every pin the development environment mirrors: ci.yml's jobs but `windows` and its tools action, and the steps of
+/// release.yml's `build` job that run on Linux or macOS (`make dist` is the local route to them). The Windows-only
+/// job and step (`choco install make`) and the publish jobs, which only CI runs, are not mirrored.
 fn workflow_pins() -> Vec<(String, String)> {
-    let ci = workflow("ci.yml");
-    let mut all = pins(ci.lines());
+    let ci = jobs(&workflow("ci.yml"));
+    let mut all: Vec<(String, String)> = ci
+        .iter()
+        .filter(|(name, _)| name != "windows")
+        .flat_map(|(_, lines)| pins(lines.iter().map(String::as_str)))
+        .collect();
     all.extend(pins(tools_action().lines()));
     let release = jobs(&workflow("release.yml"));
     let (_, build) = release

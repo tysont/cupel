@@ -7,6 +7,7 @@
 
 use std::fs;
 use std::io::Write;
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
@@ -70,13 +71,18 @@ where
 
 /// Runs `command` with `args` in a fresh temporary working directory, so a verb that keeps a run
 /// record under `.cupel/` never writes into the source tree; tests that inspect what a run
-/// wrote pass `--cwd` explicitly.
+/// wrote pass `--cwd` explicitly. Unless the test sets `TMPDIR`, the run gets a temporary
+/// directory of its own, so its mutation slots, and `doctor`'s report of them, are its own.
 pub fn run_with<I, S>(command: &mut Command, args: I) -> Outcome
 where
     I: IntoIterator<Item = S>,
     S: AsRef<std::ffi::OsStr>,
 {
     let dir = tempfile::tempdir().expect("temporary directory");
+    let tmp = tempfile::tempdir().expect("temporary directory");
+    if !command.get_envs().any(|(key, _)| key == "TMPDIR") {
+        command.env("TMPDIR", tmp.path());
+    }
     let output = command
         .args(args)
         .current_dir(dir.path())
@@ -372,6 +378,7 @@ fn sample_finding() -> Value {
 
 /// Writes the plugin script `name` in `dir`: it describes `manifest`, plans 1 target in 25 ms,
 /// and runs by saving its request beside itself, then reporting one finding and a failing result.
+#[cfg(unix)]
 pub fn plugin(dir: &Path, name: &str, manifest: &Value) {
     let result = json!({
         "ev": "result", "status": "fail", "score": null, "metrics": {"files": 1}, "notes": []

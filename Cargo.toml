@@ -49,6 +49,8 @@ insta = "1.49.0"
 proptest = "1.11.0"
 tempfile = "3.27.0"
 nix = { version = "0.31.3", features = ["signal"] }
+# The daemon's named pipes on Windows (ADR-137); already in the lock through notify and others.
+windows-sys = "0.61.2"
 # 2.x, not 3.x: the version insta already resolves to, so the build carries one copy (ADR-003).
 similar = "2.7.0"
 # Parsing. tree-sitter 0.27 reads grammar ABI 13–15; the TypeScript, Java, and Clojure grammars are ABI 14,
@@ -87,7 +89,8 @@ libtest-mimic = "0.8.2"
 strip = true
 
 [workspace.lints.rust]
-unsafe_code = "forbid"
+# `deny`, not `forbid`: the Windows named-pipe transport is the one module that allows it (ADR-137).
+unsafe_code = "deny"
 
 [workspace.lints.clippy]
 all = { level = "warn", priority = -1 }

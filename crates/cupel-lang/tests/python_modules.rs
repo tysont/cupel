@@ -98,6 +98,13 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
         "src/ledger/references.py",
         true,
     ),
+    (
+        "src/ledger/rates.py",
+        3,
+        ".references.exported_rate",
+        "src/ledger/references.py",
+        true,
+    ),
     ("src/ledger/references.py", 4, "sys", "external:sys", false),
     (
         "src/ledger/report/__init__.py",

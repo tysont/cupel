@@ -1,13 +1,13 @@
-// ABOUTME: Tests for the daemon's server and client over real Unix sockets with a scripted handler: answers,
+// ABOUTME: Tests for the daemon's server and client over the real transport (Unix sockets, Windows named pipes) with a scripted handler: answers,
 // ABOUTME: streaming order, refusals, malformed requests, stop, stale sockets, concurrency, hang-ups, the watcher.
 use std::io::Write;
-use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, mpsc};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
 use cupel_core::Cancellation;
+use cupel_serve::transport::Connection;
 use cupel_serve::{
     Body, Build, ClientError, Daemon, Done, Handler, Invocation, Reply, Request, ServeError,
     Served, Status, request, serve,
@@ -284,7 +284,7 @@ fn a_run_from_another_build_protocol_or_path_is_refused_but_status_and_stop_are_
 #[test]
 fn a_malformed_request_gets_an_error_and_the_daemon_keeps_serving() {
     let daemon = Running::new(false);
-    let mut stream = UnixStream::connect(&daemon.socket).unwrap();
+    let mut stream = Connection::connect(&daemon.socket).unwrap();
     stream.write_all(b"{\"type\":\"dance\"}\n").unwrap();
     let reply: Reply = cupel_serve::read_message(&mut std::io::BufReader::new(&stream))
         .unwrap()
@@ -313,12 +313,21 @@ fn stop_ends_the_daemon_and_removes_its_socket() {
     );
 }
 
+/// An endpoint file no daemon answers behind: a socket nothing listens on, or on Windows a file
+/// naming a pipe that does not exist.
+fn stale_endpoint(socket: &Path) {
+    #[cfg(unix)]
+    drop(std::os::unix::net::UnixListener::bind(socket).unwrap());
+    #[cfg(windows)]
+    std::fs::write(socket, "stale\n").unwrap();
+}
+
 #[test]
 fn a_stale_socket_is_unanswered_and_a_new_daemon_replaces_it() {
     let dir = tempfile::tempdir().unwrap();
     let socket = dir.path().join(".cupel/serve.sock");
     std::fs::create_dir_all(socket.parent().unwrap()).unwrap();
-    drop(UnixListener::bind(&socket).unwrap());
+    stale_endpoint(&socket);
     assert!(socket.exists());
     assert!(
         matches!(
@@ -380,7 +389,7 @@ fn concurrent_clients_run_at_once_and_each_gets_its_own_answer() {
 #[test]
 fn a_client_that_hangs_up_cancels_its_run() {
     let daemon = Running::new(false);
-    let mut stream = UnixStream::connect(&daemon.socket).unwrap();
+    let mut stream = Connection::connect(&daemon.socket).unwrap();
     cupel_serve::write_message(&mut stream, &run_request(&["wait"])).unwrap();
     thread::sleep(Duration::from_millis(100));
     drop(stream);
@@ -425,4 +434,29 @@ fn the_watcher_hands_changed_files_to_the_handler() {
         (status.watching, changed, status.reparsed >= 1),
         (true, true, true)
     );
+}
+
+#[test]
+fn an_endpoint_that_cannot_be_made_is_an_io_error_naming_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let blocker = dir.path().join("not-a-directory");
+    std::fs::write(&blocker, "").unwrap();
+    let socket = blocker.join("serve.sock");
+    let daemon = Daemon {
+        root: dir.path().to_path_buf(),
+        socket: socket.clone(),
+        build: build(),
+        path: None,
+        watch: false,
+    };
+    let refused = serve(
+        &daemon,
+        Arc::new(Script::default()),
+        &Cancellation::new(),
+        &mut |_| panic!("a daemon with no endpoint must not start"),
+    );
+    let Err(ServeError::Io { socket: at, .. }) = refused else {
+        panic!("not an I/O error: {refused:?}")
+    };
+    assert_eq!(at, socket);
 }

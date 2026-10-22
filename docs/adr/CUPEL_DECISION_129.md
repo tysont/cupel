@@ -1,6 +1,6 @@
 # CUPEL_DECISION_129: Cupel's own gate at `--depth deep`: changed on every push, tree on `main`, a local budget, and the deep rules
 
-**Date:** 2026-10-20 · **Status:** accepted · **Phase:** P9.0
+**Date:** 2026-10-20 · **Status:** accepted; §5's mutation score (1 when nothing was scored) counts uncovered mutants as scored since [141](CUPEL_DECISION_141.md) §1 · **Phase:** P9.0
 
 ## Context
 

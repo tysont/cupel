@@ -10,10 +10,14 @@
 //!   per specifier.
 //! - `@import.name` (optional, repeatable) on each name the statement imports from the module
 //!   (`from pkg import a, b`), as the module spells it (not a local alias).
+//! - `@import.alias` (optional) on the local name the match's `@import.name` is bound under
+//!   (`from pkg import a as b`): an alias (ADR-141).
 //! - `@import.default` (optional) on the local name of a default import (`import d from`): the
-//!   statement imports the name `default`.
+//!   statement imports the name `default`, bound under that local name.
 //! - `@import.names` (optional) on a list whose named children each import one name (`{ a, b as
-//!   c }`): each child's `name` field, or the child itself when it has none, as written.
+//!   c }`): each child's `name` field, or the child itself when it has none, as written; a
+//!   child's `alias` field is the local name it is bound under, unless the statement is a
+//!   re-export, which binds nothing locally.
 //! - `@import.module` (optional) marks a declaration of a child module whose file sits next to
 //!   the declaring file (Rust `mod a;`): an edge of kind `declaration`.
 //! - `@import.reexport` (optional) marks a statement that exports what it imports (Rust
@@ -28,7 +32,7 @@ use std::fs;
 use std::path::Path;
 use std::sync::{Arc, Mutex, PoisonError};
 
-use cupel_core::syntax::{EdgeKind, ModuleGraph};
+use cupel_core::syntax::{EdgeKind, ImportAlias, ModuleGraph};
 use cupel_core::{
     Availability, Cancellation, CostClass, Ctx, EventSink, FactKind, Langs, ProduceCtx, Producer,
     ProducerId, Result, Scope,
@@ -47,6 +51,8 @@ use crate::spec::QueryFile;
 pub struct RawImport {
     pub specifier: String,
     pub names: Vec<String>,
+    /// The names of `names` the statement binds under another local name.
+    pub aliases: Vec<ImportAlias>,
     /// What the statement does with the module: a use, a child-module declaration (`mod a;`),
     /// or a re-export.
     pub kind: EdgeKind,
@@ -105,6 +111,7 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
             Some(RawImport {
                 specifier: unquote(parsed.text(specifier)).to_owned(),
                 kind: edge_kind(m, &names, &reexported),
+                aliases: aliases(parsed, m),
                 names,
                 scope: path_of(statement),
                 line: crate::query::one_based(statement.start_position().row),
@@ -150,6 +157,37 @@ fn listed(parsed: &Parsed, list: tree_sitter::Node<'_>) -> Vec<String> {
             parsed.text(name).to_owned()
         })
         .collect()
+}
+
+/// The names the import `m` matched binds under another local name: a default import's local
+/// name, the `@import.alias` of its `@import.name`, and each `alias` field of an `@import.names`
+/// list that is not re-exported.
+fn aliases(parsed: &Parsed, m: &Match<'_, '_>) -> Vec<ImportAlias> {
+    let alias = |name: &str, local: tree_sitter::Node<'_>| ImportAlias {
+        name: name.to_owned(),
+        local: parsed.text(local).to_owned(),
+    };
+    let default = m
+        .node(capture::IMPORT_DEFAULT)
+        .map(|local| alias("default", local));
+    let named = m.node(capture::IMPORT_NAME).and_then(|name| {
+        m.node(capture::IMPORT_ALIAS)
+            .map(|local| alias(parsed.text(name), local))
+    });
+    let listed = m
+        .nodes(capture::IMPORT_NAMES)
+        .filter(|_| !m.has(capture::IMPORT_REEXPORT))
+        .flat_map(|list| {
+            let mut cursor = list.walk();
+            list.named_children(&mut cursor)
+                .filter_map(|child| {
+                    let name = child.child_by_field_name("name")?;
+                    let local = child.child_by_field_name("alias")?;
+                    Some(alias(parsed.text(name), local))
+                })
+                .collect::<Vec<_>>()
+        });
+    default.into_iter().chain(named).chain(listed).collect()
 }
 
 /// What the import `m` matched does with its module: declares it, re-exports it (by its

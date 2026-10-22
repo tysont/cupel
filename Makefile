@@ -16,7 +16,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers version dev-setup dev-env
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers version windows-check windows-test dev-setup dev-env
 
 build:
 	$(CARGO) build --workspace
@@ -137,6 +137,20 @@ version:
 # INSTALLER_TESTS_REQUIRE_TOOLS=1, as CI sets it, makes a missing tool a failure.
 installers:
 	$(CARGO) test --package cupel-cli --test installers
+
+# The Windows target (ADR-137), which CI's `windows` job runs on a Windows runner: the workspace
+# compiles for it, and the tests that need no Unix tools pass: every test of cupel-serve (the daemon's
+# transport over real named pipes) and the unit tests of the crates whose unit tests spawn no process
+# and touch no file. Elsewhere `windows-check` needs `rustup target add x86_64-pc-windows-msvc` and a C
+# compiler for the target (bundled SQLite, the grammars, and BLAKE3 compile C).
+WINDOWS_TARGET = x86_64-pc-windows-msvc
+
+windows-check:
+	$(CARGO) check --workspace --all-targets --target $(WINDOWS_TARGET)
+
+windows-test:
+	$(CARGO) test --package cupel-serve
+	$(CARGO) test --lib --package cupel-core --package cupel-checks --package cupel-lang --package cupel-mutate
 
 # Installs or verifies every tool the merge procedure needs, at the versions CI pins (ADR-139), under
 # CUPEL_DEV_TOOLS. A second run installs nothing; each run ends with each tool's version.

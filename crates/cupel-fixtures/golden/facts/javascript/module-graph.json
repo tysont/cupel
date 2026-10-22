@@ -98,6 +98,12 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "path",
+              "name": "default"
+            }
+          ],
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 2,
@@ -112,6 +118,12 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "fp",
+              "name": "default"
+            }
+          ],
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 3,
@@ -168,6 +180,12 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "side",
+              "name": "square"
+            }
+          ],
           "edge_kind": "import",
           "from": "src/ledger.js",
           "line": 7,
@@ -231,6 +249,12 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "assert",
+              "name": "default"
+            }
+          ],
           "edge_kind": "import",
           "from": "test/decide.test.js",
           "line": 1,
@@ -401,6 +425,12 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "fc",
+              "name": "default"
+            }
+          ],
           "edge_kind": "import",
           "from": "test/properties.test.js",
           "line": 1,

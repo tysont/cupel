@@ -192,6 +192,26 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "tripled",
+              "name": "exported_rate"
+            }
+          ],
+          "edge_kind": "import",
+          "from": "src/ledger/rates.py",
+          "line": 3,
+          "names": [
+            "exported_rate"
+          ],
+          "relative": true,
+          "specifier": ".references.exported_rate",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/references.py"
+          }
+        },
+        {
           "edge_kind": "import",
           "from": "src/ledger/references.py",
           "line": 4,
@@ -426,6 +446,12 @@
           }
         },
         {
+          "aliases": [
+            {
+              "local": "st",
+              "name": "strategies"
+            }
+          ],
           "edge_kind": "import",
           "from": "tests/test_properties.py",
           "line": 1,

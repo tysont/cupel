@@ -395,6 +395,21 @@ pub struct ImportEdge {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub names: Vec<String>,
+    /// Each name of `names` the statement binds under another local name (`import { a as b }`,
+    /// a default import's local name, Python's `from x import a as b`); empty when it binds
+    /// every name as itself (ADR-141).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub aliases: Vec<ImportAlias>,
+}
+
+/// A name an import statement binds under another local name.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct ImportAlias {
+    /// The name as the module spells it.
+    pub name: String,
+    /// The name the importing file uses.
+    pub local: String,
 }
 
 /// What an import statement does with the module it names.

@@ -589,6 +589,18 @@
       }
     },
     {
+      "file": "src/ledger/rates.py",
+      "kind": "constant",
+      "path": "ledger.rates.TRIPLED",
+      "signature": "",
+      "span": {
+        "col": 1,
+        "end_col": 18,
+        "end_line": 10,
+        "line": 10
+      }
+    },
+    {
       "file": "src/ledger/references.py",
       "kind": "function",
       "path": "ledger.references.exported_rate",

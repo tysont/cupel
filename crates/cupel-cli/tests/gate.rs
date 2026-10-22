@@ -456,19 +456,14 @@ fn a_changed_mutation_rule_against_base_reruns_the_suite_at_the_base_commit() {
     let source = std::fs::read_to_string(repo.path("discount.py")).unwrap();
     let check = ["check", "--changed", "--only", "tests.mutation"];
 
-    // The base's discount.py scores 0.75. The changed line of `refund` is covered by a test
-    // that pins no value, so its mutants survive. (A change no test covers has every mutant
-    // uncovered, which the score leaves out; `tests.coverage` is the rule for that.)
+    // The base's discount.py scores 0.6: 3 killed, 1 survived, and `refund`'s mutant uncovered
+    // (ADR-141 §1). The changed lines of `refund` have no covering test, so the change scores 0.
     repo.write("discount.py", &source.replace("total - 5", "total - 6"));
-    repo.write(
-        "tests/test_refund.py",
-        "from discount import refund\n\n\ndef test_refunds_a_number():\n    assert isinstance(refund(10), int)\n",
-    );
-    let weak = repo.run(&check);
-    assert_eq!(weak.code, 1, "{}", weak.stdout);
+    let untested = repo.run(&check);
+    assert_eq!(untested.code, 1, "{}", untested.stdout);
     assert_eq!(
-        gate(&weak.envelope())["rules"][0],
-        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 0.0, "bound": 0.73,
+        gate(&untested.envelope())["rules"][0],
+        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 0.0, "bound": 0.58,
                "result": "fail", "reason": null})
     );
 
@@ -480,7 +475,7 @@ fn a_changed_mutation_rule_against_base_reruns_the_suite_at_the_base_commit() {
     assert_eq!(tested.code, 0, "{}", tested.stdout);
     assert_eq!(
         gate(&tested.envelope())["rules"][0],
-        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 1.0, "bound": 0.73,
+        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 1.0, "bound": 0.58,
                "result": "pass", "reason": null})
     );
 }
