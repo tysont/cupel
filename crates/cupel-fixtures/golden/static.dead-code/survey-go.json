@@ -4,17 +4,17 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 20,
+      "findings": 22,
       "id": "static.dead-code",
       "metrics": {
         "dead_exports": 1.0,
-        "dead_symbols": 19.0
+        "dead_symbols": 21.0
       },
       "oracle": null,
       "score": {
-        "n": 84,
+        "n": 86,
         "unit": "dead_symbols",
-        "value": 19.0
+        "value": 21.0
       },
       "skipped": null,
       "status": "fail",
@@ -237,6 +237,114 @@
       },
       "tier": 0,
       "title": "`ledger.refundLines` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `runningRefunds` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `runningRefunds` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "clones_settlement.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_614955",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 77,
+        "file": "clones_settlement.go",
+        "line": 69
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_e557c73a47cc94fa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_614955 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.runningRefunds",
+        "hash": "sh_e557c73a47cc94fa",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.runningRefunds` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `runningRefundsAgain` from clones_settlement.go if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `runningRefundsAgain` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "clones_settlement.go",
+        "module": "ledger",
+        "module_files": [
+          "clones_settlement.go",
+          "complexity.go",
+          "crap_scores.go",
+          "decide.go",
+          "ledger.go",
+          "ledger_property_test.go",
+          "ledger_quality_test.go",
+          "ledger_test.go",
+          "pricing.go",
+          "pricing_test.go",
+          "rates.go",
+          "references.go",
+          "twins.go"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_614955",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 90,
+        "file": "clones_settlement.go",
+        "line": 79
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_e557c73a47cc94fa",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_614955 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.runningRefundsAgain",
+        "hash": "sh_e557c73a47cc94fa",
+        "lang": "go"
+      },
+      "tier": 0,
+      "title": "`ledger.runningRefundsAgain` is never referenced"
     },
     {
       "action": {

@@ -49,13 +49,11 @@ jobs:
             runs: true
           - target: x86_64-apple-darwin
             os: macos-latest
-          # Best effort (ADR-124 Consequences): a failure here does not hold back the release.
+          # Natively with MSVC; a first-class target like the others (ADR-137).
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             runs: true
-            best-effort: true
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.best-effort || false }}
     defaults:
       run:
         shell: bash

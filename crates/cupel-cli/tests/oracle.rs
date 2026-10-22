@@ -1,5 +1,6 @@
 // ABOUTME: Integration tests for `cupel oracle` through the binary (ADR-090): add and remove edit cupel.toml
 // ABOUTME: (previewed without --write), list reports state, verify runs each kind's smoke comparison.
+#![cfg(unix)]
 mod support;
 
 use std::fs;

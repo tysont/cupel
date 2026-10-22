@@ -4,17 +4,17 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 23,
+      "findings": 25,
       "id": "static.dead-code",
       "metrics": {
         "dead_exports": 1.0,
-        "dead_symbols": 22.0
+        "dead_symbols": 24.0
       },
       "oracle": null,
       "score": {
-        "n": 106,
+        "n": 108,
         "unit": "dead_symbols",
-        "value": 22.0
+        "value": 24.0
       },
       "skipped": null,
       "status": "fail",
@@ -352,6 +352,118 @@
       },
       "tier": 0,
       "title": "`ledger.ClonesSettlement.refundLines` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `runningRefunds` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `runningRefunds` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_fdee00",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 83,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_3904a83873202846",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_fdee00 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.runningRefunds",
+        "hash": "sh_3904a83873202846",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.runningRefunds` is never referenced"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `runningRefundsAgain` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.3,
+      "detail": "Nothing in the repository's files names `runningRefundsAgain` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it. The language computes names at run time where it could reach it, first at src/main/java/ledger/References.java:33 (the evidence lists up to ten such places).",
+      "evidence": {
+        "dynamic": [
+          "src/main/java/ledger/References.java:33"
+        ],
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "module": "ledger",
+        "module_files": [
+          "src/main/java/ledger/Account.java",
+          "src/main/java/ledger/ClonesSettlement.java",
+          "src/main/java/ledger/Complexity.java",
+          "src/main/java/ledger/Decide.java",
+          "src/main/java/ledger/Ledger.java",
+          "src/main/java/ledger/Pricing.java",
+          "src/main/java/ledger/Rates.java",
+          "src/main/java/ledger/References.java",
+          "src/main/java/ledger/Twins.java",
+          "src/test/java/ledger/LedgerPropertyTest.java",
+          "src/test/java/ledger/LedgerQualityTest.java",
+          "src/test/java/ledger/LedgerTest.java",
+          "src/test/java/ledger/PricingTest.java"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_fdee00",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 92,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_3904a83873202846",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_fdee00 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "ledger.ClonesSettlement.runningRefundsAgain",
+        "hash": "sh_3904a83873202846",
+        "lang": "java"
+      },
+      "tier": 0,
+      "title": "`ledger.ClonesSettlement.runningRefundsAgain` is never referenced"
     },
     {
       "action": {
@@ -1309,31 +1421,31 @@
     },
     {
       "command": null,
-      "finding": "fnd_8958dc",
+      "finding": "fnd_fdee00",
       "kind": "review",
       "priority": 7,
+      "summary": "Delete `runningRefunds` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_fdee00",
+      "kind": "review",
+      "priority": 8,
+      "summary": "Delete `runningRefundsAgain` from src/main/java/ledger/ClonesSettlement.java if nothing outside the repository uses it, or call it where it is meant to be used."
+    },
+    {
+      "command": null,
+      "finding": "fnd_8958dc",
+      "kind": "review",
+      "priority": 9,
       "summary": "Delete `firstOverdraft` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
     },
     {
       "command": null,
       "finding": "fnd_b563d2",
       "kind": "review",
-      "priority": 8,
-      "summary": "Delete `describe` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
-    },
-    {
-      "command": null,
-      "finding": "fnd_ff8922",
-      "kind": "review",
-      "priority": 9,
-      "summary": "Delete `sign` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
-    },
-    {
-      "command": null,
-      "finding": "fnd_fee931",
-      "kind": "review",
       "priority": 10,
-      "summary": "Delete `size` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
+      "summary": "Delete `describe` from src/main/java/ledger/Decide.java if nothing outside the repository uses it, or call it where it is meant to be used."
     }
   ],
   "oracles": null,
@@ -1391,7 +1503,7 @@
       "roots": [
         "."
       ],
-      "symbols": 106
+      "symbols": 108
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -1403,7 +1515,7 @@
     "findings": {
       "fail": 0,
       "info": 1,
-      "warn": 22
+      "warn": 24
     },
     "gate": null,
     "new": 0,
@@ -1411,6 +1523,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 23,
+  "total_findings": 25,
   "truncated": false
 }

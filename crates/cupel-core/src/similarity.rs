@@ -89,6 +89,32 @@ pub fn combine(hash: u64, value: u64) -> u64 {
     mix(hash.rotate_left(23) ^ value.wrapping_add(0x9e37_79b9_7f4a_7c15))
 }
 
+/// The labels a normalizer gives an identifier or a literal, whose source text the node keeps
+/// (ADR-025, ADR-133).
+const MARKERS: [&str; 2] = ["$id", "$lit"];
+
+/// A digest of the tree's tokens: every label with its child count and every text, in pre-order,
+/// so two trees share it when they have one shape and the same identifier and literal texts
+/// (type-1 clones, ADR-136). Spans are not part of it. `None` when an identifier or literal
+/// leaf lacks its text, so a tree whose producer kept no texts never matches as type 1.
+pub fn token_digest(root: &NormNode) -> Option<u64> {
+    fn fold(node: &NormNode, hash: u64) -> Option<u64> {
+        let mut hash = combine(
+            combine(hash, label(&node.label)),
+            node.children.len() as u64,
+        );
+        hash = match &node.text {
+            Some(text) => combine(combine(hash, 1), label(text)),
+            None if MARKERS.contains(&node.label.as_str()) => return None,
+            None => combine(hash, 0),
+        };
+        node.children
+            .iter()
+            .try_fold(hash, |hash, child| fold(child, hash))
+    }
+    fold(root, 0).map(mix)
+}
+
 /// The min-hash signature of `set`: for each of `SIGNATURE` hash functions, the least hash of
 /// any element. Two sets agree at a position with probability equal to their Jaccard
 /// similarity. The functions are `x ↦ mix(x ⊕ seedᵢ)` with fixed seeds, so signatures are
@@ -377,6 +403,90 @@ mod tests {
         // Each tree has one fingerprint, the call's, and the two have none in common.
         let shared = ab.set.iter().filter(|print| ba.set.contains(print)).count();
         assert_eq!((ab.set.len(), ba.set.len(), shared), (1, 1, 0));
+    }
+
+    /// A marker leaf (`$id`, `$lit`) standing for `text`.
+    fn marker(label: &str, text: &str) -> NormNode {
+        NormNode {
+            text: Some(text.to_owned()),
+            ..NormNode::leaf(label)
+        }
+    }
+
+    /// A function over `items` whose block assigns, per `(target, operand, literal)`,
+    /// `target = operand + literal`.
+    fn texted(statements: &[(&str, &str, &str)]) -> NormNode {
+        let assignment = |(target, operand, literal): &(&str, &str, &str)| {
+            NormNode::new(
+                "assignment",
+                vec![
+                    marker("$id", target),
+                    NormNode::leaf("="),
+                    NormNode::new(
+                        "binary",
+                        vec![
+                            marker("$id", operand),
+                            NormNode::leaf("+"),
+                            marker("$lit", literal),
+                        ],
+                    ),
+                ],
+            )
+        };
+        NormNode::new(
+            "function",
+            vec![
+                NormNode::new("parameters", vec![marker("$id", "items")]),
+                NormNode::new("block", statements.iter().map(assignment).collect()),
+            ],
+        )
+    }
+
+    const TEXTS: [(&str, &str, &str); 2] = [("a", "a", "1"), ("b", "b", "2")];
+
+    #[test]
+    fn token_digests_agree_exactly_when_shapes_and_texts_agree() {
+        let digest = token_digest(&texted(&TEXTS));
+        let variants = [
+            texted(&TEXTS),
+            texted(&[("c", "a", "1"), ("b", "b", "2")]),
+            texted(&[("a", "a", "1"), ("b", "b", "3")]),
+            texted(&[("a", "1", "a"), ("b", "b", "2")]),
+            texted(&TEXTS[..1]),
+        ];
+        let agree: Vec<bool> = variants
+            .iter()
+            .map(|variant| token_digest(variant) == digest)
+            .collect();
+        // The same texts agree; a renamed identifier, a changed literal, a text moved to another
+        // marker, and a missing statement do not.
+        assert_eq!(agree, [true, false, false, false, false]);
+    }
+
+    #[test]
+    fn spans_do_not_change_a_token_digest() {
+        let span = crate::syntax::Span {
+            line: 3,
+            col: 1,
+            end_line: 9,
+            end_col: 2,
+        };
+        let placed = texted(&TEXTS).at(span);
+        assert_eq!(token_digest(&placed), token_digest(&texted(&TEXTS)));
+    }
+
+    #[test]
+    fn a_tree_with_a_marker_lacking_its_text_has_no_token_digest() {
+        let mut untexted = texted(&TEXTS);
+        untexted.children[0].children[0].text = None;
+        assert_eq!(token_digest(&untexted), None);
+        assert_eq!(token_digest(&function(2)), None);
+        let operators = NormNode::new("binary", vec![NormNode::leaf("+")]);
+        assert_eq!(
+            token_digest(&operators),
+            token_digest(&NormNode::new("binary", vec![NormNode::leaf("+")]))
+        );
+        assert!(token_digest(&operators).is_some());
     }
 
     #[test]

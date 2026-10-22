@@ -6457,6 +6457,1458 @@
       }
     },
     {
+      "hash": "sh_3904a83873202846",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 12,
+                  "end_col": 16,
+                  "end_line": 74,
+                  "line": 74
+                },
+                "text": "List"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "<",
+                    "span": {
+                      "col": 16,
+                      "end_col": 17,
+                      "end_line": 74,
+                      "line": 74
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 17,
+                      "end_col": 21,
+                      "end_line": 74,
+                      "line": 74
+                    },
+                    "text": "Long"
+                  },
+                  {
+                    "children": [],
+                    "label": ">",
+                    "span": {
+                      "col": 21,
+                      "end_col": 22,
+                      "end_line": 74,
+                      "line": 74
+                    }
+                  }
+                ],
+                "label": "type_arguments",
+                "span": {
+                  "col": 16,
+                  "end_col": 22,
+                  "end_line": 74,
+                  "line": 74
+                }
+              }
+            ],
+            "label": "generic_type",
+            "span": {
+              "col": 12,
+              "end_col": 22,
+              "end_line": 74,
+              "line": 74
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "integral_type",
+                        "span": {
+                          "col": 38,
+                          "end_col": 42,
+                          "end_line": 74,
+                          "line": 74
+                        }
+                      },
+                      {
+                        "children": [],
+                        "label": "dimensions",
+                        "span": {
+                          "col": 42,
+                          "end_col": 44,
+                          "end_line": 74,
+                          "line": 74
+                        }
+                      }
+                    ],
+                    "label": "array_type",
+                    "span": {
+                      "col": 38,
+                      "end_col": 44,
+                      "end_line": 74,
+                      "line": 74
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 45,
+                      "end_col": 52,
+                      "end_line": 74,
+                      "line": 74
+                    },
+                    "text": "refunds"
+                  }
+                ],
+                "label": "formal_parameter",
+                "span": {
+                  "col": 38,
+                  "end_col": 52,
+                  "end_line": 74,
+                  "line": 74
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type",
+                    "span": {
+                      "col": 54,
+                      "end_col": 58,
+                      "end_line": 74,
+                      "line": 74
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 59,
+                      "end_col": 64,
+                      "end_line": 74,
+                      "line": 74
+                    },
+                    "text": "start"
+                  }
+                ],
+                "label": "formal_parameter",
+                "span": {
+                  "col": 54,
+                  "end_col": 64,
+                  "end_line": 74,
+                  "line": 74
+                }
+              }
+            ],
+            "label": "formal_parameters",
+            "span": {
+              "col": 37,
+              "end_col": 65,
+              "end_line": 74,
+              "line": 74
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 9,
+                          "end_col": 13,
+                          "end_line": 75,
+                          "line": 75
+                        },
+                        "text": "List"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "<",
+                            "span": {
+                              "col": 13,
+                              "end_col": 14,
+                              "end_line": 75,
+                              "line": 75
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 14,
+                              "end_col": 18,
+                              "end_line": 75,
+                              "line": 75
+                            },
+                            "text": "Long"
+                          },
+                          {
+                            "children": [],
+                            "label": ">",
+                            "span": {
+                              "col": 18,
+                              "end_col": 19,
+                              "end_line": 75,
+                              "line": 75
+                            }
+                          }
+                        ],
+                        "label": "type_arguments",
+                        "span": {
+                          "col": 13,
+                          "end_col": 19,
+                          "end_line": 75,
+                          "line": 75
+                        }
+                      }
+                    ],
+                    "label": "generic_type",
+                    "span": {
+                      "col": 9,
+                      "end_col": 19,
+                      "end_line": 75,
+                      "line": 75
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 20,
+                          "end_col": 26,
+                          "end_line": 75,
+                          "line": 75
+                        },
+                        "text": "totals"
+                      },
+                      {
+                        "children": [],
+                        "label": "=",
+                        "span": {
+                          "col": 27,
+                          "end_col": 28,
+                          "end_line": 75,
+                          "line": 75
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "ArrayList",
+                                "span": {
+                                  "col": 33,
+                                  "end_col": 42,
+                                  "end_line": 75,
+                                  "line": 75
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "<",
+                                    "span": {
+                                      "col": 42,
+                                      "end_col": 43,
+                                      "end_line": 75,
+                                      "line": 75
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": ">",
+                                    "span": {
+                                      "col": 43,
+                                      "end_col": 44,
+                                      "end_line": 75,
+                                      "line": 75
+                                    }
+                                  }
+                                ],
+                                "label": "type_arguments",
+                                "span": {
+                                  "col": 42,
+                                  "end_col": 44,
+                                  "end_line": 75,
+                                  "line": 75
+                                }
+                              }
+                            ],
+                            "label": "generic_type",
+                            "span": {
+                              "col": 33,
+                              "end_col": 44,
+                              "end_line": 75,
+                              "line": 75
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "argument_list",
+                            "span": {
+                              "col": 44,
+                              "end_col": 46,
+                              "end_line": 75,
+                              "line": 75
+                            }
+                          }
+                        ],
+                        "label": "object_creation_expression",
+                        "span": {
+                          "col": 29,
+                          "end_col": 46,
+                          "end_line": 75,
+                          "line": 75
+                        }
+                      }
+                    ],
+                    "label": "variable_declarator",
+                    "span": {
+                      "col": 20,
+                      "end_col": 46,
+                      "end_line": 75,
+                      "line": 75
+                    }
+                  }
+                ],
+                "label": "local_variable_declaration",
+                "span": {
+                  "col": 9,
+                  "end_col": 47,
+                  "end_line": 75,
+                  "line": 75
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type",
+                    "span": {
+                      "col": 9,
+                      "end_col": 13,
+                      "end_line": 76,
+                      "line": 76
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 14,
+                          "end_col": 19,
+                          "end_line": 76,
+                          "line": 76
+                        },
+                        "text": "spent"
+                      },
+                      {
+                        "children": [],
+                        "label": "=",
+                        "span": {
+                          "col": 20,
+                          "end_col": 21,
+                          "end_line": 76,
+                          "line": 76
+                        }
+                      },
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 22,
+                          "end_col": 27,
+                          "end_line": 76,
+                          "line": 76
+                        },
+                        "text": "start"
+                      }
+                    ],
+                    "label": "variable_declarator",
+                    "span": {
+                      "col": 14,
+                      "end_col": 27,
+                      "end_line": 76,
+                      "line": 76
+                    }
+                  }
+                ],
+                "label": "local_variable_declaration",
+                "span": {
+                  "col": 9,
+                  "end_col": 28,
+                  "end_line": 76,
+                  "line": 76
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type",
+                    "span": {
+                      "col": 14,
+                      "end_col": 18,
+                      "end_line": 77,
+                      "line": 77
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 19,
+                      "end_col": 25,
+                      "end_line": 77,
+                      "line": 77
+                    },
+                    "text": "refund"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 28,
+                      "end_col": 35,
+                      "end_line": 77,
+                      "line": 77
+                    },
+                    "text": "refunds"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 13,
+                                  "end_col": 18,
+                                  "end_line": 78,
+                                  "line": 78
+                                },
+                                "text": "spent"
+                              },
+                              {
+                                "children": [],
+                                "label": "+=",
+                                "span": {
+                                  "col": 19,
+                                  "end_col": 21,
+                                  "end_line": 78,
+                                  "line": 78
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 22,
+                                  "end_col": 28,
+                                  "end_line": 78,
+                                  "line": 78
+                                },
+                                "text": "refund"
+                              }
+                            ],
+                            "label": "assignment_expression",
+                            "span": {
+                              "col": 13,
+                              "end_col": 28,
+                              "end_line": 78,
+                              "line": 78
+                            }
+                          }
+                        ],
+                        "label": "expression_statement",
+                        "span": {
+                          "col": 13,
+                          "end_col": 29,
+                          "end_line": 78,
+                          "line": 78
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 13,
+                                  "end_col": 19,
+                                  "end_line": 79,
+                                  "line": 79
+                                },
+                                "text": "totals"
+                              },
+                              {
+                                "children": [],
+                                "label": "add",
+                                "span": {
+                                  "col": 20,
+                                  "end_col": 23,
+                                  "end_line": 79,
+                                  "line": 79
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 24,
+                                      "end_col": 29,
+                                      "end_line": 79,
+                                      "line": 79
+                                    },
+                                    "text": "spent"
+                                  }
+                                ],
+                                "label": "argument_list",
+                                "span": {
+                                  "col": 23,
+                                  "end_col": 30,
+                                  "end_line": 79,
+                                  "line": 79
+                                }
+                              }
+                            ],
+                            "label": "method_invocation",
+                            "span": {
+                              "col": 13,
+                              "end_col": 30,
+                              "end_line": 79,
+                              "line": 79
+                            }
+                          }
+                        ],
+                        "label": "expression_statement",
+                        "span": {
+                          "col": 13,
+                          "end_col": 31,
+                          "end_line": 79,
+                          "line": 79
+                        }
+                      }
+                    ],
+                    "label": "block",
+                    "span": {
+                      "col": 37,
+                      "end_col": 10,
+                      "end_line": 80,
+                      "line": 77
+                    }
+                  }
+                ],
+                "label": "enhanced_for_statement",
+                "span": {
+                  "col": 9,
+                  "end_col": 10,
+                  "end_line": 80,
+                  "line": 77
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 9,
+                          "end_col": 15,
+                          "end_line": 81,
+                          "line": 81
+                        },
+                        "text": "totals"
+                      },
+                      {
+                        "children": [],
+                        "label": "add",
+                        "span": {
+                          "col": 16,
+                          "end_col": 19,
+                          "end_line": 81,
+                          "line": 81
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 20,
+                                  "end_col": 25,
+                                  "end_line": 81,
+                                  "line": 81
+                                },
+                                "text": "spent"
+                              },
+                              {
+                                "children": [],
+                                "label": "-",
+                                "span": {
+                                  "col": 26,
+                                  "end_col": 27,
+                                  "end_line": 81,
+                                  "line": 81
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 28,
+                                  "end_col": 33,
+                                  "end_line": 81,
+                                  "line": 81
+                                },
+                                "text": "start"
+                              }
+                            ],
+                            "label": "binary_expression",
+                            "span": {
+                              "col": 20,
+                              "end_col": 33,
+                              "end_line": 81,
+                              "line": 81
+                            }
+                          }
+                        ],
+                        "label": "argument_list",
+                        "span": {
+                          "col": 19,
+                          "end_col": 34,
+                          "end_line": 81,
+                          "line": 81
+                        }
+                      }
+                    ],
+                    "label": "method_invocation",
+                    "span": {
+                      "col": 9,
+                      "end_col": 34,
+                      "end_line": 81,
+                      "line": 81
+                    }
+                  }
+                ],
+                "label": "expression_statement",
+                "span": {
+                  "col": 9,
+                  "end_col": 35,
+                  "end_line": 81,
+                  "line": 81
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 16,
+                      "end_col": 22,
+                      "end_line": 82,
+                      "line": 82
+                    },
+                    "text": "totals"
+                  }
+                ],
+                "label": "return_statement",
+                "span": {
+                  "col": 9,
+                  "end_col": 23,
+                  "end_line": 82,
+                  "line": 82
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 66,
+              "end_col": 6,
+              "end_line": 83,
+              "line": 74
+            }
+          }
+        ],
+        "label": "method_declaration",
+        "span": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 83,
+          "line": 74
+        }
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      }
+    },
+    {
+      "hash": "sh_3904a83873202846",
+      "root": {
+        "children": [
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$id",
+                "span": {
+                  "col": 12,
+                  "end_col": 16,
+                  "end_line": 85,
+                  "line": 85
+                },
+                "text": "List"
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "<",
+                    "span": {
+                      "col": 16,
+                      "end_col": 17,
+                      "end_line": 85,
+                      "line": 85
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 17,
+                      "end_col": 21,
+                      "end_line": 85,
+                      "line": 85
+                    },
+                    "text": "Long"
+                  },
+                  {
+                    "children": [],
+                    "label": ">",
+                    "span": {
+                      "col": 21,
+                      "end_col": 22,
+                      "end_line": 85,
+                      "line": 85
+                    }
+                  }
+                ],
+                "label": "type_arguments",
+                "span": {
+                  "col": 16,
+                  "end_col": 22,
+                  "end_line": 85,
+                  "line": 85
+                }
+              }
+            ],
+            "label": "generic_type",
+            "span": {
+              "col": 12,
+              "end_col": 22,
+              "end_line": 85,
+              "line": 85
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "integral_type",
+                        "span": {
+                          "col": 43,
+                          "end_col": 47,
+                          "end_line": 85,
+                          "line": 85
+                        }
+                      },
+                      {
+                        "children": [],
+                        "label": "dimensions",
+                        "span": {
+                          "col": 47,
+                          "end_col": 49,
+                          "end_line": 85,
+                          "line": 85
+                        }
+                      }
+                    ],
+                    "label": "array_type",
+                    "span": {
+                      "col": 43,
+                      "end_col": 49,
+                      "end_line": 85,
+                      "line": 85
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 50,
+                      "end_col": 57,
+                      "end_line": 85,
+                      "line": 85
+                    },
+                    "text": "refunds"
+                  }
+                ],
+                "label": "formal_parameter",
+                "span": {
+                  "col": 43,
+                  "end_col": 57,
+                  "end_line": 85,
+                  "line": 85
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type",
+                    "span": {
+                      "col": 59,
+                      "end_col": 63,
+                      "end_line": 85,
+                      "line": 85
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 64,
+                      "end_col": 69,
+                      "end_line": 85,
+                      "line": 85
+                    },
+                    "text": "start"
+                  }
+                ],
+                "label": "formal_parameter",
+                "span": {
+                  "col": 59,
+                  "end_col": 69,
+                  "end_line": 85,
+                  "line": 85
+                }
+              }
+            ],
+            "label": "formal_parameters",
+            "span": {
+              "col": 42,
+              "end_col": 70,
+              "end_line": 85,
+              "line": 85
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 9,
+                          "end_col": 13,
+                          "end_line": 87,
+                          "line": 87
+                        },
+                        "text": "List"
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "<",
+                            "span": {
+                              "col": 13,
+                              "end_col": 14,
+                              "end_line": 87,
+                              "line": 87
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 14,
+                              "end_col": 18,
+                              "end_line": 87,
+                              "line": 87
+                            },
+                            "text": "Long"
+                          },
+                          {
+                            "children": [],
+                            "label": ">",
+                            "span": {
+                              "col": 18,
+                              "end_col": 19,
+                              "end_line": 87,
+                              "line": 87
+                            }
+                          }
+                        ],
+                        "label": "type_arguments",
+                        "span": {
+                          "col": 13,
+                          "end_col": 19,
+                          "end_line": 87,
+                          "line": 87
+                        }
+                      }
+                    ],
+                    "label": "generic_type",
+                    "span": {
+                      "col": 9,
+                      "end_col": 19,
+                      "end_line": 87,
+                      "line": 87
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 20,
+                          "end_col": 26,
+                          "end_line": 87,
+                          "line": 87
+                        },
+                        "text": "totals"
+                      },
+                      {
+                        "children": [],
+                        "label": "=",
+                        "span": {
+                          "col": 27,
+                          "end_col": 28,
+                          "end_line": 87,
+                          "line": 87
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "ArrayList",
+                                "span": {
+                                  "col": 33,
+                                  "end_col": 42,
+                                  "end_line": 87,
+                                  "line": 87
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "<",
+                                    "span": {
+                                      "col": 42,
+                                      "end_col": 43,
+                                      "end_line": 87,
+                                      "line": 87
+                                    }
+                                  },
+                                  {
+                                    "children": [],
+                                    "label": ">",
+                                    "span": {
+                                      "col": 43,
+                                      "end_col": 44,
+                                      "end_line": 87,
+                                      "line": 87
+                                    }
+                                  }
+                                ],
+                                "label": "type_arguments",
+                                "span": {
+                                  "col": 42,
+                                  "end_col": 44,
+                                  "end_line": 87,
+                                  "line": 87
+                                }
+                              }
+                            ],
+                            "label": "generic_type",
+                            "span": {
+                              "col": 33,
+                              "end_col": 44,
+                              "end_line": 87,
+                              "line": 87
+                            }
+                          },
+                          {
+                            "children": [],
+                            "label": "argument_list",
+                            "span": {
+                              "col": 44,
+                              "end_col": 46,
+                              "end_line": 87,
+                              "line": 87
+                            }
+                          }
+                        ],
+                        "label": "object_creation_expression",
+                        "span": {
+                          "col": 29,
+                          "end_col": 46,
+                          "end_line": 87,
+                          "line": 87
+                        }
+                      }
+                    ],
+                    "label": "variable_declarator",
+                    "span": {
+                      "col": 20,
+                      "end_col": 46,
+                      "end_line": 87,
+                      "line": 87
+                    }
+                  }
+                ],
+                "label": "local_variable_declaration",
+                "span": {
+                  "col": 9,
+                  "end_col": 47,
+                  "end_line": 87,
+                  "line": 87
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type",
+                    "span": {
+                      "col": 9,
+                      "end_col": 13,
+                      "end_line": 88,
+                      "line": 88
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 14,
+                          "end_col": 19,
+                          "end_line": 88,
+                          "line": 88
+                        },
+                        "text": "spent"
+                      },
+                      {
+                        "children": [],
+                        "label": "=",
+                        "span": {
+                          "col": 20,
+                          "end_col": 21,
+                          "end_line": 88,
+                          "line": 88
+                        }
+                      },
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 22,
+                          "end_col": 27,
+                          "end_line": 88,
+                          "line": 88
+                        },
+                        "text": "start"
+                      }
+                    ],
+                    "label": "variable_declarator",
+                    "span": {
+                      "col": 14,
+                      "end_col": 27,
+                      "end_line": 88,
+                      "line": 88
+                    }
+                  }
+                ],
+                "label": "local_variable_declaration",
+                "span": {
+                  "col": 9,
+                  "end_col": 28,
+                  "end_line": 88,
+                  "line": 88
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type",
+                    "span": {
+                      "col": 14,
+                      "end_col": 18,
+                      "end_line": 89,
+                      "line": 89
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 19,
+                      "end_col": 25,
+                      "end_line": 89,
+                      "line": 89
+                    },
+                    "text": "refund"
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 28,
+                      "end_col": 35,
+                      "end_line": 89,
+                      "line": 89
+                    },
+                    "text": "refunds"
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 39,
+                                  "end_col": 44,
+                                  "end_line": 89,
+                                  "line": 89
+                                },
+                                "text": "spent"
+                              },
+                              {
+                                "children": [],
+                                "label": "+=",
+                                "span": {
+                                  "col": 45,
+                                  "end_col": 47,
+                                  "end_line": 89,
+                                  "line": 89
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 48,
+                                  "end_col": 54,
+                                  "end_line": 89,
+                                  "line": 89
+                                },
+                                "text": "refund"
+                              }
+                            ],
+                            "label": "assignment_expression",
+                            "span": {
+                              "col": 39,
+                              "end_col": 54,
+                              "end_line": 89,
+                              "line": 89
+                            }
+                          }
+                        ],
+                        "label": "expression_statement",
+                        "span": {
+                          "col": 39,
+                          "end_col": 55,
+                          "end_line": 89,
+                          "line": 89
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 56,
+                                  "end_col": 62,
+                                  "end_line": 89,
+                                  "line": 89
+                                },
+                                "text": "totals"
+                              },
+                              {
+                                "children": [],
+                                "label": "add",
+                                "span": {
+                                  "col": 63,
+                                  "end_col": 66,
+                                  "end_line": 89,
+                                  "line": 89
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 67,
+                                      "end_col": 72,
+                                      "end_line": 89,
+                                      "line": 89
+                                    },
+                                    "text": "spent"
+                                  }
+                                ],
+                                "label": "argument_list",
+                                "span": {
+                                  "col": 66,
+                                  "end_col": 73,
+                                  "end_line": 89,
+                                  "line": 89
+                                }
+                              }
+                            ],
+                            "label": "method_invocation",
+                            "span": {
+                              "col": 56,
+                              "end_col": 73,
+                              "end_line": 89,
+                              "line": 89
+                            }
+                          }
+                        ],
+                        "label": "expression_statement",
+                        "span": {
+                          "col": 56,
+                          "end_col": 74,
+                          "end_line": 89,
+                          "line": 89
+                        }
+                      }
+                    ],
+                    "label": "block",
+                    "span": {
+                      "col": 37,
+                      "end_col": 76,
+                      "end_line": 89,
+                      "line": 89
+                    }
+                  }
+                ],
+                "label": "enhanced_for_statement",
+                "span": {
+                  "col": 9,
+                  "end_col": 76,
+                  "end_line": 89,
+                  "line": 89
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 9,
+                          "end_col": 15,
+                          "end_line": 90,
+                          "line": 90
+                        },
+                        "text": "totals"
+                      },
+                      {
+                        "children": [],
+                        "label": "add",
+                        "span": {
+                          "col": 16,
+                          "end_col": 19,
+                          "end_line": 90,
+                          "line": 90
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 20,
+                                  "end_col": 25,
+                                  "end_line": 90,
+                                  "line": 90
+                                },
+                                "text": "spent"
+                              },
+                              {
+                                "children": [],
+                                "label": "-",
+                                "span": {
+                                  "col": 26,
+                                  "end_col": 27,
+                                  "end_line": 90,
+                                  "line": 90
+                                }
+                              },
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 28,
+                                  "end_col": 33,
+                                  "end_line": 90,
+                                  "line": 90
+                                },
+                                "text": "start"
+                              }
+                            ],
+                            "label": "binary_expression",
+                            "span": {
+                              "col": 20,
+                              "end_col": 33,
+                              "end_line": 90,
+                              "line": 90
+                            }
+                          }
+                        ],
+                        "label": "argument_list",
+                        "span": {
+                          "col": 19,
+                          "end_col": 34,
+                          "end_line": 90,
+                          "line": 90
+                        }
+                      }
+                    ],
+                    "label": "method_invocation",
+                    "span": {
+                      "col": 9,
+                      "end_col": 34,
+                      "end_line": 90,
+                      "line": 90
+                    }
+                  }
+                ],
+                "label": "expression_statement",
+                "span": {
+                  "col": 9,
+                  "end_col": 35,
+                  "end_line": 90,
+                  "line": 90
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 16,
+                      "end_col": 22,
+                      "end_line": 91,
+                      "line": 91
+                    },
+                    "text": "totals"
+                  }
+                ],
+                "label": "return_statement",
+                "span": {
+                  "col": 9,
+                  "end_col": 23,
+                  "end_line": 91,
+                  "line": 91
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 71,
+              "end_col": 6,
+              "end_line": 92,
+              "line": 85
+            }
+          }
+        ],
+        "label": "method_declaration",
+        "span": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 92,
+          "line": 85
+        }
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      }
+    },
+    {
       "hash": "sh_181d7b3e28a51040",
       "root": {
         "children": [

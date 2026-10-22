@@ -1,5 +1,5 @@
 // ABOUTME: static.clones over synthetic facts: pairs, clusters, clone types, settings, scope, family-wide
-// ABOUTME: comparison, finding identity, deterministic order (ADR-050), and the common-subtree hint (ADR-133).
+// ABOUTME: comparison, finding identity, order (ADR-050), the common-subtree hint (ADR-133), what differs (ADR-136).
 mod support;
 
 use cupel_core::config::ConfigError;
@@ -240,9 +240,10 @@ fn the_manifest_states_its_known_limitation() {
     assert_eq!(
         limitation,
         Some(
-            "type 1 is reported as type 2, because NormTree keeps no identifier or literal text, \
-             so two functions that differ only in literals (two lookup tables of the same shape) \
-             are reported as clones (ADR-050; a raw-token digest is a P3 follow-up)."
+            "what normalization erases (layout, comments, the function's own name, and the \
+             annotations, attributes, or modifiers a language's normalizer drops) is not \
+             compared, so a copy that differs only there is type 1, and two functions that differ \
+             only in literals (two lookup tables of the same shape) are type-2 clones (ADR-136)."
         )
     );
 }
@@ -883,4 +884,205 @@ fn the_cluster_kind_declares_its_common_subtree_hint() {
     };
     assert_eq!(hints("clone.cluster"), ["common_subtree"]);
     assert!(hints("clone.pair").is_empty());
+}
+
+// ---------------------------------------------------------------- clone types and what differs
+
+/// `root` with a text on every marker leaf in pre-order: `x` for `$id`, `1` for `$lit`, except
+/// the positions `renames` names, which get the text given.
+fn named(mut root: NormNode, renames: &[(usize, &str)]) -> NormNode {
+    fn fill(node: &mut NormNode, at: &mut usize, renames: &[(usize, &str)]) {
+        if node.label.starts_with('$') {
+            let default = if node.label == "$lit" { "1" } else { "x" };
+            let text = renames
+                .iter()
+                .find(|(index, _)| index == at)
+                .map_or(default, |(_, text)| text);
+            node.text = Some(text.to_owned());
+            *at += 1;
+        }
+        for child in &mut node.children {
+            fill(child, at, renames);
+        }
+    }
+    fill(&mut root, &mut 0, renames);
+    root
+}
+
+fn renamed(kind: &str, values: &[&str], occurrences: u32) -> Value {
+    json!({ "kind": kind, "values": values, "occurrences": occurrences })
+}
+
+fn edit(change: &str, symbol: &str, nodes: u32) -> Value {
+    json!({ "change": change, "symbol": symbol, "nodes": nodes })
+}
+
+/// The pair `run` reports over `defs`, and its evidence.
+fn the_finding(defs: &[Def]) -> (Finding, serde_json::Map<String, Value>) {
+    let (_, findings) = run(defs);
+    assert_eq!(findings.len(), 1, "{findings:#?}");
+    let evidence = findings[0].evidence.0.clone();
+    (findings[0].clone(), evidence)
+}
+
+#[test]
+fn a_copy_with_the_same_tokens_is_a_type_1_pair_with_nothing_renamed_or_edited() {
+    let defs = [
+        def("a.x", "settle", 1, named(function(body(&OPERATORS)), &[])),
+        def(
+            "b.x",
+            "settle_again",
+            20,
+            named(function(body(&OPERATORS)), &[]),
+        ),
+    ];
+    let (finding, evidence) = the_finding(&defs);
+    assert_eq!(finding.kind, "clone.pair");
+    assert_eq!(evidence["clone_type"], json!(1));
+    assert_eq!(evidence["renamed"], json!([]));
+    assert_eq!(evidence["edits"], json!([]));
+    assert!(finding.title.contains("type-1"), "{}", finding.title);
+}
+
+#[test]
+fn a_renamed_copy_lists_the_identifiers_and_literals_that_differ_as_pairs() {
+    let defs = [
+        def("a.x", "settle", 1, named(function(body(&OPERATORS)), &[])),
+        def(
+            "b.x",
+            "reconcile",
+            20,
+            named(
+                function(body(&OPERATORS)),
+                &[(2, "due"), (4, "10"), (5, "due")],
+            ),
+        ),
+    ];
+    let (_, evidence) = the_finding(&defs);
+    assert_eq!(evidence["clone_type"], json!(2));
+    assert_eq!(
+        evidence["renamed"],
+        json!([
+            renamed("identifier", &["x", "due"], 2),
+            renamed("literal", &["1", "10"], 1),
+        ])
+    );
+    assert_eq!(evidence["edits"], json!([]));
+}
+
+#[test]
+fn a_copy_whose_markers_carry_no_text_is_type_2_with_nothing_renamed() {
+    let defs = [
+        def("a.x", "settle", 1, function(body(&OPERATORS))),
+        def("b.x", "reconcile", 20, function(body(&OPERATORS))),
+    ];
+    let (_, evidence) = the_finding(&defs);
+    assert_eq!(evidence["clone_type"], json!(2));
+    assert_eq!(evidence["renamed"], json!([]));
+}
+
+#[test]
+fn a_type_3_pair_lists_the_inserted_statement_where_it_is() {
+    let mut extended = body(&OPERATORS);
+    extended.push(call("audit"));
+    let defs = [
+        def("a.x", "orders", 1, placed(function(body(&OPERATORS)), 1)),
+        def("a.x", "refunds", 200, placed(function(extended), 200)),
+    ];
+    let (_, evidence) = the_finding(&defs);
+    assert_eq!(evidence["clone_type"], json!(3));
+    assert_eq!(evidence["renamed"], json!([]));
+    let audit = defs[1].root.children[1].children.last().unwrap();
+    let mut inserted = edit("inserted", "m::refunds", size(&call("audit")));
+    inserted["location"] = serde_json::to_value(located("a.x", audit.span.unwrap().line)).unwrap();
+    assert_eq!(evidence["edits"], json!([inserted]));
+}
+
+#[test]
+fn a_statement_missing_from_the_second_member_is_removed_from_it() {
+    let mut extended = body(&OPERATORS);
+    extended.insert(3, call("audit"));
+    let defs = [
+        def("a.x", "orders", 1, function(extended)),
+        def("a.x", "refunds", 20, function(body(&OPERATORS))),
+    ];
+    let (_, evidence) = the_finding(&defs);
+    assert_eq!(
+        evidence["edits"],
+        json!([edit("removed", "m::refunds", size(&call("audit")))])
+    );
+}
+
+#[test]
+fn a_changed_statement_narrows_to_the_part_that_changed() {
+    let mut changed = body(&OPERATORS);
+    changed[1] = statement("<<");
+    let defs = [
+        def("a.x", "orders", 1, function(body(&OPERATORS))),
+        def("a.x", "refunds", 20, function(changed)),
+    ];
+    let (_, evidence) = the_finding(&defs);
+    assert_eq!(evidence["clone_type"], json!(3));
+    assert_eq!(
+        evidence["edits"],
+        json!([
+            edit("removed", "m::refunds", 1),
+            edit("inserted", "m::refunds", 1)
+        ])
+    );
+}
+
+#[test]
+fn a_cluster_of_copies_with_the_same_tokens_is_type_1() {
+    let copy = || named(function(body(&OPERATORS)), &[]);
+    let defs = [
+        def("a.x", "one", 1, copy()),
+        def("a.x", "two", 20, copy()),
+        def("c.x", "three", 1, copy()),
+    ];
+    let (finding, evidence) = the_finding(&defs);
+    assert_eq!(finding.kind, "clone.cluster");
+    assert_eq!(evidence["clone_type"], json!(1));
+    assert_eq!(evidence["renamed"], json!([]));
+    assert_eq!(evidence["edits"], json!([]));
+}
+
+#[test]
+fn a_renamed_cluster_lists_each_members_text_in_member_order() {
+    let defs = [
+        def("a.x", "one", 1, named(function(body(&OPERATORS)), &[])),
+        def(
+            "a.x",
+            "two",
+            20,
+            named(function(body(&OPERATORS)), &[(0, "a")]),
+        ),
+        def(
+            "c.x",
+            "three",
+            1,
+            named(function(body(&OPERATORS)), &[(0, "b")]),
+        ),
+    ];
+    let (_, evidence) = the_finding(&defs);
+    assert_eq!(evidence["clone_type"], json!(2));
+    assert_eq!(
+        evidence["renamed"],
+        json!([renamed("identifier", &["x", "a", "b"], 1)])
+    );
+}
+
+#[test]
+fn a_cluster_with_a_changed_member_is_type_3_with_that_members_edits() {
+    let (finding, evidence) = the_finding(&three_similar());
+    assert_eq!(finding.kind, "clone.cluster");
+    assert_eq!(evidence["clone_type"], json!(3));
+    assert_eq!(evidence["renamed"], json!([]));
+    assert_eq!(
+        evidence["edits"],
+        json!([
+            edit("removed", "m::three", 1),
+            edit("inserted", "m::three", 1)
+        ])
+    );
 }

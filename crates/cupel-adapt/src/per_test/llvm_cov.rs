@@ -413,12 +413,14 @@ fn is_executable(path: &Path) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{executables, runner_script};
+    use super::runner_script;
 
     #[cfg(unix)]
     #[test]
     fn the_executables_beside_a_test_binary_are_the_programs_the_build_made() {
         use std::os::unix::fs::PermissionsExt;
+
+        use super::executables;
         let dir = tempfile::tempdir().unwrap();
         let profile = dir.path().join("debug");
         std::fs::create_dir_all(profile.join("deps")).unwrap();

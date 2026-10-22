@@ -1,5 +1,5 @@
-# ABOUTME: Manifest for cupel-serve: the daemon's socket protocol (ADR-009), server loop, client, and file
-# ABOUTME: watcher. It runs requests through a handler the CLI supplies, so it depends on cupel-core alone.
+# ABOUTME: Manifest for cupel-serve: the daemon's protocol (ADR-009), transport (ADR-137), server loop, client, and
+# ABOUTME: file watcher. It runs requests through a handler the CLI supplies, so it depends on cupel-core alone.
 [package]
 name = "cupel-serve"
 description = "The Cupel daemon: socket protocol, server, client, and file watcher."
@@ -14,7 +14,19 @@ cupel-core.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 notify.workspace = true
+blake3.workspace = true
+
+[target.'cfg(unix)'.dependencies]
 nix = { workspace = true, features = ["poll"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_Pipes",
+] }
 
 [dev-dependencies]
 tempfile.workspace = true

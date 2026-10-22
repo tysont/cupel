@@ -90,6 +90,50 @@
     },
     {
       "body": {
+        "col": 59,
+        "end_col": 2,
+        "end_line": 77,
+        "line": 69
+      },
+      "display": "ledger.runningRefunds",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "runningRefunds",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 77,
+        "line": 69
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
+        "col": 64,
+        "end_col": 2,
+        "end_line": 90,
+        "line": 79
+      },
+      "display": "ledger.runningRefundsAgain",
+      "file": "clones_settlement.go",
+      "kind": "function",
+      "lang": "go",
+      "name": "runningRefundsAgain",
+      "namespace": "ledger",
+      "parameters": 2,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 90,
+        "line": 79
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
         "col": 13,
         "end_col": 2,
         "end_line": 14,

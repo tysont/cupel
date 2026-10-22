@@ -233,6 +233,52 @@
       }
     },
     {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 10,
+            "end_line": 80,
+            "line": 77
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 9,
+            "end_col": 76,
+            "end_line": 89,
+            "line": 89
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      }
+    },
+    {
       "decisions": [],
       "symbol": {
         "col": 5,

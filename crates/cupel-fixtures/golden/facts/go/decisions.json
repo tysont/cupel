@@ -121,6 +121,52 @@
       }
     },
     {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 3,
+            "end_line": 75,
+            "line": 72
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 69
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 2,
+            "end_col": 3,
+            "end_line": 87,
+            "line": 84
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "clones_settlement.go",
+        "line": 79
+      }
+    },
+    {
       "decisions": [],
       "symbol": {
         "col": 1,

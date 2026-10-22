@@ -1,12 +1,12 @@
 // ABOUTME: `static.clones`: near-duplicate functions within a language family, from NormTree subtree
-// ABOUTME: fingerprints through MinHash and LSH to exact Jaccard, reported as pairs and clusters (ADR-050).
+// ABOUTME: fingerprints through MinHash and LSH to exact Jaccard, as typed pairs and clusters (ADR-050, ADR-136).
 use std::collections::hash_map::DefaultHasher;
 use std::collections::{BTreeMap, HashMap};
 use std::hash::{Hash, Hasher};
 
 use cupel_core::config::{ConfigError, Table};
 use cupel_core::hint::{self, CommonSubtree, Parameter, ParameterKind, PlacedSubtree};
-use cupel_core::similarity::{Fingerprints, Similar, combine, mix, search};
+use cupel_core::similarity::{Fingerprints, Similar, combine, mix, search, token_digest};
 use cupel_core::syntax::{NormNode, NormTree, SymbolDef, Symbols};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
@@ -127,16 +127,48 @@ struct Member {
     nodes: u32,
 }
 
+/// Whether an edited subtree is in the first member only (`removed`) or in the other member
+/// only (`inserted`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+enum Change {
+    Removed,
+    Inserted,
+}
+
+/// A subtree one member has and the first member lacks, or the reverse (ADR-136).
+#[derive(Serialize, JsonSchema)]
+#[schemars(inline)]
+#[serde(deny_unknown_fields)]
+struct Edit {
+    /// `removed`: in the first member and not in `symbol`; `inserted`: in `symbol` and not in
+    /// the first member.
+    change: Change,
+    /// The member compared with the first.
+    symbol: String,
+    /// Nodes of the subtree's normalized tree.
+    nodes: u32,
+    /// The subtree in the member that holds it; absent when its producer gave it no span.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    location: Option<Location>,
+}
+
 /// Evidence of `clone.pair`.
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 struct ClonePair {
     /// Jaccard similarity of the two symbols' subtree fingerprint sets, to three decimals.
     jaccard: f64,
-    /// 2 when the normalized trees are identical (type 1 and type 2 clones: only names,
-    /// literals, types, layout, or comments differ); 3 when they differ (statements added,
-    /// removed, or changed).
+    /// 1 when the normalized trees and their identifier and literal texts are equal (only
+    /// layout, comments, or what normalization erases differ); 2 when the trees are equal and
+    /// texts differ (renamed identifiers or changed literals, in `renamed`); 3 when the trees
+    /// differ (statements inserted, removed, or changed, in `edits`).
     clone_type: u8,
+    /// For type 2, each identifier or literal whose text differs: `values` is the left text
+    /// then the right; empty otherwise.
+    renamed: Vec<Parameter>,
+    /// For type 3, the subtrees one side has and the other lacks; empty otherwise.
+    edits: Vec<Edit>,
     threshold: f64,
     left: Member,
     right: Member,
@@ -152,6 +184,15 @@ struct CloneCluster {
     pairs: u32,
     min_jaccard: f64,
     max_jaccard: f64,
+    /// 1 when every member's normalized tree and texts equal the first member's, 2 when every
+    /// tree equals the first's, 3 otherwise.
+    clone_type: u8,
+    /// For type 2, each identifier or literal whose text differs: `values` holds one text per
+    /// member, in `members` order; empty otherwise.
+    renamed: Vec<Parameter>,
+    /// For type 3, each member's subtrees that it has and the first member lacks or the
+    /// reverse; empty otherwise.
+    edits: Vec<Edit>,
     threshold: f64,
 }
 
@@ -176,11 +217,15 @@ impl StaticClones {
                 settings: Settings::specs(),
                 stability: Stability::Experimental,
                 summary: "Type 1, 2, and 3 clones: functions whose normalized syntax trees share \
-                          most subtree fingerprints, compared within a language family. \
-                          Limitation: type 1 is reported as type 2, because NormTree keeps no \
-                          identifier or literal text, so two functions that differ only in \
-                          literals (two lookup tables of the same shape) are reported as clones \
-                          (ADR-050; a raw-token digest is a P3 follow-up)."
+                          most subtree fingerprints, compared within a language family. Type 1 \
+                          has the same tokens; type 2 the same tree with identifiers or literals \
+                          renamed, listed in `renamed`; type 3 statements inserted, removed, or \
+                          changed, listed in `edits`. Limitation: what normalization erases \
+                          (layout, comments, the function's own name, and the annotations, \
+                          attributes, or modifiers a language's normalizer drops) is not \
+                          compared, so a copy that differs only there is type 1, and two \
+                          functions that differ only in literals (two lookup tables of the same \
+                          shape) are type-2 clones (ADR-136)."
                     .to_owned(),
             },
         }
@@ -203,6 +248,7 @@ fn comparable<'a>(facts: &'a Facts, settings: &Settings) -> Result<Vec<Compared<
                 hash,
                 root,
                 prints: Fingerprints::of(root),
+                tokens: token_digest(root),
             })
         })
         .filter(|compared| compared.prints.nodes >= settings.min_nodes)
@@ -328,6 +374,8 @@ struct Compared<'a> {
     hash: &'a SymbolHash,
     root: &'a NormNode,
     prints: Fingerprints,
+    /// The digest of its tokens, which only a type-1 copy shares (ADR-136).
+    tokens: Option<u64>,
 }
 
 fn lines(symbol: &SymbolDef) -> u32 {
@@ -515,11 +563,11 @@ impl Report<'_> {
 
     fn pair(&self, pair: &Similar) -> (&'static str, String, String, Value) {
         let (left, right) = (&self.compared[pair.left], &self.compared[pair.right]);
-        let clone_type = if left.root.same_shape(right.root) {
-            2
-        } else {
-            3
-        };
+        let Differences {
+            clone_type,
+            renamed,
+            edits,
+        } = Differences::of(left, &[right]);
         let jaccard = rounded(pair.jaccard);
         let title = format!(
             "`{}` and `{}` ({}:{}) are type-{clone_type} clones (jaccard {jaccard:.2})",
@@ -532,6 +580,8 @@ impl Report<'_> {
         let evidence = evidence(&ClonePair {
             jaccard,
             clone_type,
+            renamed,
+            edits,
             threshold: self.settings.threshold,
             left: member(left),
             right: member(right),
@@ -541,6 +591,15 @@ impl Report<'_> {
 
     fn cluster(&self, group: &Group) -> (&'static str, String, String, Value) {
         let first = &self.compared[group.members[0]];
+        let others: Vec<&Compared<'_>> = group.members[1..]
+            .iter()
+            .map(|index| &self.compared[*index])
+            .collect();
+        let Differences {
+            clone_type,
+            renamed,
+            edits,
+        } = Differences::of(first, &others);
         let similarity = group.pairs.iter().map(|pair| pair.jaccard);
         let min_jaccard = rounded(similarity.clone().fold(1.0, f64::min));
         let max_jaccard = rounded(similarity.fold(0.0, f64::max));
@@ -565,10 +624,137 @@ impl Report<'_> {
             pairs: u32::try_from(group.pairs.len()).unwrap_or(u32::MAX),
             min_jaccard,
             max_jaccard,
+            clone_type,
+            renamed,
+            edits,
             threshold: self.settings.threshold,
         });
         (CLUSTER, title, summary, evidence)
     }
+}
+
+/// A clone group's type and what differs between its members (ADR-136).
+struct Differences {
+    clone_type: u8,
+    renamed: Vec<Parameter>,
+    edits: Vec<Edit>,
+}
+
+impl Differences {
+    /// How `others` differ from `first`: type 1 when every tree and token digest equals the
+    /// first's, 2 when every tree does (with the texts that differ), 3 otherwise (with each
+    /// differing member's edits).
+    fn of(first: &Compared<'_>, others: &[&Compared<'_>]) -> Self {
+        let same_tree = others.iter().all(|other| other.root.same_shape(first.root));
+        let same_tokens =
+            first.tokens.is_some() && others.iter().all(|other| other.tokens == first.tokens);
+        if same_tree && same_tokens {
+            return Self {
+                clone_type: 1,
+                renamed: Vec::new(),
+                edits: Vec::new(),
+            };
+        }
+        if same_tree {
+            let roots: Vec<&NormNode> = others.iter().map(|other| other.root).collect();
+            return Self {
+                clone_type: 2,
+                renamed: parameters(first.root, &roots),
+                edits: Vec::new(),
+            };
+        }
+        let mut edits = Vec::new();
+        for other in others {
+            let mut unmatched = Vec::new();
+            align(first.root, other.root, &mut unmatched);
+            edits.extend(unmatched.into_iter().map(|(change, node)| {
+                let holder = match change {
+                    Change::Removed => first,
+                    Change::Inserted => other,
+                };
+                Edit {
+                    change,
+                    symbol: other.symbol.display.clone(),
+                    nodes: size(node),
+                    location: node
+                        .span
+                        .map(|span| crate::finding::located(&holder.symbol.file, &span)),
+                }
+            }));
+        }
+        Self {
+            clone_type: 3,
+            renamed: Vec::new(),
+            edits,
+        }
+    }
+}
+
+/// The subtrees of `left` and `right` that a top-down alignment leaves unmatched (ADR-136):
+/// nodes with different labels are a removal and an insertion; under nodes with one label, the
+/// children are aligned by a longest common subsequence of equal shapes, and between aligned
+/// children a run of equal length on both sides is compared pairwise again while any other run
+/// is removed from `left` and inserted from `right`.
+fn align<'a>(left: &'a NormNode, right: &'a NormNode, out: &mut Vec<(Change, &'a NormNode)>) {
+    if left.same_shape(right) {
+        return;
+    }
+    if left.label != right.label {
+        out.push((Change::Removed, left));
+        out.push((Change::Inserted, right));
+        return;
+    }
+    let (lefts, rights) = (&left.children, &right.children);
+    let (mut from_left, mut from_right) = (0, 0);
+    for (to_left, to_right) in common_subsequence(lefts, rights)
+        .into_iter()
+        .chain(std::iter::once((lefts.len(), rights.len())))
+    {
+        let run_left = &lefts[from_left..to_left];
+        let run_right = &rights[from_right..to_right];
+        if run_left.len() == run_right.len() {
+            for (one, other) in run_left.iter().zip(run_right) {
+                align(one, other, out);
+            }
+        } else {
+            out.extend(run_left.iter().map(|node| (Change::Removed, node)));
+            out.extend(run_right.iter().map(|node| (Change::Inserted, node)));
+        }
+        (from_left, from_right) = (to_left + 1, to_right + 1);
+    }
+}
+
+/// The index pairs of a longest common subsequence of `left` and `right` under equal shapes,
+/// ascending.
+fn common_subsequence(left: &[NormNode], right: &[NormNode]) -> Vec<(usize, usize)> {
+    // `longest[i][j]`: the length of a longest common subsequence of `left[i..]` and `right[j..]`.
+    let mut longest = vec![vec![0_u32; right.len() + 1]; left.len() + 1];
+    for i in (0..left.len()).rev() {
+        for j in (0..right.len()).rev() {
+            longest[i][j] = if left[i].same_shape(&right[j]) {
+                longest[i + 1][j + 1] + 1
+            } else {
+                longest[i + 1][j].max(longest[i][j + 1])
+            };
+        }
+    }
+    let (mut i, mut j, mut pairs) = (0, 0, Vec::new());
+    while i < left.len() && j < right.len() {
+        if left[i].same_shape(&right[j]) {
+            pairs.push((i, j));
+            (i, j) = (i + 1, j + 1);
+        } else if longest[i + 1][j] >= longest[i][j + 1] {
+            i += 1;
+        } else {
+            j += 1;
+        }
+    }
+    pairs
+}
+
+/// How many nodes the tree rooted at `node` has.
+fn size(node: &NormNode) -> u32 {
+    1 + node.children.iter().map(size).sum::<u32>()
 }
 
 /// The largest normalized subtree every member shares, as placed in each (ADR-133): among the

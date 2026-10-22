@@ -2,10 +2,10 @@
 // ABOUTME: they arrive, and every way of not getting an answer told apart (no daemon, no answer, refused).
 use std::fmt;
 use std::io::BufReader;
-use std::os::unix::net::UnixStream;
 use std::path::Path;
 
 use crate::protocol::{FrameError, Reply, Request, read_message, write_message};
+use crate::transport::Connection;
 
 /// Why a request got no final reply.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -48,7 +48,7 @@ pub fn request(
         return Err(ClientError::Absent);
     }
     let unanswered = |error: &dyn fmt::Display| ClientError::Unanswered(error.to_string());
-    let stream = UnixStream::connect(socket).map_err(|error| unanswered(&error))?;
+    let stream = Connection::connect(socket).map_err(|error| unanswered(&error))?;
     write_message(&mut &stream, request).map_err(|error| unanswered(&error))?;
     let mut replies = BufReader::new(&stream);
     let interrupted = |error: &dyn fmt::Display| ClientError::Interrupted(error.to_string());

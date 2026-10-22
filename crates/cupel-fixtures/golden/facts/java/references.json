@@ -3899,6 +3899,842 @@
       }
     },
     {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "List",
+      "span": {
+        "col": 12,
+        "end_col": 16,
+        "end_line": 74,
+        "line": 74
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "Long",
+      "span": {
+        "col": 17,
+        "end_col": 21,
+        "end_line": 74,
+        "line": 74
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "refunds",
+      "span": {
+        "col": 45,
+        "end_col": 52,
+        "end_line": 74,
+        "line": 74
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "start",
+      "span": {
+        "col": 59,
+        "end_col": 64,
+        "end_line": 74,
+        "line": 74
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "List",
+      "span": {
+        "col": 9,
+        "end_col": 13,
+        "end_line": 75,
+        "line": 75
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "Long",
+      "span": {
+        "col": 14,
+        "end_col": 18,
+        "end_line": 75,
+        "line": 75
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "totals",
+      "span": {
+        "col": 20,
+        "end_col": 26,
+        "end_line": 75,
+        "line": 75
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "ArrayList",
+      "span": {
+        "col": 33,
+        "end_col": 42,
+        "end_line": 75,
+        "line": 75
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "spent",
+      "span": {
+        "col": 14,
+        "end_col": 19,
+        "end_line": 76,
+        "line": 76
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "start",
+      "span": {
+        "col": 22,
+        "end_col": 27,
+        "end_line": 76,
+        "line": 76
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "refund",
+      "span": {
+        "col": 19,
+        "end_col": 25,
+        "end_line": 77,
+        "line": 77
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "refunds",
+      "span": {
+        "col": 28,
+        "end_col": 35,
+        "end_line": 77,
+        "line": 77
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "spent",
+      "span": {
+        "col": 13,
+        "end_col": 18,
+        "end_line": 78,
+        "line": 78
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "refund",
+      "span": {
+        "col": 22,
+        "end_col": 28,
+        "end_line": 78,
+        "line": 78
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "totals",
+      "span": {
+        "col": 13,
+        "end_col": 19,
+        "end_line": 79,
+        "line": 79
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "member",
+      "name": "add",
+      "span": {
+        "col": 20,
+        "end_col": 23,
+        "end_line": 79,
+        "line": 79
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "spent",
+      "span": {
+        "col": 24,
+        "end_col": 29,
+        "end_line": 79,
+        "line": 79
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "totals",
+      "span": {
+        "col": 9,
+        "end_col": 15,
+        "end_line": 81,
+        "line": 81
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "member",
+      "name": "add",
+      "span": {
+        "col": 16,
+        "end_col": 19,
+        "end_line": 81,
+        "line": 81
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "spent",
+      "span": {
+        "col": 20,
+        "end_col": 25,
+        "end_line": 81,
+        "line": 81
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "start",
+      "span": {
+        "col": 28,
+        "end_col": 33,
+        "end_line": 81,
+        "line": 81
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 74
+      },
+      "kind": "name",
+      "name": "totals",
+      "span": {
+        "col": 16,
+        "end_col": 22,
+        "end_line": 82,
+        "line": 82
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "List",
+      "span": {
+        "col": 12,
+        "end_col": 16,
+        "end_line": 85,
+        "line": 85
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "Long",
+      "span": {
+        "col": 17,
+        "end_col": 21,
+        "end_line": 85,
+        "line": 85
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "refunds",
+      "span": {
+        "col": 50,
+        "end_col": 57,
+        "end_line": 85,
+        "line": 85
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "start",
+      "span": {
+        "col": 64,
+        "end_col": 69,
+        "end_line": 85,
+        "line": 85
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "List",
+      "span": {
+        "col": 9,
+        "end_col": 13,
+        "end_line": 87,
+        "line": 87
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "Long",
+      "span": {
+        "col": 14,
+        "end_col": 18,
+        "end_line": 87,
+        "line": 87
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "totals",
+      "span": {
+        "col": 20,
+        "end_col": 26,
+        "end_line": 87,
+        "line": 87
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "ArrayList",
+      "span": {
+        "col": 33,
+        "end_col": 42,
+        "end_line": 87,
+        "line": 87
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "spent",
+      "span": {
+        "col": 14,
+        "end_col": 19,
+        "end_line": 88,
+        "line": 88
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "start",
+      "span": {
+        "col": 22,
+        "end_col": 27,
+        "end_line": 88,
+        "line": 88
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "refund",
+      "span": {
+        "col": 19,
+        "end_col": 25,
+        "end_line": 89,
+        "line": 89
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "refunds",
+      "span": {
+        "col": 28,
+        "end_col": 35,
+        "end_line": 89,
+        "line": 89
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "spent",
+      "span": {
+        "col": 39,
+        "end_col": 44,
+        "end_line": 89,
+        "line": 89
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "refund",
+      "span": {
+        "col": 48,
+        "end_col": 54,
+        "end_line": 89,
+        "line": 89
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "totals",
+      "span": {
+        "col": 56,
+        "end_col": 62,
+        "end_line": 89,
+        "line": 89
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "member",
+      "name": "add",
+      "span": {
+        "col": 63,
+        "end_col": 66,
+        "end_line": 89,
+        "line": 89
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "spent",
+      "span": {
+        "col": 67,
+        "end_col": 72,
+        "end_line": 89,
+        "line": 89
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "totals",
+      "span": {
+        "col": 9,
+        "end_col": 15,
+        "end_line": 90,
+        "line": 90
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "member",
+      "name": "add",
+      "span": {
+        "col": 16,
+        "end_col": 19,
+        "end_line": 90,
+        "line": 90
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "spent",
+      "span": {
+        "col": 20,
+        "end_col": 25,
+        "end_line": 90,
+        "line": 90
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "start",
+      "span": {
+        "col": 28,
+        "end_col": 33,
+        "end_line": 90,
+        "line": 90
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/main/java/ledger/ClonesSettlement.java",
+      "from": {
+        "col": 5,
+        "file": "src/main/java/ledger/ClonesSettlement.java",
+        "line": 85
+      },
+      "kind": "name",
+      "name": "totals",
+      "span": {
+        "col": 16,
+        "end_col": 22,
+        "end_line": 91,
+        "line": 91
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
       "file": "src/main/java/ledger/Complexity.java",
       "from": null,
       "kind": "name",
