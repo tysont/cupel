@@ -885,6 +885,7 @@ fn resolve_symbols(
     let mut scopes = HashMap::new();
     for lang in &job.langs {
         let keys = symbols_in_scope(job, store, lang, &mut matched, sink).unwrap_or_default();
+        let keys = within_range(job, store, lang, keys, sink);
         scopes.insert(lang.id.clone(), scope_of(job, keys));
     }
     if job.selectors_must_match
@@ -906,8 +907,7 @@ fn resolve_symbols(
 }
 
 /// The keys of `lang`'s symbols in scope, marking in `matched` the selectors that matched one;
-/// under a range, only the symbols it touched. `None` when the language's symbols cannot be
-/// produced.
+/// `None` when the language's symbols cannot be produced.
 fn symbols_in_scope(
     job: &Job<'_>,
     store: &mut FactStore<'_>,
@@ -917,35 +917,14 @@ fn symbols_in_scope(
 ) -> Option<BTreeSet<crate::syntax::SymbolKey>> {
     let produced = store.ensure(FactKind::Symbols, lang, sink).ok()?;
     let symbols = produced.downcast_ref::<Symbols>()?;
-    let mut keys = selected_keys(job, store, lang, symbols, matched, sink);
-    if let Some(changed) = &job.changed {
-        let untouched: BTreeSet<_> = symbols
-            .symbols
-            .iter()
-            .filter(|symbol| !touched(changed, symbol))
-            .map(crate::syntax::SymbolDef::key)
-            .collect();
-        keys.retain(|key| !untouched.contains(key));
-    }
-    Some(keys)
-}
-
-/// The keys of `symbols` the selectors match, marking in `matched` the selectors that matched
-/// one; every key without selectors.
-fn selected_keys(
-    job: &Job<'_>,
-    store: &mut FactStore<'_>,
-    lang: &Lang,
-    symbols: &Symbols,
-    matched: &mut [bool],
-    sink: &mut dyn EventSink,
-) -> BTreeSet<crate::syntax::SymbolKey> {
     if job.selectors.is_empty() {
-        return symbols
-            .symbols
-            .iter()
-            .map(crate::syntax::SymbolDef::key)
-            .collect();
+        return Some(
+            symbols
+                .symbols
+                .iter()
+                .map(crate::syntax::SymbolDef::key)
+                .collect(),
+        );
     }
     let norm = job
         .selectors
@@ -959,6 +938,33 @@ fn selected_keys(
     let (keys, hits) = select_symbols(&job.selectors, symbols, norm);
     for (seen, hit) in matched.iter_mut().zip(hits) {
         *seen |= hit;
+    }
+    Some(keys)
+}
+
+/// Under a range, `keys` less the symbols of `lang` its changed lines do not touch (ADR-142);
+/// `keys` as they are without a range.
+fn within_range(
+    job: &Job<'_>,
+    store: &mut FactStore<'_>,
+    lang: &Lang,
+    mut keys: BTreeSet<crate::syntax::SymbolKey>,
+    sink: &mut dyn EventSink,
+) -> BTreeSet<crate::syntax::SymbolKey> {
+    let Some(changed) = &job.changed else {
+        return keys;
+    };
+    let Ok(produced) = store.ensure(FactKind::Symbols, lang, sink) else {
+        return keys;
+    };
+    if let Some(symbols) = produced.downcast_ref::<Symbols>() {
+        let untouched: BTreeSet<_> = symbols
+            .symbols
+            .iter()
+            .filter(|symbol| !touched(changed, symbol))
+            .map(crate::syntax::SymbolDef::key)
+            .collect();
+        keys.retain(|key| !untouched.contains(key));
     }
     keys
 }
