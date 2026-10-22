@@ -16,7 +16,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers dev-setup dev-env
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers version dev-setup dev-env
 
 build:
 	$(CARGO) build --workspace
@@ -125,6 +125,11 @@ dist:
 	$(CARGO) $(DIST_BUILD) --release --locked --package cupel-cli --target $(TARGET)
 	@archive="$$(scripts/release.sh package $(DIST_BINARY) $(TARGET) $(DIST_DIR))" && \
 		scripts/release.sh verify "$$archive" && echo "$$archive"
+
+# Writes the release version V (MAJOR.MINOR.PATCH) into every file that names it: the workspace
+# package, the lock file's workspace crates, the npm wrapper's package.json, and the pipx module.
+version:
+	scripts/release.sh version --set $(V)
 
 # The installers under dist/ (ADR-125) against a fake release on a local HTTP server: install.sh,
 # the Homebrew formula, the npm and pipx wrappers, and the cargo-binstall metadata. `make test` runs

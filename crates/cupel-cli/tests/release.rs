@@ -322,6 +322,7 @@ fn release_workflow_pins_every_action_to_a_commit() {
     assert_eq!(
         names,
         vec![
+            "Swatinem/rust-cache",
             "actions/checkout",
             "actions/download-artifact",
             "actions/upload-artifact"
@@ -329,6 +330,32 @@ fn release_workflow_pins_every_action_to_a_commit() {
     );
     let unpinned: Vec<&&str> = actions.iter().filter(|action| !is_pinned(action)).collect();
     assert_eq!(unpinned, Vec::<&&str>::new());
+}
+
+/// The build job restores and saves the build cache per target, between installing the toolchain
+/// and `make dist`, so one target's cache never overwrites another's.
+#[test]
+fn the_build_job_caches_each_targets_build() {
+    let jobs = jobs(&release_workflow());
+    let (_, lines) = jobs
+        .iter()
+        .find(|(name, _)| name == "build")
+        .expect("a `build` job");
+    let position = |wanted: &str| lines.iter().position(|line| line.contains(wanted));
+    let cache = position("uses: Swatinem/rust-cache@");
+    let toolchain = position("rustup toolchain install");
+    let dist = position("make dist");
+    assert!(
+        toolchain < cache && cache < dist && cache.is_some(),
+        "toolchain {toolchain:?}, cache {cache:?}, dist {dist:?}"
+    );
+    assert_eq!(
+        lines[cache.unwrap() + 1..dist.unwrap()]
+            .iter()
+            .filter_map(|line| line.strip_prefix("key: "))
+            .collect::<Vec<_>>(),
+        ["${{ matrix.target }}"]
+    );
 }
 
 /// The pages workflow (ADR-127) holds its actions to the release workflow's rule.
@@ -485,4 +512,166 @@ fn only_its_publish_job_and_the_probe_read_each_secret() {
         .map(|(job, _, secret)| ((*job).to_owned(), (*secret).to_owned()))
         .collect();
     assert_eq!(readers, expected);
+}
+
+/// The files a release's version is written in, relative to the repository root.
+const VERSIONED: [&str; 4] = [
+    "Cargo.toml",
+    "Cargo.lock",
+    "dist/npm/package.json",
+    "dist/pipx/cupel.py",
+];
+
+fn repository() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
+}
+
+/// Each version the files under `root` name the release by, as `(file, version)`: the workspace
+/// package's, each workspace crate's in the lock file, the npm package's, and the pipx module's.
+fn named_versions(root: &Path) -> Vec<(String, String)> {
+    let read = |file: &str| fs::read_to_string(root.join(file)).unwrap();
+    let quoted = |line: &str, prefix: &str| {
+        line.strip_prefix(prefix)
+            .and_then(|rest| rest.split('"').nth(1))
+            .map(str::to_owned)
+    };
+    let mut versions = Vec::new();
+    let manifest = read("Cargo.toml");
+    let package = manifest
+        .split_once("[workspace.package]\n")
+        .expect("a [workspace.package] table")
+        .1;
+    versions.extend(
+        package
+            .lines()
+            .find_map(|line| quoted(line, "version = "))
+            .map(|version| ("Cargo.toml".to_owned(), version)),
+    );
+    let lock = read("Cargo.lock");
+    let mut lines = lock.lines();
+    while let Some(line) = lines.next() {
+        if let Some(name) = quoted(line, "name = ").filter(|name| name.starts_with("cupel-")) {
+            let version = lines.next().and_then(|next| quoted(next, "version = "));
+            versions.push((format!("Cargo.lock {name}"), version.unwrap_or_default()));
+        }
+    }
+    let npm: serde_json::Value = serde_json::from_str(&read("dist/npm/package.json")).unwrap();
+    versions.push((
+        "dist/npm/package.json".to_owned(),
+        npm["version"].as_str().unwrap_or_default().to_owned(),
+    ));
+    versions.extend(
+        read("dist/pipx/cupel.py")
+            .lines()
+            .find_map(|line| quoted(line, "__version__ = "))
+            .map(|version| ("dist/pipx/cupel.py".to_owned(), version)),
+    );
+    versions
+}
+
+/// The workspace, its lock file, and both wrappers name the same release, the crate's.
+#[test]
+fn every_file_that_names_the_release_carries_the_crate_version() {
+    let versions = named_versions(&repository());
+    assert_eq!(versions.len(), 13, "{versions:?}");
+    let different: Vec<&(String, String)> = versions
+        .iter()
+        .filter(|(_, version)| version != VERSION)
+        .collect();
+    assert_eq!(different, Vec::<&(String, String)>::new());
+}
+
+/// A copy of the release script and the versioned files in a directory of their own.
+fn versioned_copy() -> TempDir {
+    let dir = TempDir::new().unwrap();
+    for file in VERSIONED.iter().chain(&["scripts/release.sh"]) {
+        let to = dir.path().join(file);
+        fs::create_dir_all(to.parent().unwrap()).unwrap();
+        fs::copy(repository().join(file), to).unwrap();
+    }
+    dir
+}
+
+fn release_in(dir: &Path, args: &[&str]) -> Output {
+    Command::new("sh")
+        .arg(dir.join("scripts/release.sh"))
+        .args(args)
+        .output()
+        .expect("sh runs scripts/release.sh")
+}
+
+/// `version --set` writes the new version into every versioned file and changes nothing else.
+#[test]
+fn version_set_rewrites_the_version_in_every_file_that_names_it() {
+    let dir = versioned_copy();
+    let output = release_in(dir.path(), &["version", "--set", "9.8.7"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(stdout(&output), "9.8.7\n");
+    let versions = named_versions(dir.path());
+    assert_eq!(versions.len(), 13, "{versions:?}");
+    assert!(
+        versions.iter().all(|(_, version)| version == "9.8.7"),
+        "{versions:?}"
+    );
+    let changed: Vec<String> = VERSIONED
+        .iter()
+        .flat_map(|file| {
+            let before = fs::read_to_string(repository().join(file)).unwrap();
+            let after = fs::read_to_string(dir.path().join(file)).unwrap();
+            assert_eq!(before.lines().count(), after.lines().count(), "{file}");
+            before
+                .lines()
+                .zip(after.lines())
+                .filter(|(was, is)| was != is)
+                .map(|(was, is)| format!("{file}: {}", was.replace(VERSION, "9.8.7") == is))
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    assert_eq!(changed.len(), 13, "{changed:?}");
+    assert!(changed.iter().all(|line| line.ends_with(": true")), "{changed:?}");
+    let shown = release_in(dir.path(), &["version"]);
+    assert_eq!(stdout(&shown), "9.8.7\n");
+}
+
+/// `version --set` takes a plain `MAJOR.MINOR.PATCH` and writes nothing for anything else.
+#[test]
+fn version_set_refuses_what_is_not_a_version() {
+    let dir = versioned_copy();
+    let refused: Vec<(Option<i32>, String)> = ["v1.2.3", "1.2", "1.2.3-rc.1", ""]
+        .iter()
+        .map(|text| {
+            let output = release_in(dir.path(), &["version", "--set", text]);
+            (output.status.code(), stderr(&output))
+        })
+        .collect();
+    let expected: Vec<(Option<i32>, String)> = ["v1.2.3", "1.2", "1.2.3-rc.1", ""]
+        .iter()
+        .map(|text| {
+            (
+                Some(1),
+                format!(
+                    "release.sh: {text:?} is not a version: pass MAJOR.MINOR.PATCH, such as 0.2.0\n"
+                ),
+            )
+        })
+        .collect();
+    assert_eq!(refused, expected);
+    assert!(named_versions(dir.path()).iter().all(|(_, v)| v == VERSION));
+}
+
+/// `make version V=X.Y.Z` is the script's `version --set`, and the README's Makefile table lists it.
+#[test]
+fn make_version_sets_the_version_through_the_release_script() {
+    let output = Command::new("make")
+        .args(["--no-print-directory", "-n", "version", "V=9.8.7"])
+        .current_dir(repository())
+        .output()
+        .expect("make runs");
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(stdout(&output), "scripts/release.sh version --set 9.8.7\n");
+    let readme = fs::read_to_string(repository().join("README.md")).unwrap();
+    assert!(
+        readme.lines().any(|line| line.starts_with("| `make version V=X.Y.Z` |")),
+        "the README's Makefile table lists `make version`"
+    );
 }
