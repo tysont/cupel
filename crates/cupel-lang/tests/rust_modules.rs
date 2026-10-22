@@ -41,6 +41,7 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
     ("src/lib.rs", 11, "account::Account", "src/account.rs", true),
     ("src/lib.rs", 35, "rates", "src/rates.rs", true),
     ("src/lib.rs", 36, "references", "src/references.rs", true),
+    ("src/lib.rs", 38, "table", "src/rate_table.rs", true),
     ("src/main.rs", 1, "ledger::balance", "src/lib.rs", false),
     (
         "src/pricing.rs",
@@ -357,5 +358,31 @@ fn mod_declarations_are_declarations_and_visible_uses_re_exports() {
             kind("src/lib.rs", "child::Other", EdgeKind::ReExport),
             kind("src/lib.rs", "std::fmt", EdgeKind::Import),
         ]
+    );
+}
+
+#[test]
+fn a_path_attribute_names_the_file_a_mod_declaration_loads() {
+    // `#[path]` is relative to the declaring file's directory; serde_json's `io` facade loads
+    // `core.rs` as `imp` when it builds without `std`.
+    let dir = tree(&[
+        ("Cargo.toml", "[package]\nname = \"facade\"\n"),
+        ("src/lib.rs", "mod io;\n"),
+        (
+            "src/io/mod.rs",
+            "#[cfg(not(feature = \"std\"))]\n#[path = \"core.rs\"]\nmod imp;\n",
+        ),
+        ("src/io/core.rs", "pub fn write() {}\n"),
+    ]);
+    let graph: ModuleGraph = produce("rust", dir.path());
+    assert_eq!(
+        edge_rows(&graph),
+        under(
+            ".",
+            &[
+                ("src/io/mod.rs", 3, "imp", "src/io/core.rs", true),
+                ("src/lib.rs", 1, "io", "src/io/mod.rs", true),
+            ]
+        )
     );
 }

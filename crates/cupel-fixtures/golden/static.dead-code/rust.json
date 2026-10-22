@@ -12,7 +12,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 84,
+        "n": 85,
         "unit": "dead_symbols",
         "value": 4.0
       },
@@ -951,7 +951,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 30,
+      "files": 31,
       "languages": [
         "rust"
       ],
@@ -959,7 +959,7 @@
       "roots": [
         "."
       ],
-      "symbols": 84
+      "symbols": 85
     },
     "seed": "<seed>",
     "started": "<timestamp>",

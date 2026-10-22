@@ -54,7 +54,7 @@
             "git": null,
             "id": "<run-id>",
             "scope": {
-              "files": 30,
+              "files": 31,
               "languages": [
                 "rust"
               ],
@@ -62,7 +62,7 @@
               "roots": [
                 "."
               ],
-              "symbols": 84
+              "symbols": 85
             },
             "seed": "<seed>",
             "started": "<timestamp>",
@@ -94,7 +94,7 @@
             },
             "oracle": null,
             "score": {
-              "n": 84,
+              "n": 85,
               "unit": "cyclomatic_max",
               "value": 11.0
             },

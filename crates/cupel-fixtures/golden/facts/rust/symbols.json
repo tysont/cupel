@@ -948,6 +948,28 @@
     },
     {
       "body": {
+        "col": 23,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 2
+      },
+      "display": "rate_table::first",
+      "file": "src/rate_table.rs",
+      "kind": "function",
+      "lang": "rust",
+      "name": "first",
+      "namespace": "rate_table",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 4,
+        "line": 2
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 36,
         "end_col": 2,
         "end_line": 7,

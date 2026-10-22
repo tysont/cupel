@@ -3608,6 +3608,30 @@
       }
     },
     {
+      "sites": [
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "7f4e0e5b535f669b",
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "src/rate_table.rs",
+        "line": 2
+      }
+    },
+    {
       "sites": [],
       "symbol": {
         "col": 1,

@@ -1147,6 +1147,14 @@
       "decisions": [],
       "symbol": {
         "col": 1,
+        "file": "src/rate_table.rs",
+        "line": 2
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 1,
         "file": "src/rates.rs",
         "line": 5
       }

@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 24,
+        "n": 25,
         "unit": "cycles",
         "value": 1.0
       },
@@ -279,7 +279,7 @@
             },
             "symbol": null
           },
-          "value": 13.0
+          "value": 14.0
         },
         {
           "lang": "rust",
@@ -426,7 +426,7 @@
           "value": 3.0
         }
       ],
-      "measured": 24,
+      "measured": 25,
       "metric": "coupling",
       "per": "module",
       "summary": "Afferent plus efferent coupling per module.",

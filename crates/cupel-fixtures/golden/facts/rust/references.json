@@ -7374,6 +7374,51 @@
       }
     },
     {
+      "file": "src/lib.rs",
+      "from": null,
+      "kind": "name",
+      "name": "path",
+      "span": {
+        "col": 3,
+        "end_col": 7,
+        "end_line": 37,
+        "line": 37
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "from": null,
+      "kind": "text",
+      "name": "rs",
+      "span": {
+        "col": 11,
+        "end_col": 24,
+        "end_line": 37,
+        "line": 37
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "src/lib.rs",
+      "from": null,
+      "kind": "name",
+      "name": "table",
+      "span": {
+        "col": 5,
+        "end_col": 10,
+        "end_line": 38,
+        "line": 38
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
       "file": "src/main.rs",
       "from": null,
       "kind": "name",

@@ -18359,6 +18359,77 @@
       }
     },
     {
+      "hash": "sh_44bbd9931fa27021",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "parameters",
+            "span": {
+              "col": 13,
+              "end_col": 15,
+              "end_line": 2,
+              "line": 2
+            }
+          },
+          {
+            "children": [],
+            "label": "->",
+            "span": {
+              "col": 16,
+              "end_col": 18,
+              "end_line": 2,
+              "line": 2
+            }
+          },
+          {
+            "children": [],
+            "label": "primitive_type",
+            "span": {
+              "col": 19,
+              "end_col": 22,
+              "end_line": 2,
+              "line": 2
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [],
+                "label": "$lit",
+                "span": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 3,
+                  "line": 3
+                },
+                "text": "5"
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 23,
+              "end_col": 2,
+              "end_line": 4,
+              "line": 2
+            }
+          }
+        ],
+        "label": "function_item",
+        "span": {
+          "col": 1,
+          "end_col": 2,
+          "end_line": 4,
+          "line": 2
+        }
+      },
+      "symbol": {
+        "col": 1,
+        "file": "src/rate_table.rs",
+        "line": 2
+      }
+    },
+    {
       "hash": "sh_7fe74ca19213f786",
       "root": {
         "children": [

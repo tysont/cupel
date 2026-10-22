@@ -34,3 +34,5 @@ mod deps_layers;
 mod deps_tree;
 mod rates;
 mod references;
+#[path = "rate_table.rs"]
+mod table;

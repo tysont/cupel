@@ -58,6 +58,9 @@ pub struct RawImport {
     pub kind: EdgeKind,
     /// The inline modules the import is written in, outermost first.
     pub scope: Vec<String>,
+    /// The file a module declaration names itself (`@import.path`, Rust's `#[path = "…"]`),
+    /// relative to the declaring file's directory; `None` for the language's default.
+    pub path: Option<String>,
     pub line: u32,
 }
 
@@ -114,10 +117,23 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
                 aliases: aliases(parsed, m),
                 names,
                 scope: path_of(statement),
+                path: m
+                    .node(capture::IMPORT_PATH)
+                    .map(|path| unquote(parsed.text(path)).to_owned()),
                 line: crate::query::one_based(statement.start_position().row),
             })
         })
         .collect();
+    // A statement one pattern matched with its `@import.path` and another without is one
+    // import, the one that names its file.
+    let named: BTreeSet<(u32, String)> = imports
+        .iter()
+        .filter(|import| import.path.is_some())
+        .map(|import| (import.line, import.specifier.clone()))
+        .collect();
+    imports.retain(|import| {
+        import.path.is_some() || !named.contains(&(import.line, import.specifier.clone()))
+    });
     imports.dedup();
     let modules = scopes
         .iter()

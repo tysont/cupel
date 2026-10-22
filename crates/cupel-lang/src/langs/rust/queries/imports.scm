@@ -10,6 +10,17 @@
   name: (identifier) @import.specifier
   !body) @import @import.module
 
+; `#[path = "core.rs"] mod imp;` loads the file the attribute names.
+((attribute_item
+  (attribute
+    (identifier) @_path
+    value: (string_literal) @import.path))
+  .
+  (mod_item
+    name: (identifier) @import.specifier
+    !body) @import @import.module
+  (#eq? @_path "path"))
+
 (extern_crate_declaration
   name: (identifier) @import.specifier) @import
 
