@@ -124,9 +124,13 @@ fn build() -> Build {
     )
 }
 
-/// Waits up to fifteen seconds for `condition`.
+/// Longer than any stall of a loaded machine, a fresh binary's first watcher start on macOS
+/// (8-30 s) included: only a daemon that never answers is waited on this long.
+const HANG: Duration = Duration::from_secs(600);
+
+/// Waits up to `HANG` for `condition`.
 fn eventually(condition: impl Fn() -> bool) -> bool {
-    let deadline = Instant::now() + Duration::from_secs(15);
+    let deadline = Instant::now() + HANG;
     while Instant::now() < deadline {
         if condition() {
             return true;

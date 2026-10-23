@@ -86,7 +86,7 @@ impl Mcp {
     /// Closes stdin and returns the exit code, what stdout still held, and stderr.
     fn close(mut self) -> (i32, Vec<String>, String) {
         self.client.close();
-        let deadline = Instant::now() + Duration::from_secs(60);
+        let deadline = Instant::now() + PATIENCE;
         let status = loop {
             if let Some(status) = self.child.try_wait().unwrap() {
                 break status;
@@ -342,9 +342,9 @@ fn stdout_carries_only_protocol_messages_and_the_serve_envelope_goes_to_stderr()
     assert_eq!(envelope["findings"][0]["evidence"]["requests"], 1);
 }
 
-/// Waits up to thirty seconds for `path` to exist.
+/// Waits up to `PATIENCE` for `path` to exist.
 fn appears(path: &Path) -> bool {
-    let deadline = Instant::now() + Duration::from_secs(30);
+    let deadline = Instant::now() + PATIENCE;
     std::iter::from_fn(|| {
         thread::sleep(Duration::from_millis(20));
         Some(path.exists())
