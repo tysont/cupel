@@ -1,0 +1,39 @@
+# CUPEL_DECISION_146: The package is `cupel-cli` on PyPI, npm, and crates.io; `publish-crates` skips while another project holds a crate name
+
+**Date:** 2026-10-23 · **Status:** accepted · **Phase:** P9.F5
+
+## Context
+
+ADR-128 named the wrappers' packages `cupel` and left two registries blocked by names other projects hold: PyPI's `cupel` (`tolitius/cupel`), and crates.io's `cupel-core` (`ace-coderr/Cupel`, 0.1.1 on 2026-10-23) and `cupel` (`wollax/cupel`, 1.2.0). Its Consequences left the rename to the owner. The owner's ruling: the package name is `cupel-cli` on PyPI, npm, and crates.io; the binary and the command stay `cupel`; each publish job still runs only when its secret exists and skips cleanly otherwise. On 2026-10-23 `cupel-cli` was free on all three (npm and PyPI answered 404 for it, crates.io had no crate of that name), as were the seven other library crate names; npm's `cupel` was also free.
+
+The binary crate is already `cupel-cli`, but it depends on eight workspace library crates (`cupel-core`, `cupel-adapt`, `cupel-checks`, `cupel-lang`, `cupel-plugin`, `cupel-serve`, `cupel-store`, `cupel-mutate`; `cupel-fixtures` is `publish = false`), and crates.io needs every dependency published. Renaming them is the owner's decision, not this step's. The questions:
+
+1. What each registry's package is called, and what command each route runs.
+2. What the flit build needs when the distribution's name is not the module's.
+3. How `publish-crates` avoids failing a release while `cupel-core` belongs to another project, and what the owner can choose to unblock it.
+
+## Options
+
+**npm: `npx cupel-cli`, or `npx -p cupel-cli cupel`.** `npx <package>` runs the package's one `bin` entry when there is exactly one, whatever it is named; `dist/npm/package.json` has one, `cupel`. `npx cupel-cli` is the shorter command and stays right while the package has one executable. A global `npm install -g cupel-cli` puts `cupel` on the `PATH`.
+
+**PyPI: rename the module to `cupel_cli`, or tell flit the module's name.** flit_core looks for a module named after the distribution (`cupel_cli`) unless `[tool.flit.module] name` says otherwise. Renaming the file changes the import name the installer tests load and the wrapper's own name for no user-visible gain; one table in `pyproject.toml` keeps `cupel.py` and its `cupel` console script. `pipx install cupel-cli` puts `cupel` on the `PATH`.
+
+**crates.io, the library crates: a `cupel-cli-` prefix, another prefix, or vendoring.** (a) Prefix the eight library crates `cupel-cli-` (`cupel-cli-core`, …): every name is free today, the binary's name already carries the prefix, and the change is the `[package] name` of eight crates, with `package = "cupel-cli-core"` renames in `[workspace.dependencies]` so no `use` changes. Nine crates appear on crates.io, eight of them not meant to be used alone. (b) Another prefix (for example `tysont-cupel-`): the same mechanics, with names that say whose they are but not that they belong to the CLI. (c) Vendor the libraries into `cupel-cli` (modules, or `include!`d sources): one crate on crates.io and no names to hold, but it ends the workspace's crate boundaries, which the fact model's rules (no language name in `cupel-checks`, no check name in `cupel-lang`) are enforced along, and makes every build of the binary recompile everything. Each option also needs a `version` on every `[workspace.dependencies]` path entry, bumped with every release (ADR-128's Consequences). This step chooses none of them.
+
+**`publish-crates` while a name is taken: fail, skip on a failed dry run, or skip on a name probe.** Failing is what ADR-128 shipped: setting `CARGO_REGISTRY_TOKEN` today fails the release run at `cupel-core`. Skipping when `cargo publish --workspace --dry-run --no-verify` fails was the brief's plan, but a dry run never asks the registry who owns a name: here it fails first on the path-only dependencies ("all dependencies must have a version requirement specified when publishing"), and with versions added it only warns that `cupel-core@0.1.0` already exists on the index (and would say nothing for a version the other project has not published) before failing on `cupel-fixtures`. A skip on any dry-run failure would hide every real packaging error, and a skip on its message would match neither. A probe that asks the crates.io API about each publishable crate (`cargo metadata`'s packages whose `publish` is not `[]`) and calls a name taken when crates.io has a crate of that name whose `repository` is not the workspace's answers the question itself: a 404 is free, a crate whose `repository` is ours is ours (any later release), and any other answer fails the job, since the probe could not tell.
+
+## Decision
+
+1. **npm**: `dist/npm/package.json` `name` is `cupel-cli`; `bin` stays `{"cupel": "bin/cupel.js"}`. The route is `npx cupel-cli`, pending "once the `cupel-cli` package is published to npm".
+2. **PyPI**: `dist/pipx/pyproject.toml` `name` is `cupel-cli`, with `[tool.flit.module] name = "cupel"`; the module stays `cupel.py` and the console script `cupel = "cupel:main"`. The route is `pipx install cupel-cli`, pending "once the `cupel-cli` package is published to PyPI".
+3. **crates.io**: the route stays `cargo install --locked cupel-cli`, pending "once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's". The library crates keep their names; the options above are left to the owner.
+4. **`publish-crates`** (still `needs: secrets`, gated on `CARGO_REGISTRY_TOKEN`) gains a first step, `names`, after the toolchain: for each publishable crate it asks `https://crates.io/api/v1/crates/<name>` (with a User-Agent naming the repository, as crates.io requires), and when any is held by a crate whose `repository` differs from the workspace's, it writes `taken=true`, `::notice title=publish-crates::skipped: crate names held by another project on crates.io: <names>`, and the same line to the step summary, and exits 0. Otherwise it writes `taken=false`. The dry run (`cargo publish --workspace --dry-run --no-verify --locked`) and then `cargo publish --workspace --locked` run only when `steps.names.outputs.taken == 'false'`; either failing fails the run.
+5. **The Homebrew formula, the archive names, `dist/install.sh`, and the binary** are unchanged: `brew install tysont/cupel/cupel`, `cupel-<version>-<target>`, and the `cupel` command.
+
+## Consequences
+
+- With `CARGO_REGISTRY_TOKEN` set and the names as they are, a release run is green, with `publish-crates` showing the skip notice naming `cupel-core`. Once the owner renames the library crates (and adds the dependency versions), the same job dry-runs and publishes with no workflow change; a renamed crate that is still taken is caught by the probe.
+- The probe trusts the `repository` field of the crate already on crates.io. A crate of ours published without `repository` would read as taken, and a stranger's crate claiming our repository would read as ours (its publish would then fail on ownership, failing the run, as a real error should).
+- `npm publish ./dist/npm --dry-run` packs `cupel-cli@<version>`, and `python -m build dist/pipx` writes `cupel_cli-<version>.tar.gz` and `cupel_cli-<version>-py3-none-any.whl`; publishing to npm and PyPI is still not live-tested.
+- A user who ran `pipx install cupel` before this got `tolitius/cupel`; the route now names a package that is Cupel's.
+- The routes' commands change in `describe`, the README's install table, and the text rendering of the CLI description; binaries already released keep naming `npx cupel` and `pipx install cupel` as pending routes, which never told anyone they worked.
