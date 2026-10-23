@@ -1,5 +1,5 @@
-// ABOUTME: Tests for scripts/dogfood.sh, which `make dogfood` runs through: one dogfood at a time across every
-// ABOUTME: checkout on the machine, under a lock file, and none from a working tree that no longer exists.
+// ABOUTME: Tests for scripts/heavy.sh, which `make dogfood` and every external suite run go through: one heavy
+// ABOUTME: command at a time across the machine, under a lock file, and none from a working tree that no longer exists.
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -15,16 +15,16 @@ fn workspace() -> PathBuf {
 }
 
 fn script() -> PathBuf {
-    workspace().join("scripts/dogfood.sh")
+    workspace().join("scripts/heavy.sh")
 }
 
-/// `scripts/dogfood.sh ARGS` in `dir`, locking `lock`.
-fn dogfood(dir: &Path, lock: &Path, args: &[&str]) -> Command {
+/// `scripts/heavy.sh ARGS` in `dir`, locking `lock`.
+fn heavy(dir: &Path, lock: &Path, args: &[&str]) -> Command {
     let mut command = Command::new("sh");
     command
         .arg(script())
         .args(args)
-        .env("CUPEL_DOGFOOD_LOCK", lock)
+        .env("CUPEL_HEAVY_LOCK", lock)
         .current_dir(dir);
     command
 }
@@ -54,7 +54,7 @@ fn the_script_passes_shellcheck() {
         return;
     }
     let output = Command::new("shellcheck")
-        .args(["--shell=sh", "scripts/dogfood.sh"])
+        .args(["--shell=sh", "scripts/heavy.sh"])
         .current_dir(workspace())
         .output()
         .unwrap();
@@ -77,7 +77,7 @@ fn make_dogfood_runs_through_the_script() {
         .expect("a dogfood recipe line that runs check");
     assert_eq!(
         recipe.split_whitespace().take(2).collect::<Vec<_>>(),
-        ["scripts/dogfood.sh", "$(CARGO)"]
+        ["scripts/heavy.sh", "$(CARGO)"]
     );
 }
 
@@ -85,7 +85,7 @@ fn make_dogfood_runs_through_the_script() {
 fn the_command_runs_with_the_lock_held_and_its_exit_code_is_returned() {
     let repo = repository();
     let lock = repo.path().join("lock");
-    let output: Output = dogfood(repo.path(), &lock, &["sh", "-c", "echo graded; exit 3"])
+    let output: Output = heavy(repo.path(), &lock, &["sh", "-c", "echo graded; exit 3"])
         .output()
         .unwrap();
     assert_eq!(output.status.code(), Some(3));
@@ -94,7 +94,7 @@ fn the_command_runs_with_the_lock_held_and_its_exit_code_is_returned() {
 }
 
 #[test]
-fn a_second_dogfood_waits_until_the_first_releases_the_lock() {
+fn a_second_command_waits_until_the_first_releases_the_lock() {
     let repo = repository();
     let lock = repo.path().join("lock");
     let log = repo.path().join("log");
@@ -103,11 +103,11 @@ fn a_second_dogfood_waits_until_the_first_releases_the_lock() {
         "echo start $1 >> {log}; sleep 1; echo end $1 >> {log}",
         log = log.display()
     );
-    let mut first = dogfood(repo.path(), &lock, &["sh", "-c", &body, "sh", "first"])
+    let mut first = heavy(repo.path(), &lock, &["sh", "-c", &body, "sh", "first"])
         .spawn()
         .unwrap();
     std::thread::sleep(Duration::from_millis(300));
-    let second = dogfood(repo.path(), &lock, &["sh", "-c", &body, "sh", "second"])
+    let second = heavy(repo.path(), &lock, &["sh", "-c", &body, "sh", "second"])
         .output()
         .unwrap();
     assert!(first.wait().unwrap().success());
@@ -124,7 +124,7 @@ fn a_second_dogfood_waits_until_the_first_releases_the_lock() {
 }
 
 #[test]
-fn a_dogfood_from_a_deleted_working_tree_refuses_to_start() {
+fn a_command_from_a_deleted_working_tree_refuses_to_start() {
     let repo = repository();
     let lock = tempfile::tempdir().unwrap();
     let gone = repo.path().join("worktree");
@@ -138,7 +138,7 @@ fn a_dogfood_from_a_deleted_working_tree_refuses_to_start() {
             gone.display(),
             script().display()
         ))
-        .env("CUPEL_DOGFOOD_LOCK", lock.path().join("lock"))
+        .env("CUPEL_HEAVY_LOCK", lock.path().join("lock"))
         .current_dir(&gone)
         .output()
         .unwrap();
@@ -147,6 +147,6 @@ fn a_dogfood_from_a_deleted_working_tree_refuses_to_start() {
     // The shell that lost its directory complains on its own line first.
     assert_eq!(
         text(&output.stderr).lines().last(),
-        Some("dogfood.sh: the working tree this dogfood was started from no longer exists")
+        Some("heavy.sh: the working tree this command was started from no longer exists")
     );
 }
