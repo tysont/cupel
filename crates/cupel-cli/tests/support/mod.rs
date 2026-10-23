@@ -395,6 +395,20 @@ pub fn plugin(dir: &Path, name: &str, manifest: &Value) {
     let path = dir.join(name);
     fs::write(&path, body).unwrap();
     fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+    warm(&path);
+}
+
+/// Runs the new executable at `path` once with an argument no plugin answers, so the operating
+/// system's check of a file's first execution (seconds on a loaded macOS) is behind it before
+/// Cupel's plugin time limits apply to it (ADR-145).
+#[cfg(unix)]
+pub fn warm(path: &Path) {
+    let _ = std::process::Command::new(path)
+        .arg("warm")
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status();
 }
 
 /// The tools `cupel serve --mcp` lists, asked over its stdin (ADR-121).
