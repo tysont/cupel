@@ -15,6 +15,14 @@ expression: pretty(&schema)
         "$ref": "#/$defs/DynamicAccess"
       }
     },
+    "imports": {
+      "description": "Every import edge of the same files, resolved as `ModuleGraph` resolves them, so an\nimporter outside a narrowed scope counts (ADR-144); empty when the producer records none.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ImportEdge"
+      },
+      "x-cupel-optional": true
+    },
     "references": {
       "type": "array",
       "items": {
@@ -76,6 +84,145 @@ expression: pretty(&schema)
           "description": "A lookup by a run-time name in a module or namespace, or code evaluated from text:\nreaches any symbol.",
           "type": "string",
           "const": "names"
+        }
+      ]
+    },
+    "EdgeKind": {
+      "description": "What an import statement does with the module it names.",
+      "oneOf": [
+        {
+          "description": "Uses the module (`use`, `import`, `require`).",
+          "type": "string",
+          "const": "import"
+        },
+        {
+          "description": "Declares the module as a child of the importing one (Rust `mod a;`): structure, not use.",
+          "type": "string",
+          "const": "declaration"
+        },
+        {
+          "description": "Imports names in order to export them again (Rust `pub use`, `export … from`, a Python\nimport of names listed in `__all__`).",
+          "type": "string",
+          "const": "re-export"
+        }
+      ]
+    },
+    "ImportAlias": {
+      "description": "A name an import statement binds under another local name.",
+      "type": "object",
+      "properties": {
+        "local": {
+          "description": "The name the importing file uses.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name as the module spells it.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "local",
+        "name"
+      ]
+    },
+    "ImportEdge": {
+      "type": "object",
+      "properties": {
+        "aliases": {
+          "description": "Each name of `names` the statement binds under another local name (`import { a as b }`,\na default import's local name, Python's `from x import a as b`); empty when it binds\nevery name as itself (ADR-141).",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ImportAlias"
+          },
+          "x-cupel-optional": true
+        },
+        "edge_kind": {
+          "description": "What the statement does with the module (ADR-068).",
+          "$ref": "#/$defs/EdgeKind"
+        },
+        "from": {
+          "description": "The importing file.",
+          "type": "string"
+        },
+        "line": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "names": {
+          "description": "The names the statement imports from its target, as written (not a local alias); empty\nwhen it imports the module whole or the language's import names nothing (ADR-133).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-cupel-optional": true
+        },
+        "relative": {
+          "description": "True for path-relative imports such as `./b`.",
+          "type": "boolean"
+        },
+        "specifier": {
+          "description": "The import as written.",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/ImportTarget"
+        }
+      },
+      "required": [
+        "edge_kind",
+        "from",
+        "line",
+        "relative",
+        "specifier",
+        "target"
+      ]
+    },
+    "ImportTarget": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "file"
+            },
+            "path": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "path"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "external"
+            },
+            "package": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "package"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "unresolved"
+            }
+          },
+          "required": [
+            "kind"
+          ]
         }
       ]
     },

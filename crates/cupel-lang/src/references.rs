@@ -1,5 +1,5 @@
 // ABOUTME: The `References` producer: the names, members, strings, and attributes that may name a symbol, from
-// ABOUTME: references.scm over every file of the language, resolved in their file or through its imports (ADR-135).
+// ABOUTME: references.scm over every file of the language, resolved through its imports, with those edges (ADR-135, ADR-144).
 //!
 //! # `references.scm`
 //!
@@ -152,7 +152,7 @@ struct FileReferences {
 }
 
 /// Every file's references, each plain name its file does not define resolved through the
-/// file's imports.
+/// file's imports, and every file's import edges (ADR-144).
 fn resolve(parts: &[FileReferences], graph: &ModuleGraph) -> References {
     let by_file: HashMap<&str, &FileReferences> = parts
         .iter()
@@ -189,6 +189,11 @@ fn resolve(parts: &[FileReferences], graph: &ModuleGraph) -> References {
         }
         fact.dynamic.extend(part.dynamic.iter().cloned());
     }
+    fact.imports = graph
+        .roots
+        .iter()
+        .flat_map(|root| root.edges.iter().cloned())
+        .collect();
     fact
 }
 

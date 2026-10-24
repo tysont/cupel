@@ -2,6 +2,7 @@
 // ABOUTME: streaming order, refusals, malformed requests, stop, stale sockets, concurrency, hang-ups, the watcher.
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex, mpsc};
 use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
@@ -14,17 +15,40 @@ use cupel_serve::{
 };
 use tempfile::TempDir;
 
+/// Longer than any stall of a loaded machine: a wait this long is one for something that never
+/// happens.
+const HANG: Duration = Duration::from_secs(600);
+
+/// Whether `condition` holds within `HANG`, polled every 20 ms.
+fn within_hang(condition: impl Fn() -> bool) -> bool {
+    let patience = Cancellation::with_deadline(Instant::now() + HANG);
+    let mut met = condition();
+    while !met && patience.wait(Duration::from_millis(20)) {
+        met = condition();
+    }
+    met
+}
+
 /// A handler scripted by the invocation's first argument, recording each run's stdout when it
-/// finishes and every changed path the watcher hands it.
+/// finishes and every changed path the watcher hands it, and counting the runs it has begun.
 #[derive(Default)]
 struct Script {
     finished: Mutex<Vec<String>>,
     changed: Mutex<Vec<PathBuf>>,
+    begun: AtomicUsize,
+    /// Set by a client once the first line of a `lines` run reached it.
+    streamed: AtomicBool,
+    /// The `gather` runs in flight.
+    gathered: AtomicUsize,
 }
 
 impl Script {
     fn finished(&self) -> Vec<String> {
         self.finished.lock().unwrap().clone()
+    }
+
+    fn begun(&self) -> usize {
+        self.begun.load(Ordering::SeqCst)
     }
 }
 
@@ -36,19 +60,30 @@ impl Handler for Script {
         cancel: Cancellation,
     ) -> Done {
         let args = invocation.args;
+        self.begun.fetch_add(1, Ordering::SeqCst);
         let stdout = match args[0].as_str() {
+            // The run goes on past its first line only once the client has it, and says whether
+            // the client had it while the run was still going.
             "lines" => {
-                for line in 0..3 {
+                writeln!(stderr, "line 0").unwrap();
+                let streamed = within_hang(|| self.streamed.load(Ordering::SeqCst));
+                for line in 1..3 {
                     writeln!(stderr, "line {line}").unwrap();
-                    thread::sleep(Duration::from_millis(100));
                 }
-                "out".to_owned()
+                if streamed { "out" } else { "held back" }.to_owned()
             }
-            "sleep" => {
-                thread::sleep(Duration::from_millis(args[1].parse().unwrap()));
-                args[2].clone()
+            // Answers its id once `args[1]` gather runs are in flight at once, or "alone".
+            "gather" => {
+                let wanted: usize = args[1].parse().unwrap();
+                self.gathered.fetch_add(1, Ordering::SeqCst);
+                let met = within_hang(|| self.gathered.load(Ordering::SeqCst) >= wanted);
+                if met {
+                    args[2].clone()
+                } else {
+                    "alone".to_owned()
+                }
             }
-            "wait" if cancel.wait(Duration::from_secs(30)) => "finished".to_owned(),
+            "wait" if cancel.wait(HANG) => "finished".to_owned(),
             "wait" => "cancelled".to_owned(),
             _ => args.join(" "),
         };
@@ -119,7 +154,7 @@ impl Running {
         // Generous: on macOS a freshly built binary's first FSEvents registration (the watcher's
         // `FSEventStreamStart`) has taken 8-14 s here, and a wait cut short leaves it to start over
         // on the next run; a built binary that has registered once is ready in well under a second.
-        started.recv_timeout(Duration::from_secs(60)).unwrap();
+        started.recv_timeout(HANG).unwrap();
         Self {
             root: root.to_path_buf(),
             socket,
@@ -189,17 +224,6 @@ fn stdout(reply: Result<Reply, ClientError>) -> String {
     }
 }
 
-/// Polls `condition` every 20 ms, up to 500 times.
-fn eventually(condition: impl Fn() -> bool) {
-    let _ = (0..500).find(|_| {
-        let met = condition();
-        if !met {
-            thread::sleep(Duration::from_millis(20));
-        }
-        met
-    });
-}
-
 #[test]
 fn the_daemon_says_what_it_is_and_runs_requests() {
     let daemon = Running::new(false);
@@ -221,26 +245,21 @@ fn the_daemon_says_what_it_is_and_runs_requests() {
 #[test]
 fn stderr_reaches_the_client_in_order_while_the_run_goes_on() {
     let daemon = Running::new(false);
-    let started = Instant::now();
     let mut lines = Vec::new();
     let reply = request(&daemon.socket, &run_request(&["lines"]), &mut |text| {
-        lines.push((text.to_owned(), started.elapsed()));
+        lines.push(text.to_owned());
+        daemon.script.streamed.store(true, Ordering::SeqCst);
     });
-    let finished = started.elapsed();
     let Ok(Reply::Done(done)) = reply else {
         panic!("not done: {reply:?}")
     };
-    let texts: Vec<&str> = lines.iter().map(|(text, _)| text.as_str()).collect();
-    assert_eq!(texts, ["line 0\n", "line 1\n", "line 2\n"]);
+    assert_eq!(lines, ["line 0\n", "line 1\n", "line 2\n"]);
+    // "out": the run saw the client holding its first line before it wrote the second.
     assert_eq!(
         (done.stdout.as_str(), done.stderr.as_str()),
         ("out", "rest\n")
     );
-    let ahead = finished.saturating_sub(lines[0].1);
-    assert!(
-        ahead >= Duration::from_millis(150),
-        "the first line arrived {ahead:?} before the end, not as it was written"
-    );
+    assert_eq!(daemon.script.finished(), ["out"]);
 }
 
 #[test]
@@ -366,23 +385,19 @@ fn a_second_daemon_on_a_live_socket_is_refused_with_the_first_one_s_status() {
 #[test]
 fn concurrent_clients_run_at_once_and_each_gets_its_own_answer() {
     let daemon = Running::new(false);
-    let started = Instant::now();
+    // Each run answers its id only once all four are in flight together.
     let clients: Vec<JoinHandle<String>> = (0..4)
         .map(|client| {
             let socket = daemon.socket.clone();
             thread::spawn(move || {
                 let id = client.to_string();
-                stdout(ask(&socket, &run_request(&["sleep", "400", &id])))
+                stdout(ask(&socket, &run_request(&["gather", "4", &id])))
             })
         })
         .collect();
     let answers: Vec<String> = clients.into_iter().map(|c| c.join().unwrap()).collect();
     assert_eq!(answers, ["0", "1", "2", "3"]);
-    assert!(
-        started.elapsed() < Duration::from_millis(1200),
-        "four 400 ms runs took {:?}: they ran one at a time",
-        started.elapsed()
-    );
+    assert_eq!(daemon.script.gathered.load(Ordering::SeqCst), 4);
     assert_eq!(daemon.status().served, 4);
 }
 
@@ -391,9 +406,9 @@ fn a_client_that_hangs_up_cancels_its_run() {
     let daemon = Running::new(false);
     let mut stream = Connection::connect(&daemon.socket).unwrap();
     cupel_serve::write_message(&mut stream, &run_request(&["wait"])).unwrap();
-    thread::sleep(Duration::from_millis(100));
+    assert!(within_hang(|| daemon.script.begun() == 1), "the run began");
     drop(stream);
-    eventually(|| !daemon.script.finished().is_empty());
+    within_hang(|| !daemon.script.finished().is_empty());
     assert_eq!(daemon.script.finished(), ["cancelled"]);
 }
 
@@ -402,8 +417,7 @@ fn stopping_cancels_runs_in_flight_and_they_still_answer() {
     let daemon = Running::new(false);
     let socket = daemon.socket.clone();
     let waiting = thread::spawn(move || stdout(ask(&socket, &run_request(&["wait"]))));
-    // The handler gives no sign that the run started; give it time to.
-    thread::sleep(Duration::from_millis(300));
+    assert!(within_hang(|| daemon.script.begun() == 1), "the run began");
     daemon.ask(&Request::new(build(), Body::Stop)).unwrap();
     assert_eq!(waiting.join().unwrap(), "cancelled");
     assert_eq!(daemon.finished().unwrap().requests, 1);
@@ -412,10 +426,12 @@ fn stopping_cancels_runs_in_flight_and_they_still_answer() {
 #[test]
 fn removing_the_socket_file_ends_the_daemon() {
     let daemon = Running::new(false);
-    std::fs::remove_file(&daemon.socket).unwrap();
-    let started = Instant::now();
+    let socket = daemon.socket.clone();
+    std::fs::remove_file(&socket).unwrap();
+    // Nothing else ends this daemon: `finished` returns only because it noticed, and it leaves
+    // no socket behind.
     assert_eq!(daemon.finished().unwrap().requests, 0);
-    assert!(started.elapsed() < Duration::from_secs(5));
+    assert!(!socket.exists());
 }
 
 #[test]
@@ -423,7 +439,7 @@ fn the_watcher_hands_changed_files_to_the_handler() {
     let daemon = Running::new(true);
     let file = daemon.root.join("a.rs");
     // The watcher may start a moment after the daemon answers; write until it reports.
-    eventually(|| {
+    within_hang(|| {
         std::fs::write(&file, "fn a() {}\n").unwrap();
         thread::sleep(Duration::from_millis(100));
         daemon.script.changed.lock().unwrap().contains(&file)

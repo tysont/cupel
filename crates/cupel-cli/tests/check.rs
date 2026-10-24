@@ -283,3 +283,84 @@ fn scope_exclude_keeps_nested_projects_out_of_files_roots_languages_and_ranges()
     assert_eq!(changed["run"]["scope"]["files"], json!(0), "{changed:#}");
     assert_eq!(changed["run"]["scope"]["languages"], json!([]));
 }
+
+/// A Rust function long enough for `static.clones` to compare, named `name`.
+fn tally(name: &str) -> String {
+    format!(
+        "pub fn {name}(items: &[i64], limit: i64) -> i64 {{\n    let mut sum = 0;\n    for item in items {{\n        if *item > limit {{\n            sum += item * 2;\n        }} else if *item < 0 {{\n            sum -= item;\n        }} else {{\n            sum += item;\n        }}\n    }}\n    if sum > 1000 {{ sum / 2 }} else {{ sum }}\n}}\n"
+    )
+}
+
+const SHORT: &str = "pub fn short(a: i64) -> i64 {\n    a + 1\n}\n";
+
+/// The clone groups a `--changed` run of `static.clones` reports, as each group's sorted
+/// member names.
+fn changed_clones(repo: &Repo) -> Vec<Vec<String>> {
+    let outcome = repo.run(&["check", "--only", "static.clones", "--changed"]);
+    let envelope = outcome.envelope();
+    envelope["findings"]
+        .as_array()
+        .expect("findings")
+        .iter()
+        .map(|finding| {
+            let evidence = &finding["evidence"];
+            let members: Vec<&Value> = match evidence["members"].as_array() {
+                Some(members) => members.iter().collect(),
+                None => vec![&evidence["left"], &evidence["right"]],
+            };
+            let mut names: Vec<String> = members
+                .iter()
+                .map(|member| {
+                    let symbol = member["symbol"].as_str().expect("a symbol");
+                    symbol.rsplit("::").next().unwrap_or(symbol).to_owned()
+                })
+                .collect();
+            names.sort();
+            names
+        })
+        .collect()
+}
+
+#[test]
+fn a_range_reports_a_clone_group_only_when_it_touched_a_member() {
+    let repo = Repo::new();
+    repo.write(".gitignore", ".cupel/\n");
+    let base = format!("{}\n{}\n{SHORT}", tally("first"), tally("second"));
+    repo.write("src/lib.rs", &base);
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
+        eprintln!("SKIPPED: git not installed");
+        return;
+    }
+    assert!(repo.git(&["add", "--all"]));
+    assert!(repo.git(&["commit", "--quiet", "-m", "two copies"]));
+    assert!(repo.git(&["checkout", "--quiet", "-b", "work"]));
+
+    // An edit to `short` leaves the pair that existed at the base untouched.
+    repo.write("src/lib.rs", &base.replace("a + 1", "a + 2"));
+    assert_eq!(changed_clones(&repo), Vec::<Vec<String>>::new());
+    let tree = repo.run(&["check", "--only", "static.clones"]).envelope();
+    assert_eq!(tree["findings"].as_array().map(Vec::len), Some(1), "{tree}");
+
+    // A third copy is new: its group is reported, with the members it copies.
+    repo.write(
+        "src/lib.rs",
+        &format!("{}\n{}", base.replace("a + 1", "a + 2"), tally("third")),
+    );
+    assert_eq!(
+        changed_clones(&repo),
+        [vec![
+            "first".to_owned(),
+            "second".to_owned(),
+            "third".to_owned()
+        ]]
+    );
+
+    // An edit inside `first` touches the pair that existed at the base.
+    let edited = base.replacen("sum / 2", "sum / 3", 1);
+    assert_ne!(edited, base);
+    repo.write("src/lib.rs", &edited);
+    assert_eq!(
+        changed_clones(&repo),
+        [vec!["first".to_owned(), "second".to_owned()]]
+    );
+}

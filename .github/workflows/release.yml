@@ -63,6 +63,11 @@ jobs:
         run: |
           rustup toolchain install
           rustup target add ${{ matrix.target }}
+      # The build directory and cargo's registry, restored and saved per target. GitHub scopes a cache to the
+      # ref that saved it, so a tag run restores what a run on `main` (a `workflow_dispatch` dry run) saved.
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: ${{ matrix.target }}
       - name: Install zig 0.16.0 and cargo-zigbuild 0.23.4
         if: matrix.zig
         run: |

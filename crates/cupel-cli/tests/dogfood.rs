@@ -39,7 +39,7 @@ fn dogfood(vars: &[&str]) -> String {
 fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
     assert_eq!(
         dogfood(&[]),
-        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
+        "scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
          --budget 30m --gate --no-install --skip tests.flaky --skip conc.race --format text\n"
     );
 }
@@ -53,7 +53,7 @@ fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
         dogfood(&["DOGFOOD_SCOPE=tree"]),
         "cargo run --quiet --package cupel-cli -- baseline import .cupel/baseline.json --write \
          --format text >/dev/null\n\
-         scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --budget 30m \
+         scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --depth deep --budget 30m \
          --gate --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
     );
 }
@@ -63,14 +63,14 @@ fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
 fn an_empty_dogfood_budget_runs_the_full_deep_set() {
     assert_eq!(
         dogfood(&["DOGFOOD_BUDGET="]),
-        "scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
+        "scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
          --gate --no-install --skip tests.flaky --skip conc.race --format text\n"
     );
     assert_eq!(
         dogfood(&["DOGFOOD_SCOPE=tree", "DOGFOOD_BUDGET="]),
         "cargo run --quiet --package cupel-cli -- baseline import .cupel/baseline.json --write \
          --format text >/dev/null\n\
-         scripts/dogfood.sh cargo run --quiet --package cupel-cli -- check --depth deep --gate \
+         scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --depth deep --gate \
          --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
     );
 }

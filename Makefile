@@ -16,7 +16,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers windows-check windows-test dev-setup dev-env
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers version windows-check windows-test dev-setup dev-env
 
 build:
 	$(CARGO) build --workspace
@@ -90,9 +90,10 @@ DOGFOOD_BUDGET ?= 30m
 # `tests.mutation`: mutating the whole tree is thousands of mutants; the changed gate mutates
 # every function of every changed file.
 # `--no-install`: grading Cupel never asks to install a tool, even from a terminal (ADR-081).
-# scripts/dogfood.sh holds a machine-wide lock while the gate runs, so dogfoods from every checkout
-# on the machine run one at a time (the mutation engine's slots default to half the cores, at most
-# four), and it refuses to start from a working tree that was deleted under the invoking shell.
+# scripts/heavy.sh holds the machine-wide lock every heavy command takes while the gate runs, so
+# dogfoods from every checkout on the machine, and the external test suites run beside them, run one
+# at a time (the mutation engine's slots default to half the cores, at most four); it refuses to
+# start from a working tree that was deleted under the invoking shell.
 # The tree gate's `base` rules compare with the committed baseline, `.cupel/baseline.json`, a
 # tree run on `main` (ADR-140); it is imported first so a fresh store (a CI runner's, or one just
 # deleted) has the reference. `make baseline` refreshes it from the last tree run here.
@@ -101,7 +102,7 @@ BASELINE = .cupel/baseline.json
 
 dogfood:
 	$(if $(filter tree,$(DOGFOOD_SCOPE)),$(CUPEL) baseline import $(BASELINE) --write --format text >/dev/null)
-	scripts/dogfood.sh $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep $(if $(DOGFOOD_BUDGET),--budget $(DOGFOOD_BUDGET) )--gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
+	scripts/heavy.sh $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep $(if $(DOGFOOD_BUDGET),--budget $(DOGFOOD_BUDGET) )--gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
 
 # After a green `make dogfood DOGFOOD_SCOPE=tree`: the store's baseline becomes that run and is
 # exported to the committed file, so the ratchets move with the commit that lowered them.
@@ -125,6 +126,11 @@ dist:
 	$(CARGO) $(DIST_BUILD) --release --locked --package cupel-cli --target $(TARGET)
 	@archive="$$(scripts/release.sh package $(DIST_BINARY) $(TARGET) $(DIST_DIR))" && \
 		scripts/release.sh verify "$$archive" && echo "$$archive"
+
+# Writes the release version V (MAJOR.MINOR.PATCH) into every file that names it: the workspace
+# package, the lock file's workspace crates, the npm wrapper's package.json, and the pipx module.
+version:
+	scripts/release.sh version --set $(V)
 
 # The installers under dist/ (ADR-125) against a fake release on a local HTTP server: install.sh,
 # the Homebrew formula, the npm and pipx wrappers, and the cargo-binstall metadata. `make test` runs
