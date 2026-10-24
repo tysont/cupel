@@ -442,7 +442,6 @@ pub fn listed_tools() -> Vec<Value> {
         .clone()
 }
 
-/// The repository's root.
 /// Longer than any stall of a loaded machine, a fresh binary's first watcher start on macOS
 /// (8-30 s) included: only something that never happens is waited on this long (ADR-145).
 pub const HANG: Duration = Duration::from_secs(600);
@@ -459,6 +458,7 @@ pub fn eventually(condition: impl Fn() -> bool) -> bool {
     false
 }
 
+/// The repository's root.
 pub fn workspace() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../..")
