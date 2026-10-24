@@ -15,6 +15,15 @@ fail() {
 git rev-parse --show-toplevel >/dev/null 2>&1 ||
 	fail "the working tree this command was started from no longer exists"
 
+# A heavy command that runs out of disk corrupts what it was building (a coverage build, a mutant
+# slot, a clone's build) and takes the machine's other work with it. A fresh checkout's build is 15 to
+# 30 GB and a coverage run doubles it, so the floor is 40 GB of free space on the working tree's
+# volume; CUPEL_HEAVY_MIN_FREE_GB moves it (0 turns the check off).
+min_free_gb=${CUPEL_HEAVY_MIN_FREE_GB:-40}
+free_gb=$(($(df -Pk . | awk 'NR == 2 { print $4 }') / 1048576))
+[ "$free_gb" -ge "$min_free_gb" ] ||
+	fail "$free_gb GB free on this volume, below the $min_free_gb GB a heavy command needs; run \`make reclaim\` in idle checkouts, or remove merged worktrees"
+
 # One lock for the machine: a tree dogfood grades a whole tree and builds mutants in slots that each
 # hold a build of the workspace; an external suite run for the dogfood of another project is as heavy.
 # Two at once starve each other, so every heavy command on the machine takes this lock. (`make check`

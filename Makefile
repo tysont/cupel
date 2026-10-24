@@ -16,7 +16,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers version windows-check windows-test dev-setup dev-env
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline reclaim parity install dist installers version windows-check windows-test dev-setup dev-env
 
 build:
 	$(CARGO) build --workspace
@@ -113,6 +113,16 @@ baseline:
 
 install:
 	$(CARGO) install --path crates/cupel-cli
+
+# The build outputs a checkout regenerates on demand: the coverage build (`target/cupel-llvm-cov`, a
+# second build of the workspace, 14 to 18 GB), the incremental caches (5 to 14 GB after a day of
+# edits), and the suite cache (`.cupel/cache`, the coverage artifacts of each tree state). A worktree
+# that keeps them is 30 to 50 GB; `scripts/heavy.sh` refuses to start below 40 GB free. The compiled
+# dependencies, the fact store, the runs, and the baseline stay. Run it after a dogfood and before a
+# branch is handed over; the next build or dogfood rebuilds what it needs.
+reclaim:
+	rm -rf target/cupel-llvm-cov target/debug/incremental target/release/incremental .cupel/cache
+	@df -Ph . | awk 'NR == 2 { print "reclaim: " $$4 " free on this volume" }'
 
 # A release archive (ADR-124): builds the stripped release binary for TARGET (the host by default)
 # and packages it with LICENSE and README.md as target/dist/cupel-<version>-<TARGET>.tar.gz (.zip

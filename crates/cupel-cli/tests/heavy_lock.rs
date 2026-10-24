@@ -24,6 +24,7 @@ fn heavy(dir: &Path, lock: &Path, args: &[&str]) -> Command {
         .args(args)
         .env("CUPEL_HEAVY_LOCK", lock)
         .env("CUPEL_HEAVY_PRIORITY", "default")
+        .env("CUPEL_HEAVY_MIN_FREE_GB", "0")
         .current_dir(dir);
     command
 }
@@ -194,6 +195,27 @@ fn a_prioritized_command_takes_the_lock_before_a_longer_waiting_default_one() {
         fs::read_to_string(&log).unwrap(),
         "start holding\nend holding\nstart first\nend first\nstart default\nend default\n"
     );
+}
+
+/// A heavy command that runs out of disk corrupts what it was building and takes the machine's other
+/// work with it, so the script refuses to start one below a floor of free space (40 GB by default;
+/// `CUPEL_HEAVY_MIN_FREE_GB` moves it) and says what to run.
+#[test]
+fn a_command_refuses_to_start_below_the_free_space_floor() {
+    let repo = repository();
+    let lock = repo.path().join("lock");
+    let output = heavy(repo.path(), &lock, &["sh", "-c", "echo ran"])
+        .env("CUPEL_HEAVY_MIN_FREE_GB", "999999")
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(1));
+    assert_eq!(text(&output.stdout), "");
+    let stderr = text(&output.stderr);
+    assert!(
+        stderr.contains("GB free") && stderr.contains("make reclaim"),
+        "the refusal names the floor and the remedy: {stderr}"
+    );
+    assert!(!lock.exists(), "no lock is taken");
 }
 
 #[test]
