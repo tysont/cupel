@@ -1,5 +1,5 @@
 {
-  "name": "cupel",
+  "name": "cupel-cli",
   "version": "0.1.0",
   "description": "Verification suite that grades what a coding agent produced. Runs the cupel release binary for this platform.",
   "license": "BSD-3-Clause",
