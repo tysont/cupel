@@ -9,7 +9,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 
 use serde_json::{Value, json};
-use support::{cupel, manifest, plugin, run_with};
+use support::{cupel, manifest, plugin, run_with, warm};
 
 /// A Python repository whose `cupel.toml` holds `config`.
 fn repository(config: &str) -> tempfile::TempDir {
@@ -129,6 +129,7 @@ fn a_plugin_that_cannot_describe_itself_is_a_usage_error_naming_the_fix() {
     let broken = dir.path().join("broken.sh");
     fs::write(&broken, "#!/bin/sh\necho 'cannot start' >&2\nexit 3\n").unwrap();
     fs::set_permissions(&broken, fs::Permissions::from_mode(0o755)).unwrap();
+    warm(&broken);
     let out = cupel_in(dir.path(), &["check"]);
     assert_eq!(out.code, 2, "{}", out.stdout);
     let finding = out.finding();
@@ -143,6 +144,7 @@ fn a_plugin_that_cannot_describe_itself_is_a_usage_error_naming_the_fix() {
 
     let bin = tempfile::tempdir().unwrap();
     fs::copy(&broken, bin.path().join("cupel-check-broken")).unwrap();
+    warm(&bin.path().join("cupel-check-broken"));
     let clean = repository("");
     let path = format!(
         "{}:{}",

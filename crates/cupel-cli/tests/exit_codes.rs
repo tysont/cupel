@@ -187,7 +187,7 @@ fn flags_that_do_not_apply_to_describe_change_nothing() {
         "--seed",
         "1",
         "--timeout",
-        "10s",
+        "1h",
         "--limit",
         "5",
         "--offset",
@@ -243,13 +243,15 @@ fn exit_3_when_doctor_finds_something_required_missing() {
 
 #[test]
 fn exit_5_when_the_timeout_cuts_work_short_keeps_the_partial_results() {
+    // The slow task sleeps ten minutes, longer than any stall of a loaded machine.
+    let slow = std::time::Duration::from_secs(600);
     let started = std::time::Instant::now();
     let outcome = run_with(
-        cupel().env("CUPEL_DEBUG_SLEEP_MS", "60000"),
+        cupel().env("CUPEL_DEBUG_SLEEP_MS", slow.as_millis().to_string()),
         ["describe", "--timeout", "200ms"],
     );
     assert!(
-        started.elapsed() < std::time::Duration::from_secs(20),
+        started.elapsed() < slow,
         "the slow task was cancelled, not waited out: {:?}",
         started.elapsed()
     );

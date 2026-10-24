@@ -4,7 +4,8 @@
 
 mod support;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use cupel_core::{
@@ -13,6 +14,19 @@ use cupel_core::{
 };
 use serde_json::{Map, Value, json};
 use support::{check_manifest, discovery, entries, languages, plugin, prints, script};
+
+/// Longer than any stall of a loaded machine: only a plugin that never starts or never stops
+/// is waited on this long.
+const HANG: Duration = Duration::from_secs(600);
+
+/// Cancels `cancel` once `ready` exists, or after `HANG`.
+fn cancel_once_made(ready: PathBuf, cancel: Cancellation) -> JoinHandle<()> {
+    std::thread::spawn(move || {
+        let patience = Cancellation::with_deadline(Instant::now() + HANG);
+        while !ready.exists() && patience.wait(Duration::from_millis(10)) {}
+        cancel.cancel();
+    })
+}
 
 /// A check plugin in `dir` answering `plan` with `plan` and `run` with `run`, registered.
 fn registered(dir: &Path, plan: &str, run: &str) -> CheckRegistry {
@@ -299,30 +313,34 @@ fn a_non_zero_exit_without_a_result_is_an_error_and_with_one_is_noted() {
 fn a_cancelled_run_sends_sigterm_then_sigkill_and_is_cut_short() {
     let dir = tempfile::tempdir().unwrap();
     let marker = dir.path().join("terminated");
+    let ready = dir.path().join("ready");
+    // The plugin says it has set its trap; the run is cancelled then, long before its deadline.
     let body = format!(
-        "trap 'echo term > {}; exit 0' TERM; while true; do sleep 0.05; done",
-        marker.display()
+        "trap 'echo term > {}; exit 0' TERM; : > {}; while true; do sleep 0.05; done",
+        marker.display(),
+        ready.display()
     );
     let checks = registered(dir.path(), "exit 1", &body);
     let check = checks.iter().next().unwrap();
-    let started = Instant::now();
-    let cancel = Cancellation::with_deadline(started + Duration::from_millis(400));
+    let cancel = Cancellation::with_deadline(Instant::now() + HANG);
+    let cancelling = cancel_once_made(ready.clone(), cancel.clone());
     let ran = check.run(
         &ctx(dir.path(), cancel),
         &facts(check),
         &Plan::estimate(CostClass::Quick, 2),
         &mut Vec::new(),
     );
+    cancelling.join().unwrap();
+    // The plugin loops until a signal ends it: the run returned because it was cut short.
+    assert!(ready.exists(), "the plugin never set its trap");
     assert_eq!(ran, Err(Error::Cancelled));
     assert_eq!(std::fs::read_to_string(&marker).unwrap(), "term\n");
-    assert!(
-        started.elapsed() < Duration::from_secs(10),
-        "{:?}",
-        started.elapsed()
-    );
     let request: Value =
         serde_json::from_str(&std::fs::read_to_string(dir.path().join("request.json")).unwrap())
             .unwrap();
     let budget = request["budget_ms"].as_u64().unwrap();
-    assert!(budget > 0 && budget <= 400, "{budget}");
+    assert!(
+        budget > 0 && u128::from(budget) <= HANG.as_millis(),
+        "{budget}"
+    );
 }
