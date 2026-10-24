@@ -48,6 +48,15 @@
     (scoped_type_identifier name: (type_identifier) @scope.name)
   ]) @scope
 
+; An impl for a reference (`impl Read for &mut Reader<R>`) is an impl on the referenced type.
+(impl_item
+  type: (reference_type
+    type: [
+      (type_identifier) @scope.name
+      (generic_type type: (type_identifier) @scope.name)
+      (scoped_type_identifier name: (type_identifier) @scope.name)
+    ])) @scope
+
 (trait_item
   name: (type_identifier) @scope.name) @scope
 
