@@ -44,6 +44,7 @@
 (impl_item
   type: [
     (type_identifier) @scope.name
+    (primitive_type) @scope.name
     (generic_type type: (type_identifier) @scope.name)
     (scoped_type_identifier name: (type_identifier) @scope.name)
   ]) @scope
@@ -53,6 +54,7 @@
   type: (reference_type
     type: [
       (type_identifier) @scope.name
+      (primitive_type) @scope.name
       (generic_type type: (type_identifier) @scope.name)
       (scoped_type_identifier name: (type_identifier) @scope.name)
     ])) @scope
