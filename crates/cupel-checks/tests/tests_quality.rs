@@ -49,6 +49,9 @@ struct Case {
     decisions: Vec<DecisionKind>,
     /// Loops over tables of cases written in place, after `decisions`.
     tables: usize,
+    /// Clauses of expressions computing a value (a comprehension's `for` and `if`), after
+    /// `tables`.
+    clauses: Vec<DecisionKind>,
     body: Vec<NormNode>,
     /// The body's statements sit inside one list node, as Go's do.
     wrapped: bool,
@@ -64,6 +67,7 @@ fn case(name: &'static str, line: u32) -> Case {
         skipped: false,
         decisions: Vec::new(),
         tables: 0,
+        clauses: Vec::new(),
         body: Vec::new(),
         wrapped: false,
     }
@@ -92,6 +96,11 @@ impl Case {
 
     fn iterating_tables(mut self, tables: usize) -> Self {
         self.tables = tables;
+        self
+    }
+
+    fn computing(mut self, clauses: &[DecisionKind]) -> Self {
+        self.clauses = clauses.to_vec();
         self
     }
 
@@ -230,9 +239,10 @@ impl World {
                             decisions: case
                                 .decisions
                                 .iter()
-                                .map(|kind| (*kind, false))
-                                .chain((0..case.tables).map(|_| (DecisionKind::Loop, true)))
-                                .map(|(kind, table)| Decision {
+                                .map(|kind| (*kind, false, false))
+                                .chain((0..case.tables).map(|_| (DecisionKind::Loop, true, false)))
+                                .chain(case.clauses.iter().map(|kind| (*kind, false, true)))
+                                .map(|(kind, table, expression)| Decision {
                                     span: None,
                                     kind,
                                     nesting: 0,
@@ -240,6 +250,7 @@ impl World {
                                     cognitive: 1,
                                     table,
                                     continues: false,
+                                    expression,
                                 })
                                 .collect(),
                         })
@@ -512,6 +523,11 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
         case("table_with_logic", 70)
             .iterating_tables(1)
             .deciding(&[Loop]),
+        // `self.assertEqual([x for x in xs if x], want)`: a comprehension computes a value.
+        case("comprehension", 80).computing(&[Loop, Branch]),
+        case("comprehension_in_a_loop", 90)
+            .deciding(&[Loop])
+            .computing(&[Loop]),
     ])
     .go();
     assert_eq!(
@@ -521,6 +537,7 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
             ("t::branches_beyond_guards", "test.logic"),
             ("t::alternatives", "test.logic"),
             ("t::table_with_logic", "test.logic"),
+            ("t::comprehension_in_a_loop", "test.logic"),
         ])
     );
     assert_eq!(

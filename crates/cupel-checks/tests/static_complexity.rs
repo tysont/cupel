@@ -44,6 +44,7 @@ fn decision(kind: DecisionKind, nesting: u32, cyclomatic: u32, cognitive: u32) -
         cognitive,
         table: false,
         continues: false,
+        expression: false,
     }
 }
 

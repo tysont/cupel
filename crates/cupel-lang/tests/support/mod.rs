@@ -120,6 +120,15 @@ pub fn case_continuations(lang: &str, root: &Path, display: &str) -> Vec<bool> {
     flags_of_kind(lang, root, display, DecisionKind::Case, |d| d.continues)
 }
 
+/// (kind, expression) for each decision of the `lang` symbol `display` under `root`, in
+/// document order: whether it is a clause of an expression computing a value.
+pub fn expression_clauses(lang: &str, root: &Path, display: &str) -> Vec<(DecisionKind, bool)> {
+    decisions_for(lang, root, display)
+        .iter()
+        .map(|d| (d.kind, d.expression))
+        .collect()
+}
+
 /// (kind, nesting, cyclomatic, cognitive) for each decision of the `lang` symbol `display`.
 pub fn decisions_of(lang: &str, root: &Path, display: &str) -> Vec<(DecisionKind, u32, u32, u32)> {
     decisions_for(lang, root, display)

@@ -108,7 +108,7 @@ pub enum Visibility {
 pub struct Decisions {
     pub symbols: Vec<SymbolDecisions>,
 }
-fact!(Decisions, Decisions, "decisions", 2);
+fact!(Decisions, Decisions, "decisions", 3);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct SymbolDecisions {
@@ -132,6 +132,10 @@ pub struct Decision {
     /// A `case` arm after the first of its match or switch: the same multiway decision, which
     /// modified cyclomatic complexity counts once (ADR-072). Always false for other kinds.
     pub continues: bool,
+    /// A loop or branch that is a clause of an expression computing a value (a Python
+    /// comprehension's `for` and `if`): it decides which values the expression yields, not
+    /// which statements run (ADR-138 §9). Always false for other kinds.
+    pub expression: bool,
     /// Where the decision's construct is in the file; absent when the producer does not say
     /// (ADR-133).
     #[serde(default, skip_serializing_if = "Option::is_none")]

@@ -49,6 +49,7 @@ fn branches(cyclomatic: u32) -> Vec<Decision> {
             cognitive: 1,
             table: false,
             continues: false,
+            expression: false,
         })
         .collect()
 }

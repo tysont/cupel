@@ -21,6 +21,9 @@
 //!   are marked `continues` (one multiway decision, ADR-072).
 //! - **Tables**: `@loop.table` (any pattern) on a loop node marks it as iterating over a table
 //!   of cases written in place; the loop's decision has `table: true` (ADR-069).
+//! - **Expression clauses**: `@expression.clause` (any pattern) on a loop or branch node marks
+//!   it as a clause of an expression computing a value (a comprehension's `for` or `if`); its
+//!   decision has `expression: true` (ADR-138 §9).
 use std::collections::HashSet;
 
 use cupel_core::FactKind;
@@ -72,6 +75,15 @@ pub fn extract(source: &Source<'_>) -> Decisions {
         .flat_map(|m| m.nodes(capture::LOOP_TABLE))
         .map(|node| node.id())
         .collect();
+    let clauses: HashSet<usize> = all
+        .iter()
+        .flat_map(|m| m.nodes(capture::EXPRESSION_CLAUSE))
+        .map(|node| node.id())
+        .collect();
+    let marked = Marked {
+        tables: &tables,
+        clauses: &clauses,
+    };
 
     let owners: Vec<Option<usize>> = found
         .iter()
@@ -90,7 +102,7 @@ pub fn extract(source: &Source<'_>) -> Decisions {
                     .collect();
                 SymbolDecisions {
                     symbol: symbol.symbol.key(),
-                    decisions: weigh(&mine, symbol, rules, &tables),
+                    decisions: weigh(&mine, symbol, rules, &marked),
                 }
             })
             .collect(),
@@ -110,11 +122,19 @@ fn innermost(symbols: &[Definition<'_>], node: Node<'_>) -> Option<usize> {
         .map(|(index, _)| index)
 }
 
+/// The decision nodes a query marked, by node ID.
+struct Marked<'a> {
+    /// Loops over a table of cases (`@loop.table`).
+    tables: &'a HashSet<usize>,
+    /// Clauses of an expression computing a value (`@expression.clause`).
+    clauses: &'a HashSet<usize>,
+}
+
 fn weigh(
     found: &[(DecisionKind, Node<'_>)],
     symbol: &Definition<'_>,
     rules: &DecisionRules,
-    tables: &HashSet<usize>,
+    marked: &Marked<'_>,
 ) -> Vec<Decision> {
     let body = symbol.body.unwrap_or(symbol.node);
     let kept: Vec<(DecisionKind, Node<'_>)> = found
@@ -133,8 +153,10 @@ fn weigh(
                 nesting: nesting(*node, symbol.node, &kept, rules),
                 cyclomatic: weight.cyclomatic,
                 cognitive: if first_case { weight.cognitive } else { 0 },
-                table: *kind == DecisionKind::Loop && tables.contains(&node.id()),
+                table: *kind == DecisionKind::Loop && marked.tables.contains(&node.id()),
                 continues: !first_case,
+                expression: matches!(kind, DecisionKind::Loop | DecisionKind::Branch)
+                    && marked.clauses.contains(&node.id()),
                 span: Some(span(*node)),
             }
         })

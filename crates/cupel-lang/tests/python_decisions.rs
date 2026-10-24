@@ -3,7 +3,9 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{case_continuations, decisions_of, fixture, loop_tables, produce, tree};
+use support::{
+    case_continuations, decisions_of, expression_clauses, fixture, loop_tables, produce, tree,
+};
 
 use DecisionKind::{BooleanOp, Branch, Case, Catch, EarlyReturn, Loop, Ternary};
 
@@ -162,6 +164,27 @@ fn loops_over_literal_lists_and_tuples_are_tables_and_others_are_not() {
     assert_eq!(
         loop_tables("python", dir.path(), "t.cases"),
         [true, true, true, false, false]
+    );
+}
+
+#[test]
+fn comprehension_clauses_are_expression_decisions_and_statements_are_not() {
+    let dir = tree(&[(
+        "t.py",
+        "def mixed(xs):\n\
+         \x20   for x in xs:\n        if x:\n            f(x)\n\
+         \x20   return [y for y in xs if y], {k: v for k, v in xs}, any(z for z in xs)\n",
+    )]);
+    assert_eq!(
+        expression_clauses("python", dir.path(), "t.mixed"),
+        [
+            (Loop, false),
+            (Branch, false),
+            (Loop, true),
+            (Branch, true),
+            (Loop, true),
+            (Loop, true),
+        ]
     );
 }
 

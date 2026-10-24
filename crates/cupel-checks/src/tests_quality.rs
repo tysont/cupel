@@ -395,6 +395,12 @@ struct LogicCount {
 
 impl LogicCount {
     fn of(case: &TestCase, decisions: &[Decision]) -> Self {
+        // A comprehension's clauses compute a value; the case's statements still run in one
+        // straight line (ADR-138 §9).
+        let decisions: Vec<&Decision> = decisions
+            .iter()
+            .filter(|decision| !decision.expression)
+            .collect();
         let of_kinds = |kinds: &[DecisionKind]| {
             count(
                 decisions
