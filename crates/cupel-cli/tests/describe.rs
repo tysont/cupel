@@ -1061,8 +1061,8 @@ fn describe_lists_install_routes_each_live_or_saying_what_it_waits_for() {
         ["Homebrew", "npm", "pipx", "crates.io", "cupel.dev"]
     );
 }
-
-/// The registry routes install the packages dist/ and the binary crate are named (ADR-146): npm's,
+/// The registry routes install the packages dist/ and the binary crate are named (ADR-146): the npm,
+/// pipx, and crates.io routes each name the package its manifest names.
 /// PyPI's, and crates.io's package each carry the name of its manifest.
 #[test]
 fn the_registry_routes_install_the_packages_their_manifests_name() {
