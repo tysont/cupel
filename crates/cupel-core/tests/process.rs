@@ -2,12 +2,31 @@
 // ABOUTME: codes, merged streams in order, environment and directory, cancellation, and spawn failures.
 #![cfg(unix)]
 
+use std::path::PathBuf;
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use cupel_core::{Cancellation, Captured, Error, Process, find_program};
 
+/// Longer than any stall of a loaded machine: only a child that is never stopped, or never
+/// starts, lasts this long.
+const HANG: Duration = Duration::from_secs(600);
+
 fn shell(script: &str) -> Process {
     Process::new("sh", std::env::temp_dir()).args(["-c", script])
+}
+
+/// Cancels `cancel` once `ready` exists, the child's sign that it has set up what the test
+/// needs, or after `HANG`; the thread returns the moment it cancelled.
+fn cancel_when_ready(ready: PathBuf, cancel: Cancellation) -> JoinHandle<Instant> {
+    std::thread::spawn(move || {
+        let patience = Instant::now() + HANG;
+        while !ready.exists() && Instant::now() < patience {
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        cancel.cancel();
+        Instant::now()
+    })
 }
 
 #[test]
@@ -53,10 +72,12 @@ fn the_child_runs_in_its_directory_with_the_extra_environment() {
 fn cancellation_kills_the_child_and_its_process_group() {
     let started = Instant::now();
     let cancel = Cancellation::with_deadline(Instant::now() + Duration::from_millis(200));
-    let ran = shell("sleep 30 & sleep 30").run(&cancel);
+    // The background sleep holds the output open: the run ends before it only if it was killed.
+    let sleeps = format!("sleep {0} & sleep {0}", HANG.as_secs());
+    let ran = shell(&sleeps).run(&cancel);
     assert_eq!(ran, Err(Error::Cancelled));
     assert!(
-        started.elapsed() < Duration::from_secs(10),
+        started.elapsed() < HANG,
         "cancelled after {:?}",
         started.elapsed()
     );
@@ -71,46 +92,47 @@ fn input_reaches_the_child_on_its_standard_input() {
     assert_eq!(captured.stdout, "PLUGIN REQUEST\n");
 }
 
-/// Runs a child that runs `on_term` when SIGTERM reaches it, cancelled after 300 ms with
-/// `grace` to exit: what it ended with, its directory, and how long the run took.
+/// Runs a child that runs `on_term` when SIGTERM reaches it, cancelled once it has set its
+/// trap, with `grace` to exit: what it ended with, its directory, and how long the run went on
+/// after the cancellation.
 fn terminated(
     on_term: &str,
     grace: Duration,
 ) -> (Result<Captured, Error>, tempfile::TempDir, Duration) {
     let dir = tempfile::tempdir().unwrap();
-    let script = format!("trap '{on_term}' TERM; while true; do sleep 0.05; done");
-    let started = Instant::now();
-    let cancel = Cancellation::with_deadline(started + Duration::from_millis(300));
+    let script = format!("trap '{on_term}' TERM; : > ready; while true; do sleep 0.05; done");
+    let cancel = Cancellation::new();
+    let cancelling = cancel_when_ready(dir.path().join("ready"), cancel.clone());
     let ran = Process::new("sh", dir.path())
         .args(["-c", script.as_str()])
         .terminate(grace)
         .run(&cancel);
-    (ran, dir, started.elapsed())
+    let cancelled = cancelling.join().unwrap();
+    (ran, dir, cancelled.elapsed())
 }
 
 #[test]
 fn termination_sends_sigterm_and_waits_for_the_child_to_exit() {
-    let (ran, dir, elapsed) = terminated("echo stopped > term; exit 0", Duration::from_secs(20));
+    let (ran, dir, elapsed) = terminated("echo stopped > term; exit 0", HANG);
     assert_eq!(ran, Err(Error::Cancelled));
     assert_eq!(
         std::fs::read_to_string(dir.path().join("term")).unwrap(),
         "stopped\n"
     );
-    assert!(elapsed < Duration::from_secs(10), "{elapsed:?}");
+    // Ended by its own exit, not by the kill at the end of the grace period.
+    assert!(elapsed < HANG, "{elapsed:?}");
 }
 
 #[test]
 fn a_child_that_ignores_sigterm_is_killed_after_the_grace_period() {
-    let (ran, dir, elapsed) = terminated("echo ignored > term", Duration::from_millis(500));
+    let grace = Duration::from_millis(500);
+    let (ran, dir, elapsed) = terminated("echo ignored > term", grace);
     assert_eq!(ran, Err(Error::Cancelled));
     assert_eq!(
         std::fs::read_to_string(dir.path().join("term")).unwrap(),
         "ignored\n"
     );
-    assert!(
-        elapsed >= Duration::from_millis(800) && elapsed < Duration::from_secs(10),
-        "{elapsed:?}"
-    );
+    assert!(elapsed >= grace, "{elapsed:?}");
 }
 
 #[test]
