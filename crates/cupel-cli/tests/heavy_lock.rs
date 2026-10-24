@@ -136,6 +136,64 @@ fn a_second_command_waits_until_the_first_releases_the_lock() {
     );
 }
 
+/// A run that holds the lock until `release` exists, logging its start and end as `name`.
+fn holder(dir: &Path, lock: &Path, log: &Path, release: &Path, name: &str) -> Command {
+    let body = format!(
+        "echo start $1 >> {log}; while [ ! -f {release} ]; do sleep 0.05; done; echo end $1 >> {log}",
+        log = log.display(),
+        release = release.display()
+    );
+    let mut command = heavy(dir, lock, &["sh", "-c", &body, "sh", name]);
+    command.stderr(Stdio::piped());
+    command
+}
+
+/// The first line a spawned run writes to stderr, within `HANG`.
+fn first_stderr_line(child: &mut std::process::Child) -> String {
+    let mut stderr = BufReader::new(child.stderr.take().unwrap());
+    let (said, heard) = mpsc::channel();
+    std::thread::spawn(move || {
+        let mut line = String::new();
+        let _ = stderr.read_line(&mut line);
+        let _ = said.send(line);
+    });
+    heard.recv_timeout(HANG).unwrap_or_default()
+}
+
+/// The integrator's merge chains set `CUPEL_HEAVY_PRIORITY=first`; a waiting run with it takes the
+/// lock before any waiting run without it, however long the other has waited.
+#[test]
+fn a_prioritized_command_takes_the_lock_before_a_longer_waiting_default_one() {
+    let repo = repository();
+    let lock = repo.path().join("lock");
+    let log = repo.path().join("log");
+    let release = repo.path().join("release");
+    let mut holding = holder(repo.path(), &lock, &log, &release, "holding")
+        .spawn()
+        .unwrap();
+    assert!(
+        eventually(|| fs::read_to_string(&log).is_ok_and(|log| log == "start holding\n")),
+        "the holding run never started"
+    );
+    let mut default = holder(repo.path(), &lock, &log, &release, "default")
+        .spawn()
+        .unwrap();
+    assert!(first_stderr_line(&mut default).contains("waiting for"));
+    let mut first = holder(repo.path(), &lock, &log, &release, "first")
+        .env("CUPEL_HEAVY_PRIORITY", "first")
+        .spawn()
+        .unwrap();
+    assert!(first_stderr_line(&mut first).contains("waiting for"));
+    fs::write(&release, "").unwrap();
+    assert!(holding.wait().unwrap().success());
+    assert!(first.wait().unwrap().success());
+    assert!(default.wait().unwrap().success());
+    assert_eq!(
+        fs::read_to_string(&log).unwrap(),
+        "start holding\nend holding\nstart first\nend first\nstart default\nend default\n"
+    );
+}
+
 #[test]
 fn a_command_from_a_deleted_working_tree_refuses_to_start() {
     let repo = repository();

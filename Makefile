@@ -92,8 +92,9 @@ DOGFOOD_BUDGET ?= 30m
 # `--no-install`: grading Cupel never asks to install a tool, even from a terminal (ADR-081).
 # scripts/heavy.sh holds the machine-wide lock every heavy command takes while the gate runs, so
 # dogfoods from every checkout on the machine, and the external test suites run beside them, run one
-# at a time (the mutation engine's slots default to half the cores, at most four); it refuses to
-# start from a working tree that was deleted under the invoking shell.
+# at a time (the mutation engine's slots default to half the cores, at most four), the integrator's
+# chains first (CUPEL_HEAVY_PRIORITY=first); it refuses to start from a working tree that was deleted
+# under the invoking shell. `make check` takes no lock: the suite is deterministic under load (ADR-145).
 # The tree gate's `base` rules compare with the committed baseline, `.cupel/baseline.json`, a
 # tree run on `main` (ADR-140); it is imported first so a fresh store (a CI runner's, or one just
 # deleted) has the reference. `make baseline` refreshes it from the last tree run here.
