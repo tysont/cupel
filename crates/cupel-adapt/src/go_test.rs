@@ -18,6 +18,8 @@ pub(crate) static GO_TEST: RunnerSpec = RunnerSpec {
     merged: false,
     read,
     select: |selected| tests_flag(selected, "-run", run_pattern),
+    // By name in every package of the root, as `-run` narrows.
+    exclude: |ids| Some(vec!["-skip".to_owned(), run_pattern(ids)]),
     list: Some(Lister {
         command: list_command,
         parse: listing::go,

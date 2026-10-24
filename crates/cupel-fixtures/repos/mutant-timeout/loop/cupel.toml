@@ -1,0 +1,9 @@
+# The mutant-timeout fixture (ADR-147): two mutants of `count` loop forever. The factor alone would give each a run
+# of a hundred thousand times its reference; `max_mutant_timeout` cuts each at thirty seconds, far beyond what a
+# run that ends takes, even on a loaded machine.
+[lang.python]
+coverage = "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov=. --cov-branch --cov-report=lcov:{out}"
+mutation = { timeout_factor = 100000 }
+
+[checks."tests.mutation"]
+max_mutant_timeout = "30s"

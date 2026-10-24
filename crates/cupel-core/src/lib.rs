@@ -120,7 +120,9 @@ pub use matrix::{Support, SupportMatrix};
 pub use model_check::{
     Counterexample, HarnessStatus, ModelCheckResults, ModelHarness, RefutedProperty,
 };
-pub use mutation::{Mutant, MutantOutcome, MutationOutcomes, MutationStrategy};
+pub use mutation::{
+    ExcludedTest, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, SLOW_TEST_MS,
+};
 pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};

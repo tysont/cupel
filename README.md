@@ -978,6 +978,7 @@ Without a `coverage` command a language's `tests.coverage` is skipped as `unconf
 - `mutant.uncovered` (a note): no test runs the site, so its mutant was not run.
 - `mutant.timeout` (a note): the tests ran past their timeout against the mutant, which usually means it loops.
 - `mutant.equivalent?` (a note, confidence 0.3): the mutant survived but may behave exactly as the original — today, swapping `+`/`-` before a literal `0` or `*`/`/` before a literal `1`. It is left out of the score; suppress it once you agree.
+- `mutant.slow-test-excluded` (a note): a test that took more than 60 seconds in the baseline was left out of every mutant run that per-test selection did not narrow (see Timeouts below); the finding names the test and its baseline duration.
 
 The score `tests.mutation.score` is killed / (killed + survived + uncovered), 1 when nothing was scored: a change no test runs scores 0, so a score floor in a gate also asks for tests of it. Timeouts, unviable mutants, and possibly equivalent survivors are left out. The other gate keys count mutants by outcome (`killed`, `survived`, `timeout`, `uncovered`, `unviable` for one that did not build, `equivalent`) and say how many ran this time (`executed`) or were reused (`reused`), and how many of those ran behind a schemata build (`schemata`) or fell back to file copies (`fallback`).
 
@@ -989,6 +990,9 @@ mutation = { operators = "extended", jobs = 2, timeout_factor = 10 }
 
 [lang.rust]
 mutation = { strategy = "file-copy" }   # "schemata" (the default) or "file-copy"
+
+[checks."tests.mutation"]
+max_mutant_timeout = "5m"               # the longest any mutant's run may take; default 120s
 ```
 
 Mutation testing is expensive, so the engine stacks every saving it can. Before the first mutant, the baseline, the coverage report, and the per-test map come from [one run of the suite](#one-suite-run) where the toolchain allows, or from its cache when nothing changed. Then:
@@ -998,10 +1002,25 @@ Mutation testing is expensive, so the engine stacks every saving it can. Before 
 3. **Per-test selection.** Where the language has a per-test coverage map from the baseline's runner (Go; Python with pytest-cov; Rust when cargo-nextest is the runner and cargo-llvm-cov is installed), a mutant runs only the tests that execute its line. The [one suite run](#one-suite-run) makes the map for Rust and Python at any depth. Otherwise, measuring a map from nothing happens at `--depth deep` and beyond; at `standard` the engine uses a cached map (see [`cupel tests --impacted`](#cupel-tests---impacted)) when refreshing it is cheap: one suite run for Rust and Python, at most 32 tests for Go. `cupel check --dry-run` says which, in the check's `needs`: `per-test-map(cached)`, `per-test-map(refresh 3 stale)`, or `per-test-map(deep)` when the depth leaves it out. Without a map a mutant runs the whole suite.
 4. **Schemata (Rust).** Instead of one build per mutant, each Rust file is rewritten once with every mutant behind a run-time switch — the smallest whole expression around each site becomes `if cupel_mutant_id() == N { mutated } else { original }`, and a small reader of the `CUPEL_MUTANT` environment variable is appended to the file — so the file builds once and each mutant runs with `CUPEL_MUTANT=N`. Every line stays where it was. Before any mutant runs, each worker builds the rewritten file and runs its tests with no mutant selected; they must pass. Sites where an `if` cannot stand (patterns, `const` and `static` items, `const fn`, array lengths, macro arguments, attributes) and constants the compiler checks run as ordinary file copies. If the rewritten file does not compile, the sites on the lines the compiler names run as file copies and the file is rebuilt; if it still fails, the whole file runs as file copies. Nothing is lost either way: outcomes are the same under both, which the tests check on the Rust fixtures. The check reports how many mutants ran each way (`schemata`, `fallback`) and a note for each reason a mutant fell back. Other languages build per mutant (Go's builds take a fraction of a second; see [ADR-005](docs/adr/CUPEL_DECISION_005.md)).
 5. **Overlays.** Mutants run in copies of the tree outside the repository, one per worker, kept between runs so builds stay incremental: files are cloned (macOS) or hard-linked, what `.gitignore` ignores is shared through symlinks except the runner's build directory (`target/` for cargo), and the mutated file is a private copy. Mutants of one file run concurrently; files run one after another. The copies live under `$TMPDIR/cupel-mutate/`, one directory per repository; a run that is stopped (the budget, Ctrl-C) puts the original files back. Each run removes the copies of repositories that no longer exist or that no run has used for 7 days, then, while all copies hold more than 32 GiB, those of the least recently used other repositories; never those of the repository being graded or of a run in progress. `cupel doctor` reports how much they hold and for which repositories (`doctor.mutation-slots`).
-6. **Timeouts.** Before its first mutant of a file, each worker times the unmutated file's tests (for Rust, its schemata build's), rebuild included; a mutant gets ten times that (`timeout_factor`), at least two seconds.
+6. **Timeouts.** Before its first mutant of a file, each worker times the unmutated file's tests (for Rust, its schemata build's), rebuild included; a mutant gets ten times that (`timeout_factor`), at least two seconds and at most `max_mutant_timeout` (default two minutes, under `[checks."tests.mutation"]`, overridable per language). A mutant that makes a loop endless costs at most the cap, however long the suite. A mutant that per-test selection did not narrow runs the whole suite, and a test slower than 60 seconds in the baseline is left out of that run (and of the timing run before it) where the runner can leave a test out, with one `mutant.slow-test-excluded` note per test; mutants whose covering tests the map selected run them however slow. A mutant only that test would kill then survives, so the note is worth reading beside the survivors.
 7. **Order.** Last run's survivors run first, then mutants of functions never run before, then the rest, so a time limit cuts the least informative work.
 
 A Rust file's mutants cost one build per worker plus one test run each; outside Rust, each mutant costs an incremental build of what it changes plus the tests. The run's `--seed` reaches every mutant run.
+
+Which tests a mutant's run can be narrowed to, or leave out, depends on the runner ([ADR-147](docs/adr/CUPEL_DECISION_147.md)); a mutant is narrowed only with a per-test map from the baseline's runner:
+
+| Runner | Runs one test alone | Per-test map | Leaves a slow test out |
+|---|---|---|---|
+| `cargo-nextest` | every test (a `trybuild` test is one test) | yes | yes |
+| `cargo-test` | none: the whole workspace, each integration binary whole | no | no (libtest reports no durations) |
+| `go test` | each `Test` function, by name | yes | yes, by name in every package |
+| `pytest` | each node ID and file | yes | yes |
+| `unittest` | each dotted ID | no | no |
+| `jest`, `vitest` | test files | no | no |
+| Maven, Gradle (Surefire) | classes and methods | no | no |
+| `clojure.test` | each var and file | no | no |
+
+With a runner that has no map, every mutant runs the whole suite; with one that cannot leave a test out, a slow test stays in each such run and the cap bounds it. For a Rust repository, `[lang.rust] runner = "cargo-nextest"` gives per-test durations, selection, and exclusion.
 
 On the Cupel repository itself (1377 tests, release build, 8-core Apple silicon, a quiet machine), a one-function change checked at `standard` with a warm cache takes about 10.5 minutes: one instrumented run of the suite (5.3 min) and the mutants (5.2 min, two mutants with sixteen covering tests each); an unchanged rerun takes 2 seconds.
 

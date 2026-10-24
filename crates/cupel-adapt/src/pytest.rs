@@ -19,6 +19,13 @@ static PYTEST: RunnerSpec = RunnerSpec {
     read,
     // Node IDs and test files are both arguments pytest runs.
     select: tests_or_files,
+    exclude: |ids| {
+        Some(
+            ids.iter()
+                .flat_map(|id| ["--deselect".to_owned(), id.clone()])
+                .collect(),
+        )
+    },
     list: Some(Lister {
         command: collect,
         parse: listing::pytest,

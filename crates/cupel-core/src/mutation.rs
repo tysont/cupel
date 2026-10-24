@@ -12,7 +12,7 @@ use crate::id::ProducerId;
 use crate::syntax::{MutationOperator, Span, SymbolKey};
 
 /// What mutation testing found in scope (ADR-080; version 2 adds how each mutant was built,
-/// ADR-082).
+/// ADR-082; the slow tests left out, ADR-147, are an optional field of version 2).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct MutationOutcomes {
     /// The producer, such as `engine.mutation`.
@@ -25,6 +25,26 @@ pub struct MutationOutcomes {
     pub per_test: bool,
     /// One per (site, replacement), sorted by file, position, then replacement.
     pub mutants: Vec<Mutant>,
+    /// The tests slower than [`SLOW_TEST_MS`] in the baseline that were left out of the
+    /// mutants' whole-suite runs (ADR-147), sorted by ID; absent when none was.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub excluded: Vec<ExcludedTest>,
+}
+
+/// A test whose baseline run is longer than this, in milliseconds, is left out of every mutant
+/// run that per-test selection did not narrow, where the runner can leave it out (ADR-147).
+pub const SLOW_TEST_MS: u64 = 60_000;
+
+/// A test left out of the mutants' whole-suite runs for its baseline duration (ADR-147).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct ExcludedTest {
+    /// The runner's ID of the test.
+    pub id: String,
+    /// The file the runner attributes it to, relative to the repository root.
+    pub file: Option<String>,
+    /// Its duration in the baseline run.
+    pub baseline_ms: u64,
 }
 
 impl Fact for MutationOutcomes {
@@ -59,6 +79,7 @@ impl MutationOutcomes {
             depth,
             per_test,
             mutants,
+            excluded: Vec::new(),
         }
     }
 }

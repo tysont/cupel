@@ -23,6 +23,7 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     merged: false,
     read,
     select: |selected| tests_flag(selected, "-E", filterset),
+    exclude: |ids| Some(vec!["-E".to_owned(), format!("not ({})", filterset(ids))]),
     list: Some(Lister {
         command: list_command,
         parse: listing::nextest,

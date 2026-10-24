@@ -59,8 +59,13 @@ impl Ctx {
 pub struct ProduceCtx {
     pub ctx: Ctx,
     /// The `[lang.<lang>]` table for the language being produced (`Config::lang_config`).
-    /// Producers never see `[checks.*]` (design §6.7).
+    /// Producers never see a check's table (design §6.7).
     pub config: Map<String, Value>,
+    /// The settings registered checks declare for the fact being produced
+    /// (`SettingSpec::configures`), as `[checks."<id>"]` and its override for the language
+    /// configure them; an unconfigured one is absent, and the producer applies its own default
+    /// (ADR-147).
+    pub settings: Map<String, Value>,
     /// Writes only under `.cupel/` (`Writer::confined`), such as `.cupel/cache/`.
     pub writer: Writer,
     /// Fires on `--timeout`; poll it between units of work.
@@ -143,11 +148,12 @@ impl Focus {
 
 impl ProduceCtx {
     /// The context of producing in `ctx`'s repository with `writer` and `cancel`, with no
-    /// `[lang.*]` configuration, no upstream facts, and seed 0.
+    /// `[lang.*]` configuration, no settings, no upstream facts, and seed 0.
     pub fn new(ctx: Ctx, writer: Writer, cancel: Cancellation) -> Self {
         Self {
             ctx,
             config: Map::new(),
+            settings: Map::new(),
             writer,
             cancel,
             upstream: Upstream::default(),
@@ -290,6 +296,8 @@ pub enum TestSelection {
     Tests(Vec<String>),
     /// The tests in these files, relative to the repository root.
     Files(Vec<String>),
+    /// The whole suite but these tests, by the IDs the runner's `TestResults` use (ADR-147).
+    Except(Vec<String>),
 }
 
 /// A command a person or agent runs to run a selection in one project root.

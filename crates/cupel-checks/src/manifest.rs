@@ -60,6 +60,7 @@ pub fn setting(name: &str, default: Value, summary: &str) -> SettingSpec {
         name: name.to_owned(),
         default,
         summary: summary.to_owned(),
+        configures: None,
     }
 }
 

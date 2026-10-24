@@ -38,6 +38,9 @@ pub struct RunnerSpec {
     /// The arguments appended to the command to run only a selection in one root; `None` when
     /// the runner cannot narrow to it.
     pub select: fn(&Selected<'_>) -> Option<Vec<String>>,
+    /// The arguments appended to the command to run the whole suite of one root but these
+    /// test IDs; `None` when the runner cannot leave a test out (ADR-147).
+    pub exclude: fn(&[String]) -> Option<Vec<String>>,
     /// How the runner lists its tests; `None` when it cannot.
     pub list: Option<Lister>,
     /// How a run's order, seed, and parallelism reach the runner (ADR-078).
@@ -132,6 +135,11 @@ pub struct Lister {
 
 /// A spec's `select` for runners that cannot narrow.
 pub fn whole_suite(_: &Selected<'_>) -> Option<Vec<String>> {
+    None
+}
+
+/// A spec's `exclude` for runners that cannot leave a test out of a run.
+pub fn keeps_every_test(_: &[String]) -> Option<Vec<String>> {
     None
 }
 
@@ -368,10 +376,26 @@ impl Runner {
                     }
                     self.select(&Selected::Files(&own))?
                 }
+                TestSelection::Except(ids) => {
+                    let own = owned(ids, &root.0, &dirs, ID_SEPARATOR);
+                    if own.is_empty() {
+                        Vec::new()
+                    } else {
+                        self.exclude(&own)?
+                    }
+                }
             };
             narrowed.push((index, root, narrowing));
         }
         Ok(narrowed)
+    }
+
+    fn exclude(&self, ids: &[String]) -> Result<Vec<String>> {
+        (self.0.exclude)(ids).ok_or_else(|| Error::InvalidValue {
+            what: "test selection",
+            value: self.0.id.to_owned(),
+            expected: "a runner that can leave a test out of a run",
+        })
     }
 
     fn select(&self, selected: &Selected<'_>) -> Result<Vec<String>> {

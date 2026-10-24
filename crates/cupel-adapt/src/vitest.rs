@@ -5,7 +5,7 @@ use cupel_core::{LangFamily, Langs, RunOrdering, TestResult};
 use crate::report::jest_json;
 use crate::runner::{
     Executed, Ran, Root, Runner, RunnerSpec, Varying, files, jest_report_command,
-    jest_report_variation,
+    jest_report_variation, keeps_every_test,
 };
 
 const ID: &str = "tool.vitest";
@@ -22,6 +22,7 @@ static VITEST: RunnerSpec = RunnerSpec {
     read,
     completed_codes: &[0],
     select: files,
+    exclude: keeps_every_test,
     list: None,
     vary: &Varying {
         ordering: RunOrdering::Seeded,

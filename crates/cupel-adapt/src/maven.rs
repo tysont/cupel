@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use cupel_core::{LangId, Langs, RunOptions, RunOrder, RunOrdering, TestResult};
 
 use crate::java_tests::{class_selection, read_reports};
-use crate::runner::{Executed, Ran, Root, Runner, RunnerSpec, Varying};
+use crate::runner::{Executed, Ran, Root, Runner, RunnerSpec, Varying, keeps_every_test};
 
 const ID: &str = "tool.maven";
 
@@ -21,6 +21,7 @@ static MAVEN: RunnerSpec = RunnerSpec {
     merged: false,
     read,
     select: |selected| class_selection(selected, '+').map(|tests| vec![format!("-Dtest={tests}")]),
+    exclude: keeps_every_test,
     list: None,
     completed_codes: &[0],
     vary: &Varying {

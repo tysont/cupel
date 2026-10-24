@@ -3,7 +3,7 @@
 use cupel_core::{LangId, Langs, TestResult};
 
 use crate::report::unittest;
-use crate::runner::{PYTHON, Ran, Root, Runner, RunnerSpec, as_arguments};
+use crate::runner::{PYTHON, Ran, Root, Runner, RunnerSpec, as_arguments, keeps_every_test};
 
 const ID: &str = "tool.unittest";
 
@@ -21,6 +21,7 @@ static UNITTEST: RunnerSpec = RunnerSpec {
     completed_codes: &[0, 5],
     // Dotted test IDs are arguments unittest runs; files are not.
     select: |selected| as_arguments(selected, false),
+    exclude: keeps_every_test,
     list: None,
     vary: &PYTHON,
     outputs: &[],

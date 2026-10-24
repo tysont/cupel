@@ -1,0 +1,263 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 3,
+      "id": "tests.mutation",
+      "metrics": {
+        "equivalent": 0.0,
+        "executed": 4.0,
+        "fallback": 0.0,
+        "killed": 1.0,
+        "reused": 0.0,
+        "schemata": 0.0,
+        "score": 0.5,
+        "survived": 1.0,
+        "timeout": 2.0,
+        "uncovered": 0.0,
+        "unviable": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "killed_ratio",
+        "value": 0.5
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 3
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "covering_tests": [
+            "tests/test_count.py::test_counts_to_three"
+          ],
+          "nearest_test_file": "tests/test_count.py"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add a test that fails when `0` at count.py:2 becomes `1`."
+      },
+      "check": "tests.mutation",
+      "confidence": 0.95,
+      "detail": null,
+      "evidence": {
+        "covering_tests": [
+          "tests/test_count.py::test_counts_to_three"
+        ],
+        "mutation": {
+          "from": "0",
+          "operator": "zero-one",
+          "to": "1"
+        },
+        "tests_run": 1
+      },
+      "id": "fnd_15dff6",
+      "kind": "mutant.survived",
+      "location": {
+        "col": 9,
+        "end_col": 10,
+        "end_line": 2,
+        "file": "count.py",
+        "line": 2
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_7003dd170f01c4d4",
+      "severity": "fail",
+      "suppress": "cupel suppress fnd_15dff6 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "count.count",
+        "hash": "sh_7003dd170f01c4d4",
+        "lang": "python"
+      },
+      "tier": 3,
+      "title": "Mutant survived: `0` → `1` at count.py:2"
+    },
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "tests/test_count.py"
+        },
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `+=` → `-=` at count.py:4: the tests ran past their timeout against it."
+      },
+      "check": "tests.mutation",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "+=",
+          "operator": "arith-add-sub",
+          "to": "-="
+        }
+      },
+      "id": "fnd_30fe17",
+      "kind": "mutant.timeout",
+      "location": {
+        "col": 11,
+        "end_col": 13,
+        "end_line": 4,
+        "file": "count.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_7003dd170f01c4d4",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_30fe17 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "count.count",
+        "hash": "sh_7003dd170f01c4d4",
+        "lang": "python"
+      },
+      "tier": 3,
+      "title": "Mutant timed out: `+=` → `-=` at count.py:4"
+    },
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "tests/test_count.py"
+        },
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `1` → `0` at count.py:4: the tests ran past their timeout against it."
+      },
+      "check": "tests.mutation",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "mutation": {
+          "from": "1",
+          "operator": "zero-one",
+          "to": "0"
+        }
+      },
+      "id": "fnd_edcd53",
+      "kind": "mutant.timeout",
+      "location": {
+        "col": 14,
+        "end_col": 15,
+        "end_line": 4,
+        "file": "count.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.mutation --symbols sh_7003dd170f01c4d4",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_edcd53 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "count.count",
+        "hash": "sh_7003dd170f01c4d4",
+        "lang": "python"
+      },
+      "tier": 3,
+      "title": "Mutant timed out: `1` → `0` at count.py:4"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_15dff6",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Add a test that fails when `0` at count.py:2 becomes `1`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_30fe17",
+      "kind": "review",
+      "priority": 2,
+      "summary": "Review `+=` → `-=` at count.py:4: the tests ran past their timeout against it."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {
+          "tests.mutation": {
+            "max_mutant_timeout": "30s"
+          }
+        },
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "python": {
+            "coverage": "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov=. --cov-branch --cov-report=lcov:{out}",
+            "mutation": {
+              "timeout_factor": 100000
+            }
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 2
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 1,
+      "info": 2,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 3,
+  "truncated": false
+}

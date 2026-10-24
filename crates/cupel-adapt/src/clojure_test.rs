@@ -5,7 +5,9 @@ use std::path::{Path, PathBuf};
 use cupel_core::{LangId, Langs, RunOptions, RunOrder, RunOrdering, TestResult};
 
 use crate::report::junit;
-use crate::runner::{Executed, Lister, Ran, Root, Runner, RunnerSpec, Varying, tests_or_files};
+use crate::runner::{
+    Executed, Lister, Ran, Root, Runner, RunnerSpec, Varying, keeps_every_test, tests_or_files,
+};
 
 const ID: &str = "tool.clojure-test";
 
@@ -24,6 +26,7 @@ static CLOJURE_TEST: RunnerSpec = RunnerSpec {
     read,
     // Test IDs (vars) and test files are both arguments the script runs, in the order given.
     select: tests_or_files,
+    exclude: keeps_every_test,
     list: Some(Lister {
         command: list_command,
         parse: |stdout| stdout.lines().map(str::to_owned).collect(),

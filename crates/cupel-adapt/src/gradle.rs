@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use cupel_core::{LangId, Langs, RunOptions, RunOrder, RunOrdering, TestResult};
 
 use crate::java_tests::{read_reports, selected_classes};
-use crate::runner::{Executed, Ran, Root, Runner, RunnerSpec, Selected, Varying};
+use crate::runner::{Executed, Ran, Root, Runner, RunnerSpec, Selected, Varying, keeps_every_test};
 
 const ID: &str = "tool.gradle";
 
@@ -20,6 +20,7 @@ static GRADLE: RunnerSpec = RunnerSpec {
     merged: false,
     read,
     select,
+    exclude: keeps_every_test,
     list: None,
     completed_codes: &[0],
     vary: &Varying {
