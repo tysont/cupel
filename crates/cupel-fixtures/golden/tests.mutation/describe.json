@@ -190,6 +190,41 @@
           },
           "kind": "mutant.equivalent?",
           "summary": "The mutant survived and may behave exactly as the original (ADR-004)."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `mutant.slow-test-excluded`.",
+            "properties": {
+              "baseline_ms": {
+                "description": "How long it ran in the baseline, in milliseconds.",
+                "format": "uint64",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "file": {
+                "description": "Its file, when the runner names one.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "test": {
+                "description": "The runner's ID of the test.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "test",
+              "baseline_ms"
+            ],
+            "title": "SlowTest",
+            "type": "object"
+          },
+          "kind": "mutant.slow-test-excluded",
+          "summary": "A test slower than 60 s in the baseline was left out of the mutants' runs that per-test selection did not narrow (ADR-147)."
         }
       ],
       "id": "tests.mutation",
@@ -270,6 +305,14 @@
       "needs": [
         "symbols",
         "mutation-outcomes"
+      ],
+      "settings": [
+        {
+          "configures": "mutation-outcomes",
+          "default": "120s",
+          "name": "max_mutant_timeout",
+          "summary": "The longest a mutant's run may take, as a duration such as 90s or 5m; a run that reaches it is a timeout, whatever timeout_factor allows."
+        }
       ],
       "stability": "experimental",
       "summary": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs.",

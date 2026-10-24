@@ -17,6 +17,14 @@ expression: pretty(&schema)
       "description": "The producer, such as `engine.mutation`.",
       "$ref": "#/$defs/ProducerId"
     },
+    "excluded": {
+      "description": "The tests slower than 60 s (`SLOW_TEST_MS`) in the baseline that were left out of the\nmutants' whole-suite runs (ADR-147), sorted by ID; absent when none was.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ExcludedTest"
+      },
+      "x-cupel-optional": true
+    },
     "mutants": {
       "description": "One per (site, replacement), sorted by file, position, then replacement.",
       "type": "array",
@@ -57,6 +65,34 @@ expression: pretty(&schema)
         "standard",
         "deep",
         "exhaustive"
+      ]
+    },
+    "ExcludedTest": {
+      "description": "A test left out of the mutants' whole-suite runs for its baseline duration (ADR-147).",
+      "type": "object",
+      "properties": {
+        "baseline_ms": {
+          "description": "Its duration in the baseline run.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "file": {
+          "description": "The file the runner attributes it to, relative to the repository root.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The runner's ID of the test.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "baseline_ms",
+        "file",
+        "id"
       ]
     },
     "Mutant": {

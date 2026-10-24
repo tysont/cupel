@@ -12,7 +12,7 @@ use crate::id::ProducerId;
 use crate::syntax::{MutationOperator, Span, SymbolKey};
 
 /// What mutation testing found in scope (ADR-080; version 2 adds how each mutant was built,
-/// ADR-082; the slow tests left out, ADR-147, are an optional field of version 2).
+/// ADR-082).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct MutationOutcomes {
     /// The producer, such as `engine.mutation`.
@@ -25,7 +25,7 @@ pub struct MutationOutcomes {
     pub per_test: bool,
     /// One per (site, replacement), sorted by file, position, then replacement.
     pub mutants: Vec<Mutant>,
-    /// The tests slower than [`SLOW_TEST_MS`] in the baseline that were left out of the
+    /// The tests slower than 60 s (`SLOW_TEST_MS`) in the baseline that were left out of the
     /// mutants' whole-suite runs (ADR-147), sorted by ID; absent when none was.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     #[schemars(extend("x-cupel-optional" = true))]
