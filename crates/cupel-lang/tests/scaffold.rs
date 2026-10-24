@@ -108,6 +108,41 @@ fn a_file_that_does_not_parse_is_a_parse_error_finding_and_still_extracted() {
 }
 
 #[test]
+fn a_token_the_grammar_lacks_inside_a_macro_call_is_not_a_parse_error() {
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(
+        dir.path().join("tilde.rs"),
+        "macro_rules! m {\n    ($a:tt ~ $b:tt) => {};\n}\n\nfn main() {\n    json!({ \"a\" : ~ });\n}\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("broken.rs"),
+        "fn main() {\n    json!({ \"a\" : ~ });\n    let x = 1 +;\n}\n",
+    )
+    .unwrap();
+    let registry = LanguageRegistry::builtin();
+    let producer = rust_producer(&registry);
+    let mut events = Vec::new();
+
+    producer
+        .produce(
+            &produce_ctx(dir.path(), Cancellation::new()),
+            &scope(&["broken.rs", "tilde.rs"]),
+            &mut events,
+        )
+        .unwrap();
+
+    let [Event::Finding(finding)] = events.as_slice() else {
+        panic!("one finding expected: {events:?}");
+    };
+    let location = finding.location.as_ref().unwrap();
+    assert_eq!(
+        (location.file.as_str(), location.line, location.col),
+        ("broken.rs", 3, Some(16))
+    );
+}
+
+#[test]
 fn unreadable_and_non_utf8_files_are_findings_not_panics() {
     let dir = tempfile::tempdir().unwrap();
     fs::write(dir.path().join("bytes.rs"), [0xff, 0xfe, 0x00, 0x80]).unwrap();
