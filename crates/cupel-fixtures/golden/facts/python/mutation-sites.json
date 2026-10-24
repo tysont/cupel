@@ -6611,8 +6611,8 @@
           "span": {
             "col": 9,
             "end_col": 33,
-            "end_line": 6,
-            "line": 6
+            "end_line": 7,
+            "line": 7
           },
           "to": [
             "pass"
@@ -6626,8 +6626,8 @@
           "span": {
             "col": 24,
             "end_col": 25,
-            "end_line": 6,
-            "line": 6
+            "end_line": 7,
+            "line": 7
           },
           "to": [
             "0"
@@ -6641,8 +6641,8 @@
           "span": {
             "col": 27,
             "end_col": 28,
-            "end_line": 6,
-            "line": 6
+            "end_line": 7,
+            "line": 7
           },
           "to": [
             "0"
@@ -6656,8 +6656,8 @@
           "span": {
             "col": 31,
             "end_col": 32,
-            "end_line": 6,
-            "line": 6
+            "end_line": 7,
+            "line": 7
           },
           "to": [
             "0"
@@ -6667,7 +6667,91 @@
       "symbol": {
         "col": 5,
         "file": "tests/test_ledger_case.py",
-        "line": 5
+        "line": 6
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "self.assertEqual([balance([c]) for c in (1, 2) if c], [1, 2])",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 9,
+            "end_col": 70,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "c6c952d99913e63e",
+          "span": {
+            "col": 50,
+            "end_col": 51,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "b5dfd747e4e3cc0a",
+          "span": {
+            "col": 53,
+            "end_col": 54,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "fbf99f5532839914",
+          "span": {
+            "col": 64,
+            "end_col": 65,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "90bba93d249fca1d",
+          "span": {
+            "col": 67,
+            "end_col": 68,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 9
       }
     },
     {

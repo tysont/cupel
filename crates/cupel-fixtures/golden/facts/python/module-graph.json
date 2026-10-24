@@ -419,6 +419,20 @@
         },
         {
           "edge_kind": "import",
+          "from": "tests/test_ledger_case.py",
+          "line": 2,
+          "names": [
+            "balance"
+          ],
+          "relative": false,
+          "specifier": "ledger.balance",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "tests/test_pricing.py",
           "line": 1,
           "relative": false,

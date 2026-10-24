@@ -38,13 +38,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 64,
+            "rank": 66,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 64,
+            "rank": 66,
             "value": 0.0
           },
           {
@@ -82,13 +82,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 67,
+            "rank": 69,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 67,
+            "rank": 69,
             "value": 0.0
           },
           {
@@ -126,13 +126,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 73,
+            "rank": 75,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 73,
+            "rank": 75,
             "value": 0.0
           },
           {
@@ -170,13 +170,13 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 74,
+            "rank": 76,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 74,
+            "rank": 76,
             "value": 0.0
           },
           {
@@ -214,19 +214,19 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 76,
+            "rank": 79,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 76,
+            "rank": 79,
             "value": 0.0
           },
           {
             "check": "tests.quality",
             "metric": "mock_density",
-            "rank": 14,
+            "rank": 16,
             "value": 0.0
           }
         ]
@@ -258,19 +258,19 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 80,
+            "rank": 83,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 80,
+            "rank": 83,
             "value": 0.0
           },
           {
             "check": "tests.quality",
             "metric": "mock_density",
-            "rank": 17,
+            "rank": 19,
             "value": 0.0
           }
         ]
@@ -302,19 +302,19 @@
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 85,
+            "rank": 88,
             "value": 1.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 85,
+            "rank": 88,
             "value": 0.0
           },
           {
             "check": "tests.quality",
             "metric": "mock_density",
-            "rank": 24,
+            "rank": 26,
             "value": 0.0
           }
         ]
@@ -480,7 +480,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 30,
+      "files": 32,
       "languages": [
         "python"
       ],
@@ -488,7 +488,7 @@
       "roots": [
         "."
       ],
-      "symbols": 87
+      "symbols": 90
     },
     "seed": "<seed>",
     "started": "<timestamp>",
