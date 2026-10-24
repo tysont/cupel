@@ -379,7 +379,7 @@ op         := ">=" | ">" | "<=" | "<" | "=="
 
 `base` is the metric's value in the reference run: the run `--against` names; else, for `--changed`/`--base`, the base recomputed (the rule's checks run over the base commit's versions of the changed files); else the `default` baseline. A rule against `base` with no reference value is `skipped` with reason `no reference: …` and fails the gate. Every rule result carries `bound`, the value `actual` was compared with, and a skipped one its `reason`.
 
-Configuration follows the three axes: `[checks."<id>"]` is language-neutral, `[checks."<id>".lang.<lang>]` overrides it for one language, and `[lang.<lang>]` chooses tools and producers for that language (`coverage = "coverage.py"` pins a producer when several exist). A check never reads `[lang.*]`; a producer never reads `[checks.*]`.
+Configuration follows the three axes: `[checks."<id>"]` is language-neutral, `[checks."<id>".lang.<lang>]` overrides it for one language, and `[lang.<lang>]` chooses tools and producers for that language (`coverage = "coverage.py"` pins a producer when several exist). A check never reads `[lang.*]`; a producer never reads a check's table, only the settings a check declares for the fact the producer makes (`SettingSpec::configures`, [ADR-147](adr/CUPEL_DECISION_147.md): `tests.mutation`'s `max_mutant_timeout` reaches the mutation engine).
 
 ### 6.8 Dry run
 
@@ -896,7 +896,7 @@ Stacked, in order of payoff:
 3. **Per-test selection** — run only tests whose coverage includes the mutated line; typically 5–20× over full-suite runs.
 4. **Mutant schemata for compiled languages** — rewrite the function so every site is gated by a runtime switch (`cupel_mutant_id() == N`), compile once, run each mutant as a process with `CUPEL_MUTANT=N`. Replaces N compiles with one. Rust and Go first; the rewrite must preserve types (branch both arms through the same expression type) and is validated by compiling the schemata build before any mutant runs. Falls back to file-copy strategy on compile failure of the schemata build.
 5. **Worker overlays** (file-copy strategy): reflink the tree where the filesystem supports it (APFS, btrfs, XFS), else hardlink the tree and copy the mutated file privately. Modules reaching the mutated file by relative import are copied too (Node resolution).
-6. **Timeouts per test**, `timeout_factor × baseline_duration(test)`, floor 2 s.
+6. **Timeouts per test**, `timeout_factor × baseline_duration(test)`, floor 2 s, capped by `max_mutant_timeout` (default 120 s); a test slower than 60 s in the baseline is left out of a mutant's run that per-test selection did not narrow ([ADR-147](adr/CUPEL_DECISION_147.md)).
 7. **Ordering by information**: last run's survivors, then sites in changed symbols, then the rest.
 
 ### 9.4 Test impact analysis
