@@ -659,7 +659,7 @@ fn the_formula_is_not_rendered_from_sha256sums_missing_a_target() {
 
 // The npm and pipx wrappers
 
-/// The name Cupel's packages have on npm, PyPI, and crates.io (ADR-146).
+/// The name Cupel's packages have on npm, the Python Package Index, and crates.io (ADR-146).
 const PACKAGE: &str = "cupel-cli";
 
 /// Each wrapper is the `cupel-cli` package and installs one command, `cupel`, from its one module.
