@@ -1487,17 +1487,17 @@ The owner's P9 ruling (2026-10-19) defines three tracks. Track (b), the deep gat
 
 - Track (a), follow-up items 10, 12, 13, and 18, and the deferrals of items 9, 11, 14, 15 and the P9.4–P9.7 open items ([brief](plan/p9/p9.f2-gate-and-release-fixes.md)).
 
-#### P9.F4 Follow-up fix: Cupel's own test suite is deterministic under load
-
-**Status:** complete (2026-10-24, 2d6f1af; [ADR-145](adr/CUPEL_DECISION_145.md))
-
-- The timing-sensitive tests of Cupel's own suite wait on events, bound work, and warm fresh executables, so their outcome no longer depends on the machine's load ([brief](plan/p9/p9.f4-flakes.md)).
-
 #### P9.F3 Follow-up fix: `dead.export` under a range reads the whole language's import edges
 
 **Status:** complete (2026-10-22, b2e8399; [ADR-144](adr/CUPEL_DECISION_144.md))
 
 - Track (a), follow-up item 21 ([brief](plan/p9/p9.f3-dead-export-range.md)).
+
+#### P9.F4 Follow-up fix: Cupel's own test suite is deterministic under load
+
+**Status:** complete (2026-10-24, 2d6f1af; [ADR-145](adr/CUPEL_DECISION_145.md))
+
+- The timing-sensitive tests of Cupel's own suite wait on events, bound work, and warm fresh executables, so their outcome no longer depends on the machine's load ([brief](plan/p9/p9.f4-flakes.md)).
 
 #### P9.10 Release v0.2.0
 
