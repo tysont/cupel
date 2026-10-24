@@ -11,7 +11,7 @@ use std::time::{Duration, Instant};
 use cupel_core::Envelope;
 use cupel_serve::{Body, Build, Reply, Request, Status};
 use serde_json::{Value, json};
-use support::{Outcome, Repo, cupel, manifest, plugin, run_with};
+use support::{Outcome, Repo, cupel, eventually, manifest, plugin, run_with};
 
 /// `src/lib.rs` with a function of `branches` decisions (over the default `cyclomatic_max` of 10
 /// from 10 on) and a simple one, so `static.complexity` has a finding to report.
@@ -122,18 +122,6 @@ fn build() -> Build {
         env!("CARGO_PKG_VERSION"),
         &assert_cmd::cargo::cargo_bin("cupel"),
     )
-}
-
-/// Waits up to fifteen seconds for `condition`.
-fn eventually(condition: impl Fn() -> bool) -> bool {
-    let deadline = Instant::now() + Duration::from_secs(15);
-    while Instant::now() < deadline {
-        if condition() {
-            return true;
-        }
-        thread::sleep(Duration::from_millis(25));
-    }
-    false
 }
 
 /// `outcome`'s envelope with every volatile field redacted (ADR-003).

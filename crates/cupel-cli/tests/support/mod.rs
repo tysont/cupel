@@ -11,6 +11,7 @@ use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
+use std::time::{Duration, Instant};
 
 use assert_cmd::Command;
 use cupel_core::{CheckId, CheckRegistry, Envelope, FindingId, Writer};
@@ -395,6 +396,20 @@ pub fn plugin(dir: &Path, name: &str, manifest: &Value) {
     let path = dir.join(name);
     fs::write(&path, body).unwrap();
     fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+    warm(&path);
+}
+
+/// Runs the new executable at `path` once with an argument no plugin answers, so the operating
+/// system's check of a file's first execution (seconds on a loaded macOS) is behind it before
+/// Cupel's plugin time limits apply to it (ADR-145).
+#[cfg(unix)]
+pub fn warm(path: &Path) {
+    let _ = std::process::Command::new(path)
+        .arg("warm")
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status();
 }
 
 /// The tools `cupel serve --mcp` lists, asked over its stdin (ADR-121).
@@ -425,6 +440,22 @@ pub fn listed_tools() -> Vec<Value> {
         .as_array()
         .expect("tools")
         .clone()
+}
+
+/// Longer than any stall of a loaded machine, a fresh binary's first watcher start on macOS
+/// (8-30 s) included: only something that never happens is waited on this long (ADR-145).
+pub const HANG: Duration = Duration::from_secs(600);
+
+/// Whether `condition` holds within `HANG`, polled every 25 ms.
+pub fn eventually(condition: impl Fn() -> bool) -> bool {
+    let deadline = Instant::now() + HANG;
+    while Instant::now() < deadline {
+        if condition() {
+            return true;
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    false
 }
 
 /// The repository's root.

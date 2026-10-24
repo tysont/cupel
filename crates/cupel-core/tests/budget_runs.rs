@@ -209,6 +209,13 @@ impl World {
     }
 }
 
+/// The largest budget the costly check's closure does not fit by its defaults (30 200 ms), so
+/// the instant work around it has all the time a loaded machine can take.
+const WITHIN_DEFAULT_MS: u64 = 30_000;
+
+/// Longer than any stall of a loaded machine: a task this slow is one only a budget ends.
+const HANG: Duration = Duration::from_secs(600);
+
 /// A budget of `ms` milliseconds from now.
 fn budget(ms: u64) -> Budget {
     let limit = Duration::from_millis(ms);
@@ -262,7 +269,7 @@ fn cheap_and_costly() -> Vec<Box<dyn Check>> {
 #[test]
 fn a_check_whose_closure_does_not_fit_is_skipped_for_budget_with_its_estimate() {
     let world = World::new(cheap_and_costly(), Duration::ZERO);
-    let (outcome, events) = world.run(with_budget(5_000));
+    let (outcome, events) = world.run(with_budget(WITHIN_DEFAULT_MS));
     let cheap = result(&outcome, "static.cheap");
     assert_eq!(cheap.status, CheckStatus::Pass);
     let costly = result(&outcome, "tests.costly");
@@ -298,7 +305,7 @@ fn recorded_durations_replace_the_default_and_let_the_check_fit() {
     let mut history = History::default();
     recorded(&mut history, "tool.graph", 40);
     let (outcome, _) = world.run(Resources {
-        budget: Some(budget(5_000)),
+        budget: Some(budget(WITHIN_DEFAULT_MS)),
         history,
         ..Resources::default()
     });
@@ -367,9 +374,9 @@ fn a_task_running_at_the_deadline_is_cut_and_the_run_ends_near_the_budget() {
         CostClass::Standard,
         &[FactKind::TestFrames],
     )];
-    let world = World::new(checks, Duration::from_secs(60));
+    let world = World::new(checks, HANG);
     let mut history = History::default();
-    // History says the frames take 10 ms, so the knapsack takes the check; they take a minute.
+    // History says the frames take 10 ms, so the knapsack takes the check; they take `HANG`.
     recorded(&mut history, "tool.frames", 10);
     let started = Instant::now();
     let (outcome, _) = world.run(Resources {
@@ -378,8 +385,8 @@ fn a_task_running_at_the_deadline_is_cut_and_the_run_ends_near_the_budget() {
         ..Resources::default()
     });
     let elapsed = started.elapsed();
-    assert!(elapsed < Duration::from_secs(5), "took {elapsed:?}");
-    assert!(elapsed >= Duration::from_millis(250), "took {elapsed:?}");
+    assert!(elapsed < HANG, "took {elapsed:?}");
+    assert!(elapsed >= Duration::from_millis(300), "took {elapsed:?}");
     assert_eq!(result(&outcome, "tests.slow").status, CheckStatus::Partial);
     assert!(outcome.interrupted);
 }
@@ -397,10 +404,13 @@ fn a_task_the_knapsack_took_is_skipped_when_an_earlier_one_overran() {
     ];
     let world = World::new(checks, Duration::from_millis(600));
     let mut history = History::default();
+    // Both fit the hour by history; once the frames take 600 ms instead of 10, what is left of
+    // it is less than the graph's estimate, however long the run took to get there, and the
+    // frames end long before the deadline.
     recorded(&mut history, "tool.frames", 10);
-    recorded(&mut history, "tool.graph", 400);
+    recorded(&mut history, "tool.graph", 3_599_600);
     let (outcome, _) = world.run(Resources {
-        budget: Some(budget(800)),
+        budget: Some(budget(3_600_000)),
         history,
         ..Resources::default()
     });

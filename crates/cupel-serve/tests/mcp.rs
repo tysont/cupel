@@ -10,6 +10,10 @@ use cupel_serve::Served;
 use cupel_serve::mcp::{self, Call, Called, Client, Server, Tool, Tools};
 use serde_json::{Value, json};
 
+/// Longer than any stall of a loaded machine: a call or message this late is one that never
+/// comes.
+const HANG: Duration = Duration::from_secs(600);
+
 /// Tools scripted by name: `echo` returns its arguments, in order, as its document; `events`
 /// writes two event lines and a stderr line first; `wait` waits on its token; `broken` fails.
 #[derive(Default)]
@@ -47,7 +51,7 @@ impl Tools for Script {
                 json!({"status": "pass"})
             }
             "wait" => {
-                let outcome = if call.cancel.wait(Duration::from_secs(30)) {
+                let outcome = if call.cancel.wait(HANG) {
                     "finished"
                 } else {
                     "cancelled"
@@ -98,7 +102,7 @@ impl Session {
             )
         });
         Self {
-            client: Client::new(input, output, Duration::from_secs(30)),
+            client: Client::new(input, output, HANG),
             stop,
             server: Some(server),
             tools,
