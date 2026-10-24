@@ -425,6 +425,10 @@ mod tests {
 
     use super::*;
 
+    /// The debug sleep the slow call takes: longer than any stall of a loaded machine, so a call
+    /// that ends before it was cancelled, not waited out.
+    const SLOW: Duration = Duration::from_secs(600);
+
     #[test]
     fn a_tool_call_runs_under_its_token_and_ends_partial_when_it_fires() {
         let dir = tempfile::tempdir().unwrap();
@@ -435,7 +439,10 @@ mod tests {
                 path: None,
             },
             root: dir.path().to_path_buf(),
-            variables: BTreeMap::from([("CUPEL_DEBUG_SLEEP_MS".to_owned(), "60000".to_owned())]),
+            variables: BTreeMap::from([(
+                "CUPEL_DEBUG_SLEEP_MS".to_owned(),
+                SLOW.as_millis().to_string(),
+            )]),
             no_color: false,
         };
         let cancel = Cancellation::new();
@@ -452,7 +459,7 @@ mod tests {
             cancel,
         };
         let called = verbs.call("survey", call);
-        assert!(started.elapsed() < Duration::from_secs(30));
+        assert!(started.elapsed() < SLOW, "{:?}", started.elapsed());
         let envelope: Value = serde_json::from_str(&called.document).unwrap();
         assert_eq!(
             (envelope["status"].as_str(), envelope["exit_code"].as_u64()),

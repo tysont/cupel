@@ -9,6 +9,7 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
+use std::process::{Command, Stdio};
 
 use cupel_core::config::PluginEntry;
 use cupel_core::{Cancellation, CheckId, Lang, LangFamily, LangId};
@@ -20,7 +21,20 @@ pub fn script(dir: &Path, name: &str, body: &str) -> PathBuf {
     let path = dir.join(name);
     fs::write(&path, format!("#!/bin/sh\n{body}\n")).unwrap();
     fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+    warm(&path);
     path
+}
+
+/// Runs the new executable at `path` once with an argument no plugin answers, so the operating
+/// system's check of a file's first execution (seconds on a loaded macOS) is behind it before the
+/// host's time limits apply to it (ADR-145).
+fn warm(path: &Path) {
+    let _ = Command::new(path)
+        .arg("warm")
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status();
 }
 
 /// A script body answering `describe` with `manifest`, `plan` with `plan`, and `run` by saving

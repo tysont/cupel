@@ -32,18 +32,20 @@ fn a_deadline_cancels_once_it_passes() {
 
 #[test]
 fn remaining_is_the_time_to_the_nearest_deadline_in_the_chain() {
-    let parent = Cancellation::with_deadline(Instant::now() + Duration::from_secs(60));
+    let made = Instant::now();
+    let parent = Cancellation::with_deadline(made + Duration::from_secs(60));
     let child = parent.child(Duration::from_secs(3600));
     let tighter = parent.child(Duration::from_secs(5));
-    let remaining = |token: &Cancellation| token.remaining().map(|left| left.as_secs());
-    assert_eq!(
-        [
-            remaining(&Cancellation::new()),
-            remaining(&child),
-            remaining(&tighter),
-        ],
-        [None, Some(59), Some(4)]
-    );
+    let left = [child.remaining(), tighter.remaining()];
+    // However long the thread was held up, each deadline is no further than its own limit and
+    // has drawn no nearer than the time that has passed since the tokens were made.
+    let passed = made.elapsed();
+    let within = |left: Option<Duration>, limit: Duration| {
+        left.is_some_and(|left| left <= limit && left >= limit.saturating_sub(passed))
+    };
+    assert_eq!(Cancellation::new().remaining(), None);
+    assert!(within(left[0], Duration::from_secs(60)), "{left:?}");
+    assert!(within(left[1], Duration::from_secs(5)), "{left:?}");
     let past = Cancellation::with_deadline(
         Instant::now()
             .checked_sub(Duration::from_millis(1))
@@ -66,16 +68,13 @@ fn wait_completes_when_nothing_cancels_it() {
 fn wait_returns_early_when_the_deadline_passes() {
     let started = Instant::now();
     let token = Cancellation::with_deadline(started + Duration::from_millis(20));
-    // (completed, cancelled)
+    // (completed, cancelled): a wait that ran its whole hour would say it completed.
     assert_eq!(
-        (token.wait(Duration::from_secs(30)), token.is_cancelled()),
+        (token.wait(Duration::from_secs(3600)), token.is_cancelled()),
         (false, true)
     );
-    assert!(
-        started.elapsed() < Duration::from_secs(5),
-        "{:?}",
-        started.elapsed()
-    );
+    // And it lasted until the deadline: however loaded the machine, never less.
+    assert!(started.elapsed() >= Duration::from_millis(20));
 }
 
 #[test]
@@ -87,13 +86,14 @@ fn wait_returns_early_when_another_thread_cancels() {
         std::thread::sleep(Duration::from_millis(20));
         canceller.cancel();
     });
-    // (completed, cancelled)
+    // (completed, cancelled): a wait that ran its whole hour would say it completed.
     assert_eq!(
-        (token.wait(Duration::from_secs(30)), token.is_cancelled()),
+        (token.wait(Duration::from_secs(3600)), token.is_cancelled()),
         (false, true)
     );
     handle.join().unwrap();
-    assert!(started.elapsed() < Duration::from_secs(5));
+    // The other thread cancelled after its 20 ms sleep, so the wait lasted at least that.
+    assert!(started.elapsed() >= Duration::from_millis(20));
 }
 
 /// Records what reaches it and how often it was flushed.

@@ -7,7 +7,7 @@ Every P9 brief in this directory is read together with this file. A brief names 
 - You are in a git worktree of Cupel on the branch the brief names. Never run git commands against another worktree or `main`. Never push. Never `cd` out of the worktree for git operations (`git -C` if you must look elsewhere, read-only).
 - `make dev-setup` installs the pinned tool environment (ADR-139) and every `make` target exports it; run it first. `cargo` run by hand does not see the tools unless you `eval "$(make dev-env)"`.
 - `timeout` does not exist on macOS. In zsh, quote strings like `'===='`. Run anything that takes more than a few minutes with `nohup ... > LOG 2>&1 &` under your scratchpad directory and poll the log.
-- `make dogfood` waits on a machine-wide lock (`scripts/dogfood.sh`) so one dogfood runs at a time across every checkout. Wait on the lock; never poll the load average and never start a second dogfood of your own.
+- `make dogfood` waits on a machine-wide lock (`scripts/heavy.sh`) so one heavy command runs at a time across every checkout. Any other heavy command you run, above all an external project's test suite or a `cupel check` over one, goes through the same script: `scripts/heavy.sh <command>`. Wait on the lock; never poll the load average and never start a second dogfood of your own.
 
 ## How you work
 
