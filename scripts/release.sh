@@ -13,6 +13,7 @@ fail() {
 usage() {
 	cat >&2 <<'EOF'
 usage: release.sh version [TAG]               print the crate version; with TAG, fail unless TAG is v<version>
+       release.sh version --set VERSION         write VERSION into every file that names the release; print it
        release.sh package BINARY TARGET OUTDIR  write OUTDIR/cupel-<version>-<TARGET>.tar.gz (.zip on Windows)
        release.sh sums DIR                      write DIR/SHA256SUMS over every archive in DIR
        release.sh verify ARCHIVE                fail unless ARCHIVE holds exactly the binary, LICENSE, and README.md
@@ -57,6 +58,25 @@ version() {
 		fail "tag $1 does not match the crate version $v (expected v$v)"
 	fi
 	echo "$v"
+}
+
+# Rewrites the release's version in every file that names it: the workspace package, each workspace
+# crate's entry in the lock file, the npm wrapper's package.json, and the pipx module.
+set_version() {
+	new=$1
+	echo "$new" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' ||
+		fail "\"$new\" is not a version: pass MAJOR.MINOR.PATCH, such as 0.2.0"
+	old=$(version | sed 's/\./\\./g')
+	rewrite "$root/Cargo.toml" "/^\[workspace\.package\]/,/^\[/s/^version = \"$old\"\$/version = \"$new\"/"
+	rewrite "$root/Cargo.lock" "/^name = \"cupel-/{n;s/^version = \"$old\"\$/version = \"$new\"/;}"
+	rewrite "$root/dist/npm/package.json" "s/^  \"version\": \"$old\",\$/  \"version\": \"$new\",/"
+	rewrite "$root/dist/pipx/cupel.py" "s/^__version__ = \"$old\"\$/__version__ = \"$new\"/"
+	version
+}
+
+# Applies the sed script $2 to the file $1 in place (BSD and GNU sed spell -i differently).
+rewrite() {
+	sed "$2" "$1" >"$1.version" && mv "$1.version" "$1"
 }
 
 package() {
@@ -151,7 +171,15 @@ static() {
 command=$1
 shift
 case "$command" in
-version) [ $# -le 1 ] || usage; version "$@" ;;
+version)
+	if [ "${1:-}" = --set ]; then
+		[ $# -eq 2 ] || usage
+		set_version "$2"
+	else
+		[ $# -le 1 ] || usage
+		version "$@"
+	fi
+	;;
 package) [ $# -eq 3 ] || usage; package "$@" ;;
 sums) [ $# -eq 1 ] || usage; sums "$(cd "$1" && pwd)" ;;
 verify) [ $# -eq 1 ] || usage; verify "$1" ;;

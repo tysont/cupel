@@ -46,12 +46,13 @@ fn the_results(cli: &CliDescription, checks: &CheckRegistry) -> String {
     format!(
         "## The gate
 
-`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `\"static.complexity.cyclomatic_max\" = \"<= 10\"` or `\"tests.weakening\" = \"none\"`; `\"static.clones.pairs\" = \"<= base\"` compares with the baseline, or with a range's base. `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
+`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `\"static.complexity.cyclomatic_max\" = \"<= 10\"` or `\"tests.weakening\" = \"none\"`; `\"static.clones.pairs\" = \"<= base\"` compares with the baseline, or with a range's base (`--against baseline|REF|run:ID` names another reference). `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
 
 ## Depth
 
 {depth}
-- Scope flags (`--changed`, `--base`, `--paths`, `--symbols`) intersect; `--only` and `--skip` select checks by ID or group.
+- Scope flags (`--changed`, `--base` with `--head`, `--paths`, `--symbols`) intersect; under `--changed` or `--base` the checks rule on the functions the change touched. `--only` and `--skip` select checks by ID or group, `--tier N+` by tier; `--jobs N` caps the threads and test processes.
+- `--oracle NAME` picks the reference implementation `gen.differential` compares with and `--cases N` the inputs generative checks try; `check --scaffold --write` writes a property stub for each `property.missing` finding.
 
 {depth_table}
 ## The envelope
@@ -65,7 +66,7 @@ Stdout is one JSON envelope; diagnostics go to stderr. Read:
 
 ## MCP
 
-A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are {tools}; each takes its verb's flags as arguments and returns the envelope the command prints.
+A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are {tools}; each takes its verb's flags as arguments and returns the envelope the command prints. Without `--mcp`, `cupel serve` keeps facts warm for every command run in the repository, and `--watch` reparses files as they change.
 
 ## More
 
@@ -186,7 +187,72 @@ fn verbs(cli: &CliDescription) -> String {
 
 #[cfg(test)]
 mod tests {
+    use clap::CommandFactory;
+
     use super::*;
+
+    /// The long flags of `check`, `survey`, `explain`, and `serve` the guide need not name, each
+    /// with the reason.
+    const UNNAMED: [(&str, &str); 3] = [
+        (
+            "--since-baseline",
+            "parsed but not yet implemented (the registry marks it pending), so the guide must \
+             not send an agent to it",
+        ),
+        (
+            "--socket",
+            "every command connects to the daemon at the default socket; another path is for \
+             running two daemons in one repository, which an agent's loop never does",
+        ),
+        (
+            "--stop",
+            "stops a daemon a person started; the loop neither starts nor stops one",
+        ),
+    ];
+
+    /// Every long flag of the verbs an agent runs, from clap's command definition.
+    fn agent_flags() -> Vec<String> {
+        let cli = crate::cli::Cli::command();
+        let mut flags: Vec<String> = ["check", "survey", "explain", "serve"]
+            .iter()
+            .flat_map(|verb| {
+                cli.find_subcommand(verb)
+                    .expect("the verb is registered")
+                    .get_arguments()
+                    .filter(|argument| !argument.is_global_set())
+                    .filter_map(|argument| argument.get_long().map(|long| format!("--{long}")))
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+        flags.sort();
+        flags.dedup();
+        flags
+    }
+
+    #[test]
+    fn the_guide_names_every_flag_of_the_verbs_an_agent_runs() {
+        let guide = guide(&crate::catalog::checks());
+        let named = |flag: &str| {
+            guide.split('`').skip(1).step_by(2).any(|span| {
+                span.split(|c: char| c.is_whitespace() || "/|=,".contains(c))
+                    .any(|word| word == flag)
+            })
+        };
+        let flags = agent_flags();
+        let missing: Vec<&String> = flags
+            .iter()
+            .filter(|flag| !named(flag))
+            .filter(|flag| !UNNAMED.iter().any(|(unnamed, _)| unnamed == flag))
+            .collect();
+        assert_eq!(missing, Vec::<&String>::new(), "{guide}");
+        let stale: Vec<&str> = UNNAMED
+            .iter()
+            .map(|(flag, _)| *flag)
+            .filter(|flag| !flags.iter().any(|known| known == flag) || named(flag))
+            .collect();
+        assert_eq!(stale, Vec::<&str>::new(), "allowed but unknown, or named");
+        assert!(flags.len() > 20, "{flags:?}");
+    }
 
     #[test]
     fn statuses_are_every_status_the_envelope_can_carry() {

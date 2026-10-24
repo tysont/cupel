@@ -583,11 +583,6 @@ mod tests {
             })
     }
 
-    /// Design §9.2's "approximately linear", for plan P2.4's 10k symbols: about 120 nodes
-    /// each, every hundredth an edited copy of the one before. Exact comparisons stay linear
-    /// in the symbol count, and the whole search (fingerprints included) takes under a second
-    /// in a release build, about 0.2 s on an Apple M2. A debug build (`make test`) is about
-    /// ten times slower, so it is held to a debug budget instead.
     /// `count` random function trees, every hundredth an edited copy of the one before.
     fn corpus(count: usize) -> Vec<NormNode> {
         let mut rng = Rng(7);
@@ -608,33 +603,28 @@ mod tests {
         trees
     }
 
-    /// Milliseconds the ten-thousand-symbol search may take: a debug build is about ten times
-    /// slower than a release build.
-    const SEARCH_BUDGET_MS: u128 = if cfg!(debug_assertions) {
-        20_000
-    } else {
-        1_000
-    };
-
+    /// Design §9.2's "approximately linear", for plan P2.4's 10k symbols: about 120 nodes
+    /// each, every hundredth an edited copy of the one before. Every planted pair is found and
+    /// the exact comparisons stay linear in the symbol count. The bound is on the work, not on
+    /// the wall clock, which measures the machine's load as much as the search (ADR-145).
     #[test]
-    fn ten_thousand_symbols_are_searched_in_linear_work_and_under_a_second() {
+    fn ten_thousand_symbols_are_searched_in_linear_work() {
         let trees = corpus(10_000);
-        let started = std::time::Instant::now();
         let sets: Vec<Fingerprints> = trees.iter().map(Fingerprints::of).collect();
         let found = search(&sets, 0.82);
-        let elapsed = started.elapsed();
         let planted: Vec<(usize, usize)> = (0..100).map(|n| (n * 100 + 98, n * 100 + 99)).collect();
         let missed: Vec<&(usize, usize)> = planted
             .iter()
             .filter(|pair| !found.pairs.iter().any(|p| (p.left, p.right) == **pair))
             .collect();
         assert_eq!(missed, Vec::<&(usize, usize)>::new());
+        // Every planted pair was compared exactly, and few others were.
+        assert!(found.compared >= planted.len(), "{}", found.compared);
         assert!(
             found.compared <= 2 * sets.len(),
             "{} exact comparisons",
             found.compared
         );
-        assert!(elapsed.as_millis() < SEARCH_BUDGET_MS, "took {elapsed:?}");
     }
 
     proptest! {

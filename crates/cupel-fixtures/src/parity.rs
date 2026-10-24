@@ -175,7 +175,9 @@ impl Daemon {
         }
         let child = command.spawn().expect("cupel serve starts");
         let daemon = Self { child, socket };
-        let deadline = Instant::now() + Duration::from_secs(20);
+        // Longer than any stall of a loaded machine: only a daemon that never answers is waited
+        // on this long.
+        let deadline = Instant::now() + Duration::from_secs(600);
         while daemon.ask(Body::Status).is_err() {
             assert!(
                 Instant::now() < deadline,

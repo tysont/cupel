@@ -23,12 +23,10 @@ use crate::matching::{self, SymbolMatch};
 use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
 use crate::oracle::RunOracle;
-use crate::producer::{
-    Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, Upstream,
-};
+use crate::producer::{Availability, Ctx, Focus, ProduceCtx, ProducerRegistry, Upstream};
 use crate::rank::{Measured, Measurement};
 use crate::result::{CheckResult, CheckStatus, SkipReason, Skipped};
-use crate::scope::{Scope, SymbolSelector, select_symbols};
+use crate::scope::{ChangedLines, Scope, SymbolSelector, select_symbols, touched};
 use crate::syntax::{NormTree, Symbols};
 use crate::test_results::{TestResults, Unevaluable};
 use crate::writer::Writer;
@@ -874,7 +872,8 @@ impl<'a> Prepared<'a> {
     }
 }
 
-/// The symbols in scope per language: every symbol of its files, or those the selectors match.
+/// The symbols in scope per language: every symbol of its files, or those the selectors match,
+/// and under a range only those its changed lines touch (ADR-142).
 fn resolve_symbols(
     job: &Job<'_>,
     store: &mut FactStore<'_>,
@@ -884,6 +883,7 @@ fn resolve_symbols(
     let mut scopes = HashMap::new();
     for lang in &job.langs {
         let keys = symbols_in_scope(job, store, lang, &mut matched, sink).unwrap_or_default();
+        let keys = within_range(job, store, lang, keys, sink);
         scopes.insert(lang.id.clone(), scope_of(job, keys));
     }
     if job.selectors_must_match
@@ -938,6 +938,33 @@ fn symbols_in_scope(
         *seen |= hit;
     }
     Some(keys)
+}
+
+/// Under a range, `keys` less the symbols of `lang` its changed lines do not touch (ADR-142);
+/// `keys` as they are without a range.
+fn within_range(
+    job: &Job<'_>,
+    store: &mut FactStore<'_>,
+    lang: &Lang,
+    mut keys: BTreeSet<crate::syntax::SymbolKey>,
+    sink: &mut dyn EventSink,
+) -> BTreeSet<crate::syntax::SymbolKey> {
+    let Some(changed) = &job.changed else {
+        return keys;
+    };
+    let Ok(produced) = store.ensure(FactKind::Symbols, lang, sink) else {
+        return keys;
+    };
+    if let Some(symbols) = produced.downcast_ref::<Symbols>() {
+        let untouched: BTreeSet<_> = symbols
+            .symbols
+            .iter()
+            .filter(|symbol| !touched(changed, symbol))
+            .map(crate::syntax::SymbolDef::key)
+            .collect();
+        keys.retain(|key| !untouched.contains(key));
+    }
+    keys
 }
 
 fn scope_of(job: &Job<'_>, keys: BTreeSet<crate::syntax::SymbolKey>) -> Scope {

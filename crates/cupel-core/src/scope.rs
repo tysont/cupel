@@ -1,6 +1,6 @@
 // ABOUTME: The scope a run considers and its resolution from --paths, --changed, --base/--head, and
 // ABOUTME: --symbols: files first (tree ∩ paths ∩ range), then symbols from produced facts (ADR-040).
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use globset::{GlobBuilder, GlobMatcher};
@@ -356,6 +356,20 @@ impl SymbolSelector {
 
 fn normalized(name: &str) -> String {
     name.replace("::", ".")
+}
+
+/// Per file, the 1-based inclusive line ranges a change touched (ADR-077 §5).
+pub type ChangedLines = BTreeMap<String, Vec<(u32, u32)>>;
+
+/// Whether a range whose changed lines are `changed` touched `symbol` (ADR-142): one of its
+/// file's changed lines falls within its span, or its file has no changed lines because git
+/// does not track it yet, so every line of it is new.
+pub fn touched(changed: &ChangedLines, symbol: &SymbolDef) -> bool {
+    changed.get(&symbol.file).is_none_or(|lines| {
+        lines
+            .iter()
+            .any(|&(start, end)| start <= symbol.span.end_line && symbol.span.line <= end)
+    })
 }
 
 /// The symbols of `symbols` that some selector matches, and for each selector whether it
