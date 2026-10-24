@@ -93,50 +93,14 @@ fn the_command_runs_with_the_lock_held_and_its_exit_code_is_returned() {
     assert!(lock.exists(), "the lock file is created");
 }
 
-#[test]
-fn a_second_command_waits_until_the_first_releases_the_lock() {
+/// A repository with the paths the lock tests share: the lock, the log the runs append to, and
+/// the file whose creation releases every holder.
+fn lock_fixture() -> (TempDir, PathBuf, PathBuf, PathBuf) {
     let repo = repository();
     let lock = repo.path().join("lock");
     let log = repo.path().join("log");
     let release = repo.path().join("release");
-    // Each run appends its start and end, and ends only once the test has made `release`; with
-    // the lock held, no run starts before the other ends.
-    let body = format!(
-        "echo start $1 >> {log}; while [ ! -f {release} ]; do sleep 0.05; done; echo end $1 >> {log}",
-        log = log.display(),
-        release = release.display()
-    );
-    let mut first = heavy(repo.path(), &lock, &["sh", "-c", &body, "sh", "first"])
-        .spawn()
-        .unwrap();
-    assert!(
-        eventually(|| fs::read_to_string(&log).is_ok_and(|log| log == "start first\n")),
-        "the first run never started"
-    );
-    let mut second = heavy(repo.path(), &lock, &["sh", "-c", &body, "sh", "second"])
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
-    // The first run is released once the second has said it waits for it.
-    let mut stderr = BufReader::new(second.stderr.take().unwrap());
-    let (said, heard) = mpsc::channel();
-    std::thread::spawn(move || {
-        let mut line = String::new();
-        let _ = stderr.read_line(&mut line);
-        let _ = said.send(line);
-    });
-    let waiting = heard.recv_timeout(HANG).unwrap_or_default();
-    fs::write(&release, "").unwrap();
-    assert!(first.wait().unwrap().success());
-    assert!(second.wait().unwrap().success());
-    assert_eq!(
-        fs::read_to_string(&log).unwrap(),
-        "start first\nend first\nstart second\nend second\n"
-    );
-    assert!(
-        waiting.contains("waiting for"),
-        "the second run says it waits: {waiting}"
-    );
+    (repo, lock, log, release)
 }
 
 /// A run that holds the lock until `release` exists, logging its start and end as `name`.
@@ -163,14 +127,39 @@ fn first_stderr_line(child: &mut std::process::Child) -> String {
     heard.recv_timeout(HANG).unwrap_or_default()
 }
 
+#[test]
+fn a_second_command_waits_until_the_first_releases_the_lock() {
+    let (repo, lock, log, release) = lock_fixture();
+    let mut first = holder(repo.path(), &lock, &log, &release, "first")
+        .spawn()
+        .unwrap();
+    assert!(
+        eventually(|| fs::read_to_string(&log).is_ok_and(|log| log == "start first\n")),
+        "the first run never started"
+    );
+    let mut second = holder(repo.path(), &lock, &log, &release, "second")
+        .spawn()
+        .unwrap();
+    // The first run is released once the second has said it waits for it.
+    let waiting = first_stderr_line(&mut second);
+    fs::write(&release, "").unwrap();
+    assert!(first.wait().unwrap().success());
+    assert!(second.wait().unwrap().success());
+    assert_eq!(
+        fs::read_to_string(&log).unwrap(),
+        "start first\nend first\nstart second\nend second\n"
+    );
+    assert!(
+        waiting.contains("waiting for"),
+        "the second run says it waits: {waiting}"
+    );
+}
+
 /// The integrator's merge chains set `CUPEL_HEAVY_PRIORITY=first`; a waiting run with it takes the
 /// lock before any waiting run without it, however long the other has waited.
 #[test]
 fn a_prioritized_command_takes_the_lock_before_a_longer_waiting_default_one() {
-    let repo = repository();
-    let lock = repo.path().join("lock");
-    let log = repo.path().join("log");
-    let release = repo.path().join("release");
+    let (repo, lock, log, release) = lock_fixture();
     let mut holding = holder(repo.path(), &lock, &log, &release, "holding")
         .spawn()
         .unwrap();
