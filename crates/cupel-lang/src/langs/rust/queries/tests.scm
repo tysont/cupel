@@ -137,14 +137,14 @@
   (#eq? @_assert "assert")
   (token_tree "!=")) @test.assertion @assertion.idiom.not-equal
 
-; `assert!(x.is_none())` and `assert!(x.is_empty())` hold for exactly one value of `x`'s type, so
-; they pin it; a leading `!` rules that one value out instead.
+; `assert!(x.is_none())`, `assert!(x.is_empty())`, and `assert!(x.is_null())` hold for exactly one
+; value of `x`'s type, so they pin it; a leading `!` rules that one value out instead.
 (macro_invocation
   macro: (identifier) @_assert
   (#eq? @_assert "assert")
   (token_tree
     (identifier) @_method
-    (#any-of? @_method "is_none" "is_empty")) @_arguments
+    (#any-of? @_method "is_none" "is_empty" "is_null")) @_arguments
   (#not-match? @_arguments "^[(]\\s*!")) @test.assertion @assertion.idiom.one-value
 
 (macro_invocation
@@ -199,6 +199,14 @@
 ]
   (#match? @assertion.name "^(debug_|prop_)?assert"))
 
+; A `macro_rules!` macro of this file, and an invocation by plain name, which asserts when it
+; names such a macro whose rules assert (`test_parse_err!(from_str(s) => err)`).
+(macro_definition
+  name: (identifier) @assertion.macro)
+
+(macro_invocation
+  macro: (identifier) @assertion.expansion)
+
 ; A call by plain name, which asserts when it names a helper of this file that asserts
 ; (`test_encode_ok(&cases)`); `assert_…` calls are assertions above.
 (call_expression
@@ -208,6 +216,15 @@
       function: (identifier) @assertion.helper)
   ]
   (#not-match? @assertion.helper "^assert_"))
+
+; trybuild: `TestCases::new()` checks, when it goes out of scope, that each file its calls name
+; compiles or fails to compile with the expected output.
+(call_expression
+  function: (scoped_identifier
+    path: (_) @_cases
+    name: (identifier) @_new)
+  (#match? @_cases "(^|::)TestCases$")
+  (#eq? @_new "new")) @test.assertion @assertion.idiom.compile-test
 
 ; assert_cmd: `Command::assert()` checks the process outcome its chained calls describe.
 (call_expression

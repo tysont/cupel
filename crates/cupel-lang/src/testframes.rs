@@ -18,6 +18,12 @@
 //!   an assertion takes the class of an asserting function of that name in another file of the
 //!   same directory in scope (a Go package's shared `_test.go` helpers). One level: a helper's
 //!   own calls of helpers are not followed.
+//! - `@assertion.macro` on the name of a macro the file defines (the definition is the name's
+//!   parent node) and `@assertion.expansion` on the name a macro is invoked by: when the
+//!   invoked macro is one the file defines outside every case and its definition holds an
+//!   assertion (serde_json's `test_parse_err!`), the invocation asserts with the class of the
+//!   definition's first strong assertion, else its first, as a helper call does. An invocation
+//!   in a helper is one of the helper's assertions, so a case calling that helper asserts too.
 //! - `@test.mock` on a test double's creation, with optional `@mock.target` naming what it
 //!   replaces (else the mock node's text).
 //! - `@test.skip` on a skip marker, with optional `@skip.reason` (the reason's text, without
@@ -97,7 +103,8 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
     if cases.is_empty() {
         return TestFrames::default();
     }
-    let loose = attach_assertions(&mut cases, parsed, &found, rules);
+    let mut loose = attach_assertions(&mut cases, parsed, &found, rules);
+    expand_macros(&mut cases, &mut loose, parsed, &found);
     let helpers = file_helpers(source, &cases, &loose);
     for (case, node) in helper_calls(&cases, &found) {
         if let (Some(class), Some(case)) = (helpers.get(parsed.text(node)), cases.get_mut(&case)) {
@@ -271,6 +278,68 @@ fn file_helpers(
         .collect()
 }
 
+/// Makes each invocation of an asserting macro of the file an assertion: of its case when it is
+/// in one, else one of the `loose` assertions, which [`file_helpers`] gives the helper holding it.
+fn expand_macros(
+    cases: &mut Cases<'_>,
+    loose: &mut Vec<Assertion>,
+    parsed: &Parsed,
+    found: &[Match<'_, '_>],
+) {
+    let macros = file_macros(parsed, found, loose);
+    if macros.is_empty() {
+        return;
+    }
+    for m in found {
+        let Some(node) = m.node(capture::ASSERTION_EXPANSION) else {
+            continue;
+        };
+        let Some(class) = macros.get(parsed.text(node)) else {
+            continue;
+        };
+        match owner(cases, m, node).and_then(|id| cases.get_mut(&id)) {
+            Some(case) => assert_through(&mut case.assertions, *class, span(node)),
+            None => assert_through(loose, *class, span(node)),
+        }
+    }
+}
+
+/// The asserting macros of the file: each `@assertion.macro` whose definition holds one of the
+/// `loose` assertions (a definition inside a case holds none), with the class of its first strong
+/// assertion, else its first.
+fn file_macros(
+    parsed: &Parsed,
+    found: &[Match<'_, '_>],
+    loose: &[Assertion],
+) -> BTreeMap<String, Class> {
+    found
+        .iter()
+        .filter_map(|m| m.node(capture::ASSERTION_MACRO))
+        .filter_map(|name| {
+            let outer = span(name.parent()?);
+            let held: Vec<&Assertion> = loose
+                .iter()
+                .filter(|assertion| {
+                    let inner = assertion.span;
+                    (outer.line, outer.col) <= (inner.line, inner.col)
+                        && (inner.end_line, inner.end_col) <= (outer.end_line, outer.end_col)
+                })
+                .collect();
+            let first = held
+                .iter()
+                .find(|assertion| assertion.strength == AssertionStrength::Strong)
+                .or_else(|| held.first())?;
+            Some((
+                parsed.text(name).to_owned(),
+                Class {
+                    kind: first.kind,
+                    strength: first.strength,
+                },
+            ))
+        })
+        .collect()
+}
+
 /// Each `@assertion.helper` node inside a case, with its case.
 fn helper_calls<'t>(cases: &Cases<'t>, found: &[Match<'_, 't>]) -> Vec<(usize, Node<'t>)> {
     found
@@ -318,7 +387,8 @@ fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn La
             .unwrap_or_else(|error| panic!("{} tests.scm: {error}", language.id()));
         let found = matches(&query, parsed);
         let mut cases = collect_cases(parsed, &found);
-        let loose = attach_assertions(&mut cases, parsed, &found, rules);
+        let mut loose = attach_assertions(&mut cases, parsed, &found, rules);
+        expand_macros(&mut cases, &mut loose, parsed, &found);
         let helpers = file_helpers(&source, &cases, &loose);
         let dir = directory(&parsed.file);
         for (case, node) in helper_calls(&cases, &found) {

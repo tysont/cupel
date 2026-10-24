@@ -168,10 +168,12 @@ fn assertions_in(body: &str) -> Vec<(AssertionKind, AssertionStrength)> {
 
 /// Assertion bodies and how each is classified (ADR-070): comparisons and predicates true of one
 /// value pin it; inequality, presence, and plain truthiness do not; a comparison inside a
-/// closure and a negated predicate stay weak; `assert_…` helpers and `assert_cmd` are custom.
+/// closure and a negated predicate stay weak; `assert_…` helpers, `assert_cmd`, and trybuild's
+/// compile tests are custom.
 const ASSERTION_FORMS: &[(&str, &[(AssertionKind, AssertionStrength)])] = &[
     ("assert!(total == 3);", &[(Equality, Strong)]),
     ("assert!(found.is_none());", &[(Equality, Strong)]),
+    ("assert!(value.is_null());", &[(Equality, Strong)]),
     (
         "assert!(findings.is_empty(), \"{findings:?}\");",
         &[(Equality, Strong)],
@@ -191,6 +193,10 @@ const ASSERTION_FORMS: &[(&str, &[(AssertionKind, AssertionStrength)])] = &[
     ),
     (
         "cupel().arg(\"--version\").assert().success().stdout(\"x\");",
+        &[(Custom, Strong)],
+    ),
+    (
+        "let t = trybuild::TestCases::new();\n    t.compile_fail(\"tests/ui/*.rs\");",
         &[(Custom, Strong)],
     ),
     ("helper(&outcome);", &[]),
@@ -339,6 +345,51 @@ fn numbers_compare() {
             case("only_values", &[], Runs, &[], 33),
             case("stream_newlines", &[(Equality, Strong)], Runs, &[], 38),
             case("numbers_compare", &[(Equality, Strong)], Runs, &[], 45),
+        ]
+    );
+}
+
+#[test]
+fn a_macro_of_the_file_that_asserts_asserts_where_it_is_invoked_and_in_a_helper_that_invokes_it() {
+    let dir = tree(&[(
+        "tests/parse.rs",
+        r#"macro_rules! test_parse_err {
+    ($name:ident($arg:expr) => $expected:expr) => {
+        let actual = $name($arg).unwrap_err().to_string();
+        assert_eq!(actual, $expected);
+    };
+}
+
+fn test_parse_err(errors: &[(&str, &str)]) {
+    for &(s, err) in errors {
+        test_parse_err!(from_str(s) => err);
+    }
+}
+
+#[test]
+fn number_errors() {
+    test_parse_err(&[("+", "expected value")]);
+}
+
+#[test]
+fn slice_error() {
+    test_parse_err!(from_slice(b"+") => "expected value");
+}
+
+#[test]
+fn values_parse() {
+    from_str("1").unwrap();
+    vec![1];
+}
+"#,
+    )]);
+    let frames: TestFrames = produce("rust", dir.path());
+    assert_eq!(
+        rows(file(&frames, "tests/parse.rs")),
+        [
+            case("number_errors", &[(Equality, Strong)], Runs, &[], 15),
+            case("slice_error", &[(Equality, Strong)], Runs, &[], 20),
+            case("values_parse", &[], Runs, &[], 25),
         ]
     );
 }

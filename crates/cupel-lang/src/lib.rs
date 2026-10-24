@@ -40,7 +40,7 @@
 //! | `symbols.scm` | `@symbol.function` / `@symbol.method` / `@symbol.closure`; `@symbol.name`; `@symbol.parameter` | `@symbol.body` `@symbol.visibility` `@visibility.public` `@visibility.internal` `@visibility.private` `@export.name` `@scope` `@scope.name` `@namespace.name` |
 //! | `decisions.scm` | one of `@decision.branch` `.loop` `.boolean-op` `.case` `.catch` `.early-return` `.ternary` | `@loop.table` |
 //! | `mutations.scm` | one of `@mut.relational` `.equality` `.arith-add-sub` `.arith-mul-div` `.boolean-op` `.boolean-literal` `.zero-one` `.statement-deletion` `.return-value` `.constant` `.boundary` `.negation` | |
-//! | `tests.scm` | `@test.case`; `@test.name` | `@test.assertion` `@assertion.name` `@assertion.idiom.<key>` `@assertion.helper` `@test.mock` `@mock.target` `@test.skip` `@skip.reason` `@test.setup` `@framework.<name>` |
+//! | `tests.scm` | `@test.case`; `@test.name` | `@test.assertion` `@assertion.name` `@assertion.idiom.<key>` `@assertion.helper` `@assertion.macro` `@assertion.expansion` `@test.mock` `@mock.target` `@test.skip` `@skip.reason` `@test.setup` `@framework.<name>` |
 //! | `imports.scm` | `@import`; `@import.specifier` | `@import.name` `@import.module` `@import.reexport` `@reexport.name` `@scope` `@scope.name` |
 //! | `api.scm` | one of `@api.function` `.method` `.type` `.interface` `.constant` `.variable` `.module`; `@api.name` | `@api.signature` `@api.local` `@root.entry-point` `@root.hook` `@scope` `@scope.name` `@namespace.name` |
 //! | `references.scm` | `@reference.name`; `@reference.member` | `@reference.text` `@reference.attribute` `@attribute.name` `@dynamic.members` `@dynamic.names` |
