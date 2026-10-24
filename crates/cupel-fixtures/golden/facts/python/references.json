@@ -10614,6 +10614,264 @@
       }
     },
     {
+      "file": "tests/ledger_case.py",
+      "from": null,
+      "kind": "member",
+      "name": "unittest",
+      "span": {
+        "col": 8,
+        "end_col": 16,
+        "end_line": 1,
+        "line": 1
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": null,
+      "kind": "member",
+      "name": "ledger",
+      "span": {
+        "col": 6,
+        "end_col": 12,
+        "end_line": 3,
+        "line": 3
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": null,
+      "kind": "name",
+      "name": "balance",
+      "span": {
+        "col": 20,
+        "end_col": 27,
+        "end_line": 3,
+        "line": 3
+      },
+      "target": {
+        "file": "src/ledger/__init__.py",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "src/ledger/__init__.py",
+            "line": 13
+          }
+        ]
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": null,
+      "kind": "name",
+      "name": "LedgerTestCase",
+      "span": {
+        "col": 7,
+        "end_col": 21,
+        "end_line": 6,
+        "line": 6
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": null,
+      "kind": "name",
+      "name": "unittest",
+      "span": {
+        "col": 22,
+        "end_col": 30,
+        "end_line": 6,
+        "line": 6
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": null,
+      "kind": "member",
+      "name": "TestCase",
+      "span": {
+        "col": 31,
+        "end_col": 39,
+        "end_line": 6,
+        "line": 6
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      },
+      "kind": "name",
+      "name": "self",
+      "span": {
+        "col": 18,
+        "end_col": 22,
+        "end_line": 7,
+        "line": 7
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      },
+      "kind": "name",
+      "name": "entries",
+      "span": {
+        "col": 24,
+        "end_col": 31,
+        "end_line": 7,
+        "line": 7
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      },
+      "kind": "name",
+      "name": "expected",
+      "span": {
+        "col": 33,
+        "end_col": 41,
+        "end_line": 7,
+        "line": 7
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      },
+      "kind": "name",
+      "name": "self",
+      "span": {
+        "col": 9,
+        "end_col": 13,
+        "end_line": 8,
+        "line": 8
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      },
+      "kind": "member",
+      "name": "assertEqual",
+      "span": {
+        "col": 14,
+        "end_col": 25,
+        "end_line": 8,
+        "line": 8
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      },
+      "kind": "name",
+      "name": "balance",
+      "span": {
+        "col": 26,
+        "end_col": 33,
+        "end_line": 8,
+        "line": 8
+      },
+      "target": {
+        "file": "src/ledger/__init__.py",
+        "kind": "imported",
+        "symbols": [
+          {
+            "col": 1,
+            "file": "src/ledger/__init__.py",
+            "line": 13
+          }
+        ]
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      },
+      "kind": "name",
+      "name": "entries",
+      "span": {
+        "col": 34,
+        "end_col": 41,
+        "end_line": 8,
+        "line": 8
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      },
+      "kind": "name",
+      "name": "expected",
+      "span": {
+        "col": 44,
+        "end_col": 52,
+        "end_line": 8,
+        "line": 8
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
       "file": "tests/test_ledger.py",
       "from": null,
       "kind": "member",
@@ -11834,6 +12092,123 @@
         "end_col": 17,
         "end_line": 58,
         "line": 58
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "from": null,
+      "kind": "member",
+      "name": "ledger_case",
+      "span": {
+        "col": 6,
+        "end_col": 17,
+        "end_line": 1,
+        "line": 1
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "from": null,
+      "kind": "name",
+      "name": "LedgerTestCase",
+      "span": {
+        "col": 25,
+        "end_col": 39,
+        "end_line": 1,
+        "line": 1
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "from": null,
+      "kind": "name",
+      "name": "TestBalancesThroughTheHarness",
+      "span": {
+        "col": 7,
+        "end_col": 36,
+        "end_line": 4,
+        "line": 4
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "from": null,
+      "kind": "name",
+      "name": "LedgerTestCase",
+      "span": {
+        "col": 37,
+        "end_col": 51,
+        "end_line": 4,
+        "line": 4
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 5
+      },
+      "kind": "name",
+      "name": "self",
+      "span": {
+        "col": 39,
+        "end_col": 43,
+        "end_line": 5,
+        "line": 5
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 5
+      },
+      "kind": "name",
+      "name": "self",
+      "span": {
+        "col": 9,
+        "end_col": 13,
+        "end_line": 6,
+        "line": 6
+      },
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "from": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 5
+      },
+      "kind": "member",
+      "name": "balances",
+      "span": {
+        "col": 14,
+        "end_col": 22,
+        "end_line": 6,
+        "line": 6
       },
       "target": {
         "kind": "unresolved"

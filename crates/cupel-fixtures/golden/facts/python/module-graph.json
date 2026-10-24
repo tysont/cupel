@@ -285,6 +285,31 @@
         },
         {
           "edge_kind": "import",
+          "from": "tests/ledger_case.py",
+          "line": 1,
+          "relative": false,
+          "specifier": "unittest",
+          "target": {
+            "kind": "external",
+            "package": "unittest"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/ledger_case.py",
+          "line": 3,
+          "names": [
+            "balance"
+          ],
+          "relative": false,
+          "specifier": "ledger.balance",
+          "target": {
+            "kind": "file",
+            "path": "src/ledger/__init__.py"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "tests/test_ledger.py",
           "line": 1,
           "names": [
@@ -376,6 +401,20 @@
           "target": {
             "kind": "file",
             "path": "src/ledger/report/format.py"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "tests/test_ledger_case.py",
+          "line": 1,
+          "names": [
+            "LedgerTestCase"
+          ],
+          "relative": false,
+          "specifier": "ledger_case.LedgerTestCase",
+          "target": {
+            "kind": "file",
+            "path": "tests/ledger_case.py"
           }
         },
         {

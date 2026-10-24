@@ -306,6 +306,38 @@
             {
               "kind": "equality",
               "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 6,
+                "line": 6
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_a_harness_method_asserts",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 33,
+            "end_line": 6,
+            "line": 5
+          }
+        }
+      ],
+      "file": "tests/test_ledger_case.py",
+      "framework": "unittest",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
                 "col": 9,
                 "end_col": 36,
                 "end_line": 13,

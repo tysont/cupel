@@ -300,12 +300,12 @@ fn assert_through(assertions: &mut Vec<Assertion>, class: Class, at: Span) {
     assertions.sort_by_key(|assertion| (assertion.span.line, assertion.span.col));
 }
 
-/// Gives each helper call that is already an assertion (a convention such as Go's call handing
-/// `t` to a function) and names no helper of its own file the class of an asserting helper of
-/// that name in another file of the same directory, a Go package's shared `_test.go` helpers.
+/// Gives each helper call that names no helper of its own file the class of an asserting helper
+/// of that name in another file of the same directory, when the language's tests share helpers
+/// by directory (a Go package's `_test.go` helpers, a Python test package's harness).
 fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn Language) {
     let spec = language.spec();
-    if !spec.has(QueryFile::Tests) {
+    if !spec.has(QueryFile::Tests) || !spec.tables().tests.directory_helpers {
         return;
     }
     let rules = &spec.tables().tests;
@@ -321,14 +321,9 @@ fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn La
         let loose = attach_assertions(&mut cases, parsed, &found, rules);
         let helpers = file_helpers(&source, &cases, &loose);
         let dir = directory(&parsed.file);
-        for (case, node) in helper_calls(&cases, &found) {
+        for (_, node) in helper_calls(&cases, &found) {
             let name = parsed.text(node);
-            let asserts = cases.get(&case).is_some_and(|case| {
-                case.assertions
-                    .iter()
-                    .any(|a| a.span.line == span(node).line && a.span.col == span(node).col)
-            });
-            if asserts && !helpers.contains_key(name) {
+            if !helpers.contains_key(name) {
                 unresolved.push((parsed.file.clone(), span(node), name.to_owned()));
             }
         }

@@ -6167,6 +6167,30 @@
     {
       "sites": [
         {
+          "from": "self.assertEqual(balance(entries), expected)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 9,
+            "end_col": 53,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "pass"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "account.deposit(250)",
           "operator": "statement-deletion",
           "set": "extended",
@@ -6575,6 +6599,75 @@
         "col": 1,
         "file": "tests/test_ledger.py",
         "line": 56
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "self.balances([2, 3], 5)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 9,
+            "end_col": 33,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0438267a3405d54e",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "6a9835fb110ba45a",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "414fdd807f12bdf7",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 5
       }
     },
     {

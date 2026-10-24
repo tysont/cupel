@@ -757,6 +757,30 @@
       }
     },
     {
+      "file": "tests/ledger_case.py",
+      "kind": "type",
+      "path": "tests.ledger_case.LedgerTestCase",
+      "signature": "(unittest.TestCase)",
+      "span": {
+        "col": 1,
+        "end_col": 53,
+        "end_line": 8,
+        "line": 6
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "kind": "method",
+      "path": "tests.ledger_case.LedgerTestCase.balances",
+      "signature": "(self, _, _)",
+      "span": {
+        "col": 5,
+        "end_col": 53,
+        "end_line": 8,
+        "line": 7
+      }
+    },
+    {
       "file": "tests/test_ledger.py",
       "kind": "function",
       "path": "tests.test_ledger.test_deposit_adds_to_the_balance",
@@ -886,6 +910,30 @@
         "end_col": 19,
         "end_line": 58,
         "line": 56
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "kind": "type",
+      "path": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "signature": "(LedgerTestCase)",
+      "span": {
+        "col": 1,
+        "end_col": 33,
+        "end_line": 6,
+        "line": 4
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "path": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_a_harness_method_asserts",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 33,
+        "end_line": 6,
+        "line": 5
       }
     },
     {

@@ -345,3 +345,73 @@ def test_example():
         ]
     );
 }
+
+#[test]
+fn a_call_of_an_asserting_helper_or_of_a_base_class_method_beside_it_asserts() {
+    let dir = tree(&[
+        (
+            "pkg/test/harness.py",
+            "import unittest\n\
+             \n\
+             class TestCase(unittest.TestCase):\n    \
+             def flakes(self, source, *expected):\n        \
+             self.assertEqual(check(source), list(expected))\n\
+             \n    \
+             def make_file(self, text):\n        \
+             return write(text)\n",
+        ),
+        (
+            "pkg/test/test_builtin.py",
+            "from pkg.test.harness import TestCase\n\
+             \n\
+             def verify(found):\n    \
+             assert found == []\n\
+             \n\
+             class TestBuiltins(TestCase):\n    \
+             def has_errors(self, path, errors):\n        \
+             self.assertIn(errors, path)\n\
+             \n    \
+             def test_unbound_local(self):\n        \
+             self.flakes('print(range)', UndefinedLocal)\n\
+             \n    \
+             def test_errors(self):\n        \
+             self.has_errors('a.py', [])\n\
+             \n    \
+             def test_verified(self):\n        \
+             verify(check('x = 1'))\n\
+             \n    \
+             def test_file_only(self):\n        \
+             self.make_file('x = 1')\n",
+        ),
+        (
+            "pkg/other/test_elsewhere.py",
+            "import unittest\n\
+             \n\
+             class TestElsewhere(unittest.TestCase):\n    \
+             def test_no_helper_beside_it(self):\n        \
+             self.flakes('x')\n",
+        ),
+    ]);
+    let frames: TestFrames = produce("python", dir.path());
+    assert_eq!(
+        rows(&assert_framework(
+            &frames,
+            "pkg/test/test_builtin.py",
+            "unittest"
+        )),
+        [
+            case("test_unbound_local", &[(Equality, Strong)], Runs, &[], 10),
+            case("test_errors", &[(Custom, Weak)], Runs, &[], 13),
+            case("test_verified", &[(Equality, Strong)], Runs, &[], 16),
+            case("test_file_only", &[], Runs, &[], 19),
+        ]
+    );
+    assert_eq!(
+        rows(&assert_framework(
+            &frames,
+            "pkg/other/test_elsewhere.py",
+            "unittest"
+        )),
+        [case("test_no_helper_beside_it", &[], Runs, &[], 4)]
+    );
+}

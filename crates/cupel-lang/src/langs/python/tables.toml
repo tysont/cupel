@@ -97,6 +97,8 @@ templates = ["not ({})"]
 
 [tests]
 framework = "pytest"
+# A test package's harness (a `TestCase` base class, shared functions) sits beside its tests.
+directory_helpers = true
 
 [tests.assertions]
 # Idioms captured as @assertion.idiom.<key> from `assert` statements and `pytest.raises`.
