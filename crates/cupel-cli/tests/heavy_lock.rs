@@ -15,13 +15,15 @@ fn script() -> PathBuf {
     workspace().join("scripts/heavy.sh")
 }
 
-/// `scripts/heavy.sh ARGS` in `dir`, locking `lock`.
+/// `scripts/heavy.sh ARGS` in `dir`, locking `lock`, at the default priority whatever the test's own
+/// environment says (a merge chain runs the suite with `CUPEL_HEAVY_PRIORITY=first` set).
 fn heavy(dir: &Path, lock: &Path, args: &[&str]) -> Command {
     let mut command = Command::new("sh");
     command
         .arg(script())
         .args(args)
         .env("CUPEL_HEAVY_LOCK", lock)
+        .env("CUPEL_HEAVY_PRIORITY", "default")
         .current_dir(dir);
     command
 }
