@@ -396,7 +396,7 @@ fn each_payload_declares_its_own_kind_and_version() {
         declared,
         [
             (FactKind::Symbols, 2),
-            (FactKind::Decisions, 2),
+            (FactKind::Decisions, 3),
             (FactKind::NormTree, 1),
             (FactKind::MutationSites, 1),
             (FactKind::TestFrames, 3),
