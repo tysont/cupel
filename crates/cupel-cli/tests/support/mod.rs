@@ -11,6 +11,7 @@ use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
+use std::time::{Duration, Instant};
 
 use assert_cmd::Command;
 use cupel_core::{CheckId, CheckRegistry, Envelope, FindingId, Writer};
@@ -442,6 +443,22 @@ pub fn listed_tools() -> Vec<Value> {
 }
 
 /// The repository's root.
+/// Longer than any stall of a loaded machine, a fresh binary's first watcher start on macOS
+/// (8-30 s) included: only something that never happens is waited on this long (ADR-145).
+pub const HANG: Duration = Duration::from_secs(600);
+
+/// Whether `condition` holds within `HANG`, polled every 25 ms.
+pub fn eventually(condition: impl Fn() -> bool) -> bool {
+    let deadline = Instant::now() + HANG;
+    while Instant::now() < deadline {
+        if condition() {
+            return true;
+        }
+        std::thread::sleep(Duration::from_millis(25));
+    }
+    false
+}
+
 pub fn workspace() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../..")

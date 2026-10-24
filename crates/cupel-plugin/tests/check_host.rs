@@ -4,7 +4,8 @@
 
 mod support;
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use cupel_core::{
@@ -17,6 +18,15 @@ use support::{check_manifest, discovery, entries, languages, plugin, prints, scr
 /// Longer than any stall of a loaded machine: only a plugin that never starts or never stops
 /// is waited on this long.
 const HANG: Duration = Duration::from_secs(600);
+
+/// Cancels `cancel` once `ready` exists, or after `HANG`.
+fn cancel_once_made(ready: PathBuf, cancel: Cancellation) -> JoinHandle<()> {
+    std::thread::spawn(move || {
+        let patience = Cancellation::with_deadline(Instant::now() + HANG);
+        while !ready.exists() && patience.wait(Duration::from_millis(10)) {}
+        cancel.cancel();
+    })
+}
 
 /// A check plugin in `dir` answering `plan` with `plan` and `run` with `run`, registered.
 fn registered(dir: &Path, plan: &str, run: &str) -> CheckRegistry {
@@ -313,14 +323,7 @@ fn a_cancelled_run_sends_sigterm_then_sigkill_and_is_cut_short() {
     let checks = registered(dir.path(), "exit 1", &body);
     let check = checks.iter().next().unwrap();
     let cancel = Cancellation::with_deadline(Instant::now() + HANG);
-    let canceller = cancel.clone();
-    let cancelling = std::thread::spawn(move || {
-        let patience = Instant::now() + HANG;
-        while !ready.exists() && Instant::now() < patience {
-            std::thread::sleep(Duration::from_millis(10));
-        }
-        canceller.cancel();
-    });
+    let cancelling = cancel_once_made(ready.clone(), cancel.clone());
     let ran = check.run(
         &ctx(dir.path(), cancel),
         &facts(check),
@@ -329,6 +332,7 @@ fn a_cancelled_run_sends_sigterm_then_sigkill_and_is_cut_short() {
     );
     cancelling.join().unwrap();
     // The plugin loops until a signal ends it: the run returned because it was cut short.
+    assert!(ready.exists(), "the plugin never set its trap");
     assert_eq!(ran, Err(Error::Cancelled));
     assert_eq!(std::fs::read_to_string(&marker).unwrap(), "term\n");
     let request: Value =

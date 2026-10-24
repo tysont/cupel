@@ -1,20 +1,15 @@
 // ABOUTME: Tests for scripts/dogfood.sh, which `make dogfood` runs through: one dogfood at a time across every
 // ABOUTME: checkout on the machine, under a lock file, and none from a working tree that no longer exists.
+mod support;
+
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
 use std::sync::mpsc;
-use std::time::{Duration, Instant};
 
+use support::{HANG, eventually, workspace};
 use tempfile::TempDir;
-
-fn workspace() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../..")
-        .canonicalize()
-        .unwrap()
-}
 
 fn script() -> PathBuf {
     workspace().join("scripts/dogfood.sh")
@@ -29,21 +24,6 @@ fn dogfood(dir: &Path, lock: &Path, args: &[&str]) -> Command {
         .env("CUPEL_DOGFOOD_LOCK", lock)
         .current_dir(dir);
     command
-}
-
-/// Longer than any stall of a loaded machine: only a run that never gets there waits this long.
-const HANG: Duration = Duration::from_secs(600);
-
-/// Whether `condition` holds within `HANG`, polled every 20 ms.
-fn eventually(condition: impl Fn() -> bool) -> bool {
-    let patience = Instant::now() + HANG;
-    while !condition() {
-        if Instant::now() >= patience {
-            return false;
-        }
-        std::thread::sleep(Duration::from_millis(20));
-    }
-    true
 }
 
 fn text(bytes: &[u8]) -> String {

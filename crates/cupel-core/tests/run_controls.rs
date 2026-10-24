@@ -66,18 +66,22 @@ fn wait_completes_when_nothing_cancels_it() {
 
 #[test]
 fn wait_returns_early_when_the_deadline_passes() {
-    let token = Cancellation::with_deadline(Instant::now() + Duration::from_millis(20));
+    let started = Instant::now();
+    let token = Cancellation::with_deadline(started + Duration::from_millis(20));
     // (completed, cancelled): a wait that ran its whole hour would say it completed.
     assert_eq!(
         (token.wait(Duration::from_secs(3600)), token.is_cancelled()),
         (false, true)
     );
+    // And it lasted until the deadline: however loaded the machine, never less.
+    assert!(started.elapsed() >= Duration::from_millis(20));
 }
 
 #[test]
 fn wait_returns_early_when_another_thread_cancels() {
     let token = Cancellation::new();
     let canceller = token.clone();
+    let started = Instant::now();
     let handle = std::thread::spawn(move || {
         std::thread::sleep(Duration::from_millis(20));
         canceller.cancel();
@@ -88,6 +92,8 @@ fn wait_returns_early_when_another_thread_cancels() {
         (false, true)
     );
     handle.join().unwrap();
+    // The other thread cancelled after its 20 ms sleep, so the wait lasted at least that.
+    assert!(started.elapsed() >= Duration::from_millis(20));
 }
 
 /// Records what reaches it and how often it was flushed.

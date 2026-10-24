@@ -618,6 +618,8 @@ mod tests {
             .filter(|pair| !found.pairs.iter().any(|p| (p.left, p.right) == **pair))
             .collect();
         assert_eq!(missed, Vec::<&(usize, usize)>::new());
+        // Every planted pair was compared exactly, and few others were.
+        assert!(found.compared >= planted.len(), "{}", found.compared);
         assert!(
             found.compared <= 2 * sets.len(),
             "{} exact comparisons",

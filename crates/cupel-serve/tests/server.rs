@@ -21,14 +21,12 @@ const HANG: Duration = Duration::from_secs(600);
 
 /// Whether `condition` holds within `HANG`, polled every 20 ms.
 fn within_hang(condition: impl Fn() -> bool) -> bool {
-    let patience = Instant::now() + HANG;
-    while !condition() {
-        if Instant::now() >= patience {
-            return false;
-        }
-        thread::sleep(Duration::from_millis(20));
+    let patience = Cancellation::with_deadline(Instant::now() + HANG);
+    let mut met = condition();
+    while !met && patience.wait(Duration::from_millis(20)) {
+        met = condition();
     }
-    true
+    met
 }
 
 /// A handler scripted by the invocation's first argument, recording each run's stdout when it
@@ -261,6 +259,7 @@ fn stderr_reaches_the_client_in_order_while_the_run_goes_on() {
         (done.stdout.as_str(), done.stderr.as_str()),
         ("out", "rest\n")
     );
+    assert_eq!(daemon.script.finished(), ["out"]);
 }
 
 #[test]
@@ -398,6 +397,7 @@ fn concurrent_clients_run_at_once_and_each_gets_its_own_answer() {
         .collect();
     let answers: Vec<String> = clients.into_iter().map(|c| c.join().unwrap()).collect();
     assert_eq!(answers, ["0", "1", "2", "3"]);
+    assert_eq!(daemon.script.gathered.load(Ordering::SeqCst), 4);
     assert_eq!(daemon.status().served, 4);
 }
 
@@ -426,9 +426,12 @@ fn stopping_cancels_runs_in_flight_and_they_still_answer() {
 #[test]
 fn removing_the_socket_file_ends_the_daemon() {
     let daemon = Running::new(false);
-    std::fs::remove_file(&daemon.socket).unwrap();
-    // Nothing else ends this daemon: `finished` returns only because it noticed.
+    let socket = daemon.socket.clone();
+    std::fs::remove_file(&socket).unwrap();
+    // Nothing else ends this daemon: `finished` returns only because it noticed, and it leaves
+    // no socket behind.
     assert_eq!(daemon.finished().unwrap().requests, 0);
+    assert!(!socket.exists());
 }
 
 #[test]
