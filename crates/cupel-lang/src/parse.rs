@@ -105,10 +105,7 @@ fn first_error_in<'t>(node: Node<'t>, token_trees: &[String]) -> Option<Node<'t>
         return (!tolerated).then_some(node);
     }
     let mut cursor = node.walk();
-    let children: Vec<Node<'t>> = node
-        .children(&mut cursor)
-        .filter(|child| child.has_error())
-        .collect();
+    let children: Vec<Node<'t>> = node.children(&mut cursor).filter(Node::has_error).collect();
     if children.is_empty() {
         return Some(node);
     }

@@ -21,7 +21,7 @@
 //! - `@assertion.macro` on the name of a macro the file defines (the definition is the name's
 //!   parent node) and `@assertion.expansion` on the name a macro is invoked by: when the
 //!   invoked macro is one the file defines outside every case and its definition holds an
-//!   assertion (serde_json's `test_parse_err!`), the invocation asserts with the class of the
+//!   assertion (`serde_json`'s `test_parse_err!`), the invocation asserts with the class of the
 //!   definition's first strong assertion, else its first, as a helper call does. An invocation
 //!   in a helper is one of the helper's assertions, so a case calling that helper asserts too.
 //! - `@test.mock` on a test double's creation, with optional `@mock.target` naming what it
