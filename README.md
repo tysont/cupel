@@ -71,14 +71,14 @@ Every other route installs a release binary from GitHub Releases, checked agains
 | Release archive | `gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'` | Linux, macOS | now |
 | From source | `cargo install --locked --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
 | Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap |
-| npm | `npx cupel` | Linux, macOS | once the `cupel` package is published to npm |
-| pipx | `pipx install cupel` | Linux, macOS | once Cupel's package is on PyPI; the `cupel` there is another project's |
-| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the crates are published to crates.io |
+| npm | `npx cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to npm |
+| pipx | `pipx install cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to PyPI |
+| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's |
 | cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
 <!-- end:install-routes -->
 
 - **Install script** (POSIX `sh`): installs Linux x86_64/aarch64 and macOS arm64/x86_64 binaries into `~/.local/bin`, or `CUPEL_INSTALL_DIR`, and prints the line to add to your `PATH` when that directory is not on it. `CUPEL_VERSION=0.1.0` installs that release instead of the latest. It needs `curl` or `wget`, `tar`, and `sha256sum` or `shasum`.
-- **npm and pipx**: the package's `cupel` command downloads the binary of the package's own version on first run into `CUPEL_CACHE_DIR`, else `~/.cache/cupel` (`%LOCALAPPDATA%\cupel` on Windows), then runs it with your arguments, stdio, and exit code. When the binary cannot be downloaded or its checksum differs, it prints why and exits 3. npm needs Node 18 or newer; pipx, Python 3.9 or newer.
+- **npm and pipx**: the `cupel-cli` package's `cupel` command downloads the binary of the package's own version on first run into `CUPEL_CACHE_DIR`, else `~/.cache/cupel` (`%LOCALAPPDATA%\cupel` on Windows), then runs it with your arguments, stdio, and exit code. When the binary cannot be downloaded or its checksum differs, it prints why and exits 3. npm needs Node 18 or newer; pipx, Python 3.9 or newer.
 - **Homebrew**: the formula, rendered per release by `dist/homebrew/render.sh` from `SHA256SUMS`, covers macOS and Linux.
 
 ## The agent loop
@@ -1637,6 +1637,7 @@ All automation goes through `make`.
 | `make readme` | regenerate this README's verb, global-flag, exit-code, check, check-settings, and support-matrix tables and its agent guide from `cupel describe`, and its MCP tool table from `cupel serve --mcp` |
 | `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)), and each run of a verb an MCP tool serves again as that tool's call to `cupel serve --mcp` on another copy, which must return the same envelope and stderr ([ADR-121](docs/adr/CUPEL_DECISION_121.md)) |
 | `make baseline` | after a green tree dogfood, sets the store's baseline to that run and exports it to `.cupel/baseline.json`, the committed reference the tree gate's `base` rules compare with ([ADR-140](docs/adr/CUPEL_DECISION_140.md)) |
+| `make reclaim` | removes the build outputs a checkout regenerates on demand (the coverage build, the incremental caches, the suite cache under `.cupel/cache`), which grow a worktree to 30 to 50 GB; `scripts/heavy.sh` refuses to start a heavy command below 40 GB of free space (`CUPEL_HEAVY_MIN_FREE_GB`) |
 | `make dogfood` | Cupel grades itself at `--depth deep`: `cupel check --changed --depth deep --gate` against `main`, which mutates every function of every changed file; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`, whose clone ratchets read `<= base` against the committed `.cupel/baseline.json` it imports first, and skips `tests.mutation`. Both skip `tests.flaky`, whose engine reruns the whole suite one test at a time and does not rerun cargo-nextest, and `conc.race`, which Miri cannot run on tests that spawn processes ([ADR-129](docs/adr/CUPEL_DECISION_129.md)). A local run is bounded by `--budget 30m` (`DOGFOOD_BUDGET`), lists what the budget left out, and exits 5 when it left anything out; CI runs both with `DOGFOOD_BUDGET=`, which runs every check. They need cargo-nextest and cargo-llvm-cov on `PATH`. The run goes through `scripts/heavy.sh`, the machine-wide lock every heavy command takes, so one dogfood (or one external test suite run through the same script) runs at a time on a machine |
 | `make install` | `cargo install --path crates/cupel-cli` |
 | `make dist` | build the stripped release binary and package it as `target/dist/cupel-<version>-<target>.tar.gz` (`.zip` on Windows) with `LICENSE` and this README; `TARGET=<triple>` builds another target, the Linux musl targets through `cargo-zigbuild` with `zig` on PATH ([ADR-124](docs/adr/CUPEL_DECISION_124.md)) |

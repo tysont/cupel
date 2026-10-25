@@ -515,6 +515,55 @@ fn only_its_publish_job_and_the_probe_read_each_secret() {
     assert_eq!(readers, expected);
 }
 
+/// `publish-crates` asks crates.io who holds each publishable crate's name before it publishes
+/// (ADR-146): a name held by another project writes "skipped: crate names held by another project"
+/// and the dry run and the publish, in that order, run only when no name is taken.
+#[test]
+fn the_crates_job_skips_publishing_while_another_project_holds_a_crate_name() {
+    let jobs = jobs(&release_workflow());
+    let lines = jobs
+        .iter()
+        .find(|(name, _)| name == "publish-crates")
+        .map(|(_, lines)| lines.clone())
+        .expect("a `publish-crates` job");
+    let skip = "skipped: crate names held by another project on crates.io:$taken";
+    let gate = "if: steps.names.outputs.taken == 'false'".to_owned();
+    let expected = vec![
+        "- id: names".to_owned(),
+        "echo \"taken=true\" >> \"$GITHUB_OUTPUT\"".to_owned(),
+        "echo \"taken=false\" >> \"$GITHUB_OUTPUT\"".to_owned(),
+        format!("echo \"::notice title=publish-crates::{skip}\""),
+        format!("echo \"publish-crates {skip}\" >> \"$GITHUB_STEP_SUMMARY\""),
+    ];
+    let position = |line: &str| lines.iter().position(|candidate| candidate == line);
+    let names = position("- id: names");
+    let dry_run = position("run: cargo publish --workspace --dry-run --no-verify --locked");
+    let publish = position("run: cargo publish --workspace --locked");
+    // The line before each `run:` of a gated step is its `if:`, after `env:` and its variables.
+    let gated = |step: Option<usize>| {
+        step.and_then(|at| {
+            lines[..at]
+                .iter()
+                .rposition(|line| line.starts_with("- name:"))
+        })
+        .is_some_and(|start| {
+            lines[start..]
+                .iter()
+                .take_while(|line| !line.starts_with("run:"))
+                .any(|line| *line == gate)
+        })
+    };
+    assert_eq!(
+        (
+            missing(&lines, expected),
+            names < dry_run && dry_run < publish && names.is_some(),
+            gated(dry_run),
+            gated(publish),
+        ),
+        (Vec::<String>::new(), true, true, true)
+    );
+}
+
 /// The Windows build is a release target like the others (ADR-137): no build may fail without
 /// failing the release.
 #[test]
