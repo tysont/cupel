@@ -127,3 +127,27 @@ fn files_outside_src_are_namespaced_by_their_whole_path() {
         &[("tests::ledger::checks", Function, Private, (1, 1))],
     );
 }
+
+#[test]
+fn methods_of_an_impl_for_a_reference_or_a_primitive_are_methods_on_that_type() {
+    let dir = tree(&[(
+        "src/lib.rs",
+        "pub struct Reader<R>(R);\n\
+         pub struct Number(u64);\n\
+         impl<'a, R> Iterator for &'a mut Reader<R> {\n    type Item = u8;\n    fn next(&mut self) -> Option<u8> { None }\n}\n\
+         impl std::fmt::Display for &Number {\n    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result { write!(f, \"{}\", self.0) }\n}\n\
+         impl Float for f32 {\n    fn pow10(self) -> f32 { self }\n}\n\
+         impl Float for &f64 {\n    fn pow10(self) -> f64 { *self }\n}\n",
+    )]);
+    let symbols: Symbols = produce("rust", dir.path());
+    assert_symbols(
+        &symbols,
+        "src/lib.rs",
+        &[
+            ("Reader::next", Method, Public, (5, 5)),
+            ("Number::fmt", Method, Public, (8, 8)),
+            ("f32::pow10", Method, Public, (11, 11)),
+            ("f64::pow10", Method, Public, (14, 14)),
+        ],
+    );
+}

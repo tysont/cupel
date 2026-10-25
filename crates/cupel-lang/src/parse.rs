@@ -80,26 +80,41 @@ impl Parsed {
 
     /// The first syntax error in document order: an `ERROR` node or a node the parser had to
     /// invent (`MISSING`). Tree-sitter recovers from errors, so the rest of the tree is usable.
-    pub fn first_error(&self) -> Option<Node<'_>> {
+    /// An `ERROR` of only tokens directly inside a node of a kind in `token_trees` is a token
+    /// the grammar does not know there, not an error (`[syntax]`).
+    pub fn first_error(&self, token_trees: &[String]) -> Option<Node<'_>> {
         let root = self.root();
         if !root.has_error() {
             return None;
         }
-        let mut node = root;
-        'descend: loop {
-            if node.is_error() || node.is_missing() {
-                return Some(node);
-            }
-            let mut cursor = node.walk();
-            for child in node.children(&mut cursor) {
-                if child.has_error() {
-                    node = child;
-                    continue 'descend;
-                }
-            }
-            return Some(node);
-        }
+        first_error_in(root, token_trees)
     }
+}
+
+/// The first syntax error at or below `node`, which has one; see [`Parsed::first_error`].
+fn first_error_in<'t>(node: Node<'t>, token_trees: &[String]) -> Option<Node<'t>> {
+    if node.is_error() || node.is_missing() {
+        let mut cursor = node.walk();
+        let tolerated = node.is_error()
+            && node
+                .children(&mut cursor)
+                .all(|token| token.child_count() == 0)
+            && node
+                .parent()
+                .is_some_and(|parent| token_trees.iter().any(|kind| kind == parent.kind()));
+        return (!tolerated).then_some(node);
+    }
+    let mut cursor = node.walk();
+    let children: Vec<Node<'t>> = node
+        .children(&mut cursor)
+        .filter(|child| child.has_error())
+        .collect();
+    if children.is_empty() {
+        return Some(node);
+    }
+    children
+        .into_iter()
+        .find_map(|child| first_error_in(child, token_trees))
 }
 
 /// A file that could not be parsed at all.

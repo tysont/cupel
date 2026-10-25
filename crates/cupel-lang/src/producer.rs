@@ -144,7 +144,8 @@ pub fn parse_scope(
     for outcome in outcomes {
         match outcome {
             Ok(file) => {
-                if let Some(error) = file.first_error() {
+                let token_trees = &language.spec().tables().syntax.token_trees;
+                if let Some(error) = file.first_error(token_trees) {
                     let start = error.start_position();
                     sink.emit(Event::Finding(Box::new(parse_error(
                         &file.file,

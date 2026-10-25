@@ -15,6 +15,7 @@ pub struct Tables {
     pub namespace: NamespaceRules,
     pub visibility: VisibilityRules,
     pub decisions: DecisionRules,
+    pub syntax: SyntaxRules,
     /// Present when the language has a `NormTree` producer.
     pub normalize: Option<NormalizeRules>,
     pub mutations: HashMap<MutationOperator, Replacements>,
@@ -146,6 +147,22 @@ impl VisibilityRules {
             .find(|rule| rule.matches(name))
             .map_or(self.default, |rule| rule.visibility)
     }
+}
+
+/// `[syntax]`: which syntax errors the grammar reports that the language does not have.
+///
+/// ```toml
+/// [syntax]
+/// token_trees = ["token_tree"]  # node kinds whose children may be any token
+/// ```
+///
+/// An `ERROR` node directly inside a `token_trees` node that holds only tokens is a token the
+/// grammar does not know there (Rust's `~` in a macro call, which rustc lexes and leaves to the
+/// macro), so it is not a `lang.parse-error`. Default: none.
+#[derive(Debug, Clone, Default, PartialEq, Deserialize)]
+#[serde(deny_unknown_fields, default)]
+pub struct SyntaxRules {
+    pub token_trees: Vec<String>,
 }
 
 /// `[decisions]`: how decisions captured by decisions.scm weigh and nest.

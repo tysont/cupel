@@ -12,6 +12,10 @@ modifiers = { "pub" = "public", "pub(self)" = "private" }
 # pub(crate), pub(super), pub(in path): visible inside the crate, not exported.
 modifier_default = "internal"
 
+# A macro call, `macro_rules!` rule, or repetition takes any token; `~` is one the grammar lacks.
+[syntax]
+token_trees = ["token_tree", "token_tree_pattern", "token_repetition", "token_repetition_pattern"]
+
 # `else if` is an `if_expression` inside the `else_clause` of the branch it continues.
 [decisions]
 chain_parents = ["else_clause"]
@@ -107,6 +111,7 @@ equal = { kind = "equality", strength = "strong" }
 not-equal = { kind = "equality", strength = "weak" }
 one-value = { kind = "equality", strength = "strong" }
 process = { kind = "custom", strength = "strong" }
+compile-test = { kind = "custom", strength = "strong" }
 is-present = { kind = "not-null", strength = "weak" }
 is-err = { kind = "throws", strength = "weak" }
 should-panic = { kind = "throws", strength = "strong" }
