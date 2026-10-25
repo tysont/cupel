@@ -922,6 +922,62 @@ fn symbol_selectors_limit_what_each_check_plans_and_sees() {
     assert_eq!(in_range.unwrap().symbols, 0);
 }
 
+/// Notes the file of each symbol in the check's scope.
+fn scoped_files(ctx: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+    let mut result = passing("t.scoped", None);
+    result.notes = ctx
+        .scope
+        .symbols
+        .iter()
+        .flatten()
+        .map(|key| key.file.clone())
+        .collect();
+    Ok(result)
+}
+
+#[test]
+fn under_a_range_the_symbols_in_scope_are_those_its_changed_lines_touch() {
+    let world = World::new(
+        vec![check("t.scoped", &[FactKind::Symbols], scoped_files)],
+        "",
+    );
+    let scoped = |changed: &[(&str, (u32, u32))], selectors: &[&str]| {
+        let changed: BTreeMap<String, Vec<(u32, u32)>> = changed
+            .iter()
+            .map(|(file, lines)| ((*file).to_owned(), vec![*lines]))
+            .collect();
+        let (outcome, _) = world.run(&["rust"], |job| {
+            job.changed = Some(changed);
+            job.selectors = selectors
+                .iter()
+                .map(|text| SymbolSelector::parse(text).unwrap())
+                .collect();
+            job.selectors_must_match = false;
+        });
+        let outcome = outcome.unwrap();
+        (outcome.symbols, outcome.checks[0].notes.clone())
+    };
+    // Each file's one symbol spans lines 1-2: a change at line 2 touches it, one at 3-9 does not.
+    assert_eq!(
+        scoped(&[("a.x", (3, 9)), ("b.x", (2, 2))], &[]),
+        (1, vec!["b.x (rust)".to_owned()])
+    );
+    // A file in scope without changed lines is new to git (untracked): every line is new.
+    assert_eq!(
+        scoped(&[("a.x", (3, 9))], &[]),
+        (1, vec!["b.x (rust)".to_owned()])
+    );
+    // `--symbols` intersects with the range.
+    assert_eq!(
+        scoped(&[("a.x", (1, 1)), ("b.x", (1, 1))], &["b"]),
+        (1, vec!["b.x (rust)".to_owned()])
+    );
+    assert_eq!(
+        scoped(&[("a.x", (1, 1)), ("b.x", (4, 4))], &["b"]),
+        (0, vec![])
+    );
+}
+
 #[test]
 fn a_cancelled_run_skips_unstarted_work_with_reason_timeout() {
     let world = World::new(vec![check("t.one", &[FactKind::Symbols], ok)], "");

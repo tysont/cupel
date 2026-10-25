@@ -1,28 +1,32 @@
-// ABOUTME: `tests.mutation`: scores MutationOutcomes, whoever produced them (ADR-080): surviving mutants as failures at
-// ABOUTME: their site, timeouts and uncovered sites as notes, ADR-004's equivalents, ADR-082's fallbacks, killed ratio.
+// ABOUTME: `tests.mutation`: scores MutationOutcomes, whoever produced them (ADR-080): surviving mutants as failures at their
+// ABOUTME: site, timeouts, uncovered sites, and slow tests left out as notes (ADR-147), equivalents, fallbacks, killed ratio.
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
+use cupel_core::config::{ConfigError, Table, TimeLimit};
 use cupel_core::syntax::{SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
-    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant, MutantOutcome,
-    MutationOutcomes, MutationStrategy, Plan, ProtectionMetric, Result, Scope, Score, Severity,
-    SiteHash, Stability, SymbolHash, Tier,
+    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, ExcludedTest,
+    FactKind, Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant, MutantOutcome,
+    MutationOutcomes, MutationStrategy, Plan, ProtectionMetric, Result, Scope, Score, SettingSpec,
+    Severity, SiteHash, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
 use serde_json::Value;
 
-use crate::finding::{SymbolFinding, with_nearest_test};
-use crate::manifest::{kind, metric, protection, ranked};
+use crate::finding::{SubjectFinding, SymbolFinding, with_nearest_test};
+use crate::manifest::{kind, metric, protection, ranked, setting};
 use crate::metrics::{scored, sum, symbol_target, weighted_mean};
 use crate::outcome;
-use crate::settings::Limits;
 
 const ID: &str = "tests.mutation";
 
-/// The check takes no settings; how mutants run is the engine's (`[lang.<id>] mutation`).
-const SETTINGS: Limits = Limits::new(&[]);
+/// The check's one setting, the cap on a mutant's run, which configures the engine's fact
+/// (ADR-147); everything else about how mutants run is the engine's (`[lang.<id>] mutation`).
+const MAX_MUTANT_TIMEOUT: &str = "max_mutant_timeout";
+
+/// The cap when none is configured; the engine's default, which a test holds equal.
+const DEFAULT_MAX_MUTANT_TIMEOUT: &str = "120s";
 
 /// The confidence of a possibly equivalent survivor (ADR-004).
 const EQUIVALENT_CONFIDENCE: f64 = 0.3;
@@ -55,6 +59,18 @@ struct Survived {
 #[serde(deny_unknown_fields)]
 struct Site {
     mutation: Mutation,
+}
+
+/// Evidence of `mutant.slow-test-excluded`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct SlowTest {
+    /// The runner's ID of the test.
+    test: String,
+    /// Its file, when the runner names one.
+    file: Option<String>,
+    /// How long it ran in the baseline, in milliseconds.
+    baseline_ms: u64,
 }
 
 /// Evidence of `mutant.equivalent?`.
@@ -112,9 +128,23 @@ fn manifest() -> Manifest {
                 ActionKind::Review,
                 "The mutant survived and may behave exactly as the original (ADR-004).",
             ),
+            kind::<SlowTest>(
+                "mutant.slow-test-excluded",
+                ActionKind::Review,
+                "A test slower than 60 s in the baseline was left out of the mutants' runs \
+                 that per-test selection did not narrow (ADR-147).",
+            ),
         ],
         metrics: metrics(),
-        settings: SETTINGS.specs(),
+        settings: vec![SettingSpec {
+            configures: Some(FactKind::MutationOutcomes),
+            ..setting(
+                MAX_MUTANT_TIMEOUT,
+                Value::from(DEFAULT_MAX_MUTANT_TIMEOUT),
+                "The longest a mutant's run may take, as a duration such as 90s or 5m; a run \
+                 that reaches it is a timeout, whatever timeout_factor allows.",
+            )
+        }],
         stability: Stability::Experimental,
         summary: "Mutates the code in scope and runs the tests that cover each mutant; a \
                   mutant every test passes against survived. Score: killed / (killed + \
@@ -183,11 +213,8 @@ impl Check for TestsMutation {
     }
 
     fn plan(&self, ctx: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        SETTINGS.plan(
-            &self.manifest,
-            ctx,
-            outcome::plan_symbols(&self.manifest, scope),
-        )
+        read_settings(&ctx.config)?;
+        Ok(outcome::plan_symbols(&self.manifest, scope))
     }
 
     fn run(
@@ -197,7 +224,7 @@ impl Check for TestsMutation {
         _: &Plan,
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
-        SETTINGS.read(&self.manifest.id, &ctx.config)?;
+        read_settings(&ctx.config)?;
         let outcomes = facts.get::<MutationOutcomes>()?;
         let symbols: HashMap<SymbolKey, &SymbolDef> = facts
             .get::<Symbols>()?
@@ -228,6 +255,10 @@ impl Check for TestsMutation {
         }
         for protection in by_symbol.values() {
             protection.measure(sink);
+        }
+        for test in &outcomes.excluded {
+            tally.findings += 1;
+            sink.emit(Event::Finding(Box::new(self.slow_test(test))));
         }
         Ok(tally.result(&self.manifest))
     }
@@ -470,6 +501,68 @@ impl TestsMutation {
             Value::Array(mutant.tests.iter().cloned().map(Value::String).collect()),
         );
         with_nearest_test(finding, symbol, conventions)
+    }
+}
+
+/// Refuses any key of `config` but the cap, and a cap that is not a duration.
+fn read_settings(config: &Table) -> Result<()> {
+    let refuse = |key: &str, reason: String| ConfigError::CheckSetting {
+        check: ID.to_owned(),
+        key: key.to_owned(),
+        reason,
+        valid: vec![MAX_MUTANT_TIMEOUT.to_owned()],
+    };
+    for (key, value) in config {
+        if key != MAX_MUTANT_TIMEOUT {
+            return Err(refuse(key, "not a setting of this check".to_owned()).into());
+        }
+        if value
+            .as_str()
+            .and_then(|text| text.parse::<TimeLimit>().ok())
+            .is_none()
+        {
+            return Err(refuse(
+                key,
+                format!("expected a duration such as \"90s\" or \"5m\", got {value}"),
+            )
+            .into());
+        }
+    }
+    Ok(())
+}
+
+impl TestsMutation {
+    /// `mutant.slow-test-excluded` about `test`, left out of the whole-suite runs.
+    fn slow_test(&self, test: &ExcludedTest) -> Finding {
+        #[allow(
+            clippy::cast_precision_loss,
+            reason = "a test's duration in milliseconds stays far below 2^52"
+        )]
+        let seconds = test.baseline_ms as f64 / 1000.0;
+        SubjectFinding {
+            kind: "mutant.slow-test-excluded",
+            subject: test.id.clone(),
+            severity: Severity::Info,
+            confidence: 1.0,
+            title: format!(
+                "Slow test left out of mutant runs: `{}` ({seconds:.1} s in the baseline)",
+                test.id
+            ),
+            summary: format!(
+                "Make `{}` run in under 60 s, or let per-test selection narrow the mutants that \
+                 it covers (a per-test map, cached or at --depth deep), so they run it.",
+                test.id
+            ),
+            evidence: serde_json::to_value(SlowTest {
+                test: test.id.clone(),
+                file: test.file.clone(),
+                baseline_ms: test.baseline_ms,
+            })
+            .unwrap_or(Value::Null),
+            location: None,
+            repro: format!("cupel check --only {ID}"),
+        }
+        .finding(&self.manifest)
     }
 }
 

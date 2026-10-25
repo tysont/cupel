@@ -1,0 +1,4 @@
+# The slow-test fixture (ADR-147): `TestSlowIntegration` sleeps past 60 s in the baseline, and Go has no per-test
+# map at `standard` without a cache, so every mutant runs the whole suite but that test, which a finding names.
+[lang.go]
+coverage = "go test -coverprofile={out} ./..."

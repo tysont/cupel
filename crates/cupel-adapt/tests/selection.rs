@@ -153,6 +153,72 @@ fn a_runner_that_cannot_narrow_to_a_selection_gives_no_command() {
     );
 }
 
+fn except(ids: &[&str]) -> TestSelection {
+    TestSelection::Except(ids.iter().map(|id| (*id).to_owned()).collect())
+}
+
+#[test]
+fn the_whole_suite_but_some_tests_becomes_the_runners_flag_that_leaves_them_out() {
+    assert_eq!(
+        commands(
+            "tool.cargo-nextest",
+            "rust",
+            "rust",
+            &except(&["calc tests::scales"])
+        ),
+        Some(vec![
+            ".: cargo nextest run --workspace -E 'not ((binary_id(=calc) & test(=tests::scales)))'"
+                .to_owned()
+        ])
+    );
+    assert_eq!(
+        commands(
+            "tool.go-test",
+            "go",
+            "go",
+            &except(&["example.com/calc/TestScale"])
+        ),
+        Some(vec![
+            ".: go test -json ./... -skip '^(TestScale)$'".to_owned()
+        ])
+    );
+    assert_eq!(
+        commands(
+            "tool.pytest",
+            "python",
+            "python",
+            &except(&[
+                "tests/test_calc.py::test_add",
+                "tests/test_calc.py::test_scale"
+            ])
+        ),
+        Some(vec![
+            ".: python -m pytest --deselect tests/test_calc.py::test_add --deselect \
+             tests/test_calc.py::test_scale"
+                .to_owned()
+        ])
+    );
+    assert_eq!(
+        commands("tool.pytest", "python", "python", &except(&[])),
+        Some(vec![".: python -m pytest".to_owned()])
+    );
+}
+
+#[test]
+fn a_runner_that_cannot_leave_a_test_out_gives_no_command_for_one() {
+    for (id, repo, test) in [
+        ("tool.cargo-test", "rust", "calc/src/lib.rs::tests::adds"),
+        ("tool.jest", "javascript", "add.test.js > adds"),
+        (
+            "tool.unittest",
+            "python",
+            "tests.test_calc.CalcTest.test_add",
+        ),
+    ] {
+        assert_eq!(commands(id, repo, repo, &except(&[test])), None, "{id}");
+    }
+}
+
 #[test]
 fn a_selection_reaches_only_the_roots_that_hold_it_relative_to_each() {
     let dir = tempfile::tempdir().unwrap();
@@ -370,4 +436,56 @@ fn a_seeded_run_hands_the_seed_to_the_runner() {
         .unwrap();
     let outcomes: Vec<TestOutcome> = ran.results.tests.iter().map(|test| test.outcome).collect();
     assert_eq!(outcomes, [TestOutcome::Passed]);
+}
+
+/// `id` runs every test of `per-test/<repo>` but `left_out`, which leaves `kept`.
+fn assert_leaves_out_one(id: &str, repo: &str, lang: &str, left_out: &str, kept: &str) {
+    let Some((_dir, ctx)) = installed(id, repo, lang) else {
+        return;
+    };
+    let registry = registry();
+    let results = runner(&registry, id)
+        .run(&ctx, &except(&[left_out]), &RunOptions::default())
+        .unwrap()
+        .results;
+    let ran: Vec<(&str, TestOutcome)> = results
+        .tests
+        .iter()
+        .map(|test| (test.id.as_str(), test.outcome))
+        .collect();
+    assert_eq!(ran, [(kept, TestOutcome::Passed)], "{id}");
+    assert!(results.is_green());
+}
+
+#[test]
+fn cargo_nextest_runs_every_test_but_one() {
+    assert_leaves_out_one(
+        "tool.cargo-nextest",
+        "rust",
+        "rust",
+        "calc tests::scales",
+        "calc tests::adds",
+    );
+}
+
+#[test]
+fn go_test_runs_every_test_but_one() {
+    assert_leaves_out_one(
+        "tool.go-test",
+        "go",
+        "go",
+        "example.com/calc/TestScale",
+        "example.com/calc/TestAdd",
+    );
+}
+
+#[test]
+fn pytest_runs_every_test_but_one() {
+    assert_leaves_out_one(
+        "tool.pytest",
+        "python",
+        "python",
+        "tests/test_calc.py::test_scale",
+        "tests/test_calc.py::test_add",
+    );
 }

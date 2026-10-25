@@ -1,5 +1,5 @@
-// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082): the mutants of one file run concurrently, one slot each, after a
-// ABOUTME: green reference run (of the unmutated file, or of its validated schemata build); each is killed or not.
+// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082, ADR-147): the mutants of one file run concurrently, one slot each,
+// ABOUTME: after a green reference run (of the unmutated file, or of its validated schemata build); each is killed or not.
 use std::collections::BTreeSet;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -12,20 +12,22 @@ use cupel_core::{
 
 use crate::overlay::Slot;
 use crate::plan::Planned;
+use crate::settings::Settings;
 
 /// The environment variable that selects a schemata mutant at run time (ADR-082); `0` selects
 /// none.
 pub const MUTANT_VAR: &str = "CUPEL_MUTANT";
-
-/// The shortest timeout a mutant's run gets (design §9.3).
-const TIMEOUT_FLOOR: Duration = Duration::from_secs(2);
 
 /// What every mutant run of one production shares.
 pub struct Execution<'a> {
     pub ctx: &'a ProduceCtx,
     pub runner: &'a dyn Runner,
     pub slots: &'a [Slot],
-    pub timeout_factor: u32,
+    /// How long a mutant's run may take (`Settings::timeout`).
+    pub settings: Settings,
+    /// What a mutant that per-test selection did not narrow runs: the whole suite, or all of it
+    /// but the slow tests the runner can leave out (ADR-147).
+    pub whole: &'a TestSelection,
 }
 
 /// What a mutant's run found.
@@ -96,7 +98,7 @@ impl Execution<'_> {
                             write(slot, importer, text)?;
                         }
                         write(slot, run.file, source.as_bytes())?;
-                        self.timed(&ctx, &union(&run.mutants))
+                        self.timed(&ctx, &self.union(&run.mutants))
                     })
                 })
                 .collect();
@@ -238,7 +240,7 @@ impl Execution<'_> {
         let mut renewed = run.original.to_vec();
         renewed.push(b'\n');
         write(slot, run.file, &renewed)?;
-        let (ran, elapsed) = self.timed(ctx, &union(&run.mutants))?;
+        let (ran, elapsed) = self.timed(ctx, &self.union(&run.mutants))?;
         if !ran.results.is_green() {
             return Err(Error::Process {
                 program: self.runner.id().to_string(),
@@ -262,7 +264,20 @@ impl Execution<'_> {
 
     /// A mutant's timeout after a reference run of `elapsed`.
     fn limit(&self, elapsed: Duration) -> Duration {
-        TIMEOUT_FLOOR.max(elapsed * self.timeout_factor)
+        self.settings.timeout(elapsed)
+    }
+
+    /// The tests every mutant of a file runs together: the whole selection when one of them
+    /// runs it.
+    fn union(&self, mutants: &[&Planned]) -> TestSelection {
+        let mut ids = BTreeSet::new();
+        for planned in mutants {
+            match &planned.tests {
+                Some(tests) => ids.extend(tests.iter().cloned()),
+                None => return self.whole.clone(),
+            }
+        }
+        TestSelection::Tests(ids.into_iter().collect())
     }
 
     /// How every run of the production runs: in the runner's own order, with the run's seed (so
@@ -283,7 +298,7 @@ impl Execution<'_> {
         let selection = planned
             .tests
             .clone()
-            .map_or(TestSelection::All, TestSelection::Tests);
+            .map_or_else(|| self.whole.clone(), TestSelection::Tests);
         let started = Instant::now();
         let ran = self
             .runner
@@ -352,18 +367,6 @@ fn classify(
         strategy,
         fallback: None,
     }
-}
-
-/// The tests every mutant of a file runs together: the whole suite when one of them runs it.
-fn union(mutants: &[&Planned]) -> TestSelection {
-    let mut ids = BTreeSet::new();
-    for planned in mutants {
-        match &planned.tests {
-            Some(tests) => ids.extend(tests.iter().cloned()),
-            None => return TestSelection::All,
-        }
-    }
-    TestSelection::Tests(ids.into_iter().collect())
 }
 
 /// The first reason `ran` is red: a failing test or an incomplete invocation's output.

@@ -723,7 +723,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
             "tier": 3
           },
           "ruleId": "crap.high",
-          "ruleIndex": 6,
+          "ruleIndex": 7,
           "suppressions": []
         },
         {
@@ -886,6 +886,25 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
               },
               "shortDescription": {
                 "text": "The mutant survived and may behave exactly as the original (ADR-004)."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
+              },
+              "help": {
+                "text": "A test slower than 60 s in the baseline was left out of the mutants' runs that per-test selection did not narrow (ADR-147).\n\nAction: review. `cupel describe finding mutant.slow-test-excluded` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "mutant.slow-test-excluded",
+              "properties": {
+                "action": "review",
+                "check": "tests.mutation",
+                "cost": "standard",
+                "stability": "experimental",
+                "tier": 3
+              },
+              "shortDescription": {
+                "text": "A test slower than 60 s in the baseline was left out of the mutants' runs that per-test selection did not narrow (ADR-147)."
               }
             },
             {

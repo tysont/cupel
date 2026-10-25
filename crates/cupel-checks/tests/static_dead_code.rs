@@ -627,6 +627,33 @@ fn only_symbols_in_scope_are_reported_but_every_fact_is_read() {
 }
 
 #[test]
+fn an_import_from_outside_the_scope_that_only_references_carries_enters_the_module() {
+    let mut world = World::with(vec![
+        public("prices.x", "prices", "price", 1),
+        public("loader.x", "loader", "load", 1),
+        public("unused.x", "unused", "spare", 1),
+    ]);
+    // Edges only `References` carries: imports by files outside the scope (ADR-144).
+    world.references.imports = vec![
+        edge("checkout.x", "prices", support::imported_file("prices.x")),
+        edge("main.x", "./loader", ImportTarget::Unresolved),
+    ];
+    let (_, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[
+            ("loader::load", "dead.export"),
+            ("unused::spare", "dead.export")
+        ])
+    );
+    let suspects: Vec<_> = findings
+        .iter()
+        .map(|finding| finding.evidence.0["suspect_imports"].clone())
+        .collect();
+    assert_eq!(suspects, [json!(["./loader"]), json!([])]);
+}
+
+#[test]
 fn the_score_counts_dead_symbols_and_combines_by_sum() {
     let world = World::with(vec![
         private("a.x", "a", "one", 1),

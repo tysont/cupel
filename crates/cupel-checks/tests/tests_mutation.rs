@@ -7,8 +7,8 @@ use cupel_core::syntax::{
     Visibility,
 };
 use cupel_core::{
-    ActionKind, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts, Finding, LangId,
-    MetricPer, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, ProducerId,
+    ActionKind, CheckResult, CheckStatus, CostClass, Error, ExcludedTest, FactKind, Facts, Finding,
+    LangId, MetricPer, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, ProducerId,
     ProtectionMetric, Scope, Severity,
 };
 use serde_json::{Value, json};
@@ -133,6 +133,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("mutant.timeout", ActionKind::Review),
             ("mutant.uncovered", ActionKind::WriteTest),
             ("mutant.equivalent?", ActionKind::Review),
+            ("mutant.slow-test-excluded", ActionKind::Review),
         ]
     );
     assert_eq!(
@@ -483,9 +484,100 @@ fn without_mutation_outcomes_the_check_cannot_run() {
 }
 
 #[test]
+fn the_cap_on_a_mutants_run_is_its_one_setting_and_configures_the_engines_fact() {
+    assert_eq!(
+        support::declared_settings(ID),
+        [("max_mutant_timeout", json!("120s"))]
+    );
+    let configures: Vec<Option<FactKind>> = support::check(ID)
+        .manifest()
+        .settings
+        .iter()
+        .map(|setting| setting.configures)
+        .collect();
+    assert_eq!(configures, [Some(FactKind::MutationOutcomes)]);
+}
+
+#[test]
 fn any_setting_is_a_configuration_error() {
     let (key, valid) = support::setting_error(support::check(ID), json!({"timeout_factor": 10}));
-    assert_eq!((key.as_str(), valid.len()), ("timeout_factor", 0));
+    assert_eq!(
+        (key.as_str(), valid),
+        ("timeout_factor", vec!["max_mutant_timeout".to_owned()])
+    );
+}
+
+#[test]
+fn a_cap_that_is_not_a_duration_is_a_configuration_error() {
+    for (config, refused) in [
+        (json!({"max_mutant_timeout": 120}), "max_mutant_timeout"),
+        (
+            json!({"max_mutant_timeout": "two minutes"}),
+            "max_mutant_timeout",
+        ),
+    ] {
+        let (key, valid) = support::setting_error(support::check(ID), config);
+        assert_eq!(
+            (key.as_str(), valid),
+            (refused, vec!["max_mutant_timeout".to_owned()])
+        );
+    }
+    let (ctx, _dir) = support::ctx(scope(), json!({"max_mutant_timeout": "90s"}));
+    assert!(support::check(ID).plan(&ctx, &scope()).is_ok());
+}
+
+#[test]
+fn each_slow_test_left_out_of_whole_suite_runs_is_one_info_finding_naming_its_duration() {
+    let mut facts = facts(vec![mutant(6, 14, ">=", ">", MutantOutcome::Killed)]);
+    let mut outcomes = MutationOutcomes::new(
+        ProducerId::from("engine.test"),
+        Some(ProducerId::from("tool.pytest")),
+        CostClass::Standard,
+        false,
+        vec![mutant(6, 14, ">=", ">", MutantOutcome::Killed)],
+    );
+    outcomes.excluded = vec![ExcludedTest {
+        id: "tests/test_slow.py::test_slow".to_owned(),
+        file: Some("tests/test_slow.py".to_owned()),
+        baseline_ms: 61_300,
+    }];
+    facts.insert(outcomes).unwrap();
+    let (result, recorded) =
+        support::recorded(support::check(ID), &facts, scope(), json!({})).unwrap();
+    let excluded: Vec<&Finding> = recorded
+        .findings
+        .iter()
+        .filter(|finding| finding.kind == "mutant.slow-test-excluded")
+        .collect();
+    assert_eq!(excluded.len(), 1);
+    let finding = excluded[0];
+    assert_eq!(
+        (
+            finding.severity,
+            finding.action.kind,
+            finding.title.as_str()
+        ),
+        (
+            Severity::Info,
+            ActionKind::Review,
+            "Slow test left out of mutant runs: `tests/test_slow.py::test_slow` (61.3 s in the baseline)"
+        )
+    );
+    assert_eq!(
+        Value::Object(finding.evidence.0.clone()),
+        json!({
+            "test": "tests/test_slow.py::test_slow",
+            "file": "tests/test_slow.py",
+            "baseline_ms": 61_300
+        })
+    );
+    assert_eq!(
+        (
+            result.status,
+            result.score.as_ref().map(|score| score.value)
+        ),
+        (CheckStatus::Pass, Some(1.0))
+    );
 }
 
 #[test]

@@ -55,6 +55,7 @@ fn a_setting_is_its_name_default_and_summary() {
             name: "files_max".to_owned(),
             default: json!(3),
             summary: "The most untested files.".to_owned(),
+            configures: None,
         }],
         ..check_manifest()
     };
@@ -62,6 +63,25 @@ fn a_setting_is_its_name_default_and_summary() {
     assert_eq!(
         json["settings"],
         json!([{"name": "files_max", "default": 3, "summary": "The most untested files."}])
+    );
+    assert_eq!(serde_json::from_value::<Manifest>(json).unwrap(), manifest);
+}
+
+#[test]
+fn a_setting_that_configures_a_fact_names_its_kind() {
+    let manifest = Manifest {
+        settings: vec![SettingSpec {
+            name: "max_mutant_timeout".to_owned(),
+            default: json!("120s"),
+            summary: "The longest a mutant's run may take.".to_owned(),
+            configures: Some(FactKind::MutationOutcomes),
+        }],
+        ..check_manifest()
+    };
+    let json = serde_json::to_value(&manifest).unwrap();
+    assert_eq!(
+        json["settings"][0]["configures"],
+        json!("mutation-outcomes")
     );
     assert_eq!(serde_json::from_value::<Manifest>(json).unwrap(), manifest);
 }

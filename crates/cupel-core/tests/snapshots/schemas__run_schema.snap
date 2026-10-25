@@ -3211,6 +3211,18 @@ expression: pretty(&schema)
       "description": "A setting a check reads from `[checks.\"<id>\"]`, with its default (ADR-111).",
       "type": "object",
       "properties": {
+        "configures": {
+          "description": "The fact whose production the setting configures: the scheduler hands its configured\nvalue to that fact's producers (`ProduceCtx::settings`, ADR-147). Absent for a setting\nonly the check reads.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FactKind"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-cupel-optional": true
+        },
         "default": {
           "description": "The value in force when the setting is not configured; null when an unconfigured\nsetting turns its rule off."
         },

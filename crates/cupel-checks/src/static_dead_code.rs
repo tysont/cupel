@@ -3,8 +3,8 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::syntax::{
-    DynamicAccess, DynamicReach, ImportTarget, ModuleGraph, NormTree, Reference, References,
-    RootReason, Roots, SymbolDef, SymbolKey, SymbolKind, Symbols, TestConventions,
+    DynamicAccess, DynamicReach, ImportEdge, ImportTarget, ModuleGraph, NormTree, Reference,
+    References, RootReason, Roots, SymbolDef, SymbolKey, SymbolKind, Symbols, TestConventions,
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
@@ -165,13 +165,14 @@ impl Check for StaticDeadCode {
         let symbols = facts.get::<Symbols>()?;
         let hashes = hashes_by_symbol(facts.get::<NormTree>()?);
         let roots = facts.get::<Roots>()?;
+        let references = facts.get::<References>()?;
         let reachability = Reachability::of(
             &symbols.symbols,
             roots,
-            facts.get::<ModuleGraph>()?,
+            imports(facts.get::<ModuleGraph>()?, references),
             facts.get::<TestConventions>().ok(),
         );
-        let usage = Usage::of(facts.get::<References>()?, roots);
+        let usage = Usage::of(references, roots);
         let mut tally = Tally::default();
         let mut ordered: Vec<&SymbolDef> = symbols.symbols.iter().collect();
         ordered.sort_by_key(|symbol| symbol.key());
@@ -399,6 +400,17 @@ struct Module<'a> {
     exports: bool,
 }
 
+/// The scope's import edges (`ModuleGraph`) and the language's (`References`), so an importer
+/// outside a narrowed scope enters the module it imports (ADR-144).
+fn imports<'a>(graph: &'a ModuleGraph, references: &'a References) -> Vec<&'a ImportEdge> {
+    graph
+        .roots
+        .iter()
+        .flat_map(|root| &root.edges)
+        .chain(&references.imports)
+        .collect()
+}
+
 /// Which modules imports and roots reach, over every symbol and edge the facts carry.
 struct Reachability<'a> {
     /// Each file's module namespace.
@@ -416,7 +428,7 @@ impl<'a> Reachability<'a> {
     fn of(
         symbols: &'a [SymbolDef],
         roots: &Roots,
-        graph: &'a ModuleGraph,
+        edges: Vec<&'a ImportEdge>,
         conventions: Option<&TestConventions>,
     ) -> Self {
         let module_of = module_namespaces(symbols);
@@ -451,7 +463,7 @@ impl<'a> Reachability<'a> {
             }
         }
         let mut unfollowed = Vec::new();
-        for edge in graph.roots.iter().flat_map(|root| &root.edges) {
+        for edge in edges {
             match &edge.target {
                 ImportTarget::File { path } => {
                     let Some(target) = module_of.get(path.as_str()) else {

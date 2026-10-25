@@ -337,3 +337,109 @@ fn a_dry_run_says_how_a_want_of_a_needed_facts_producer_would_be_made() {
         ]
     );
 }
+
+/// Each language a producer ran for, with the settings it got.
+type SettingsSeen = Vec<(String, serde_json::Map<String, serde_json::Value>)>;
+
+/// A `Symbols` producer that records, per language, the settings checks declared for it.
+struct Configured(Arc<Mutex<SettingsSeen>>);
+
+impl Producer<Symbols> for Configured {
+    fn id(&self) -> ProducerId {
+        ProducerId::from("lang.configured")
+    }
+
+    fn languages(&self) -> Langs {
+        Langs::Any
+    }
+
+    fn needs(&self) -> &[FactKind] {
+        &[]
+    }
+
+    fn cost(&self) -> CostClass {
+        CostClass::Quick
+    }
+
+    fn availability(&self, _: &Ctx) -> Availability {
+        Availability::Ready
+    }
+
+    fn produce(&self, ctx: &ProduceCtx, scope: &Scope, _: &mut dyn EventSink) -> Result<Symbols> {
+        let lang = scope.files.first().cloned().unwrap_or_default();
+        self.0.lock().unwrap().push((lang, ctx.settings.clone()));
+        Ok(Symbols::default())
+    }
+}
+
+/// The settings a `Symbols` producer got for rust and go under `toml`, with a check that
+/// declares `cap` (and `plain`, which configures no fact) registered but not selected.
+fn settings_seen(toml: &str) -> Vec<(String, serde_json::Value)> {
+    let dir = tempfile::tempdir().unwrap();
+    let config = support::config_at(dir.path(), toml);
+    let writer = Writer::new(dir.path(), false).unwrap();
+    let recorded = Arc::new(Mutex::new(Vec::new()));
+    let mut producers = ProducerRegistry::default();
+    producers.register::<Symbols, _>(Configured(Arc::clone(&recorded)));
+    let mut checks = CheckRegistry::default();
+    let setting = |name: &str, configures| cupel_core::SettingSpec {
+        name: name.to_owned(),
+        default: serde_json::json!("1s"),
+        summary: String::new(),
+        configures,
+    };
+    checks
+        .register(Box::new(support::Declared(cupel_core::Manifest {
+            settings: vec![
+                setting("cap", Some(FactKind::Symbols)),
+                setting("plain", None),
+            ],
+            ..support::manifest("t.cap", &[FactKind::Symbols], &[])
+        })))
+        .unwrap();
+    let mut job = support::job(&writer, &config, &checks, &["rust", "go"]);
+    job.selected = Vec::new();
+    let scheduler = Scheduler {
+        checks: &checks,
+        producers: &producers,
+    };
+    for lang in ["rust", "go"] {
+        job.files = vec![lang.to_owned()];
+        scheduler
+            .production(&job)
+            .ensure(
+                FactKind::Symbols,
+                &support::lang(lang, lang),
+                &mut Vec::new(),
+            )
+            .unwrap();
+    }
+    let seen = recorded.lock().unwrap().clone();
+    seen.into_iter()
+        .map(|(lang, settings)| (lang, serde_json::Value::Object(settings)))
+        .collect()
+}
+
+#[test]
+fn a_producer_gets_the_settings_checks_declare_for_its_fact_as_configured_for_its_language() {
+    let toml = "[checks.\"t.cap\"]\ncap = \"3s\"\nplain = \"2s\"\n\
+                [checks.\"t.cap\".lang.go]\ncap = \"5s\"\n";
+    assert_eq!(
+        settings_seen(toml),
+        [
+            ("rust".to_owned(), serde_json::json!({"cap": "3s"})),
+            ("go".to_owned(), serde_json::json!({"cap": "5s"})),
+        ]
+    );
+}
+
+#[test]
+fn an_unconfigured_setting_for_a_fact_is_left_to_the_producer() {
+    assert_eq!(
+        settings_seen(""),
+        [
+            ("rust".to_owned(), serde_json::json!({})),
+            ("go".to_owned(), serde_json::json!({})),
+        ]
+    );
+}

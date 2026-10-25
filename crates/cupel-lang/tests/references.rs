@@ -5,7 +5,7 @@ mod support;
 use std::collections::HashSet;
 use std::path::Path;
 
-use cupel_core::syntax::{DynamicReach, ReferenceKind, References};
+use cupel_core::syntax::{DynamicReach, ImportTarget, ReferenceKind, References};
 use support::{fixture, produce, produce_scoped, tree};
 
 /// (kind, target kind, target lines) of each reference named `name` in `file`.
@@ -269,5 +269,32 @@ fn references_come_from_every_file_of_the_language_whatever_the_scope() {
         named(&fact, "src/rates.rs", "imported_rate"),
         resolved(2, "imported", 13),
         "a caller outside the scope is read and resolved"
+    );
+}
+
+/// The fact carries the import edges of every file it reads, so an importer outside the scope
+/// counts for `static.dead-code`'s module pass (ADR-144).
+#[test]
+fn import_edges_come_from_every_file_of_the_language_whatever_the_scope() {
+    let fact: References = produce_scoped("rust", &fixture("rust"), &["src/references.rs"]);
+    let into = |target: &str| -> Vec<(&str, &str)> {
+        fact.imports
+            .iter()
+            .filter(|edge| {
+                edge.target
+                    == ImportTarget::File {
+                        path: target.to_owned(),
+                    }
+            })
+            .map(|edge| (edge.from.as_str(), edge.specifier.as_str()))
+            .collect()
+    };
+    assert_eq!(
+        into("src/references.rs"),
+        [
+            ("src/lib.rs", "references"),
+            ("src/rates.rs", "crate::references::imported_rate")
+        ],
+        "the module declaration and the import, both outside the scope"
     );
 }

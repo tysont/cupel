@@ -379,7 +379,7 @@ op         := ">=" | ">" | "<=" | "<" | "=="
 
 `base` is the metric's value in the reference run: the run `--against` names; else, for `--changed`/`--base`, the base recomputed (the rule's checks run over the base commit's versions of the changed files); else the `default` baseline. A rule against `base` with no reference value is `skipped` with reason `no reference: …` and fails the gate. Every rule result carries `bound`, the value `actual` was compared with, and a skipped one its `reason`.
 
-Configuration follows the three axes: `[checks."<id>"]` is language-neutral, `[checks."<id>".lang.<lang>]` overrides it for one language, and `[lang.<lang>]` chooses tools and producers for that language (`coverage = "coverage.py"` pins a producer when several exist). A check never reads `[lang.*]`; a producer never reads `[checks.*]`.
+Configuration follows the three axes: `[checks."<id>"]` is language-neutral, `[checks."<id>".lang.<lang>]` overrides it for one language, and `[lang.<lang>]` chooses tools and producers for that language (`coverage = "coverage.py"` pins a producer when several exist). A check never reads `[lang.*]`; a producer never reads a check's table, only the settings a check declares for the fact the producer makes (`SettingSpec::configures`, [ADR-147](adr/CUPEL_DECISION_147.md): `tests.mutation`'s `max_mutant_timeout` reaches the mutation engine).
 
 ### 6.8 Dry run
 
@@ -629,7 +629,7 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `ModelCheckResults` | per proof harness a bounded model checker found in the project roots: verified, failed, or undetermined; the properties it refuted (description, function, place) and a counterexample (the values drawn, a test that replays them); each root's run (ADR-117) | model checker tool | `conc.model-check` |
 | `ProofResults` | a deductive verifier's run over the proof files in the project roots: the files, the declarations verified, and each obligation not discharged — failed (the verifier could not prove it) or open (assumed, or undecided in its time or resources) — with its place and related places; each root's run (ADR-118) | verifier tool | `spec.prove` |
 | `ContractViolations` | per violated contract: kind (precondition, postcondition, invariant), function, message, where it is declared, the test that violated it; whether a project root declares the contract library, each root's run (ADR-113) | contract tool, from the baseline runner's run with contract checking on | `spec.contracts` |
-| `References` | every place that may name a symbol, over every file of the language: plain names resolved in their file or through its imports, members, strings, and attributes, each from its innermost symbol; and where a name is computed at run time, with what it can reach (ADR-135) | language | `static.dead-code` |
+| `References` | every place that may name a symbol, over every file of the language: plain names resolved in their file or through its imports, members, strings, and attributes, each from its innermost symbol; and where a name is computed at run time, with what it can reach (ADR-135); and the import edges of those files, so an importer outside a narrowed scope counts (ADR-144) | language | `static.dead-code` |
 
 P7 added `Traces`, `Histories`, `ProofResults`, `ContractViolations`, `SimulationResults` (ADR-120), and `ModelCheckResults` (ADR-117) under the same rules. P9 added `References` (ADR-135). Facts carry completeness flags rather than languages carrying capability flags: a `CoverageMap` with `branches: None` makes `tests.coverage` skip branch findings with that reason; whether a language has a per-test map is simply whether a `PerTestMap` producer is registered for it.
 
@@ -896,7 +896,7 @@ Stacked, in order of payoff:
 3. **Per-test selection** — run only tests whose coverage includes the mutated line; typically 5–20× over full-suite runs.
 4. **Mutant schemata for compiled languages** — rewrite the function so every site is gated by a runtime switch (`cupel_mutant_id() == N`), compile once, run each mutant as a process with `CUPEL_MUTANT=N`. Replaces N compiles with one. Rust and Go first; the rewrite must preserve types (branch both arms through the same expression type) and is validated by compiling the schemata build before any mutant runs. Falls back to file-copy strategy on compile failure of the schemata build.
 5. **Worker overlays** (file-copy strategy): reflink the tree where the filesystem supports it (APFS, btrfs, XFS), else hardlink the tree and copy the mutated file privately. Modules reaching the mutated file by relative import are copied too (Node resolution).
-6. **Timeouts per test**, `timeout_factor × baseline_duration(test)`, floor 2 s.
+6. **Timeouts per test**, `timeout_factor × baseline_duration(test)`, floor 2 s, capped by `max_mutant_timeout` (default 120 s); a test slower than 60 s in the baseline is left out of a mutant's run that per-test selection did not narrow ([ADR-147](adr/CUPEL_DECISION_147.md)).
 7. **Ordering by information**: last run's survivors, then sites in changed symbols, then the rest.
 
 ### 9.4 Test impact analysis
@@ -914,7 +914,7 @@ Value per task = `tier_weight[tier] × novelty × (changed ? 2 : 1)`; cost from 
 ## 10. Compatibility and distribution
 
 - **Platforms:** Linux x86_64/aarch64 (musl, static), macOS arm64/x86_64, Windows x86_64 native (ADR-137; WSL first-class). Built in CI by `.github/workflows/release.yml` on a `v*` tag, each target through `make dist TARGET=<triple>`: the Linux musl targets with `cargo-zigbuild` on one x86_64 runner, macOS natively on an arm64 runner, Windows natively with MSVC. Each target ships as `cupel-<version>-<target>.tar.gz` (`.zip` on Windows) holding `cupel-<version>-<target>/` with the stripped binary, `LICENSE`, and `README.md`, beside one `SHA256SUMS`; the tag must be `v` and the crate version (ADR-124).
-- **Distribution:** GitHub Releases; `cargo-binstall`; Homebrew tap; `curl -fsSL https://cupel.dev/install | sh`; thin `npm` (`npx cupel`) and `pipx` wrappers that fetch the platform binary. `required_version` in `cupel.toml`; `doctor` reports a binary outside it and every verb that reads the repository refuses to run.
+- **Distribution:** GitHub Releases; `cargo-binstall`; Homebrew tap; `curl -fsSL https://cupel.dev/install | sh`; thin `npm` (`npx cupel-cli`) and `pipx` (`pipx install cupel-cli`) wrappers that fetch the platform binary; the package is `cupel-cli` on npm, PyPI, and crates.io, and its command is `cupel` (ADR-146). `required_version` in `cupel.toml`; `doctor` reports a binary outside it and every verb that reads the repository refuses to run.
 - **Existing tooling:** ingest LCOV, Cobertura, JaCoCo XML, go coverprofile, Istanbul JSON, Stryker JSON, PIT XML, SARIF from other analyzers. Emit SARIF 2.1 and LCOV.
 - **Monorepos:** multiple roots from workspace manifests; per-root scoping; single envelope with `scope.roots`.
 - **Schema versioning:** `schema: v1`; additive within major; `describe schema` serves the exact version; `stability` on every entity.

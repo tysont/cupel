@@ -1062,6 +1062,34 @@ fn describe_lists_install_routes_each_live_or_saying_what_it_waits_for() {
     );
 }
 
+/// The registry routes install the packages dist/ and the binary crate are named (ADR-146): the npm,
+/// pipx, and crates.io routes each name the package its manifest names.
+#[test]
+fn the_registry_routes_install_the_packages_their_manifests_name() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let read = |path: &str| std::fs::read_to_string(root.join(path)).unwrap();
+    let npm: Value = serde_json::from_str(&read("dist/npm/package.json")).unwrap();
+    let pipx: toml_edit::DocumentMut = read("dist/pipx/pyproject.toml").parse().unwrap();
+    let commands: Vec<(String, String)> = install_routes()
+        .iter()
+        .filter(|route| ["npm", "pipx", "crates.io"].contains(&route_text(route, "name").as_str()))
+        .map(|route| (route_text(route, "name"), route_text(route, "command")))
+        .collect();
+    let expected = [
+        ("npm", format!("npx {}", npm["name"].as_str().unwrap())),
+        (
+            "pipx",
+            format!("pipx install {}", pipx["project"]["name"].as_str().unwrap()),
+        ),
+        (
+            "crates.io",
+            format!("cargo install --locked {}", env!("CARGO_PKG_NAME")),
+        ),
+    ]
+    .map(|(name, command)| (name.to_owned(), command));
+    assert_eq!(commands, expected);
+}
+
 /// Each command is one trimmed line run by a known installer, for platforms Cupel releases for.
 #[test]
 fn every_install_route_is_one_command_for_released_platforms() {

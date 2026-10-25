@@ -52,6 +52,12 @@ pub struct SettingSpec {
     /// setting turns its rule off.
     pub default: Value,
     pub summary: String,
+    /// The fact whose production the setting configures: the scheduler hands its configured
+    /// value to that fact's producers (`ProduceCtx::settings`, ADR-147). Absent for a setting
+    /// only the check reads.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub configures: Option<FactKind>,
 }
 
 /// A finding kind a check emits, the action it maps to, and its evidence schema (ADR-012).
