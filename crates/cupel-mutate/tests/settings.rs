@@ -188,39 +188,42 @@ fn a_mutant_gets_the_factor_times_its_reference_at_least_two_seconds_and_at_most
     assert_eq!(DEFAULT_MAX_MUTANT_TIMEOUT, Duration::from_secs(120));
 }
 
-/// The settings read from the default a check declares for the engine's fact under `name`.
-fn declared_default(name: &str) -> Vec<Settings> {
+#[test]
+fn the_cap_a_check_declares_for_the_engines_fact_defaults_to_the_engines_own() {
     let registries = cupel_fixtures::matrix::Registries::shared();
-    registries
+    let declared: Vec<Duration> = registries
         .checks
         .iter()
         .flat_map(|check| &check.manifest().settings)
         .filter(|setting| {
-            setting.name == name
+            setting.name == MAX_MUTANT_TIMEOUT
                 && setting.configures == Some(cupel_core::FactKind::MutationOutcomes)
         })
         .map(|setting| {
-            let declared = Map::from_iter([(name.to_owned(), setting.default.clone())]);
-            Settings::read(&Map::new(), &declared).unwrap()
+            let declared =
+                Map::from_iter([(MAX_MUTANT_TIMEOUT.to_owned(), setting.default.clone())]);
+            Settings::read(&Map::new(), &declared)
+                .unwrap()
+                .max_mutant_timeout
         })
-        .collect()
+        .collect();
+    assert_eq!(declared, [DEFAULT_MAX_MUTANT_TIMEOUT]);
 }
 
 #[test]
-fn the_cap_and_the_budget_a_check_declares_for_the_engines_fact_default_to_the_engines_own() {
-    let caps: Vec<Duration> = declared_default(MAX_MUTANT_TIMEOUT)
+fn the_budget_a_check_declares_for_the_engines_fact_is_the_engines_default() {
+    let registries = cupel_fixtures::matrix::Registries::shared();
+    let declared: Vec<&Value> = registries
+        .checks
         .iter()
-        .map(|settings| settings.max_mutant_timeout)
+        .flat_map(|check| &check.manifest().settings)
+        .filter(|setting| setting.configures == Some(cupel_core::FactKind::MutationOutcomes))
+        .filter(|setting| setting.name == MAX_MUTANT_MEMORY)
+        .map(|setting| &setting.default)
         .collect();
-    let budgets: Vec<MemoryLimit> = declared_default(MAX_MUTANT_MEMORY)
-        .iter()
-        .map(|settings| settings.max_mutant_memory)
-        .collect();
+    assert_eq!(declared, [&json!(DEFAULT_MAX_MUTANT_MEMORY)]);
     assert_eq!(
-        (caps, budgets),
-        (
-            vec![DEFAULT_MAX_MUTANT_TIMEOUT],
-            vec![memory(DEFAULT_MAX_MUTANT_MEMORY)]
-        )
+        memory(DEFAULT_MAX_MUTANT_MEMORY).resolve(32 << 30),
+        16 << 30
     );
 }
