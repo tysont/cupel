@@ -146,27 +146,7 @@ fn manifest() -> Manifest {
             ),
         ],
         metrics: metrics(),
-        settings: vec![
-            SettingSpec {
-                configures: Some(FactKind::MutationOutcomes),
-                ..setting(
-                    MAX_MUTANT_TIMEOUT,
-                    Value::from(DEFAULT_MAX_MUTANT_TIMEOUT),
-                    "The longest a mutant's run may take, as a duration such as 90s or 5m; a \
-                     run that reaches it is a timeout, whatever timeout_factor allows.",
-                )
-            },
-            SettingSpec {
-                configures: Some(FactKind::MutationOutcomes),
-                ..setting(
-                    MAX_MUTANT_MEMORY,
-                    Value::from(DEFAULT_MAX_MUTANT_MEMORY),
-                    "The resident memory the mutant runs may hold together, as a size such as \
-                     3g or 512m or a share of physical memory such as 50%; each slot's run gets \
-                     an equal part, and a run over it is killed and is out-of-memory.",
-                )
-            },
-        ],
+        settings: settings(),
         stability: Stability::Experimental,
         summary: "Mutates the code in scope and runs the tests that cover each mutant; a \
                   mutant every test passes against survived. Score: killed / (killed + \
@@ -174,6 +154,31 @@ fn manifest() -> Manifest {
                   (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
             .to_owned(),
     }
+}
+
+/// The settings this check declares, each configuring the engine's fact (ADR-147 §2).
+fn settings() -> Vec<SettingSpec> {
+    [
+        (
+            MAX_MUTANT_TIMEOUT,
+            DEFAULT_MAX_MUTANT_TIMEOUT,
+            "The longest a mutant's run may take, as a duration such as 90s or 5m; a run that \
+             reaches it is a timeout, whatever timeout_factor allows.",
+        ),
+        (
+            MAX_MUTANT_MEMORY,
+            DEFAULT_MAX_MUTANT_MEMORY,
+            "The resident memory the mutant runs may hold together, as a size such as 3g or \
+             512m or a share of physical memory such as 50%; each slot's run gets an equal \
+             part, and a run over it is killed and is out-of-memory.",
+        ),
+    ]
+    .into_iter()
+    .map(|(name, default, summary)| SettingSpec {
+        configures: Some(FactKind::MutationOutcomes),
+        ..setting(name, Value::from(default), summary)
+    })
+    .collect()
 }
 
 /// The metrics this check reports: gate keys, then what `survey` ranks.

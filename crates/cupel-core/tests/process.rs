@@ -113,10 +113,35 @@ fn a_child_within_its_memory_budget_runs_to_its_end() {
     );
 }
 
+/// The machine's physical memory as the platform's own tool reports it.
+fn reported_physical_memory() -> u64 {
+    if cfg!(target_os = "macos") {
+        let output = std::process::Command::new("sysctl")
+            .args(["-n", "hw.memsize"])
+            .output()
+            .unwrap();
+        String::from_utf8_lossy(&output.stdout)
+            .trim()
+            .parse()
+            .unwrap()
+    } else {
+        let meminfo = std::fs::read_to_string("/proc/meminfo").unwrap();
+        let line = meminfo
+            .lines()
+            .find(|l| l.starts_with("MemTotal:"))
+            .unwrap();
+        line.split_whitespace()
+            .nth(1)
+            .unwrap()
+            .parse::<u64>()
+            .unwrap()
+            * 1024
+    }
+}
+
 #[test]
-fn the_machines_physical_memory_is_known() {
-    let physical = physical_memory().unwrap();
-    assert!(physical > 1 << 30, "{physical}");
+fn the_machines_physical_memory_is_what_the_platform_reports() {
+    assert_eq!(physical_memory(), Some(reported_physical_memory()));
 }
 
 #[test]

@@ -66,13 +66,8 @@ impl Settings {
             strategy: Strategy::Schemata,
             max_mutant_timeout: DEFAULT_MAX_MUTANT_TIMEOUT,
             max_mutant_memory: default_memory(),
-        };
-        if let Some(value) = declared.get(MAX_MUTANT_TIMEOUT) {
-            settings.max_mutant_timeout = cap(value)?;
         }
-        if let Some(value) = declared.get(MAX_MUTANT_MEMORY) {
-            settings.max_mutant_memory = budget(value)?;
-        }
+        .declared(declared)?;
         let Some(table) = config.get(KEY) else {
             return Ok(settings);
         };
@@ -91,6 +86,17 @@ impl Settings {
             }
         }
         Ok(settings)
+    }
+
+    /// These settings with the cap and the budget `declared` names (ADR-147, ADR-148).
+    fn declared(mut self, declared: &Map<String, Value>) -> Result<Self> {
+        if let Some(value) = declared.get(MAX_MUTANT_TIMEOUT) {
+            self.max_mutant_timeout = cap(value)?;
+        }
+        if let Some(value) = declared.get(MAX_MUTANT_MEMORY) {
+            self.max_mutant_memory = budget(value)?;
+        }
+        Ok(self)
     }
 
     /// The timeout of a mutant whose reference run took `reference`: `timeout_factor` times it,

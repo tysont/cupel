@@ -207,19 +207,20 @@ fn declared_default(name: &str) -> Vec<Settings> {
 }
 
 #[test]
-fn the_cap_a_check_declares_for_the_engines_fact_defaults_to_the_engines_own() {
-    let declared: Vec<Duration> = declared_default(MAX_MUTANT_TIMEOUT)
+fn the_cap_and_the_budget_a_check_declares_for_the_engines_fact_default_to_the_engines_own() {
+    let caps: Vec<Duration> = declared_default(MAX_MUTANT_TIMEOUT)
         .iter()
         .map(|settings| settings.max_mutant_timeout)
         .collect();
-    assert_eq!(declared, [DEFAULT_MAX_MUTANT_TIMEOUT]);
-}
-
-#[test]
-fn the_budget_a_check_declares_for_the_engines_fact_defaults_to_the_engines_own() {
-    let declared: Vec<MemoryLimit> = declared_default(MAX_MUTANT_MEMORY)
+    let budgets: Vec<MemoryLimit> = declared_default(MAX_MUTANT_MEMORY)
         .iter()
         .map(|settings| settings.max_mutant_memory)
         .collect();
-    assert_eq!(declared, [memory(DEFAULT_MAX_MUTANT_MEMORY)]);
+    assert_eq!(
+        (caps, budgets),
+        (
+            vec![DEFAULT_MAX_MUTANT_TIMEOUT],
+            vec![memory(DEFAULT_MAX_MUTANT_MEMORY)]
+        )
+    );
 }

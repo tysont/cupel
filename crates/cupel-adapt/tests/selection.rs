@@ -367,14 +367,25 @@ fn cargo_nextest_takes_the_runs_parallelism_as_its_test_threads() {
         )
         .unwrap()
         .results;
-    assert!(results.is_green(), "{results:?}");
+    let ran: Vec<(&str, TestOutcome)> = results
+        .tests
+        .iter()
+        .map(|test| (test.id.as_str(), test.outcome))
+        .collect();
+    assert_eq!(
+        ran,
+        [
+            ("calc tests::adds", TestOutcome::Passed),
+            ("calc tests::scales", TestOutcome::Passed)
+        ]
+    );
     let command = &results.invocations[0].command;
-    for flag in ["--test-threads", "--build-jobs"] {
-        assert!(
-            command.windows(2).any(|pair| pair == [flag, "1"]),
-            "{command:?}"
-        );
-    }
+    let share: Vec<&str> = command
+        .iter()
+        .skip_while(|word| *word != "--test-threads")
+        .map(String::as_str)
+        .collect();
+    assert_eq!(share, ["--test-threads", "1", "--build-jobs", "1"]);
 }
 
 #[test]
@@ -391,9 +402,9 @@ fn a_run_whose_processes_hold_more_than_its_memory_budget_is_stopped_as_out_of_m
             ..RunOptions::default()
         },
     );
-    assert!(
-        matches!(ran, Err(Error::OutOfMemory { limit: 1 })),
-        "{ran:?}"
+    assert_eq!(
+        ran.map(|run| run.results.tests.len()),
+        Err(Error::OutOfMemory { limit: 1 })
     );
 }
 
