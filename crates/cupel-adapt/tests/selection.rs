@@ -5,8 +5,8 @@ use std::time::Duration;
 use cupel_adapt::report::listing;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, Error, LangId, ProduceCtx, Produced, ProducerId,
-    ProducerRegistry, RunOptions, RunOrder, Runner, RunnerCommand, TestOutcome, TestSelection,
+    Availability, Cancellation, Error, LangId, ProduceCtx, Produced, ProducerId, ProducerRegistry,
+    RunOptions, RunOrder, Runner, RunnerCommand, TestOutcome, TestSelection,
 };
 use cupel_fixtures::Capture;
 use support::{lang, produce_ctx, registry};
@@ -369,10 +369,12 @@ fn cargo_nextest_takes_the_runs_parallelism_as_its_test_threads() {
         .results;
     assert!(results.is_green(), "{results:?}");
     let command = &results.invocations[0].command;
-    assert!(
-        command.windows(2).any(|pair| pair == ["--test-threads", "1"]),
-        "{command:?}"
-    );
+    for flag in ["--test-threads", "--build-jobs"] {
+        assert!(
+            command.windows(2).any(|pair| pair == [flag, "1"]),
+            "{command:?}"
+        );
+    }
 }
 
 #[test]

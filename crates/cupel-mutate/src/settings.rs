@@ -116,7 +116,9 @@ impl Settings {
 /// The test threads each of `slots` slots runs with on a machine of `cores` cores: an equal
 /// share, at least one (ADR-148).
 pub fn threads(cores: usize, slots: usize) -> u32 {
-    u32::try_from(cores / slots.max(1)).unwrap_or(u32::MAX).max(1)
+    u32::try_from(cores / slots.max(1))
+        .unwrap_or(u32::MAX)
+        .max(1)
 }
 
 /// `value`, the budget, as a memory limit such as `3g` or `50%`.

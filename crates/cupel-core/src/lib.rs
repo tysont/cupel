@@ -118,6 +118,7 @@ pub use histories::{Histories, History, HistoryOp, HistoryStatus, HistoryViolati
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
+pub use memory::physical_memory;
 pub use model_check::{
     Counterexample, HarnessStatus, ModelCheckResults, ModelHarness, RefutedProperty,
 };
@@ -127,7 +128,6 @@ pub use mutation::{
 pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
-pub use memory::physical_memory;
 pub use process::{Captured, Process, find_program};
 pub use producer::{
     Availability, Ctx, Estimate, Focus, Install, JointProducer, ProduceCtx, Producer,

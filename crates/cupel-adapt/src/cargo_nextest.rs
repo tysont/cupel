@@ -30,7 +30,7 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     }),
     completed_codes: &[0],
     // One process per test has no order or seed to vary; the run's parallelism is its test
-    // threads (ADR-148).
+    // threads and build jobs (ADR-148).
     vary: &Varying {
         ordering: RunOrdering::Fixed,
         args: vary,
@@ -67,11 +67,20 @@ fn command(root: &Root) -> Vec<String> {
     command
 }
 
-/// `--test-threads` for a run's parallelism; nothing for the runner's default.
+/// A run's parallelism as its test threads and its build jobs; nothing for the runner's
+/// defaults.
 fn vary(options: &RunOptions) -> Vec<String> {
     options
         .parallelism
-        .map(|threads| vec!["--test-threads".to_owned(), threads.to_string()])
+        .map(|parallelism| {
+            let count = parallelism.to_string();
+            vec![
+                "--test-threads".to_owned(),
+                count.clone(),
+                "--build-jobs".to_owned(),
+                count,
+            ]
+        })
         .unwrap_or_default()
 }
 

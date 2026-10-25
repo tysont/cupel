@@ -67,8 +67,9 @@ fn vary(options: &RunOptions) -> Vec<String> {
         harness.extend(["-Z", "unstable-options", "--shuffle-seed"].map(str::to_owned));
         harness.push(options.seed.unwrap_or_default().to_string());
     }
-    if let Some(threads) = options.parallelism {
-        harness.push(format!("--test-threads={threads}"));
+    if let Some(parallelism) = options.parallelism {
+        args.push(format!("--jobs={parallelism}"));
+        harness.push(format!("--test-threads={parallelism}"));
     }
     if !harness.is_empty() {
         args.push("--".to_owned());

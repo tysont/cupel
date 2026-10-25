@@ -1,6 +1,6 @@
 # CUPEL_DECISION_080: `MutationOutcomes` and the file-copy mutation engine
 
-**Date:** 2026-10-14 · **Status:** accepted; the score (now over killed, survived, and uncovered mutants) and §8 (slots are reclaimed) amended by [141](CUPEL_DECISION_141.md) §1 and §3; §9 (timeouts) capped, and slow tests left out of whole-suite runs, by [147](CUPEL_DECISION_147.md) · **Phase:** P3.4
+**Date:** 2026-10-14 · **Status:** accepted; the score (now over killed, survived, and uncovered mutants) and §8 (slots are reclaimed) amended by [141](CUPEL_DECISION_141.md) §1 and §3; §9 (timeouts) capped, and slow tests left out of whole-suite runs, by [147](CUPEL_DECISION_147.md); §8 (slots share the cores) and §9 (a run is bounded in memory too) amended by [148](CUPEL_DECISION_148.md) · **Phase:** P3.4
 
 ## Context
 

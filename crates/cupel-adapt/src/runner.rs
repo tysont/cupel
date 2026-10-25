@@ -261,9 +261,7 @@ impl cupel_core::Runner for Runner {
         for (index, (dir, packages)) in suite_roots(ctx).into_iter().enumerate() {
             let root = self.root(ctx, index, &dir, packages, false)?;
             let command = (lister.command)(&root);
-            let captured = self
-                .process(&root, &command, &[], None)
-                .run(&ctx.cancel)?;
+            let captured = self.process(&root, &command, &[], None).run(&ctx.cancel)?;
             ids.extend(
                 (lister.parse)(&captured.stdout)
                     .into_iter()

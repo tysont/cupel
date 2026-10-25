@@ -723,7 +723,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
             "tier": 3
           },
           "ruleId": "crap.high",
-          "ruleIndex": 7,
+          "ruleIndex": 8,
           "suppressions": []
         },
         {
@@ -848,6 +848,25 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
               },
               "shortDescription": {
                 "text": "The tests ran past their timeout against the mutant, which usually means it loops."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
+              },
+              "help": {
+                "text": "The tests held more memory than the run's share of max_mutant_memory against the mutant and were killed (ADR-148).\n\nAction: review. `cupel describe finding mutant.out-of-memory` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "mutant.out-of-memory",
+              "properties": {
+                "action": "review",
+                "check": "tests.mutation",
+                "cost": "standard",
+                "stability": "experimental",
+                "tier": 3
+              },
+              "shortDescription": {
+                "text": "The tests held more memory than the run's share of max_mutant_memory against the mutant and were killed (ADR-148)."
               }
             },
             {

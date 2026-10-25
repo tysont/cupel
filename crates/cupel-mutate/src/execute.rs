@@ -328,7 +328,9 @@ impl Execution<'_> {
             .runner
             .run(ctx, &selection, &self.options(Some(limit), id))
         {
-            Err(Error::OutOfMemory { .. }) => return Ok(out_of_memory(started.elapsed(), strategy)),
+            Err(Error::OutOfMemory { .. }) => {
+                return Ok(out_of_memory(started.elapsed(), strategy));
+            }
             ran => ran?,
         };
         let elapsed = started.elapsed();
