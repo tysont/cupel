@@ -499,9 +499,17 @@ fn the_cap_on_a_mutants_run_is_its_one_setting_and_configures_the_engines_fact()
 }
 
 #[test]
-fn any_other_setting_or_a_cap_that_is_not_a_duration_is_a_configuration_error() {
+fn any_setting_is_a_configuration_error() {
+    let (key, valid) = support::setting_error(support::check(ID), json!({"timeout_factor": 10}));
+    assert_eq!(
+        (key.as_str(), valid),
+        ("timeout_factor", vec!["max_mutant_timeout".to_owned()])
+    );
+}
+
+#[test]
+fn a_cap_that_is_not_a_duration_is_a_configuration_error() {
     for (config, refused) in [
-        (json!({"timeout_factor": 10}), "timeout_factor"),
         (json!({"max_mutant_timeout": 120}), "max_mutant_timeout"),
         (
             json!({"max_mutant_timeout": "two minutes"}),

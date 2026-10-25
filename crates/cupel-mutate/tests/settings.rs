@@ -96,15 +96,21 @@ fn an_unknown_key_or_a_bad_value_is_refused() {
     );
 }
 
+/// The setting reading `value` as the cap names as invalid.
+fn refused_cap(value: Value) -> &'static str {
+    let settings = Map::from_iter([(MAX_MUTANT_TIMEOUT.to_owned(), value)]);
+    match Settings::read(&Map::new(), &settings) {
+        Err(Error::InvalidValue { what, .. }) => what,
+        other => panic!("{other:?}"),
+    }
+}
+
 #[test]
 fn a_cap_that_is_not_a_duration_is_refused() {
-    for value in [json!("fast"), json!(120), json!("0s")] {
-        let settings = Map::from_iter([(MAX_MUTANT_TIMEOUT.to_owned(), value.clone())]);
-        match Settings::read(&Map::new(), &settings) {
-            Err(Error::InvalidValue { what, .. }) => assert_eq!(what, MAX_MUTANT_TIMEOUT),
-            other => panic!("{value}: {other:?}"),
-        }
-    }
+    assert_eq!(
+        [json!("fast"), json!(120), json!("0s")].map(refused_cap),
+        [MAX_MUTANT_TIMEOUT; 3]
+    );
 }
 
 #[test]

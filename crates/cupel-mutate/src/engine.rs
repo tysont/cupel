@@ -100,11 +100,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
             .filter(|map| map.runner == baseline.runner);
         let toolchain = toolchain_hash(ctx, runner);
         let excluded = excluded(ctx, runner, baseline);
-        let whole = if excluded.is_empty() {
-            TestSelection::All
-        } else {
-            TestSelection::Except(excluded.iter().map(|test| test.id.clone()).collect())
-        };
+        let whole = whole_suite(&excluded);
         let suite_hash = whole_suite_hash(baseline, &excluded);
         let inputs = Inputs {
             sites,
@@ -171,6 +167,15 @@ fn excluded(ctx: &ProduceCtx, runner: &dyn Runner, baseline: &TestResults) -> Ve
         return Vec::new();
     }
     slow
+}
+
+/// What a mutant that per-test selection did not narrow runs: the whole suite but `excluded`.
+fn whole_suite(excluded: &[ExcludedTest]) -> TestSelection {
+    if excluded.is_empty() {
+        TestSelection::All
+    } else {
+        TestSelection::Except(excluded.iter().map(|test| test.id.clone()).collect())
+    }
 }
 
 /// The suite hash of a mutant that runs the whole suite: the baseline's, with the IDs of the
