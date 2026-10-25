@@ -46,6 +46,6 @@ fn a_mutant_that_loops_while_allocating_is_killed_over_its_memory_budget() {
     // well before the ten-second cap; the check ends well within this guard.
     let ran_ms = envelope.checks[0].duration_ms;
     assert!(ran_ms < 120_000, "{ran_ms} ms");
-    assert_eq!(envelope.checks[0].metrics["out_of_memory"], 2.0);
+    assert_eq!(envelope.checks[0].metrics["out_of_memory"].to_string(), "2");
     outcome.assert_golden("mutant-memory/grow");
 }

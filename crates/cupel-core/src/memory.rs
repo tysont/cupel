@@ -55,10 +55,10 @@ fn sample() -> Option<Arc<BTreeMap<u32, u64>>> {
     let mut latest = SAMPLE
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
-    if let Some(sample) = latest.as_ref() {
-        if sample.taken.elapsed() < SAMPLE_AGE {
-            return Some(Arc::clone(&sample.by_group));
-        }
+    if let Some(sample) = latest.as_ref()
+        && sample.taken.elapsed() < SAMPLE_AGE
+    {
+        return Some(Arc::clone(&sample.by_group));
     }
     let by_group = Arc::new(resident_by_group()?);
     *latest = Some(Sample {

@@ -60,7 +60,7 @@ fn each_key_is_read() {
         &table(
             &json!({"operators": "extended", "jobs": 3, "timeout_factor": 4, "strategy": "file-copy"}),
         ),
-        &Map::from_iter(cap("90s").into_iter().chain(budget("3g"))),
+        &cap("90s").into_iter().chain(budget("3g")).collect(),
     )
     .unwrap();
     assert_eq!(
