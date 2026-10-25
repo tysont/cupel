@@ -93,16 +93,6 @@ fn the_command_runs_with_the_lock_held_and_its_exit_code_is_returned() {
     assert!(lock.exists(), "the lock file is created");
 }
 
-/// A repository with the paths the lock tests share: the lock, the log the runs append to, and
-/// the file whose creation releases every holder.
-fn lock_fixture() -> (TempDir, PathBuf, PathBuf, PathBuf) {
-    let repo = repository();
-    let lock = repo.path().join("lock");
-    let log = repo.path().join("log");
-    let release = repo.path().join("release");
-    (repo, lock, log, release)
-}
-
 /// A run that holds the lock until `release` exists, logging its start and end as `name`.
 fn holder(dir: &Path, lock: &Path, log: &Path, release: &Path, name: &str) -> Command {
     let body = format!(
@@ -115,15 +105,36 @@ fn holder(dir: &Path, lock: &Path, log: &Path, release: &Path, name: &str) -> Co
     command
 }
 
-/// A holder named `name`, spawned and running: its start is in the log, so it holds the lock.
-fn started_holder(dir: &Path, lock: &Path, log: &Path, release: &Path, name: &str) -> Child {
-    let child = holder(dir, lock, log, release, name).spawn().unwrap();
+/// A repository whose lock a running holder holds: the lock, the log the runs append to, the file
+/// whose creation releases every holder, and the holder, whose start is in the log.
+struct Held {
+    repo: TempDir,
+    lock: PathBuf,
+    log: PathBuf,
+    release: PathBuf,
+    holder: Child,
+}
+
+fn held_lock(name: &str) -> Held {
+    let repo = repository();
+    let lock = repo.path().join("lock");
+    let log = repo.path().join("log");
+    let release = repo.path().join("release");
+    let holder = holder(repo.path(), &lock, &log, &release, name)
+        .spawn()
+        .unwrap();
     let started = format!("start {name}\n");
     assert!(
-        eventually(|| fs::read_to_string(log).is_ok_and(|log| log.ends_with(&started))),
+        eventually(|| fs::read_to_string(&log).is_ok_and(|log| log == started)),
         "the {name} run never started"
     );
-    child
+    Held {
+        repo,
+        lock,
+        log,
+        release,
+        holder,
+    }
 }
 
 /// The first line a spawned run writes to stderr, within `HANG`.
@@ -140,18 +151,23 @@ fn first_stderr_line(child: &mut Child) -> String {
 
 #[test]
 fn a_second_command_waits_until_the_first_releases_the_lock() {
-    let (repo, lock, log, release) = lock_fixture();
-    let mut first = started_holder(repo.path(), &lock, &log, &release, "first");
-    let mut second = holder(repo.path(), &lock, &log, &release, "second")
-        .spawn()
-        .unwrap();
+    let mut held = held_lock("first");
+    let mut second = holder(
+        held.repo.path(),
+        &held.lock,
+        &held.log,
+        &held.release,
+        "second",
+    )
+    .spawn()
+    .unwrap();
     // The first run is released once the second has said it waits for it.
     let waiting = first_stderr_line(&mut second);
-    fs::write(&release, "").unwrap();
-    assert!(first.wait().unwrap().success());
+    fs::write(&held.release, "").unwrap();
+    assert!(held.holder.wait().unwrap().success());
     assert!(second.wait().unwrap().success());
     assert_eq!(
-        fs::read_to_string(&log).unwrap(),
+        fs::read_to_string(&held.log).unwrap(),
         "start first\nend first\nstart second\nend second\n"
     );
     assert!(
@@ -164,23 +180,29 @@ fn a_second_command_waits_until_the_first_releases_the_lock() {
 /// lock before any waiting run without it, however long the other has waited.
 #[test]
 fn a_prioritized_command_takes_the_lock_before_a_longer_waiting_default_one() {
-    let (repo, lock, log, release) = lock_fixture();
-    let mut holding = started_holder(repo.path(), &lock, &log, &release, "holding");
-    let mut default = holder(repo.path(), &lock, &log, &release, "default")
+    let Held {
+        repo,
+        lock,
+        log,
+        release,
+        holder: mut holding,
+    } = held_lock("holding");
+    let (lock, log, release) = (&lock, &log, &release);
+    let mut default = holder(repo.path(), lock, log, release, "default")
         .spawn()
         .unwrap();
     assert!(first_stderr_line(&mut default).contains("waiting for"));
-    let mut first = holder(repo.path(), &lock, &log, &release, "first")
+    let mut first = holder(repo.path(), lock, log, release, "first")
         .env("CUPEL_HEAVY_PRIORITY", "first")
         .spawn()
         .unwrap();
     assert!(first_stderr_line(&mut first).contains("waiting for"));
-    fs::write(&release, "").unwrap();
+    fs::write(release, "").unwrap();
     assert!(holding.wait().unwrap().success());
     assert!(first.wait().unwrap().success());
     assert!(default.wait().unwrap().success());
     assert_eq!(
-        fs::read_to_string(&log).unwrap(),
+        fs::read_to_string(log).unwrap(),
         "start holding\nend holding\nstart first\nend first\nstart default\nend default\n"
     );
 }
