@@ -5,7 +5,7 @@ mod support;
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
-use std::process::{Command, Output, Stdio};
+use std::process::{Child, Command, Output, Stdio};
 use std::sync::mpsc;
 
 use support::{HANG, eventually, workspace};
@@ -115,8 +115,19 @@ fn holder(dir: &Path, lock: &Path, log: &Path, release: &Path, name: &str) -> Co
     command
 }
 
+/// A holder named `name`, spawned and running: its start is in the log, so it holds the lock.
+fn started_holder(dir: &Path, lock: &Path, log: &Path, release: &Path, name: &str) -> Child {
+    let child = holder(dir, lock, log, release, name).spawn().unwrap();
+    let started = format!("start {name}\n");
+    assert!(
+        eventually(|| fs::read_to_string(log).is_ok_and(|log| log.ends_with(&started))),
+        "the {name} run never started"
+    );
+    child
+}
+
 /// The first line a spawned run writes to stderr, within `HANG`.
-fn first_stderr_line(child: &mut std::process::Child) -> String {
+fn first_stderr_line(child: &mut Child) -> String {
     let mut stderr = BufReader::new(child.stderr.take().unwrap());
     let (said, heard) = mpsc::channel();
     std::thread::spawn(move || {
@@ -130,13 +141,7 @@ fn first_stderr_line(child: &mut std::process::Child) -> String {
 #[test]
 fn a_second_command_waits_until_the_first_releases_the_lock() {
     let (repo, lock, log, release) = lock_fixture();
-    let mut first = holder(repo.path(), &lock, &log, &release, "first")
-        .spawn()
-        .unwrap();
-    assert!(
-        eventually(|| fs::read_to_string(&log).is_ok_and(|log| log == "start first\n")),
-        "the first run never started"
-    );
+    let mut first = started_holder(repo.path(), &lock, &log, &release, "first");
     let mut second = holder(repo.path(), &lock, &log, &release, "second")
         .spawn()
         .unwrap();
@@ -160,13 +165,7 @@ fn a_second_command_waits_until_the_first_releases_the_lock() {
 #[test]
 fn a_prioritized_command_takes_the_lock_before_a_longer_waiting_default_one() {
     let (repo, lock, log, release) = lock_fixture();
-    let mut holding = holder(repo.path(), &lock, &log, &release, "holding")
-        .spawn()
-        .unwrap();
-    assert!(
-        eventually(|| fs::read_to_string(&log).is_ok_and(|log| log == "start holding\n")),
-        "the holding run never started"
-    );
+    let mut holding = started_holder(repo.path(), &lock, &log, &release, "holding");
     let mut default = holder(repo.path(), &lock, &log, &release, "default")
         .spawn()
         .unwrap();
