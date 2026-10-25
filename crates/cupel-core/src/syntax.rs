@@ -558,6 +558,11 @@ pub struct ProjectRoot {
 pub struct References {
     pub references: Vec<Reference>,
     pub dynamic: Vec<DynamicAccess>,
+    /// Every import edge of the same files, resolved as `ModuleGraph` resolves them, so an
+    /// importer outside a narrowed scope counts (ADR-144); empty when the producer records none.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub imports: Vec<ImportEdge>,
 }
 fact!(References, References, "references");
 

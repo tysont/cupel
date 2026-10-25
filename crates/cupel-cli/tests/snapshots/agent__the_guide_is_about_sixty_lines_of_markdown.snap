@@ -34,13 +34,14 @@ Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the 
 
 ## The gate
 
-`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base. `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
+`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base (`--against baseline|REF|run:ID` names another reference). `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
 
 ## Depth
 
 - `--depth quick|standard|deep|exhaustive`, default `standard`. How much evidence to gather.
 - `--budget DURATION`. A wall-clock budget: run the most valuable checks that fit and skip the rest.
-- Scope flags (`--changed`, `--base`, `--paths`, `--symbols`) intersect; `--only` and `--skip` select checks by ID or group.
+- Scope flags (`--changed`, `--base` with `--head`, `--paths`, `--symbols`) intersect; under `--changed` or `--base` the checks rule on the functions the change touched. `--only` and `--skip` select checks by ID or group, `--tier N+` by tier; `--jobs N` caps the threads and test processes.
+- `--oracle NAME` picks the reference implementation `gen.differential` compares with and `--cases N` the inputs generative checks try; `check --scaffold --write` writes a property stub for each `property.missing` finding.
 
 | Depth | Adds |
 | --- | --- |
@@ -60,7 +61,7 @@ Stdout is one JSON envelope; diagnostics go to stderr. Read:
 
 ## MCP
 
-A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints.
+A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints. Without `--mcp`, `cupel serve` keeps facts warm for every command run in the repository, and `--watch` reparses files as they change.
 
 ## More
 

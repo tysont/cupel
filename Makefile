@@ -16,7 +16,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline parity install dist installers windows-check windows-test dev-setup dev-env
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline reclaim parity install dist installers version windows-check windows-test dev-setup dev-env
 
 build:
 	$(CARGO) build --workspace
@@ -92,8 +92,9 @@ DOGFOOD_BUDGET ?= 30m
 # `--no-install`: grading Cupel never asks to install a tool, even from a terminal (ADR-081).
 # scripts/heavy.sh holds the machine-wide lock every heavy command takes while the gate runs, so
 # dogfoods from every checkout on the machine, and the external test suites run beside them, run one
-# at a time (the mutation engine's slots default to half the cores, at most four); it refuses to
-# start from a working tree that was deleted under the invoking shell.
+# at a time (the mutation engine's slots default to half the cores, at most four), the integrator's
+# chains first (CUPEL_HEAVY_PRIORITY=first); it refuses to start from a working tree that was deleted
+# under the invoking shell. `make check` takes no lock: the suite is deterministic under load (ADR-145).
 # The tree gate's `base` rules compare with the committed baseline, `.cupel/baseline.json`, a
 # tree run on `main` (ADR-140); it is imported first so a fresh store (a CI runner's, or one just
 # deleted) has the reference. `make baseline` refreshes it from the last tree run here.
@@ -113,6 +114,16 @@ baseline:
 install:
 	$(CARGO) install --path crates/cupel-cli
 
+# The build outputs a checkout regenerates on demand: the coverage build (`target/cupel-llvm-cov`, a
+# second build of the workspace, 14 to 18 GB), the incremental caches (5 to 14 GB after a day of
+# edits), and the suite cache (`.cupel/cache`, the coverage artifacts of each tree state). A worktree
+# that keeps them is 30 to 50 GB; `scripts/heavy.sh` refuses to start below 40 GB free. The compiled
+# dependencies, the fact store, the runs, and the baseline stay. Run it after a dogfood and before a
+# branch is handed over; the next build or dogfood rebuilds what it needs.
+reclaim:
+	rm -rf target/cupel-llvm-cov target/debug/incremental target/release/incremental .cupel/cache
+	@df -Ph . | awk 'NR == 2 { print "reclaim: " $$4 " free on this volume" }'
+
 # A release archive (ADR-124): builds the stripped release binary for TARGET (the host by default)
 # and packages it with LICENSE and README.md as target/dist/cupel-<version>-<TARGET>.tar.gz (.zip
 # on Windows). The Linux musl targets build through cargo-zigbuild, which needs `zig` on PATH; every
@@ -126,6 +137,11 @@ dist:
 	$(CARGO) $(DIST_BUILD) --release --locked --package cupel-cli --target $(TARGET)
 	@archive="$$(scripts/release.sh package $(DIST_BINARY) $(TARGET) $(DIST_DIR))" && \
 		scripts/release.sh verify "$$archive" && echo "$$archive"
+
+# Writes the release version V (MAJOR.MINOR.PATCH) into every file that names it: the workspace
+# package, the lock file's workspace crates, the npm wrapper's package.json, and the pipx module.
+version:
+	scripts/release.sh version --set $(V)
 
 # The installers under dist/ (ADR-125) against a fake release on a local HTTP server: install.sh,
 # the Homebrew formula, the npm and pipx wrappers, and the cargo-binstall metadata. `make test` runs

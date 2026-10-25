@@ -120,13 +120,15 @@ pub use matrix::{Support, SupportMatrix};
 pub use model_check::{
     Counterexample, HarnessStatus, ModelCheckResults, ModelHarness, RefutedProperty,
 };
-pub use mutation::{Mutant, MutantOutcome, MutationOutcomes, MutationStrategy};
+pub use mutation::{
+    ExcludedTest, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, SLOW_TEST_MS,
+};
 pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
-    Availability, ChangedLines, Ctx, Estimate, Focus, Install, JointProducer, ProduceCtx, Producer,
+    Availability, Ctx, Estimate, Focus, Install, JointProducer, ProduceCtx, Producer,
     ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand, Runners,
     TestRun, TestSelection, ToolProbe, Upstream,
 };
@@ -144,7 +146,7 @@ pub use relation::{
 };
 pub use root_run::{RootRun, RunStatus};
 pub use schedule::{Job, Outcome, Production, Scheduler};
-pub use scope::{ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
+pub use scope::{ChangedLines, ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
 pub use select::Selection;
 pub use simulation::{SimulationFailure, SimulationHarness, SimulationResults, SimulationStatus};
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};

@@ -17,6 +17,580 @@
       "text": "getattr(sys.modules[__name__], f\"_{kind}_rate\")"
     }
   ],
+  "imports": [
+    {
+      "edge_kind": "import",
+      "from": "src/deps_cycle/alpha.py",
+      "line": 1,
+      "names": [
+        "BETA"
+      ],
+      "relative": true,
+      "specifier": ".beta.BETA",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_cycle/beta.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_cycle/beta.py",
+      "line": 1,
+      "relative": true,
+      "specifier": ".alpha",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_cycle/alpha.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_layers/domain/order.py",
+      "line": 1,
+      "names": [
+        "Store"
+      ],
+      "relative": true,
+      "specifier": "..infra.store.Store",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_layers/infra/store.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_layers/port.py",
+      "line": 1,
+      "names": [
+        "Protocol"
+      ],
+      "relative": false,
+      "specifier": "typing.Protocol",
+      "target": {
+        "kind": "external",
+        "package": "typing"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/deps_layers/port.py",
+      "line": 3,
+      "names": [
+        "Order"
+      ],
+      "relative": true,
+      "specifier": ".domain.order.Order",
+      "target": {
+        "kind": "file",
+        "path": "src/deps_layers/domain/order.py"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "src/ledger/__init__.py",
+      "line": 5,
+      "names": [
+        "Account"
+      ],
+      "relative": true,
+      "specifier": ".account.Account",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/account.py"
+      }
+    },
+    {
+      "edge_kind": "re-export",
+      "from": "src/ledger/__init__.py",
+      "line": 5,
+      "names": [
+        "Audited"
+      ],
+      "relative": true,
+      "specifier": ".account.Audited",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/account.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/__init__.py",
+      "line": 6,
+      "names": [
+        "schema"
+      ],
+      "relative": true,
+      "specifier": ".generated.schema",
+      "target": {
+        "kind": "unresolved"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/__init__.py",
+      "line": 25,
+      "names": [
+        "doubled"
+      ],
+      "relative": true,
+      "specifier": ".rates.doubled",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/rates.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/account.py",
+      "line": 1,
+      "names": [
+        "Protocol"
+      ],
+      "relative": false,
+      "specifier": "typing.Protocol",
+      "target": {
+        "kind": "external",
+        "package": "typing"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/account.py",
+      "line": 3,
+      "names": [
+        "render"
+      ],
+      "relative": false,
+      "specifier": "ledger.report.format.render",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/report/format.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/cli.py",
+      "line": 1,
+      "relative": false,
+      "specifier": "sys",
+      "target": {
+        "kind": "external",
+        "package": "sys"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/cli.py",
+      "line": 3,
+      "names": [
+        "balance"
+      ],
+      "relative": false,
+      "specifier": "ledger.balance",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/__init__.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/rates.py",
+      "line": 3,
+      "names": [
+        "_imported_rate"
+      ],
+      "relative": true,
+      "specifier": ".references._imported_rate",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/references.py"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "tripled",
+          "name": "exported_rate"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "src/ledger/rates.py",
+      "line": 3,
+      "names": [
+        "exported_rate"
+      ],
+      "relative": true,
+      "specifier": ".references.exported_rate",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/references.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/references.py",
+      "line": 4,
+      "relative": false,
+      "specifier": "sys",
+      "target": {
+        "kind": "external",
+        "package": "sys"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/report/__init__.py",
+      "line": 1,
+      "names": [
+        "cents"
+      ],
+      "relative": false,
+      "specifier": "units.cents",
+      "target": {
+        "kind": "file",
+        "path": "libs/units/src/units/__init__.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/report/__init__.py",
+      "line": 3,
+      "relative": true,
+      "specifier": ".format",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/report/format.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "src/ledger/report/format.py",
+      "line": 1,
+      "relative": false,
+      "specifier": "requests",
+      "target": {
+        "kind": "external",
+        "package": "requests"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/conftest.py",
+      "line": 1,
+      "relative": false,
+      "specifier": "pytest",
+      "target": {
+        "kind": "external",
+        "package": "pytest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/conftest.py",
+      "line": 3,
+      "names": [
+        "Account"
+      ],
+      "relative": false,
+      "specifier": "ledger.Account",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/__init__.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_ledger.py",
+      "line": 1,
+      "names": [
+        "patch"
+      ],
+      "relative": false,
+      "specifier": "unittest.mock.patch",
+      "target": {
+        "kind": "external",
+        "package": "unittest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_ledger.py",
+      "line": 3,
+      "relative": false,
+      "specifier": "pytest",
+      "target": {
+        "kind": "external",
+        "package": "pytest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_ledger.py",
+      "line": 5,
+      "names": [
+        "Account"
+      ],
+      "relative": false,
+      "specifier": "ledger.Account",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/__init__.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_ledger.py",
+      "line": 6,
+      "names": [
+        "parse_cents"
+      ],
+      "relative": false,
+      "specifier": "ledger.decide.parse_cents",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/decide.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_ledger.py",
+      "line": 6,
+      "names": [
+        "require_positive"
+      ],
+      "relative": false,
+      "specifier": "ledger.decide.require_positive",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/decide.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_ledger.py",
+      "line": 7,
+      "names": [
+        "publish"
+      ],
+      "relative": false,
+      "specifier": "ledger.report.format.publish",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/report/format.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_ledger.py",
+      "line": 7,
+      "names": [
+        "render"
+      ],
+      "relative": false,
+      "specifier": "ledger.report.format.render",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/report/format.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_pricing.py",
+      "line": 1,
+      "relative": false,
+      "specifier": "unittest",
+      "target": {
+        "kind": "external",
+        "package": "unittest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_pricing.py",
+      "line": 2,
+      "names": [
+        "mock"
+      ],
+      "relative": false,
+      "specifier": "unittest.mock",
+      "target": {
+        "kind": "external",
+        "package": "unittest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_pricing.py",
+      "line": 4,
+      "names": [
+        "discounted"
+      ],
+      "relative": false,
+      "specifier": "ledger.pricing.discounted",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/pricing.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_pricing.py",
+      "line": 4,
+      "names": [
+        "tally"
+      ],
+      "relative": false,
+      "specifier": "ledger.pricing.tally",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/pricing.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_properties.py",
+      "line": 1,
+      "names": [
+        "given"
+      ],
+      "relative": false,
+      "specifier": "hypothesis.given",
+      "target": {
+        "kind": "external",
+        "package": "hypothesis"
+      }
+    },
+    {
+      "aliases": [
+        {
+          "local": "st",
+          "name": "strategies"
+        }
+      ],
+      "edge_kind": "import",
+      "from": "tests/test_properties.py",
+      "line": 1,
+      "names": [
+        "strategies"
+      ],
+      "relative": false,
+      "specifier": "hypothesis.strategies",
+      "target": {
+        "kind": "external",
+        "package": "hypothesis"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_properties.py",
+      "line": 3,
+      "names": [
+        "parse_cents"
+      ],
+      "relative": false,
+      "specifier": "ledger.decide.parse_cents",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/decide.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_quality_signals.py",
+      "line": 1,
+      "relative": false,
+      "specifier": "pytest",
+      "target": {
+        "kind": "external",
+        "package": "pytest"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_quality_signals.py",
+      "line": 3,
+      "names": [
+        "Account"
+      ],
+      "relative": false,
+      "specifier": "ledger.Account",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/__init__.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_quality_signals.py",
+      "line": 3,
+      "names": [
+        "balance"
+      ],
+      "relative": false,
+      "specifier": "ledger.balance",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/__init__.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_quality_signals.py",
+      "line": 4,
+      "names": [
+        "classify"
+      ],
+      "relative": false,
+      "specifier": "ledger.decide.classify",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/decide.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_quality_signals.py",
+      "line": 4,
+      "names": [
+        "require_positive"
+      ],
+      "relative": false,
+      "specifier": "ledger.decide.require_positive",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/decide.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_quality_signals.py",
+      "line": 5,
+      "names": [
+        "discounted"
+      ],
+      "relative": false,
+      "specifier": "ledger.pricing.discounted",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/pricing.py"
+      }
+    },
+    {
+      "edge_kind": "import",
+      "from": "tests/test_quality_signals.py",
+      "line": 5,
+      "names": [
+        "tally"
+      ],
+      "relative": false,
+      "specifier": "ledger.pricing.tally",
+      "target": {
+        "kind": "file",
+        "path": "src/ledger/pricing.py"
+      }
+    }
+  ],
   "references": [
     {
       "file": "libs/units/src/units/__init__.py",

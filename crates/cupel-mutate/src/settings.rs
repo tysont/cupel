@@ -1,5 +1,8 @@
-// ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, jobs, timeout_factor, strategy }`
-// ABOUTME: (ADR-080, ADR-082): the operator set, slots at once, the timeout factor, and schemata or file copies.
+// ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, jobs, timeout_factor, strategy }` (ADR-080,
+// ABOUTME: ADR-082) and the cap a check declares for its fact (ADR-147): operators, slots, timeouts, and how mutants build.
+use std::time::Duration;
+
+use cupel_core::config::TimeLimit;
 use cupel_core::syntax::OperatorSet;
 use cupel_core::{Error, Result};
 use serde_json::{Map, Value};
@@ -9,6 +12,15 @@ pub const KEY: &str = "mutation";
 
 /// The timeout factor when none is configured (design §6.7).
 pub const DEFAULT_TIMEOUT_FACTOR: u32 = 10;
+
+/// The setting a check declares for the engine's fact that caps a mutant's run (ADR-147).
+pub const MAX_MUTANT_TIMEOUT: &str = "max_mutant_timeout";
+
+/// The cap when none is configured (ADR-147).
+pub const DEFAULT_MAX_MUTANT_TIMEOUT: Duration = Duration::from_secs(120);
+
+/// The shortest timeout a mutant's run gets (design §9.3).
+const TIMEOUT_FLOOR: Duration = Duration::from_secs(2);
 
 /// How the engine mutates and runs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -21,6 +33,8 @@ pub struct Settings {
     pub timeout_factor: u32,
     /// How mutants are built.
     pub strategy: Strategy,
+    /// The longest a mutant's run may take, whatever its reference (ADR-147).
+    pub max_mutant_timeout: Duration,
 }
 
 /// How the engine builds mutants (ADR-082).
@@ -33,14 +47,19 @@ pub enum Strategy {
 }
 
 impl Settings {
-    /// The settings in `config`, a `[lang.<id>]` table; defaults for what it does not say.
-    pub fn read(config: &Map<String, Value>) -> Result<Self> {
+    /// The settings in `config`, a `[lang.<id>]` table, and in `declared`, the settings checks
+    /// declare for the engine's fact (`ProduceCtx::settings`); defaults for what they do not say.
+    pub fn read(config: &Map<String, Value>, declared: &Map<String, Value>) -> Result<Self> {
         let mut settings = Self {
             operators: OperatorSet::Default,
             jobs: default_jobs(),
             timeout_factor: DEFAULT_TIMEOUT_FACTOR,
             strategy: Strategy::Schemata,
+            max_mutant_timeout: DEFAULT_MAX_MUTANT_TIMEOUT,
         };
+        if let Some(value) = declared.get(MAX_MUTANT_TIMEOUT) {
+            settings.max_mutant_timeout = cap(value)?;
+        }
         let Some(table) = config.get(KEY) else {
             return Ok(settings);
         };
@@ -60,6 +79,27 @@ impl Settings {
         }
         Ok(settings)
     }
+
+    /// The timeout of a mutant whose reference run took `reference`: `timeout_factor` times it,
+    /// at least two seconds, at most `max_mutant_timeout`.
+    pub fn timeout(&self, reference: Duration) -> Duration {
+        TIMEOUT_FLOOR
+            .max(reference * self.timeout_factor)
+            .min(self.max_mutant_timeout)
+    }
+}
+
+/// `value`, the cap, as a duration such as `120s` or `2m`.
+fn cap(value: &Value) -> Result<Duration> {
+    value
+        .as_str()
+        .and_then(|text| text.parse::<TimeLimit>().ok())
+        .map(TimeLimit::as_duration)
+        .ok_or_else(|| Error::InvalidValue {
+            what: MAX_MUTANT_TIMEOUT,
+            value: value.to_string(),
+            expected: "a duration such as `120s` or `2m`",
+        })
 }
 
 /// The operator sets, by name.

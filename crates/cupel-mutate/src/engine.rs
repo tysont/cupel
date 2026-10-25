@@ -7,9 +7,9 @@ use cupel_core::syntax::{
     ImportTarget, ModuleGraph, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
 };
 use cupel_core::{
-    Availability, CostClass, Ctx, Error, EventSink, FactKind, Langs, MutationOutcomes, PerTestMap,
-    Process, ProduceCtx, Producer, ProducerId, ProducerRegistry, Result, Runner, Scope,
-    TestResults, WriteError,
+    Availability, CostClass, Ctx, Error, EventSink, ExcludedTest, FactKind, Langs,
+    MutationOutcomes, PerTestMap, Process, ProduceCtx, Producer, ProducerId, ProducerRegistry,
+    Result, Runner, SLOW_TEST_MS, Scope, TestResults, TestSelection, WriteError,
 };
 
 use crate::execute::{Execution, FileRun};
@@ -86,7 +86,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         ) else {
             return Ok(self.outcomes(ctx, None, false, Vec::new()));
         };
-        let settings = Settings::read(&ctx.config)?;
+        let settings = Settings::read(&ctx.config, &ctx.settings)?;
         let runner = ctx
             .runners
             .get(&baseline.runner)
@@ -99,6 +99,9 @@ impl Producer<MutationOutcomes> for MutationEngine {
             .get::<PerTestMap>()
             .filter(|map| map.runner == baseline.runner);
         let toolchain = toolchain_hash(ctx, runner);
+        let excluded = excluded(ctx, runner, baseline);
+        let whole = whole_suite(&excluded);
+        let suite_hash = whole_suite_hash(baseline, &excluded);
         let inputs = Inputs {
             sites,
             symbols,
@@ -110,14 +113,21 @@ impl Producer<MutationOutcomes> for MutationEngine {
             focus: &ctx.focus,
             scope,
             operators: settings.operators,
-            suite_hash: &baseline.suite_hash,
+            suite_hash: &suite_hash,
             toolchain_hash: &toolchain,
         };
         let root = &ctx.ctx.root;
         let mut planned = plan(&inputs, &|file| read(root, file));
-        Running::new(ctx, runner, settings, symbols).run(&mut planned)?;
+        Running::new(ctx, runner, settings, symbols, &whole).run(&mut planned)?;
+        let runs_whole = planned
+            .iter()
+            .any(|planned| planned.covered && planned.tests.is_none());
         let mutants = planned.into_iter().map(|planned| planned.mutant).collect();
-        Ok(self.outcomes(ctx, Some(baseline), per_test.is_some(), mutants))
+        let mut outcomes = self.outcomes(ctx, Some(baseline), per_test.is_some(), mutants);
+        if runs_whole {
+            outcomes.excluded = excluded;
+        }
+        Ok(outcomes)
     }
 }
 
@@ -139,11 +149,53 @@ impl MutationEngine {
     }
 }
 
+/// The tests of `baseline` slower than [`SLOW_TEST_MS`], when `runner` can leave them out of a
+/// run of the whole suite (ADR-147); none otherwise, so every mutant runs them.
+fn excluded(ctx: &ProduceCtx, runner: &dyn Runner, baseline: &TestResults) -> Vec<ExcludedTest> {
+    let slow: Vec<ExcludedTest> = baseline
+        .tests
+        .iter()
+        .filter(|test| test.duration_ms.is_some_and(|ms| ms > SLOW_TEST_MS))
+        .map(|test| ExcludedTest {
+            id: test.id.clone(),
+            file: test.file.clone(),
+            baseline_ms: test.duration_ms.unwrap_or_default(),
+        })
+        .collect();
+    let ids = slow.iter().map(|test| test.id.clone()).collect();
+    if slow.is_empty() || runner.commands(ctx, &TestSelection::Except(ids)).is_none() {
+        return Vec::new();
+    }
+    slow
+}
+
+/// What a mutant that per-test selection did not narrow runs: the whole suite but `excluded`.
+fn whole_suite(excluded: &[ExcludedTest]) -> TestSelection {
+    if excluded.is_empty() {
+        TestSelection::All
+    } else {
+        TestSelection::Except(excluded.iter().map(|test| test.id.clone()).collect())
+    }
+}
+
+/// The suite hash of a mutant that runs the whole suite: the baseline's, with the IDs of the
+/// tests left out of it when any is, so a test becoming slow or fast reruns those mutants.
+fn whole_suite_hash(baseline: &TestResults, excluded: &[ExcludedTest]) -> String {
+    if excluded.is_empty() {
+        return baseline.suite_hash.clone();
+    }
+    let mut parts = vec![baseline.suite_hash.as_str()];
+    parts.extend(excluded.iter().map(|test| test.id.as_str()));
+    digest(&parts)
+}
+
 /// One production's running of its planned mutants.
 struct Running<'a> {
     ctx: &'a ProduceCtx,
     runner: &'a dyn Runner,
     settings: Settings,
+    /// What a mutant that per-test selection did not narrow runs.
+    whole: &'a TestSelection,
     graph: Option<&'a ModuleGraph>,
     /// The language's schemata rewriter, when its mutants are built as schemata.
     rewriter: Option<&'static dyn Rewriter>,
@@ -152,12 +204,14 @@ struct Running<'a> {
 }
 
 impl<'a> Running<'a> {
-    /// How `ctx`'s production of `symbols`' language runs its mutants with `runner`.
+    /// How `ctx`'s production of `symbols`' language runs its mutants with `runner`, those
+    /// per-test selection did not narrow over `whole`.
     fn new(
         ctx: &'a ProduceCtx,
         runner: &'a dyn Runner,
         settings: Settings,
         symbols: &Symbols,
+        whole: &'a TestSelection,
     ) -> Self {
         let lang = symbols
             .symbols
@@ -167,6 +221,7 @@ impl<'a> Running<'a> {
             ctx,
             runner,
             settings,
+            whole,
             graph: ctx.upstream.get::<ModuleGraph>(),
             rewriter: match settings.strategy {
                 Strategy::Schemata => schemata::rewriter(&lang),
@@ -195,7 +250,8 @@ impl<'a> Running<'a> {
             ctx: self.ctx,
             runner: self.runner,
             slots: &slots,
-            timeout_factor: self.settings.timeout_factor,
+            settings: self.settings,
+            whole: self.whole,
         };
         let root = &self.ctx.ctx.root;
         for (file, indexes) in order {

@@ -71,14 +71,14 @@ Every other route installs a release binary from GitHub Releases, checked agains
 | Release archive | `gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'` | Linux, macOS | now |
 | From source | `cargo install --locked --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
 | Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap |
-| npm | `npx cupel` | Linux, macOS | once the `cupel` package is published to npm |
-| pipx | `pipx install cupel` | Linux, macOS | once Cupel's package is on PyPI; the `cupel` there is another project's |
-| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the crates are published to crates.io |
+| npm | `npx cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to npm |
+| pipx | `pipx install cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to PyPI |
+| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's |
 | cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
 <!-- end:install-routes -->
 
 - **Install script** (POSIX `sh`): installs Linux x86_64/aarch64 and macOS arm64/x86_64 binaries into `~/.local/bin`, or `CUPEL_INSTALL_DIR`, and prints the line to add to your `PATH` when that directory is not on it. `CUPEL_VERSION=0.1.0` installs that release instead of the latest. It needs `curl` or `wget`, `tar`, and `sha256sum` or `shasum`.
-- **npm and pipx**: the package's `cupel` command downloads the binary of the package's own version on first run into `CUPEL_CACHE_DIR`, else `~/.cache/cupel` (`%LOCALAPPDATA%\cupel` on Windows), then runs it with your arguments, stdio, and exit code. When the binary cannot be downloaded or its checksum differs, it prints why and exits 3. npm needs Node 18 or newer; pipx, Python 3.9 or newer.
+- **npm and pipx**: the `cupel-cli` package's `cupel` command downloads the binary of the package's own version on first run into `CUPEL_CACHE_DIR`, else `~/.cache/cupel` (`%LOCALAPPDATA%\cupel` on Windows), then runs it with your arguments, stdio, and exit code. When the binary cannot be downloaded or its checksum differs, it prints why and exits 3. npm needs Node 18 or newer; pipx, Python 3.9 or newer.
 - **Homebrew**: the formula, rendered per release by `dist/homebrew/render.sh` from `SHA256SUMS`, covers macOS and Linux.
 
 ## The agent loop
@@ -184,7 +184,7 @@ Each schema's `$id` is the URL it is published at, under [`https://tysont.github
 | `--paths P` | Files, directories, or globs (gitignore-aware); repeatable |
 | `--symbols S` | Symbols by qualified name (`shop.shipping.shipping_cost`) or structural hash (`sh_c7dca337c9ad7dd1`); repeatable |
 
-A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weakening` compares tests between two revisions, so it runs only with `--changed` or `--base` and is reported as skipped on a tree.
+Under `--changed` or `--base` the symbols in scope are the functions and methods the range's changed lines touch (a file git does not track yet counts whole): a clone group is reported when one of its members was touched, every other per-symbol finding when its symbol was, so the changed gate rules on what the change wrote, and the tree gate grades the rest ([ADR-142](docs/adr/CUPEL_DECISION_142.md)). Facts are still produced for whole files, so a touched function's clone elsewhere in its file is found. A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weakening` compares tests between two revisions, so it runs only with `--changed` or `--base` and is reported as skipped on a tree.
 
 **Selection** decides which checks run.
 
@@ -751,7 +751,7 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 | `tests.assertion-density` | 2 | quick | `density.sparse-test`, `density.sparse-file` | `assertions_per_test`, `assertions_per_public_function`, `tested_public_functions`, `sparse_tests`, `sparse_files` | — | clojure, go, java, javascript, python, rust, typescript |
 | `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines`, `line_coverage` |  |
 | `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | clojure, go, java, javascript, python, rust, typescript |
-| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?` | `score`, `killed`, `survived`, `timeout`, `uncovered`, `unviable`, `equivalent`, `executed`, `reused`, `schemata`, `fallback` | `survivors`, `mutation_score`, `tests` |  |
+| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.uncovered`, `mutant.equivalent?`, `mutant.slow-test-excluded` | `score`, `killed`, `survived`, `timeout`, `uncovered`, `unviable`, `equivalent`, `executed`, `reused`, `schemata`, `fallback` | `survivors`, `mutation_score`, `tests` |  |
 | `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | clojure, go, java, javascript, python, rust, typescript |
 <!-- end:check-table -->
@@ -978,10 +978,11 @@ Without a `coverage` command a language's `tests.coverage` is skipped as `unconf
 - `mutant.uncovered` (a note): no test runs the site, so its mutant was not run.
 - `mutant.timeout` (a note): the tests ran past their timeout against the mutant, which usually means it loops.
 - `mutant.equivalent?` (a note, confidence 0.3): the mutant survived but may behave exactly as the original — today, swapping `+`/`-` before a literal `0` or `*`/`/` before a literal `1`. It is left out of the score; suppress it once you agree.
+- `mutant.slow-test-excluded` (a note): a test that took more than 60 seconds in the baseline was left out of every mutant run that per-test selection did not narrow (see Timeouts below); the finding names the test and its baseline duration.
 
 The score `tests.mutation.score` is killed / (killed + survived + uncovered), 1 when nothing was scored: a change no test runs scores 0, so a score floor in a gate also asks for tests of it. Timeouts, unviable mutants, and possibly equivalent survivors are left out. The other gate keys count mutants by outcome (`killed`, `survived`, `timeout`, `uncovered`, `unviable` for one that did not build, `equivalent`) and say how many ran this time (`executed`) or were reused (`reused`), and how many of those ran behind a schemata build (`schemata`) or fell back to file copies (`fallback`).
 
-How much is mutated follows the depth: at `standard` with `--changed` or `--base`, the functions the change touched; at `deep` and `exhaustive`, every function of the files in scope (the touched files with `--changed`, the tree without). Test code is never mutated. Only the `default` operators run unless the language asks for more:
+How much is mutated follows the depth: at `standard` with `--changed` or `--base`, the functions the change touched; at `deep` and `exhaustive`, every function of the files in scope (the touched files with `--changed`, the tree without). Under a range, `tests.mutation` scores only the mutants in the functions the change touched (ADR-142). Test code is never mutated. Only the `default` operators run unless the language asks for more:
 
 ```toml
 [lang.python]
@@ -989,6 +990,9 @@ mutation = { operators = "extended", jobs = 2, timeout_factor = 10 }
 
 [lang.rust]
 mutation = { strategy = "file-copy" }   # "schemata" (the default) or "file-copy"
+
+[checks."tests.mutation"]
+max_mutant_timeout = "5m"               # the longest any mutant's run may take; default 120s
 ```
 
 Mutation testing is expensive, so the engine stacks every saving it can. Before the first mutant, the baseline, the coverage report, and the per-test map come from [one run of the suite](#one-suite-run) where the toolchain allows, or from its cache when nothing changed. Then:
@@ -998,10 +1002,25 @@ Mutation testing is expensive, so the engine stacks every saving it can. Before 
 3. **Per-test selection.** Where the language has a per-test coverage map from the baseline's runner (Go; Python with pytest-cov; Rust when cargo-nextest is the runner and cargo-llvm-cov is installed), a mutant runs only the tests that execute its line. The [one suite run](#one-suite-run) makes the map for Rust and Python at any depth. Otherwise, measuring a map from nothing happens at `--depth deep` and beyond; at `standard` the engine uses a cached map (see [`cupel tests --impacted`](#cupel-tests---impacted)) when refreshing it is cheap: one suite run for Rust and Python, at most 32 tests for Go. `cupel check --dry-run` says which, in the check's `needs`: `per-test-map(cached)`, `per-test-map(refresh 3 stale)`, or `per-test-map(deep)` when the depth leaves it out. Without a map a mutant runs the whole suite.
 4. **Schemata (Rust).** Instead of one build per mutant, each Rust file is rewritten once with every mutant behind a run-time switch — the smallest whole expression around each site becomes `if cupel_mutant_id() == N { mutated } else { original }`, and a small reader of the `CUPEL_MUTANT` environment variable is appended to the file — so the file builds once and each mutant runs with `CUPEL_MUTANT=N`. Every line stays where it was. Before any mutant runs, each worker builds the rewritten file and runs its tests with no mutant selected; they must pass. Sites where an `if` cannot stand (patterns, `const` and `static` items, `const fn`, array lengths, macro arguments, attributes) and constants the compiler checks run as ordinary file copies. If the rewritten file does not compile, the sites on the lines the compiler names run as file copies and the file is rebuilt; if it still fails, the whole file runs as file copies. Nothing is lost either way: outcomes are the same under both, which the tests check on the Rust fixtures. The check reports how many mutants ran each way (`schemata`, `fallback`) and a note for each reason a mutant fell back. Other languages build per mutant (Go's builds take a fraction of a second; see [ADR-005](docs/adr/CUPEL_DECISION_005.md)).
 5. **Overlays.** Mutants run in copies of the tree outside the repository, one per worker, kept between runs so builds stay incremental: files are cloned (macOS) or hard-linked, what `.gitignore` ignores is shared through symlinks except the runner's build directory (`target/` for cargo), and the mutated file is a private copy. Mutants of one file run concurrently; files run one after another. The copies live under `$TMPDIR/cupel-mutate/`, one directory per repository; a run that is stopped (the budget, Ctrl-C) puts the original files back. Each run removes the copies of repositories that no longer exist or that no run has used for 7 days, then, while all copies hold more than 32 GiB, those of the least recently used other repositories; never those of the repository being graded or of a run in progress. `cupel doctor` reports how much they hold and for which repositories (`doctor.mutation-slots`).
-6. **Timeouts.** Before its first mutant of a file, each worker times the unmutated file's tests (for Rust, its schemata build's), rebuild included; a mutant gets ten times that (`timeout_factor`), at least two seconds.
+6. **Timeouts.** Before its first mutant of a file, each worker times the unmutated file's tests (for Rust, its schemata build's), rebuild included; a mutant gets ten times that (`timeout_factor`), at least two seconds and at most `max_mutant_timeout` (default two minutes, under `[checks."tests.mutation"]`, overridable per language). A mutant that makes a loop endless costs at most the cap, however long the suite. A mutant that per-test selection did not narrow runs the whole suite, and a test slower than 60 seconds in the baseline is left out of that run (and of the timing run before it) where the runner can leave a test out, with one `mutant.slow-test-excluded` note per test; mutants whose covering tests the map selected run them however slow. A mutant only that test would kill then survives, so the note is worth reading beside the survivors.
 7. **Order.** Last run's survivors run first, then mutants of functions never run before, then the rest, so a time limit cuts the least informative work.
 
 A Rust file's mutants cost one build per worker plus one test run each; outside Rust, each mutant costs an incremental build of what it changes plus the tests. The run's `--seed` reaches every mutant run.
+
+Which tests a mutant's run can be narrowed to, or leave out, depends on the runner ([ADR-147](docs/adr/CUPEL_DECISION_147.md)); a mutant is narrowed only with a per-test map from the baseline's runner:
+
+| Runner | Runs one test alone | Per-test map | Leaves a slow test out |
+|---|---|---|---|
+| `cargo-nextest` | every test (a `trybuild` test is one test) | yes | yes |
+| `cargo-test` | none: the whole workspace, each integration binary whole | no | no (libtest reports no durations) |
+| `go test` | each `Test` function, by name | yes | yes, by name in every package |
+| `pytest` | each node ID and file | yes | yes |
+| `unittest` | each dotted ID | no | no |
+| `jest`, `vitest` | test files | no | no |
+| Maven, Gradle (Surefire) | classes and methods | no | no |
+| `clojure.test` | each var and file | no | no |
+
+With a runner that has no map, every mutant runs the whole suite; with one that cannot leave a test out, a slow test stays in each such run and the cap bounds it. For a Rust repository, `[lang.rust] runner = "cargo-nextest"` gives per-test durations, selection, and exclusion.
 
 On the Cupel repository itself (1377 tests, release build, 8-core Apple silicon, a quiet machine), a one-function change checked at `standard` with a warm cache takes about 10.5 minutes: one instrumented run of the suite (5.3 min) and the mutants (5.2 min, two mutants with sixteen covering tests each); an unchanged rerun takes 2 seconds.
 
@@ -1513,6 +1532,7 @@ depth = "quick"
 | `tests.assertion-density` | `lines_per_assertion_max` | `20` | The most lines per assertion a test may span before density.sparse-test. |
 | `tests.assertion-density` | `file_density_percent_min` | `50` | The least assertions per test a file may make, in percent of the repository's, before density.sparse-file. |
 | `tests.assertion-density` | `file_tests_min` | `3` | The fewest tests a file needs to be compared with the repository. |
+| `tests.mutation` | `max_mutant_timeout` | `"120s"` | The longest a mutant's run may take, as a duration such as 90s or 5m; a run that reaches it is a timeout, whatever timeout_factor allows. |
 | `tests.quality` | `mock_density_max` | `50` | The highest share, in percent, of doubles among a test's doubles and assertions before test.mock-heavy. |
 | `tests.quality` | `mocks_min` | `2` | The fewest test doubles that can make a test test.mock-heavy. |
 | `tests.quality` | `logic_max` | `0` | The most loops, alternatives, and unguarded branches a test may have before test.logic. |
@@ -1565,13 +1585,14 @@ Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the 
 
 ## The gate
 
-`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base. `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
+`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base (`--against baseline|REF|run:ID` names another reference). `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1); `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
 
 ## Depth
 
 - `--depth quick|standard|deep|exhaustive`, default `standard`. How much evidence to gather.
 - `--budget DURATION`. A wall-clock budget: run the most valuable checks that fit and skip the rest.
-- Scope flags (`--changed`, `--base`, `--paths`, `--symbols`) intersect; `--only` and `--skip` select checks by ID or group.
+- Scope flags (`--changed`, `--base` with `--head`, `--paths`, `--symbols`) intersect; under `--changed` or `--base` the checks rule on the functions the change touched. `--only` and `--skip` select checks by ID or group, `--tier N+` by tier; `--jobs N` caps the threads and test processes.
+- `--oracle NAME` picks the reference implementation `gen.differential` compares with and `--cases N` the inputs generative checks try; `check --scaffold --write` writes a property stub for each `property.missing` finding.
 
 | Depth | Adds |
 | --- | --- |
@@ -1591,7 +1612,7 @@ Stdout is one JSON envelope; diagnostics go to stderr. Read:
 
 ## MCP
 
-A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints.
+A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints. Without `--mcp`, `cupel serve` keeps facts warm for every command run in the repository, and `--watch` reparses files as they change.
 
 ## More
 
@@ -1616,9 +1637,11 @@ All automation goes through `make`.
 | `make readme` | regenerate this README's verb, global-flag, exit-code, check, check-settings, and support-matrix tables and its agent guide from `cupel describe`, and its MCP tool table from `cupel serve --mcp` |
 | `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)), and each run of a verb an MCP tool serves again as that tool's call to `cupel serve --mcp` on another copy, which must return the same envelope and stderr ([ADR-121](docs/adr/CUPEL_DECISION_121.md)) |
 | `make baseline` | after a green tree dogfood, sets the store's baseline to that run and exports it to `.cupel/baseline.json`, the committed reference the tree gate's `base` rules compare with ([ADR-140](docs/adr/CUPEL_DECISION_140.md)) |
+| `make reclaim` | removes the build outputs a checkout regenerates on demand (the coverage build, the incremental caches, the suite cache under `.cupel/cache`), which grow a worktree to 30 to 50 GB; `scripts/heavy.sh` refuses to start a heavy command below 40 GB of free space (`CUPEL_HEAVY_MIN_FREE_GB`) |
 | `make dogfood` | Cupel grades itself at `--depth deep`: `cupel check --changed --depth deep --gate` against `main`, which mutates every function of every changed file; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`, whose clone ratchets read `<= base` against the committed `.cupel/baseline.json` it imports first, and skips `tests.mutation`. Both skip `tests.flaky`, whose engine reruns the whole suite one test at a time and does not rerun cargo-nextest, and `conc.race`, which Miri cannot run on tests that spawn processes ([ADR-129](docs/adr/CUPEL_DECISION_129.md)). A local run is bounded by `--budget 30m` (`DOGFOOD_BUDGET`), lists what the budget left out, and exits 5 when it left anything out; CI runs both with `DOGFOOD_BUDGET=`, which runs every check. They need cargo-nextest and cargo-llvm-cov on `PATH`. The run goes through `scripts/heavy.sh`, the machine-wide lock every heavy command takes, so one dogfood (or one external test suite run through the same script) runs at a time on a machine |
 | `make install` | `cargo install --path crates/cupel-cli` |
 | `make dist` | build the stripped release binary and package it as `target/dist/cupel-<version>-<target>.tar.gz` (`.zip` on Windows) with `LICENSE` and this README; `TARGET=<triple>` builds another target, the Linux musl targets through `cargo-zigbuild` with `zig` on PATH ([ADR-124](docs/adr/CUPEL_DECISION_124.md)) |
+| `make version V=X.Y.Z` | write the release version into every file that names it: the workspace `Cargo.toml`, the workspace crates in `Cargo.lock`, `dist/npm/package.json`, and `dist/pipx/cupel.py`; a test holds them equal |
 | `make installers` | the tests of `dist/`'s installers against a fake release on a local HTTP server ([ADR-125](docs/adr/CUPEL_DECISION_125.md)); `make test` runs them too, skipping a test whose tool (ShellCheck, Ruby, Node, npm, Python) is missing |
 
 The generated README sections sit between `<!-- generated:NAME -->` and `<!-- end:NAME -->` markers. A test in `crates/cupel-cli/tests/readme.rs` renders them from the binary's `describe` output and fails when the committed text differs, so `make check` catches a stale table. Run `make readme` and review the diff.

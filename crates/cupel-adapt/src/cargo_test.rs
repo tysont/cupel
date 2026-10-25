@@ -3,7 +3,9 @@
 use cupel_core::{LangId, Langs, RunOptions, RunOrder, RunOrdering, TestResult};
 
 use crate::report::libtest;
-use crate::runner::{Executed, Ran, Root, Runner, RunnerSpec, Varying, whole_suite};
+use crate::runner::{
+    Executed, Ran, Root, Runner, RunnerSpec, Varying, keeps_every_test, whole_suite,
+};
 
 const ID: &str = "tool.cargo-test";
 
@@ -19,6 +21,7 @@ static CARGO_TEST: RunnerSpec = RunnerSpec {
     read,
     completed_codes: &[0],
     select: whole_suite,
+    exclude: keeps_every_test,
     list: None,
     vary: &Varying {
         ordering: RunOrdering::Seeded,

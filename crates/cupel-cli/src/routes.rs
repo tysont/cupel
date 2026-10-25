@@ -1,4 +1,4 @@
-// ABOUTME: The ways to install `cupel` and which of them work today (ADR-128): `describe` lists them, `doctor`'s
+// ABOUTME: The ways to install `cupel` and which of them work today (ADR-128, ADR-146): `describe` lists them, `doctor`'s
 // ABOUTME: version finding names the live ones, and the README's install table is generated from them.
 use cupel_core::{InstallRoute, Stability};
 
@@ -51,21 +51,23 @@ const ROUTES: &[Route] = &[
     },
     Route {
         name: "npm",
-        command: "npx cupel",
+        command: "npx cupel-cli",
         platforms: UNIX,
-        pending: Some("once the `cupel` package is published to npm"),
+        pending: Some("once the `cupel-cli` package is published to npm"),
     },
     Route {
         name: "pipx",
-        command: "pipx install cupel",
+        command: "pipx install cupel-cli",
         platforms: UNIX,
-        pending: Some("once Cupel's package is on PyPI; the `cupel` there is another project's"),
+        pending: Some("once the `cupel-cli` package is published to PyPI"),
     },
     Route {
         name: "crates.io",
         command: "cargo install --locked cupel-cli",
         platforms: UNIX,
-        pending: Some("once the crates are published to crates.io"),
+        pending: Some(
+            "once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's",
+        ),
     },
     Route {
         name: "cupel.dev",

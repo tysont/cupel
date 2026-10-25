@@ -1,6 +1,6 @@
 # CUPEL_DECISION_135: A `References` fact, and `static.dead-code` decides per symbol
 
-**Date:** 2026-10-20 · **Status:** accepted; §3 (an import binds a name its statement lists that is its specifier's last segment) amended by [141](CUPEL_DECISION_141.md) §4 (an import binds each of its names under its local name, through re-exports) · **Phase:** P9.6
+**Date:** 2026-10-20 · **Status:** accepted; §3 (an import binds a name its statement lists that is its specifier's last segment) amended by [141](CUPEL_DECISION_141.md) §4 (an import binds each of its names under its local name, through re-exports); §1 (the fact's fields) and the module pass's narrowed-scope note amended by [144](CUPEL_DECISION_144.md) (`References.imports`, the language's import edges, which the module pass reads) · **Phase:** P9.6
 
 ## Context
 

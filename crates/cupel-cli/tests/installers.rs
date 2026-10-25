@@ -659,6 +659,50 @@ fn the_formula_is_not_rendered_from_sha256sums_missing_a_target() {
 
 // The npm and pipx wrappers
 
+/// The name Cupel's packages have on npm, the Python Package Index, and crates.io (ADR-146).
+const PACKAGE: &str = "cupel-cli";
+
+/// Each wrapper is the `cupel-cli` package and installs one command, `cupel`, from its one module.
+#[test]
+fn each_wrapper_is_the_cupel_cli_package_and_installs_the_cupel_command() {
+    let npm: Value = serde_json::from_str(
+        &fs::read_to_string(workspace().join("dist/npm/package.json")).unwrap(),
+    )
+    .unwrap();
+    let pipx = read_toml("dist/pipx/pyproject.toml");
+    let commands = |table: &Item| -> Vec<String> {
+        table
+            .as_table_like()
+            .expect("a table of commands")
+            .iter()
+            .map(|(name, _)| name.to_owned())
+            .collect()
+    };
+    let npm_commands: Vec<String> = npm["bin"]
+        .as_object()
+        .expect("a `bin` map")
+        .keys()
+        .cloned()
+        .collect();
+    let seen = (
+        npm["name"].as_str().map(str::to_owned),
+        npm_commands,
+        pipx["project"]["name"].as_str().map(str::to_owned),
+        commands(&pipx["project"]["scripts"]),
+        pipx.get("tool")
+            .and_then(|tool| tool.get("flit")?.get("module")?.get("name")?.as_str())
+            .map(str::to_owned),
+    );
+    let expected = (
+        Some(PACKAGE.to_owned()),
+        vec!["cupel".to_owned()],
+        Some(PACKAGE.to_owned()),
+        vec!["cupel".to_owned()],
+        Some("cupel".to_owned()),
+    );
+    assert_eq!(seen, expected);
+}
+
 /// A wrapper installed from its directory under dist/ into a temporary prefix, as its package
 /// manager installs it from the registry.
 struct Wrapper {
@@ -703,7 +747,7 @@ impl Wrapper {
             dir.path().as_os_str(),
             source.as_os_str(),
         ]);
-        let tarball = dir.path().join(format!("cupel-{VERSION}.tgz"));
+        let tarball = dir.path().join(format!("{PACKAGE}-{VERSION}.tgz"));
         let prefix = dir.path().join("prefix");
         npm(&[
             "install".as_ref(),

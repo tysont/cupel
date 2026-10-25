@@ -16,19 +16,17 @@ use crate::fact::{FactKind, SharedFact};
 use crate::facts::Facts;
 use crate::finding::{Finding, Severity};
 use crate::grade::CostClass;
-use crate::id::{LangId, RunId};
+use crate::id::{CheckId, LangId, RunId};
 use crate::joint::Deciding;
 use crate::lang::Lang;
 use crate::matching::{self, SymbolMatch};
 use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
 use crate::oracle::RunOracle;
-use crate::producer::{
-    Availability, ChangedLines, Ctx, Focus, ProduceCtx, ProducerRegistry, Upstream,
-};
+use crate::producer::{Availability, Ctx, Focus, ProduceCtx, ProducerRegistry, Upstream};
 use crate::rank::{Measured, Measurement};
 use crate::result::{CheckResult, CheckStatus, SkipReason, Skipped};
-use crate::scope::{Scope, SymbolSelector, select_symbols};
+use crate::scope::{ChangedLines, Scope, SymbolSelector, select_symbols, touched};
 use crate::syntax::{NormTree, Symbols};
 use crate::test_results::{TestResults, Unevaluable};
 use crate::writer::Writer;
@@ -108,7 +106,7 @@ pub struct Production<'a>(FactStore<'a>);
 impl<'a> Scheduler<'a> {
     /// A fact store over `job`'s files and configuration.
     pub fn production(&self, job: &Job<'a>) -> Production<'a> {
-        Production(FactStore::new(self.producers, job))
+        Production(FactStore::new(self, job))
     }
 }
 
@@ -158,11 +156,8 @@ struct Skip<'a> {
 impl Scheduler<'_> {
     /// Runs `job`, streaming events to `sink`.
     pub fn run(&self, job: &Job<'_>, sink: &mut dyn EventSink) -> Result<Outcome> {
-        let mut store = FactStore::new(self.producers, job);
-        let base = job
-            .base
-            .as_ref()
-            .map(|base| FactStore::at(self.producers, job, base));
+        let mut store = FactStore::new(self, job);
+        let base = job.base.as_ref().map(|base| FactStore::at(self, job, base));
         let mut prepared = self.prepare(job, &mut store, sink)?;
         budgeted::schedule(job, &mut store, &mut prepared);
         prepared.announce(job, sink);
@@ -208,7 +203,7 @@ impl Scheduler<'_> {
     /// Plans `job` without running a check: what would run, with targets and estimates, and
     /// what would be skipped. Resolving the scope parses files but writes nothing.
     pub fn plan(&self, job: &Job<'_>, sink: &mut dyn EventSink) -> Result<Outcome> {
-        let mut store = FactStore::new(self.producers, job);
+        let mut store = FactStore::new(self, job);
         let mut prepared = self.prepare(job, &mut store, sink)?;
         budgeted::schedule(job, &mut store, &mut prepared);
         let would_run = job
@@ -874,7 +869,8 @@ impl<'a> Prepared<'a> {
     }
 }
 
-/// The symbols in scope per language: every symbol of its files, or those the selectors match.
+/// The symbols in scope per language: every symbol of its files, or those the selectors match,
+/// and under a range only those its changed lines touch (ADR-142).
 fn resolve_symbols(
     job: &Job<'_>,
     store: &mut FactStore<'_>,
@@ -884,6 +880,7 @@ fn resolve_symbols(
     let mut scopes = HashMap::new();
     for lang in &job.langs {
         let keys = symbols_in_scope(job, store, lang, &mut matched, sink).unwrap_or_default();
+        let keys = within_range(job, store, lang, keys, sink);
         scopes.insert(lang.id.clone(), scope_of(job, keys));
     }
     if job.selectors_must_match
@@ -938,6 +935,33 @@ fn symbols_in_scope(
         *seen |= hit;
     }
     Some(keys)
+}
+
+/// Under a range, `keys` less the symbols of `lang` its changed lines do not touch (ADR-142);
+/// `keys` as they are without a range.
+fn within_range(
+    job: &Job<'_>,
+    store: &mut FactStore<'_>,
+    lang: &Lang,
+    mut keys: BTreeSet<crate::syntax::SymbolKey>,
+    sink: &mut dyn EventSink,
+) -> BTreeSet<crate::syntax::SymbolKey> {
+    let Some(changed) = &job.changed else {
+        return keys;
+    };
+    let Ok(produced) = store.ensure(FactKind::Symbols, lang, sink) else {
+        return keys;
+    };
+    if let Some(symbols) = produced.downcast_ref::<Symbols>() {
+        let untouched: BTreeSet<_> = symbols
+            .symbols
+            .iter()
+            .filter(|symbol| !touched(changed, symbol))
+            .map(crate::syntax::SymbolDef::key)
+            .collect();
+        keys.retain(|key| !untouched.contains(key));
+    }
+    keys
 }
 
 fn scope_of(job: &Job<'_>, keys: BTreeSet<crate::syntax::SymbolKey>) -> Scope {
@@ -1000,13 +1024,16 @@ struct FactStore<'a> {
     durations: Vec<TaskDuration>,
     oracle: Option<RunOracle>,
     cases: Option<u64>,
+    /// Each setting a registered check declares for a fact (`SettingSpec::configures`), as
+    /// (fact, setting, check), the first check by ID for each fact and setting (ADR-147).
+    declared: Vec<(FactKind, String, CheckId)>,
 }
 
 impl<'a> FactStore<'a> {
     /// The head side: the repository root and the files in scope.
-    fn new(producers: &'a ProducerRegistry, job: &Job<'a>) -> Self {
+    fn new(scheduler: &Scheduler<'a>, job: &Job<'a>) -> Self {
         Self::over(
-            producers,
+            scheduler,
             job,
             job.writer.root().to_path_buf(),
             job.files.clone(),
@@ -1014,18 +1041,19 @@ impl<'a> FactStore<'a> {
     }
 
     /// The base side of a range: the base versions of the changed files (ADR-056).
-    fn at(producers: &'a ProducerRegistry, job: &Job<'a>, base: &BaseTree) -> Self {
-        Self::over(producers, job, base.root.clone(), base.files.clone())
+    fn at(scheduler: &Scheduler<'a>, job: &Job<'a>, base: &BaseTree) -> Self {
+        Self::over(scheduler, job, base.root.clone(), base.files.clone())
     }
 
     fn over(
-        producers: &'a ProducerRegistry,
+        scheduler: &Scheduler<'a>,
         job: &Job<'a>,
         root: std::path::PathBuf,
         files: Vec<String>,
     ) -> Self {
         Self {
-            producers,
+            producers: scheduler.producers,
+            declared: declared_settings(scheduler.checks),
             root: Ctx {
                 root,
                 exclude: job.config.file.scope.exclude.clone(),
@@ -1211,6 +1239,22 @@ impl<'a> FactStore<'a> {
         met
     }
 
+    /// The configured value of each setting checks declare for `kind`, for `lang` (ADR-147).
+    fn settings_for(
+        &self,
+        kind: FactKind,
+        lang: &LangId,
+    ) -> serde_json::Map<String, serde_json::Value> {
+        self.declared
+            .iter()
+            .filter(|(fact, _, _)| *fact == kind)
+            .filter_map(|(_, name, check)| {
+                let value = self.config.check_config(check, lang).get(name)?.clone();
+                Some((name.clone(), value))
+            })
+            .collect()
+    }
+
     /// What a producer of `lang` sees: the run's context, with the facts of `inputs` (its needs
     /// and wants) already made.
     fn produce_ctx<'k>(
@@ -1221,6 +1265,7 @@ impl<'a> FactStore<'a> {
         ProduceCtx {
             ctx: self.root.clone(),
             config: self.config.lang_config(&lang.id),
+            settings: serde_json::Map::new(),
             writer: self.writer.clone(),
             cancel: self.cancel.clone(),
             upstream: self.upstream(inputs, lang),
@@ -1283,7 +1328,8 @@ impl<'a> FactStore<'a> {
             }
             self.ensure_wants(producer.wants(), lang, sink, visiting);
             self.cancel.checkpoint()?;
-            let ctx = self.produce_ctx(producer.needs().iter().chain(producer.wants()), lang);
+            let mut ctx = self.produce_ctx(producer.needs().iter().chain(producer.wants()), lang);
+            ctx.settings = self.settings_for(kind, &lang.id);
             let estimate = producer.estimate(&self.root, &ctx.upstream);
             let scope = Scope::of_files(self.files.clone());
             let produced = self.timed(&producer.id(), lang, &estimate, sink, &mut |events| {
@@ -1662,4 +1708,26 @@ fn sort_findings(findings: &mut [Finding]) {
 
 fn elapsed_ms(started: Instant) -> u64 {
     u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX)
+}
+
+/// Each setting a check of `checks` declares for a fact, as (fact, setting, check): checks in ID
+/// order, and for one fact and setting name the first check (ADR-147).
+fn declared_settings(checks: &CheckRegistry) -> Vec<(FactKind, String, CheckId)> {
+    let mut manifests: Vec<&Manifest> = checks.iter().map(Check::manifest).collect();
+    manifests.sort_by(|a, b| a.id.cmp(&b.id));
+    let mut declared: Vec<(FactKind, String, CheckId)> = Vec::new();
+    for manifest in manifests {
+        for setting in &manifest.settings {
+            let Some(fact) = setting.configures else {
+                continue;
+            };
+            if !declared
+                .iter()
+                .any(|(kind, name, _)| *kind == fact && *name == setting.name)
+            {
+                declared.push((fact, setting.name.clone(), manifest.id.clone()));
+            }
+        }
+    }
+    declared
 }
