@@ -1,5 +1,5 @@
-// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082, ADR-147): the mutants of one file run concurrently, one slot each,
-// ABOUTME: after a green reference run (of the unmutated file, or of its validated schemata build); each is killed or not.
+// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082, ADR-147, ADR-148): the mutants of one file run concurrently, one slot
+// ABOUTME: each with its share of the cores and memory, after a green reference run; each is killed or not.
 use std::collections::BTreeSet;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -7,12 +7,12 @@ use std::time::{Duration, Instant};
 
 use cupel_core::{
     Ctx, Error, MutantOutcome, MutationStrategy, ProduceCtx, Result, RunOptions, Runner, TestRun,
-    TestSelection, WriteError, Writer,
+    TestSelection, WriteError, Writer, physical_memory,
 };
 
 use crate::overlay::Slot;
 use crate::plan::Planned;
-use crate::settings::Settings;
+use crate::settings::{Settings, threads};
 
 /// The environment variable that selects a schemata mutant at run time (ADR-082); `0` selects
 /// none.
@@ -23,7 +23,8 @@ pub struct Execution<'a> {
     pub ctx: &'a ProduceCtx,
     pub runner: &'a dyn Runner,
     pub slots: &'a [Slot],
-    /// How long a mutant's run may take (`Settings::timeout`).
+    /// How long a mutant's run may take (`Settings::timeout`) and how much memory the slots
+    /// may hold together (`Settings::memory_per_slot`).
     pub settings: Settings,
     /// What a mutant that per-test selection did not narrow runs: the whole suite, or all of it
     /// but the slow tests the runner can leave out (ADR-147).
@@ -255,10 +256,23 @@ impl Execution<'_> {
         Ok(self.limit(elapsed))
     }
 
-    /// Runs `selection` with no mutant selected; the run and its wall time.
+    /// Runs `selection` with no mutant selected; the run and its wall time. A run over the
+    /// slot's memory budget is an error naming the setting: every mutant of the file would be.
     fn timed(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Result<(TestRun, Duration)> {
         let started = Instant::now();
-        let ran = self.runner.run(ctx, selection, &self.options(None, 0))?;
+        let ran = match self.runner.run(ctx, selection, &self.options(None, 0)) {
+            Err(Error::OutOfMemory { limit }) => {
+                return Err(Error::Process {
+                    program: self.runner.id().to_string(),
+                    message: format!(
+                        "the tests of the unmutated file held more than {} MiB of memory, one \
+                         slot's share of `max_mutant_memory`; raise it or lower `mutation.jobs`",
+                        limit >> 20
+                    ),
+                });
+            }
+            ran => ran?,
+        };
         Ok((ran, started.elapsed()))
     }
 
@@ -282,13 +296,18 @@ impl Execution<'_> {
 
     /// How every run of the production runs: in the runner's own order, with the run's seed (so
     /// `--seed` repeats it, and nothing is answered from a cache of earlier results), `timeout`,
-    /// and `CUPEL_MUTANT` set to `mutant` (0 for none), so a variable inherited from an outer run
-    /// never selects a mutant here.
+    /// this slot's share of the cores and of the memory budget (ADR-148), and `CUPEL_MUTANT`
+    /// set to `mutant` (0 for none), so a variable inherited from an outer run never selects a
+    /// mutant here.
     fn options(&self, timeout: Option<Duration>, mutant: u32) -> RunOptions {
+        let slots = self.slots.len();
+        let cores = std::thread::available_parallelism().map_or(1, std::num::NonZero::get);
         RunOptions {
             env: vec![(MUTANT_VAR.to_owned(), mutant.to_string())],
             timeout,
+            memory: self.settings.memory_per_slot(physical_memory(), slots),
             seed: Some(self.ctx.seed),
+            parallelism: Some(threads(cores, slots)),
             ..RunOptions::default()
         }
     }
@@ -300,15 +319,19 @@ impl Execution<'_> {
             .clone()
             .map_or_else(|| self.whole.clone(), TestSelection::Tests);
         let started = Instant::now();
-        let ran = self
-            .runner
-            .run(ctx, &selection, &self.options(Some(limit), id))?;
-        let elapsed = started.elapsed();
         let strategy = if id == 0 {
             MutationStrategy::FileCopy
         } else {
             MutationStrategy::Schemata
         };
+        let ran = match self
+            .runner
+            .run(ctx, &selection, &self.options(Some(limit), id))
+        {
+            Err(Error::OutOfMemory { .. }) => return Ok(out_of_memory(started.elapsed(), strategy)),
+            ran => ran?,
+        };
+        let elapsed = started.elapsed();
         Ok(classify(&ran, elapsed >= limit, elapsed, strategy))
     }
 }
@@ -363,6 +386,18 @@ fn classify(
         outcome,
         tests: results.tests.iter().map(|test| test.id.clone()).collect(),
         killing_tests,
+        duration_ms: u64::try_from(elapsed.as_millis()).unwrap_or(u64::MAX),
+        strategy,
+        fallback: None,
+    }
+}
+
+/// What a mutant run killed over its memory budget says: nothing ran to report (ADR-148).
+fn out_of_memory(elapsed: Duration, strategy: MutationStrategy) -> Ran {
+    Ran {
+        outcome: MutantOutcome::OutOfMemory,
+        tests: Vec::new(),
+        killing_tests: Vec::new(),
         duration_ms: u64::try_from(elapsed.as_millis()).unwrap_or(u64::MAX),
         strategy,
         fallback: None,

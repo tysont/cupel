@@ -79,6 +79,7 @@ fn only_killed_and_survived_mutants_are_scored() {
         MutantOutcome::Killed,
         MutantOutcome::Survived,
         MutantOutcome::Timeout,
+        MutantOutcome::OutOfMemory,
         MutantOutcome::Uncovered,
         MutantOutcome::Unviable,
     ]
@@ -91,11 +92,13 @@ fn only_killed_and_survived_mutants_are_scored() {
             (MutantOutcome::Killed, Some(true)),
             (MutantOutcome::Survived, Some(false)),
             (MutantOutcome::Timeout, None),
+            (MutantOutcome::OutOfMemory, None),
             (MutantOutcome::Uncovered, None),
             (MutantOutcome::Unviable, None),
         ]
     );
     assert_eq!(MutantOutcome::Timeout.as_str(), "timeout");
+    assert_eq!(MutantOutcome::OutOfMemory.as_str(), "out-of-memory");
 }
 
 #[test]

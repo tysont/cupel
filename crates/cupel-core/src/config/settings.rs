@@ -1,5 +1,5 @@
 // ABOUTME: The layered settings that flags, `CUPEL_*` env, a profile, and `cupel.toml` can all set.
-// ABOUTME: Defines each setting's env var once, plus the output format and time-limit value types.
+// ABOUTME: Defines each setting's env var once, plus the output format, time-limit, and memory-limit value types.
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
@@ -199,6 +199,93 @@ impl FromStr for TimeLimit {
                 value: value.to_owned(),
                 expected: "a positive whole number followed by `ms`, `s`, `m`, or `h`, \
                            such as `20s`",
+            })
+    }
+}
+
+/// A memory limit written as a whole number and a unit (`512k`, `3m`, `2g`: KiB, MiB, GiB), or
+/// as a share of the machine's physical memory (`50%`, from `1%` to `100%`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct MemoryLimit {
+    amount: u64,
+    unit: MemoryUnit,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum MemoryUnit {
+    Kibi,
+    Mebi,
+    Gibi,
+    Percent,
+}
+
+impl MemoryUnit {
+    const ALL: [MemoryUnit; 4] = [Self::Kibi, Self::Mebi, Self::Gibi, Self::Percent];
+
+    fn suffix(self) -> &'static str {
+        match self {
+            Self::Kibi => "k",
+            Self::Mebi => "m",
+            Self::Gibi => "g",
+            Self::Percent => "%",
+        }
+    }
+
+    /// Whether `amount` of this unit is a limit: positive, and for a share at most the whole.
+    fn admits(self, amount: u64) -> bool {
+        amount > 0 && (self != Self::Percent || amount <= 100)
+    }
+
+    /// `amount` of this unit in bytes, on a machine with `physical` bytes of memory.
+    fn bytes(self, amount: u64, physical: u64) -> u64 {
+        match self {
+            Self::Kibi => amount.saturating_mul(1 << 10),
+            Self::Mebi => amount.saturating_mul(1 << 20),
+            Self::Gibi => amount.saturating_mul(1 << 30),
+            Self::Percent => {
+                u64::try_from(u128::from(physical) * u128::from(amount) / 100).unwrap_or(u64::MAX)
+            }
+        }
+    }
+}
+
+impl MemoryLimit {
+    /// The limit in bytes on a machine with `physical` bytes of memory.
+    pub fn resolve(self, physical: u64) -> u64 {
+        self.unit.bytes(self.amount, physical)
+    }
+
+    /// The limit in bytes when it is a size; `None` for a share, which needs the machine.
+    pub fn bytes(self) -> Option<u64> {
+        (self.unit != MemoryUnit::Percent).then(|| self.unit.bytes(self.amount, 0))
+    }
+}
+
+impl fmt::Display for MemoryLimit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.amount, self.unit.suffix())
+    }
+}
+
+impl FromStr for MemoryLimit {
+    type Err = Error;
+
+    fn from_str(value: &str) -> Result<Self> {
+        MemoryUnit::ALL
+            .into_iter()
+            .find_map(|unit| {
+                let number = value.strip_suffix(unit.suffix())?;
+                if number.is_empty() || !number.bytes().all(|b| b.is_ascii_digit()) {
+                    return None;
+                }
+                let amount: u64 = number.parse().ok().filter(|amount| unit.admits(*amount))?;
+                Some(Self { amount, unit })
+            })
+            .ok_or_else(|| Error::InvalidValue {
+                what: "memory limit",
+                value: value.to_owned(),
+                expected: "a positive whole number followed by `k`, `m`, or `g`, such as \
+                           `512m`, or a share of physical memory from `1%` to `100%`",
             })
     }
 }

@@ -16,4 +16,4 @@ pub use file::{
 };
 pub use gate::{Comparison, GateCondition, GateKey, GateRuleSpec, Threshold, parse_check_id};
 pub use resolve::{Config, ConfigRequest, Effective, FILE_NAME, discover};
-pub use settings::{Format, PROFILE_ENV_VAR, Setting, Settings, TimeLimit};
+pub use settings::{Format, MemoryLimit, PROFILE_ENV_VAR, Setting, Settings, TimeLimit};

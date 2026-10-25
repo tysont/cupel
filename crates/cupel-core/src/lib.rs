@@ -40,6 +40,7 @@ mod json_schema;
 mod lang;
 pub mod matching;
 mod matrix;
+mod memory;
 mod model_check;
 mod mutation;
 mod oracle;
@@ -126,6 +127,7 @@ pub use mutation::{
 pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
+pub use memory::physical_memory;
 pub use process::{Captured, Process, find_program};
 pub use producer::{
     Availability, Ctx, Estimate, Focus, Install, JointProducer, ProduceCtx, Producer,

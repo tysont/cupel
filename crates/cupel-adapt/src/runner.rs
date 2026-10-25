@@ -70,14 +70,6 @@ pub enum Executed {
     Unknown,
 }
 
-/// The variation of a runner that varies nothing.
-pub static FIXED: Varying = Varying {
-    ordering: RunOrdering::Fixed,
-    args: |_| Vec::new(),
-    env: |_| Vec::new(),
-    executed: Executed::Unknown,
-};
-
 /// The variation of the Python runners: the order of the test IDs they are given, the seed as
 /// `PYTHONHASHSEED`, and the report's order.
 pub static PYTHON: Varying = Varying {
@@ -269,7 +261,9 @@ impl cupel_core::Runner for Runner {
         for (index, (dir, packages)) in suite_roots(ctx).into_iter().enumerate() {
             let root = self.root(ctx, index, &dir, packages, false)?;
             let command = (lister.command)(&root);
-            let captured = self.process(&root, &command, &[]).run(&ctx.cancel)?;
+            let captured = self
+                .process(&root, &command, &[], None)
+                .run(&ctx.cancel)?;
             ids.extend(
                 (lister.parse)(&captured.stdout)
                     .into_iter()
@@ -461,7 +455,7 @@ impl Runner {
             .cloned()
             .chain((vary.env)(run.options))
             .collect();
-        let process = self.process(root, &command, &env);
+        let process = self.process(root, &command, &env, run.options.memory);
         let captured = match process.run(run.cancel) {
             Err(Error::Cancelled) if !ctx.cancel.is_cancelled() => {
                 let limit = run.options.timeout.unwrap_or_default();
@@ -491,10 +485,20 @@ impl Runner {
         Ok((invocation, found, order))
     }
 
-    /// The process that runs `command` in `root`, with the spec's environment and `env`.
-    fn process(&self, root: &Root, command: &[String], env: &[(String, String)]) -> Process {
+    /// The process that runs `command` in `root`, with the spec's environment and `env`, and
+    /// the run's memory budget (ADR-148) when it has one.
+    fn process(
+        &self,
+        root: &Root,
+        command: &[String],
+        env: &[(String, String)],
+        memory: Option<u64>,
+    ) -> Process {
         let (program, args) = command.split_first().unwrap_or((&root.program, &[]));
         let mut process = Process::new(program, &root.dir).args(args.iter().cloned());
+        if let Some(bytes) = memory {
+            process = process.memory(bytes);
+        }
         for (key, value) in self.0.env {
             process = process.env(key, value);
         }

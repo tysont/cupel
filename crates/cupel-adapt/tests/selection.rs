@@ -5,8 +5,8 @@ use std::time::Duration;
 use cupel_adapt::report::listing;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, LangId, ProduceCtx, Produced, ProducerId, ProducerRegistry,
-    RunOptions, RunOrder, Runner, RunnerCommand, TestOutcome, TestSelection,
+    Availability, Cancellation, Error, LangId, ProduceCtx, Produced, ProducerId,
+    ProducerRegistry, RunOptions, RunOrder, Runner, RunnerCommand, TestOutcome, TestSelection,
 };
 use cupel_fixtures::Capture;
 use support::{lang, produce_ctx, registry};
@@ -348,6 +348,51 @@ fn a_run_its_own_timeout_ends_is_incomplete_and_leaves_the_run_going() {
         (false, None, Some("timed out after 1 ms"))
     );
     assert!(!ctx.cancel.is_cancelled());
+}
+
+#[test]
+fn cargo_nextest_takes_the_runs_parallelism_as_its_test_threads() {
+    let Some((_dir, ctx)) = installed("tool.cargo-nextest", "rust", "rust") else {
+        return;
+    };
+    let registry = registry();
+    let results = runner(&registry, "tool.cargo-nextest")
+        .run(
+            &ctx,
+            &TestSelection::All,
+            &RunOptions {
+                parallelism: Some(1),
+                ..RunOptions::default()
+            },
+        )
+        .unwrap()
+        .results;
+    assert!(results.is_green(), "{results:?}");
+    let command = &results.invocations[0].command;
+    assert!(
+        command.windows(2).any(|pair| pair == ["--test-threads", "1"]),
+        "{command:?}"
+    );
+}
+
+#[test]
+fn a_run_whose_processes_hold_more_than_its_memory_budget_is_stopped_as_out_of_memory() {
+    let Some((_dir, ctx)) = installed("tool.cargo-nextest", "rust", "rust") else {
+        return;
+    };
+    let registry = registry();
+    let ran = runner(&registry, "tool.cargo-nextest").run(
+        &ctx,
+        &TestSelection::All,
+        &RunOptions {
+            memory: Some(1),
+            ..RunOptions::default()
+        },
+    );
+    assert!(
+        matches!(ran, Err(Error::OutOfMemory { limit: 1 })),
+        "{ran:?}"
+    );
 }
 
 #[test]

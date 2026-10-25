@@ -1,8 +1,8 @@
 // ABOUTME: `tests.mutation`: scores MutationOutcomes, whoever produced them (ADR-080): surviving mutants as failures at their
-// ABOUTME: site, timeouts, uncovered sites, and slow tests left out as notes (ADR-147), equivalents, fallbacks, killed ratio.
+// ABOUTME: site; timeouts, runs over the memory budget, uncovered sites, slow tests left out, equivalents, fallbacks as notes.
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
-use cupel_core::config::{ConfigError, Table, TimeLimit};
+use cupel_core::config::{ConfigError, MemoryLimit, Table, TimeLimit};
 use cupel_core::syntax::{SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, ExcludedTest,
@@ -21,12 +21,16 @@ use crate::outcome;
 
 const ID: &str = "tests.mutation";
 
-/// The check's one setting, the cap on a mutant's run, which configures the engine's fact
-/// (ADR-147); everything else about how mutants run is the engine's (`[lang.<id>] mutation`).
+/// The check's settings, the cap on a mutant's run (ADR-147) and the memory budget of the runs
+/// together (ADR-148), which configure the engine's fact; everything else about how mutants
+/// run is the engine's (`[lang.<id>] mutation`).
 const MAX_MUTANT_TIMEOUT: &str = "max_mutant_timeout";
+const MAX_MUTANT_MEMORY: &str = "max_mutant_memory";
 
-/// The cap when none is configured; the engine's default, which a test holds equal.
+/// The cap and the budget when none is configured; the engine's defaults, which a test holds
+/// equal.
 const DEFAULT_MAX_MUTANT_TIMEOUT: &str = "120s";
+const DEFAULT_MAX_MUTANT_MEMORY: &str = "50%";
 
 /// The confidence of a possibly equivalent survivor (ADR-004).
 const EQUIVALENT_CONFIDENCE: f64 = 0.3;
@@ -54,7 +58,7 @@ struct Survived {
     tests_run: u32,
 }
 
-/// Evidence of `mutant.timeout` and `mutant.uncovered`.
+/// Evidence of `mutant.timeout`, `mutant.out-of-memory`, and `mutant.uncovered`.
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 struct Site {
@@ -119,6 +123,12 @@ fn manifest() -> Manifest {
                  loops.",
             ),
             kind::<Site>(
+                "mutant.out-of-memory",
+                ActionKind::Review,
+                "The tests held more memory than the run's share of max_mutant_memory against \
+                 the mutant and were killed (ADR-148).",
+            ),
+            kind::<Site>(
                 "mutant.uncovered",
                 ActionKind::WriteTest,
                 "No test runs the site, so its mutant was not run.",
@@ -136,15 +146,27 @@ fn manifest() -> Manifest {
             ),
         ],
         metrics: metrics(),
-        settings: vec![SettingSpec {
-            configures: Some(FactKind::MutationOutcomes),
-            ..setting(
-                MAX_MUTANT_TIMEOUT,
-                Value::from(DEFAULT_MAX_MUTANT_TIMEOUT),
-                "The longest a mutant's run may take, as a duration such as 90s or 5m; a run \
-                 that reaches it is a timeout, whatever timeout_factor allows.",
-            )
-        }],
+        settings: vec![
+            SettingSpec {
+                configures: Some(FactKind::MutationOutcomes),
+                ..setting(
+                    MAX_MUTANT_TIMEOUT,
+                    Value::from(DEFAULT_MAX_MUTANT_TIMEOUT),
+                    "The longest a mutant's run may take, as a duration such as 90s or 5m; a \
+                     run that reaches it is a timeout, whatever timeout_factor allows.",
+                )
+            },
+            SettingSpec {
+                configures: Some(FactKind::MutationOutcomes),
+                ..setting(
+                    MAX_MUTANT_MEMORY,
+                    Value::from(DEFAULT_MAX_MUTANT_MEMORY),
+                    "The resident memory the mutant runs may hold together, as a size such as \
+                     3g or 512m or a share of physical memory such as 50%; each slot's run gets \
+                     an equal part, and a run over it is killed and is out-of-memory.",
+                )
+            },
+        ],
         stability: Stability::Experimental,
         summary: "Mutates the code in scope and runs the tests that cover each mutant; a \
                   mutant every test passes against survived. Score: killed / (killed + \
@@ -167,6 +189,10 @@ fn metrics() -> Vec<MetricSpec> {
             "Mutants every test passed against, not counting possibly equivalent ones.",
         ),
         ("timeout", "Mutants whose tests ran past their timeout."),
+        (
+            "out_of_memory",
+            "Mutants whose tests held more than their share of max_mutant_memory and were killed.",
+        ),
         ("uncovered", "Mutants no test runs, which were not run."),
         ("unviable", "Mutants that did not build or load."),
         (
@@ -400,11 +426,12 @@ impl Tally {
             MutantOutcome::Killed,
             MutantOutcome::Survived,
             MutantOutcome::Timeout,
+            MutantOutcome::OutOfMemory,
             MutantOutcome::Uncovered,
             MutantOutcome::Unviable,
         ]
         .into_iter()
-        .map(|outcome| (outcome.as_str().to_owned(), count(self.of(outcome))))
+        .map(|outcome| (metric_name(outcome), count(self.of(outcome))))
         .collect();
         metrics.insert("score".to_owned(), score);
         metrics.insert("equivalent".to_owned(), count(self.equivalent));
@@ -504,28 +531,35 @@ impl TestsMutation {
     }
 }
 
-/// Refuses any key of `config` but the cap, and a cap that is not a duration.
+/// An outcome's metric: its name with `_` for `-`, as a gate key is written.
+fn metric_name(outcome: MutantOutcome) -> String {
+    outcome.as_str().replace('-', "_")
+}
+
+/// Refuses any key of `config` but the cap and the budget, a cap that is not a duration, and
+/// a budget that is neither a size nor a share.
 fn read_settings(config: &Table) -> Result<()> {
     let refuse = |key: &str, reason: String| ConfigError::CheckSetting {
         check: ID.to_owned(),
         key: key.to_owned(),
         reason,
-        valid: vec![MAX_MUTANT_TIMEOUT.to_owned()],
+        valid: vec![MAX_MUTANT_TIMEOUT.to_owned(), MAX_MUTANT_MEMORY.to_owned()],
     };
     for (key, value) in config {
-        if key != MAX_MUTANT_TIMEOUT {
-            return Err(refuse(key, "not a setting of this check".to_owned()).into());
-        }
-        if value
-            .as_str()
-            .and_then(|text| text.parse::<TimeLimit>().ok())
-            .is_none()
-        {
-            return Err(refuse(
-                key,
-                format!("expected a duration such as \"90s\" or \"5m\", got {value}"),
-            )
-            .into());
+        let text = value.as_str();
+        let (well_formed, expected) = match key.as_str() {
+            MAX_MUTANT_TIMEOUT => (
+                text.is_some_and(|text| text.parse::<TimeLimit>().is_ok()),
+                "a duration such as \"90s\" or \"5m\"",
+            ),
+            MAX_MUTANT_MEMORY => (
+                text.is_some_and(|text| text.parse::<MemoryLimit>().is_ok()),
+                "a size such as \"3g\" or \"512m\", or a share such as \"50%\"",
+            ),
+            _ => return Err(refuse(key, "not a setting of this check".to_owned()).into()),
+        };
+        if !well_formed {
+            return Err(refuse(key, format!("expected {expected}, got {value}")).into());
         }
     }
     Ok(())
@@ -575,7 +609,8 @@ struct Note {
 }
 
 /// The note `mutant`, in `file`, calls for when it is not a plain survivor: possibly
-/// equivalent, timed out, or uncovered; none for one killed or unviable.
+/// equivalent, timed out, killed over its memory budget, or uncovered; none for one killed
+/// or unviable.
 fn note(mutant: &Mutant, file: &str, mutation: Mutation) -> Option<Note> {
     let at = format!("{file}:{}", mutant.span.line);
     let change = format!("`{}` → `{}`", mutant.from, mutant.to);
@@ -597,6 +632,16 @@ fn note(mutant: &Mutant, file: &str, mutation: Mutation) -> Option<Note> {
             serde_json::to_value(Site { mutation }),
             format!("Mutant timed out: {change} at {at}"),
             format!("Review {change} at {at}: the tests ran past their timeout against it."),
+        ),
+        (MutantOutcome::OutOfMemory, _) => (
+            "mutant.out-of-memory",
+            serde_json::to_value(Site { mutation }),
+            format!("Mutant ran out of memory: {change} at {at}"),
+            format!(
+                "Review {change} at {at}: the tests held more than their share of \
+                 `max_mutant_memory` against it and were killed; raise it or lower \
+                 `mutation.jobs` if the tests honestly need more."
+            ),
         ),
         (MutantOutcome::Uncovered, _) => (
             "mutant.uncovered",
