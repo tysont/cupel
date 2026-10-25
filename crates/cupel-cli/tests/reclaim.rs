@@ -31,26 +31,29 @@ fn reclaim() -> String {
 #[test]
 fn make_reclaim_removes_the_coverage_build_the_incremental_caches_and_the_suite_cache() {
     let commands = reclaim();
-    for path in [
-        "target/cupel-llvm-cov",
-        "target/debug/incremental",
-        "target/release/incremental",
-        ".cupel/cache",
-    ] {
-        assert!(
-            commands
-                .lines()
-                .any(|line| line.starts_with("rm -rf ")
-                    && line.split_whitespace().any(|w| w == path)),
-            "{path} is removed:\n{commands}"
-        );
-    }
-    for kept in [
+    let removals: Vec<&str> = commands
+        .lines()
+        .filter(|line| line.starts_with("rm "))
+        .collect();
+    assert_eq!(
+        removals,
+        [
+            "rm -rf target/cupel-llvm-cov target/debug/incremental target/release/incremental .cupel/cache"
+        ]
+    );
+    let kept = [
         "target/debug/deps",
         ".cupel/cupel.db",
         ".cupel/baseline.json",
         "target/debug/cupel",
-    ] {
-        assert!(!commands.contains(kept), "{kept} is kept:\n{commands}");
-    }
+    ];
+    let touched: Vec<&str> = kept
+        .into_iter()
+        .filter(|path| commands.contains(path))
+        .collect();
+    assert_eq!(
+        touched,
+        Vec::<&str>::new(),
+        "nothing kept is named:\n{commands}"
+    );
 }
