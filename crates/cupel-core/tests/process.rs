@@ -1,12 +1,12 @@
 // ABOUTME: Tests for `Process`, the one way producers run programs (ADR-076 §3): captured output and exit
-// ABOUTME: codes, merged streams in order, environment and directory, cancellation, and spawn failures.
+// ABOUTME: codes, merged streams in order, environment and directory, cancellation, the memory budget, and spawn failures.
 #![cfg(unix)]
 
 use std::path::PathBuf;
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
-use cupel_core::{Cancellation, Captured, Error, Process, find_program};
+use cupel_core::{Cancellation, Captured, Error, Process, find_program, physical_memory};
 
 /// Longer than any stall of a loaded machine: only a child that is never stopped, or never
 /// starts, lasts this long.
@@ -81,6 +81,67 @@ fn cancellation_kills_the_child_and_its_process_group() {
         "cancelled after {:?}",
         started.elapsed()
     );
+}
+
+#[test]
+fn a_child_whose_group_holds_more_than_its_memory_budget_is_killed_with_the_group() {
+    let started = Instant::now();
+    // The background perl holds 256 MiB for as long as HANG, and the shell waits on it: the
+    // run ends before HANG only if the whole group was killed.
+    let holds = format!(
+        "perl -e '$x = \"x\" x (256 * 1024 * 1024); sleep {}' & wait",
+        HANG.as_secs()
+    );
+    let ran = shell(&holds).memory(64 << 20).run(&Cancellation::new());
+    assert_eq!(ran, Err(Error::OutOfMemory { limit: 64 << 20 }));
+    assert!(
+        started.elapsed() < HANG,
+        "stopped after {:?}",
+        started.elapsed()
+    );
+}
+
+#[test]
+fn a_child_within_its_memory_budget_runs_to_its_end() {
+    let captured = shell("echo done")
+        .memory(1 << 30)
+        .run(&Cancellation::new())
+        .unwrap();
+    assert_eq!(
+        (captured.exit_code, captured.stdout.as_str()),
+        (Some(0), "done\n")
+    );
+}
+
+/// The machine's physical memory as the platform's own tool reports it.
+fn reported_physical_memory() -> u64 {
+    if cfg!(target_os = "macos") {
+        let output = std::process::Command::new("sysctl")
+            .args(["-n", "hw.memsize"])
+            .output()
+            .unwrap();
+        String::from_utf8_lossy(&output.stdout)
+            .trim()
+            .parse()
+            .unwrap()
+    } else {
+        let meminfo = std::fs::read_to_string("/proc/meminfo").unwrap();
+        let line = meminfo
+            .lines()
+            .find(|l| l.starts_with("MemTotal:"))
+            .unwrap();
+        line.split_whitespace()
+            .nth(1)
+            .unwrap()
+            .parse::<u64>()
+            .unwrap()
+            * 1024
+    }
+}
+
+#[test]
+fn the_machines_physical_memory_is_what_the_platform_reports() {
+    assert_eq!(physical_memory(), Some(reported_physical_memory()));
 }
 
 #[test]

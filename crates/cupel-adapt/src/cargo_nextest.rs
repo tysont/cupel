@@ -1,9 +1,9 @@
 // ABOUTME: The `cargo nextest` runner producer: `cargo nextest run` with a tool configuration file whose `cupel`
 // ABOUTME: profile writes a JUnit report under the target directory, read by the JUnit parser.
-use cupel_core::{LangId, Langs, TestResult};
+use cupel_core::{LangId, Langs, RunOptions, RunOrdering, TestResult};
 
 use crate::report::{junit, listing};
-use crate::runner::{FIXED, Lister, Ran, Root, Runner, RunnerSpec, tests_flag};
+use crate::runner::{Executed, Lister, Ran, Root, Runner, RunnerSpec, Varying, tests_flag};
 
 const ID: &str = "tool.cargo-nextest";
 
@@ -29,7 +29,14 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
         parse: listing::nextest,
     }),
     completed_codes: &[0],
-    vary: &FIXED,
+    // One process per test has no order or seed to vary; the run's parallelism is its test
+    // threads and build jobs (ADR-148).
+    vary: &Varying {
+        ordering: RunOrdering::Fixed,
+        args: vary,
+        env: |_| Vec::new(),
+        executed: Executed::Unknown,
+    },
     outputs: &["target"],
 };
 
@@ -58,6 +65,23 @@ fn command(root: &Root) -> Vec<String> {
     .to_vec();
     command.push(format!("cupel:{}", root.config.display()));
     command
+}
+
+/// A run's parallelism as its test threads and its build jobs; nothing for the runner's
+/// defaults.
+fn vary(options: &RunOptions) -> Vec<String> {
+    options
+        .parallelism
+        .map(|parallelism| {
+            let count = parallelism.to_string();
+            vec![
+                "--test-threads".to_owned(),
+                count.clone(),
+                "--build-jobs".to_owned(),
+                count,
+            ]
+        })
+        .unwrap_or_default()
 }
 
 fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {

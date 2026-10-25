@@ -235,6 +235,11 @@ expression: pretty(&schema)
           "const": "timeout"
         },
         {
+          "description": "Its run held more memory than its budget and was killed (ADR-148).",
+          "type": "string",
+          "const": "out-of-memory"
+        },
+        {
           "description": "No test runs its site, so it was not run (coverage gating).",
           "type": "string",
           "const": "uncovered"

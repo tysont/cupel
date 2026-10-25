@@ -3,7 +3,9 @@
 use std::collections::BTreeMap;
 use std::time::Duration;
 
-use cupel_core::config::{ConfigError, Format, PROFILE_ENV_VAR, Setting, Settings, TimeLimit};
+use cupel_core::config::{
+    ConfigError, Format, MemoryLimit, PROFILE_ENV_VAR, Setting, Settings, TimeLimit,
+};
 use cupel_core::{CostClass, Error};
 
 fn env(vars: &[(&str, &str)]) -> BTreeMap<String, String> {
@@ -118,6 +120,41 @@ fn time_limits_reject_everything_else() {
             format!(
                 "invalid duration `{text}`: expected a positive whole number followed by \
                  `ms`, `s`, `m`, or `h`, such as `20s`"
+            ),
+            "{text:?}"
+        );
+    }
+}
+
+#[test]
+fn memory_limits_parse_whole_numbers_with_a_unit_or_a_share_of_physical_memory() {
+    let physical = 16 << 30;
+    for (text, bytes) in [
+        ("512k", 512 << 10),
+        ("3m", 3 << 20),
+        ("2g", 2 << 30),
+        ("50%", 8 << 30),
+        ("100%", 16 << 30),
+        ("1%", physical / 100),
+    ] {
+        let limit: MemoryLimit = text.parse().unwrap();
+        assert_eq!(limit.resolve(physical), bytes, "{text}");
+        assert_eq!(limit.to_string(), text);
+    }
+}
+
+#[test]
+fn memory_limits_reject_everything_else() {
+    for text in [
+        "", "10", "m", "0m", "-1g", "1.5g", "10 m", "3gb", "3G", "0%", "101%", "50 %",
+    ] {
+        let err = text.parse::<MemoryLimit>().unwrap_err();
+        assert_eq!(
+            err.to_string(),
+            format!(
+                "invalid memory limit `{text}`: expected a positive whole number followed by \
+                 `k`, `m`, or `g`, such as `512m`, or a share of physical memory from `1%` to \
+                 `100%`"
             ),
             "{text:?}"
         );

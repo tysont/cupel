@@ -1,8 +1,8 @@
 // ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, jobs, timeout_factor, strategy }` (ADR-080,
-// ABOUTME: ADR-082) and the cap a check declares for its fact (ADR-147): operators, slots, timeouts, and how mutants build.
+// ABOUTME: ADR-082) and the cap and budget a check declares for its fact (ADR-147, ADR-148): slots, timeouts, memory, builds.
 use std::time::Duration;
 
-use cupel_core::config::TimeLimit;
+use cupel_core::config::{MemoryLimit, TimeLimit};
 use cupel_core::syntax::OperatorSet;
 use cupel_core::{Error, Result};
 use serde_json::{Map, Value};
@@ -18,6 +18,13 @@ pub const MAX_MUTANT_TIMEOUT: &str = "max_mutant_timeout";
 
 /// The cap when none is configured (ADR-147).
 pub const DEFAULT_MAX_MUTANT_TIMEOUT: Duration = Duration::from_secs(120);
+
+/// The setting a check declares for the engine's fact that budgets the memory of its mutant
+/// runs together (ADR-148).
+pub const MAX_MUTANT_MEMORY: &str = "max_mutant_memory";
+
+/// The budget when none is configured: half of physical memory (ADR-148).
+pub const DEFAULT_MAX_MUTANT_MEMORY: &str = "50%";
 
 /// The shortest timeout a mutant's run gets (design §9.3).
 const TIMEOUT_FLOOR: Duration = Duration::from_secs(2);
@@ -35,6 +42,8 @@ pub struct Settings {
     pub strategy: Strategy,
     /// The longest a mutant's run may take, whatever its reference (ADR-147).
     pub max_mutant_timeout: Duration,
+    /// The resident memory the slots' runs may hold together (ADR-148).
+    pub max_mutant_memory: MemoryLimit,
 }
 
 /// How the engine builds mutants (ADR-082).
@@ -56,10 +65,9 @@ impl Settings {
             timeout_factor: DEFAULT_TIMEOUT_FACTOR,
             strategy: Strategy::Schemata,
             max_mutant_timeout: DEFAULT_MAX_MUTANT_TIMEOUT,
-        };
-        if let Some(value) = declared.get(MAX_MUTANT_TIMEOUT) {
-            settings.max_mutant_timeout = cap(value)?;
+            max_mutant_memory: default_memory(),
         }
+        .declared(declared)?;
         let Some(table) = config.get(KEY) else {
             return Ok(settings);
         };
@@ -80,6 +88,17 @@ impl Settings {
         Ok(settings)
     }
 
+    /// These settings with the cap and the budget `declared` names (ADR-147, ADR-148).
+    fn declared(mut self, declared: &Map<String, Value>) -> Result<Self> {
+        if let Some(value) = declared.get(MAX_MUTANT_TIMEOUT) {
+            self.max_mutant_timeout = cap(value)?;
+        }
+        if let Some(value) = declared.get(MAX_MUTANT_MEMORY) {
+            self.max_mutant_memory = budget(value)?;
+        }
+        Ok(self)
+    }
+
     /// The timeout of a mutant whose reference run took `reference`: `timeout_factor` times it,
     /// at least two seconds, at most `max_mutant_timeout`.
     pub fn timeout(&self, reference: Duration) -> Duration {
@@ -87,6 +106,43 @@ impl Settings {
             .max(reference * self.timeout_factor)
             .min(self.max_mutant_timeout)
     }
+
+    /// The resident memory each of `slots` slots' runs may hold: an equal part of the budget
+    /// on a machine with `physical` bytes of memory; `None` when the budget is a share of a
+    /// physical memory that is not known (ADR-148).
+    pub fn memory_per_slot(&self, physical: Option<u64>, slots: usize) -> Option<u64> {
+        let budget = match physical {
+            Some(physical) => self.max_mutant_memory.resolve(physical),
+            None => self.max_mutant_memory.bytes()?,
+        };
+        Some(budget / u64::try_from(slots.max(1)).unwrap_or(1))
+    }
+}
+
+/// The test threads each of `slots` slots runs with on a machine of `cores` cores: an equal
+/// share, at least one (ADR-148).
+pub fn threads(cores: usize, slots: usize) -> u32 {
+    u32::try_from(cores / slots.max(1))
+        .unwrap_or(u32::MAX)
+        .max(1)
+}
+
+/// `value`, the budget, as a memory limit such as `3g` or `50%`.
+fn budget(value: &Value) -> Result<MemoryLimit> {
+    value
+        .as_str()
+        .and_then(|text| text.parse::<MemoryLimit>().ok())
+        .ok_or_else(|| Error::InvalidValue {
+            what: MAX_MUTANT_MEMORY,
+            value: value.to_string(),
+            expected: "a size such as `3g` or `512m`, or a share of physical memory such as `50%`",
+        })
+}
+
+fn default_memory() -> MemoryLimit {
+    DEFAULT_MAX_MUTANT_MEMORY
+        .parse()
+        .expect("the default budget is a memory limit")
 }
 
 /// `value`, the cap, as a duration such as `120s` or `2m`.
