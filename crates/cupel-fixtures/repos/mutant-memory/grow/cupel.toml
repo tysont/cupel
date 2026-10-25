@@ -1,0 +1,10 @@
+# The mutant-memory fixture (ADR-148): two mutants of `grow` loop forever, each turn of the loop holding four more
+# MiB. One slot gets the whole budget, 128 MiB, which a looping mutant reaches within a second; the time cap is only
+# a backstop, so a run the budget somehow misses still ends in bounded time and memory.
+[lang.python]
+coverage = "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov=. --cov-branch --cov-report=lcov:{out}"
+mutation = { jobs = 1, timeout_factor = 100000 }
+
+[checks."tests.mutation"]
+max_mutant_memory = "128m"
+max_mutant_timeout = "10s"

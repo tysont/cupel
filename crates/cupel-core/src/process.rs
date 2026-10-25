@@ -1,5 +1,5 @@
 // ABOUTME: `Process`, the one way producers run an external program (ADR-076 §3): input given, output captured,
-// ABOUTME: the child polled against the run's `Cancellation`, and stopped with its process group when it fires.
+// ABOUTME: the child polled against the run's `Cancellation` and its memory budget, and stopped with its process group.
 use std::io::{ErrorKind, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 
 use crate::cancel::Cancellation;
 use crate::error::{Error, Result};
+use crate::memory;
 
 /// How often a running child is checked for exit and cancellation.
 const POLL: Duration = Duration::from_millis(10);
@@ -28,6 +29,9 @@ pub struct Process {
     input: Option<Vec<u8>>,
     /// How long a cancelled child has to exit after SIGTERM before SIGKILL; `None` kills at once.
     grace: Option<Duration>,
+    /// The most resident memory the child's process group may hold, in bytes; `None` for no
+    /// bound (ADR-148).
+    memory: Option<u64>,
 }
 
 /// What a finished process wrote and how it exited.
@@ -52,6 +56,7 @@ impl Process {
             merged: false,
             input: None,
             grace: None,
+            memory: None,
         }
     }
 
@@ -99,6 +104,15 @@ impl Process {
         self
     }
 
+    /// Kills the child's process group once it holds more than `bytes` of resident memory, as
+    /// `ps` reports it (ADR-148); the run is then `Error::OutOfMemory`. Where no sample can be
+    /// taken (no `ps`), the bound is not enforced.
+    #[must_use]
+    pub fn memory(mut self, bytes: u64) -> Self {
+        self.memory = Some(bytes);
+        self
+    }
+
     /// A JVM program's temporary directory: `-Djava.io.tmpdir=<dir>` appended to the
     /// `JAVA_TOOL_OPTIONS` the environment has. The TLA+ tools (SANY, TLC) write the standard
     /// modules they parse into it and delete them on exit, so two running at once in the shared
@@ -121,7 +135,8 @@ impl Process {
     }
 
     /// Runs the program to completion, or until `cancel` fires, when it is killed (with its
-    /// process group on Unix) and the result is `Error::Cancelled`.
+    /// process group on Unix) and the result is `Error::Cancelled`, or until its group holds
+    /// more than its memory budget, when it is killed and the result is `Error::OutOfMemory`.
     pub fn run(&self, cancel: &Cancellation) -> Result<Captured> {
         cancel.checkpoint()?;
         let mut command = Command::new(&self.program);
@@ -165,7 +180,7 @@ impl Process {
             Some(reader) => (Some(read(reader)), None),
             None => (child.stdout.take().map(read), child.stderr.take().map(read)),
         };
-        let exit_code = wait(&mut child, cancel, self.grace);
+        let exit_code = wait(&mut child, cancel, self.grace, self.memory);
         if let Some(writing) = writing {
             let _ = writing.join();
         }
@@ -185,8 +200,6 @@ impl Process {
     }
 }
 
-/// Waits for `child` to exit, stopping it when `cancel` fires first: at once, or after SIGTERM
-/// and `grace`.
 /// Spawns `command`. Linux refuses to execute a program some process has open for writing
 /// (`ETXTBSY`); a child another thread forked holds a just-written script's descriptor until it
 /// execs, so the spawn is retried until the program closes, within `BUSY_WAIT`.
@@ -204,7 +217,14 @@ fn spawn(command: &mut Command) -> std::io::Result<Child> {
     }
 }
 
-fn wait(child: &mut Child, cancel: &Cancellation, grace: Option<Duration>) -> Result<Option<i32>> {
+/// Waits for `child` to exit, stopping it when `cancel` fires first (at once, or after SIGTERM
+/// and `grace`) or when its process group holds more than `memory` bytes (at once).
+fn wait(
+    child: &mut Child,
+    cancel: &Cancellation,
+    grace: Option<Duration>,
+    memory: Option<u64>,
+) -> Result<Option<i32>> {
     loop {
         if let Ok(Some(status)) = child.try_wait() {
             return Ok(status.code());
@@ -216,8 +236,18 @@ fn wait(child: &mut Child, cancel: &Cancellation, grace: Option<Duration>) -> Re
             kill(child);
             return Err(Error::Cancelled);
         }
+        if let Some(limit) = memory.filter(|limit| over(child, *limit)) {
+            kill(child);
+            return Err(Error::OutOfMemory { limit });
+        }
         std::thread::sleep(POLL);
     }
+}
+
+/// Whether `child`'s process group (its own, see `process_group(0)` above) holds more than
+/// `limit` bytes of resident memory.
+fn over(child: &Child, limit: u64) -> bool {
+    memory::resident(child.id()).is_some_and(|held| held > limit)
 }
 
 /// Sends SIGTERM to `child`'s process group and waits up to `grace` for `child` to exit.

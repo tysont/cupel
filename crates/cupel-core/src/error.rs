@@ -44,6 +44,10 @@ pub enum Error {
     /// The run's `Cancellation` fired (`--timeout`); the work stopped early.
     #[error("cancelled: the run's time limit passed")]
     Cancelled,
+    /// The run's processes held more memory than the run's budget allows (ADR-148); they
+    /// were killed.
+    #[error("stopped: the run held more than {limit} bytes of memory")]
+    OutOfMemory { limit: u64 },
     /// A file write was refused or failed (ADR-020).
     #[error(transparent)]
     Write(#[from] WriteError),

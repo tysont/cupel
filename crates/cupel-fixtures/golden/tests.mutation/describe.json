@@ -68,7 +68,7 @@
           "evidence": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": false,
-            "description": "Evidence of `mutant.timeout` and `mutant.uncovered`.",
+            "description": "Evidence of `mutant.timeout`, `mutant.out-of-memory`, and `mutant.uncovered`.",
             "properties": {
               "mutation": {
                 "additionalProperties": false,
@@ -105,11 +105,52 @@
           "summary": "The tests ran past their timeout against the mutant, which usually means it loops."
         },
         {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `mutant.timeout`, `mutant.out-of-memory`, and `mutant.uncovered`.",
+            "properties": {
+              "mutation": {
+                "additionalProperties": false,
+                "description": "What was mutated; inlined in each evidence schema, which has no `$defs` (ADR-043).",
+                "properties": {
+                  "from": {
+                    "description": "The source text replaced.",
+                    "type": "string"
+                  },
+                  "operator": {
+                    "description": "The mutation operator, such as `relational`.",
+                    "type": "string"
+                  },
+                  "to": {
+                    "description": "What replaced it.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "from",
+                  "to",
+                  "operator"
+                ],
+                "type": "object"
+              }
+            },
+            "required": [
+              "mutation"
+            ],
+            "title": "Site",
+            "type": "object"
+          },
+          "kind": "mutant.out-of-memory",
+          "summary": "The tests held more memory than the run's share of max_mutant_memory against the mutant and were killed (ADR-148)."
+        },
+        {
           "action": "write_test",
           "evidence": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": false,
-            "description": "Evidence of `mutant.timeout` and `mutant.uncovered`.",
+            "description": "Evidence of `mutant.timeout`, `mutant.out-of-memory`, and `mutant.uncovered`.",
             "properties": {
               "mutation": {
                 "additionalProperties": false,
@@ -250,6 +291,11 @@
           "summary": "Mutants whose tests ran past their timeout."
         },
         {
+          "name": "out_of_memory",
+          "per": "scope",
+          "summary": "Mutants whose tests held more than their share of max_mutant_memory and were killed."
+        },
+        {
           "name": "uncovered",
           "per": "scope",
           "summary": "Mutants no test runs, which were not run."
@@ -312,6 +358,12 @@
           "default": "120s",
           "name": "max_mutant_timeout",
           "summary": "The longest a mutant's run may take, as a duration such as 90s or 5m; a run that reaches it is a timeout, whatever timeout_factor allows."
+        },
+        {
+          "configures": "mutation-outcomes",
+          "default": "50%",
+          "name": "max_mutant_memory",
+          "summary": "The resident memory the mutant runs may hold together, as a size such as 3g or 512m or a share of physical memory such as 50%; each slot's run gets an equal part, and a run over it is killed and is out-of-memory."
         }
       ],
       "stability": "experimental",

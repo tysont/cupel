@@ -131,6 +131,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
         [
             ("mutant.survived", ActionKind::WriteTest),
             ("mutant.timeout", ActionKind::Review),
+            ("mutant.out-of-memory", ActionKind::Review),
             ("mutant.uncovered", ActionKind::WriteTest),
             ("mutant.equivalent?", ActionKind::Review),
             ("mutant.slow-test-excluded", ActionKind::Review),
@@ -143,6 +144,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("killed", MetricPer::Scope),
             ("survived", MetricPer::Scope),
             ("timeout", MetricPer::Scope),
+            ("out_of_memory", MetricPer::Scope),
             ("uncovered", MetricPer::Scope),
             ("unviable", MetricPer::Scope),
             ("equivalent", MetricPer::Scope),
@@ -331,6 +333,29 @@ fn timeouts_and_uncovered_mutants_are_notes_and_unviable_ones_are_not_reported()
     );
 }
 
+#[test]
+fn a_mutant_killed_over_its_memory_budget_is_a_note_left_out_of_the_score() {
+    let (result, recorded) = run(vec![
+        mutant(7, 24, "10", "11", MutantOutcome::OutOfMemory),
+        mutant(8, 12, "*", "/", MutantOutcome::Killed),
+    ]);
+    assert_eq!(
+        kinds(&recorded.findings),
+        [("mutant.out-of-memory", Severity::Info, 1.0)]
+    );
+    let finding = &recorded.findings[0];
+    assert_eq!(finding.evidence.0["mutation"]["to"], json!("11"));
+    assert!(
+        finding.action.summary.contains("max_mutant_memory"),
+        "{}",
+        finding.action.summary
+    );
+    let score = result.score.unwrap();
+    assert_eq!((score.value, score.n), (1.0, 1));
+    assert_eq!(result.metrics.get("out_of_memory"), Some(&1.0));
+    assert_eq!(result.status, CheckStatus::Pass);
+}
+
 /// Timeouts and unviable mutants are left out of the score, so a scope of only those has
 /// nothing scored and scores 1.
 #[test]
@@ -483,11 +508,22 @@ fn without_mutation_outcomes_the_check_cannot_run() {
     );
 }
 
+/// The check's settings, as a configuration error lists them.
+fn settings() -> Vec<String> {
+    vec![
+        "max_mutant_timeout".to_owned(),
+        "max_mutant_memory".to_owned(),
+    ]
+}
+
 #[test]
-fn the_cap_on_a_mutants_run_is_its_one_setting_and_configures_the_engines_fact() {
+fn the_cap_and_the_budget_of_a_mutants_run_are_its_settings_and_configure_the_engines_fact() {
     assert_eq!(
         support::declared_settings(ID),
-        [("max_mutant_timeout", json!("120s"))]
+        [
+            ("max_mutant_timeout", json!("120s")),
+            ("max_mutant_memory", json!("50%"))
+        ]
     );
     let configures: Vec<Option<FactKind>> = support::check(ID)
         .manifest()
@@ -495,16 +531,13 @@ fn the_cap_on_a_mutants_run_is_its_one_setting_and_configures_the_engines_fact()
         .iter()
         .map(|setting| setting.configures)
         .collect();
-    assert_eq!(configures, [Some(FactKind::MutationOutcomes)]);
+    assert_eq!(configures, [Some(FactKind::MutationOutcomes); 2]);
 }
 
 #[test]
 fn any_setting_is_a_configuration_error() {
     let (key, valid) = support::setting_error(support::check(ID), json!({"timeout_factor": 10}));
-    assert_eq!(
-        (key.as_str(), valid),
-        ("timeout_factor", vec!["max_mutant_timeout".to_owned()])
-    );
+    assert_eq!((key.as_str(), valid), ("timeout_factor", settings()));
 }
 
 #[test]
@@ -517,12 +550,23 @@ fn a_cap_that_is_not_a_duration_is_a_configuration_error() {
         ),
     ] {
         let (key, valid) = support::setting_error(support::check(ID), config);
-        assert_eq!(
-            (key.as_str(), valid),
-            (refused, vec!["max_mutant_timeout".to_owned()])
-        );
+        assert_eq!((key.as_str(), valid), (refused, settings()));
     }
     let (ctx, _dir) = support::ctx(scope(), json!({"max_mutant_timeout": "90s"}));
+    assert!(support::check(ID).plan(&ctx, &scope()).is_ok());
+}
+
+#[test]
+fn a_budget_that_is_neither_a_size_nor_a_share_is_a_configuration_error() {
+    for config in [
+        json!({"max_mutant_memory": 3}),
+        json!({"max_mutant_memory": "3 gigabytes"}),
+        json!({"max_mutant_memory": "0%"}),
+    ] {
+        let (key, valid) = support::setting_error(support::check(ID), config);
+        assert_eq!((key.as_str(), valid), ("max_mutant_memory", settings()));
+    }
+    let (ctx, _dir) = support::ctx(scope(), json!({"max_mutant_memory": "3g"}));
     assert!(support::check(ID).plan(&ctx, &scope()).is_ok());
 }
 

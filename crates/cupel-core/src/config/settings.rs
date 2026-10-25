@@ -1,5 +1,5 @@
 // ABOUTME: The layered settings that flags, `CUPEL_*` env, a profile, and `cupel.toml` can all set.
-// ABOUTME: Defines each setting's env var once, plus the output format and time-limit value types.
+// ABOUTME: Defines each setting's env var once, plus the output format, time-limit, and memory-limit value types.
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
@@ -180,25 +180,113 @@ impl fmt::Display for TimeLimit {
     }
 }
 
+/// `value` as a positive whole number followed by one of `suffixes`, the first in order that
+/// ends it: the number and the suffix's index; `None` for any other text.
+fn number_with_suffix(value: &str, suffixes: &[&str]) -> Option<(u64, usize)> {
+    suffixes.iter().enumerate().find_map(|(index, suffix)| {
+        let number = value.strip_suffix(suffix)?;
+        if number.is_empty() || !number.bytes().all(|b| b.is_ascii_digit()) {
+            return None;
+        }
+        let amount: u64 = number.parse().ok().filter(|amount| *amount > 0)?;
+        Some((amount, index))
+    })
+}
+
 impl FromStr for TimeLimit {
     type Err = Error;
 
     fn from_str(value: &str) -> Result<Self> {
-        TimeUnit::MATCH_ORDER
-            .into_iter()
-            .find_map(|unit| {
-                let number = value.strip_suffix(unit.suffix())?;
-                if number.is_empty() || !number.bytes().all(|b| b.is_ascii_digit()) {
-                    return None;
-                }
-                let amount: u64 = number.parse().ok().filter(|amount| *amount > 0)?;
-                Some(Self { amount, unit })
+        let suffixes = TimeUnit::MATCH_ORDER.map(TimeUnit::suffix);
+        number_with_suffix(value, &suffixes)
+            .map(|(amount, index)| Self {
+                amount,
+                unit: TimeUnit::MATCH_ORDER[index],
             })
             .ok_or_else(|| Error::InvalidValue {
                 what: "duration",
                 value: value.to_owned(),
                 expected: "a positive whole number followed by `ms`, `s`, `m`, or `h`, \
                            such as `20s`",
+            })
+    }
+}
+
+/// A memory limit written as a whole number and a unit (`512k`, `3m`, `2g`: KiB, MiB, GiB), or
+/// as a share of the machine's physical memory (`50%`, from `1%` to `100%`).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct MemoryLimit {
+    amount: u64,
+    unit: &'static MemoryUnit,
+}
+
+/// A unit a memory limit is written in: its suffix, and the power of two it scales by, or
+/// `None` for a share of physical memory.
+#[derive(Debug, PartialEq, Eq, Hash)]
+struct MemoryUnit {
+    suffix: &'static str,
+    shift: Option<u32>,
+}
+
+/// The units, in the order they are matched.
+const MEMORY_UNITS: [MemoryUnit; 4] = [
+    MemoryUnit {
+        suffix: "k",
+        shift: Some(10),
+    },
+    MemoryUnit {
+        suffix: "m",
+        shift: Some(20),
+    },
+    MemoryUnit {
+        suffix: "g",
+        shift: Some(30),
+    },
+    MemoryUnit {
+        suffix: "%",
+        shift: None,
+    },
+];
+
+impl MemoryLimit {
+    /// The limit in bytes on a machine with `physical` bytes of memory.
+    pub fn resolve(self, physical: u64) -> u64 {
+        match self.unit.shift {
+            Some(shift) => self.amount.saturating_mul(1 << shift),
+            None => u64::try_from(u128::from(physical) * u128::from(self.amount) / 100)
+                .unwrap_or(u64::MAX),
+        }
+    }
+
+    /// The limit in bytes when it is a size; `None` for a share, which needs the machine.
+    pub fn bytes(self) -> Option<u64> {
+        self.unit.shift.is_some().then(|| self.resolve(0))
+    }
+}
+
+impl fmt::Display for MemoryLimit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.amount, self.unit.suffix)
+    }
+}
+
+impl FromStr for MemoryLimit {
+    type Err = Error;
+
+    fn from_str(value: &str) -> Result<Self> {
+        let suffixes = MEMORY_UNITS.each_ref().map(|unit| unit.suffix);
+        number_with_suffix(value, &suffixes)
+            .map(|(amount, index)| Self {
+                amount,
+                unit: &MEMORY_UNITS[index],
+            })
+            // A share is at most the whole.
+            .filter(|limit| limit.unit.shift.is_some() || limit.amount <= 100)
+            .ok_or_else(|| Error::InvalidValue {
+                what: "memory limit",
+                value: value.to_owned(),
+                expected: "a positive whole number followed by `k`, `m`, or `g`, such as \
+                           `512m`, or a share of physical memory from `1%` to `100%`",
             })
     }
 }

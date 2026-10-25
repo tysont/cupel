@@ -154,6 +154,8 @@ pub enum MutantOutcome {
     Survived,
     /// Its run took longer than its timeout.
     Timeout,
+    /// Its run held more memory than its budget and was killed (ADR-148).
+    OutOfMemory,
     /// No test runs its site, so it was not run (coverage gating).
     Uncovered,
     /// Its run did not complete and no test failed: it did not build or load.
@@ -172,13 +174,20 @@ impl MutantOutcome {
         match self {
             Self::Killed => Some(true),
             Self::Survived => Some(false),
-            Self::Timeout | Self::Uncovered | Self::Unviable => None,
+            Self::Timeout | Self::OutOfMemory | Self::Uncovered | Self::Unviable => None,
         }
     }
 }
 
 /// Each outcome's name, in declaration order (so `OUTCOMES[outcome as usize]` names it).
-const OUTCOMES: [&str; 5] = ["killed", "survived", "timeout", "uncovered", "unviable"];
+const OUTCOMES: [&str; 6] = [
+    "killed",
+    "survived",
+    "timeout",
+    "out-of-memory",
+    "uncovered",
+    "unviable",
+];
 
 impl fmt::Display for MutantOutcome {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

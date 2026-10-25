@@ -40,6 +40,7 @@ mod json_schema;
 mod lang;
 pub mod matching;
 mod matrix;
+mod memory;
 mod model_check;
 mod mutation;
 mod oracle;
@@ -117,6 +118,7 @@ pub use histories::{Histories, History, HistoryOp, HistoryStatus, HistoryViolati
 pub use id::{CheckId, LangFamily, LangId, ProducerId, RunId, ToolId, random_seed};
 pub use lang::{Lang, Langs};
 pub use matrix::{Support, SupportMatrix};
+pub use memory::physical_memory;
 pub use model_check::{
     Counterexample, HarnessStatus, ModelCheckResults, ModelHarness, RefutedProperty,
 };

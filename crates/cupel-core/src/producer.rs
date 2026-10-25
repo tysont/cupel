@@ -321,6 +321,9 @@ pub struct RunOptions {
     pub args: Vec<String>,
     /// Ends only this run, which then reports an incomplete invocation.
     pub timeout: Option<Duration>,
+    /// The most resident memory the run's processes may hold together, in bytes; over it, the
+    /// run is killed and is `Error::OutOfMemory` (ADR-148). `None` for no bound.
+    pub memory: Option<u64>,
     /// `Shuffled` asks the runner for its seeded shuffle; `Declared` and `Reversed` run a
     /// `Tests` selection in the order given where the runner takes an explicit order.
     pub order: RunOrder,
@@ -337,6 +340,7 @@ impl Default for RunOptions {
             env: Vec::new(),
             args: Vec::new(),
             timeout: None,
+            memory: None,
             order: RunOrder::Declared,
             seed: None,
             parallelism: None,
