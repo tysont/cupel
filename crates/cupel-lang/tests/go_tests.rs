@@ -167,12 +167,22 @@ fn conventions_pair_sources_with_test_files_beside_them() {
     assert!(conventions.is_test("report/format_test.go"));
     assert!(conventions.is_test("report/testdata/golden.go"));
     assert!(!conventions.is_test("ledger.go"));
+    assert!(!conventions.is_test("report/format.go"));
+    assert!(
+        conventions
+            .test_globs
+            .iter()
+            .any(|glob| glob.ends_with("_test.go")),
+        "a Go test file is named `*_test.go`"
+    );
     assert_eq!(conventions.test_files_for("ledger.go"), ["ledger_test.go"]);
     assert_eq!(
         conventions.test_files_for("pricing.go"),
         ["pricing_test.go"]
     );
     assert!(conventions.test_files_for("decide.go").is_empty());
+    // A package's tests sit beside its files: `report/` has none for `format.go`.
+    assert!(conventions.test_files_for("report/format.go").is_empty());
     let sources: Vec<&str> = conventions
         .pairs
         .iter()

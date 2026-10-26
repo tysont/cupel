@@ -116,23 +116,14 @@ fn a_file_of_only_tokio_tests_is_a_tokio_file_and_unknown_assertions_are_custom(
 }
 
 #[test]
-fn conventions_take_integration_tests_and_benches_for_test_files() {
-    let conventions: TestConventions = produce("rust", &fixture("rust"));
-    // Cargo builds each bench as its own crate that only `cargo bench` runs, beside the tests.
-    let files = [
-        "tests/ledger.rs",
-        "crates/foo/tests/it.rs",
-        "benches/combinations.rs",
-        "crates/foo/benches/parse.rs",
-        "src/pricing.rs",
-    ];
-    let tests: Vec<bool> = files.iter().map(|file| conventions.is_test(file)).collect();
-    assert_eq!(tests, [true, true, true, true, false]);
-}
-
-#[test]
 fn conventions_pair_sources_with_integration_and_inline_tests() {
     let conventions: TestConventions = produce("rust", &fixture("rust"));
+    assert!(conventions.is_test("tests/ledger.rs"));
+    assert!(conventions.is_test("crates/foo/tests/it.rs"));
+    // Cargo builds each bench as its own crate that only `cargo bench` runs, beside the tests.
+    assert!(conventions.is_test("benches/combinations.rs"));
+    assert!(conventions.is_test("crates/foo/benches/parse.rs"));
+    assert!(!conventions.is_test("src/pricing.rs"));
     assert_eq!(
         conventions.test_files_for("src/lib.rs"),
         [
