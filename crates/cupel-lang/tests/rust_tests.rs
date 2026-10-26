@@ -5,8 +5,8 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
 use support::{
-    assert_framework, assert_test_file, case, file, fixture, produce, properties, property, rows,
-    tree,
+    assert_framework, assert_test_file, case, file, fixture, produce, produce_scoped, properties,
+    property, rows, tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -143,6 +143,20 @@ fn conventions_pair_sources_with_integration_and_inline_tests() {
         .map(|p| p.source.as_str())
         .collect();
     assert_eq!(sources, ["src/lib.rs", "src/pricing.rs"]);
+}
+
+#[test]
+fn a_source_pairs_with_its_tests_when_the_scope_holds_the_source_alone() {
+    // `check --paths src/lib.rs` leaves the integration tests out of the scope; they still test it.
+    let conventions: TestConventions = produce_scoped("rust", &fixture("rust"), &["src/lib.rs"]);
+    assert_eq!(
+        conventions.test_files_for("src/lib.rs"),
+        [
+            "tests/ledger.rs",
+            "tests/properties.rs",
+            "tests/quality_signals.rs"
+        ]
+    );
 }
 
 #[test]
