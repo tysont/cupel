@@ -156,6 +156,13 @@ pub struct TestsQuality {
 
 inventory::submit!(crate::NativeCheck(|| Box::new(TestsQuality::new())));
 
+/// The facts the check reads: each test file's cases and assertions, and the symbols and trees
+/// that identify a case and hold its statements.
+const NEEDS: [FactKind; 3] = [FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree];
+
+/// The decisions, by which a case's loops and branches are counted as logic.
+const WANTS: [FactKind; 1] = [FactKind::Decisions];
+
 impl TestsQuality {
     pub fn new() -> Self {
         Self {
@@ -164,8 +171,8 @@ impl TestsQuality {
                 version: 1,
                 tier: Tier::try_from(2).expect("tier 2 exists"),
                 cost: CostClass::Quick,
-                needs: vec![FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree],
-                wants: vec![FactKind::Decisions],
+                needs: NEEDS.to_vec(),
+                wants: WANTS.to_vec(),
                 findings: finding_kinds(),
                 metrics: metrics(),
                 settings: LIMITS.specs(),
