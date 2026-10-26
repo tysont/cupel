@@ -276,6 +276,14 @@
       "reason": "test",
       "symbol": {
         "col": 5,
+        "file": "src/test/java/ledger/LedgerHelperTest.java",
+        "line": 12
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
         "file": "src/test/java/ledger/LedgerPropertyTest.java",
         "line": 7
       }

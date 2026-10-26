@@ -5,6 +5,38 @@
         {
           "assertions": [
             {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 21,
+                "end_line": 14,
+                "line": 14
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "aHelperOfTheClassAsserts",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 15,
+            "line": 12
+          }
+        }
+      ],
+      "file": "src/test/java/ledger/LedgerHelperTest.java",
+      "framework": "junit5",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
               "kind": "custom",
               "span": {
                 "col": 9,

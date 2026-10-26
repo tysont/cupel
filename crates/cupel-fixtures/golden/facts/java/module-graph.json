@@ -297,6 +297,34 @@
         },
         {
           "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerHelperTest.java",
+          "line": 3,
+          "names": [
+            "assertEquals"
+          ],
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Assertions.assertEquals",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
+          "from": "src/test/java/ledger/LedgerHelperTest.java",
+          "line": 5,
+          "names": [
+            "Test"
+          ],
+          "relative": false,
+          "specifier": "org.junit.jupiter.api.Test",
+          "target": {
+            "kind": "external",
+            "package": "org.junit.jupiter.api"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "src/test/java/ledger/LedgerPropertyTest.java",
           "line": 3,
           "names": [

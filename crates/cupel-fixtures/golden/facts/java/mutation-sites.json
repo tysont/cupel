@@ -5581,6 +5581,99 @@
     {
       "sites": [
         {
+          "from": "assertEquals(expected, Ledger.balance(entries));",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 57,
+            "end_line": 9,
+            "line": 9
+          },
+          "to": [
+            ""
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerHelperTest.java",
+        "line": 8
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "checkBalance(30, 10, 20);",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 34,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            ""
+          ]
+        },
+        {
+          "from": "30",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "ccdedc12d92b2f22",
+          "span": {
+            "col": 22,
+            "end_col": 24,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "2583c4ce86510588",
+          "span": {
+            "col": 26,
+            "end_col": 28,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "20",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "05b0ba3d71affa2e",
+          "span": {
+            "col": 30,
+            "end_col": 32,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerHelperTest.java",
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "==",
           "operator": "equality",
           "set": "default",
