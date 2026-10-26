@@ -167,21 +167,24 @@ fn loops_over_literal_lists_and_tuples_are_tables_and_others_are_not() {
     );
 }
 
-/// (kind, expression) of each decision of the function `display` of a file `t.py` holding `source`.
-fn clauses_of(source: &str, display: &str) -> Vec<(DecisionKind, bool)> {
-    let dir = tree(&[("t.py", source)]);
-    expression_clauses("python", dir.path(), display)
-}
-
 #[test]
-fn comprehension_clauses_are_expression_decisions_and_statements_are_not() {
+fn comprehension_clauses_and_lambda_bodies_are_expression_decisions_and_statements_are_not() {
+    // A comprehension's clauses decide which values it yields; a lambda handed to the code under
+    // test computes values when that code calls it. Neither is the function's control flow.
+    let dir = tree(&[(
+        "t.py",
+        "def mixed(xs):\n\
+         \x20   for x in xs:\n        if x:\n            f(x)\n\
+         \x20   return [y for y in xs if y], {k: v for k, v in xs}, any(z for z in xs)\n\
+         \n\
+         def passes(f, g, h, t):\n\
+         \x20   f(lambda x: 1 if x else 2)\n\
+         \x20   g(key=lambda y: (3 if y else 4))\n\
+         \x20   h(lambda z: [w for w in z if w and z])\n\
+         \x20   return 5 if t else 6\n",
+    )]);
     assert_eq!(
-        clauses_of(
-            "def mixed(xs):\n\
-             \x20   for x in xs:\n        if x:\n            f(x)\n\
-             \x20   return [y for y in xs if y], {k: v for k, v in xs}, any(z for z in xs)\n",
-            "t.mixed"
-        ),
+        expression_clauses("python", dir.path(), "t.mixed"),
         [
             (Loop, false),
             (Branch, false),
@@ -189,6 +192,17 @@ fn comprehension_clauses_are_expression_decisions_and_statements_are_not() {
             (Branch, true),
             (Loop, true),
             (Loop, true),
+        ]
+    );
+    assert_eq!(
+        expression_clauses("python", dir.path(), "t.passes"),
+        [
+            (Ternary, true),
+            (Ternary, true),
+            (Loop, true),
+            (Branch, true),
+            (BooleanOp, true),
+            (Ternary, false),
         ]
     );
 }
@@ -200,29 +214,5 @@ fn every_case_after_the_first_continues_its_multiway_decision() {
     assert_eq!(
         case_continuations("python", &fixture("python"), "ledger.complexity.month"),
         expected
-    );
-}
-
-#[test]
-fn decisions_inside_a_lambda_are_expression_decisions() {
-    // A lambda handed to the code under test computes values when that code calls it; its
-    // decisions are not the enclosing function's control flow.
-    assert_eq!(
-        clauses_of(
-            "def passes(f, g, h, t):\n\
-             \x20   f(lambda x: 1 if x else 2)\n\
-             \x20   g(key=lambda y: (3 if y else 4))\n\
-             \x20   h(lambda z: [w for w in z if w and z])\n\
-             \x20   return 5 if t else 6\n",
-            "t.passes"
-        ),
-        [
-            (Ternary, true),
-            (Ternary, true),
-            (Loop, true),
-            (Branch, true),
-            (BooleanOp, true),
-            (Ternary, false),
-        ]
     );
 }
