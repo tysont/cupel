@@ -1,6 +1,6 @@
 # CUPEL_DECISION_052: `static.deps`: modules, coupling, abstractness, distance, cycles, and findings
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.5
+**Date:** 2026-10-13 · **Status:** accepted; the narrowed-scope consequence amended on 2026-10-25 (P9.9 group 1): afferent coupling counts importers outside the scope · **Phase:** P2.5
 
 ## Context
 
@@ -29,7 +29,7 @@ Design §5.1 says `static.deps` measures "afferent/efferent coupling, instabilit
 - **`dep.layer-violation`** follows ADR-053. Action `review`.
 - **Identity** is `FindingId::for_subject("static.deps", kind, subject)`: the sorted members joined by newlines for a cycle, `from -> to` for a violation, the module path for an unstable module. The repro is `cupel check --only static.deps`: coupling and cycles need the whole graph, so narrowing the repro to one file would hide what it reproduces.
 - All findings are `warn` with confidence 1; a gate escalates them (P2.9). **Metrics:** `cycles`, `max_distance`, `violations`. **Score:** `{value: cycles, unit: "cycles", n: modules}`; per-language scores are summed. **Status:** `fail` when any finding was emitted.
-- The graph is the one the producers built for the files in scope: on a narrowed scope, edges from files outside it are absent, so afferent coupling and cycles are complete only for a whole-tree run.
+- The graph is the one the producers built for the files in scope: on a narrowed scope, edges from files outside it are absent, so afferent coupling and cycles are complete only for a whole-tree run. *Amended 2026-10-25.* A module's afferent coupling now also counts the files that import it through `References.imports` (every import edge of the language, whatever the scope, ADR-144), which the check wants: on serde_json, `check --paths` over `src/value/index.rs` (a trait-only module that only `src/value/mod.rs` imports) reported it `dep.unstable-abstract` with no importer and distance 1.00, where the tree measures 0.67. Efferent coupling, the modules measured, and cycles still come from the scope's edges (ADR-142 §5: a cycle under a range is a cycle among the changed files); on a tree scope both facts hold the same edges and nothing changes.
 
 ## Consequences
 

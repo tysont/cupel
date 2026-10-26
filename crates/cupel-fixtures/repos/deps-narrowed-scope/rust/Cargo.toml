@@ -1,0 +1,10 @@
+# ABOUTME: A crate whose trait-only module only a file outside a narrowed scope imports, so `static.deps` must
+# ABOUTME: count that importer when the scope holds the trait's file alone (P9.9, serde_json's `src/value/index.rs`).
+[package]
+name = "values"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
