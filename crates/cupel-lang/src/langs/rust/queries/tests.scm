@@ -57,6 +57,57 @@
     (token_tree) @test.case @property.proptest)
   (#eq? @_proptest "proptest"))
 
+; quickcheck's `quickcheck! { fn prop(xs: Vec<u32>) -> bool { … } }`: each `fn` in the block is a test of
+; its own, named by the identifier after `fn`, whose body is the token tree that starts with `{`: right after
+; the parameters when there is no return type, or after its one token (`bool`, `TestResult`, `()`). A named
+; return type is what quickcheck checks, as a `#[quickcheck]` function's result is.
+(macro_invocation
+  macro: (identifier) @_quickcheck
+  (token_tree
+    "fn"
+    .
+    (identifier) @test.name
+    .
+    (token_tree)
+    .
+    (token_tree) @test.case @property.quickcheck)
+  (#eq? @_quickcheck "quickcheck")
+  (#match? @test.case "^[{]"))
+
+(macro_invocation
+  macro: (identifier) @_quickcheck
+  (token_tree
+    "fn"
+    .
+    (identifier) @test.name
+    .
+    (token_tree)
+    .
+    "->"
+    .
+    [(identifier) (primitive_type)] @test.assertion @assertion.idiom.property
+    .
+    (token_tree) @test.case @property.quickcheck)
+  (#eq? @_quickcheck "quickcheck")
+  (#match? @test.case "^[{]"))
+
+(macro_invocation
+  macro: (identifier) @_quickcheck
+  (token_tree
+    "fn"
+    .
+    (identifier) @test.name
+    .
+    (token_tree)
+    .
+    "->"
+    .
+    (token_tree)
+    .
+    (token_tree) @test.case @property.quickcheck)
+  (#eq? @_quickcheck "quickcheck")
+  (#match? @test.case "^[{]"))
+
 ; `proptest!(|(x in …)| { … })` inside a test function makes it a property test.
 (macro_invocation
   macro: (identifier) @_proptest

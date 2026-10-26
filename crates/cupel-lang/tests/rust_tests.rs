@@ -276,6 +276,40 @@ fn property_tests_name_their_framework_and_proptest_blocks_hold_cases() {
     );
 }
 
+/// quickcheck's `quickcheck!` block: each `fn` in it is a test of its own that quickcheck drives,
+/// named by the function (as itertools' `tests/quick.rs` writes its properties).
+const QUICKCHECK_BLOCK: &str = r"quickcheck! {
+    fn size_merge(a: Vec<u16>, b: Vec<u16>) -> bool {
+        merged(&a, &b).len() == a.len() + b.len()
+    }
+
+    fn merge_keeps_order(a: Vec<u16>) -> () {
+        assert!(sorted(&merged(&a, &a)));
+    }
+
+    fn halves(a: u8) {
+        assert_eq!(a / 2 * 2 + a % 2, a);
+    }
+}
+";
+
+#[test]
+fn a_quickcheck_block_holds_one_property_case_per_function() {
+    let dir = tree(&[("tests/quick.rs", QUICKCHECK_BLOCK)]);
+    assert_eq!(
+        properties("rust", dir.path(), "tests/quick.rs"),
+        [
+            property("size_merge", Some("quickcheck"), &[(Custom, Strong)]),
+            property(
+                "merge_keeps_order",
+                Some("quickcheck"),
+                &[(Truthiness, Weak)]
+            ),
+            property("halves", Some("quickcheck"), &[(Equality, Strong)]),
+        ]
+    );
+}
+
 #[test]
 fn a_call_of_a_helper_in_the_file_that_asserts_and_an_assertion_in_a_macro_argument_count() {
     let dir = tree(&[(
