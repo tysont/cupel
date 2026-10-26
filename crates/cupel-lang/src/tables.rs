@@ -251,6 +251,7 @@ impl Weight {
 /// identifiers = ["identifier", "field_identifier"]  # named kinds that become `$id`
 /// literals = ["integer_literal", "string_literal"]  # named kinds that become `$lit`
 /// erase = ["attribute_item"]                        # kinds dropped with their subtrees
+/// keep = []                                         # kinds below which nothing is erased
 /// flatten = []                                      # kinds replaced by their children
 /// operators = []                                    # word tokens kept as operators (`and`)
 /// receivers = ["value"]                             # callee fields that hold a receiver
@@ -265,6 +266,7 @@ pub struct NormalizeRules {
     pub identifiers: Vec<String>,
     pub literals: Vec<String>,
     pub erase: Vec<String>,
+    pub keep: Vec<String>,
     pub flatten: Vec<String>,
     pub operators: Vec<String>,
     pub receivers: Vec<String>,

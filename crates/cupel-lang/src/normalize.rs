@@ -90,7 +90,7 @@ struct Normalizer<'a> {
 
 impl Normalizer<'_> {
     fn root(&self, node: Node<'_>) -> NormNode {
-        let mut nodes = self.node(node, Mode::Plain);
+        let mut nodes = self.node(node, Mode::Plain, false);
         if nodes.len() == 1 {
             nodes.remove(0)
         } else {
@@ -98,12 +98,14 @@ impl Normalizer<'_> {
         }
     }
 
-    /// The normalized form of `node`: none (erased), one node, or several (flattened).
-    fn node(&self, node: Node<'_>, mode: Mode) -> Vec<NormNode> {
-        if let Some(terminal) = self.terminal(node, mode) {
+    /// The normalized form of `node`: none (erased), one node, or several (flattened). `kept` is
+    /// whether an ancestor is one of `keep`, below which nothing is erased.
+    fn node(&self, node: Node<'_>, mode: Mode, kept: bool) -> Vec<NormNode> {
+        if let Some(terminal) = self.terminal(node, mode, kept) {
             return terminal;
         }
         let kind = node.kind();
+        let kept = kept || self.rules.keep.iter().any(|k| k == kind);
         let callee = self
             .rules
             .calls
@@ -116,7 +118,7 @@ impl Normalizer<'_> {
             let field = u32::try_from(index)
                 .ok()
                 .and_then(|index| node.field_name_for_child(index));
-            children.extend(self.node(child, self.child_mode(mode, callee, field)));
+            children.extend(self.node(child, self.child_mode(mode, callee, field), kept));
         }
         if self.rules.flatten.iter().any(|k| k == kind) {
             return children;
@@ -126,13 +128,13 @@ impl Normalizer<'_> {
 }
 
 impl Normalizer<'_> {
-    /// What `node` normalizes to when its children do not matter: nothing for an erased,
-    /// skipped, or extra node or a non-operator token, a leaf for an operator, identifier, or
-    /// literal; `None` for a node whose children decide.
-    fn terminal(&self, node: Node<'_>, mode: Mode) -> Option<Vec<NormNode>> {
+    /// What `node` normalizes to when its children do not matter: nothing for an erased (outside
+    /// a kept node), skipped, or extra node or a non-operator token, a leaf for an operator,
+    /// identifier, or literal; `None` for a node whose children decide.
+    fn terminal(&self, node: Node<'_>, mode: Mode, kept: bool) -> Option<Vec<NormNode>> {
         let kind = node.kind();
         let has = |list: &[String]| list.iter().any(|k| k == kind);
-        if node.id() == self.skip || node.is_extra() || has(&self.rules.erase) {
+        if node.id() == self.skip || node.is_extra() || (!kept && has(&self.rules.erase)) {
             return Some(Vec::new());
         }
         if !node.is_named() {

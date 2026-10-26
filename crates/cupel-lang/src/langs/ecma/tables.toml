@@ -48,6 +48,9 @@ erase = [
   "accessibility_modifier",
   "override_modifier",
 ]
+# A type declaration is code of its own, not an annotation of runtime code: a type-level test is
+# its declared types, so nothing inside one is erased.
+keep = ["type_alias_declaration"]
 # TypeScript wraps each parameter with its type; JavaScript writes a default as a pattern.
 flatten = ["required_parameter", "assignment_pattern"]
 operators = ["typeof", "instanceof", "in", "of", "delete", "void"]

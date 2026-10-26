@@ -89,6 +89,24 @@ fn type_annotations_generics_decorators_and_modifiers_do_not_change_a_typescript
     assert_eq!(javascript.0, plain.0);
 }
 
+/// A type-level test is its type declarations (ts-pattern, P9.9 group 3): the arguments of the
+/// types it declares are what it checks, so they are part of its shape, as they are not in an
+/// annotation of runtime code.
+#[test]
+fn a_type_declaration_keeps_its_type_arguments() {
+    let shape = |cases: &str| {
+        ts(&format!(
+            "export function f() {{\n  type cases = [{cases}];\n  return 1;\n}}\n"
+        ))
+    };
+    let one = shape("Expect<Equal<Exclude<string, 'a'>, string>>");
+    let two = shape("Expect<Equal<Exclude<string | number, string>, number>>, Expect<Equal<1, 1>>");
+    assert_ne!(one.1, two.1, "{} {}", one.0, two.0);
+    assert!(one.0.contains("type_arguments"), "{}", one.0);
+    let annotated = ts("export function f(a: Map<string, number>) {\n  return a;\n}\n");
+    assert!(!annotated.0.contains("type_arguments"), "{}", annotated.0);
+}
+
 #[test]
 fn a_tsx_component_and_its_jsx_twin_normalize_alike() {
     let jsx = normalize_at(
