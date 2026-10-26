@@ -1,6 +1,6 @@
 # External dogfood: serde-rs/json
 
-Group 1 of P9.9 ([ADR-138](../adr/CUPEL_DECISION_138.md)): the first Rust repository. Cupel at `11d1f40` (branch `p9-dogfood-rust-go`) for the final runs, the debug build of the worktree (`target/debug/cupel`); every run went through `scripts/heavy.sh`.
+Group 1 of P9.9 ([ADR-138](../adr/CUPEL_DECISION_138.md)): the first Rust repository. Cupel at `4eeb6f5` (branch `p9-dogfood-rust-go`) for the final runs, the debug build of the worktree (`target/debug/cupel`); every run went through `scripts/heavy.sh`.
 
 ## Repository
 
@@ -19,10 +19,11 @@ $C survey --depth standard --budget 30m --no-install --format json            # 
 $C check  --depth deep --no-install --format json --paths <the survey's ten target files>   # 90.8 s, exit 0
 $C survey --depth standard --budget 30m --no-install --format json --paths src  # 117.0 s, exit 0
 $C check  --depth deep --no-install --format json --paths <its ten target files>            # 78.8 s, exit 0
-# after the fixes, at 11d1f40:
+# after the fixes, at 11d1f40 (and again at 4eeb6f5, after itertools' fixes: the same findings):
 $C survey --depth standard --budget 30m --no-install --format json            # 130.4 s, exit 0
 $C check  --depth deep ... --paths <the survey's ten target files>             # 77.1 s, exit 0
 $C check  --depth deep ... --paths <the src survey's ten target files>         # 222.8 s, exit 0
+# the same three at 4eeb6f5: 185.6 s, 71.4 s, 84.2 s, each exit 0 (the tables below)
 ```
 
 `cupel init` wrote `[lang.rust] test = "cargo test --workspace"` and `coverage = "cargo llvm-cov --lcov --output-path {out}"`. Set by hand: `runner = "cargo-nextest"` (ADR-138 §2: per-test selection, durations, and ADR-147's exclusion for Rust mutants) and `mutation = { jobs = 1 }`. The brief asked for `jobs = 2`; the first survey ran with it, and `tests.mutation` ended in `error`: `test_deserialize_from_stream` binds the fixed port `localhost:20000`, so the reference runs of two slots collide, and an unmutated file whose reference is red fails the whole production. That survey also left two of the test's processes running for an hour after it ended (holding the heavy lock), which is the Cupel defect fixed below; with one slot nothing collides.
@@ -31,7 +32,7 @@ The ten targets of the whole-tree survey are all test functions (below), so the 
 
 ## Survey
 
-Whole tree at `11d1f40`, status `pass`, exit 0, 851 findings (101 fail, 431 warn, 319 info), scope 72 files and 1280 symbols, 130.4 s. The rankings, verbatim (`rank. target value (location)`):
+Whole tree at `4eeb6f5`, status `pass`, exit 0, 851 findings (101 fail, 431 warn, 319 info), scope 72 files and 1280 symbols, 185.6 s. The rankings, verbatim (`rank. target value (location)`):
 
 - `static.clones.cluster_size` per group, highest worst, 102 measured: 1. `raw::RawValue::deserialize_any and 24 others` 25 (src/raw.rs:592); 2. `ser::MapKeySerializer::serialize_bool and 10 others` 11 (src/ser.rs:834); 3. `ser::Formatter::write_i8 and 9 others` 10 (src/ser.rs:1567); 4. `ser::Formatter::write_null and 8 others` 9 (src/ser.rs:1544); 5. `value::de::Value::deserialize_bool and 5 others` 6 (src/value/de.rs:372); 6. `ser::MapKeySerializer::serialize_newtype_variant and 4 others` 5 (src/ser.rs:1079); 7. `ser::MapKeySerializer::serialize_tuple_variant and 3 others` 4 (src/ser.rs:1119); 8. `ser::NumberStrEmitter::serialize_tuple_variant and 3 others` 4 (src/ser.rs:1303); 9. `value::de::SeqDeserializer::size_hint and 3 others` 4 (src/value/de.rs:646); 10. `de::Deserializer::deserialize_char and 2 others` 3 (src/de.rs:1517)
 - `static.complexity.cyclomatic` per symbol, highest worst, 1280 measured: 1. `de::Deserializer::ignore_value` 16 (src/de.rs:1102); 2. `read::parse_unicode_escape` 14 (src/read.rs:951); 3. `lexical::algorithm::fast_path` 10 (src/lexical/algorithm.rs:18); 4. `build::main` 9 (build.rs:19); 5. `de::Deserializer::f64_from_parts` 8 (src/de.rs:639); 6. `de::Deserializer::peek_invalid_type` 8 (src/de.rs:269); 7. `error::parse_line_col` 8 (src/error.rs:494); 8. `de::Deserializer::deserialize_any` 7 (src/de.rs:1393); 9. `de::Deserializer::parse_exponent` 7 (src/de.rs:567); 10. `de::Deserializer::parse_integer` 7 (src/de.rs:462)
@@ -67,39 +68,39 @@ Scoped to `src`, at `e235f85` (before the two check fixes; neither changes these
 
 ## Check
 
-Final whole-tree survey (status `pass`, exit 0, 851 findings (101 fail, 431 warn, 319 info), scope 72 files and 1280 symbols, 130.4 s):
+Final whole-tree survey (status `pass`, exit 0, 851 findings (101 fail, 431 warn, 319 info), scope 72 files and 1280 symbols, 185.6 s):
 
 | Check | Status | Findings | Score | Time |
 |---|---|---|---|---|
-| `conc.race` | pass | 0 | 0 reports (n 1) | 65.5 s |
-| `gen.property` | pass | property.missing 42 | 0 falsified (n 0) | 1.6 s |
+| `conc.race` | pass | 0 | 0 reports (n 1) | 151.2 s |
+| `gen.property` | pass | property.missing 42 | 0 falsified (n 0) | 0.1 s |
 | `meta.oracle-independence` | skipped (needs-range) | 0 | — | 0.0 s |
 | `meta.traceability` | skipped (needs-range) | 0 | — | 0.0 s |
-| `perf.footprint` | pass | 0 | 45 dependencies (n 45) | 0.2 s |
-| `spec.contracts` | pass | 0 | — | 5.4 s |
-| `static.analyze` | pass | 0 | 0 diagnostics (n 1) | 0.2 s |
+| `perf.footprint` | pass | 0 | 45 dependencies (n 45) | 0.4 s |
+| `spec.contracts` | pass | 0 | — | 2.7 s |
+| `static.analyze` | pass | 0 | 0 diagnostics (n 1) | 0.5 s |
 | `static.api-surface` | skipped (needs-range) | 0 | — | 0.0 s |
-| `static.clones` | fail | clone.cluster 20, clone.pair 82 | 586 pairs (n 863) | 0.2 s |
+| `static.clones` | fail | clone.cluster 20, clone.pair 82 | 586 pairs (n 863) | 0.4 s |
 | `static.complexity` | fail | complexity.high 5, function.long 19, nesting.deep 1, params.many 1 | 16 cyclomatic_max (n 1280) | 0.0 s |
-| `static.crap` | fail | crap.high 9, crap.watch 126 | 97.1254 max (n 804) | 10.8 s |
-| `static.dead-code` | pass | 0 | 0 dead_symbols (n 1280) | 0.6 s |
-| `static.deps` | fail | dep.cycle 4 | 4 cycles (n 76) | 4.4 s |
-| `tests.assertion-density` | fail | density.sparse-file 4, density.sparse-test 12 | 4.62733 assertions_per_test (n 161) | 7.8 s |
-| `tests.coverage` | fail | coverage.uncovered-symbol 252 | 0.707533 line_ratio (n 5204) | 9.8 s |
+| `static.crap` | fail | crap.high 9, crap.watch 126 | 97.1254 max (n 804) | 3.3 s |
+| `static.dead-code` | pass | 0 | 0 dead_symbols (n 1280) | 0.8 s |
+| `static.deps` | fail | dep.cycle 4 | 4 cycles (n 76) | 1.9 s |
+| `tests.assertion-density` | fail | density.sparse-file 4, density.sparse-test 12 | 4.62733 assertions_per_test (n 161) | 2.1 s |
+| `tests.coverage` | fail | coverage.uncovered-symbol 252 | 0.707533 line_ratio (n 5204) | 3.3 s |
 | `tests.flaky` | error | 0 | — | 0.0 s |
-| `tests.mutation` | fail | mutant.survived 101, mutant.timeout 11, mutant.uncovered 140 | 0.653237 killed_ratio (n 695) | 13.2 s |
-| `tests.quality` | fail | test.duplicate-setup 1, test.logic 4, test.no-assertion 6, test.weak-assertion 11 | 4.62733 assertion_density (n 161) | 1.6 s |
+| `tests.mutation` | fail | mutant.survived 101, mutant.timeout 11, mutant.uncovered 140 | 0.653237 killed_ratio (n 695) | 8.5 s |
+| `tests.quality` | fail | test.duplicate-setup 1, test.logic 4, test.no-assertion 6, test.weak-assertion 11 | 4.62733 assertion_density (n 161) | 1.8 s |
 | `tests.weakening` | skipped (needs-range) | 0 | — | 0.0 s |
 
-Deep check on the survey's ten target files (status `pass`, exit 0, 43 findings (0 fail, 43 warn, 0 info), scope 6 files and 141 symbols, 77.1 s):
+Deep check on the survey's ten target files (status `pass`, exit 0, 43 findings (0 fail, 43 warn, 0 info), scope 6 files and 141 symbols, 71.4 s):
 
 | Check | Status | Findings | Score | Time |
 |---|---|---|---|---|
 | `conc.linearizability` | skipped (unconfigured) | 0 | — | 0.0 s |
-| `conc.race` | pass | 0 | 0 reports (n 1) | 69.7 s |
-| `gen.fuzz` | pass | 0 | 0 failing (n 1) | 0.6 s |
+| `conc.race` | pass | 0 | 0 reports (n 1) | 66.6 s |
+| `gen.fuzz` | pass | 0 | 0 failing (n 1) | 0.7 s |
 | `gen.metamorphic` | skipped (unsupported) | 0 | — | 0.0 s |
-| `gen.property` | pass | 0 | 0 falsified (n 0) | 0.7 s |
+| `gen.property` | pass | 0 | 0 falsified (n 0) | 0.8 s |
 | `meta.oracle-independence` | skipped (needs-range) | 0 | — | 0.0 s |
 | `meta.traceability` | skipped (needs-range) | 0 | — | 0.0 s |
 | `perf.bench` | pass | 0 | 0 regression (n 0) | 0.0 s |
@@ -109,42 +110,42 @@ Deep check on the survey's ten target files (status `pass`, exit 0, 43 findings 
 | `static.api-surface` | skipped (needs-range) | 0 | — | 0.0 s |
 | `static.clones` | fail | clone.pair 6 | 6 pairs (n 128) | 0.1 s |
 | `static.complexity` | fail | function.long 7 | 4 cyclomatic_max (n 141) | 0.2 s |
-| `static.crap` | pass | 0 | 0 max (n 0) | 0.5 s |
-| `static.dead-code` | pass | 0 | 0 dead_symbols (n 141) | 1.0 s |
+| `static.crap` | pass | 0 | 0 max (n 0) | 0.0 s |
+| `static.dead-code` | pass | 0 | 0 dead_symbols (n 141) | 0.9 s |
 | `static.deps` | pass | 0 | 0 cycles (n 10) | 0.0 s |
-| `tests.assertion-density` | fail | density.sparse-test 11 | 3.2551 assertions_per_test (n 98) | 0.3 s |
-| `tests.coverage` | pass | 0 | 0 line_ratio (n 0) | 0.9 s |
+| `tests.assertion-density` | fail | density.sparse-test 11 | 3.2551 assertions_per_test (n 98) | 0.0 s |
+| `tests.coverage` | pass | 0 | 0 line_ratio (n 0) | 0.0 s |
 | `tests.flaky` | error | 0 | — | 0.0 s |
-| `tests.mutation` | pass | 0 | 1 killed_ratio (n 0) | 0.9 s |
+| `tests.mutation` | pass | 0 | 1 killed_ratio (n 0) | 0.5 s |
 | `tests.quality` | fail | test.logic 2, test.no-assertion 6, test.weak-assertion 11 | 3.2551 assertion_density (n 98) | 0.0 s |
 | `tests.weakening` | skipped (needs-range) | 0 | — | 0.0 s |
 | `gen.differential` | skipped (unconfigured) | 0 | — | 0.0 s |
 
-Deep check on the `src` survey's ten target files (status `pass`, exit 0, 441 findings (22 fail, 231 warn, 188 info), scope 7 files and 510 symbols, 222.8 s):
+Deep check on the `src` survey's ten target files (status `pass`, exit 0, 441 findings (22 fail, 231 warn, 188 info), scope 7 files and 510 symbols, 84.2 s):
 
 | Check | Status | Findings | Score | Time |
 |---|---|---|---|---|
 | `conc.linearizability` | skipped (unconfigured) | 0 | — | 0.0 s |
-| `conc.race` | pass | 0 | 0 reports (n 1) | 83.9 s |
-| `gen.fuzz` | pass | 0 | 0 failing (n 1) | 5.6 s |
+| `conc.race` | pass | 0 | 0 reports (n 1) | 77.3 s |
+| `gen.fuzz` | pass | 0 | 0 failing (n 1) | 0.7 s |
 | `gen.metamorphic` | skipped (unsupported) | 0 | — | 0.0 s |
-| `gen.property` | pass | property.missing 34 | 0 falsified (n 0) | 1.7 s |
+| `gen.property` | pass | property.missing 34 | 0 falsified (n 0) | 1.3 s |
 | `meta.oracle-independence` | skipped (needs-range) | 0 | — | 0.0 s |
 | `meta.traceability` | skipped (needs-range) | 0 | — | 0.0 s |
-| `perf.bench` | pass | 0 | 0 regression (n 0) | 0.0 s |
-| `perf.footprint` | pass | 0 | 45 dependencies (n 45) | 0.1 s |
+| `perf.bench` | pass | 0 | 0 regression (n 0) | 0.1 s |
+| `perf.footprint` | pass | 0 | 45 dependencies (n 45) | 0.4 s |
 | `spec.contracts` | pass | 0 | — | 0.0 s |
-| `static.analyze` | pass | 0 | 0 diagnostics (n 1) | 1.4 s |
+| `static.analyze` | pass | 0 | 0 diagnostics (n 1) | 0.2 s |
 | `static.api-surface` | skipped (needs-range) | 0 | — | 0.0 s |
 | `static.clones` | fail | clone.cluster 11, clone.pair 48 | 219 pairs (n 347) | 0.1 s |
 | `static.complexity` | fail | function.long 1 | 8 cyclomatic_max (n 510) | 0.2 s |
-| `static.crap` | fail | crap.high 6, crap.watch 61 | 97.1254 max (n 421) | 37.4 s |
-| `static.dead-code` | pass | 0 | 0 dead_symbols (n 510) | 6.7 s |
+| `static.crap` | fail | crap.high 6, crap.watch 61 | 97.1254 max (n 421) | 0.2 s |
+| `static.dead-code` | pass | 0 | 0 dead_symbols (n 510) | 1.2 s |
 | `static.deps` | pass | 0 | 0 cycles (n 13) | 0.0 s |
-| `tests.assertion-density` | pass | 0 | 0 assertions_per_test (n 0) | 31.5 s |
-| `tests.coverage` | fail | coverage.uncovered-symbol 165 | 0.584228 line_ratio (n 2701) | 23.8 s |
+| `tests.assertion-density` | pass | 0 | 0 assertions_per_test (n 0) | 0.1 s |
+| `tests.coverage` | fail | coverage.uncovered-symbol 165 | 0.584228 line_ratio (n 2701) | 0.2 s |
 | `tests.flaky` | error | 0 | — | 0.0 s |
-| `tests.mutation` | fail | mutant.survived 22, mutant.timeout 3, mutant.uncovered 90 | 0.504425 killed_ratio (n 226) | 28.8 s |
+| `tests.mutation` | fail | mutant.survived 22, mutant.timeout 3, mutant.uncovered 90 | 0.504425 killed_ratio (n 226) | 0.9 s |
 | `tests.quality` | pass | 0 | 0 assertion_density (n 0) | 0.0 s |
 | `tests.weakening` | skipped (needs-range) | 0 | — | 0.0 s |
 | `gen.differential` | skipped (unconfigured) | 0 | — | 0.0 s |
@@ -1089,7 +1090,7 @@ Every other check that ran (`conc.race`, `gen.fuzz`, `perf.bench`, `perf.footpri
 - **Importers outside a narrowed scope count toward afferent coupling** (`static.deps`): 1 `dep.unstable-abstract` row (`src/value/index.rs` under `--paths`, distance 1.00, 0.67 on the tree). Fixture: `crates/cupel-fixtures/repos/deps-narrowed-scope/rust/` (a trait-only `src/value/index.rs` only `src/value/mod.rs` imports); tests `crates/cupel-fixtures/tests/deps_narrowed_scope.rs` and `static_deps::an_importer_outside_a_narrowed_scope_counts_toward_afferent_coupling`. Commit 7c95067 (ADR-052 amended).
 - **An assertion is not setup** (`tests.quality`): 5 `test.duplicate-setup` rows (`lower_n_mask_test` with `lower_n_halfway_test` and `nth_bit_test`, `parse_f32_test` with `parse_f64_test`, `to_f32_test` with `to_f64_test`, `test_partialeq_string` with `test_partialeq_bool`, `test_missing_option_field` with `test_missing_renamed_field`), whose first three statements are or include assertions. Fixture: `crates/cupel-fixtures/repos/setup-assertions/rust/tests/masks.rs`; test `crates/cupel-fixtures/tests/setup_assertions.rs`. Commit 11d1f40 (ADR-055 amended). `mul_test` with `imul_test`, which arrange the same three values before asserting, is still reported.
 
-Rerun after the fixes: the six removed rows are gone and every other finding of the earlier runs is still reported (the whole-tree survey went from 856 to 851 findings, the `src` deep check from 442 to 441, and nothing was added).
+Rerun after the fixes: the six removed rows are gone and every other finding of the earlier runs is still reported (the whole-tree survey went from 856 to 851 findings, the `src` deep check from 442 to 441, and nothing was added). The fixes itertools needed (`quickcheck!` blocks, calls in a macro's tokens, pairing outside a narrowed scope, impls for path-named generic types) change nothing here: the three runs at `4eeb6f5` report the same findings with the same titles.
 
 Not fixed, counted false above (open items, each needing a decision outside this brief):
 
