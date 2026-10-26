@@ -73,7 +73,7 @@ impl World {
 
     /// The whole language's edges are this world's edges and `outside`'s, of files a narrowed
     /// scope leaves out.
-    fn narrowed(mut self, outside: World) -> Self {
+    fn narrowed(mut self, outside: &World) -> Self {
         self.language = Some(self.edges.iter().chain(&outside.edges).cloned().collect());
         self
     }
@@ -362,7 +362,7 @@ fn an_importer_outside_a_narrowed_scope_counts_toward_afferent_coupling() {
         .declares("port", ApiItemKind::Interface)
         .edge("port", "model", 1)
         .edge("port", "other", 2)
-        .narrowed(World::default().edge("model", "port", 1));
+        .narrowed(&World::default().edge("model", "port", 1));
     let (_, measured) = recorded(&world, json!({}));
     assert_eq!(measured.findings, Vec::<Finding>::new());
     let coupling: Vec<(String, f64)> = measured
