@@ -36,7 +36,7 @@ use tree_sitter::Node;
 
 use crate::contract::capture;
 use crate::producer::{QueryProducer, Source};
-use crate::query::{matches, span};
+use crate::query::{Match, matches, span};
 use crate::spec::QueryFile;
 use crate::symbols::{Definition, definitions};
 use crate::tables::DecisionRules;
@@ -73,27 +73,7 @@ pub fn extract(source: &Source<'_>) -> Decisions {
         })
         .collect();
     found.sort_by_key(|(_, node)| node.start_byte());
-    let tables: HashSet<usize> = all
-        .iter()
-        .flat_map(|m| m.nodes(capture::LOOP_TABLE))
-        .map(|node| node.id())
-        .collect();
-    let clauses: HashSet<usize> = all
-        .iter()
-        .flat_map(|m| m.nodes(capture::EXPRESSION_CLAUSE))
-        .map(|node| node.id())
-        .collect();
-    let functions: Vec<(usize, usize)> = all
-        .iter()
-        .flat_map(|m| m.nodes(capture::EXPRESSION_FUNCTION))
-        .map(|node| (node.start_byte(), node.end_byte()))
-        .collect();
-    let marked = Marked {
-        tables: &tables,
-        clauses: &clauses,
-        functions: &functions,
-    };
-
+    let marked = Marked::of(&all);
     let owners: Vec<Option<usize>> = found
         .iter()
         .map(|(_, node)| innermost(&symbols, *node))
@@ -131,17 +111,35 @@ fn innermost(symbols: &[Definition<'_>], node: Node<'_>) -> Option<usize> {
         .map(|(index, _)| index)
 }
 
-/// The decision nodes a query marked, by node ID.
-struct Marked<'a> {
+/// The decision nodes a query marked, by node ID, and the functions it marked, by byte range.
+struct Marked {
     /// Loops over a table of cases (`@loop.table`).
-    tables: &'a HashSet<usize>,
+    tables: HashSet<usize>,
     /// Clauses of an expression computing a value (`@expression.clause`).
-    clauses: &'a HashSet<usize>,
+    clauses: HashSet<usize>,
     /// The byte ranges of functions written as expressions (`@expression.function`).
-    functions: &'a [(usize, usize)],
+    functions: Vec<(usize, usize)>,
 }
 
-impl Marked<'_> {
+impl Marked {
+    fn of(all: &[Match<'_, '_>]) -> Self {
+        let ids = |name: &str| -> HashSet<usize> {
+            all.iter()
+                .flat_map(|m| m.nodes(name))
+                .map(|node| node.id())
+                .collect()
+        };
+        Self {
+            tables: ids(capture::LOOP_TABLE),
+            clauses: ids(capture::EXPRESSION_CLAUSE),
+            functions: all
+                .iter()
+                .flat_map(|m| m.nodes(capture::EXPRESSION_FUNCTION))
+                .map(|node| (node.start_byte(), node.end_byte()))
+                .collect(),
+        }
+    }
+
     /// Whether the decision at `node` computes a value: a clause of an expression, or any
     /// decision inside a function written as one.
     fn expression(&self, kind: DecisionKind, node: Node<'_>) -> bool {
@@ -159,7 +157,7 @@ fn weigh(
     found: &[(DecisionKind, Node<'_>)],
     symbol: &Definition<'_>,
     rules: &DecisionRules,
-    marked: &Marked<'_>,
+    marked: &Marked,
 ) -> Vec<Decision> {
     let body = symbol.body.unwrap_or(symbol.node);
     let kept: Vec<(DecisionKind, Node<'_>)> = found

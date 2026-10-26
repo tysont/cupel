@@ -402,19 +402,22 @@ fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn La
         }
     }
     for (file, at, name) in unresolved {
-        let Some(class) = shared.get(&(directory(&file).to_owned(), name)) else {
-            continue;
-        };
-        for test_file in frames
-            .files
-            .iter_mut()
-            .filter(|test_file| test_file.file == file)
-        {
-            for case in &mut test_file.cases {
-                if case.span.line <= at.line && at.line <= case.span.end_line {
-                    assert_through(&mut case.assertions, *class, at);
-                }
-            }
+        if let Some(class) = shared.get(&(directory(&file).to_owned(), name)) {
+            assert_in_file(frames, &file, *class, at);
+        }
+    }
+}
+
+/// Makes the call at `at` in `file` an assertion of `class` in the case that holds it.
+fn assert_in_file(frames: &mut TestFrames, file: &str, class: Class, at: Span) {
+    let cases = frames
+        .files
+        .iter_mut()
+        .filter(|test_file| test_file.file == file)
+        .flat_map(|test_file| &mut test_file.cases);
+    for case in cases {
+        if case.span.line <= at.line && at.line <= case.span.end_line {
+            assert_through(&mut case.assertions, class, at);
         }
     }
 }
