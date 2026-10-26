@@ -182,6 +182,11 @@ not-nullish = { kind = "not-null", strength = "weak" }
 does-not-throw = { kind = "custom", strength = "weak" }
 negated = { kind = "custom", strength = "weak" }
 throws-specific = { kind = "throws", strength = "strong" }
+# TypeScript's type-level assertions (queries/typescript/tests.scm): `Expect<Equal<A, B>>` pins a
+# type, another `Expect<…>` a type-level boolean, and `// @ts-expect-error` any type error.
+type-equal = { kind = "equality", strength = "strong" }
+type-true = { kind = "truthiness", strength = "weak" }
+type-error = { kind = "throws", strength = "weak" }
 
 [conventions]
 test_globs = ["**/*.test.*", "**/*.spec.*", "**/__tests__/**", "**/test/**"]

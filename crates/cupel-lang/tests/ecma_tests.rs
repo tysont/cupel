@@ -423,3 +423,56 @@ test("example", () => {
         );
     }
 }
+
+/// A type-level test of a TypeScript library (ts-pattern's idiom, P9.9 group 3): `Expect<Equal<A, B>>`
+/// fails the file's type check unless the two types are equal, and `// @ts-expect-error` fails it
+/// unless the next line is a type error; a runner that type-checks (ts-jest) or the project's `tsc`
+/// enforces both, so each is an assertion of the case that holds it.
+const TYPE_ASSERTIONS: &str = r"type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+type Expect<T extends true> = T;
+
+describe('narrow', () => {
+  it('infers the input', () => {
+    const value = parse('1');
+    type t = Expect<Equal<typeof value, number>>;
+  });
+
+  it('infers every case', () => {
+    const handler = (x: number | string) => {
+      type cases = [Expect<Equal<typeof x, number | string>>, Expect<IsUnion<typeof x>>];
+      return x;
+    };
+  });
+
+  it('rejects a string', () => {
+    // @ts-expect-error
+    parse(1);
+  });
+
+  it('runs exhaustively', () => {
+    parse('2');
+  });
+});
+";
+
+#[test]
+fn type_level_assertions_assert_in_typescript_tests() {
+    let dir = tree(&[("tests/narrow.test.ts", TYPE_ASSERTIONS)]);
+    let frames: TestFrames = produce("typescript", dir.path());
+    let narrow = &assert_framework(&frames, "tests/narrow.test.ts", "jest");
+    assert_eq!(
+        rows(narrow),
+        [
+            case("infers the input", &[(Equality, Strong)], Runs, &[], 5),
+            case(
+                "infers every case",
+                &[(Equality, Strong), (Truthiness, Weak)],
+                Runs,
+                &[],
+                10
+            ),
+            case("rejects a string", &[(Throws, Weak)], Runs, &[], 17),
+            case("runs exhaustively", &[], Runs, &[], 22),
+        ]
+    );
+}
