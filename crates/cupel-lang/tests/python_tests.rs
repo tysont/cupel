@@ -347,9 +347,10 @@ def test_example():
     );
 }
 
-#[test]
-fn a_call_of_an_asserting_helper_or_of_a_base_class_method_beside_it_asserts() {
-    let dir = tree(&[
+/// A test package whose harness module defines an asserting `TestCase` method, a test module
+/// beside it with its own helpers, and a test module in another directory.
+fn harness_package() -> tempfile::TempDir {
+    tree(&[
         (
             "pkg/test/harness.py",
             "import unittest\n\
@@ -392,7 +393,12 @@ fn a_call_of_an_asserting_helper_or_of_a_base_class_method_beside_it_asserts() {
              def test_no_helper_beside_it(self):\n        \
              self.flakes('x')\n",
         ),
-    ]);
+    ])
+}
+
+#[test]
+fn a_call_of_an_asserting_helper_or_of_a_base_class_method_beside_it_asserts() {
+    let dir = harness_package();
     let frames: TestFrames = produce("python", dir.path());
     assert_eq!(
         rows(&assert_framework(
