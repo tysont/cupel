@@ -1,5 +1,5 @@
 // ABOUTME: `Process`, the one way producers run an external program (ADR-076 §3): input given, output captured,
-// ABOUTME: the child polled against the run's `Cancellation` and its memory budget, and stopped with its process group.
+// ABOUTME: the child polled against the run's `Cancellation` and its memory budget, and stopped with every descendant.
 use std::io::{ErrorKind, Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
@@ -29,8 +29,8 @@ pub struct Process {
     input: Option<Vec<u8>>,
     /// How long a cancelled child has to exit after SIGTERM before SIGKILL; `None` kills at once.
     grace: Option<Duration>,
-    /// The most resident memory the child's process group may hold, in bytes; `None` for no
-    /// bound (ADR-148).
+    /// The most resident memory the child's run (its group and descendants) may hold, in
+    /// bytes; `None` for no bound (ADR-148).
     memory: Option<u64>,
 }
 
@@ -96,17 +96,18 @@ impl Process {
         self
     }
 
-    /// When cancelled, sends SIGTERM to the child's process group and kills the group only if
-    /// it is still running after `grace` (ADR-089 §7); without this the group is killed at once.
+    /// When cancelled, sends SIGTERM to the child's run (its group and every group a descendant
+    /// is in) and kills it only if it is still running after `grace` (ADR-089 §7); without this
+    /// the run is killed at once.
     #[must_use]
     pub fn terminate(mut self, grace: Duration) -> Self {
         self.grace = Some(grace);
         self
     }
 
-    /// Kills the child's process group once it holds more than `bytes` of resident memory, as
-    /// `ps` reports it (ADR-148); the run is then `Error::OutOfMemory`. Where no sample can be
-    /// taken (no `ps`), the bound is not enforced.
+    /// Kills the child's run (its group and every descendant) once it holds more than `bytes`
+    /// of resident memory, as `ps` reports it (ADR-148); the run is then `Error::OutOfMemory`.
+    /// Where no sample can be taken (no `ps`), the bound is not enforced.
     #[must_use]
     pub fn memory(mut self, bytes: u64) -> Self {
         self.memory = Some(bytes);
@@ -135,7 +136,7 @@ impl Process {
     }
 
     /// Runs the program to completion, or until `cancel` fires, when it is killed (with its
-    /// process group on Unix) and the result is `Error::Cancelled`, or until its group holds
+    /// descendants on Unix) and the result is `Error::Cancelled`, or until its run holds
     /// more than its memory budget, when it is killed and the result is `Error::OutOfMemory`.
     pub fn run(&self, cancel: &Cancellation) -> Result<Captured> {
         cancel.checkpoint()?;
@@ -218,7 +219,7 @@ fn spawn(command: &mut Command) -> std::io::Result<Child> {
 }
 
 /// Waits for `child` to exit, stopping it when `cancel` fires first (at once, or after SIGTERM
-/// and `grace`) or when its process group holds more than `memory` bytes (at once).
+/// and `grace`) or when its run holds more than `memory` bytes (at once).
 fn wait(
     child: &mut Child,
     cancel: &Cancellation,
@@ -244,20 +245,23 @@ fn wait(
     }
 }
 
-/// Whether `child`'s process group (its own, see `process_group(0)` above) holds more than
-/// `limit` bytes of resident memory.
+/// Whether `child`'s run (its own process group, see `process_group(0)` above, and every
+/// descendant in another group) holds more than `limit` bytes of resident memory.
 fn over(child: &Child, limit: u64) -> bool {
     memory::resident(child.id()).is_some_and(|held| held > limit)
 }
 
-/// Sends SIGTERM to `child`'s process group and waits up to `grace` for `child` to exit.
+/// Sends SIGTERM to every process group of `child`'s run and waits up to `grace` for `child`
+/// to exit.
 fn terminate(child: &mut Child, grace: Duration) {
     #[cfg(unix)]
     {
         use nix::sys::signal::{Signal, killpg};
         use nix::unistd::Pid;
-        if let Ok(pid) = i32::try_from(child.id()) {
-            let _ = killpg(Pid::from_raw(pid), Signal::SIGTERM);
+        for group in memory::groups(child.id()) {
+            if let Ok(pgid) = i32::try_from(group) {
+                let _ = killpg(Pid::from_raw(pgid), Signal::SIGTERM);
+            }
         }
     }
     let until = std::time::Instant::now() + grace;
@@ -269,17 +273,35 @@ fn terminate(child: &mut Child, grace: Duration) {
     }
 }
 
-/// Kills `child` and, on Unix, every process in its group, then reaps it. The group is the
-/// child's own (`process_group(0)` above), so its descendants die with it and cannot keep the
-/// output pipes open after it is gone.
+/// Kills `child` and, on Unix, every process of its run, then reaps it: its group (the child's
+/// own, `process_group(0)` above) and every group a descendant moved to, which `cargo nextest`
+/// gives each test. The groups are stopped first, so none forks a process the kill misses, and
+/// listed again while stopped; no descendant outlives the run or keeps its output pipes open.
 fn kill(child: &mut Child) {
     #[cfg(unix)]
     {
         use nix::sys::signal::{Signal, killpg};
         use nix::unistd::Pid;
-        if let Ok(pid) = i32::try_from(child.id()) {
-            let _ = killpg(Pid::from_raw(pid), Signal::SIGKILL);
+        let signal_all = |groups: &[u32], signal: Signal| {
+            for group in groups {
+                if let Ok(pgid) = i32::try_from(*group) {
+                    let _ = killpg(Pid::from_raw(pgid), signal);
+                }
+            }
+        };
+        let mut groups = memory::groups(child.id());
+        loop {
+            signal_all(&groups, Signal::SIGSTOP);
+            let new: Vec<u32> = memory::groups(child.id())
+                .into_iter()
+                .filter(|group| !groups.contains(group))
+                .collect();
+            if new.is_empty() {
+                break;
+            }
+            groups.extend(new);
         }
+        signal_all(&groups, Signal::SIGKILL);
     }
     let _ = child.kill();
     let _ = child.wait();
