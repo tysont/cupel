@@ -268,6 +268,14 @@
   ]
   (#not-match? @assertion.helper "^assert_"))
 
+; The same call written inside a macro's tokens (a `quickcheck!` property's body, a macro's
+; argument): the grammar leaves it as tokens, so the name and its `(…)` are siblings.
+(token_tree
+  (identifier) @assertion.helper
+  .
+  (token_tree)
+  (#not-match? @assertion.helper "^(debug_|prop_)?assert"))
+
 ; trybuild: `TestCases::new()` checks, when it goes out of scope, that each file its calls name
 ; compiles or fails to compile with the expected output.
 (call_expression

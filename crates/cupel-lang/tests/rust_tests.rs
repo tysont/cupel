@@ -311,6 +311,31 @@ fn a_quickcheck_block_holds_one_property_case_per_function() {
 }
 
 #[test]
+fn a_property_in_a_quickcheck_block_that_calls_an_asserting_helper_of_the_file_asserts() {
+    let dir = tree(&[(
+        "tests/specializations.rs",
+        r"fn test_specializations(values: &[u8]) {
+    assert_eq!(values.iter().count(), values.len());
+}
+
+quickcheck! {
+    fn interleave(v: Vec<u8>, w: Vec<u8>) -> () {
+        test_specializations(&interleaved(&v, &w));
+    }
+}
+",
+    )]);
+    assert_eq!(
+        properties("rust", dir.path(), "tests/specializations.rs"),
+        [property(
+            "interleave",
+            Some("quickcheck"),
+            &[(Equality, Strong)]
+        )]
+    );
+}
+
+#[test]
 fn a_call_of_a_helper_in_the_file_that_asserts_and_an_assertion_in_a_macro_argument_count() {
     let dir = tree(&[(
         "tests/encode.rs",

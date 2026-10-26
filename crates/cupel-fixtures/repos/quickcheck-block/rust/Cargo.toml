@@ -1,0 +1,11 @@
+# ABOUTME: A crate whose properties live in a quickcheck! block and assert through a helper of their file, beside
+# ABOUTME: plain tests: the properties are tests, and they assert (P9.9, itertools' `tests/specializations.rs`).
+[package]
+name = "counts"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dev-dependencies]
+quickcheck = "1"

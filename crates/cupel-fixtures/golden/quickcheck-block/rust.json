@@ -1,0 +1,99 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.assertion-density",
+      "metrics": {
+        "assertions_per_public_function": 3.0,
+        "assertions_per_test": 1.0,
+        "sparse_files": 0.0,
+        "sparse_tests": 0.0,
+        "tested_public_functions": 2.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 3,
+        "unit": "assertions_per_test",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "pass",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 6
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}
