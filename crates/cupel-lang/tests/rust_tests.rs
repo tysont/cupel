@@ -358,7 +358,7 @@ quickcheck! {
     );
 }
 
-/// Tests that assert through helpers of their file (serde_json's `test_encode_ok`, a weak
+/// Tests that assert through helpers of their file (`serde_json`'s `test_encode_ok`, a weak
 /// `check_ready`), call a function that asserts nothing, and assert inside a macro's arguments or
 /// a `macro_rules!` repetition.
 const HELPERS_AND_MACRO_ARGUMENTS: &str = r#"fn test_encode_ok<T: Serialize>(tests: &[(T, &str)]) {
