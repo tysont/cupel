@@ -31,6 +31,7 @@ pub mod capture {
     pub const DECISION_PREFIX: &str = "decision.";
     pub const LOOP_TABLE: &str = "loop.table";
     pub const EXPRESSION_CLAUSE: &str = "expression.clause";
+    pub const EXPRESSION_FUNCTION: &str = "expression.function";
     // mutations.scm: `mut.<operator>`, operators spelled as `MutationOperator` serializes.
     pub const MUT_RELATIONAL: &str = "mut.relational";
     pub const MUT_EQUALITY: &str = "mut.equality";
@@ -182,7 +183,7 @@ const DECISIONS: Contract = Contract {
         c::DECISION_EARLY_RETURN,
         c::DECISION_TERNARY,
     ]],
-    optional: &[c::LOOP_TABLE, c::EXPRESSION_CLAUSE],
+    optional: &[c::LOOP_TABLE, c::EXPRESSION_CLAUSE, c::EXPRESSION_FUNCTION],
     open: &[],
 };
 

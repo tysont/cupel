@@ -41,7 +41,7 @@ expression: pretty(&schema)
           "minimum": 0
         },
         "expression": {
-          "description": "A loop or branch that is a clause of an expression computing a value (a Python\ncomprehension's `for` and `if`): it decides which values the expression yields, not\nwhich statements run (ADR-138 §9). Always false for other kinds.",
+          "description": "A decision of an expression computing a value: a loop or branch that is a clause of one (a\nPython comprehension's `for` and `if`), or any decision inside a function written as one\n(a Python lambda). It decides which values the expression yields, not which statements\nrun (ADR-138 §9).",
           "type": "boolean"
         },
         "kind": {

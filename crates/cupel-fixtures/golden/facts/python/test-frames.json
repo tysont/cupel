@@ -460,6 +460,31 @@
             "end_line": 22,
             "line": 18
           }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 86,
+                "end_line": 25,
+                "line": 25
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_a_lambda_chooses_each_entry",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 86,
+            "end_line": 25,
+            "line": 24
+          }
         }
       ],
       "file": "tests/test_ledger_case.py",

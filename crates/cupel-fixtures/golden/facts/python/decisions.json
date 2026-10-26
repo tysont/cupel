@@ -2116,6 +2116,30 @@
       }
     },
     {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "expression": true,
+          "kind": "ternary",
+          "nesting": 0,
+          "span": {
+            "col": 53,
+            "end_col": 70,
+            "end_line": 25,
+            "line": 25
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 24
+      }
+    },
+    {
       "decisions": [],
       "symbol": {
         "col": 5,

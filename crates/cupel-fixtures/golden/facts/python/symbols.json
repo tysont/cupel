@@ -1741,6 +1741,28 @@
     {
       "body": {
         "col": 9,
+        "end_col": 86,
+        "end_line": 25,
+        "line": 25
+      },
+      "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_a_lambda_chooses_each_entry",
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_a_lambda_chooses_each_entry",
+      "namespace": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 86,
+        "end_line": 25,
+        "line": 24
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
         "end_col": 32,
         "end_line": 9,
         "line": 9

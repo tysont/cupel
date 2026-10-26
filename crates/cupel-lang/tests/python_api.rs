@@ -162,7 +162,7 @@ fn main_guards_exports_tests_fixtures_and_dunders_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixture_is_a_test_root() {
-    assert_every_case_is_a_test_root("python", 28);
+    assert_every_case_is_a_test_root("python", 29);
 }
 
 #[test]

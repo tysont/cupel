@@ -24,6 +24,9 @@
 //! - **Expression clauses**: `@expression.clause` (any pattern) on a loop or branch node marks
 //!   it as a clause of an expression computing a value (a comprehension's `for` or `if`); its
 //!   decision has `expression: true` (ADR-138 §9).
+//! - **Expression functions**: `@expression.function` (any pattern) on a function written as an
+//!   expression (a lambda) marks every decision inside it, of any kind, `expression: true`: the
+//!   function runs when the code it is handed calls it, not in the enclosing statements' flow.
 use std::collections::HashSet;
 
 use cupel_core::FactKind;
@@ -80,9 +83,15 @@ pub fn extract(source: &Source<'_>) -> Decisions {
         .flat_map(|m| m.nodes(capture::EXPRESSION_CLAUSE))
         .map(|node| node.id())
         .collect();
+    let functions: Vec<(usize, usize)> = all
+        .iter()
+        .flat_map(|m| m.nodes(capture::EXPRESSION_FUNCTION))
+        .map(|node| (node.start_byte(), node.end_byte()))
+        .collect();
     let marked = Marked {
         tables: &tables,
         clauses: &clauses,
+        functions: &functions,
     };
 
     let owners: Vec<Option<usize>> = found
@@ -128,6 +137,22 @@ struct Marked<'a> {
     tables: &'a HashSet<usize>,
     /// Clauses of an expression computing a value (`@expression.clause`).
     clauses: &'a HashSet<usize>,
+    /// The byte ranges of functions written as expressions (`@expression.function`).
+    functions: &'a [(usize, usize)],
+}
+
+impl Marked<'_> {
+    /// Whether the decision at `node` computes a value: a clause of an expression, or any
+    /// decision inside a function written as one.
+    fn expression(&self, kind: DecisionKind, node: Node<'_>) -> bool {
+        let clause = matches!(kind, DecisionKind::Loop | DecisionKind::Branch)
+            && self.clauses.contains(&node.id());
+        clause
+            || self
+                .functions
+                .iter()
+                .any(|&(start, end)| start <= node.start_byte() && node.end_byte() <= end)
+    }
 }
 
 fn weigh(
@@ -155,8 +180,7 @@ fn weigh(
                 cognitive: if first_case { weight.cognitive } else { 0 },
                 table: *kind == DecisionKind::Loop && marked.tables.contains(&node.id()),
                 continues: !first_case,
-                expression: matches!(kind, DecisionKind::Loop | DecisionKind::Branch)
-                    && marked.clauses.contains(&node.id()),
+                expression: marked.expression(*kind, *node),
                 span: Some(span(*node)),
             }
         })

@@ -7264,6 +7264,136 @@
     {
       "sites": [
         {
+          "from": "self.assertEqual(balance(list(map(lambda c: c if c > 0 else 0, [2, -1]))), 2)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 9,
+            "end_col": 86,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": ">",
+          "operator": "relational",
+          "set": "default",
+          "site_hash": "5e50deccae5f012b",
+          "span": {
+            "col": 60,
+            "end_col": 61,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            ">="
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "f1cc01f3456a0ec4",
+          "span": {
+            "col": 62,
+            "end_col": 63,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "boundary",
+          "set": "extended",
+          "site_hash": "6d104db518226e74",
+          "span": {
+            "col": 62,
+            "end_col": 63,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0 + 1",
+            "0 - 1"
+          ]
+        },
+        {
+          "from": "0",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "b83535a955433ad0",
+          "span": {
+            "col": 69,
+            "end_col": 70,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "1"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "f5e35cb9fe0acc91",
+          "span": {
+            "col": 73,
+            "end_col": 74,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "4d199c841e459afb",
+          "span": {
+            "col": 77,
+            "end_col": 78,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "414fdd807f12bdf7",
+          "span": {
+            "col": 84,
+            "end_col": 85,
+            "end_line": 25,
+            "line": 25
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 24
+      }
+    },
+    {
+      "sites": [
+        {
           "from": "self.entries = [5, -10]",
           "operator": "statement-deletion",
           "set": "extended",

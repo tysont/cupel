@@ -20,3 +20,6 @@ class TestBalancesThroughTheHarness(LedgerTestCase):
         self.balances([6, 6], 12)
         self.balances([7, 7], 14)
         self.balances([8], 8)
+
+    def test_a_lambda_chooses_each_entry(self):
+        self.assertEqual(balance(list(map(lambda c: c if c > 0 else 0, [2, -1]))), 2)
