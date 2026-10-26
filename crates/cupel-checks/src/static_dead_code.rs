@@ -77,6 +77,19 @@ pub struct StaticDeadCode {
 
 inventory::submit!(crate::NativeCheck(|| Box::new(StaticDeadCode::new())));
 
+/// The facts the check reads: the symbols and their trees, the import graph, the roots, and the
+/// references that keep a symbol alive.
+const NEEDS: [FactKind; 5] = [
+    FactKind::Symbols,
+    FactKind::NormTree,
+    FactKind::ModuleGraph,
+    FactKind::Roots,
+    FactKind::References,
+];
+
+/// The test conventions, by which a test file roots its module.
+const WANTS: [FactKind; 1] = [FactKind::TestConventions];
+
 impl StaticDeadCode {
     pub fn new() -> Self {
         Self {
@@ -85,14 +98,8 @@ impl StaticDeadCode {
                 version: 2,
                 tier: Tier::try_from(0).expect("tier 0 exists"),
                 cost: CostClass::Quick,
-                needs: vec![
-                    FactKind::Symbols,
-                    FactKind::NormTree,
-                    FactKind::ModuleGraph,
-                    FactKind::Roots,
-                    FactKind::References,
-                ],
-                wants: vec![FactKind::TestConventions],
+                needs: NEEDS.to_vec(),
+                wants: WANTS.to_vec(),
                 findings: finding_kinds(),
                 metrics: metrics(),
                 settings: SETTINGS.specs(),
@@ -400,6 +407,81 @@ struct Module<'a> {
     exports: bool,
 }
 
+/// Each module namespace with its files; a test file roots its module, since a test runner
+/// reaches it by its path whether or not a case in it is one the facts name (a macro may write
+/// them).
+fn modules_of<'a>(
+    module_of: &HashMap<&'a str, &'a str>,
+    conventions: Option<&TestConventions>,
+) -> BTreeMap<&'a str, Module<'a>> {
+    let mut modules: BTreeMap<&str, Module<'_>> = BTreeMap::new();
+    for (file, namespace) in module_of {
+        let module = modules.entry(namespace).or_default();
+        module.files.insert(file);
+        if conventions.is_some_and(|conventions| conventions.is_test(file)) {
+            module.rooted = true;
+        }
+    }
+    modules
+}
+
+/// Marks the module of each root as exporting (an export root) or rooted (any other); the
+/// export roots' symbols.
+fn root_modules<'a>(
+    modules: &mut BTreeMap<&'a str, Module<'a>>,
+    module_of: &HashMap<&'a str, &'a str>,
+    symbols: &'a [SymbolDef],
+    roots: &Roots,
+) -> BTreeSet<SymbolKey> {
+    let by_key: HashMap<SymbolKey, &SymbolDef> = symbols
+        .iter()
+        .map(|symbol| (symbol.key(), symbol))
+        .collect();
+    let mut exported = BTreeSet::new();
+    for root in &roots.roots {
+        let Some(namespace) = by_key
+            .get(&root.symbol)
+            .and_then(|symbol| module_of.get(symbol.file.as_str()))
+        else {
+            continue;
+        };
+        let module = modules.entry(namespace).or_default();
+        if root.reason == RootReason::Export {
+            module.exports = true;
+            exported.insert(root.symbol.clone());
+        } else {
+            module.rooted = true;
+        }
+    }
+    exported
+}
+
+/// Marks each module an edge from outside it enters; the specifiers of the edges no file
+/// resolves.
+fn enter_modules<'a>(
+    modules: &mut BTreeMap<&'a str, Module<'a>>,
+    module_of: &HashMap<&'a str, &'a str>,
+    edges: Vec<&'a ImportEdge>,
+) -> Vec<&'a str> {
+    let mut unfollowed = Vec::new();
+    for edge in edges {
+        match &edge.target {
+            ImportTarget::File { path } => {
+                let Some(target) = module_of.get(path.as_str()) else {
+                    continue;
+                };
+                if module_of.get(edge.from.as_str()) != Some(target) {
+                    modules.entry(target).or_default().entered = true;
+                }
+            }
+            ImportTarget::External { .. } | ImportTarget::Unresolved => {
+                unfollowed.push(edge.specifier.as_str());
+            }
+        }
+    }
+    unfollowed
+}
+
 /// The scope's import edges (`ModuleGraph`) and the language's (`References`), so an importer
 /// outside a narrowed scope enters the module it imports (ADR-144).
 fn imports<'a>(graph: &'a ModuleGraph, references: &'a References) -> Vec<&'a ImportEdge> {
@@ -432,52 +514,9 @@ impl<'a> Reachability<'a> {
         conventions: Option<&TestConventions>,
     ) -> Self {
         let module_of = module_namespaces(symbols);
-        let mut modules: BTreeMap<&str, Module<'_>> = BTreeMap::new();
-        for (file, namespace) in &module_of {
-            let module = modules.entry(namespace).or_default();
-            module.files.insert(file);
-            // A test runner reaches a test file by its path, whether or not a case in it is
-            // one the facts name (a macro may write them).
-            if conventions.is_some_and(|conventions| conventions.is_test(file)) {
-                module.rooted = true;
-            }
-        }
-        let by_key: HashMap<SymbolKey, &SymbolDef> = symbols
-            .iter()
-            .map(|symbol| (symbol.key(), symbol))
-            .collect();
-        let mut exported = BTreeSet::new();
-        for root in &roots.roots {
-            let Some(namespace) = by_key
-                .get(&root.symbol)
-                .and_then(|symbol| module_of.get(symbol.file.as_str()))
-            else {
-                continue;
-            };
-            let module = modules.entry(namespace).or_default();
-            if root.reason == RootReason::Export {
-                module.exports = true;
-                exported.insert(root.symbol.clone());
-            } else {
-                module.rooted = true;
-            }
-        }
-        let mut unfollowed = Vec::new();
-        for edge in edges {
-            match &edge.target {
-                ImportTarget::File { path } => {
-                    let Some(target) = module_of.get(path.as_str()) else {
-                        continue;
-                    };
-                    if module_of.get(edge.from.as_str()) != Some(target) {
-                        modules.entry(target).or_default().entered = true;
-                    }
-                }
-                ImportTarget::External { .. } | ImportTarget::Unresolved => {
-                    unfollowed.push(edge.specifier.as_str());
-                }
-            }
-        }
+        let mut modules = modules_of(&module_of, conventions);
+        let exported = root_modules(&mut modules, &module_of, symbols, roots);
+        let unfollowed = enter_modules(&mut modules, &module_of, edges);
         Self {
             module_of,
             modules,

@@ -485,10 +485,10 @@ fn doubles_without_assertions_are_both_mock_heavy_and_assertion_free() {
     );
 }
 
-#[test]
-fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
+/// Cases with loops, branches, guarded failure calls, alternatives, and tables of cases.
+fn logic_cases() -> Vec<Case> {
     use DecisionKind::{BooleanOp, Branch, Case as Switch, Catch, EarlyReturn, Loop, Ternary};
-    let (_, findings) = Run::of(vec![
+    vec![
         case("loops", 1).deciding(&[Loop]),
         // `if got != want { t.Errorf(…) }`: the branch is the assertion.
         case("guarded_assertion", 10).deciding(&[Branch]),
@@ -512,8 +512,12 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
         case("table_with_logic", 70)
             .iterating_tables(1)
             .deciding(&[Loop]),
-    ])
-    .go();
+    ]
+}
+
+#[test]
+fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
+    let (_, findings) = Run::of(logic_cases()).go();
     assert_eq!(
         support::kinds(&findings),
         pairs(&[

@@ -116,14 +116,23 @@ fn a_file_of_only_tokio_tests_is_a_tokio_file_and_unknown_assertions_are_custom(
 }
 
 #[test]
+fn conventions_take_integration_tests_and_benches_for_test_files() {
+    let conventions: TestConventions = produce("rust", &fixture("rust"));
+    // Cargo builds each bench as its own crate that only `cargo bench` runs, beside the tests.
+    let files = [
+        "tests/ledger.rs",
+        "crates/foo/tests/it.rs",
+        "benches/combinations.rs",
+        "crates/foo/benches/parse.rs",
+        "src/pricing.rs",
+    ];
+    let tests: Vec<bool> = files.iter().map(|file| conventions.is_test(file)).collect();
+    assert_eq!(tests, [true, true, true, true, false]);
+}
+
+#[test]
 fn conventions_pair_sources_with_integration_and_inline_tests() {
     let conventions: TestConventions = produce("rust", &fixture("rust"));
-    assert!(conventions.is_test("tests/ledger.rs"));
-    assert!(conventions.is_test("crates/foo/tests/it.rs"));
-    // Cargo builds each bench as its own crate that only `cargo bench` runs, beside the tests.
-    assert!(conventions.is_test("benches/combinations.rs"));
-    assert!(conventions.is_test("crates/foo/benches/parse.rs"));
-    assert!(!conventions.is_test("src/pricing.rs"));
     assert_eq!(
         conventions.test_files_for("src/lib.rs"),
         [
@@ -349,11 +358,10 @@ quickcheck! {
     );
 }
 
-#[test]
-fn a_call_of_a_helper_in_the_file_that_asserts_and_an_assertion_in_a_macro_argument_count() {
-    let dir = tree(&[(
-        "tests/encode.rs",
-        r#"fn test_encode_ok<T: Serialize>(tests: &[(T, &str)]) {
+/// Tests that assert through helpers of their file (serde_json's `test_encode_ok`, a weak
+/// `check_ready`), call a function that asserts nothing, and assert inside a macro's arguments or
+/// a `macro_rules!` repetition.
+const HELPERS_AND_MACRO_ARGUMENTS: &str = r#"fn test_encode_ok<T: Serialize>(tests: &[(T, &str)]) {
     for (value, expected) in tests {
         assert_eq!(to_string(value).unwrap(), *expected);
     }
@@ -407,8 +415,11 @@ fn numbers_compare() {
     }
     compare!(0 1 100);
 }
-"#,
-    )]);
+"#;
+
+#[test]
+fn a_call_of_a_helper_in_the_file_that_asserts_and_an_assertion_in_a_macro_argument_count() {
+    let dir = tree(&[("tests/encode.rs", HELPERS_AND_MACRO_ARGUMENTS)]);
     let frames: TestFrames = produce("rust", dir.path());
     assert_eq!(
         rows(file(&frames, "tests/encode.rs")),

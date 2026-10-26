@@ -373,52 +373,78 @@ fn assert_through(assertions: &mut Vec<Assertion>, class: Class, at: Span) {
 /// `t` to a function) and names no helper of its own file the class of an asserting helper of
 /// that name in another file of the same directory, a Go package's shared `_test.go` helpers.
 fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn Language) {
-    let spec = language.spec();
-    if !spec.has(QueryFile::Tests) {
+    if !language.spec().has(QueryFile::Tests) {
         return;
     }
-    let rules = &spec.tables().tests;
     let mut shared: BTreeMap<(String, String), Class> = BTreeMap::new();
-    let mut unresolved: Vec<(String, Span, String)> = Vec::new();
+    let mut unresolved: Vec<Unresolved> = Vec::new();
     for parsed in parsed {
-        let source = Source { parsed, language };
-        let query = spec
-            .query(QueryFile::Tests, &parsed.grammar)
-            .unwrap_or_else(|error| panic!("{} tests.scm: {error}", language.id()));
-        let found = matches(&query, parsed);
-        let mut cases = collect_cases(parsed, &found);
-        let mut loose = attach_assertions(&mut cases, parsed, &found, rules);
-        expand_macros(&mut cases, &mut loose, parsed, &found);
-        let helpers = file_helpers(&source, &cases, &loose);
+        let (helpers, calls) = helpers_of(parsed, language);
         let dir = directory(&parsed.file);
-        for (case, node) in helper_calls(&cases, &found) {
-            let name = parsed.text(node);
-            let asserts = cases.get(&case).is_some_and(|case| {
-                case.assertions
-                    .iter()
-                    .any(|a| a.span.line == span(node).line && a.span.col == span(node).col)
-            });
-            if asserts && !helpers.contains_key(name) {
-                unresolved.push((parsed.file.clone(), span(node), name.to_owned()));
-            }
-        }
+        unresolved.extend(calls);
         for (name, class) in helpers {
             shared.entry((dir.to_owned(), name)).or_insert(class);
         }
     }
-    for (file, at, name) in unresolved {
-        let Some(class) = shared.get(&(directory(&file).to_owned(), name)) else {
-            continue;
-        };
-        for test_file in frames
-            .files
-            .iter_mut()
-            .filter(|test_file| test_file.file == file)
-        {
-            for case in &mut test_file.cases {
-                if case.span.line <= at.line && at.line <= case.span.end_line {
-                    assert_through(&mut case.assertions, *class, at);
-                }
+    for call in unresolved {
+        let key = (directory(&call.file).to_owned(), call.name);
+        if let Some(class) = shared.get(&key) {
+            assert_through_cases(frames, &call.file, call.at, *class);
+        }
+    }
+}
+
+/// A helper call already read as an assertion that names no asserting helper of its own file.
+struct Unresolved {
+    file: String,
+    at: Span,
+    name: String,
+}
+
+/// The asserting helpers of the test file `parsed`, and its helper calls that are already
+/// assertions but name none of them.
+fn helpers_of(
+    parsed: &Parsed,
+    language: &dyn Language,
+) -> (BTreeMap<String, Class>, Vec<Unresolved>) {
+    let spec = language.spec();
+    let query = spec
+        .query(QueryFile::Tests, &parsed.grammar)
+        .unwrap_or_else(|error| panic!("{} tests.scm: {error}", language.id()));
+    let found = matches(&query, parsed);
+    let mut cases = collect_cases(parsed, &found);
+    let mut loose = attach_assertions(&mut cases, parsed, &found, &spec.tables().tests);
+    expand_macros(&mut cases, &mut loose, parsed, &found);
+    let helpers = file_helpers(&Source { parsed, language }, &cases, &loose);
+    let unresolved = helper_calls(&cases, &found)
+        .into_iter()
+        .filter_map(|(case, node)| {
+            let (name, at) = (parsed.text(node), span(node));
+            let asserts = cases.get(&case).is_some_and(|case| {
+                case.assertions
+                    .iter()
+                    .any(|a| (a.span.line, a.span.col) == (at.line, at.col))
+            });
+            (asserts && !helpers.contains_key(name)).then(|| Unresolved {
+                file: parsed.file.clone(),
+                at,
+                name: name.to_owned(),
+            })
+        })
+        .collect();
+    (helpers, unresolved)
+}
+
+/// Every case of `file` whose lines hold `at` asserts there with `class`.
+fn assert_through_cases(frames: &mut TestFrames, file: &str, at: Span, class: Class) {
+    for test_file in frames
+        .files
+        .iter_mut()
+        .filter(|test_file| test_file.file == file)
+    {
+        for case in &mut test_file.cases {
+            if case.span.line <= at.line && at.line <= case.span.end_line {
+                assert_through(&mut case.assertions, class, at);
             }
         }
     }

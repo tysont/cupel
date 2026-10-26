@@ -373,16 +373,20 @@ fn a_path_attribute_names_the_file_a_mod_declaration_loads() {
             "#[cfg(not(feature = \"std\"))]\n#[path = \"core.rs\"]\nmod imp;\n",
         ),
         ("src/io/core.rs", "pub fn write() {}\n"),
+        // The file the declaration would load without the attribute.
+        ("src/io/imp.rs", "pub fn write() {}\n"),
     ]);
     let graph: ModuleGraph = produce("rust", dir.path());
+    let rows = edge_rows(&graph);
     assert_eq!(
-        edge_rows(&graph),
+        rows,
         under(
             ".",
             &[
                 ("src/io/mod.rs", 3, "imp", "src/io/core.rs", true),
                 ("src/lib.rs", 1, "io", "src/io/mod.rs", true),
             ]
-        )
+        ),
+        "the attribute's file, not `imp.rs`"
     );
 }

@@ -288,11 +288,9 @@ func TestSetupIsNoAssertion(t *testing.T) {
     );
 }
 
-#[test]
-fn standard_library_equality_calls_compound_conditions_and_switch_cases_pin_values() {
-    let dir = tree(&[(
-        "flags_test.go",
-        r#"package flags
+/// Tests that pin values with the standard library's equality, `errors.Is`, a compound
+/// condition, and a switch case.
+const FLAGS_TEST: &str = r#"package flags
 
 import (
 	"bytes"
@@ -335,8 +333,11 @@ func TestSwitch(t *testing.T) {
 		t.Errorf("unexpected %v", err)
 	}
 }
-"#,
-    )]);
+"#;
+
+#[test]
+fn standard_library_equality_calls_compound_conditions_and_switch_cases_pin_values() {
+    let dir = tree(&[("flags_test.go", FLAGS_TEST)]);
     let frames: TestFrames = produce("go", dir.path());
     let flags = &assert_framework(&frames, "flags_test.go", "go-test");
     assert_eq!(
@@ -357,12 +358,8 @@ func TestSwitch(t *testing.T) {
     );
 }
 
-#[test]
-fn a_helper_of_another_test_file_of_the_package_asserts_as_it_does() {
-    let dir = tree(&[
-        (
-            "helpers_test.go",
-            r#"package cli
+/// A package's shared helpers: a weak `check` and an exact `checkExact`.
+const HELPERS_TEST: &str = r#"package cli
 
 import (
 	"strings"
@@ -381,11 +378,10 @@ func checkExact(t *testing.T, got, want string) {
 		t.Errorf("got %q, want %q", got, want)
 	}
 }
-"#,
-        ),
-        (
-            "cli_test.go",
-            r#"package cli
+"#;
+
+/// Tests that call the package's helpers, and one that calls a helper nowhere defined.
+const CLI_TEST: &str = r#"package cli
 
 import "testing"
 
@@ -400,8 +396,13 @@ func TestOutputIsExact(t *testing.T) {
 func TestUnknownHelper(t *testing.T) {
 	verify(t, Run())
 }
-"#,
-        ),
+"#;
+
+#[test]
+fn a_helper_of_another_test_file_of_the_package_asserts_as_it_does() {
+    let dir = tree(&[
+        ("helpers_test.go", HELPERS_TEST),
+        ("cli_test.go", CLI_TEST),
         (
             "other/other_test.go",
             "package other\n\nimport \"testing\"\n\nfunc TestElsewhere(t *testing.T) {\n\tcheck(t, \"a\", \"a\")\n}\n",
