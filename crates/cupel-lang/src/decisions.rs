@@ -16,7 +16,9 @@
 //!   whose parent node's kind is in `chain_parents` is not nested under the branch that owns
 //!   that parent, and neither is anything nested under it.
 //! - **Early returns** whose node is the symbol body's final statement are dropped: a return
-//!   is final when every node from it up to the body is its parent's last named child.
+//!   is final when every node from it up to the body is its parent's last named child. A return
+//!   that ends an anonymous function inside the symbol (one of `[decisions] functions`, a
+//!   callback passed inline) is final there, since it leaves only that function.
 //! - **Cases**: only the first `case` among siblings keeps its cognitive weight; the others
 //!   are marked `continues` (one multiway decision, ADR-072).
 //! - **Tables**: `@loop.table` (any pattern) on a loop node marks it as iterating over a table
@@ -120,7 +122,9 @@ fn weigh(
     let kept: Vec<(DecisionKind, Node<'_>)> = found
         .iter()
         .copied()
-        .filter(|(kind, node)| *kind != DecisionKind::EarlyReturn || !is_final(*node, body))
+        .filter(|(kind, node)| {
+            *kind != DecisionKind::EarlyReturn || !is_final(*node, body, &rules.functions)
+        })
         .collect();
     let mut cased_parents = HashSet::new();
     kept.iter()
@@ -183,7 +187,7 @@ fn nesting(
 
 /// Whether `node` is the final statement of `body`: every node from it up to `body` is its
 /// parent's last named child, ignoring comments.
-fn is_final(node: Node<'_>, body: Node<'_>) -> bool {
+fn is_final(node: Node<'_>, body: Node<'_>, functions: &[String]) -> bool {
     let mut child = node;
     while let Some(parent) = child.parent() {
         let mut cursor = parent.walk();
@@ -194,7 +198,7 @@ fn is_final(node: Node<'_>, body: Node<'_>) -> bool {
         if last.is_none_or(|last| last.id() != child.id()) {
             return false;
         }
-        if parent.id() == body.id() {
+        if parent.id() == body.id() || functions.iter().any(|kind| kind == parent.kind()) {
             return true;
         }
         child = parent;

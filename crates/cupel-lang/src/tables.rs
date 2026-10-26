@@ -171,6 +171,7 @@ pub struct SyntaxRules {
 /// [decisions]
 /// chain_parents = ["else_clause"]   # a branch whose parent is one of these continues a chain
 /// condition_fields = ["condition"]  # decisions in these fields of a decision do not nest in it
+/// functions = ["arrow_function"]    # anonymous functions a final `return` of theirs only ends
 ///
 /// [decisions.weights.early-return]  # overrides one kind's default weight
 /// cyclomatic = 0
@@ -186,6 +187,9 @@ pub struct SyntaxRules {
 pub struct DecisionRules {
     pub chain_parents: Vec<String>,
     pub condition_fields: Vec<String>,
+    /// Node kinds of anonymous functions whose decisions stay with the enclosing symbol: a
+    /// `return` that is the last statement of one only ends it, so it is not an early return.
+    pub functions: Vec<String>,
     pub weights: HashMap<DecisionKind, Weight>,
 }
 
@@ -194,6 +198,7 @@ impl Default for DecisionRules {
         Self {
             chain_parents: Vec::new(),
             condition_fields: vec!["condition".to_owned()],
+            functions: Vec::new(),
             weights: HashMap::new(),
         }
     }

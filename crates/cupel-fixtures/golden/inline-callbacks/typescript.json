@@ -1,0 +1,144 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "static.complexity",
+      "metrics": {
+        "cognitive_max": 0.0,
+        "cyclomatic_max": 1.0,
+        "length_max": 67.0,
+        "nesting_max": 0.0,
+        "params_max": 3.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "cyclomatic_max",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `handles every value` into named functions until it is at most 60 lines."
+      },
+      "check": "static.complexity",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 67
+      },
+      "id": "fnd_237d8e",
+      "kind": "function.long",
+      "location": {
+        "col": 27,
+        "end_col": 2,
+        "end_line": 71,
+        "file": "tests/handle.test.ts",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.complexity --symbols sh_a3b129b7016edf82",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_237d8e --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.handle.handles every value",
+        "hash": "sh_a3b129b7016edf82",
+        "lang": "typescript"
+      },
+      "tier": 0,
+      "title": "`tests.handle.handles every value` is 67 lines long (max 60)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_237d8e",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract cohesive blocks of `handles every value` into named functions until it is at most 60 lines."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "typescript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 2
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

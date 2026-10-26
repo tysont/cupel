@@ -15,6 +15,8 @@ modifiers = { "public" = "public", "protected" = "private", "private" = "private
 # `else if` is an `if_statement` inside the `else_clause` of the branch it continues.
 [decisions]
 chain_parents = ["else_clause"]
+# A callback passed inline is part of its caller; the `return` that ends it ends only the callback.
+functions = ["arrow_function", "function_expression", "generator_function"]
 
 # Types, decorators, and accessibility say nothing about what a function does, so a JavaScript
 # function and its type-annotated TypeScript twin normalize to the same tree.
