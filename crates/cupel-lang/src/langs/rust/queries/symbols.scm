@@ -46,16 +46,19 @@
     (type_identifier) @scope.name
     (primitive_type) @scope.name
     (generic_type type: (type_identifier) @scope.name)
+    (generic_type type: (scoped_type_identifier name: (type_identifier) @scope.name))
     (scoped_type_identifier name: (type_identifier) @scope.name)
   ]) @scope
 
-; An impl for a reference (`impl Read for &mut Reader<R>`) is an impl on the referenced type.
+; An impl for a reference (`impl Read for &mut Reader<R>`) is an impl on the referenced type. A generic
+; type named by a path (`impl<T> Next for ::alloc::vec::IntoIter<T>`) is its last segment, in both.
 (impl_item
   type: (reference_type
     type: [
       (type_identifier) @scope.name
       (primitive_type) @scope.name
       (generic_type type: (type_identifier) @scope.name)
+      (generic_type type: (scoped_type_identifier name: (type_identifier) @scope.name))
       (scoped_type_identifier name: (type_identifier) @scope.name)
     ])) @scope
 

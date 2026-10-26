@@ -1,0 +1,169 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 0.0,
+        "max_jaccard": 1.0,
+        "pairs": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "pairs",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `next_if` and `next_if` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 1,
+        "edits": [],
+        "jaccard": 1.0,
+        "left": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 13,
+          "file": "src/lib.rs",
+          "hash": "sh_b6d06b69cb4c6a0a",
+          "lang": "rust",
+          "line": 8,
+          "lines": 6,
+          "nodes": 56,
+          "symbol": "IntoIter::next_if"
+        },
+        "renamed": [],
+        "right": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 22,
+          "file": "src/lib.rs",
+          "hash": "sh_b6d06b69cb4c6a0a",
+          "lang": "rust",
+          "line": 17,
+          "lines": 6,
+          "nodes": 56,
+          "symbol": "Drain::next_if"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_3181ed",
+      "kind": "clone.pair",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 13,
+        "file": "src/lib.rs",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_b6d06b69cb4c6a0a",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3181ed --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "IntoIter::next_if",
+        "hash": "sh_b6d06b69cb4c6a0a",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`IntoIter::next_if` and `Drain::next_if` (src/lib.rs:17) are type-1 clones (jaccard 1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_3181ed",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract what `next_if` and `next_if` share into one function and call it from both."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 2
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

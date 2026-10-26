@@ -1,0 +1,10 @@
+# ABOUTME: A crate that implements one trait for two standard generic types named by their paths, with one body
+# ABOUTME: twice, so the clone pair names each method on its type (P9.9, itertools' `PeekingNext` impls).
+[package]
+name = "peek"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]

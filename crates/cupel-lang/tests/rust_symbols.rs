@@ -129,6 +129,25 @@ fn files_outside_src_are_namespaced_by_their_whole_path() {
 }
 
 #[test]
+fn methods_of_an_impl_for_a_generic_type_named_by_a_path_are_methods_on_that_type() {
+    // itertools' `impl<T> PeekingNext for ::alloc::vec::IntoIter<T>` and its `Drain` twin.
+    let dir = tree(&[(
+        "src/lib.rs",
+        "impl<T> Next for ::alloc::vec::IntoIter<T> {\n    fn peek(&mut self) -> Option<T> { None }\n}\n\
+         impl<'a> Next for &'a mut std::vec::Drain<'a, u8> {\n    fn peek(&mut self) -> Option<u8> { None }\n}\n",
+    )]);
+    let symbols: Symbols = produce("rust", dir.path());
+    assert_symbols(
+        &symbols,
+        "src/lib.rs",
+        &[
+            ("IntoIter::peek", Method, Public, (2, 2)),
+            ("Drain::peek", Method, Public, (5, 5)),
+        ],
+    );
+}
+
+#[test]
 fn methods_of_an_impl_for_a_reference_or_a_primitive_are_methods_on_that_type() {
     let dir = tree(&[(
         "src/lib.rs",
