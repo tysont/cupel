@@ -213,7 +213,9 @@ fn mypy_command(target: &Target<'_>) -> Option<Vec<String>> {
             .files
             .iter()
             .filter(|file| {
-                !(file.ends_with(".py") && target.dir.join(format!("{file}i")).is_file())
+                let path = target.dir.join(file);
+                path.extension().is_none_or(|extension| extension != "py")
+                    || !path.with_extension("pyi").is_file()
             })
             .cloned()
             .collect(),
