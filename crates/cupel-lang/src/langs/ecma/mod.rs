@@ -51,7 +51,10 @@ const TYPESCRIPT_ONLY: &[(QueryFile, &str)] = &[
         include_str!("queries/typescript/imports.scm"),
     ),
     (QueryFile::Api, include_str!("queries/typescript/api.scm")),
-    (QueryFile::Tests, include_str!("queries/typescript/tests.scm")),
+    (
+        QueryFile::Tests,
+        include_str!("queries/typescript/tests.scm"),
+    ),
 ];
 
 static JAVASCRIPT: LazyLock<LanguageSpec> = LazyLock::new(|| {
