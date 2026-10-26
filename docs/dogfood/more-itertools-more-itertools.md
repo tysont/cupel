@@ -2343,7 +2343,6 @@ Every finding of the final check, every finding of the final survey outside the 
 | `fnd_1f902d` | `test.logic` | `tests/test_more.py:313` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
 | `fnd_b4f7da` | `test.duplicate-setup` | `tests/test_more.py:421` | true | The tests open with the same arrange statements, differing only in literal values (ADR-055 counts those as the same setup). | extract a fixture |
 | `fnd_1e0e08` | `test.duplicate-setup` | `tests/test_more.py:458` | true | The tests open with the same arrange statements, differing only in literal values (ADR-055 counts those as the same setup). | extract a fixture |
-| `fnd_1e0e08` | `test.duplicate-setup` | `tests/test_more.py:458` | false | The shared leading statements include the tests' assertions, which no fixture can hold (fixed in 8b6e07b: a statement holding an assertion ends the setup). | check fix |
 | `fnd_8752b6` | `test.no-assertion` | `tests/test_more.py:498` | true | The test makes no assertion: it passes as long as nothing raises. | add an assertion |
 | `fnd_eeb026` | `test.logic` | `tests/test_more.py:545` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
 | `fnd_ab23f5` | `test.logic` | `tests/test_more.py:565` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
@@ -2359,9 +2358,7 @@ Every finding of the final check, every finding of the final survey outside the 
 | `fnd_3330d0` | `test.logic` | `tests/test_more.py:1686` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
 | `fnd_cdd7f7` | `test.logic` | `tests/test_more.py:1778` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
 | `fnd_e657e2` | `test.duplicate-setup` | `tests/test_more.py:1844` | true | The tests open with the same arrange statements, differing only in literal values (ADR-055 counts those as the same setup). | extract a fixture |
-| `fnd_e657e2` | `test.duplicate-setup` | `tests/test_more.py:1844` | false | The shared leading statements include the tests' assertions, which no fixture can hold (fixed in 8b6e07b: a statement holding an assertion ends the setup). | check fix |
 | `fnd_e08ee7` | `test.duplicate-setup` | `tests/test_more.py:2192` | true | The tests open with the same arrange statements, differing only in literal values (ADR-055 counts those as the same setup). | extract a fixture |
-| `fnd_e08ee7` | `test.duplicate-setup` | `tests/test_more.py:2192` | false | The shared leading statements include the tests' assertions, which no fixture can hold (fixed in 8b6e07b: a statement holding an assertion ends the setup). | check fix |
 | `fnd_5e2b17` | `test.logic` | `tests/test_more.py:2329` | false | The only decision is a conditional expression inside a lambda the test hands the code under test; the test's own statements run in one line (fixed in 650a00e). | check fix |
 | `fnd_fe8ffa` | `test.weak-assertion` | `tests/test_more.py:2601` | disputed | Every assertion is `assertTrue` or `assertFalse` (or `assertIn` over exact candidates) of a predicate or comparison's result, which pins a boolean; the check reads truthiness as weak. | none |
 | `fnd_6dc24c` | `test.logic` | `tests/test_more.py:2837` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
@@ -2383,14 +2380,12 @@ Every finding of the final check, every finding of the final survey outside the 
 | `fnd_34c9b5` | `test.duplicate-setup` | `tests/test_more.py:4108` | true | The tests open with the same arrange statements, differing only in literal values (ADR-055 counts those as the same setup). | extract a fixture |
 | `fnd_df05d7` | `test.duplicate-setup` | `tests/test_more.py:4188` | true | The tests open with the same arrange statements, differing only in literal values (ADR-055 counts those as the same setup). | extract a fixture |
 | `fnd_2cfdc4` | `test.duplicate-setup` | `tests/test_more.py:4204` | true | The tests open with the same arrange statements, differing only in literal values (ADR-055 counts those as the same setup). | extract a fixture |
-| `fnd_2cfdc4` | `test.duplicate-setup` | `tests/test_more.py:4204` | false | The shared leading statements include the tests' assertions, which no fixture can hold (fixed in 8b6e07b: a statement holding an assertion ends the setup). | check fix |
 | `fnd_f0366b` | `test.logic` | `tests/test_more.py:4364` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
 | `fnd_d3323a` | `test.logic` | `tests/test_more.py:4370` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
 | `fnd_274e67` | `test.weak-assertion` | `tests/test_more.py:4370` | disputed | Every assertion is `assertTrue` or `assertFalse` (or `assertIn` over exact candidates) of a predicate or comparison's result, which pins a boolean; the check reads truthiness as weak. | none |
 | `fnd_84d9aa` | `test.logic` | `tests/test_more.py:4410` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
 | `fnd_b7a8e4` | `test.logic` | `tests/test_more.py:4637` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
 | `fnd_52dbc3` | `test.duplicate-setup` | `tests/test_more.py:4767` | true | The tests open with the same arrange statements, differing only in literal values (ADR-055 counts those as the same setup). | extract a fixture |
-| `fnd_52dbc3` | `test.duplicate-setup` | `tests/test_more.py:4767` | false | The shared leading statements include the tests' assertions, which no fixture can hold (fixed in 8b6e07b: a statement holding an assertion ends the setup). | check fix |
 | `fnd_180610` | `test.weak-assertion` | `tests/test_more.py:4843` | disputed | Every assertion is `assertTrue` or `assertFalse` (or `assertIn` over exact candidates) of a predicate or comparison's result, which pins a boolean; the check reads truthiness as weak. | none |
 | `fnd_21da85` | `test.weak-assertion` | `tests/test_more.py:4861` | disputed | Every assertion is `assertTrue` or `assertFalse` (or `assertIn` over exact candidates) of a predicate or comparison's result, which pins a boolean; the check reads truthiness as weak. | none |
 | `fnd_600fb9` | `test.logic` | `tests/test_more.py:5161` | true | The test loops over computed values, or branches or catches an exception, in its own body. | split or parametrize |
@@ -2489,7 +2484,7 @@ Every finding of the final check, every finding of the final survey outside the 
 | `static.complexity` | 18 | 0 | 13 | 0.00 |
 | `static.crap` | 67 | 0 | 0 | 0.00 |
 | `tests.assertion-density` | 4 | 0 | 24 | 0.00 |
-| `tests.quality` | 90 | 14 | 32 | 0.13 |
+| `tests.quality` | 90 | 9 | 32 | 0.09 |
 
 Every other check that ran (`perf.bench`, `perf.footprint`, `spec.contracts`, `static.dead-code`, `static.deps`, `tests.coverage` in the check, `tests.flaky`) reported nothing: no rate; `tests.mutation` produced nothing to grade (see Commands). The `static.analyze` and `tests.quality` rates are those of the first runs; after the fixes neither reports a false row.
 
