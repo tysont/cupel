@@ -55,6 +55,30 @@
       }
     },
     {
+      "sites": [
+        {
+          "from": "\"0.1.0\"",
+          "operator": "return-value",
+          "set": "extended",
+          "site_hash": "b678b5b1bffc48b2",
+          "span": {
+            "col": 12,
+            "end_col": 19,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "None"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 1,
+        "file": "setup.py",
+        "line": 4
+      }
+    },
+    {
       "sites": [],
       "symbol": {
         "col": 5,
@@ -6752,6 +6776,489 @@
         "col": 5,
         "file": "tests/test_ledger_case.py",
         "line": 9
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "self.balances([1, 1], 2)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 9,
+            "end_col": 33,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "d80343690ddf7d52",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "1",
+          "operator": "zero-one",
+          "set": "default",
+          "site_hash": "1ecad66f737e50a3",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "414fdd807f12bdf7",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "self.balances([2, 2], 4)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 33,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "6f43ffff205445ef",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "2",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "be4a0ece232903f1",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3189c9ad1310ce8b",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "self.balances([3, 3], 6)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 33,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "432d0387d0e27302",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "3",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "81c590b901805af3",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "6",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e9948711732a0a4c",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "self.balances([4, 4], 8)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 9,
+            "end_col": 33,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d7bc683cd7e167c1",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "4",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "562d46c6f2c698f1",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "8",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c6a1f8b6e554c106",
+          "span": {
+            "col": 31,
+            "end_col": 32,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 12
+      }
+    },
+    {
+      "sites": [
+        {
+          "from": "self.balances([5, 5], 10)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ab6d1d18dc681475",
+          "span": {
+            "col": 9,
+            "end_col": 34,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "0438267a3405d54e",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "5",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "6a9835fb110ba45a",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "10",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "414fdd807f12bdf7",
+          "span": {
+            "col": 31,
+            "end_col": 33,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "self.balances([6, 6], 12)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "0ee4a1b2ac315eb9",
+          "span": {
+            "col": 9,
+            "end_col": 34,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "6",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "6f43ffff205445ef",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "6",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "be4a0ece232903f1",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "12",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "3189c9ad1310ce8b",
+          "span": {
+            "col": 31,
+            "end_col": 33,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "self.balances([7, 7], 14)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "d855c1afdc287254",
+          "span": {
+            "col": 9,
+            "end_col": 34,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "7",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "432d0387d0e27302",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "7",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "81c590b901805af3",
+          "span": {
+            "col": 27,
+            "end_col": 28,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "14",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "e9948711732a0a4c",
+          "span": {
+            "col": 31,
+            "end_col": 33,
+            "end_line": 21,
+            "line": 21
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "self.balances([8], 8)",
+          "operator": "statement-deletion",
+          "set": "extended",
+          "site_hash": "ca9094ecb08e0217",
+          "span": {
+            "col": 9,
+            "end_col": 30,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "pass"
+          ]
+        },
+        {
+          "from": "8",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "d7bc683cd7e167c1",
+          "span": {
+            "col": 24,
+            "end_col": 25,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "0"
+          ]
+        },
+        {
+          "from": "8",
+          "operator": "constant",
+          "set": "extended",
+          "site_hash": "c6a1f8b6e554c106",
+          "span": {
+            "col": 28,
+            "end_col": 29,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "0"
+          ]
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 18
       }
     },
     {

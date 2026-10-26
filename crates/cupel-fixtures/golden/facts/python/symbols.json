@@ -24,6 +24,28 @@
     },
     {
       "body": {
+        "col": 5,
+        "end_col": 19,
+        "end_line": 5,
+        "line": 5
+      },
+      "display": "setup.read_version",
+      "file": "setup.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "read_version",
+      "namespace": "setup",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 5,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 44,
         "end_col": 47,
         "end_line": 7,
@@ -1669,6 +1691,50 @@
         "end_col": 70,
         "end_line": 10,
         "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 33,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_pairs",
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_balances_of_pairs",
+      "namespace": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 33,
+        "end_line": 16,
+        "line": 12
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 19
+      },
+      "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_larger_pairs",
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_balances_of_larger_pairs",
+      "namespace": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 18
       },
       "visibility": "public"
     },

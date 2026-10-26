@@ -350,6 +350,116 @@
             "end_line": 10,
             "line": 9
           }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 13,
+                "line": 13
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 14,
+                "line": 14
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 15,
+                "line": 15
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 16,
+                "line": 16
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_balances_of_pairs",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 33,
+            "end_line": 16,
+            "line": 12
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 19,
+                "line": 19
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 20,
+                "line": 20
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 21,
+                "line": 21
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 22,
+                "line": 22
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_balances_of_larger_pairs",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 30,
+            "end_line": 22,
+            "line": 18
+          }
         }
       ],
       "file": "tests/test_ledger_case.py",

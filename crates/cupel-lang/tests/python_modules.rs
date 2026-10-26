@@ -7,6 +7,13 @@ use support::{Edge, EdgeRow, edge_rows, fixture, kind, kinds, produce, row, tree
 
 const FIXTURE_EDGES: &[Edge<'static>] = &[
     (
+        "setup.py",
+        1,
+        "setuptools.setup",
+        "external:setuptools",
+        false,
+    ),
+    (
         "src/deps_cycle/alpha.py",
         1,
         ".beta.BETA",

@@ -11,6 +11,14 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 1,
+        "file": "setup.py",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 5,
         "file": "src/deps_layers/port.py",
         "line": 7
@@ -2089,6 +2097,22 @@
         "col": 5,
         "file": "tests/test_ledger_case.py",
         "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 18
       }
     },
     {

@@ -30,6 +30,22 @@ fn statements(shapes: &[&str]) -> Vec<NormNode> {
     shapes.iter().map(|shape| statement(shape)).collect()
 }
 
+/// `statements` one per line from `line`, each spanning its line.
+fn statements_from(line: u32, shapes: &[&str]) -> Vec<NormNode> {
+    (line..)
+        .zip(shapes)
+        .map(|(at, shape)| NormNode {
+            span: Some(Span {
+                line: at,
+                col: 1,
+                end_line: at,
+                end_col: 40,
+            }),
+            ..statement(shape)
+        })
+        .collect()
+}
+
 fn hash_of(file: &str, line: u32) -> SymbolHash {
     let file_bits = u64::from(file.bytes().map(u32::from).sum::<u32>());
     format!("sh_{:016x}", (file_bits << 32) | u64::from(line))
@@ -44,6 +60,8 @@ struct Case {
     name: &'static str,
     line: u32,
     assertions: Vec<(AssertionKind, AssertionStrength)>,
+    /// The lines the assertions are on, in order; each is on the case's first line without.
+    asserted_on: Vec<u32>,
     mocks: u32,
     skipped: bool,
     decisions: Vec<DecisionKind>,
@@ -63,6 +81,7 @@ fn case(name: &'static str, line: u32) -> Case {
         name,
         line,
         assertions: vec![(AssertionKind::Equality, AssertionStrength::Strong)],
+        asserted_on: Vec::new(),
         mocks: 0,
         skipped: false,
         decisions: Vec::new(),
@@ -76,6 +95,13 @@ fn case(name: &'static str, line: u32) -> Case {
 impl Case {
     fn asserting(mut self, assertions: &[(AssertionKind, AssertionStrength)]) -> Self {
         self.assertions = assertions.to_vec();
+        self
+    }
+
+    /// One strong equality assertion on each of `lines`.
+    fn asserting_on(mut self, lines: &[u32]) -> Self {
+        self.assertions = vec![(AssertionKind::Equality, AssertionStrength::Strong); lines.len()];
+        self.asserted_on = lines.to_vec();
         self
     }
 
@@ -146,10 +172,11 @@ impl Case {
             assertions: self
                 .assertions
                 .iter()
-                .map(|(kind, strength)| Assertion {
+                .enumerate()
+                .map(|(n, (kind, strength))| Assertion {
                     kind: *kind,
                     strength: *strength,
-                    span: at,
+                    span: self.asserted_on.get(n).map_or(at, |line| span(*line, 1)),
                 })
                 .collect(),
             mocks: (0..self.mocks)
@@ -627,6 +654,54 @@ fn tests_repeating_their_leading_statements_are_one_duplicate_setup_finding() {
         .unwrap()
     );
     assert_eq!(findings[0].action.kind, ActionKind::RefactorExtract);
+}
+
+#[test]
+fn a_statement_holding_an_assertion_ends_the_setup_tests_share() {
+    // Tests written through an asserting harness (`self.flakes(source, *expected)` three
+    // times) repeat assertions, not arrange code; arrange code that ends at an assertion is
+    // shared only as far as it goes.
+    let (_, findings) = Run::of(vec![
+        case("harness_one", 100)
+            .asserting_on(&[101, 102, 103])
+            .with_body(statements_from(
+                101,
+                &["flakes", "flakes", "flakes", "check"],
+            )),
+        case("harness_two", 110)
+            .asserting_on(&[111, 112, 113])
+            .with_body(statements_from(
+                111,
+                &["flakes", "flakes", "flakes", "flakes"],
+            )),
+        case("short_one", 120)
+            .asserting_on(&[123])
+            .with_body(statements_from(
+                121,
+                &["open", "deposit", "check", "deposit"],
+            )),
+        case("short_two", 130)
+            .asserting_on(&[133])
+            .with_body(statements_from(131, &["open", "deposit", "check", "other"])),
+        case("arranged_one", 140)
+            .asserting_on(&[145])
+            .with_body(statements_from(
+                141,
+                &["open", "deposit", "deposit", "deposit", "check"],
+            )),
+        case("arranged_two", 150)
+            .asserting_on(&[155])
+            .with_body(statements_from(
+                151,
+                &["open", "deposit", "deposit", "deposit", "check"],
+            )),
+    ])
+    .go();
+    assert_eq!(
+        support::kinds(&findings),
+        pairs(&[("t::arranged_one", "test.duplicate-setup")])
+    );
+    assert_eq!(findings[0].evidence.0["statements"], json!(4));
 }
 
 #[test]

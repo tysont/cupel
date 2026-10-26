@@ -1,6 +1,6 @@
 # CUPEL_DECISION_034: Python syntactic facts: visibility and `__all__`, normalization of receivers and docstrings, test idioms, API, and roots
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P1.2–P1.8 (python)
+**Date:** 2026-10-10 · **Status:** accepted; a function module-level code calls is an entry point per [138](CUPEL_DECISION_138.md) §9 · **Phase:** P1.2–P1.8 (python)
 
 ## Context
 

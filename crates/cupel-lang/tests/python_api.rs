@@ -162,7 +162,7 @@ fn main_guards_exports_tests_fixtures_and_dunders_are_roots() {
 
 #[test]
 fn every_test_case_in_the_fixture_is_a_test_root() {
-    assert_every_case_is_a_test_root("python", 26);
+    assert_every_case_is_a_test_root("python", 28);
 }
 
 #[test]
@@ -183,4 +183,37 @@ fn a_decorated_command_called_through_sys_exit_in_the_guard_is_an_entry_point() 
         reasons(&roots, &symbols, "tool.pytest_configure"),
         [Export, FrameworkHook]
     );
+}
+
+#[test]
+fn a_function_the_module_level_code_calls_is_an_entry_point() {
+    // A setup script: setuptools runs its body, which calls its own functions, directly, as an
+    // argument, or as a keyword argument's value; nothing imports it.
+    let dir = tree(&[(
+        "setup.py",
+        "from setuptools import setup\n\n\
+         def get_version():\n    return '1'\n\n\
+         def get_long_description():\n    return ''\n\n\
+         def configure():\n    pass\n\n\
+         def banner():\n    return ''\n\n\
+         def unused():\n    pass\n\n\
+         configure()\n\
+         TITLE = banner()\n\
+         setup(\n    get_long_description(),\n    version=get_version(),\n)\n",
+    )]);
+    let roots: Roots = produce("python", dir.path());
+    let symbols: Symbols = produce("python", dir.path());
+    for called in [
+        "setup.get_version",
+        "setup.get_long_description",
+        "setup.configure",
+        "setup.banner",
+    ] {
+        assert_eq!(
+            reasons(&roots, &symbols, called),
+            [EntryPoint, Export],
+            "{called}"
+        );
+    }
+    assert_eq!(reasons(&roots, &symbols, "setup.unused"), [Export]);
 }

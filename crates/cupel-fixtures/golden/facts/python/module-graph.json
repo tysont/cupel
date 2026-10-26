@@ -4,6 +4,20 @@
       "edges": [
         {
           "edge_kind": "import",
+          "from": "setup.py",
+          "line": 1,
+          "names": [
+            "setup"
+          ],
+          "relative": false,
+          "specifier": "setuptools.setup",
+          "target": {
+            "kind": "external",
+            "package": "setuptools"
+          }
+        },
+        {
+          "edge_kind": "import",
           "from": "src/deps_cycle/alpha.py",
           "line": 1,
           "names": [

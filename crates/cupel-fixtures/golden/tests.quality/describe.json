@@ -348,7 +348,7 @@
             "type": "object"
           },
           "kind": "test.duplicate-setup",
-          "summary": "Tests in one file repeat the same setup_statements_min or more leading statements."
+          "summary": "Tests in one file repeat the same setup_statements_min or more leading statements before their first assertion."
         }
       ],
       "id": "tests.quality",

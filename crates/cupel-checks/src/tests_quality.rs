@@ -209,7 +209,7 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
             "test.duplicate-setup",
             ActionKind::RefactorExtract,
             "Tests in one file repeat the same setup_statements_min or more leading \
-             statements.",
+             statements before their first assertion.",
         ),
     ]
 }
@@ -468,7 +468,7 @@ impl TestsQuality {
                 LogicCount::of(case, by_symbol.get(&key).copied().unwrap_or_default())
             });
             reported.extend(self.case_findings(&subject, case, logic.as_ref(), &index.limits));
-            candidates.push((subject, statements(root)));
+            candidates.push((subject, arranged(statements(root), case)));
         }
         reported.extend(self.duplicate_setup(&candidates, &index.limits));
         Ok(reported)
@@ -649,7 +649,11 @@ impl TestsQuality {
             .unwrap_or(0);
         let first = members[0].1;
         let shared = (min..shortest - 1)
-            .take_while(|&at| members.iter().all(|(_, body)| body[at] == first[at]))
+            .take_while(|&at| {
+                members
+                    .iter()
+                    .all(|(_, body)| body[at].same_shape(&first[at]))
+            })
             .count()
             + min;
         let statements = u32::try_from(shared).unwrap_or(u32::MAX);
@@ -725,6 +729,23 @@ fn setup_groups<'c, 's>(
         .collect();
     groups.sort_by_key(|members| members[0].0.symbol.span.line);
     groups
+}
+
+/// `body` up to and including its first statement that holds one of `case`'s assertions, or all of
+/// it when none does (ADR-138 §9): the statements before an assertion are the arrange code tests
+/// may share, and the asserting statement is what follows it. A statement the producer gives no
+/// span is never known to hold one.
+fn arranged<'s>(body: &'s [NormNode], case: &TestCase) -> &'s [NormNode] {
+    let asserts = |statement: &NormNode| {
+        statement.span.is_some_and(|span| {
+            case.assertions
+                .iter()
+                .any(|assertion| span.contains(&assertion.span))
+        })
+    };
+    body.iter()
+        .position(asserts)
+        .map_or(body, |at| &body[..=at])
 }
 
 /// The top-level statements of a symbol's body (ADR-055): the children of the tree's last child,

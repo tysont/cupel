@@ -371,6 +371,38 @@
   (#eq? @_main "__main__")
   (#eq? @_function @_called))
 
+; Roots: functions the module's own top-level statements call, directly, as an argument, or as a
+; keyword argument's value, alone or as an assignment's value: a module runs that code whenever it
+; runs, so for a module nothing imports (a setup script setuptools runs) it is the script's body,
+; as a `__main__` guard's is (ADR-138 §9).
+(module
+  [
+    (function_definition
+      name: (identifier) @_function) @root.entry-point
+    (decorated_definition
+      definition: (function_definition
+        name: (identifier) @_function) @root.entry-point)
+  ]
+  (expression_statement
+    [
+      (call function: (identifier) @_called)
+      (call
+        arguments: (argument_list
+          [
+            (call function: (identifier) @_called)
+            (keyword_argument value: (call function: (identifier) @_called))
+          ]))
+      (assignment right: (call function: (identifier) @_called))
+      (assignment
+        right: (call
+          arguments: (argument_list
+            [
+              (call function: (identifier) @_called)
+              (keyword_argument value: (call function: (identifier) @_called))
+            ])))
+    ])
+  (#eq? @_function @_called))
+
 ; Hooks: dunder methods the runtime calls, pytest hooks, and fixtures pytest injects.
 (function_definition
   name: (identifier) @_dunder

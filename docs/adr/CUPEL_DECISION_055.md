@@ -1,6 +1,6 @@
 # CUPEL_DECISION_055: `test.duplicate-setup` compares the leading statements of test bodies in `NormTree`
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.6
+**Date:** 2026-10-13 · **Status:** accepted; the statements tests share end at the first that holds an assertion per [138](CUPEL_DECISION_138.md) §9 · **Phase:** P2.6
 
 ## Context
 
