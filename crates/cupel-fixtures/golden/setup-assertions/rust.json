@@ -1,0 +1,152 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 2.5,
+        "no_assertion": 0.0,
+        "weak_ratio": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 4,
+        "unit": "assertion_density",
+        "value": 2.5
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `sum_test`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          22,
+          30
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 3,
+        "statements": 3,
+        "tests": [
+          "tests::masks::sum_test",
+          "tests::masks::product_test"
+        ]
+      },
+      "id": "fnd_0e1773",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 27,
+        "file": "tests/masks.rs",
+        "line": 22
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_074295132596d641",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_0e1773 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests::masks::sum_test",
+        "hash": "sh_074295132596d641",
+        "lang": "rust"
+      },
+      "tier": 2,
+      "title": "`tests::masks::sum_test` and 1 other test(s) repeat the same 3 leading statements"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_0e1773",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `sum_test`."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 8
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

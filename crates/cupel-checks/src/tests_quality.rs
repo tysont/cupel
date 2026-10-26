@@ -462,7 +462,12 @@ impl TestsQuality {
                 LogicCount::of(case, by_symbol.get(&key).copied().unwrap_or_default())
             });
             reported.extend(self.case_findings(&subject, case, logic.as_ref(), &index.limits));
-            candidates.push((subject, statements(root)));
+            let body = statements(root);
+            candidates.push(Candidate {
+                subject,
+                body,
+                setup: setup_length(body, case),
+            });
         }
         reported.extend(self.duplicate_setup(&candidates, &index.limits));
         Ok(reported)
@@ -618,11 +623,7 @@ impl TestsQuality {
 
     /// One finding per group of a file's tests that repeat the same leading statements, about
     /// the group's first test (ADR-055).
-    fn duplicate_setup(
-        &self,
-        candidates: &[(Subject<'_>, &[NormNode])],
-        limits: &Settings,
-    ) -> Vec<Finding> {
+    fn duplicate_setup(&self, candidates: &[Candidate<'_>], limits: &Settings) -> Vec<Finding> {
         setup_groups(candidates, limits.setup_statements_min as usize)
             .into_iter()
             .map(|members| self.duplicate_group(&members, limits))
@@ -630,24 +631,20 @@ impl TestsQuality {
     }
 
     /// The finding for one group of tests sharing their leading statements, about its first.
-    fn duplicate_group(
-        &self,
-        members: &[&(Subject<'_>, &[NormNode])],
-        limits: &Settings,
-    ) -> Finding {
+    fn duplicate_group(&self, members: &[&Candidate<'_>], limits: &Settings) -> Finding {
         let min = limits.setup_statements_min as usize;
         let shortest = members
             .iter()
-            .map(|(_, body)| body.len())
+            .map(|member| member.shared_at_most())
             .min()
             .unwrap_or(0);
-        let first = members[0].1;
-        let shared = (min..shortest - 1)
-            .take_while(|&at| members.iter().all(|(_, body)| body[at] == first[at]))
+        let first = members[0].body;
+        let shared = (min..shortest)
+            .take_while(|&at| members.iter().all(|member| member.body[at] == first[at]))
             .count()
             + min;
         let statements = u32::try_from(shared).unwrap_or(u32::MAX);
-        let subject = &members[0].0;
+        let subject = &members[0].subject;
         let others = members.len() - 1;
         self.report(
             subject,
@@ -663,11 +660,11 @@ impl TestsQuality {
                 setup_statements_min: limits.setup_statements_min,
                 tests: members
                     .iter()
-                    .map(|(member, _)| member.symbol.display.clone())
+                    .map(|member| member.subject.symbol.display.clone())
                     .collect(),
                 lines: members
                     .iter()
-                    .map(|(member, _)| member.symbol.span.line)
+                    .map(|member| member.subject.symbol.span.line)
                     .collect(),
             }),
             format!(
@@ -693,31 +690,65 @@ impl TestsQuality {
     }
 }
 
-/// The groups of two or more candidates whose first `min` statements are equal and which each
-/// have more statements than that, each sorted by line, the groups by their first line.
+/// A test case that may share its setup with others of its file: its body's statements and how
+/// many of them lead up to its first assertion.
+struct Candidate<'s> {
+    subject: Subject<'s>,
+    body: &'s [NormNode],
+    setup: usize,
+}
+
+impl Candidate<'_> {
+    /// The most leading statements this case can share as setup: those before its first
+    /// assertion, and never its last statement, since something must follow the repeated part.
+    fn shared_at_most(&self) -> usize {
+        self.setup.min(self.body.len().saturating_sub(1))
+    }
+}
+
+/// How many of `body`'s leading statements come before the first that holds one of `case`'s
+/// assertions: an assertion checks what the test did, so it is never setup a fixture could share,
+/// however alike two tests' assertions normalize. A statement without a span holds none.
+fn setup_length(body: &[NormNode], case: &TestCase) -> usize {
+    body.iter()
+        .position(|statement| {
+            statement.span.as_ref().is_some_and(|span| {
+                case.assertions
+                    .iter()
+                    .any(|assertion| span.contains(&assertion.span))
+            })
+        })
+        .unwrap_or(body.len())
+}
+
+/// The groups of two or more candidates whose first `min` statements are equal setup (they come
+/// before each case's first assertion, and more statements follow them), each sorted by line,
+/// the groups by their first line.
 fn setup_groups<'c, 's>(
-    candidates: &'c [(Subject<'s>, &'s [NormNode])],
+    candidates: &'c [Candidate<'s>],
     min: usize,
-) -> Vec<Vec<&'c (Subject<'s>, &'s [NormNode])>> {
-    let mut groups: BTreeMap<Vec<u8>, Vec<&(Subject<'_>, &[NormNode])>> = BTreeMap::new();
+) -> Vec<Vec<&'c Candidate<'s>>> {
+    let mut groups: BTreeMap<Vec<u8>, Vec<&Candidate<'_>>> = BTreeMap::new();
     for candidate in candidates {
-        let body = candidate.1;
-        // Something must follow the repeated part, and an empty prefix repeats trivially.
-        if min == 0 || body.len() <= min {
+        // An empty prefix repeats trivially.
+        if min == 0 || candidate.shared_at_most() < min {
             continue;
         }
-        let prefix: Vec<u8> = body[..min].iter().flat_map(NormNode::shape_json).collect();
+        let prefix: Vec<u8> = candidate.body[..min]
+            .iter()
+            .flat_map(NormNode::shape_json)
+            .collect();
         groups.entry(prefix).or_default().push(candidate);
     }
     let mut groups: Vec<_> = groups
         .into_values()
         .filter(|members| members.len() > 1)
         .map(|mut members| {
-            members.sort_by_key(|(subject, _)| subject.symbol.span.line);
+            members.sort_by_key(|member| member.subject.symbol.span.line);
             members
         })
         .collect();
-    groups.sort_by_key(|members| members[0].0.symbol.span.line);
+    groups.sort_by_key(|members| members[0].subject.symbol.span.line);
     groups
 }
 
