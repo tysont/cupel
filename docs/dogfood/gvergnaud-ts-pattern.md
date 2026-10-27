@@ -1,6 +1,6 @@
 # External dogfood: gvergnaud/ts-pattern
 
-Group 3 of P9.9 ([ADR-138](../adr/CUPEL_DECISION_138.md)): the TypeScript repository. Cupel's release build (`target/release/cupel`, ADR-138 §2) of branch `p9-dogfood-ts-clojure`: the first survey at `7f696f6`, the final survey and the deep check at `6a582a5`; every run went through `scripts/heavy.sh`.
+Group 3 of P9.9 ([ADR-138](../adr/CUPEL_DECISION_138.md)): the TypeScript repository. Cupel's release build (`target/release/cupel`, ADR-138 §2) of branch `p9-dogfood-ts-clojure`: the first survey at `7f696f6`, the second survey and the deep check at `6a582a5`, the final survey at `e12d282`; every run went through `scripts/heavy.sh`.
 
 ## Repository
 
@@ -17,16 +17,17 @@ From Cupel's worktree, with `C=target/release/cupel` and `R=<scratchpad>/p9-grou
 $C init --write --cwd $R                                                        # kept, one key added (below)
 $C survey --depth standard --budget 30m --no-install --format json --cwd $R    # 2347 s, exit 5 (partial: the budget ended tests.mutation), at 7f696f6
 $C survey --depth standard --budget 30m --no-install --format json --cwd $R    # 2263 s, exit 0, at 6a582a5
+$C survey --depth standard --budget 30m --no-install --format json --cwd $R    # 51 s, exit 0, at e12d282 (mutant outcomes reused)
 $C check --depth deep --no-install --format json --cwd $R \
    --paths tests/branded-nominal-types.test.ts tests/types.test.ts \
            tests/exhaustive-fallback.test.ts tests/exhaustive-match.test.ts      # 11 s, exit 0, at 6a582a5
 ```
 
-`cupel init` wrote `[lang.typescript] test = "npx jest"` and `coverage = "npx jest --coverage --coverageReporters=lcov"`. Set by hand: `mutation = { jobs = 2 }`, the brief's two slots (ADR-148 bounds their memory). The first survey ran out of its budget inside `tests.mutation` (1,755.7 s, `partial`, no finding: a partial production reports none of its mutants) and left `static.analyze` out (`skipped`, reason `budget`); the second ran every check, `tests.mutation` in 1,241.1 s over 280 mutants (jest has no per-test map, ADR-147 §5, so each runs the whole suite; nothing was reused, since the first survey stored no outcome). The survey's ten targets are all test functions in four test files (the ranking defect group 1 recorded: a test function has no mutation score or coverage), so the deep check, run on those files as the method says, mutates nothing and reports a subset of the survey's findings. The final survey envelope (0.9 MB) stays in the agent's scratchpad; the deep check's (97 KB) is [`gvergnaud-ts-pattern/check-deep.json`](gvergnaud-ts-pattern/check-deep.json).
+`cupel init` wrote `[lang.typescript] test = "npx jest"` and `coverage = "npx jest --coverage --coverageReporters=lcov"`. Set by hand: `mutation = { jobs = 2 }`, the brief's two slots (ADR-148 bounds their memory). The first survey ran out of its budget inside `tests.mutation` (1,755.7 s, `partial`, no finding: a partial production reports none of its mutants) and left `static.analyze` out (`skipped`, reason `budget`); the second ran every check, `tests.mutation` in 1,241.1 s over 280 mutants, whose outcomes the third reused (jest has no per-test map, ADR-147 §5, so each runs the whole suite; nothing was reused, since the first survey stored no outcome). The survey's ten targets are all test functions in four test files (the ranking defect group 1 recorded: a test function has no mutation score or coverage), so the deep check, run on those files as the method says, mutates nothing and reports a subset of the survey's findings. The final survey envelope (0.9 MB) stays in the agent's scratchpad; the deep check's (97 KB) is [`gvergnaud-ts-pattern/check-deep.json`](gvergnaud-ts-pattern/check-deep.json).
 
 ## Survey
 
-Whole tree at `6a582a5`, status `pass`, exit 0, 413 findings (21 fail, 222 warn, 170 info), scope 88 files and 741 symbols, 2263 s. The rankings, verbatim (`rank. target value (location)`):
+Whole tree at `e12d282`, status `pass`, exit 0, 389 findings (21 fail, 198 warn, 170 info), scope 88 files and 741 symbols, 51 s. The rankings, verbatim (`rank. target value (location)`):
 
 - `static.clones.cluster_size` per group, highest worst, 46 measured: 1. `tests.numbers.Numbers.chainable.f and 14 others` 15 (tests/numbers.test.ts:61); 2. `tests.bigints.BigInts.f and 6 others` 7 (tests/bigints.test.ts:6); 3. `benchmarks.always-last-digit.testExhaustive and 3 others` 4 (benchmarks/always-last-digit.ts:6); 4. `tests.nesting.Nesting.objects.it should work on 2 level and 3 others` 4 (tests/nesting.test.ts:56); 5. `tests.variadic-tuples.variadic tuples ([a, ...b[]]).runtime.match.[any ...any] pattern should match any non-empty array and 3 others` 4 (tests/variadic-tuples.test.ts:7); 6. `tests.chainable.chainable methods.string compositions.P.string.startsWith(..).endsWith(..) and 2 others` 3 (tests/chainable.test.ts:82); 7. `tests.chainable.chainable methods.string compositions.f and 2 others` 3 (tests/chainable.test.ts:7); 8. `tests.chainable.chainable methods.string compositions.f and 2 others` 3 (tests/chainable.test.ts:24); 9. `tests.nesting.Nesting.array.it should work on 2 levels and 2 others` 3 (tests/nesting.test.ts:124); 10. `tests.output-type.output type.exhaustive.should return a single type if they are all compatible and 2 others` 3 (tests/output-type.test.ts:7)
 - `static.complexity.cyclomatic` per symbol, highest worst, 741 measured: 1. `benchmarks.nested-objects.testIfElse` 28 (benchmarks/nested-objects.ts:12); 2. `internals.helpers.matchPattern` 23 (src/internals/helpers.ts:32); 3. `patterns.record` 12 (src/patterns.ts:445); 4. `benchmarks.always-last-digit.testIfElse` 11 (benchmarks/always-last-digit.ts:36); 5. `benchmarks.always-last-digit.testTernary` 11 (benchmarks/always-last-digit.ts:89); 6. `benchmarks.random-digit.testIfElse` 11 (benchmarks/random-digit.ts:36); 7. `benchmarks.random-digit.testTernary` 11 (benchmarks/random-digit.ts:89); 8. `match.MatchExpression.with` 10 (src/match.ts:50); 9. `scripts.completions.run.tsgo` 10 (scripts/completions/run.mjs:169); 10. `patterns.map` 7 (src/patterns.ts:362)
@@ -45,7 +46,7 @@ Whole tree at `6a582a5`, status `pass`, exit 0, 413 findings (21 fail, 222 warn,
 
 ## Check
 
-Final survey (status `pass`, exit 0, 413 findings, 2263 s):
+Final survey (status `pass`, exit 0, 389 findings, 51 s):
 
 | Check | Status | Findings | Score | Time |
 |---|---|---|---|---|
@@ -53,23 +54,23 @@ Final survey (status `pass`, exit 0, 413 findings, 2263 s):
 | `gen.property` | pass | property.missing 19 | 0 falsified (n 0) | 0.0 s |
 | `meta.oracle-independence` | skipped (needs-range) | 0 | — | 0.0 s |
 | `meta.traceability` | skipped (needs-range) | 0 | — | 0.0 s |
-| `perf.footprint` | pass | 0 | 650 dependencies (n 650) | 0.4 s |
+| `perf.footprint` | pass | 0 | 650 dependencies (n 650) | 0.5 s |
 | `spec.contracts` | skipped (unsupported) | 0 | — | 0.0 s |
-| `static.analyze` | pass | 0 | 0 diagnostics (n 1) | 1.0 s |
+| `static.analyze` | pass | 0 | 0 diagnostics (n 1) | 0.9 s |
 | `static.api-surface` | skipped (needs-range) | 0 | — | 0.0 s |
 | `static.clones` | fail | clone.cluster 14, clone.pair 32 | 167 pairs (n 684) | 0.0 s |
 | `static.complexity` | fail | complexity.high 8, function.long 38, nesting.deep 2 | 28 cyclomatic_max (n 741) | 0.0 s |
 | `static.crap` | pass | crap.watch 9 | 23.0104 max (n 81) | 0.0 s |
-| `static.dead-code` | fail | dead.export 4, dead.symbol 30 | 30 dead_symbols (n 741) | 0.2 s |
-| `static.deps` | fail | dep.cycle 1 | 1 cycles (n 88) | 0.0 s |
+| `static.dead-code` | fail | dead.export 4, dead.symbol 6 | 6 dead_symbols (n 741) | 0.4 s |
+| `static.deps` | fail | dep.cycle 1 | 1 cycles (n 88) | 0.1 s |
 | `tests.assertion-density` | fail | density.sparse-file 4, density.sparse-test 26 | 3.07389 assertions_per_test (n 406) | 0.0 s |
 | `tests.coverage` | fail | coverage.uncovered-branch 10, coverage.uncovered-symbol 3 | 0.940594 line_ratio (n 303) | 0.0 s |
-| `tests.flaky` | pass | 0 | 0 unstable (n 456) | 6.2 s |
-| `tests.mutation` | fail | mutant.survived 21, mutant.uncovered 128 | 0.467857 killed_ratio (n 280) | 1241.1 s |
-| `tests.quality` | fail | test.duplicate-setup 3, test.logic 4, test.no-assertion 19, test.weak-assertion 38 | 3.07389 assertion_density (n 406) | 0.4 s |
+| `tests.flaky` | pass | 0 | 0 unstable (n 456) | 10.2 s |
+| `tests.mutation` | fail | mutant.survived 21, mutant.uncovered 128 | 0.467857 killed_ratio (n 280) | 0.5 s |
+| `tests.quality` | fail | test.duplicate-setup 3, test.logic 4, test.no-assertion 19, test.weak-assertion 38 | 3.07389 assertion_density (n 406) | 0.7 s |
 | `tests.weakening` | skipped (needs-range) | 0 | — | 0.0 s |
 
-Deep check on the targets' four files (status `pass`, exit 0, 43 findings (0 fail, 43 warn, 0 info), scope 4 files and 85 symbols, 11 s); its 43 findings are survey findings (same IDs) and are triaged once below:
+Deep check on the targets' four files (status `pass`, exit 0, 43 findings (0 fail, 43 warn, 0 info), scope 4 files and 85 symbols, 11 s); its 43 findings are survey findings (same IDs) and are triaged once below; it ran before the last fix, which concerns no file of its scope:
 
 | Check | Status | Findings | Score | Time |
 |---|---|---|---|---|
@@ -98,11 +99,11 @@ Deep check on the targets' four files (status `pass`, exit 0, 43 findings (0 fai
 | `tests.weakening` | skipped (needs-range) | 0 | — | 0.0 s |
 | `gen.differential` | skipped (unconfigured) | 0 | — | 0.0 s |
 
-The first survey, before the fixes (status `partial`, exit 5, 475 findings): `tests.quality` reported `test.no-assertion` 217, `test.weak-assertion` 4, `test.duplicate-setup` 9, `test.logic` 5; `tests.assertion-density` 64; `static.clones` 51; `static.complexity` 49; the rest as in the final survey. `tests.mutation` scored 0.468 in the final survey: 131 killed, 21 survived, 128 uncovered (118 of them in `benchmarks/` and `examples/`, which no test loads).
+The first survey, before the fixes (status `partial`, exit 5, 475 findings): `tests.quality` reported `test.no-assertion` 217, `test.weak-assertion` 4, `test.duplicate-setup` 9, `test.logic` 5; `tests.assertion-density` 64; `static.clones` 51; `static.complexity` 49; the rest as in the final survey. `tests.mutation` scored 0.468 in the second and final surveys: 131 killed, 21 survived, 128 uncovered (118 of them in `benchmarks/` and `examples/`, which no test loads).
 
 ## Triage
 
-Every finding of the final survey (the deep check's are among them), plus every finding of the first survey that a fix removed (verdict `false`, its reason naming the fix). Verification per ADR-138 §4:
+Every finding of the final survey (the deep check's are among them), plus every finding of the first two surveys that a fix removed (verdict `false`, its reason naming the fix). Verification per ADR-138 §4:
 
 - every `mutant.survived` was replayed: the mutation applied to the clone, `npx jest --silent --maxWorkers=4` run through `scripts/heavy.sh`, the file restored with `git checkout`; all 21 left the suite green (467 passed);
 - every `coverage.*`, `crap.watch`, and `mutant.uncovered` row was recomputed from the run's `coverage/lcov.info` with the symbol-lines rule of ADR-079 (the lines after the first): all match;
@@ -268,39 +269,39 @@ Every finding of the final survey (the deep check's are among them), plus every 
 
 | Finding | Kind | Location | Verdict | Reasoning | Action |
 |---|---|---|---|---|---|
+| `fnd_423d9d` | `dead.symbol` | `benchmarks/always-last-digit.ts:21` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_b67ea0` | `dead.symbol` | `benchmarks/always-last-digit.ts:36` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_18ac43` | `dead.symbol` | `benchmarks/always-last-digit.ts:6` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_ee1bf0` | `dead.symbol` | `benchmarks/always-last-digit.ts:62` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_cc25f2` | `dead.symbol` | `benchmarks/always-last-digit.ts:89` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_6a7ff6` | `dead.symbol` | `benchmarks/nested-objects.ts:12` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_a695df` | `dead.symbol` | `benchmarks/nested-objects.ts:4` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_b63396` | `dead.symbol` | `benchmarks/nested-objects.ts:54` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_593727` | `dead.symbol` | `benchmarks/random-digit.ts:113` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_423d9d` | `dead.symbol` | `benchmarks/random-digit.ts:21` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_b67ea0` | `dead.symbol` | `benchmarks/random-digit.ts:36` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_18ac43` | `dead.symbol` | `benchmarks/random-digit.ts:6` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_ee1bf0` | `dead.symbol` | `benchmarks/random-digit.ts:62` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_cc25f2` | `dead.symbol` | `benchmarks/random-digit.ts:89` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_3f8db7` | `dead.symbol` | `scripts/completions/run.mjs:107` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_b11267` | `dead.symbol` | `scripts/completions/run.mjs:169` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_494503` | `dead.symbol` | `scripts/completions/run.mjs:264` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_a0391d` | `dead.symbol` | `scripts/completions/run.mjs:272` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_b93ce0` | `dead.symbol` | `scripts/completions/run.mjs:35` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_d64698` | `dead.symbol` | `scripts/completions/run.mjs:43` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_aa5fde` | `dead.symbol` | `scripts/completions/run.mjs:71` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_0c8ca8` | `dead.symbol` | `scripts/completions/run.mjs:74` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_097873` | `dead.symbol` | `scripts/completions/run.mjs:83` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
+| `fnd_8eacd4` | `dead.symbol` | `scripts/completions/run.mjs:88` | false | Surveys 1 and 2 only: the script's top-level code calls it, directly or in a callback it hands to `suite`, and the file is run directly (fixed in e12d282). | fixed |
 | `fnd_05bd0e` | `dead.export` | `benchmarks/compile-time/discriminated-union-exhaustive.ts:9` | disputed | Nothing imports it (correct); the file is a compile-time benchmark `tsc` checks, never imported. | none |
 | `fnd_ec6856` | `dead.export` | `benchmarks/compile-time/discriminated-union-non-exhaustive.ts:9` | disputed | Nothing imports it (correct); the file is a compile-time benchmark `tsc` checks, never imported. | none |
 | `fnd_9fa68a` | `dead.export` | `benchmarks/compile-time/large-union-exhaustive.ts:8` | disputed | Nothing imports it (correct); the file is a compile-time benchmark `tsc` checks, never imported. | none |
 | `fnd_32c969` | `dead.export` | `benchmarks/compile-time/large-union-non-exhaustive.ts:9` | disputed | Nothing imports it (correct); the file is a compile-time benchmark `tsc` checks, never imported. | none |
-| `fnd_423d9d` | `dead.symbol` | `benchmarks/always-last-digit.ts:21` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_b67ea0` | `dead.symbol` | `benchmarks/always-last-digit.ts:36` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_18ac43` | `dead.symbol` | `benchmarks/always-last-digit.ts:6` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_ee1bf0` | `dead.symbol` | `benchmarks/always-last-digit.ts:62` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_cc25f2` | `dead.symbol` | `benchmarks/always-last-digit.ts:89` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_6a7ff6` | `dead.symbol` | `benchmarks/nested-objects.ts:12` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_a695df` | `dead.symbol` | `benchmarks/nested-objects.ts:4` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_b63396` | `dead.symbol` | `benchmarks/nested-objects.ts:54` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_593727` | `dead.symbol` | `benchmarks/random-digit.ts:113` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_423d9d` | `dead.symbol` | `benchmarks/random-digit.ts:21` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_b67ea0` | `dead.symbol` | `benchmarks/random-digit.ts:36` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_18ac43` | `dead.symbol` | `benchmarks/random-digit.ts:6` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_ee1bf0` | `dead.symbol` | `benchmarks/random-digit.ts:62` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_cc25f2` | `dead.symbol` | `benchmarks/random-digit.ts:89` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
 | `fnd_2c50ba` | `dead.symbol` | `examples/one-file-demo/one-file-demo.ts:146` | true | Never referenced anywhere, its own file included. | delete or use it |
 | `fnd_9b8f57` | `dead.symbol` | `examples/one-file-demo/one-file-demo.ts:25` | true | Never referenced anywhere, its own file included. | delete or use it |
 | `fnd_049855` | `dead.symbol` | `examples/one-file-demo/one-file-demo.ts:60` | true | Never referenced anywhere, its own file included. | delete or use it |
 | `fnd_e1ceaf` | `dead.symbol` | `examples/one-file-demo/one-file-demo.ts:79` | true | Never referenced anywhere, its own file included. | delete or use it |
 | `fnd_709cbf` | `dead.symbol` | `examples/one-file-demo/one-file-demo.ts:91` | true | Never referenced anywhere, its own file included. | delete or use it |
-| `fnd_3f8db7` | `dead.symbol` | `scripts/completions/run.mjs:107` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_b11267` | `dead.symbol` | `scripts/completions/run.mjs:169` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_494503` | `dead.symbol` | `scripts/completions/run.mjs:264` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_a0391d` | `dead.symbol` | `scripts/completions/run.mjs:272` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_b93ce0` | `dead.symbol` | `scripts/completions/run.mjs:35` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_d64698` | `dead.symbol` | `scripts/completions/run.mjs:43` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_aa5fde` | `dead.symbol` | `scripts/completions/run.mjs:71` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_0c8ca8` | `dead.symbol` | `scripts/completions/run.mjs:74` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_097873` | `dead.symbol` | `scripts/completions/run.mjs:83` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
-| `fnd_8eacd4` | `dead.symbol` | `scripts/completions/run.mjs:88` | disputed | No import reaches the file (correct), but it is a script run directly, whose top-level code calls the function. | none |
 | `fnd_f1082e` | `dead.symbol` | `tests/narrow.test.ts:27` | true | Never referenced anywhere, its own file included. | delete or use it |
 
 **`static.deps`**
@@ -846,7 +847,6 @@ Every finding of the final survey (the deep check's are among them), plus every 
 | `fnd_3a8bf3` | `test.weak-assertion` | `tests/types.test.ts:332` | true | Its only assertions are `@ts-expect-error` lines: a type error, not which. | pin the error (`expectTypeOf` or a message) |
 | `fnd_c72d9a` | `test.weak-assertion` | `tests/types.test.ts:349` | true | Its only assertions are `@ts-expect-error` lines: a type error, not which. | pin the error (`expectTypeOf` or a message) |
 
-
 ## False-positive rate per check
 
 `false / (true + false)`, disputed rows apart.
@@ -857,20 +857,22 @@ Every finding of the final survey (the deep check's are among them), plus every 
 | `static.clones` | 46 | 11 | 0 | 0.19 |
 | `static.complexity` | 48 | 1 | 0 | 0.02 |
 | `static.crap` | 9 | 0 | 0 | 0.00 |
-| `static.dead-code` | 6 | 0 | 28 | 0.00 |
+| `static.dead-code` | 6 | 24 | 4 | 0.80 |
 | `static.deps` | 0 | 0 | 1 | — |
 | `tests.assertion-density` | 15 | 54 | 15 | 0.78 |
 | `tests.coverage` | 13 | 0 | 0 | 0.00 |
 | `tests.mutation` | 149 | 0 | 0 | 0.00 |
 | `tests.quality` | 64 | 207 | 0 | 0.76 |
 
-Every other check that ran (`perf.footprint`, `static.analyze`, `tests.flaky`) reported nothing: no rate. The false rows are all from the first survey and all fixed; the final survey has none.
+Every other check that ran (`perf.footprint`, `static.analyze`, `tests.flaky`) reported nothing: no rate. The false rows are all from the first two surveys and all fixed; the final survey has none.
 
 ## Check bugs fixed
 
 - **TypeScript's type-level assertions assert** (`tests.quality`, `tests.assertion-density`): ts-pattern tests its types with `type t = Expect<Equal<typeof x, string>>` and `// @ts-expect-error`, which ts-jest (and the project's `tsc`) enforce, and Cupel read 198 such tests as asserting nothing. A TypeScript-only `queries/typescript/tests.scm` captures `Expect<Equal<…>>` as `type-equal` (equality, strong), any other `Expect<…>` as `type-true` (truthiness, weak), and a `// @ts-expect-error` comment as `type-error` (throws, weak: a type error, not which). Fixture: `crates/cupel-fixtures/repos/type-assertions/typescript/`; tests `ecma_tests::type_level_assertions_assert_in_typescript_tests` and `crates/cupel-fixtures/tests/type_assertions.rs`. Commit 1a2a807. It removed 198 `test.no-assertion`, 1 `test.weak-assertion` (a `toBeDefined` beside an `Expect<Equal<…>>`), 1 `test.logic` (branches that guard type assertions, ADR-069), and 54 density rows; it added 35 `test.weak-assertion` rows, tests whose only assertions are `@ts-expect-error` lines (true), and 20 density rows, from the repository's density rising from 0.86 to 3.07 assertions per test (true or disputed above).
 - **A return that ends an inline callback is not an early exit** (`static.complexity`): decisions in an anonymous callback stay with the function that passes it (ADR-030), and the `return` that ends the callback was judged final against that function's body, so `should infer values correctly in handler` (sixteen `.with(P.x, (x) => {{ …; return 'ok'; }})`) read cognitive 16. `[decisions] functions` names the anonymous function kinds whose own final `return` ends only them (ECMAScript: `arrow_function`, `function_expression`, `generator_function`). Fixture: `crates/cupel-fixtures/repos/inline-callbacks/typescript/`; tests `ecma_decisions::a_return_that_ends_an_inline_callback_is_not_early_and_one_inside_it_is` and `crates/cupel-fixtures/tests/inline_callbacks.rs`. Commit 90d3669. It removed 1 `complexity.high`.
 - **A TypeScript type declaration keeps its type arguments when it normalizes** (`static.clones`, `tests.quality`'s `test.duplicate-setup`): `[normalize] erase` drops `type_arguments` so a typed function and its JavaScript twin normalize alike, which also emptied every `type cases = [Expect<Equal<…>>, …]`, so tests checking different types were type-1 clones (the 15-line `DeepExclude.Primitives` of a 67-line `FindSelected` test) and tests opening with three different `type` declarations repeated their setup. `[normalize] keep` names kinds below which nothing is erased (ECMAScript: `type_alias_declaration`). Fixture: `crates/cupel-fixtures/repos/type-clones/typescript/`; tests `ecma_norm::a_type_declaration_keeps_its_type_arguments` and `crates/cupel-fixtures/tests/type_clones.rs`. Commit 6a582a5. It removed 11 clone findings (6 pairs, 5 clusters) and 7 `test.duplicate-setup`; the clusters re-formed by shape (6 new clone rows, and 1 new `test.duplicate-setup` whose type declarations really repeat; true above).
+
+- **A function a module's top-level code calls is an entry point** (`static.dead-code`): `scripts/completions/run.mjs` is run with `node` and calls its functions from top-level statements (`const refRoot = checkoutRef();`, `[ref, await run(refRoot)]`), and each benny benchmark's top-level `suite("…", add("…", () => testExhaustive(9)), …)` runs the callbacks it is handed; nothing imports either, so the module pass reported their 24 functions unreachable. ECMAScript's `api.scm` makes a function an entry point when a top-level statement calls it, directly, awaited, or as a declaration's value (alone or in an array), or when a callback it hands to a call (or to a call among that call's arguments) calls it, as ADR-138 §9 does for Python's module-level calls (group 2). Fixture: `crates/cupel-fixtures/repos/script-entry/typescript/`; tests `ecma_api::functions_module_level_code_calls_are_entry_points` and `crates/cupel-fixtures/tests/script_entry.rs`. Commit e12d282. It removed 24 `dead.symbol`; the remaining 4 `dead.export` of `benchmarks/compile-time/` (functions `tsc` checks and nothing calls) stay disputed.
 
 Rerun after the fixes: the removed rows are gone and every other finding of the first survey is still reported (by check, kind, file, and line), with the additions listed above.
 
