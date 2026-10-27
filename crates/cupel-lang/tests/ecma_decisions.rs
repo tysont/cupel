@@ -175,4 +175,9 @@ fn a_return_that_ends_an_inline_callback_is_not_early_and_one_inside_it_is() {
         decisions_of("typescript", dir.path(), "a.handles.sign"),
         [(Branch, 0, 1, 1), (EarlyReturn, 1, 0, 1)]
     );
+    let javascript = tree(&[("src/a.test.js", CALLBACKS)]);
+    assert_eq!(
+        decisions_of("javascript", javascript.path(), "a.handles"),
+        [(Branch, 0, 1, 1), (EarlyReturn, 1, 0, 1)]
+    );
 }
