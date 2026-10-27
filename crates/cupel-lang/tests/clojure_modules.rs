@@ -7,6 +7,8 @@ use support::{edge_rows, produce, tree, under};
 
 /// cljfx's registry: `(lazy-load cljfx.fx.button/lifecycle)` expands to `(requiring-resolve
 /// 'cljfx.fx.button/lifecycle)`, which loads the namespace on first use, so nothing `:require`s it.
+/// A quoted symbol is data (cljfx names its extension lifecycles `'cljfx.api/ext-watcher`) unless
+/// `requiring-resolve` or `resolve` is given it.
 const REGISTRY: &str = r"(ns app.fx
   (:require [app.widgets.base :as widgets.base]
             [clojure.string :as str]))
@@ -18,13 +20,18 @@ const REGISTRY: &str = r"(ns app.fx
   {:button (lazy-load app.widgets.button/lifecycle)
    :label (delay @(requiring-resolve 'app.widgets.label/lifecycle))
    :base widgets.base/lifecycle
-   :name (str/join [app.fx/registry clojure.core/inc])})
+   :name (str/join [app.fx/registry clojure.core/inc])
+   :label-name 'app.widgets.other/name})
 ";
 
 #[test]
 fn a_qualified_symbol_naming_a_namespace_of_the_project_depends_on_it() {
     let dir = tree(&[
         ("deps.edn", "{:paths [\"src\"]}\n"),
+        (
+            "src/app/widgets/other.clj",
+            "(ns app.widgets.other)\n(def name 3)\n",
+        ),
         ("src/app/fx.clj", REGISTRY),
         (
             "src/app/widgets/base.clj",

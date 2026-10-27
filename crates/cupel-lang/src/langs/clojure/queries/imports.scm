@@ -38,10 +38,28 @@
   (#eq? @_ns "ns")
   (#eq? @_import "import"))
 
-; A symbol qualified by a dotted namespace (`cljfx.fx.button/lifecycle`), which loads or needs that
-; namespace without a `:require` (`requiring-resolve`, directly or through a macro). The specifier
-; keeps its `/`; the resolver keeps it only when the namespace is another file of the project, since
-; an alias (`fx.button/x`) or a library's namespace is not one.
-((sym_lit
-  namespace: (sym_ns) @_namespace) @import @import.specifier
+; A symbol qualified by a dotted namespace (`cljfx.fx.button/lifecycle`) read as code, which loads
+; or needs that namespace without a `:require` (`requiring-resolve` written by a macro, `@a.b/state`,
+; `#'a.b/f`): its parent is a form, not a quote, since a quoted symbol is data. The specifier keeps
+; its `/`; the resolver keeps it only when the namespace is another file of the project, since an
+; alias (`fx.button/x`) or a library's namespace is not one.
+([
+  (list_lit (sym_lit namespace: (sym_ns) @_namespace) @import @import.specifier)
+  (vec_lit (sym_lit namespace: (sym_ns) @_namespace) @import @import.specifier)
+  (map_lit (sym_lit namespace: (sym_ns) @_namespace) @import @import.specifier)
+  (set_lit (sym_lit namespace: (sym_ns) @_namespace) @import @import.specifier)
+  (anon_fn_lit (sym_lit namespace: (sym_ns) @_namespace) @import @import.specifier)
+  (derefing_lit (sym_lit namespace: (sym_ns) @_namespace) @import @import.specifier)
+  (var_quoting_lit (sym_lit namespace: (sym_ns) @_namespace) @import @import.specifier)
+ ]
+  (#match? @_namespace "[.]"))
+
+; A quoted qualified symbol `requiring-resolve` or `resolve` is given: `(requiring-resolve 'a.b/c)`.
+(list_lit
+  .
+  (sym_lit name: (sym_name) @_resolve)
+  .
+  (quoting_lit
+    (sym_lit namespace: (sym_ns) @_namespace) @import @import.specifier)
+  (#any-of? @_resolve "requiring-resolve" "resolve")
   (#match? @_namespace "[.]"))

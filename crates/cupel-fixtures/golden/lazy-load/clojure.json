@@ -4,15 +4,15 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 0,
+      "findings": 1,
       "id": "static.dead-code",
       "metrics": {
-        "dead_exports": 0.0,
+        "dead_exports": 1.0,
         "dead_symbols": 0.0
       },
       "oracle": null,
       "score": {
-        "n": 5,
+        "n": 6,
         "unit": "dead_symbols",
         "value": 0.0
       },
@@ -28,8 +28,59 @@
   "description": null,
   "exit_code": 0,
   "explanation": null,
-  "findings": [],
-  "next_actions": [],
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `render` from src/shop/widgets/label.clj if nothing outside the repository uses it, or import src/shop/widgets/label.clj where `render` is meant to be called."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.4,
+      "detail": "No import in the repository resolves to src/shop/widgets/label.clj or another file of its module, and nothing in it is an entry point, test, or framework hook. If `render` is part of a library's public API this is expected; in an application it is dead, along with whatever only it calls.",
+      "evidence": {
+        "dynamic": [],
+        "file": "src/shop/widgets/label.clj",
+        "module": "shop.widgets.label",
+        "module_files": [
+          "src/shop/widgets/label.clj"
+        ],
+        "reach": "module",
+        "suspect_imports": []
+      },
+      "id": "fnd_845724",
+      "kind": "dead.export",
+      "location": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 6,
+        "file": "src/shop/widgets/label.clj",
+        "line": 5
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_1acb76c5172286cb",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_845724 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shop.widgets.label/render",
+        "hash": "sh_1acb76c5172286cb",
+        "lang": "clojure"
+      },
+      "tier": 0,
+      "title": "`shop.widgets.label/render` is exported but no import resolves to src/shop/widgets/label.clj"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_845724",
+      "kind": "review",
+      "priority": 1,
+      "summary": "Delete `render` from src/shop/widgets/label.clj if nothing outside the repository uses it, or import src/shop/widgets/label.clj where `render` is meant to be called."
+    }
+  ],
   "oracles": null,
   "plan": null,
   "rankings": null,
@@ -63,7 +114,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 3,
+      "files": 4,
       "languages": [
         "clojure"
       ],
@@ -71,7 +122,7 @@
       "roots": [
         "."
       ],
-      "symbols": 5
+      "symbols": 6
     },
     "seed": "<seed>",
     "started": "<timestamp>",
@@ -82,7 +133,7 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 0,
+      "info": 1,
       "warn": 0
     },
     "gate": null,
@@ -91,6 +142,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 0,
+  "total_findings": 1,
   "truncated": false
 }

@@ -1,11 +1,11 @@
-// ABOUTME: A Clojure namespace loaded by `requiring-resolve` through a macro is reachable end to end: nothing of
-// ABOUTME: it is dead code, though no `:require` names it (P9.9 group 3, cljfx's lazy registry).
+// ABOUTME: A Clojure namespace loaded by `requiring-resolve` through a macro is reachable end to end, though no
+// ABOUTME: `:require` names it; one only named by a quoted symbol is not (P9.9 group 3, cljfx's lazy registry).
 use std::process::Command;
 
 use cupel_fixtures::{copy_repo, run_cupel};
 
 #[test]
-fn a_lazily_loaded_namespace_is_not_dead_code() {
+fn a_lazily_loaded_namespace_is_not_dead_code_and_a_quoted_name_loads_nothing() {
     let dir = tempfile::tempdir().unwrap();
     copy_repo("lazy-load/clojure", dir.path());
     let init = Command::new("git")
@@ -27,6 +27,11 @@ fn a_lazily_loaded_namespace_is_not_dead_code() {
             (finding.kind.as_str(), file)
         })
         .collect();
-    assert_eq!(findings, [], "{}", outcome.stdout);
+    assert_eq!(
+        findings,
+        [("dead.export", "src/shop/widgets/label.clj")],
+        "{}",
+        outcome.stdout
+    );
     outcome.assert_golden("lazy-load/clojure");
 }
