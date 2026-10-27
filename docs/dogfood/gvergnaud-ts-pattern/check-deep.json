@@ -1,0 +1,2932 @@
+{
+  "cupel": {
+    "version": "0.1.0",
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json"
+  },
+  "run": {
+    "id": "run_01M5XASM9RAHEFRYXAJAQ0BFHN",
+    "verb": "check",
+    "started": "2026-10-27T00:05:08Z",
+    "duration_ms": 10920,
+    "git": {
+      "sha": "f11be73acb18e1d653d4f252e7d75981d873a2e6",
+      "dirty": true,
+      "base": null,
+      "branch": "main"
+    },
+    "scope": {
+      "mode": "paths",
+      "files": 4,
+      "symbols": 85,
+      "roots": [
+        "."
+      ],
+      "languages": [
+        "typescript"
+      ]
+    },
+    "depth": "deep",
+    "budget_ms": null,
+    "seed": 3169931036300473669,
+    "toolchain": {},
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": "main",
+        "depth": "deep",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "typescript": {
+            "coverage": "npx jest --coverage --coverageReporters=lcov",
+            "mutation": {
+              "jobs": 2
+            },
+            "test": "npx jest"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "baseline": null
+  },
+  "status": "pass",
+  "exit_code": 0,
+  "checks": [
+    {
+      "id": "conc.linearizability",
+      "status": "skipped",
+      "tier": 5,
+      "cost": "deep",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "unconfigured",
+        "fact": null,
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel describe matrix",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "conc.race",
+      "status": "skipped",
+      "tier": 4,
+      "cost": "standard",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "unsupported",
+        "fact": "race-reports",
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel describe matrix",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "gen.fuzz",
+      "status": "skipped",
+      "tier": 4,
+      "cost": "deep",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "unsupported",
+        "fact": "fuzz-results",
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel describe matrix",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "gen.metamorphic",
+      "status": "skipped",
+      "tier": 4,
+      "cost": "deep",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "unsupported",
+        "fact": "relation-results",
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel describe matrix",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "gen.property",
+      "status": "pass",
+      "tier": 4,
+      "cost": "standard",
+      "score": {
+        "value": 0.0,
+        "unit": "falsified",
+        "n": 0
+      },
+      "metrics": {
+        "falsified": 0.0,
+        "missing": 0.0,
+        "properties": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 160,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "meta.oracle-independence",
+      "status": "skipped",
+      "tier": 2,
+      "cost": "quick",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "needs-range",
+        "fact": null,
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel check --changed --only meta.oracle-independence",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "meta.traceability",
+      "status": "skipped",
+      "tier": 2,
+      "cost": "standard",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "needs-range",
+        "fact": null,
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel check --changed --only meta.traceability",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "perf.bench",
+      "status": "skipped",
+      "tier": 0,
+      "cost": "deep",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "unconfigured",
+        "fact": null,
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel describe matrix",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "perf.footprint",
+      "status": "pass",
+      "tier": 0,
+      "cost": "quick",
+      "score": {
+        "value": 650.0,
+        "unit": "dependencies",
+        "n": 650
+      },
+      "metrics": {
+        "artifact_bytes": 0.0,
+        "copyleft": 0.0,
+        "dependencies": 650.0,
+        "vulnerable": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 417,
+      "skipped": null,
+      "oracle": null,
+      "notes": [
+        "artifact sizes not measured: set `[lang.<id>] artifacts` to their paths or globs (typescript)",
+        "vulnerabilities not measured: set `[lang.<id>] advisories` to a directory of OSV advisories (typescript)"
+      ]
+    },
+    {
+      "id": "spec.contracts",
+      "status": "skipped",
+      "tier": 5,
+      "cost": "standard",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "unsupported",
+        "fact": "contract-violations",
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel describe matrix",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "static.analyze",
+      "status": "pass",
+      "tier": 1,
+      "cost": "standard",
+      "score": {
+        "value": 0.0,
+        "unit": "diagnostics",
+        "n": 1
+      },
+      "metrics": {
+        "diagnostics": 0.0,
+        "errors": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 807,
+      "skipped": null,
+      "oracle": null,
+      "notes": [
+        "eslint unconfigured: Add an ESLint flat config (eslint.config.js or .mjs) to the project root; ESLint does not run without one. (typescript)"
+      ]
+    },
+    {
+      "id": "static.api-surface",
+      "status": "skipped",
+      "tier": 0,
+      "cost": "quick",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "needs-range",
+        "fact": null,
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel check --changed --only static.api-surface",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "static.clones",
+      "status": "fail",
+      "tier": 0,
+      "cost": "quick",
+      "score": {
+        "value": 4.0,
+        "unit": "pairs",
+        "n": 81
+      },
+      "metrics": {
+        "clusters": 0.0,
+        "max_jaccard": 0.976,
+        "pairs": 4.0
+      },
+      "delta": null,
+      "findings": 4,
+      "duration_ms": 6,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "static.complexity",
+      "status": "fail",
+      "tier": 0,
+      "cost": "quick",
+      "score": {
+        "value": 3.0,
+        "unit": "cyclomatic_max",
+        "n": 85
+      },
+      "metrics": {
+        "cognitive_max": 2.0,
+        "cyclomatic_max": 3.0,
+        "length_max": 123.0,
+        "nesting_max": 1.0,
+        "params_max": 3.0
+      },
+      "delta": null,
+      "findings": 3,
+      "duration_ms": 11,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "static.crap",
+      "status": "pass",
+      "tier": 0,
+      "cost": "quick",
+      "score": {
+        "value": 0.0,
+        "unit": "max",
+        "n": 0
+      },
+      "metrics": {
+        "max": 0.0,
+        "mean": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 4,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "static.dead-code",
+      "status": "pass",
+      "tier": 0,
+      "cost": "quick",
+      "score": {
+        "value": 0.0,
+        "unit": "dead_symbols",
+        "n": 85
+      },
+      "metrics": {
+        "dead_exports": 0.0,
+        "dead_symbols": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 123,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "static.deps",
+      "status": "pass",
+      "tier": 0,
+      "cost": "quick",
+      "score": {
+        "value": 0.0,
+        "unit": "cycles",
+        "n": 7
+      },
+      "metrics": {
+        "cycles": 0.0,
+        "max_distance": 0.0,
+        "violations": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "tests.assertion-density",
+      "status": "fail",
+      "tier": 2,
+      "cost": "quick",
+      "score": {
+        "value": 2.8035714285714284,
+        "unit": "assertions_per_test",
+        "n": 56
+      },
+      "metrics": {
+        "assertions_per_public_function": 0.0,
+        "assertions_per_test": 2.8035714285714284,
+        "sparse_files": 2.0,
+        "sparse_tests": 1.0,
+        "tested_public_functions": 0.0
+      },
+      "delta": null,
+      "findings": 3,
+      "duration_ms": 0,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "tests.coverage",
+      "status": "pass",
+      "tier": 2,
+      "cost": "standard",
+      "score": {
+        "value": 0.0,
+        "unit": "line_ratio",
+        "n": 0
+      },
+      "metrics": {
+        "branch": 0.0,
+        "branches": 0.0,
+        "line": 0.0,
+        "lines": 0.0,
+        "uncovered": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 1,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "tests.flaky",
+      "status": "pass",
+      "tier": 2,
+      "cost": "standard",
+      "score": {
+        "value": 0.0,
+        "unit": "unstable",
+        "n": 54
+      },
+      "metrics": {
+        "flaky": 0.0,
+        "order_dependent": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 6008,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "tests.mutation",
+      "status": "pass",
+      "tier": 3,
+      "cost": "standard",
+      "score": {
+        "value": 1.0,
+        "unit": "killed_ratio",
+        "n": 0
+      },
+      "metrics": {
+        "equivalent": 0.0,
+        "executed": 0.0,
+        "fallback": 0.0,
+        "killed": 0.0,
+        "out_of_memory": 0.0,
+        "reused": 0.0,
+        "schemata": 0.0,
+        "score": 1.0,
+        "survived": 0.0,
+        "timeout": 0.0,
+        "uncovered": 0.0,
+        "unviable": 0.0
+      },
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 111,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "tests.quality",
+      "status": "fail",
+      "tier": 2,
+      "cost": "quick",
+      "score": {
+        "value": 2.8035714285714284,
+        "unit": "assertion_density",
+        "n": 56
+      },
+      "metrics": {
+        "assertion_density": 2.8035714285714284,
+        "no_assertion": 10.0,
+        "weak_ratio": 0.39490445859872614
+      },
+      "delta": null,
+      "findings": 33,
+      "duration_ms": 0,
+      "skipped": null,
+      "oracle": null
+    },
+    {
+      "id": "tests.weakening",
+      "status": "skipped",
+      "tier": 2,
+      "cost": "quick",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "needs-range",
+        "fact": null,
+        "lang": "typescript",
+        "tool": null,
+        "see": "cupel check --changed --only tests.weakening",
+        "est_ms": null
+      },
+      "oracle": null
+    },
+    {
+      "id": "gen.differential",
+      "status": "skipped",
+      "tier": 4,
+      "cost": "deep",
+      "score": null,
+      "metrics": {},
+      "delta": null,
+      "findings": 0,
+      "duration_ms": 0,
+      "skipped": {
+        "reason": "unconfigured",
+        "fact": null,
+        "lang": null,
+        "tool": null,
+        "see": "cupel describe oracle add",
+        "est_ms": null
+      },
+      "oracle": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "fnd_eb430f",
+      "check": "tests.assertion-density",
+      "kind": "density.sparse-file",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": null,
+      "location": {
+        "file": "tests/branded-nominal-types.test.ts",
+        "line": 11,
+        "col": 76,
+        "end_line": 59,
+        "end_col": 4
+      },
+      "title": "`tests/branded-nominal-types.test.ts` makes 0.67 assertion(s) per test, 23% of the repository's 2.8 (min 50%)",
+      "detail": null,
+      "evidence": {
+        "assertions": 2,
+        "file_density_percent_min": 50,
+        "file_tests_min": 3,
+        "percent": 23,
+        "repository_assertions": 157,
+        "repository_tests": 56,
+        "tests": 3
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Pin more of what the tests in `tests/branded-nominal-types.test.ts` exercise: they assert less than the rest of the suite.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.assertion-density --paths tests/branded-nominal-types.test.ts",
+      "suppress": "cupel suppress fnd_eb430f --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_a037eb",
+      "check": "tests.quality",
+      "kind": "test.logic",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.branded-nominal-types.Branded strings.issue #167",
+        "hash": "sh_56dda7c94c6a233d",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/branded-nominal-types.test.ts",
+        "line": 27,
+        "col": 20,
+        "end_line": 38,
+        "end_col": 4
+      },
+      "title": "`tests.branded-nominal-types.Branded strings.issue #167` contains logic: 1 loop(s) or branch(es) (max 0)",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 1,
+        "branches": 0,
+        "guards": 0,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 0,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `issue #167` into one test per path, or parametrize it, so the test body neither loops nor branches.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_56dda7c94c6a233d",
+      "suppress": "cupel suppress fnd_a037eb --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_96faa4",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.branded-nominal-types.Branded strings.issue #167",
+        "hash": "sh_56dda7c94c6a233d",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/branded-nominal-types.test.ts",
+        "line": 27,
+        "col": 20,
+        "end_line": 38,
+        "end_col": 4
+      },
+      "title": "`tests.branded-nominal-types.Branded strings.issue #167` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `issue #167` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_56dda7c94c6a233d",
+      "suppress": "cupel suppress fnd_96faa4 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_9de658",
+      "check": "tests.assertion-density",
+      "kind": "density.sparse-file",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": null,
+      "location": {
+        "file": "tests/exhaustive-fallback.test.ts",
+        "line": 5,
+        "col": 62,
+        "end_line": 49,
+        "end_col": 4
+      },
+      "title": "`tests/exhaustive-fallback.test.ts` makes 1.25 assertion(s) per test, 44% of the repository's 2.8 (min 50%)",
+      "detail": null,
+      "evidence": {
+        "assertions": 5,
+        "file_density_percent_min": 50,
+        "file_tests_min": 3,
+        "percent": 44,
+        "repository_assertions": 157,
+        "repository_tests": 56,
+        "tests": 4
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Pin more of what the tests in `tests/exhaustive-fallback.test.ts` exercise: they assert less than the rest of the suite.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.assertion-density --paths tests/exhaustive-fallback.test.ts",
+      "suppress": "cupel suppress fnd_9de658 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_c82918",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-fallback.Exhaustive fallback function.should throw otherwise",
+        "hash": "sh_eb0c99c141749d64",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-fallback.test.ts",
+        "line": 19,
+        "col": 32,
+        "end_line": 27,
+        "end_col": 4
+      },
+      "title": "`tests.exhaustive-fallback.Exhaustive fallback function.should throw otherwise` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should throw otherwise` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_eb0c99c141749d64",
+      "suppress": "cupel suppress fnd_c82918 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_aa343b",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-fallback.Exhaustive fallback function.should return a value assignable to the explicit output type",
+        "hash": "sh_e9f4fb2e0210b8da",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-fallback.test.ts",
+        "line": 29,
+        "col": 70,
+        "end_line": 39,
+        "end_col": 4
+      },
+      "title": "`tests.exhaustive-fallback.Exhaustive fallback function.should return a value assignable to the explicit output type` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should return a value assignable to the explicit output type` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_e9f4fb2e0210b8da",
+      "suppress": "cupel suppress fnd_aa343b --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_ba44dc",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-fallback.Exhaustive fallback function.should return a value assignable .returnType<T>()",
+        "hash": "sh_803402bef720ef4f",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-fallback.test.ts",
+        "line": 41,
+        "col": 59,
+        "end_line": 49,
+        "end_col": 4
+      },
+      "title": "`tests.exhaustive-fallback.Exhaustive fallback function.should return a value assignable .returnType<T>()` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should return a value assignable .returnType<T>()` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_803402bef720ef4f",
+      "suppress": "cupel suppress fnd_ba44dc --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_40455b",
+      "check": "static.clones",
+      "kind": "clone.pair",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.string literals",
+        "hash": "sh_3499d7b030324578",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 14,
+        "col": 27,
+        "end_line": 58,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.string literals` and `tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.number literals` (tests/exhaustive-match.test.ts:60) are type-3 clones (jaccard 0.98)",
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "edits": [
+          {
+            "change": "removed",
+            "location": {
+              "col": 21,
+              "end_col": 22,
+              "end_line": 28,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 28
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.number literals"
+          }
+        ],
+        "jaccard": 0.976,
+        "left": {
+          "col": 27,
+          "end_col": 6,
+          "end_line": 58,
+          "file": "tests/exhaustive-match.test.ts",
+          "hash": "sh_3499d7b030324578",
+          "lang": "typescript",
+          "line": 14,
+          "lines": 45,
+          "nodes": 260,
+          "symbol": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.string literals"
+        },
+        "renamed": [],
+        "right": {
+          "col": 27,
+          "end_col": 6,
+          "end_line": 104,
+          "file": "tests/exhaustive-match.test.ts",
+          "hash": "sh_fd9a50aaa4c64c9f",
+          "lang": "typescript",
+          "line": 60,
+          "lines": 45,
+          "nodes": 259,
+          "symbol": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.number literals"
+        },
+        "threshold": 0.82
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `string literals` and `number literals` share into one function and call it from both.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.clones --symbols sh_3499d7b030324578",
+      "suppress": "cupel suppress fnd_40455b --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_e78e77",
+      "check": "tests.assertion-density",
+      "kind": "density.sparse-test",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": null,
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 106,
+        "col": 28,
+        "end_line": 127,
+        "end_col": 6
+      },
+      "title": "`boolean literals` makes 1 assertion(s) in 22 lines (max 20 lines per assertion)",
+      "detail": null,
+      "evidence": {
+        "assertions": 1,
+        "lines": 22,
+        "lines_per_assertion": 22,
+        "lines_per_assertion_max": 20,
+        "test": "boolean literals"
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Assert what `boolean literals` exercises as it goes, or split it into tests that each pin one outcome.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.assertion-density --paths tests/exhaustive-match.test.ts",
+      "suppress": "cupel suppress fnd_e78e77 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_27a173",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.boolean literals",
+        "hash": "sh_5eea10df6bc1e261",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 106,
+        "col": 28,
+        "end_line": 127,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.boolean literals` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `boolean literals` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_5eea10df6bc1e261",
+      "suppress": "cupel suppress fnd_27a173 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_0ebb9d",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.boolean literals",
+        "hash": "sh_b0176aa99c7ba058",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 129,
+        "col": 28,
+        "end_line": 146,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.boolean literals` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `boolean literals` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_b0176aa99c7ba058",
+      "suppress": "cupel suppress fnd_0ebb9d --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_1a4096",
+      "check": "static.complexity",
+      "kind": "function.long",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.union of objects",
+        "hash": "sh_6bccaf31c57c9c0c",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 148,
+        "col": 28,
+        "end_line": 256,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.union of objects` is 109 lines long (max 60)",
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 109
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `union of objects` into named functions until it is at most 60 lines.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.complexity --symbols sh_6bccaf31c57c9c0c",
+      "suppress": "cupel suppress fnd_1a4096 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_e3ba32",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.union of tuples",
+        "hash": "sh_f07e529cc6561fac",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 258,
+        "col": 27,
+        "end_line": 285,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.union of tuples` asserts only weakly: 2 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 2,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 2
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `union of tuples` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_f07e529cc6561fac",
+      "suppress": "cupel suppress fnd_e3ba32 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_49093a",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.deeply nested 1",
+        "hash": "sh_07fe5273c2d83e94",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 287,
+        "col": 27,
+        "end_line": 318,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.deeply nested 1` asserts only weakly: 3 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 3,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 3
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `deeply nested 1` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_07fe5273c2d83e94",
+      "suppress": "cupel suppress fnd_49093a --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_1d45a6",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.deeply nested 2",
+        "hash": "sh_c699779827347f64",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 320,
+        "col": 27,
+        "end_line": 328,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.deeply nested 2` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `deeply nested 2` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_c699779827347f64",
+      "suppress": "cupel suppress fnd_1d45a6 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_f016ea",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with non-unions",
+        "hash": "sh_3682b1d510d9698b",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 330,
+        "col": 39,
+        "end_line": 354,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with non-unions` asserts only weakly: 2 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 2,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 2
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should work with non-unions` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_3682b1d510d9698b",
+      "suppress": "cupel suppress fnd_f016ea --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_26127b",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with object properties union",
+        "hash": "sh_b610b3f970e646a4",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 356,
+        "col": 52,
+        "end_line": 373,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with object properties union` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should work with object properties union` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_b610b3f970e646a4",
+      "suppress": "cupel suppress fnd_26127b --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_f57bf5",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with lists",
+        "hash": "sh_e6ab830bc7c0fcd4",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 375,
+        "col": 34,
+        "end_line": 411,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with lists` asserts only weakly: 2 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 2,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 2
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should work with lists` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_e6ab830bc7c0fcd4",
+      "suppress": "cupel suppress fnd_f57bf5 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_8100c1",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should support P.any in a readonly tuple",
+        "hash": "sh_65c9951c6dd1815c",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 413,
+        "col": 52,
+        "end_line": 428,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should support P.any in a readonly tuple` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `should support P.any in a readonly tuple` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_65c9951c6dd1815c",
+      "suppress": "cupel suppress fnd_8100c1 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_5ede66",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with Sets",
+        "hash": "sh_49ff776c9dfbcbb8",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 430,
+        "col": 33,
+        "end_line": 443,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with Sets` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should work with Sets` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_49ff776c9dfbcbb8",
+      "suppress": "cupel suppress fnd_5ede66 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_e56cb1",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with structures with a lot of unions",
+        "hash": "sh_bb60fc901847820f",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 494,
+        "col": 60,
+        "end_line": 538,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should work with structures with a lot of unions` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `should work with structures with a lot of unions` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_bb60fc901847820f",
+      "suppress": "cupel suppress fnd_e56cb1 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_90256c",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should infer literals as literal types",
+        "hash": "sh_d6c70e7e45331aaf",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 603,
+        "col": 50,
+        "end_line": 616,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should infer literals as literal types` asserts only weakly: 2 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 2,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 2
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should infer literals as literal types` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_d6c70e7e45331aaf",
+      "suppress": "cupel suppress fnd_90256c --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_a35637",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should correctly exclude cases if .when is a type guard",
+        "hash": "sh_a56597c4454be0da",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 635,
+        "col": 67,
+        "end_line": 650,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should correctly exclude cases if .when is a type guard` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `should correctly exclude cases if .when is a type guard` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_a56597c4454be0da",
+      "suppress": "cupel suppress fnd_a35637 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_0f7dca",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should correctly exclude cases if the pattern is a literal type",
+        "hash": "sh_ae0f6eb57baa9180",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 652,
+        "col": 75,
+        "end_line": 665,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().should exclude matched patterns from subsequent `.with()` clauses.should correctly exclude cases if the pattern is a literal type` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should correctly exclude cases if the pattern is a literal type` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_ae0f6eb57baa9180",
+      "suppress": "cupel suppress fnd_0f7dca --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_273aa3",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().real world example",
+        "hash": "sh_f30cbb58c9552ed7",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 701,
+        "col": 28,
+        "end_line": 746,
+        "end_col": 4
+      },
+      "title": "`tests.exhaustive-match.exhaustive().real world example` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `real world example` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_f30cbb58c9552ed7",
+      "suppress": "cupel suppress fnd_273aa3 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_e8560a",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().reducer example",
+        "hash": "sh_c56c79ddc43bfd0d",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 748,
+        "col": 25,
+        "end_line": 770,
+        "end_col": 4
+      },
+      "title": "`tests.exhaustive-match.exhaustive().reducer example` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `reducer example` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_c56c79ddc43bfd0d",
+      "suppress": "cupel suppress fnd_e8560a --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_8765c7",
+      "check": "tests.quality",
+      "kind": "test.logic",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().Exhaustive match with runtime error.Unmatched pattern results in NonExhaustiveError",
+        "hash": "sh_8294933fc985ca99",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 811,
+        "col": 59,
+        "end_line": 825,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().Exhaustive match with runtime error.Unmatched pattern results in NonExhaustiveError` contains logic: 1 loop(s) or branch(es) (max 0)",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 1,
+        "branches": 0,
+        "guards": 3,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 0,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `Unmatched pattern results in NonExhaustiveError` into one test per path, or parametrize it, so the test body neither loops nor branches.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_8294933fc985ca99",
+      "suppress": "cupel suppress fnd_8765c7 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_9e02d6",
+      "check": "tests.quality",
+      "kind": "test.logic",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().Exhaustive match with runtime error.Matched pattern with callback error does not result in NonExhaustiveError",
+        "hash": "sh_56ee991388c59665",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 827,
+        "col": 85,
+        "end_line": 838,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().Exhaustive match with runtime error.Matched pattern with callback error does not result in NonExhaustiveError` contains logic: 1 loop(s) or branch(es) (max 0)",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 1,
+        "branches": 0,
+        "guards": 3,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 0,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `Matched pattern with callback error does not result in NonExhaustiveError` into one test per path, or parametrize it, so the test body neither loops nor branches.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_56ee991388c59665",
+      "suppress": "cupel suppress fnd_9e02d6 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_58ff42",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with a single not pattern",
+        "hash": "sh_d23d1171016bdbb9",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 842,
+        "col": 49,
+        "end_line": 855,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with a single not pattern` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should work with a single not pattern` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_d23d1171016bdbb9",
+      "suppress": "cupel suppress fnd_58ff42 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_55d24b",
+      "check": "static.clones",
+      "kind": "clone.pair",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f",
+        "hash": "sh_9b2138c95d62d8b3",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 868,
+        "col": 13,
+        "end_line": 874,
+        "end_col": 24
+      },
+      "title": "`tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f` and `tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2` (tests/exhaustive-match.test.ts:888) are type-3 clones (jaccard 0.84)",
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "edits": [
+          {
+            "change": "removed",
+            "location": {
+              "col": 9,
+              "end_col": 16,
+              "end_line": 870,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 869
+            },
+            "nodes": 6,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 9,
+              "end_col": 14,
+              "end_line": 889,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 889
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 17,
+              "end_col": 47,
+              "end_line": 870,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 870
+            },
+            "nodes": 19,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 49,
+              "end_col": 60,
+              "end_line": 870,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 870
+            },
+            "nodes": 5,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 15,
+              "end_col": 20,
+              "end_line": 889,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 889
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 18,
+              "end_col": 19,
+              "end_line": 871,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 871
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 18,
+              "end_col": 26,
+              "end_line": 890,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 890
+            },
+            "nodes": 6,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 21,
+              "end_col": 24,
+              "end_line": 871,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 871
+            },
+            "nodes": 3,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 28,
+              "end_col": 36,
+              "end_line": 890,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 890
+            },
+            "nodes": 6,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 26,
+              "end_col": 29,
+              "end_line": 871,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 871
+            },
+            "nodes": 3,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 38,
+              "end_col": 46,
+              "end_line": 890,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 890
+            },
+            "nodes": 6,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 50,
+              "end_col": 51,
+              "end_line": 890,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 890
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 18,
+              "end_col": 21,
+              "end_line": 872,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 872
+            },
+            "nodes": 3,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 28,
+              "end_col": 33,
+              "end_line": 891,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 891
+            },
+            "nodes": 3,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 23,
+              "end_col": 26,
+              "end_line": 873,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 873
+            },
+            "nodes": 3,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 28,
+              "end_col": 33,
+              "end_line": 892,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 892
+            },
+            "nodes": 3,
+            "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+          }
+        ],
+        "jaccard": 0.837,
+        "left": {
+          "col": 13,
+          "end_col": 24,
+          "end_line": 874,
+          "file": "tests/exhaustive-match.test.ts",
+          "hash": "sh_9b2138c95d62d8b3",
+          "lang": "typescript",
+          "line": 868,
+          "lines": 7,
+          "nodes": 90,
+          "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f"
+        },
+        "renamed": [],
+        "right": {
+          "col": 13,
+          "end_col": 24,
+          "end_line": 894,
+          "file": "tests/exhaustive-match.test.ts",
+          "hash": "sh_c9b7db545269320c",
+          "lang": "typescript",
+          "line": 888,
+          "lines": 7,
+          "nodes": 74,
+          "symbol": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with several not patterns.f2"
+        },
+        "threshold": 0.82
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `f` and `f2` share into one function and call it from both.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.clones --symbols sh_9b2138c95d62d8b3",
+      "suppress": "cupel suppress fnd_55d24b --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_4b8c0a",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with not patterns and lists",
+        "hash": "sh_13abbfab70569bb8",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 897,
+        "col": 51,
+        "end_line": 904,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().Exhaustive match and `not` patterns.should work with not patterns and lists` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should work with not patterns and lists` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_13abbfab70569bb8",
+      "suppress": "cupel suppress fnd_4b8c0a --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_e05df7",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().issue #271: P.array should exhaustively match readonly arrays",
+        "hash": "sh_86ea2306bbd302cf",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 983,
+        "col": 71,
+        "end_line": 992,
+        "end_col": 4
+      },
+      "title": "`tests.exhaustive-match.exhaustive().issue #271: P.array should exhaustively match readonly arrays` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `issue #271: P.array should exhaustively match readonly arrays` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_86ea2306bbd302cf",
+      "suppress": "cupel suppress fnd_e05df7 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_fea682",
+      "check": "static.clones",
+      "kind": "clone.pair",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should fail when matching on { type: undefined }",
+        "hash": "sh_40dd7d86d447efc1",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 1016,
+        "col": 71,
+        "end_line": 1038,
+        "end_col": 6
+      },
+      "title": "`tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should fail when matching on { type: undefined }` and `tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }` (tests/exhaustive-match.test.ts:1061) are type-3 clones (jaccard 0.82)",
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "edits": [
+          {
+            "change": "removed",
+            "location": {
+              "col": 9,
+              "end_col": 14,
+              "end_line": 1020,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1020
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 9,
+              "end_col": 16,
+              "end_line": 1064,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1063
+            },
+            "nodes": 6,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 15,
+              "end_col": 20,
+              "end_line": 1020,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1020
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 17,
+              "end_col": 32,
+              "end_line": 1064,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1064
+            },
+            "nodes": 4,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 34,
+              "end_col": 12,
+              "end_line": 1066,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1064
+            },
+            "nodes": 7,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 13,
+              "end_col": 67,
+              "end_line": 1071,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1071
+            },
+            "nodes": 22,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 19,
+              "end_col": 34,
+              "end_line": 1027,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1027
+            },
+            "nodes": 3,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 13,
+              "end_col": 67,
+              "end_line": 1028,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1028
+            },
+            "nodes": 22,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 14,
+              "end_col": 25,
+              "end_line": 1037,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1037
+            },
+            "nodes": 7,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 14,
+              "end_col": 19,
+              "end_line": 1082,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1082
+            },
+            "nodes": 4,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 27,
+              "end_col": 34,
+              "end_line": 1037,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1037
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 21,
+              "end_col": 25,
+              "end_line": 1082,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1082
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 26,
+              "end_col": 30,
+              "end_line": 1082,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1082
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+          }
+        ],
+        "jaccard": 0.825,
+        "left": {
+          "col": 71,
+          "end_col": 6,
+          "end_line": 1038,
+          "file": "tests/exhaustive-match.test.ts",
+          "hash": "sh_40dd7d86d447efc1",
+          "lang": "typescript",
+          "line": 1016,
+          "lines": 23,
+          "nodes": 150,
+          "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should fail when matching on { type: undefined }"
+        },
+        "renamed": [],
+        "right": {
+          "col": 72,
+          "end_col": 6,
+          "end_line": 1083,
+          "file": "tests/exhaustive-match.test.ts",
+          "hash": "sh_93bb24f3e7ed6103",
+          "lang": "typescript",
+          "line": 1061,
+          "lines": 23,
+          "nodes": 160,
+          "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }"
+        },
+        "threshold": 0.82
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `exhaustive should fail when matching on { type: undefined }` and `exhaustive should pass when using {} and { type: undefined }` share into one function and call it from both.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.clones --symbols sh_40dd7d86d447efc1",
+      "suppress": "cupel suppress fnd_fea682 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_d48ffe",
+      "check": "static.clones",
+      "kind": "clone.pair",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should fail when matching on { type: undefined }.f",
+        "hash": "sh_7425fa7d72e3820f",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/exhaustive-match.test.ts",
+        "line": 1019,
+        "col": 13,
+        "end_line": 1032,
+        "end_col": 24
+      },
+      "title": "`tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should fail when matching on { type: undefined }.f` and `tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f` (tests/exhaustive-match.test.ts:1062) are type-3 clones (jaccard 0.86)",
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "edits": [
+          {
+            "change": "removed",
+            "location": {
+              "col": 9,
+              "end_col": 14,
+              "end_line": 1020,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1020
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 9,
+              "end_col": 16,
+              "end_line": 1064,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1063
+            },
+            "nodes": 6,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 15,
+              "end_col": 20,
+              "end_line": 1020,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1020
+            },
+            "nodes": 1,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 17,
+              "end_col": 32,
+              "end_line": 1064,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1064
+            },
+            "nodes": 4,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 34,
+              "end_col": 12,
+              "end_line": 1066,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1064
+            },
+            "nodes": 7,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+          },
+          {
+            "change": "inserted",
+            "location": {
+              "col": 13,
+              "end_col": 67,
+              "end_line": 1071,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1071
+            },
+            "nodes": 22,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 19,
+              "end_col": 34,
+              "end_line": 1027,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1027
+            },
+            "nodes": 3,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+          },
+          {
+            "change": "removed",
+            "location": {
+              "col": 13,
+              "end_col": 67,
+              "end_line": 1028,
+              "file": "tests/exhaustive-match.test.ts",
+              "line": 1028
+            },
+            "nodes": 22,
+            "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+          }
+        ],
+        "jaccard": 0.863,
+        "left": {
+          "col": 13,
+          "end_col": 24,
+          "end_line": 1032,
+          "file": "tests/exhaustive-match.test.ts",
+          "hash": "sh_7425fa7d72e3820f",
+          "lang": "typescript",
+          "line": 1019,
+          "lines": 14,
+          "nodes": 81,
+          "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should fail when matching on { type: undefined }.f"
+        },
+        "renamed": [],
+        "right": {
+          "col": 13,
+          "end_col": 24,
+          "end_line": 1077,
+          "file": "tests/exhaustive-match.test.ts",
+          "hash": "sh_d5edab261c19e5d9",
+          "lang": "typescript",
+          "line": 1062,
+          "lines": 16,
+          "nodes": 93,
+          "symbol": "tests.exhaustive-match.exhaustive().issue #278: should support exhaustive check on optional property.exhaustive should pass when using {} and { type: undefined }.f"
+        },
+        "threshold": 0.82
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `f` and `f` share into one function and call it from both.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.clones --symbols sh_7425fa7d72e3820f",
+      "suppress": "cupel suppress fnd_d48ffe --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_fba982",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.types.types.wildcard patterns should typecheck",
+        "hash": "sh_cb6da843c0423577",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 8,
+        "col": 44,
+        "end_line": 21,
+        "end_col": 4
+      },
+      "title": "`tests.types.types.wildcard patterns should typecheck` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `wildcard patterns should typecheck` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_cb6da843c0423577",
+      "suppress": "cupel suppress fnd_fba982 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_180ada",
+      "check": "static.complexity",
+      "kind": "function.long",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "tests.types.types.guard patterns should typecheck",
+        "hash": "sh_bc494f6529926efb",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 23,
+        "col": 41,
+        "end_line": 103,
+        "end_col": 4
+      },
+      "title": "`tests.types.types.guard patterns should typecheck` is 81 lines long (max 60)",
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 81
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `guard patterns should typecheck` into named functions until it is at most 60 lines.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.complexity --symbols sh_bc494f6529926efb",
+      "suppress": "cupel suppress fnd_180ada --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_ab3b6d",
+      "check": "static.complexity",
+      "kind": "function.long",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "tests.types.types.should infer values correctly in handler",
+        "hash": "sh_c39c21865d88606c",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 105,
+        "col": 50,
+        "end_line": 227,
+        "end_col": 4
+      },
+      "title": "`tests.types.types.should infer values correctly in handler` is 123 lines long (max 60)",
+      "detail": null,
+      "evidence": {
+        "length_max": 60,
+        "lines": 123
+      },
+      "action": {
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract cohesive blocks of `should infer values correctly in handler` into named functions until it is at most 60 lines.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.complexity --symbols sh_c39c21865d88606c",
+      "suppress": "cupel suppress fnd_ab3b6d --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_56b0fc",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.types.types.should enforce all branches return the right typeP. when it's set",
+        "hash": "sh_5efaa4f102ebfbe0",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 286,
+        "col": 75,
+        "end_line": 292,
+        "end_col": 4
+      },
+      "title": "`tests.types.types.should enforce all branches return the right typeP. when it's set` asserts only weakly: 2 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 2,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 2
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should enforce all branches return the right typeP. when it's set` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_5efaa4f102ebfbe0",
+      "suppress": "cupel suppress fnd_56b0fc --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_1597fb",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.types.types.issue #73: should enforce the handler as the right type",
+        "hash": "sh_3145fd97e665119a",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 294,
+        "col": 65,
+        "end_line": 307,
+        "end_col": 4
+      },
+      "title": "`tests.types.types.issue #73: should enforce the handler as the right type` asserts only weakly: 4 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 4,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 4
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `issue #73: should enforce the handler as the right type` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_3145fd97e665119a",
+      "suppress": "cupel suppress fnd_1597fb --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_98ac47",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.types.type narrowing inheritence.on a discriminated union type, once a case is handled it should be excluded from the input type.union of literals",
+        "hash": "sh_5b39c95b3400e324",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 312,
+        "col": 29,
+        "end_line": 330,
+        "end_col": 6
+      },
+      "title": "`tests.types.type narrowing inheritence.on a discriminated union type, once a case is handled it should be excluded from the input type.union of literals` asserts only weakly: 2 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 2,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 2
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `union of literals` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_5b39c95b3400e324",
+      "suppress": "cupel suppress fnd_98ac47 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_3a8bf3",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.types.type narrowing inheritence.on a discriminated union type, once a case is handled it should be excluded from the input type.union of objects",
+        "hash": "sh_ca9392281d432b42",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 332,
+        "col": 28,
+        "end_line": 347,
+        "end_col": 6
+      },
+      "title": "`tests.types.type narrowing inheritence.on a discriminated union type, once a case is handled it should be excluded from the input type.union of objects` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `union of objects` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_ca9392281d432b42",
+      "suppress": "cupel suppress fnd_3a8bf3 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_c72d9a",
+      "check": "tests.quality",
+      "kind": "test.weak-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.types.type narrowing inheritence.on a discriminated union type, once a case is handled it should be excluded from the input type.should error after P.any",
+        "hash": "sh_dd4d5bc78dbe52d5",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 349,
+        "col": 36,
+        "end_line": 358,
+        "end_col": 6
+      },
+      "title": "`tests.types.type narrowing inheritence.on a discriminated union type, once a case is handled it should be excluded from the input type.should error after P.any` asserts only weakly: 1 weak assertion(s), none pinning a value",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "assertions": 1,
+        "kinds": [
+          "throws"
+        ],
+        "remediation_mode": "strengthen",
+        "weak": 1
+      },
+      "action": {
+        "kind": "strengthen_assertion",
+        "priority": 2,
+        "summary": "Replace the truthiness, presence, or inequality checks in `should error after P.any` with an assertion that pins the expected value.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_dd4d5bc78dbe52d5",
+      "suppress": "cupel suppress fnd_c72d9a --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_c2d163",
+      "check": "tests.quality",
+      "kind": "test.no-assertion",
+      "severity": "warn",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": {
+        "display": "tests.types.type narrowing inheritence.on a discriminated union type, once a case is handled it should be excluded from the input type.shouldn't exclude in case of primitive type",
+        "hash": "sh_abf35b2e692ff01c",
+        "lang": "typescript"
+      },
+      "location": {
+        "file": "tests/types.test.ts",
+        "line": 360,
+        "col": 55,
+        "end_line": 371,
+        "end_col": 6
+      },
+      "title": "`tests.types.type narrowing inheritence.on a discriminated union type, once a case is handled it should be excluded from the input type.shouldn't exclude in case of primitive type` asserts nothing",
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "action": {
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `shouldn't exclude in case of primitive type` that pins the outcome it exercises.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.quality --symbols sh_abf35b2e692ff01c",
+      "suppress": "cupel suppress fnd_c2d163 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    }
+  ],
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "warn": 43,
+      "info": 0
+    },
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0,
+    "gate": null
+  },
+  "next_actions": [
+    {
+      "priority": 1,
+      "finding": "fnd_eb430f",
+      "kind": "strengthen_assertion",
+      "summary": "Pin more of what the tests in `tests/branded-nominal-types.test.ts` exercise: they assert less than the rest of the suite.",
+      "command": null
+    },
+    {
+      "priority": 2,
+      "finding": "fnd_a037eb",
+      "kind": "refactor_extract",
+      "summary": "Split `issue #167` into one test per path, or parametrize it, so the test body neither loops nor branches.",
+      "command": null
+    },
+    {
+      "priority": 3,
+      "finding": "fnd_96faa4",
+      "kind": "write_test",
+      "summary": "Add an assertion to `issue #167` that pins the outcome it exercises.",
+      "command": null
+    },
+    {
+      "priority": 4,
+      "finding": "fnd_9de658",
+      "kind": "strengthen_assertion",
+      "summary": "Pin more of what the tests in `tests/exhaustive-fallback.test.ts` exercise: they assert less than the rest of the suite.",
+      "command": null
+    },
+    {
+      "priority": 5,
+      "finding": "fnd_c82918",
+      "kind": "strengthen_assertion",
+      "summary": "Replace the truthiness, presence, or inequality checks in `should throw otherwise` with an assertion that pins the expected value.",
+      "command": null
+    },
+    {
+      "priority": 6,
+      "finding": "fnd_aa343b",
+      "kind": "strengthen_assertion",
+      "summary": "Replace the truthiness, presence, or inequality checks in `should return a value assignable to the explicit output type` with an assertion that pins the expected value.",
+      "command": null
+    },
+    {
+      "priority": 7,
+      "finding": "fnd_ba44dc",
+      "kind": "strengthen_assertion",
+      "summary": "Replace the truthiness, presence, or inequality checks in `should return a value assignable .returnType<T>()` with an assertion that pins the expected value.",
+      "command": null
+    },
+    {
+      "priority": 8,
+      "finding": "fnd_e78e77",
+      "kind": "strengthen_assertion",
+      "summary": "Assert what `boolean literals` exercises as it goes, or split it into tests that each pin one outcome.",
+      "command": null
+    },
+    {
+      "priority": 9,
+      "finding": "fnd_0ebb9d",
+      "kind": "strengthen_assertion",
+      "summary": "Replace the truthiness, presence, or inequality checks in `boolean literals` with an assertion that pins the expected value.",
+      "command": null
+    },
+    {
+      "priority": 10,
+      "finding": "fnd_e3ba32",
+      "kind": "strengthen_assertion",
+      "summary": "Replace the truthiness, presence, or inequality checks in `union of tuples` with an assertion that pins the expected value.",
+      "command": null
+    }
+  ],
+  "description": null,
+  "plan": null,
+  "explanation": null,
+  "rankings": null,
+  "tests": null,
+  "oracles": null,
+  "truncated": false,
+  "total_findings": 43
+}
