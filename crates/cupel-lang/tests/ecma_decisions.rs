@@ -154,14 +154,25 @@ fn every_case_after_the_first_continues_its_multiway_decision() {
     );
 }
 
+/// ts-pattern's type tests pass `.with(P.x, (x) => { …; return 'ok'; })` sixteen times (P9.9 group 3):
+/// a `return` that ends an inline callback ends only it, one inside a branch of it is early, and a
+/// named closure judges its own returns.
+const CALLBACKS: &str = "it(\"handles\", () => {\n\
+                         \x20 match(1).with(1, (x) => {\n    return \"ok\";\n  });\n\
+                         \x20 const g = [1].map(function (x) {\n    return x;\n  });\n\
+                         \x20 [2].forEach((x) => {\n    if (x) {\n      return;\n    }\n    f(x);\n  });\n\
+                         \x20 const sign = (x) => {\n    if (x < 0) {\n      return -1;\n    }\n    return 1;\n  };\n\
+                         });\n";
+
 #[test]
 fn a_return_that_ends_an_inline_callback_is_not_early_and_one_inside_it_is() {
-    let dir = tree(&[(
-        "src/a.test.ts",
-        "it(\"handles\", () => {\n  match(1).with(1, (x) => {\n    return \"ok\";\n  });\n  const g = [1].map(function (x) {\n    return x;\n  });\n  [2].forEach((x) => {\n    if (x) {\n      return;\n    }\n    f(x);\n  });\n});\n",
-    )]);
+    let dir = tree(&[("src/a.test.ts", CALLBACKS)]);
     assert_eq!(
         decisions_of("typescript", dir.path(), "a.handles"),
+        [(Branch, 0, 1, 1), (EarlyReturn, 1, 0, 1)]
+    );
+    assert_eq!(
+        decisions_of("typescript", dir.path(), "a.handles.sign"),
         [(Branch, 0, 1, 1), (EarlyReturn, 1, 0, 1)]
     );
 }

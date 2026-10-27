@@ -94,17 +94,21 @@ fn type_annotations_generics_decorators_and_modifiers_do_not_change_a_typescript
 /// annotation of runtime code.
 #[test]
 fn a_type_declaration_keeps_its_type_arguments() {
-    let shape = |cases: &str| {
-        ts(&format!(
-            "export function f() {{\n  type cases = [{cases}];\n  return 1;\n}}\n"
-        ))
-    };
-    let one = shape("Expect<Equal<Exclude<string, 'a'>, string>>");
-    let two = shape("Expect<Equal<Exclude<string | number, string>, number>>, Expect<Equal<1, 1>>");
-    assert_ne!(one.1, two.1, "{} {}", one.0, two.0);
-    assert!(one.0.contains("type_arguments"), "{}", one.0);
-    let annotated = ts("export function f(a: Map<string, number>) {\n  return a;\n}\n");
-    assert!(!annotated.0.contains("type_arguments"), "{}", annotated.0);
+    let (declared, _) = ts(
+        "export function f() {\n  type cases = [Expect<Equal<Exclude<string, 'a'>, string>>];\n  return 1;\n}\n",
+    );
+    assert_eq!(
+        declared,
+        "(function_declaration formal_parameters (statement_block (type_alias_declaration $id = \
+         (tuple_type (generic_type $id (type_arguments < (generic_type $id (type_arguments < \
+         (generic_type $id (type_arguments < predefined_type (literal_type $lit) >)) \
+         predefined_type >)) >)))) (return_statement $lit)))"
+    );
+    let (annotated, _) = ts("export function f(a: Map<string, number>) {\n  return a;\n}\n");
+    assert_eq!(
+        annotated,
+        "(function_declaration (formal_parameters $id) (statement_block (return_statement $id)))"
+    );
 }
 
 #[test]

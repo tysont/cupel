@@ -231,55 +231,53 @@ fn string_literals_in_signatures_are_single_tokens() {
     );
 }
 
-/// A script nothing imports runs its module-level code (ts-pattern's `scripts/completions/run.mjs`
-/// and its benny benchmarks, P9.9 group 3, as Python's setup scripts in ADR-138 §9): a function that
-/// code calls, directly, awaited, as a declaration's value, or in a callback it passes to a call, is
-/// an entry point; one only another function calls is not.
+/// A script nothing imports runs its module-level code (ts-pattern's `scripts/completions/run.mjs`,
+/// P9.9 group 3, as Python's setup scripts in ADR-138 §9): a function that code calls, directly,
+/// awaited, or as a declaration's value, is an entry point; one only another function calls is not.
+const SCRIPT: &str = "function checkout() { return '.'; }\n\
+                      async function run(root) { return helper(root); }\n\
+                      const helper = (root) => root;\n\
+                      const report = () => {};\n\
+                      function unused() {}\n\
+                      const root = checkout();\n\
+                      const sides = [await run(root)];\n\
+                      report();\n";
+
+/// A benny benchmark (ts-pattern's `benchmarks/`): the callbacks its top-level `suite` call hands
+/// to `add` run, so what they call is an entry point; what those functions call is not.
+const BENCH: &str = "import { add, suite } from 'benny';\n\
+                     const fast = (n) => n;\n\
+                     function slow(n) { return n; }\n\
+                     const rand = () => 1;\n\
+                     suite('bench', add('fast', () => fast(rand())), add('slow', function () { slow(2); }));\n";
+
+/// The symbols of `path` (written as `source`) in `lang` that are entry points, by display name.
+fn entry_points(lang: &str, path: &str, source: &str) -> Vec<String> {
+    let dir = tree(&[(path, source)]);
+    let roots: Roots = produce(lang, dir.path());
+    let symbols: Symbols = produce(lang, dir.path());
+    symbols
+        .symbols
+        .iter()
+        .filter(|symbol| {
+            reasons(&roots, &symbols, &symbol.display).contains(&RootReason::EntryPoint)
+        })
+        .map(|symbol| symbol.display.clone())
+        .collect()
+}
+
 #[test]
 fn functions_module_level_code_calls_are_entry_points() {
-    let script = "function checkout() { return '.'; }\n\
-                  async function run(root) { return helper(root); }\n\
-                  const helper = (root) => root;\n\
-                  const report = () => {};\n\
-                  function unused() {}\n\
-                  const root = checkout();\n\
-                  const sides = [await run(root)];\n\
-                  report();\n";
-    let bench = "import { add, suite } from 'benny';\n\
-                 const fast = (n) => n;\n\
-                 function slow(n) { return n; }\n\
-                 const rand = () => 1;\n\
-                 suite('bench', add('fast', () => fast(rand())), add('slow', function () { slow(2); }));\n";
-    let dir = tree(&[("scripts/run.mjs", script), ("benchmarks/digits.ts", bench)]);
-    for (lang, expected) in [
-        (
-            "javascript",
-            &[
-                ("scripts.run.checkout", true),
-                ("scripts.run.run", true),
-                ("scripts.run.report", true),
-                ("scripts.run.helper", false),
-                ("scripts.run.unused", false),
-            ][..],
-        ),
-        (
-            "typescript",
-            &[
-                ("benchmarks.digits.fast", true),
-                ("benchmarks.digits.slow", true),
-                ("benchmarks.digits.rand", false),
-            ][..],
-        ),
-    ] {
-        let roots: Roots = produce(lang, dir.path());
-        let symbols: Symbols = produce(lang, dir.path());
-        for (display, entry) in expected {
-            let found = reasons(&roots, &symbols, display);
-            assert_eq!(
-                found.contains(&RootReason::EntryPoint),
-                *entry,
-                "{display}: {found:?}"
-            );
-        }
-    }
+    assert_eq!(
+        entry_points("javascript", "scripts/run.mjs", SCRIPT),
+        [
+            "scripts.run.checkout",
+            "scripts.run.run",
+            "scripts.run.report"
+        ]
+    );
+    assert_eq!(
+        entry_points("typescript", "benchmarks/digits.ts", BENCH),
+        ["benchmarks.digits.fast", "benchmarks.digits.slow"]
+    );
 }
