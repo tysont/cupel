@@ -16,6 +16,10 @@
 //! - **Anything else** is `Unresolved` when a prefix of it names a directory of Clojure files in
 //!   a source root (a namespace the repository should define: generated code, a typo), and
 //!   otherwise `External` with the namespace itself as its package.
+//! - **A qualified symbol** (`a.b/c`, specifier as written) is an edge to the file of its
+//!   namespace when that is another file of the project and the file has no edge to it yet: a
+//!   namespace loaded by `requiring-resolve`, directly or through a macro, has no `:require`. An
+//!   alias, a library's namespace, or the file's own is no edge.
 //! - Edges are grouped by project directory: the nearest directory above the file with a
 //!   `deps.edn` (`.` outside every project). Clojure requires by namespace, never by path.
 use std::collections::{BTreeMap, BTreeSet};
@@ -52,10 +56,23 @@ pub fn graph(imports: &Imports<'_>) -> ModuleGraph {
     let mut grouped: BTreeMap<String, Vec<ImportEdge>> = BTreeMap::new();
     for file in imports.scope() {
         let edges = grouped.entry(project_of(imports, file)).or_default();
+        let mut reached = BTreeSet::new();
         for import in imports.of(file).imports {
+            let target = match import.specifier.split_once('/') {
+                Some((namespace, _)) => match namespace_file(imports, &roots, namespace) {
+                    Some(path) if path != *file && !reached.contains(&path) => {
+                        ImportTarget::File { path }
+                    }
+                    _ => continue,
+                },
+                None => resolve(imports, &roots, &import.specifier),
+            };
+            if let ImportTarget::File { path } = &target {
+                reached.insert(path.clone());
+            }
             edges.push(ImportEdge {
                 from: file.clone(),
-                target: resolve(imports, &roots, &import.specifier),
+                target,
                 specifier: import.specifier,
                 relative: false,
                 line: import.line,

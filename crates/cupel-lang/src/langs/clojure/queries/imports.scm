@@ -37,3 +37,11 @@
     ] @import)
   (#eq? @_ns "ns")
   (#eq? @_import "import"))
+
+; A symbol qualified by a dotted namespace (`cljfx.fx.button/lifecycle`), which loads or needs that
+; namespace without a `:require` (`requiring-resolve`, directly or through a macro). The specifier
+; keeps its `/`; the resolver keeps it only when the namespace is another file of the project, since
+; an alias (`fx.button/x`) or a library's namespace is not one.
+((sym_lit
+  namespace: (sym_ns) @_namespace) @import @import.specifier
+  (#match? @_namespace "[.]"))
