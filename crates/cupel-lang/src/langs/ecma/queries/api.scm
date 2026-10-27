@@ -86,3 +86,68 @@
 ; Classes namespace their members.
 (class_declaration
   name: (_) @scope.name) @scope
+
+; Roots: functions the module's own top-level code calls, as a statement, awaited, or as a
+; declaration's value (alone or in an array): a module runs that code whenever it runs, so for a
+; script nothing imports it is the program (ADR-138 §10, as Python's setup scripts in §9).
+(program
+  [
+    (function_declaration
+      name: (identifier) @_function) @root.entry-point
+    (lexical_declaration
+      (variable_declarator
+        name: (identifier) @_function
+        value: [(arrow_function) (function_expression)] @root.entry-point))
+  ]
+  [
+    (expression_statement
+      [
+        (call_expression function: (identifier) @_called)
+        (await_expression (call_expression function: (identifier) @_called))
+      ])
+    (lexical_declaration
+      (variable_declarator
+        value: [
+          (call_expression function: (identifier) @_called)
+          (await_expression (call_expression function: (identifier) @_called))
+          (array (await_expression (call_expression function: (identifier) @_called)))
+          (array (array (await_expression (call_expression function: (identifier) @_called))))
+        ]))
+  ]
+  (#eq? @_function @_called))
+
+; Roots: functions a callback calls that top-level code hands to a call, or to a call among its
+; arguments (benny's `suite("…", add("…", () => run(9)))`): the call it is handed to runs it.
+(program
+  [
+    (function_declaration
+      name: (identifier) @_function) @root.entry-point
+    (lexical_declaration
+      (variable_declarator
+        name: (identifier) @_function
+        value: [(arrow_function) (function_expression)] @root.entry-point))
+  ]
+  (expression_statement
+    (call_expression
+      arguments: (arguments
+        [
+          (arrow_function body: (call_expression function: (identifier) @_called))
+          (arrow_function
+            body: (statement_block
+              (expression_statement (call_expression function: (identifier) @_called))))
+          (function_expression
+            body: (statement_block
+              (expression_statement (call_expression function: (identifier) @_called))))
+          (call_expression
+            arguments: (arguments
+              [
+                (arrow_function body: (call_expression function: (identifier) @_called))
+                (arrow_function
+                  body: (statement_block
+                    (expression_statement (call_expression function: (identifier) @_called))))
+                (function_expression
+                  body: (statement_block
+                    (expression_statement (call_expression function: (identifier) @_called))))
+              ]))
+        ])))
+  (#eq? @_function @_called))

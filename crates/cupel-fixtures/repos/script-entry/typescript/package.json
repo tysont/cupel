@@ -1,0 +1,9 @@
+{
+  "name": "script-entry",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "benny": "^3.7.1",
+    "typescript": "^5.9.2"
+  }
+}

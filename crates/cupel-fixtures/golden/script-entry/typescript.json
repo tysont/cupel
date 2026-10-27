@@ -1,0 +1,148 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "static.dead-code",
+      "metrics": {
+        "dead_exports": 0.0,
+        "dead_symbols": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 7,
+        "unit": "dead_symbols",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "review",
+        "priority": 2,
+        "summary": "Delete `unused` from scripts/report.mjs if nothing outside the repository uses it, or call it where it is meant to be used."
+      },
+      "check": "static.dead-code",
+      "confidence": 0.6,
+      "detail": "Nothing in the repository's files names `unused` outside its own body: no call, value, import, string, or attribute refers to it, and it is not an entry point, test, framework hook, or export. Cupel matches references by name, not by type, so any reference with this name would keep it; code generated at build time, a file in another language, or a framework that finds it by naming convention could still reach it.",
+      "evidence": {
+        "dynamic": [],
+        "file": "scripts/report.mjs",
+        "module": "scripts.report",
+        "module_files": [
+          "scripts/report.mjs"
+        ],
+        "reach": "references",
+        "suspect_imports": []
+      },
+      "id": "fnd_06c0ce",
+      "kind": "dead.symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 17,
+        "file": "scripts/report.mjs",
+        "line": 15
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.dead-code --symbols sh_8df4d738d631ca78",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_06c0ce --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "scripts.report.unused",
+        "hash": "sh_8df4d738d631ca78",
+        "lang": "javascript"
+      },
+      "tier": 0,
+      "title": "`scripts.report.unused` is never referenced"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_06c0ce",
+      "kind": "review",
+      "priority": 1,
+      "summary": "Delete `unused` from scripts/report.mjs if nothing outside the repository uses it, or call it where it is meant to be used."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 3,
+      "languages": [
+        "javascript",
+        "typescript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 7
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}
