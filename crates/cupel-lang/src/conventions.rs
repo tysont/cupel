@@ -13,6 +13,7 @@ use globset::GlobBuilder;
 use crate::language::{Language, owns, producer_id};
 use crate::namespace::file_namespace_root;
 use crate::tables::ConventionRules;
+use crate::walk::language_files;
 
 inventory::submit!(crate::generic::GenericProducer {
     kind: FactKind::TestConventions,
@@ -76,6 +77,15 @@ impl Producer<TestConventions> for GlobTestConventions {
             .map(String::as_str)
             .filter(|file| owns(self.language.as_ref(), file))
             .collect();
+        // A source in scope pairs with its tests wherever they are: a scope narrowed to sources
+        // (`--paths src`) leaves its tests out, and they test it all the same. The candidates are
+        // every file of the language the walk keeps, as `References` reads them (ADR-135).
+        let mut candidates =
+            language_files(&ctx.ctx.root, self.language.as_ref(), &ctx.ctx.exclude);
+        candidates.extend(files.iter().map(|file| (*file).to_owned()));
+        candidates.sort();
+        candidates.dedup();
+        let candidates: Vec<&str> = candidates.iter().map(String::as_str).collect();
         let read = |file: &str| fs::read_to_string(ctx.ctx.root.join(file)).unwrap_or_default();
         let sources: Vec<&str> = files
             .iter()
@@ -84,7 +94,7 @@ impl Producer<TestConventions> for GlobTestConventions {
             .collect();
         for source in sources {
             let roots = &tables.namespace.source_roots;
-            let tests = tests_for(rules, source, roots, &files, &read);
+            let tests = tests_for(rules, source, roots, &candidates, &read);
             if !tests.is_empty() {
                 conventions.pairs.push(TestPairing {
                     source: source.to_owned(),

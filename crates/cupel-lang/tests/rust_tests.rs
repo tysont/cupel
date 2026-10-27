@@ -5,8 +5,8 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
 use support::{
-    assert_framework, assert_test_file, case, file, fixture, produce, properties, property, rows,
-    tree,
+    assert_framework, assert_test_file, case, file, fixture, produce, produce_scoped, properties,
+    property, rows, tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -146,6 +146,20 @@ fn conventions_pair_sources_with_integration_and_inline_tests() {
 }
 
 #[test]
+fn a_source_pairs_with_its_tests_when_the_scope_holds_the_source_alone() {
+    // `check --paths src/lib.rs` leaves the integration tests out of the scope; they still test it.
+    let conventions: TestConventions = produce_scoped("rust", &fixture("rust"), &["src/lib.rs"]);
+    assert_eq!(
+        conventions.test_files_for("src/lib.rs"),
+        [
+            "tests/ledger.rs",
+            "tests/properties.rs",
+            "tests/quality_signals.rs"
+        ]
+    );
+}
+
+#[test]
 fn conventions_find_a_stem_named_integration_test_below_a_crate() {
     let dir = tree(&[
         ("crates/bank/src/vault.rs", "pub fn open() {}\n"),
@@ -276,11 +290,69 @@ fn property_tests_name_their_framework_and_proptest_blocks_hold_cases() {
     );
 }
 
+/// quickcheck's `quickcheck!` block: each `fn` in it is a test of its own that quickcheck drives,
+/// named by the function (as itertools' `tests/quick.rs` writes its properties).
+const QUICKCHECK_BLOCK: &str = r"quickcheck! {
+    fn size_merge(a: Vec<u16>, b: Vec<u16>) -> bool {
+        merged(&a, &b).len() == a.len() + b.len()
+    }
+
+    fn merge_keeps_order(a: Vec<u16>) -> () {
+        assert!(sorted(&merged(&a, &a)));
+    }
+
+    fn halves(a: u8) {
+        assert_eq!(a / 2 * 2 + a % 2, a);
+    }
+}
+";
+
 #[test]
-fn a_call_of_a_helper_in_the_file_that_asserts_and_an_assertion_in_a_macro_argument_count() {
+fn a_quickcheck_block_holds_one_property_case_per_function() {
+    let dir = tree(&[("tests/quick.rs", QUICKCHECK_BLOCK)]);
+    assert_eq!(
+        properties("rust", dir.path(), "tests/quick.rs"),
+        [
+            property("size_merge", Some("quickcheck"), &[(Custom, Strong)]),
+            property(
+                "merge_keeps_order",
+                Some("quickcheck"),
+                &[(Truthiness, Weak)]
+            ),
+            property("halves", Some("quickcheck"), &[(Equality, Strong)]),
+        ]
+    );
+}
+
+#[test]
+fn a_property_in_a_quickcheck_block_that_calls_an_asserting_helper_of_the_file_asserts() {
     let dir = tree(&[(
-        "tests/encode.rs",
-        r#"fn test_encode_ok<T: Serialize>(tests: &[(T, &str)]) {
+        "tests/specializations.rs",
+        r"fn test_specializations(values: &[u8]) {
+    assert_eq!(values.iter().count(), values.len());
+}
+
+quickcheck! {
+    fn interleave(v: Vec<u8>, w: Vec<u8>) -> () {
+        test_specializations(&interleaved(&v, &w));
+    }
+}
+",
+    )]);
+    assert_eq!(
+        properties("rust", dir.path(), "tests/specializations.rs"),
+        [property(
+            "interleave",
+            Some("quickcheck"),
+            &[(Equality, Strong)]
+        )]
+    );
+}
+
+/// Tests that assert through helpers of their file (`serde_json`'s `test_encode_ok`, a weak
+/// `check_ready`), call a function that asserts nothing, and assert inside a macro's arguments or
+/// a `macro_rules!` repetition.
+const HELPERS_AND_MACRO_ARGUMENTS: &str = r#"fn test_encode_ok<T: Serialize>(tests: &[(T, &str)]) {
     for (value, expected) in tests {
         assert_eq!(to_string(value).unwrap(), *expected);
     }
@@ -334,8 +406,11 @@ fn numbers_compare() {
     }
     compare!(0 1 100);
 }
-"#,
-    )]);
+"#;
+
+#[test]
+fn a_call_of_a_helper_in_the_file_that_asserts_and_an_assertion_in_a_macro_argument_count() {
+    let dir = tree(&[("tests/encode.rs", HELPERS_AND_MACRO_ARGUMENTS)]);
     let frames: TestFrames = produce("rust", dir.path());
     assert_eq!(
         rows(file(&frames, "tests/encode.rs")),

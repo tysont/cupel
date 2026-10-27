@@ -276,7 +276,9 @@
       "summary": "Module graph: import cycles, afferent and efferent coupling, instability, abstractness, distance from the main sequence, and layering rules from configuration.",
       "tier": 0,
       "version": 1,
-      "wants": []
+      "wants": [
+        "references"
+      ]
     },
     "subject": "check"
   },

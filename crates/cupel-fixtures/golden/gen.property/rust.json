@@ -9,11 +9,11 @@
       "metrics": {
         "falsified": 1.0,
         "missing": 1.0,
-        "properties": 2.0
+        "properties": 3.0
       },
       "oracle": null,
       "score": {
-        "n": 2,
+        "n": 3,
         "unit": "falsified",
         "value": 1.0
       },

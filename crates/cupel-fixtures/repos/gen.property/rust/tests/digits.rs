@@ -16,3 +16,11 @@ fn at_most_ten(n: u32) -> bool {
 fn digit_counts_stay_within_ten() {
     quickcheck::quickcheck(at_most_ten as fn(u32) -> bool);
 }
+
+use quickcheck::quickcheck;
+
+quickcheck! {
+    fn doubling_adds_at_most_one_digit(n: u32) -> bool {
+        digits(n.saturating_mul(2)) <= digits(n) + 1
+    }
+}

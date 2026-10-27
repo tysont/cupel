@@ -82,17 +82,7 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
         .query(QueryFile::Imports, &parsed.grammar)
         .unwrap_or_else(|error| panic!("{} imports.scm: {error}", language.id()));
     let found = matches(&query, parsed);
-    let mut scopes: Vec<(tree_sitter::Node<'_>, &str)> = found
-        .iter()
-        .filter_map(|m| {
-            Some((
-                m.node(capture::SCOPE)?,
-                parsed.text(m.node(capture::SCOPE_NAME)?),
-            ))
-        })
-        .collect();
-    scopes.sort_by_key(|(node, _)| node.start_byte());
-    scopes.dedup_by_key(|(node, _)| node.id());
+    let scopes = scopes_of(parsed, &found);
     let path_of = |node: tree_sitter::Node<'_>| -> Vec<String> {
         scopes
             .iter()
@@ -124,17 +114,7 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
             })
         })
         .collect();
-    // A statement one pattern matched with its `@import.path` and another without is one
-    // import, the one that names its file.
-    let named: BTreeSet<(u32, String)> = imports
-        .iter()
-        .filter(|import| import.path.is_some())
-        .map(|import| (import.line, import.specifier.clone()))
-        .collect();
-    imports.retain(|import| {
-        import.path.is_some() || !named.contains(&(import.line, import.specifier.clone()))
-    });
-    imports.dedup();
+    keep_the_named(&mut imports);
     let modules = scopes
         .iter()
         .map(|(node, name)| {
@@ -144,6 +124,39 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
         })
         .collect();
     FileImports { imports, modules }
+}
+
+/// The named scopes (`@scope` with its `@scope.name`) of `found`, in document order, each once.
+fn scopes_of<'t>(
+    parsed: &'t Parsed,
+    found: &[Match<'_, 't>],
+) -> Vec<(tree_sitter::Node<'t>, &'t str)> {
+    let mut scopes: Vec<(tree_sitter::Node<'t>, &'t str)> = found
+        .iter()
+        .filter_map(|m| {
+            Some((
+                m.node(capture::SCOPE)?,
+                parsed.text(m.node(capture::SCOPE_NAME)?),
+            ))
+        })
+        .collect();
+    scopes.sort_by_key(|(node, _)| node.start_byte());
+    scopes.dedup_by_key(|(node, _)| node.id());
+    scopes
+}
+
+/// A statement one pattern matched with its `@import.path` and another without is one import,
+/// the one that names its file; repeats are dropped.
+fn keep_the_named(imports: &mut Vec<RawImport>) {
+    let named: BTreeSet<(u32, String)> = imports
+        .iter()
+        .filter(|import| import.path.is_some())
+        .map(|import| (import.line, import.specifier.clone()))
+        .collect();
+    imports.retain(|import| {
+        import.path.is_some() || !named.contains(&(import.line, import.specifier.clone()))
+    });
+    imports.dedup();
 }
 
 /// The names the import `m` matched takes from its module: `default` for a default import, then

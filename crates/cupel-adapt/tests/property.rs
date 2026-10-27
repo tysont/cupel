@@ -285,6 +285,13 @@ fn proptest_and_quickcheck_run_with_the_budget_under_cargo_test() {
                 None,
                 false
             ),
+            row(
+                "doubling_adds_at_most_one_digit",
+                "quickcheck",
+                PropertyOutcome::Passed,
+                None,
+                false
+            ),
         ]
     );
     assert_eq!(results.frameworks, ["proptest", "quickcheck"]);

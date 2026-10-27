@@ -1,0 +1,10 @@
+# ABOUTME: A crate whose tests begin with assertions on different functions, which are not setup a fixture could
+# ABOUTME: share, beside two tests that do repeat their arrange code (P9.9, serde_json's lexical tests).
+[package]
+name = "bits"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]

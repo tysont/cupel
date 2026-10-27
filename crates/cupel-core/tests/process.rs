@@ -101,6 +101,97 @@ fn a_child_whose_group_holds_more_than_its_memory_budget_is_killed_with_the_grou
     );
 }
 
+/// Whether process `pid` still runs 5 s from now; a killed process is gone well before (a
+/// zombie no longer runs, so it does not count).
+fn survives(pid: u32) -> bool {
+    let patience = Instant::now() + Duration::from_secs(5);
+    loop {
+        let output = std::process::Command::new("ps")
+            .args(["-o", "stat=", "-p", &pid.to_string()])
+            .output()
+            .unwrap();
+        let stat = String::from_utf8_lossy(&output.stdout);
+        if stat.trim().is_empty() || stat.trim_start().starts_with('Z') {
+            return false;
+        }
+        if Instant::now() >= patience {
+            return true;
+        }
+        std::thread::sleep(Duration::from_millis(50));
+    }
+}
+
+/// Waits up to `HANG` for the pid a child wrote to `file`.
+fn pid_in(file: &std::path::Path) -> u32 {
+    let patience = Instant::now() + HANG;
+    loop {
+        if let Some(pid) = std::fs::read_to_string(file)
+            .ok()
+            .and_then(|text| text.trim().parse().ok())
+        {
+            return pid;
+        }
+        assert!(Instant::now() < patience, "no pid in {}", file.display());
+        std::thread::sleep(Duration::from_millis(10));
+    }
+}
+
+/// A shell whose background perl moves to a process group of its own (as `cargo nextest` puts
+/// each test in one), writes its pid to `pid`, runs `body`, sleeps `hold`, and holds no output
+/// pipe; the shell waits for it.
+fn detached(dir: &std::path::Path, body: &str, hold: Duration) -> Process {
+    let script = format!(
+        "perl -e 'setpgrp(0, 0); open(my $f, \">\", \"pid.tmp\"); print $f $$; close($f); \
+         rename(\"pid.tmp\", \"pid\"); {body}; sleep {}' > /dev/null 2>&1 & wait",
+        hold.as_secs()
+    );
+    Process::new("sh", dir).args(["-c", script.as_str()])
+}
+
+#[test]
+fn cancellation_kills_a_descendant_that_left_the_childs_process_group() {
+    let dir = tempfile::tempdir().unwrap();
+    let cancel = Cancellation::new();
+    let cancelling = cancel_when_ready(dir.path().join("pid"), cancel.clone());
+    let ran = detached(dir.path(), "1", HANG).run(&cancel);
+    cancelling.join().unwrap();
+    let pid = pid_in(&dir.path().join("pid"));
+    let survived = survives(pid);
+    if survived {
+        let _ = std::process::Command::new("kill")
+            .args(["-9", &pid.to_string()])
+            .status();
+    }
+    assert_eq!((ran, survived), (Err(Error::Cancelled), false));
+}
+
+#[test]
+fn a_descendant_in_a_process_group_of_its_own_counts_against_the_memory_budget() {
+    let dir = tempfile::tempdir().unwrap();
+    let started = Instant::now();
+    // Held for 20 s: a budget that does not see the descendant lets the run end by itself.
+    let ran = detached(
+        dir.path(),
+        "$x = \"x\" x (256 * 1024 * 1024)",
+        Duration::from_secs(20),
+    )
+    .memory(64 << 20)
+    .run(&Cancellation::new());
+    let pid = pid_in(&dir.path().join("pid"));
+    let survived = survives(pid);
+    if survived {
+        let _ = std::process::Command::new("kill")
+            .args(["-9", &pid.to_string()])
+            .status();
+    }
+    assert_eq!(
+        (ran, survived),
+        (Err(Error::OutOfMemory { limit: 64 << 20 }), false),
+        "after {:?}",
+        started.elapsed()
+    );
+}
+
 #[test]
 fn a_child_within_its_memory_budget_runs_to_its_end() {
     let captured = shell("echo done")

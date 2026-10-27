@@ -1,6 +1,6 @@
 # CUPEL_DECISION_027: Test frames from queries, assertion idioms, and path-template test conventions
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P1.6
+**Date:** 2026-10-10 · **Status:** accepted; the pairing candidates amended on 2026-10-25 (P9.9 group 1): every file of the language, not the scope's · **Phase:** P1.6
 
 ## Context
 
@@ -18,7 +18,7 @@ Plan P1.6 asks `QueryTestFrames` to report cases, assertions with semantic kind 
 
 - tests.scm captures are as documented in `cupel_lang::testframes`: captures in a match with `@test.case` belong to that case, others to the innermost containing case; a mock outside every case belongs to every case in the file; a case keeps its first skip; the file's framework comes from the earliest pattern with a `@framework.<name>` capture, else `[tests].framework`; files without cases are not reported.
 - Assertion keys are the `@assertion.idiom.<key>` suffix, else the `@assertion.name` text with whitespace removed; `[tests.assertions]` maps keys to `{ kind, strength }`; unknown keys are `[tests].unknown_assertion` (default `custom`, `strong`). Assertions that pin one value (`assert_eq!`, `toBe`, `==`) are strong; truthiness, inequality, and presence checks are weak.
-- `[conventions]` has `test_globs` and ordered `tests_for` rules `{ template, stems?, contains? }` with placeholders `{path} {dir} {stem} {ext} {base} {module}` (`{base}` and `{module}` split the path at its last `[namespace].source_roots` directory). Candidates must be files in scope. `TestConventions::is_test` and `test_files_for` are methods on the core fact; `is_test` matches globs with `globset` (literal separators), which `cupel-core` now depends on.
+- `[conventions]` has `test_globs` and ordered `tests_for` rules `{ template, stems?, contains? }` with placeholders `{path} {dir} {stem} {ext} {base} {module}` (`{base}` and `{module}` split the path at its last `[namespace].source_roots` directory). Candidates must be files in scope. *Amended 2026-10-25.* Candidates are every file of the language the walk keeps (`.gitignore`, `[scope] exclude`, the ecosystem's skipped directories), as `References` reads them (ADR-135), and the scope's own files; the sources paired are still the scope's. A scope narrowed to sources (`check --paths src/lib.rs`) left every test out of the candidates, so the source paired with none and `gen.property` reported its functions `property.missing` though a property test of it existed (itertools' `Itertools` methods, tested by `tests/quick.rs`; ADR-096 §3 reports only when each of a file's tests is in scope, and with no pairing that held vacuously). On a tree scope the candidates are the scope's files, as before. `TestConventions::is_test` and `test_files_for` are methods on the core fact; `is_test` matches globs with `globset` (literal separators), which `cupel-core` now depends on.
 
 ## Consequences
 

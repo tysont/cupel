@@ -1,11 +1,11 @@
 // ABOUTME: `static.deps`: file-level import cycles (Tarjan SCC) with the cheapest import to cut, Martin's coupling,
-// ABOUTME: instability, abstractness, and distance, and layering rules from config, over ModuleGraph and ApiSurface.
+// ABOUTME: instability, abstractness, and distance, and layering rules from config, over ModuleGraph, ApiSurface, References.
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use cupel_core::config::{ConfigError, Table};
 use cupel_core::hint::{self, CheapestCut};
 use cupel_core::syntax::{
-    ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph,
+    ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, References,
 };
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
@@ -111,7 +111,7 @@ impl StaticDeps {
                 tier: Tier::try_from(0).expect("tier 0 exists"),
                 cost: CostClass::Quick,
                 needs: vec![FactKind::ModuleGraph, FactKind::ApiSurface],
-                wants: vec![],
+                wants: vec![FactKind::References],
                 findings: finding_kinds(),
                 metrics: metrics(),
                 settings: settings(),
@@ -196,7 +196,7 @@ impl Check for StaticDeps {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         let settings = Settings::read(&self.manifest.id, &ctx.config)?;
-        let graph = Graph::of(facts.get::<ModuleGraph>()?);
+        let graph = Graph::of(facts.get::<ModuleGraph>()?, facts.get::<References>().ok());
         let types = TypeCounts::of(facts.get::<ApiSurface>()?);
         ctx.cancel.checkpoint()?;
         let mut findings = Vec::new();
@@ -542,11 +542,32 @@ struct Graph {
     external: BTreeMap<String, BTreeSet<String>>,
     /// Unresolved imports per module.
     unresolved: BTreeMap<String, u32>,
+    /// The files that import each module through a `File` edge, from the scope's edges and the
+    /// whole language's (`References.imports`), so an importer outside a narrowed scope counts
+    /// toward a module's afferent coupling as it does on the tree.
+    importers: BTreeMap<String, BTreeSet<String>>,
 }
 
 impl Graph {
-    fn of(fact: &ModuleGraph) -> Self {
+    fn of(fact: &ModuleGraph, references: Option<&References>) -> Self {
         let mut graph = Self::default();
+        let language = references.map_or(&[][..], |references| references.imports.as_slice());
+        for edge in fact
+            .roots
+            .iter()
+            .flat_map(|root| &root.edges)
+            .chain(language)
+        {
+            if let ImportTarget::File { path } = &edge.target
+                && *path != edge.from
+            {
+                graph
+                    .importers
+                    .entry(path.clone())
+                    .or_default()
+                    .insert(edge.from.clone());
+            }
+        }
         let mut edges: Vec<_> = fact.roots.iter().flat_map(|root| &root.edges).collect();
         edges.sort_by_key(|edge| (&edge.from, edge.line));
         for edge in edges {
@@ -589,12 +610,7 @@ impl Graph {
     fn coupling(&self, module: &str) -> Coupling {
         let count = |n: usize| u32::try_from(n).unwrap_or(u32::MAX);
         Coupling {
-            afferent: count(
-                self.imports
-                    .values()
-                    .filter(|targets| targets.contains_key(module))
-                    .count(),
-            ),
+            afferent: count(self.importers.get(module).map_or(0, BTreeSet::len)),
             efferent: count(self.imports.get(module).map_or(0, BTreeMap::len)),
             external: count(self.external.get(module).map_or(0, BTreeSet::len)),
             unresolved: self.unresolved.get(module).copied().unwrap_or(0),

@@ -4,8 +4,8 @@ mod support;
 
 use cupel_core::hint::{self, CheapestCut};
 use cupel_core::syntax::{
-    ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, RootImports,
-    Span,
+    ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, References,
+    RootImports, Span,
 };
 use cupel_core::{
     ActionKind, Check, CheckId, CheckResult, CheckStatus, FactKind, Facts, Finding, FindingId,
@@ -21,6 +21,8 @@ const ID: &str = "static.deps";
 struct World {
     edges: Vec<ImportEdge>,
     items: Vec<ApiItem>,
+    /// The whole language's edges (`References.imports`), when the world has a `References`.
+    language: Option<Vec<ImportEdge>>,
 }
 
 impl World {
@@ -69,6 +71,13 @@ impl World {
         self.import(from, imported_file(to), line)
     }
 
+    /// The whole language's edges are this world's edges and `outside`'s, of files a narrowed
+    /// scope leaves out.
+    fn narrowed(mut self, outside: &World) -> Self {
+        self.language = Some(self.edges.iter().chain(&outside.edges).cloned().collect());
+        self
+    }
+
     /// `module` declares a public item of `kind`.
     fn declares(mut self, module: &str, kind: ApiItemKind) -> Self {
         self.items.push(ApiItem {
@@ -101,6 +110,15 @@ impl World {
                 items: self.items.clone(),
             })
             .unwrap();
+        if let Some(language) = &self.language {
+            facts
+                .insert(References {
+                    references: Vec::new(),
+                    dynamic: Vec::new(),
+                    imports: language.clone(),
+                })
+                .unwrap();
+        }
         facts
     }
 }
@@ -152,7 +170,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
         support::Shape::of(manifest),
         support::Shape {
             needs: vec![FactKind::ModuleGraph, FactKind::ApiSurface],
-            wants: vec![],
+            wants: vec![FactKind::References],
             tier: 0,
             cost: cupel_core::CostClass::Quick,
             kinds: vec![
@@ -333,6 +351,33 @@ fn an_abstract_module_nothing_imports_is_unstable_abstract() {
         })
         .as_object()
         .unwrap()
+    );
+}
+
+#[test]
+fn an_importer_outside_a_narrowed_scope_counts_toward_afferent_coupling() {
+    // The scope holds port alone; model, outside it, imports port. Ca = 1 and Ce = 2, so
+    // I = 2/3, A = 1, D = 0.67: under the limit, as on the tree.
+    let world = World::default()
+        .declares("port", ApiItemKind::Interface)
+        .edge("port", "model", 1)
+        .edge("port", "other", 2)
+        .narrowed(&World::default().edge("model", "port", 1));
+    let (_, measured) = recorded(&world, json!({}));
+    assert_eq!(measured.findings, Vec::<Finding>::new());
+    let coupling: Vec<(String, f64)> = measured
+        .measurements
+        .iter()
+        .filter(|m| m.metric == "coupling")
+        .map(|m| (m.target.display.clone(), m.value))
+        .collect();
+    assert_eq!(
+        coupling,
+        [
+            ("model".to_owned(), 1.0),
+            ("other".to_owned(), 1.0),
+            ("port".to_owned(), 3.0)
+        ]
     );
 }
 

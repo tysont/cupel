@@ -1,6 +1,6 @@
 # CUPEL_DECISION_055: `test.duplicate-setup` compares the leading statements of test bodies in `NormTree`
 
-**Date:** 2026-10-13 · **Status:** accepted; the statements tests share end at the first that holds an assertion per [138](CUPEL_DECISION_138.md) §9 · **Phase:** P2.6
+**Date:** 2026-10-13 · **Status:** accepted; Groups amended on 2026-10-25 (P9.9 group 1): setup ends at a case's first assertion; the shared count compares statements by shape per [138](CUPEL_DECISION_138.md) §9 · **Phase:** P2.6
 
 ## Context
 
@@ -17,7 +17,7 @@ Design §5.2's `tests.quality` reports duplicated setup (`test.duplicate-setup`)
 ## Decision
 
 - **Statements of a body.** The body is the last child of the symbol's normalized root (a function's body follows its parameters in every grammar). Its statements are the body's children, or, when the body has exactly one child, that child's children (Go wraps statements in one list node; a one-statement body then yields that statement's parts). A list with any leaf node is not a statement list (statements are never leaves; a declaration's parts include leaf tokens such as `=`), and gives no statements.
-- **Groups.** Within one test file, cases whose first `setup_statements_min` statements are equal (default 3) form a group, provided each has more statements than that, so the repeated part is followed by something the tests do differently (identical whole tests are `static.clones`' business). A group of two or more cases is one finding.
+- **Groups.** Within one test file, cases whose first `setup_statements_min` statements are equal (default 3) form a group, provided each has more statements than that, so the repeated part is followed by something the tests do differently (identical whole tests are `static.clones`' business). A group of two or more cases is one finding. *Amended 2026-10-25.* A case's setup is its leading statements before the first statement whose span holds one of the case's assertions (`TestFrames`), and only setup is compared: a group needs `setup_statements_min` statements of setup in each member, and `statements` counts shared setup only. An assertion checks what the test did, so it is never setup a fixture could share, and assertions normalize alike whatever they check: on serde_json, `lower_n_mask_test` and `lower_n_halfway_test` open with `assert_eq!` on different functions (the call names are tokens of the macro's arguments, which normalization erases), and `parse_f32_test` and `parse_f64_test` with calls of an asserting helper, and each pair was reported as repeated setup. A statement with no span (a producer that gives none) holds no assertion, so such a language keeps the rule as first written.
 - **The finding** is about the group's first case by position, so its ID is stable while that case keeps its structure. Evidence: `remediation_mode = "extract-fixture"`, `actionability = "mechanical"`, `statements` (the leading statements every member shares, at least the minimum and fewer than any member's total), `setup_statements_min`, `tests` (each member's display name, in file order), `lines` (each member's first line).
 
 ## Consequences

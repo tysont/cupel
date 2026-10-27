@@ -1,16 +1,26 @@
-// ABOUTME: What the machine and a process group hold in memory, read without unsafe code (ADR-148): physical memory
-// ABOUTME: from the system, and each group's resident set from one `ps` sample shared by every running `Process`.
-use std::collections::BTreeMap;
+// ABOUTME: What the machine and a run's processes hold in memory, read without unsafe code (ADR-148): physical memory
+// ABOUTME: from the system, and a run's resident set and process groups from `ps` samples shared by every `Process`.
+use std::collections::BTreeSet;
 use std::sync::{Arc, Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
 /// How old a sample may be before the next reader takes a new one.
 const SAMPLE_AGE: Duration = Duration::from_millis(200);
 
-/// The resident set of every process group, in bytes, as of `taken`.
+/// One running process as `ps` lists it.
+#[derive(Debug, Clone, Copy)]
+struct Listed {
+    pid: u32,
+    ppid: u32,
+    pgid: u32,
+    /// Resident set in bytes.
+    rss: u64,
+}
+
+/// Every running process, as of `taken`.
 struct Sample {
     taken: Instant,
-    by_group: Arc<BTreeMap<u32, u64>>,
+    processes: Arc<Vec<Listed>>,
 }
 
 /// The latest sample, shared by every `Process` that watches its child's memory.
@@ -44,55 +54,114 @@ fn read_physical_memory() -> Option<u64> {
     None
 }
 
-/// The resident set, in bytes, of the processes in group `pgid`, from a sample at most
-/// `SAMPLE_AGE` old; `None` where no sample can be taken.
-pub(crate) fn resident(pgid: u32) -> Option<u64> {
-    sample().map(|by_group| by_group.get(&pgid).copied().unwrap_or(0))
+/// The resident set, in bytes, of the processes that belong to the run of `pid`: its process
+/// group and every descendant, whichever group a descendant moved to (`cargo nextest` gives each
+/// test one of its own), from a sample at most `SAMPLE_AGE` old; `None` where no sample can be
+/// taken.
+pub(crate) fn resident(pid: u32) -> Option<u64> {
+    let processes = sample()?;
+    let members = members(&processes, pid);
+    Some(
+        processes
+            .iter()
+            .filter(|process| members.contains(&process.pid))
+            .map(|process| process.rss)
+            .sum(),
+    )
+}
+
+/// The process groups the run of `pid` spans, from a new sample: `pid`'s own first, then every
+/// other group one of its descendants is in. Only `pid`'s where no sample can be taken.
+pub(crate) fn groups(pid: u32) -> Vec<u32> {
+    let Some(processes) = list() else {
+        return vec![pid];
+    };
+    let members = members(&processes, pid);
+    let mut groups = vec![pid];
+    for process in processes
+        .iter()
+        .filter(|process| members.contains(&process.pid))
+    {
+        if !groups.contains(&process.pgid) {
+            groups.push(process.pgid);
+        }
+    }
+    groups
+}
+
+/// The pids of `pid`'s group and of every descendant of a process in it.
+fn members(processes: &[Listed], pid: u32) -> BTreeSet<u32> {
+    let mut members: BTreeSet<u32> = processes
+        .iter()
+        .filter(|process| process.pgid == pid || process.pid == pid)
+        .map(|process| process.pid)
+        .collect();
+    loop {
+        let before = members.len();
+        for process in processes {
+            if members.contains(&process.ppid) {
+                members.insert(process.pid);
+            }
+        }
+        if members.len() == before {
+            return members;
+        }
+    }
 }
 
 /// The latest sample, renewed when older than `SAMPLE_AGE`.
-fn sample() -> Option<Arc<BTreeMap<u32, u64>>> {
+fn sample() -> Option<Arc<Vec<Listed>>> {
     let mut latest = SAMPLE
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
     if let Some(sample) = latest.as_ref()
         && sample.taken.elapsed() < SAMPLE_AGE
     {
-        return Some(Arc::clone(&sample.by_group));
+        return Some(Arc::clone(&sample.processes));
     }
-    let by_group = Arc::new(resident_by_group()?);
+    let processes = Arc::new(list()?);
     *latest = Some(Sample {
         taken: Instant::now(),
-        by_group: Arc::clone(&by_group),
+        processes: Arc::clone(&processes),
     });
-    Some(by_group)
+    Some(processes)
 }
 
-/// Every process group's resident set in bytes, summed from `ps`, which macOS and Linux both
-/// print as the group ID and the resident set in KiB; `None` where `ps` cannot run.
+/// Every running process from `ps`, which macOS and Linux both print as the pid, the parent's
+/// pid, the group ID, and the resident set in KiB; `None` where `ps` cannot run.
 #[cfg(unix)]
-fn resident_by_group() -> Option<BTreeMap<u32, u64>> {
+fn list() -> Option<Vec<Listed>> {
     let output = std::process::Command::new("ps")
-        .args(["-A", "-o", "pgid=", "-o", "rss="])
+        .args([
+            "-A", "-o", "pid=", "-o", "ppid=", "-o", "pgid=", "-o", "rss=",
+        ])
         .output()
         .ok()?;
     if !output.status.success() {
         return None;
     }
-    let mut by_group = BTreeMap::new();
+    let mut processes = Vec::new();
     for line in String::from_utf8_lossy(&output.stdout).lines() {
-        let mut fields = line.split_whitespace();
-        let (Some(pgid), Some(kib)) = (fields.next(), fields.next()) else {
-            continue;
-        };
-        if let (Ok(pgid), Ok(kib)) = (pgid.parse::<u32>(), kib.parse::<u64>()) {
-            *by_group.entry(pgid).or_insert(0) += kib.saturating_mul(1024);
+        let fields: Vec<u64> = line
+            .split_whitespace()
+            .filter_map(|field| field.parse().ok())
+            .collect();
+        if let [pid, ppid, pgid, kib] = fields[..]
+            && let (Ok(pid), Ok(ppid), Ok(pgid)) =
+                (u32::try_from(pid), u32::try_from(ppid), u32::try_from(pgid))
+        {
+            processes.push(Listed {
+                pid,
+                ppid,
+                pgid,
+                rss: kib.saturating_mul(1024),
+            });
         }
     }
-    Some(by_group)
+    Some(processes)
 }
 
 #[cfg(not(unix))]
-fn resident_by_group() -> Option<BTreeMap<u32, u64>> {
+fn list() -> Option<Vec<Listed>> {
     None
 }
