@@ -185,11 +185,17 @@ fn a_decorated_command_called_through_sys_exit_in_the_guard_is_an_entry_point() 
     );
 }
 
+/// The roots and symbols of a tree holding one Python file.
+fn roots_of(file: &str, source: &str) -> (Roots, Symbols) {
+    let dir = tree(&[(file, source)]);
+    (produce("python", dir.path()), produce("python", dir.path()))
+}
+
 #[test]
 fn a_function_the_module_level_code_calls_is_an_entry_point() {
     // A setup script: setuptools runs its body, which calls its own functions, directly, as an
     // argument, or as a keyword argument's value; nothing imports it.
-    let dir = tree(&[(
+    let (roots, symbols) = roots_of(
         "setup.py",
         "from setuptools import setup\n\n\
          def get_version():\n    return '1'\n\n\
@@ -200,9 +206,7 @@ fn a_function_the_module_level_code_calls_is_an_entry_point() {
          configure()\n\
          TITLE = banner()\n\
          setup(\n    get_long_description(),\n    version=get_version(),\n)\n",
-    )]);
-    let roots: Roots = produce("python", dir.path());
-    let symbols: Symbols = produce("python", dir.path());
+    );
     for called in [
         "setup.get_version",
         "setup.get_long_description",
