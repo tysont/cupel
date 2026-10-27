@@ -3,7 +3,7 @@
 mod support;
 
 use cupel_core::syntax::ModuleGraph;
-use support::{edge_rows, produce, tree, under};
+use support::{EdgeRow, edge_rows, produce, row, tree};
 
 /// cljfx's registry: `(lazy-load cljfx.fx.button/lifecycle)` expands to `(requiring-resolve
 /// 'cljfx.fx.button/lifecycle)`, which loads the namespace on first use, so nothing `:require`s it.
@@ -24,63 +24,83 @@ const REGISTRY: &str = r"(ns app.fx
    :label-name 'app.widgets.other/name})
 ";
 
+/// The namespaces the registry names: one it requires, two it loads lazily, one only quoted.
+const WIDGETS: [(&str, &str); 4] = [
+    (
+        "src/app/widgets/base.clj",
+        "(ns app.widgets.base)\n(def lifecycle 0)\n",
+    ),
+    (
+        "src/app/widgets/button.clj",
+        "(ns app.widgets.button)\n(def lifecycle 1)\n",
+    ),
+    (
+        "src/app/widgets/label.clj",
+        "(ns app.widgets.label)\n(def lifecycle 2)\n",
+    ),
+    (
+        "src/app/widgets/other.clj",
+        "(ns app.widgets.other)\n(def name 3)\n",
+    ),
+];
+
+/// The module graph's edges over the registry and its widgets, in edge order.
+fn registry_edges() -> Vec<EdgeRow> {
+    let mut files = vec![
+        ("deps.edn", "{:paths [\"src\"]}\n"),
+        ("src/app/fx.clj", REGISTRY),
+    ];
+    files.extend(WIDGETS);
+    let graph: ModuleGraph = produce("clojure", tree(&files).path());
+    edge_rows(&graph)
+}
+
 #[test]
 fn a_qualified_symbol_naming_a_namespace_of_the_project_depends_on_it() {
-    let dir = tree(&[
-        ("deps.edn", "{:paths [\"src\"]}\n"),
-        (
-            "src/app/widgets/other.clj",
-            "(ns app.widgets.other)\n(def name 3)\n",
-        ),
-        ("src/app/fx.clj", REGISTRY),
-        (
-            "src/app/widgets/base.clj",
-            "(ns app.widgets.base)\n(def lifecycle 0)\n",
-        ),
-        (
-            "src/app/widgets/button.clj",
-            "(ns app.widgets.button)\n(def lifecycle 1)\n",
-        ),
-        (
-            "src/app/widgets/label.clj",
-            "(ns app.widgets.label)\n(def lifecycle 2)\n",
-        ),
-    ]);
-    let graph: ModuleGraph = produce("clojure", dir.path());
+    let edges = registry_edges();
+    let from = "src/app/fx.clj";
+    assert_eq!(edges.len(), 4, "{edges:?}");
     assert_eq!(
-        edge_rows(&graph),
-        under(
+        edges[0],
+        row(
             ".",
-            &[
-                (
-                    "src/app/fx.clj",
-                    2,
-                    "app.widgets.base",
-                    "src/app/widgets/base.clj",
-                    false
-                ),
-                (
-                    "src/app/fx.clj",
-                    3,
-                    "clojure.string",
-                    "external:clojure",
-                    false
-                ),
-                (
-                    "src/app/fx.clj",
-                    9,
-                    "app.widgets.button/lifecycle",
-                    "src/app/widgets/button.clj",
-                    false
-                ),
-                (
-                    "src/app/fx.clj",
-                    10,
-                    "app.widgets.label/lifecycle",
-                    "src/app/widgets/label.clj",
-                    false
-                ),
-            ]
+            (
+                from,
+                2,
+                "app.widgets.base",
+                "src/app/widgets/base.clj",
+                false
+            )
+        )
+    );
+    assert_eq!(
+        edges[1],
+        row(".", (from, 3, "clojure.string", "external:clojure", false))
+    );
+    assert_eq!(
+        edges[2],
+        row(
+            ".",
+            (
+                from,
+                9,
+                "app.widgets.button/lifecycle",
+                "src/app/widgets/button.clj",
+                false
+            )
+        )
+    );
+    assert_eq!(
+        edges[3],
+        row(
+            ".",
+            (
+                from,
+                10,
+                "app.widgets.label/lifecycle",
+                "src/app/widgets/label.clj",
+                false
+            )
         )
     );
 }
