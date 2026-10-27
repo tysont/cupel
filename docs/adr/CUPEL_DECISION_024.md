@@ -1,6 +1,6 @@
 # CUPEL_DECISION_024: Decision weights, nesting, and what counts as an early return
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P1.3
+**Date:** 2026-10-10 · **Status:** accepted; the early-return rule amended on 2026-10-26 (P9.9 group 3, [ADR-138](CUPEL_DECISION_138.md) §10): a return that ends an anonymous function of `[decisions] functions` inside the symbol is final there · **Phase:** P1.3
 
 ## Context
 

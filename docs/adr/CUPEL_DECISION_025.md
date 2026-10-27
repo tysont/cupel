@@ -1,6 +1,6 @@
 # CUPEL_DECISION_025: Structural identity: normalization rules, `NormTree` serialization, and 64-bit symbol and site hashes
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P1.4
+**Date:** 2026-10-10 · **Status:** accepted; the `erase` rule amended on 2026-10-26 (P9.9 group 3, [ADR-138](CUPEL_DECISION_138.md) §10): nothing below a kind of `[normalize] keep` is erased (TypeScript type declarations) · **Phase:** P1.4
 
 ## Context
 

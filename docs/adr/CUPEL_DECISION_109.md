@@ -1,6 +1,6 @@
 # CUPEL_DECISION_109: Clojure: the grammar, what each syntactic fact means in a Lisp, and the Clojure CLI toolchain
 
-**Date:** 2026-10-17 · **Status:** accepted · **Phase:** P6.4
+**Date:** 2026-10-17 · **Status:** accepted; imports amended on 2026-10-26 (P9.9 group 3, [ADR-138](CUPEL_DECISION_138.md) §10): a symbol qualified by a project namespace, read as code or given to `requiring-resolve`, is an edge to that namespace's file · **Phase:** P6.4
 
 ## Context
 
