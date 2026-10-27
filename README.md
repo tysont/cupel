@@ -43,8 +43,8 @@ Each [GitHub Release](https://github.com/tysont/cupel/releases) carries one arch
 
 ```sh
 sha256sum --ignore-missing -c SHA256SUMS     # on macOS: shasum -a 256 --ignore-missing -c SHA256SUMS
-tar -xzf cupel-0.1.0-x86_64-unknown-linux-musl.tar.gz
-install cupel-0.1.0-x86_64-unknown-linux-musl/cupel ~/.local/bin/
+tar -xzf cupel-0.2.0-x86_64-unknown-linux-musl.tar.gz
+install cupel-0.2.0-x86_64-unknown-linux-musl/cupel ~/.local/bin/
 ```
 
 On Windows, extract the `.zip` and put `cupel.exe` on your PATH; `cupel serve` listens on a named pipe there ([ADR-137](docs/adr/CUPEL_DECISION_137.md)). Commands Cupel runs through `sh -c` (configured coverage and oracle commands, `--install`) need `sh` on PATH, as Git for Windows provides, and a timeout stops the command but not the processes it started. WSL runs the Linux archive without these limits.
@@ -269,25 +269,46 @@ gate      fail (gate.changed)
   fail  static.complexity none  actual 1
   pass  static.clones none  actual 0
 
-summary   6 findings · fail 2 · warn 2 · info 2 · new 0 · resolved 0 · suppressed 0
+summary   37 findings · fail 7 · warn 2 · info 28 · new 0 · resolved 0 · suppressed 0
 
 checks
-  static.clones      pass     tier 0 · quick · score 0 pairs (n 2) · metrics clusters 0, max_jaccard 0, pairs 0 · 0 findings · 0 ms
-  static.complexity  fail     tier 0 · quick · score 15 cyclomatic_max (n 4) · metrics cognitive_max 19, cyclomatic_max 15, length_max 27, nesting_max 2, params_max 5 · 1 finding · 4 ms
-  static.crap        pass     tier 0 · quick · 0 findings · 0 ms
-  static.dead-code   pass     tier 0 · quick · score 0 dead_symbols (n 4) · metrics dead_exports 2, dead_symbols 0 · 2 findings · 63 ms
-  static.deps        pass     tier 0 · quick · score 0 cycles (n 2) · metrics cycles 0, max_distance 0, violations 0 · 0 findings · 0 ms
-  tests.quality      fail     tier 2 · quick · score 1 assertion_density (n 2) · metrics assertion_density 1, no_assertion 0, weak_ratio 0.5 · 1 finding · 0 ms
-  tests.weakening    fail     tier 2 · quick · score 2 weakened (n 2) · metrics weakened 2 · 2 findings · 0 ms
+  conc.race                 skipped  tier 4 · standard · 0 findings · 0 ms · skipped: unsupported (fact race-reports, lang python, see `cupel describe matrix`)
+  gen.property              pass     tier 4 · standard · score 0 falsified (n 0) · metrics falsified 0, missing 1, properties 0 · 1 finding · 70 ms
+  meta.oracle-independence  pass     tier 2 · quick · score 0 independently tested share (n 0) · metrics independent 0, self_authored_only 0 · 0 findings · 0 ms · note: tests that existed before the change exercise 0 of the 0 changed functions tests run; an oracle's independence is its verification (`cupel oracle verify`) (python)
+  meta.traceability         pass     tier 2 · standard · 0 findings · 0 ms · note: no requirements are configured: list their IDs as `requirements` under [checks."meta.traceability"] (python)
+  perf.footprint            pass     tier 0 · quick · score 0 dependencies (n 0) · metrics artifact_bytes 0, copyleft 0, dependencies 0, vulnerable 0 · 0 findings · 13 ms · note: artifact sizes not measured: set `[lang.<id>] artifacts` to their paths or globs (python) · note: no lockfile or manifest found (python) · note: vulnerabilities not measured: set `[lang.<id>] advisories` to a directory of OSV advisories (python)
+  spec.contracts            pass     tier 5 · standard · 0 findings · 0 ms · note: tool.icontract: no project root declares the contract library it reads, so no contract was checked (python)
+  static.analyze            fail     tier 1 · standard · score 5 diagnostics (n 2) · metrics diagnostics 5, errors 5 · 5 findings · 756 ms
+  static.api-surface        pass     tier 0 · quick · score 0 breaking (n 3) · metrics breaking 0, widened 1 · 1 finding · 0 ms
+  static.clones             pass     tier 0 · quick · score 0 pairs (n 1) · metrics clusters 0, max_jaccard 0, pairs 0 · 0 findings · 0 ms
+  static.complexity         fail     tier 0 · quick · score 18 cyclomatic_max (n 2) · metrics cognitive_max 30, cyclomatic_max 18, length_max 26, nesting_max 3, params_max 5 · 1 finding · 4 ms
+  static.crap               pass     tier 0 · quick · score 0 max (n 0) · metrics max 0, mean 0 · 0 findings · 0 ms
+  static.dead-code          pass     tier 0 · quick · score 0 dead_symbols (n 2) · metrics dead_exports 1, dead_symbols 0 · 1 finding · 16 ms
+  static.deps               pass     tier 0 · quick · score 0 cycles (n 2) · metrics cycles 0, max_distance 0, violations 0 · 0 findings · 0 ms
+  tests.assertion-density   pass     tier 2 · quick · score 1 assertions_per_test (n 1) · metrics assertions_per_public_function 0, assertions_per_test 1, sparse_files 0, sparse_tests 0, tested_public_functions 0 · 0 findings · 0 ms
+  tests.coverage            pass     tier 2 · standard · score 0 line_ratio (n 0) · metrics line 0, lines 0, uncovered 0 · 0 findings · 0 ms · note: branches: unavailable (python)
+  tests.flaky               pass     tier 2 · standard · score 0 unstable (n 2) · metrics flaky 0, order_dependent 0 · 0 findings · 695 ms
+  tests.mutation            pass     tier 3 · standard · score 0 killed_ratio (n 25) · metrics equivalent 0, executed 0, fallback 0, killed 0, out_of_memory 0, reused 0, schemata 0, score 0, survived 0, timeout 0, uncovered 25, unviable 0 · 25 findings · 210 ms
+  tests.quality             fail     tier 2 · quick · score 1 assertion_density (n 1) · metrics assertion_density 1, no_assertion 0, weak_ratio 1 · 1 finding · 0 ms
+  tests.weakening           fail     tier 2 · quick · score 2 weakened (n 2) · metrics weakened 2 · 2 findings · 0 ms
 
-fail (2)
+fail (7)
+  static.analyze
+    mypy no-untyped-def: Function is missing a type annotation
+      fnd_478bce · analyze.mypy.no-untyped-def · tier 1 · confidence 1
+      at src/shop/shipping.py:1:1-1
+      evidence: level "error" · message "Function is missing a type annotation" · rule "no-untyped-def" · tool "mypy" (full: cupel explain fnd_478bce)
+      action fix_bug (priority 1): Fix what mypy reports at src/shop/shipping.py:1 (no-untyped-def), or configure mypy if the rule does not apply to this project.
+      repro: cupel check --only static.analyze --paths src/shop/shipping.py
+      suppress: cupel suppress fnd_478bce --reason '…'
+    …
   tests.weakening
     `test_discount_reduces_the_total` replaced 1 exact assertion(s) with weaker ones
       fnd_0c6fc5 · matcher.loosened · tier 2 · confidence 1
       at tests/test_pricing.py:6:1-7:47
       evidence: strong_base 1 · strong_head 0 · test "test_discount_reduces_the_total" · weak_base 0 · weak_head 1 (full: cupel explain fnd_0c6fc5)
       action restore_test (priority 1): Restore the exact expected values in `test_discount_reduces_the_total` instead of truthiness, presence, or inequality checks.
-      repro: cupel check --only tests.weakening --base 18dcc9167bc03aa9f0e682c90347be9425b10751
+      repro: cupel check --only tests.weakening --base 966b69ba0c1a1626e606c5b1373b6409d62843c4
       suppress: cupel suppress fnd_0c6fc5 --reason '…'
     `test_discount_rejects_a_negative_percent` is now skipped
       fnd_2b25cf · test.skipped · tier 2 · confidence 1
@@ -295,55 +316,66 @@ fail (2)
 
 warn (2)
   static.complexity
-    `shop.shipping.shipping_cost` is too complex: cyclomatic 15 (max 10), cognitive 19 (max 15)
-      fnd_207cfa · complexity.high · tier 0 · confidence 1
-      at src/shop/shipping.py:1:1-27:16 in shop.shipping.shipping_cost (python, sh_c7dca337c9ad7dd1)
-      evidence: cognitive 19 · cognitive_max 15 · cyclomatic 15 · cyclomatic_max 10 (full: cupel explain fnd_207cfa)
+    `shop.shipping.shipping_cost` is too complex: cyclomatic 18 (max 10), cognitive 30 (max 15)
+      fnd_002c9a · complexity.high · tier 0 · confidence 1
+      at src/shop/shipping.py:1:1-26:26 in shop.shipping.shipping_cost (python, sh_7cfabd3ccaf75503)
+      evidence: cognitive 30 · cognitive_max 15 · cyclomatic 18 · cyclomatic_max 10 (full: cupel explain fnd_002c9a)
       action reduce_complexity (priority 2): Split `shipping_cost` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15.
-      repro: cupel check --only static.complexity --symbols sh_c7dca337c9ad7dd1
-      suppress: cupel suppress fnd_207cfa --reason '…'
+        deepest_block: branch > ternary > ternary at src/shop/shipping.py:5:39-5:66, nesting 2
+      repro: cupel check --only static.complexity --symbols sh_7cfabd3ccaf75503
+      suppress: cupel suppress fnd_002c9a --reason '…'
   tests.quality
     `tests.test_pricing.test_discount_reduces_the_total` asserts only weakly: 1 weak assertion(s), none pinning a value
       …
 
-info (2)
+info (28)
+  gen.property
+    `shop.shipping.shipping_cost` has no property test
+      …
+  static.api-surface
+    public `shop.shipping.shipping_cost` was added
+      …
   static.dead-code
     `shop.shipping.shipping_cost` is exported but no import resolves to src/shop/shipping.py
       …
+  tests.mutation
+    No test runs src/shop/shipping.py:2; its mutant `<=` → `<` was not run
+      …
+    …
 
-run       run_01M4X8VR2HBT70ZRQAKXSM7MFV · started 2026-10-14T13:15:38Z · 261 ms · seed 9032483245384408524
-git       2c3d599be0141ca3d03368b508e93f4c91068c27 · branch agent/shipping · base 18dcc9167bc03aa9f0e682c90347be9425b10751 · clean
-scope     changed · 2 files · 4 symbols · roots . · languages python
+run       run_01M5XTV9V1H83SSR534ZNEFFR9 · started 2026-10-27T04:45:40Z · 2092 ms · seed 3214784172427479321
+git       ed909455c0e876da59cd504535298957408df7d0 · branch agent/shipping · base 966b69ba0c1a1626e606c5b1373b6409d62843c4 · clean
+scope     changed · 2 files · 2 symbols · roots . · languages python
 …
 
 next actions
   1. restore_test: Restore the exact expected values in `test_discount_reduces_the_total` instead of truthiness, presence, or inequality checks. (finding fnd_0c6fc5)
   2. restore_test: Remove the skip marker from `test_discount_rejects_a_negative_percent` and fix what made it fail. (finding fnd_2b25cf)
-  3. strengthen_assertion: Replace the truthiness, presence, or inequality checks in `test_discount_reduces_the_total` with an assertion that pins the expected value. (finding fnd_fe3613)
-  4. reduce_complexity: Split `shipping_cost` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15. (finding fnd_207cfa)
+  3. fix_bug: Fix what mypy reports at src/shop/shipping.py:1 (no-untyped-def), or configure mypy if the rule does not apply to this project. (finding fnd_478bce)
+  4. fix_bug: Fix what mypy reports at tests/test_pricing.py:6 (no-untyped-def), or configure mypy if the rule does not apply to this project. (finding fnd_677648)
   …
 ```
 
-The same run as JSON, trimmed to two checks, one finding, and one action:
+The same check as JSON, trimmed to two checks, one finding, and one action:
 
 ```json
 {
-  "cupel": { "version": "0.1.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
+  "cupel": { "version": "0.2.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
   "run": {
-    "id": "run_01M4X8VR2HBT70ZRQAKXSM7MFV", "verb": "check",
-    "started": "2026-10-14T13:15:38Z", "duration_ms": 261,
-    "git": { "sha": "2c3d599be0141ca3d03368b508e93f4c91068c27", "dirty": false,
-             "base": "18dcc9167bc03aa9f0e682c90347be9425b10751", "branch": "agent/shipping" },
-    "scope": { "mode": "changed", "files": 2, "symbols": 4, "roots": ["."], "languages": ["python"] },
-    "depth": "standard", "seed": 9032483245384408524, "…": "…"
+    "id": "run_01M5XTVBWVKJKRC293EEVPX9QN", "verb": "check",
+    "started": "2026-10-27T04:45:42Z", "duration_ms": 2058,
+    "git": { "sha": "ed909455c0e876da59cd504535298957408df7d0", "dirty": false,
+             "base": "966b69ba0c1a1626e606c5b1373b6409d62843c4", "branch": "agent/shipping" },
+    "scope": { "mode": "changed", "files": 2, "symbols": 2, "roots": ["."], "languages": ["python"] },
+    "depth": "standard", "seed": 3060524445885060845, "…": "…"
   },
   "status": "fail",
   "exit_code": 1,
   "checks": [
     {
       "id": "static.complexity", "status": "fail", "tier": 0, "cost": "quick",
-      "score": { "value": 15.0, "unit": "cyclomatic_max", "n": 4 },
-      "metrics": { "cognitive_max": 19.0, "cyclomatic_max": 15.0, "length_max": 27.0, "nesting_max": 2.0, "params_max": 5.0 },
+      "score": { "value": 18.0, "unit": "cyclomatic_max", "n": 2 },
+      "metrics": { "cognitive_max": 30.0, "cyclomatic_max": 18.0, "length_max": 26.0, "nesting_max": 3.0, "params_max": 5.0 },
       "delta": null, "findings": 1, "duration_ms": 4, "skipped": null, "oracle": null
     },
     {
@@ -355,25 +387,25 @@ The same run as JSON, trimmed to two checks, one finding, and one action:
   ],
   "findings": [
     {
-      "id": "fnd_207cfa", "check": "static.complexity", "kind": "complexity.high",
+      "id": "fnd_002c9a", "check": "static.complexity", "kind": "complexity.high",
       "severity": "warn", "confidence": 1.0, "tier": 0,
-      "symbol": { "display": "shop.shipping.shipping_cost", "hash": "sh_c7dca337c9ad7dd1", "lang": "python" },
-      "location": { "file": "src/shop/shipping.py", "line": 1, "col": 1, "end_line": 27, "end_col": 16 },
-      "title": "`shop.shipping.shipping_cost` is too complex: cyclomatic 15 (max 10), cognitive 19 (max 15)",
+      "symbol": { "display": "shop.shipping.shipping_cost", "hash": "sh_7cfabd3ccaf75503", "lang": "python" },
+      "location": { "file": "src/shop/shipping.py", "line": 1, "col": 1, "end_line": 26, "end_col": 26 },
+      "title": "`shop.shipping.shipping_cost` is too complex: cyclomatic 18 (max 10), cognitive 30 (max 15)",
       "detail": null,
-      "evidence": { "cognitive": 19, "cognitive_max": 15, "cyclomatic": 15, "cyclomatic_max": 10 },
+      "evidence": { "cognitive": 30, "cognitive_max": 15, "cyclomatic": 18, "cyclomatic_max": 10 },
       "action": {
         "kind": "reduce_complexity", "priority": 2, "hints": {},
         "summary": "Split `shipping_cost` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
       },
-      "repro": "cupel check --only static.complexity --symbols sh_c7dca337c9ad7dd1",
-      "suppress": "cupel suppress fnd_207cfa --reason '…'",
+      "repro": "cupel check --only static.complexity --symbols sh_7cfabd3ccaf75503",
+      "suppress": "cupel suppress fnd_002c9a --reason '…'",
       "new_since_baseline": false,
       "suppressed": false
     }
   ],
   "summary": {
-    "findings": { "fail": 2, "warn": 2, "info": 2 },
+    "findings": { "fail": 7, "warn": 2, "info": 28 },
     "new": 0, "resolved": 0, "suppressed": 0,
     "gate": {
       "result": "fail", "evaluated": "gate.changed",
@@ -389,7 +421,7 @@ The same run as JSON, trimmed to two checks, one finding, and one action:
       "summary": "Restore the exact expected values in `test_discount_reduces_the_total` instead of truthiness, presence, or inequality checks." }
   ],
   "truncated": false,
-  "total_findings": 6
+  "total_findings": 37
 }
 ```
 
@@ -624,7 +656,7 @@ info (1)
   doctor
     The daemon at .cupel/serve.sock serves this repository (pid 72908)
       fnd_c243c8 · doctor.daemon-running · tier 0 · confidence 1
-      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.1.0" · watching true (full: cupel explain fnd_c243c8)
+      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.2.0" · watching true (full: cupel explain fnd_c243c8)
       …
 
 $ cupel serve --stop --format text
@@ -641,7 +673,7 @@ info (1)
 
 ```console
 $ cupel check --format json > envelope.json      # cupel was rebuilt after the daemon started
-cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.1.0 (binary 56427528-1792134645316655513)) than this client (cupel 0.1.0 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
+cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.2.0 (binary 56427528-1792134645316655513)) than this client (cupel 0.2.0 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
 ```
 
 - **When the CLI uses it.** Every invocation whose repository root (`--cwd`, else the working directory) has a `.cupel/serve.sock`. It runs in its own process instead when `CUPEL_NO_DAEMON=1` is set, for `serve` itself, when an argument is not UTF-8, when the run could ask a question on the terminal (stdout is a terminal and neither `--install` nor `--no-install` is given), when `--jobs` is given (a process sizes its thread pool once), and when nothing answers on the socket (a daemon that was killed leaves its socket file behind; it is ignored).
