@@ -120,7 +120,8 @@ fn each_language_reports_exactly_its_fixture_s_planted_results() {
         ),
         (
             "python",
-            &["ledger.py"],
+            // `rates.py` is untyped and its stub `rates.pyi` typed: mypy reads the stub.
+            &["ledger.py", "rates.py"],
             vec![
                 ran("mypy", &[("arg-type", Error, "ledger.py", 9)]),
                 ran("ruff", &[("F401", Warning, "ledger.py", 1)]),

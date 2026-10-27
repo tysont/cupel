@@ -11,6 +11,14 @@
     {
       "decisions": [],
       "symbol": {
+        "col": 1,
+        "file": "setup.py",
+        "line": 4
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
         "col": 5,
         "file": "src/deps_layers/port.py",
         "line": 7
@@ -126,6 +134,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": true,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -157,6 +166,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -171,6 +181,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 1,
           "span": {
@@ -194,6 +205,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -208,6 +220,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 1,
           "span": {
@@ -231,6 +244,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -254,6 +268,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -277,6 +292,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -291,6 +307,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -305,6 +322,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -319,6 +337,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -333,6 +352,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -347,6 +367,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -361,6 +382,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -375,6 +397,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -389,6 +412,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -403,6 +427,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -426,6 +451,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -440,6 +466,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 1,
           "span": {
@@ -454,6 +481,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 2,
           "span": {
@@ -468,6 +496,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 3,
           "span": {
@@ -482,6 +511,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 4,
           "span": {
@@ -545,6 +575,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -559,6 +590,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -573,6 +605,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -587,6 +620,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -601,6 +635,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -615,6 +650,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -629,6 +665,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -643,6 +680,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -657,6 +695,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -671,6 +710,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -685,6 +725,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -699,6 +740,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -713,6 +755,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -727,6 +770,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -741,6 +785,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -755,6 +800,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -769,6 +815,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -783,6 +830,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -797,6 +845,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -811,6 +860,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -825,6 +875,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -839,6 +890,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -853,6 +905,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -867,6 +920,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -890,6 +944,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -904,6 +959,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 1,
           "span": {
@@ -918,6 +974,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "boolean-op",
           "nesting": 1,
           "span": {
@@ -932,6 +989,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 1,
           "span": {
@@ -946,6 +1004,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 1,
           "span": {
@@ -969,6 +1028,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -983,6 +1043,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -997,6 +1058,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1011,6 +1073,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1058,6 +1121,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1072,6 +1136,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1086,6 +1151,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "boolean-op",
           "nesting": 0,
           "span": {
@@ -1109,6 +1175,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -1123,6 +1190,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 1,
           "span": {
@@ -1137,6 +1205,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 2,
           "span": {
@@ -1160,6 +1229,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "catch",
           "nesting": 0,
           "span": {
@@ -1174,6 +1244,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1197,6 +1268,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1211,6 +1283,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1234,6 +1307,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -1248,6 +1322,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1262,6 +1337,7 @@
           "cognitive": 0,
           "continues": true,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "case",
           "nesting": 0,
           "span": {
@@ -1276,6 +1352,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1299,6 +1376,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "ternary",
           "nesting": 0,
           "span": {
@@ -1322,6 +1400,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": true,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -1336,6 +1415,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": true,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1359,6 +1439,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1373,6 +1454,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "boolean-op",
           "nesting": 0,
           "span": {
@@ -1387,6 +1469,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1410,6 +1493,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -1424,6 +1508,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 1,
           "span": {
@@ -1487,6 +1572,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1501,6 +1587,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1564,6 +1651,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1578,6 +1666,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1601,6 +1690,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1615,6 +1705,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1638,6 +1729,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1652,6 +1744,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1675,6 +1768,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1689,6 +1783,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1712,6 +1807,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1726,6 +1822,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1749,6 +1846,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1763,6 +1861,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1777,6 +1876,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1791,6 +1891,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1814,6 +1915,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "branch",
           "nesting": 0,
           "span": {
@@ -1828,6 +1930,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 0,
+          "expression": false,
           "kind": "early-return",
           "nesting": 1,
           "span": {
@@ -1850,6 +1953,14 @@
       "symbol": {
         "col": 1,
         "file": "tests/conftest.py",
+        "line": 7
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
         "line": 7
       }
     },
@@ -1945,6 +2056,93 @@
       "decisions": [],
       "symbol": {
         "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 6
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "expression": true,
+          "kind": "loop",
+          "nesting": 0,
+          "span": {
+            "col": 40,
+            "end_col": 55,
+            "end_line": 10,
+            "line": 10
+          },
+          "table": false
+        },
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "expression": true,
+          "kind": "branch",
+          "nesting": 0,
+          "span": {
+            "col": 56,
+            "end_col": 60,
+            "end_line": 10,
+            "line": 10
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 9
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 12
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 18
+      }
+    },
+    {
+      "decisions": [
+        {
+          "cognitive": 1,
+          "continues": false,
+          "cyclomatic": 1,
+          "expression": true,
+          "kind": "ternary",
+          "nesting": 0,
+          "span": {
+            "col": 53,
+            "end_col": 70,
+            "end_line": 25,
+            "line": 25
+          },
+          "table": false
+        }
+      ],
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 24
+      }
+    },
+    {
+      "decisions": [],
+      "symbol": {
+        "col": 5,
         "file": "tests/test_pricing.py",
         "line": 8
       }
@@ -2027,6 +2225,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {
@@ -2050,6 +2249,7 @@
           "cognitive": 1,
           "continues": false,
           "cyclomatic": 1,
+          "expression": false,
           "kind": "loop",
           "nesting": 0,
           "span": {

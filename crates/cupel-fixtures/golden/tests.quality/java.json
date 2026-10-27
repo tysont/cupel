@@ -9,11 +9,11 @@
       "metrics": {
         "assertion_density": 1.0,
         "no_assertion": 2.0,
-        "weak_ratio": 0.2916666666666667
+        "weak_ratio": 0.28
       },
       "oracle": null,
       "score": {
-        "n": 24,
+        "n": 25,
         "unit": "assertion_density",
         "value": 1.0
       },
@@ -607,7 +607,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 26,
+      "files": 27,
       "languages": [
         "java"
       ],
@@ -615,7 +615,7 @@
       "roots": [
         "."
       ],
-      "symbols": 108
+      "symbols": 110
     },
     "seed": "<seed>",
     "started": "<timestamp>",

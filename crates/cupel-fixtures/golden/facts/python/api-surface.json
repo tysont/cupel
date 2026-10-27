@@ -13,6 +13,18 @@
       }
     },
     {
+      "file": "setup.py",
+      "kind": "function",
+      "path": "setup.read_version",
+      "signature": "()",
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 5,
+        "line": 4
+      }
+    },
+    {
       "file": "src/deps_cycle/alpha.py",
       "kind": "constant",
       "path": "deps_cycle.alpha.ALPHA",
@@ -757,6 +769,30 @@
       }
     },
     {
+      "file": "tests/ledger_case.py",
+      "kind": "type",
+      "path": "tests.ledger_case.LedgerTestCase",
+      "signature": "(unittest.TestCase)",
+      "span": {
+        "col": 1,
+        "end_col": 53,
+        "end_line": 8,
+        "line": 6
+      }
+    },
+    {
+      "file": "tests/ledger_case.py",
+      "kind": "method",
+      "path": "tests.ledger_case.LedgerTestCase.balances",
+      "signature": "(self, _, _)",
+      "span": {
+        "col": 5,
+        "end_col": 53,
+        "end_line": 8,
+        "line": 7
+      }
+    },
+    {
       "file": "tests/test_ledger.py",
       "kind": "function",
       "path": "tests.test_ledger.test_deposit_adds_to_the_balance",
@@ -886,6 +922,78 @@
         "end_col": 19,
         "end_line": 58,
         "line": 56
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "kind": "type",
+      "path": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "signature": "(LedgerTestCase)",
+      "span": {
+        "col": 1,
+        "end_col": 86,
+        "end_line": 25,
+        "line": 5
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "path": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_a_harness_method_asserts",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 33,
+        "end_line": 7,
+        "line": 6
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "path": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_a_comprehension_computes_the_balances",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 70,
+        "end_line": 10,
+        "line": 9
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "path": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_pairs",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 33,
+        "end_line": 16,
+        "line": 12
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "path": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_larger_pairs",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 18
+      }
+    },
+    {
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "path": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_a_lambda_chooses_each_entry",
+      "signature": "(self)",
+      "span": {
+        "col": 5,
+        "end_col": 86,
+        "end_line": 25,
+        "line": 24
       }
     },
     {

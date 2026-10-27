@@ -30,6 +30,22 @@ fn statements(shapes: &[&str]) -> Vec<NormNode> {
     shapes.iter().map(|shape| statement(shape)).collect()
 }
 
+/// `statements` one per line from `line`, each spanning its line.
+fn statements_from(line: u32, shapes: &[&str]) -> Vec<NormNode> {
+    (line..)
+        .zip(shapes)
+        .map(|(at, shape)| NormNode {
+            span: Some(Span {
+                line: at,
+                col: 1,
+                end_line: at,
+                end_col: 40,
+            }),
+            ..statement(shape)
+        })
+        .collect()
+}
+
 fn hash_of(file: &str, line: u32) -> SymbolHash {
     let file_bits = u64::from(file.bytes().map(u32::from).sum::<u32>());
     format!("sh_{:016x}", (file_bits << 32) | u64::from(line))
@@ -44,11 +60,16 @@ struct Case {
     name: &'static str,
     line: u32,
     assertions: Vec<(AssertionKind, AssertionStrength)>,
+    /// The lines the assertions are on, in order; each is on the case's first line without.
+    asserted_on: Vec<u32>,
     mocks: u32,
     skipped: bool,
     decisions: Vec<DecisionKind>,
     /// Loops over tables of cases written in place, after `decisions`.
     tables: usize,
+    /// Clauses of expressions computing a value (a comprehension's `for` and `if`), after
+    /// `tables`.
+    clauses: Vec<DecisionKind>,
     body: Vec<NormNode>,
     /// The body's statements sit inside one list node, as Go's do.
     wrapped: bool,
@@ -60,10 +81,12 @@ fn case(name: &'static str, line: u32) -> Case {
         name,
         line,
         assertions: vec![(AssertionKind::Equality, AssertionStrength::Strong)],
+        asserted_on: Vec::new(),
         mocks: 0,
         skipped: false,
         decisions: Vec::new(),
         tables: 0,
+        clauses: Vec::new(),
         body: Vec::new(),
         wrapped: false,
     }
@@ -72,6 +95,13 @@ fn case(name: &'static str, line: u32) -> Case {
 impl Case {
     fn asserting(mut self, assertions: &[(AssertionKind, AssertionStrength)]) -> Self {
         self.assertions = assertions.to_vec();
+        self
+    }
+
+    /// One strong equality assertion on each of `lines`.
+    fn asserting_on(mut self, lines: &[u32]) -> Self {
+        self.assertions = vec![(AssertionKind::Equality, AssertionStrength::Strong); lines.len()];
+        self.asserted_on = lines.to_vec();
         self
     }
 
@@ -92,6 +122,11 @@ impl Case {
 
     fn iterating_tables(mut self, tables: usize) -> Self {
         self.tables = tables;
+        self
+    }
+
+    fn computing(mut self, clauses: &[DecisionKind]) -> Self {
+        self.clauses = clauses.to_vec();
         self
     }
 
@@ -137,10 +172,11 @@ impl Case {
             assertions: self
                 .assertions
                 .iter()
-                .map(|(kind, strength)| Assertion {
+                .enumerate()
+                .map(|(n, (kind, strength))| Assertion {
                     kind: *kind,
                     strength: *strength,
-                    span: at,
+                    span: self.asserted_on.get(n).map_or(at, |line| span(*line, 1)),
                 })
                 .collect(),
             mocks: (0..self.mocks)
@@ -230,9 +266,10 @@ impl World {
                             decisions: case
                                 .decisions
                                 .iter()
-                                .map(|kind| (*kind, false))
-                                .chain((0..case.tables).map(|_| (DecisionKind::Loop, true)))
-                                .map(|(kind, table)| Decision {
+                                .map(|kind| (*kind, false, false))
+                                .chain((0..case.tables).map(|_| (DecisionKind::Loop, true, false)))
+                                .chain(case.clauses.iter().map(|kind| (*kind, false, true)))
+                                .map(|(kind, table, expression)| Decision {
                                     span: None,
                                     kind,
                                     nesting: 0,
@@ -240,6 +277,7 @@ impl World {
                                     cognitive: 1,
                                     table,
                                     continues: false,
+                                    expression,
                                 })
                                 .collect(),
                         })
@@ -512,6 +550,11 @@ fn logic_cases() -> Vec<Case> {
         case("table_with_logic", 70)
             .iterating_tables(1)
             .deciding(&[Loop]),
+        // `self.assertEqual([x for x in xs if x], want)`: a comprehension computes a value.
+        case("comprehension", 80).computing(&[Loop, Branch]),
+        case("comprehension_in_a_loop", 90)
+            .deciding(&[Loop])
+            .computing(&[Loop]),
     ]
 }
 
@@ -525,6 +568,7 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
             ("t::branches_beyond_guards", "test.logic"),
             ("t::alternatives", "test.logic"),
             ("t::table_with_logic", "test.logic"),
+            ("t::comprehension_in_a_loop", "test.logic"),
         ])
     );
     assert_eq!(
@@ -614,6 +658,54 @@ fn tests_repeating_their_leading_statements_are_one_duplicate_setup_finding() {
         .unwrap()
     );
     assert_eq!(findings[0].action.kind, ActionKind::RefactorExtract);
+}
+
+#[test]
+fn a_statement_holding_an_assertion_ends_the_setup_tests_share() {
+    // Tests written through an asserting harness (`self.flakes(source, *expected)` three
+    // times) repeat assertions, not arrange code; arrange code that ends at an assertion is
+    // shared only as far as it goes.
+    let (_, findings) = Run::of(vec![
+        case("harness_one", 100)
+            .asserting_on(&[101, 102, 103])
+            .with_body(statements_from(
+                101,
+                &["flakes", "flakes", "flakes", "check"],
+            )),
+        case("harness_two", 110)
+            .asserting_on(&[111, 112, 113])
+            .with_body(statements_from(
+                111,
+                &["flakes", "flakes", "flakes", "flakes"],
+            )),
+        case("short_one", 120)
+            .asserting_on(&[123])
+            .with_body(statements_from(
+                121,
+                &["open", "deposit", "check", "deposit"],
+            )),
+        case("short_two", 130)
+            .asserting_on(&[133])
+            .with_body(statements_from(131, &["open", "deposit", "check", "other"])),
+        case("arranged_one", 140)
+            .asserting_on(&[145])
+            .with_body(statements_from(
+                141,
+                &["open", "deposit", "deposit", "deposit", "check"],
+            )),
+        case("arranged_two", 150)
+            .asserting_on(&[155])
+            .with_body(statements_from(
+                151,
+                &["open", "deposit", "deposit", "deposit", "check"],
+            )),
+    ])
+    .go();
+    assert_eq!(
+        support::kinds(&findings),
+        pairs(&[("t::arranged_one", "test.duplicate-setup")])
+    );
+    assert_eq!(findings[0].evidence.0["statements"], json!(4));
 }
 
 #[test]

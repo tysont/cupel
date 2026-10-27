@@ -24,6 +24,28 @@
     },
     {
       "body": {
+        "col": 5,
+        "end_col": 19,
+        "end_line": 5,
+        "line": 5
+      },
+      "display": "setup.read_version",
+      "file": "setup.py",
+      "kind": "function",
+      "lang": "python",
+      "name": "read_version",
+      "namespace": "setup",
+      "parameters": 0,
+      "span": {
+        "col": 1,
+        "end_col": 19,
+        "end_line": 5,
+        "line": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 44,
         "end_col": 47,
         "end_line": 7,
@@ -1366,6 +1388,28 @@
     },
     {
       "body": {
+        "col": 9,
+        "end_col": 53,
+        "end_line": 8,
+        "line": 8
+      },
+      "display": "tests.ledger_case.LedgerTestCase.balances",
+      "file": "tests/ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "balances",
+      "namespace": "tests.ledger_case.LedgerTestCase",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 53,
+        "end_line": 8,
+        "line": 7
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
         "col": 5,
         "end_col": 32,
         "end_line": 12,
@@ -1603,6 +1647,116 @@
         "end_col": 19,
         "end_line": 58,
         "line": 56
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 33,
+        "end_line": 7,
+        "line": 7
+      },
+      "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_a_harness_method_asserts",
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_a_harness_method_asserts",
+      "namespace": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 33,
+        "end_line": 7,
+        "line": 6
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 70,
+        "end_line": 10,
+        "line": 10
+      },
+      "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_a_comprehension_computes_the_balances",
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_a_comprehension_computes_the_balances",
+      "namespace": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 70,
+        "end_line": 10,
+        "line": 9
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 33,
+        "end_line": 16,
+        "line": 13
+      },
+      "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_pairs",
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_balances_of_pairs",
+      "namespace": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 33,
+        "end_line": 16,
+        "line": 12
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 19
+      },
+      "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_larger_pairs",
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_balances_of_larger_pairs",
+      "namespace": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 30,
+        "end_line": 22,
+        "line": 18
+      },
+      "visibility": "public"
+    },
+    {
+      "body": {
+        "col": 9,
+        "end_col": 86,
+        "end_line": 25,
+        "line": 25
+      },
+      "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_a_lambda_chooses_each_entry",
+      "file": "tests/test_ledger_case.py",
+      "kind": "method",
+      "lang": "python",
+      "name": "test_a_lambda_chooses_each_entry",
+      "namespace": "tests.test_ledger_case.TestBalancesThroughTheHarness",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 86,
+        "end_line": 25,
+        "line": 24
       },
       "visibility": "public"
     },

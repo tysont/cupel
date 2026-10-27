@@ -13,7 +13,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 20,
+        "n": 23,
         "unit": "cycles",
         "value": 1.0
       },
@@ -211,6 +211,22 @@
           "lang": "python",
           "rank": 4,
           "target": {
+            "display": "tests/ledger_case.py",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "tests/ledger_case.py",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "python",
+          "rank": 5,
+          "target": {
             "display": "src/ledger/account.py",
             "location": {
               "col": null,
@@ -225,7 +241,23 @@
         },
         {
           "lang": "python",
-          "rank": 5,
+          "rank": 6,
+          "target": {
+            "display": "tests/test_ledger_case.py",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "tests/test_ledger_case.py",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "python",
+          "rank": 7,
           "target": {
             "display": "tests/test_pricing.py",
             "location": {
@@ -240,7 +272,7 @@
           "value": 0.0
         }
       ],
-      "measured": 5,
+      "measured": 7,
       "metric": "distance",
       "per": "module",
       "summary": "Distance from the main sequence per module that declares a type and has a coupling.",
@@ -263,7 +295,7 @@
             },
             "symbol": null
           },
-          "value": 6.0
+          "value": 8.0
         },
         {
           "lang": "python",
@@ -410,7 +442,7 @@
           "value": 2.0
         }
       ],
-      "measured": 20,
+      "measured": 23,
       "metric": "coupling",
       "per": "module",
       "summary": "Afferent plus efferent coupling per module.",

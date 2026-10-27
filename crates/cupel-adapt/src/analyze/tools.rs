@@ -201,10 +201,29 @@ fn clippy_command(target: &Target<'_>) -> Option<Vec<String>> {
     })
 }
 
+/// mypy over the scope's files, less each module with a stub beside it (`more.py` beside
+/// `more.pyi`): the stub is that module's types, which every import of it reads, and checking
+/// its implementation instead grades code its project types elsewhere (ADR-138 §9).
 fn mypy_command(target: &Target<'_>) -> Option<Vec<String>> {
     let cache = format!("--cache-dir={}", target.cache.display());
+    let unstubbed = Target {
+        program: target.program.clone(),
+        dir: target.dir,
+        files: target
+            .files
+            .iter()
+            .filter(|file| {
+                let path = target.dir.join(file);
+                path.extension().is_none_or(|extension| extension != "py")
+                    || !path.with_extension("pyi").is_file()
+            })
+            .cloned()
+            .collect(),
+        packages: target.packages,
+        cache: target.cache.clone(),
+    };
     on_files(
-        target,
+        &unstubbed,
         &["--strict", "--output", "json", "--no-error-summary", &cache],
     )
 }
@@ -615,6 +634,29 @@ mod tests {
                 [2, 5, 2, 17]
             )]
         );
+    }
+
+    #[test]
+    fn mypy_checks_a_module_with_a_stub_through_the_stub() {
+        let dir = tempfile::tempdir().unwrap();
+        for file in ["typed.py", "typed.pyi", "plain.py"] {
+            std::fs::write(dir.path().join(file), "").unwrap();
+        }
+        let target = Target {
+            program: "mypy".to_owned(),
+            dir: dir.path(),
+            files: vec!["typed.py".to_owned(), "plain.py".to_owned()],
+            packages: &[],
+            cache: dir.path().join("cache"),
+        };
+        let args = mypy_command(&target).unwrap();
+        assert_eq!(args.last().map(String::as_str), Some("plain.py"));
+        assert!(!args.iter().any(|arg| arg == "typed.py"), "{args:?}");
+        let stubbed = Target {
+            files: vec!["typed.py".to_owned()],
+            ..target
+        };
+        assert_eq!(mypy_command(&stubbed), None);
     }
 
     #[test]

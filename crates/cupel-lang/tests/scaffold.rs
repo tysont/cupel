@@ -49,6 +49,26 @@ fn scope(files: &[&str]) -> Scope {
     Scope::of_files(files.iter().map(|f| (*f).to_owned()).collect())
 }
 
+/// The Rust symbols producer run over `files` (name, text), written to a fresh directory and in
+/// scope in the order given: the fact and the events it emitted.
+fn produced(files: &[(&str, &str)]) -> (Symbols, Vec<Event>) {
+    let dir = tempfile::tempdir().unwrap();
+    for (name, text) in files {
+        fs::write(dir.path().join(name), text).unwrap();
+    }
+    let registry = LanguageRegistry::builtin();
+    let names: Vec<&str> = files.iter().map(|(name, _)| *name).collect();
+    let mut events = Vec::new();
+    let fact = rust_producer(&registry)
+        .produce(
+            &produce_ctx(dir.path(), Cancellation::new()),
+            &scope(&names),
+            &mut events,
+        )
+        .unwrap();
+    (fact, events)
+}
+
 #[test]
 fn the_producer_extracts_only_its_languages_files_in_scope_order() {
     let dir = tempfile::tempdir().unwrap();
@@ -74,24 +94,10 @@ fn the_producer_extracts_only_its_languages_files_in_scope_order() {
 
 #[test]
 fn a_file_that_does_not_parse_is_a_parse_error_finding_and_still_extracted() {
-    let dir = tempfile::tempdir().unwrap();
-    fs::write(dir.path().join("ok.rs"), "fn f() {}\n").unwrap();
-    fs::write(
-        dir.path().join("broken.rs"),
-        "fn ok() {}\n\nfn f() {\n    let x = 1 +;\n}\n",
-    )
-    .unwrap();
-    let registry = LanguageRegistry::builtin();
-    let producer = rust_producer(&registry);
-    let mut events = Vec::new();
-
-    let fact = producer
-        .produce(
-            &produce_ctx(dir.path(), Cancellation::new()),
-            &scope(&["broken.rs", "ok.rs"]),
-            &mut events,
-        )
-        .unwrap();
+    let (fact, events) = produced(&[
+        ("broken.rs", "fn ok() {}\n\nfn f() {\n    let x = 1 +;\n}\n"),
+        ("ok.rs", "fn f() {}\n"),
+    ]);
 
     assert_eq!(fact.symbols.len(), 2);
     let [Event::Finding(finding)] = events.as_slice() else {
@@ -109,28 +115,16 @@ fn a_file_that_does_not_parse_is_a_parse_error_finding_and_still_extracted() {
 
 #[test]
 fn a_token_the_grammar_lacks_inside_a_macro_call_is_not_a_parse_error() {
-    let dir = tempfile::tempdir().unwrap();
-    fs::write(
-        dir.path().join("tilde.rs"),
-        "macro_rules! m {\n    ($a:tt ~ $b:tt) => {};\n}\n\nfn main() {\n    json!({ \"a\" : ~ });\n}\n",
-    )
-    .unwrap();
-    fs::write(
-        dir.path().join("broken.rs"),
-        "fn main() {\n    json!({ \"a\" : ~ });\n    let x = 1 +;\n}\n",
-    )
-    .unwrap();
-    let registry = LanguageRegistry::builtin();
-    let producer = rust_producer(&registry);
-    let mut events = Vec::new();
-
-    producer
-        .produce(
-            &produce_ctx(dir.path(), Cancellation::new()),
-            &scope(&["broken.rs", "tilde.rs"]),
-            &mut events,
-        )
-        .unwrap();
+    let (_, events) = produced(&[
+        (
+            "broken.rs",
+            "fn main() {\n    json!({ \"a\" : ~ });\n    let x = 1 +;\n}\n",
+        ),
+        (
+            "tilde.rs",
+            "macro_rules! m {\n    ($a:tt ~ $b:tt) => {};\n}\n\nfn main() {\n    json!({ \"a\" : ~ });\n}\n",
+        ),
+    ]);
 
     let [Event::Finding(finding)] = events.as_slice() else {
         panic!("one finding expected: {events:?}");

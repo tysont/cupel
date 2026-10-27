@@ -3,7 +3,9 @@
 mod support;
 
 use cupel_core::syntax::{DecisionKind, Decisions, Symbols};
-use support::{case_continuations, decisions_of, fixture, loop_tables, produce, tree};
+use support::{
+    case_continuations, decisions_of, expression_clauses, fixture, loop_tables, produce, tree,
+};
 
 use DecisionKind::{BooleanOp, Branch, Case, Catch, EarlyReturn, Loop, Ternary};
 
@@ -162,6 +164,46 @@ fn loops_over_literal_lists_and_tuples_are_tables_and_others_are_not() {
     assert_eq!(
         loop_tables("python", dir.path(), "t.cases"),
         [true, true, true, false, false]
+    );
+}
+
+#[test]
+fn comprehension_clauses_and_lambda_bodies_are_expression_decisions_and_statements_are_not() {
+    // A comprehension's clauses decide which values it yields; a lambda handed to the code under
+    // test computes values when that code calls it. Neither is the function's control flow.
+    let dir = tree(&[(
+        "t.py",
+        "def mixed(xs):\n\
+         \x20   for x in xs:\n        if x:\n            f(x)\n\
+         \x20   return [y for y in xs if y], {k: v for k, v in xs}, any(z for z in xs)\n\
+         \n\
+         def passes(f, g, h, t):\n\
+         \x20   f(lambda x: 1 if x else 2)\n\
+         \x20   g(key=lambda y: (3 if y else 4))\n\
+         \x20   h(lambda z: [w for w in z if w and z])\n\
+         \x20   return 5 if t else 6\n",
+    )]);
+    assert_eq!(
+        expression_clauses("python", dir.path(), "t.mixed"),
+        [
+            (Loop, false),
+            (Branch, false),
+            (Loop, true),
+            (Branch, true),
+            (Loop, true),
+            (Loop, true),
+        ]
+    );
+    assert_eq!(
+        expression_clauses("python", dir.path(), "t.passes"),
+        [
+            (Ternary, true),
+            (Ternary, true),
+            (Loop, true),
+            (Branch, true),
+            (BooleanOp, true),
+            (Ternary, false),
+        ]
     );
 }
 

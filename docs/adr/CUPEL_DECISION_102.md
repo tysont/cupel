@@ -1,6 +1,6 @@
 # CUPEL_DECISION_102: `static.analyze`: the `AnalyzerReport` payload, one analyzers producer per language, and `analyze.<tool>.<rule>` kinds
 
-**Date:** 2026-10-16 · **Status:** accepted · **Phase:** P6.2
+**Date:** 2026-10-16 · **Status:** accepted; mypy is not handed a module that has a stub beside it per [138](CUPEL_DECISION_138.md) §9 · **Phase:** P6.2
 
 ## Context
 

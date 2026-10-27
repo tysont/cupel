@@ -15,7 +15,7 @@
       },
       "oracle": null,
       "score": {
-        "n": 24,
+        "n": 25,
         "unit": "assertions_per_test",
         "value": 1.0
       },

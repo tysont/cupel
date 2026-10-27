@@ -156,6 +156,13 @@ pub struct TestsQuality {
 
 inventory::submit!(crate::NativeCheck(|| Box::new(TestsQuality::new())));
 
+/// The facts the check reads: each test file's cases and assertions, and the symbols and trees
+/// that identify a case and hold its statements.
+const NEEDS: [FactKind; 3] = [FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree];
+
+/// The decisions, by which a case's loops and branches are counted as logic.
+const WANTS: [FactKind; 1] = [FactKind::Decisions];
+
 impl TestsQuality {
     pub fn new() -> Self {
         Self {
@@ -164,8 +171,8 @@ impl TestsQuality {
                 version: 1,
                 tier: Tier::try_from(2).expect("tier 2 exists"),
                 cost: CostClass::Quick,
-                needs: vec![FactKind::TestFrames, FactKind::Symbols, FactKind::NormTree],
-                wants: vec![FactKind::Decisions],
+                needs: NEEDS.to_vec(),
+                wants: WANTS.to_vec(),
                 findings: finding_kinds(),
                 metrics: metrics(),
                 settings: LIMITS.specs(),
@@ -209,7 +216,7 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
             "test.duplicate-setup",
             ActionKind::RefactorExtract,
             "Tests in one file repeat the same setup_statements_min or more leading \
-             statements.",
+             statements before their first assertion.",
         ),
     ]
 }
@@ -395,6 +402,12 @@ struct LogicCount {
 
 impl LogicCount {
     fn of(case: &TestCase, decisions: &[Decision]) -> Self {
+        // A comprehension's clauses compute a value; the case's statements still run in one
+        // straight line (ADR-138 §9).
+        let decisions: Vec<&Decision> = decisions
+            .iter()
+            .filter(|decision| !decision.expression)
+            .collect();
         let of_kinds = |kinds: &[DecisionKind]| {
             count(
                 decisions
@@ -640,7 +653,11 @@ impl TestsQuality {
             .unwrap_or(0);
         let first = members[0].body;
         let shared = (min..shortest)
-            .take_while(|&at| members.iter().all(|member| member.body[at] == first[at]))
+            .take_while(|&at| {
+                members
+                    .iter()
+                    .all(|member| member.body[at].same_shape(&first[at]))
+            })
             .count()
             + min;
         let statements = u32::try_from(shared).unwrap_or(u32::MAX);

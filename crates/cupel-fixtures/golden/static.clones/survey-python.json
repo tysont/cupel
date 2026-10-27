@@ -4,18 +4,18 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 3,
+      "findings": 4,
       "id": "static.clones",
       "metrics": {
         "clusters": 1.0,
         "max_jaccard": 1.0,
-        "pairs": 8.0
+        "pairs": 9.0
       },
       "oracle": null,
       "score": {
-        "n": 28,
+        "n": 30,
         "unit": "pairs",
-        "value": 8.0
+        "value": 9.0
       },
       "skipped": null,
       "status": "fail",
@@ -436,6 +436,82 @@
       },
       "tier": 0,
       "title": "`ledger.twins.net_total` and 3 other symbols are clones of one another (jaccard 1.00–1.00)"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `test_balances_of_pairs` and `test_balances_of_larger_pairs` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 3,
+        "edits": [
+          {
+            "change": "removed",
+            "location": {
+              "col": 27,
+              "end_col": 28,
+              "end_line": 16,
+              "file": "tests/test_ledger_case.py",
+              "line": 16
+            },
+            "nodes": 1,
+            "symbol": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_larger_pairs"
+          }
+        ],
+        "jaccard": 0.833,
+        "left": {
+          "col": 5,
+          "end_col": 33,
+          "end_line": 16,
+          "file": "tests/test_ledger_case.py",
+          "hash": "sh_016947fcf4a2d214",
+          "lang": "python",
+          "line": 12,
+          "lines": 5,
+          "nodes": 43,
+          "symbol": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_pairs"
+        },
+        "renamed": [],
+        "right": {
+          "col": 5,
+          "end_col": 30,
+          "end_line": 22,
+          "file": "tests/test_ledger_case.py",
+          "hash": "sh_1de39d39d911aa78",
+          "lang": "python",
+          "line": 18,
+          "lines": 5,
+          "nodes": 42,
+          "symbol": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_larger_pairs"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_91de73",
+      "kind": "clone.pair",
+      "location": {
+        "col": 5,
+        "end_col": 33,
+        "end_line": 16,
+        "file": "tests/test_ledger_case.py",
+        "line": 12
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_016947fcf4a2d214",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_91de73 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_pairs",
+        "hash": "sh_016947fcf4a2d214",
+        "lang": "python"
+      },
+      "tier": 0,
+      "title": "`tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_pairs` and `tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_larger_pairs` (tests/test_ledger_case.py:18) are type-3 clones (jaccard 0.83)"
     }
   ],
   "rankings": [
@@ -489,9 +565,25 @@
             "symbol": null
           },
           "value": 2.0
+        },
+        {
+          "lang": "python",
+          "rank": 4,
+          "target": {
+            "display": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_pairs and 1 other",
+            "location": {
+              "col": 5,
+              "end_col": 33,
+              "end_line": 16,
+              "file": "tests/test_ledger_case.py",
+              "line": 12
+            },
+            "symbol": null
+          },
+          "value": 2.0
         }
       ],
-      "measured": 3,
+      "measured": 4,
       "metric": "cluster_size",
       "per": "group",
       "summary": "Symbols in each clone group: 2 for a pair, more for a cluster.",

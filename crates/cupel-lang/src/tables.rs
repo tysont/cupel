@@ -326,6 +326,7 @@ impl Replacements {
 /// [tests]
 /// framework = "rust-test"     # a file's framework when no `@framework.<name>` capture matched
 /// unknown_assertion = { kind = "custom", strength = "strong" }  # the default shown
+/// directory_helpers = false   # whether a helper call resolves across its directory's files
 ///
 /// [tests.assertions]          # assertion key → semantic kind and strength
 /// assert_eq = { kind = "equality", strength = "strong" }
@@ -337,6 +338,10 @@ pub struct TestRules {
     pub framework: String,
     pub unknown_assertion: AssertionClass,
     pub assertions: BTreeMap<String, AssertionClass>,
+    /// A helper call that names no asserting function of its own file takes the class of one of
+    /// that name in another file of the same directory: the language's tests share helpers by
+    /// directory (a Go package, a Python test package's harness).
+    pub directory_helpers: bool,
 }
 
 impl Default for TestRules {
@@ -348,6 +353,7 @@ impl Default for TestRules {
                 strength: AssertionStrength::Strong,
             },
             assertions: BTreeMap::new(),
+            directory_helpers: false,
         }
     }
 }

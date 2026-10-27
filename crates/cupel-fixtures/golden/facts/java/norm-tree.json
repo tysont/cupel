@@ -25895,6 +25895,366 @@
       }
     },
     {
+      "hash": "sh_26a3bec64172c3af",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "void_type",
+            "span": {
+              "col": 20,
+              "end_col": 24,
+              "end_line": 8,
+              "line": 8
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type",
+                    "span": {
+                      "col": 44,
+                      "end_col": 48,
+                      "end_line": 8,
+                      "line": 8
+                    }
+                  },
+                  {
+                    "children": [],
+                    "label": "$id",
+                    "span": {
+                      "col": 49,
+                      "end_col": 57,
+                      "end_line": 8,
+                      "line": 8
+                    },
+                    "text": "expected"
+                  }
+                ],
+                "label": "formal_parameter",
+                "span": {
+                  "col": 38,
+                  "end_col": 57,
+                  "end_line": 8,
+                  "line": 8
+                }
+              },
+              {
+                "children": [
+                  {
+                    "children": [],
+                    "label": "integral_type",
+                    "span": {
+                      "col": 65,
+                      "end_col": 69,
+                      "end_line": 8,
+                      "line": 8
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "$id",
+                        "span": {
+                          "col": 73,
+                          "end_col": 80,
+                          "end_line": 8,
+                          "line": 8
+                        },
+                        "text": "entries"
+                      }
+                    ],
+                    "label": "variable_declarator",
+                    "span": {
+                      "col": 73,
+                      "end_col": 80,
+                      "end_line": 8,
+                      "line": 8
+                    }
+                  }
+                ],
+                "label": "spread_parameter",
+                "span": {
+                  "col": 59,
+                  "end_col": 80,
+                  "end_line": 8,
+                  "line": 8
+                }
+              }
+            ],
+            "label": "formal_parameters",
+            "span": {
+              "col": 37,
+              "end_col": 81,
+              "end_line": 8,
+              "line": 8
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "assertEquals",
+                        "span": {
+                          "col": 9,
+                          "end_col": 21,
+                          "end_line": 9,
+                          "line": 9
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$id",
+                            "span": {
+                              "col": 22,
+                              "end_col": 30,
+                              "end_line": 9,
+                              "line": 9
+                            },
+                            "text": "expected"
+                          },
+                          {
+                            "children": [
+                              {
+                                "children": [],
+                                "label": "$id",
+                                "span": {
+                                  "col": 32,
+                                  "end_col": 38,
+                                  "end_line": 9,
+                                  "line": 9
+                                },
+                                "text": "Ledger"
+                              },
+                              {
+                                "children": [],
+                                "label": "balance",
+                                "span": {
+                                  "col": 39,
+                                  "end_col": 46,
+                                  "end_line": 9,
+                                  "line": 9
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "children": [],
+                                    "label": "$id",
+                                    "span": {
+                                      "col": 47,
+                                      "end_col": 54,
+                                      "end_line": 9,
+                                      "line": 9
+                                    },
+                                    "text": "entries"
+                                  }
+                                ],
+                                "label": "argument_list",
+                                "span": {
+                                  "col": 46,
+                                  "end_col": 55,
+                                  "end_line": 9,
+                                  "line": 9
+                                }
+                              }
+                            ],
+                            "label": "method_invocation",
+                            "span": {
+                              "col": 32,
+                              "end_col": 55,
+                              "end_line": 9,
+                              "line": 9
+                            }
+                          }
+                        ],
+                        "label": "argument_list",
+                        "span": {
+                          "col": 21,
+                          "end_col": 56,
+                          "end_line": 9,
+                          "line": 9
+                        }
+                      }
+                    ],
+                    "label": "method_invocation",
+                    "span": {
+                      "col": 9,
+                      "end_col": 56,
+                      "end_line": 9,
+                      "line": 9
+                    }
+                  }
+                ],
+                "label": "expression_statement",
+                "span": {
+                  "col": 9,
+                  "end_col": 57,
+                  "end_line": 9,
+                  "line": 9
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 82,
+              "end_col": 6,
+              "end_line": 10,
+              "line": 8
+            }
+          }
+        ],
+        "label": "method_declaration",
+        "span": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 10,
+          "line": 8
+        }
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerHelperTest.java",
+        "line": 8
+      }
+    },
+    {
+      "hash": "sh_a5282367f0e7bb49",
+      "root": {
+        "children": [
+          {
+            "children": [],
+            "label": "void_type",
+            "span": {
+              "col": 5,
+              "end_col": 9,
+              "end_line": 13,
+              "line": 13
+            }
+          },
+          {
+            "children": [],
+            "label": "formal_parameters",
+            "span": {
+              "col": 34,
+              "end_col": 36,
+              "end_line": 13,
+              "line": 13
+            }
+          },
+          {
+            "children": [
+              {
+                "children": [
+                  {
+                    "children": [
+                      {
+                        "children": [],
+                        "label": "checkBalance",
+                        "span": {
+                          "col": 9,
+                          "end_col": 21,
+                          "end_line": 14,
+                          "line": 14
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "children": [],
+                            "label": "$lit",
+                            "span": {
+                              "col": 22,
+                              "end_col": 24,
+                              "end_line": 14,
+                              "line": 14
+                            },
+                            "text": "30"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit",
+                            "span": {
+                              "col": 26,
+                              "end_col": 28,
+                              "end_line": 14,
+                              "line": 14
+                            },
+                            "text": "10"
+                          },
+                          {
+                            "children": [],
+                            "label": "$lit",
+                            "span": {
+                              "col": 30,
+                              "end_col": 32,
+                              "end_line": 14,
+                              "line": 14
+                            },
+                            "text": "20"
+                          }
+                        ],
+                        "label": "argument_list",
+                        "span": {
+                          "col": 21,
+                          "end_col": 33,
+                          "end_line": 14,
+                          "line": 14
+                        }
+                      }
+                    ],
+                    "label": "method_invocation",
+                    "span": {
+                      "col": 9,
+                      "end_col": 33,
+                      "end_line": 14,
+                      "line": 14
+                    }
+                  }
+                ],
+                "label": "expression_statement",
+                "span": {
+                  "col": 9,
+                  "end_col": 34,
+                  "end_line": 14,
+                  "line": 14
+                }
+              }
+            ],
+            "label": "block",
+            "span": {
+              "col": 37,
+              "end_col": 6,
+              "end_line": 15,
+              "line": 13
+            }
+          }
+        ],
+        "label": "method_declaration",
+        "span": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 15,
+          "line": 12
+        }
+      },
+      "symbol": {
+        "col": 5,
+        "file": "src/test/java/ledger/LedgerHelperTest.java",
+        "line": 12
+      }
+    },
+    {
       "hash": "sh_bed5c9d653a3dae0",
       "root": {
         "children": [

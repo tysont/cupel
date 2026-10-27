@@ -14,6 +14,15 @@
   (for_in_clause)
 ] @decision.loop
 
+; A comprehension's clauses decide which values it yields, not which statements run.
+[
+  (for_in_clause)
+  (if_clause)
+] @expression.clause
+
+; A lambda's decisions compute the value it returns when the code it is handed calls it.
+(lambda) @expression.function
+
 (boolean_operator) @decision.boolean-op
 
 (conditional_expression) @decision.ternary

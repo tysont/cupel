@@ -1,0 +1,11 @@
+# ABOUTME: A crate whose tests assert through assert_cmd chains that start with a call named like an asserting
+# ABOUTME: helper elsewhere: the chain stays the strong process assertion it is (P9.9, cupel-cli's `cli_basics.rs`).
+[package]
+name = "chains"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dev-dependencies]
+assert_cmd = "2"

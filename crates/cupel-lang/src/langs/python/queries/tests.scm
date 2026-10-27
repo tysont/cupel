@@ -183,6 +183,20 @@
     attribute: (identifier) @assertion.name)
   (#match? @assertion.name "^assert_")) @test.assertion
 
+; Helpers: a call by plain name (`verify(found)`) or of a method on `self` (`self.flakes(source,
+; UndefinedName)`), which asserts as the function it names does when this file, or another file of
+; its directory (a test package's harness `TestCase`), defines one that asserts; `self.assert…`
+; calls are assertions above.
+(call
+  function: (identifier) @assertion.helper)
+
+(call
+  function: (attribute
+    object: (identifier) @_self
+    attribute: (identifier) @assertion.helper)
+  (#eq? @_self "self")
+  (#not-match? @assertion.helper "^assert"))
+
 ; Skips inside a case: `pytest.skip("…")`, `self.skipTest("…")`.
 (call
   function: (attribute) @_skip

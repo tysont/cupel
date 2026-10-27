@@ -23,6 +23,12 @@
 //!   are marked `continues` (one multiway decision, ADR-072).
 //! - **Tables**: `@loop.table` (any pattern) on a loop node marks it as iterating over a table
 //!   of cases written in place; the loop's decision has `table: true` (ADR-069).
+//! - **Expression clauses**: `@expression.clause` (any pattern) on a loop or branch node marks
+//!   it as a clause of an expression computing a value (a comprehension's `for` or `if`); its
+//!   decision has `expression: true` (ADR-138 §9).
+//! - **Expression functions**: `@expression.function` (any pattern) on a function written as an
+//!   expression (a lambda) marks every decision inside it, of any kind, `expression: true`: the
+//!   function runs when the code it is handed calls it, not in the enclosing statements' flow.
 use std::collections::HashSet;
 
 use cupel_core::FactKind;
@@ -32,7 +38,7 @@ use tree_sitter::Node;
 
 use crate::contract::capture;
 use crate::producer::{QueryProducer, Source};
-use crate::query::{matches, span};
+use crate::query::{Match, matches, span};
 use crate::spec::QueryFile;
 use crate::symbols::{Definition, definitions};
 use crate::tables::DecisionRules;
@@ -69,12 +75,7 @@ pub fn extract(source: &Source<'_>) -> Decisions {
         })
         .collect();
     found.sort_by_key(|(_, node)| node.start_byte());
-    let tables: HashSet<usize> = all
-        .iter()
-        .flat_map(|m| m.nodes(capture::LOOP_TABLE))
-        .map(|node| node.id())
-        .collect();
-
+    let marked = Marked::of(&all);
     let owners: Vec<Option<usize>> = found
         .iter()
         .map(|(_, node)| innermost(&symbols, *node))
@@ -92,7 +93,7 @@ pub fn extract(source: &Source<'_>) -> Decisions {
                     .collect();
                 SymbolDecisions {
                     symbol: symbol.symbol.key(),
-                    decisions: weigh(&mine, symbol, rules, &tables),
+                    decisions: weigh(&mine, symbol, rules, &marked),
                 }
             })
             .collect(),
@@ -112,11 +113,53 @@ fn innermost(symbols: &[Definition<'_>], node: Node<'_>) -> Option<usize> {
         .map(|(index, _)| index)
 }
 
+/// The decision nodes a query marked, by node ID, and the functions it marked, by byte range.
+struct Marked {
+    /// Loops over a table of cases (`@loop.table`).
+    tables: HashSet<usize>,
+    /// Clauses of an expression computing a value (`@expression.clause`).
+    clauses: HashSet<usize>,
+    /// The byte ranges of functions written as expressions (`@expression.function`).
+    functions: Vec<(usize, usize)>,
+}
+
+impl Marked {
+    fn of(all: &[Match<'_, '_>]) -> Self {
+        let ids = |name: &str| -> HashSet<usize> {
+            all.iter()
+                .flat_map(|m| m.nodes(name))
+                .map(|node| node.id())
+                .collect()
+        };
+        Self {
+            tables: ids(capture::LOOP_TABLE),
+            clauses: ids(capture::EXPRESSION_CLAUSE),
+            functions: all
+                .iter()
+                .flat_map(|m| m.nodes(capture::EXPRESSION_FUNCTION))
+                .map(|node| (node.start_byte(), node.end_byte()))
+                .collect(),
+        }
+    }
+
+    /// Whether the decision at `node` computes a value: a clause of an expression, or any
+    /// decision inside a function written as one.
+    fn expression(&self, kind: DecisionKind, node: Node<'_>) -> bool {
+        let clause = matches!(kind, DecisionKind::Loop | DecisionKind::Branch)
+            && self.clauses.contains(&node.id());
+        clause
+            || self
+                .functions
+                .iter()
+                .any(|&(start, end)| start <= node.start_byte() && node.end_byte() <= end)
+    }
+}
+
 fn weigh(
     found: &[(DecisionKind, Node<'_>)],
     symbol: &Definition<'_>,
     rules: &DecisionRules,
-    tables: &HashSet<usize>,
+    marked: &Marked,
 ) -> Vec<Decision> {
     let body = symbol.body.unwrap_or(symbol.node);
     let kept: Vec<(DecisionKind, Node<'_>)> = found
@@ -137,8 +180,9 @@ fn weigh(
                 nesting: nesting(*node, symbol.node, &kept, rules),
                 cyclomatic: weight.cyclomatic,
                 cognitive: if first_case { weight.cognitive } else { 0 },
-                table: *kind == DecisionKind::Loop && tables.contains(&node.id()),
+                table: *kind == DecisionKind::Loop && marked.tables.contains(&node.id()),
                 continues: !first_case,
+                expression: marked.expression(*kind, *node),
                 span: Some(span(*node)),
             }
         })

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_055: `test.duplicate-setup` compares the leading statements of test bodies in `NormTree`
 
-**Date:** 2026-10-13 · **Status:** accepted; Groups amended on 2026-10-25 (P9.9 group 1): setup ends at a case's first assertion · **Phase:** P2.6
+**Date:** 2026-10-13 · **Status:** accepted; Groups amended on 2026-10-25 (P9.9 group 1): setup ends at a case's first assertion; the shared count compares statements by shape per [138](CUPEL_DECISION_138.md) §9 · **Phase:** P2.6
 
 ## Context
 

@@ -9,6 +9,22 @@
       }
     },
     {
+      "reason": "entry-point",
+      "symbol": {
+        "col": 1,
+        "file": "setup.py",
+        "line": 4
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 1,
+        "file": "setup.py",
+        "line": 4
+      }
+    },
+    {
       "reason": "export",
       "symbol": {
         "col": 5,
@@ -459,6 +475,14 @@
     {
       "reason": "export",
       "symbol": {
+        "col": 5,
+        "file": "tests/ledger_case.py",
+        "line": 7
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
         "col": 1,
         "file": "tests/test_ledger.py",
         "line": 10
@@ -630,6 +654,86 @@
         "col": 1,
         "file": "tests/test_ledger.py",
         "line": 56
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 6
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 6
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 9
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 9
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 12
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 12
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 18
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 18
+      }
+    },
+    {
+      "reason": "export",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 24
+      }
+    },
+    {
+      "reason": "test",
+      "symbol": {
+        "col": 5,
+        "file": "tests/test_ledger_case.py",
+        "line": 24
       }
     },
     {

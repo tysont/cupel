@@ -306,6 +306,198 @@
             {
               "kind": "equality",
               "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 7,
+                "line": 7
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_a_harness_method_asserts",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 33,
+            "end_line": 7,
+            "line": 6
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 70,
+                "end_line": 10,
+                "line": 10
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_a_comprehension_computes_the_balances",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 70,
+            "end_line": 10,
+            "line": 9
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 13,
+                "line": 13
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 14,
+                "line": 14
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 15,
+                "line": 15
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 16,
+                "line": 16
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_balances_of_pairs",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 33,
+            "end_line": 16,
+            "line": 12
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 19,
+                "line": 19
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 20,
+                "line": 20
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 21,
+                "line": 21
+              },
+              "strength": "strong"
+            },
+            {
+              "kind": "equality",
+              "span": {
+                "col": 14,
+                "end_col": 22,
+                "end_line": 22,
+                "line": 22
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_balances_of_larger_pairs",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 30,
+            "end_line": 22,
+            "line": 18
+          }
+        },
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
+                "col": 9,
+                "end_col": 86,
+                "end_line": 25,
+                "line": 25
+              },
+              "strength": "strong"
+            }
+          ],
+          "doc": null,
+          "mocks": [],
+          "name": "test_a_lambda_chooses_each_entry",
+          "property": null,
+          "skip": null,
+          "span": {
+            "col": 5,
+            "end_col": 86,
+            "end_line": 25,
+            "line": 24
+          }
+        }
+      ],
+      "file": "tests/test_ledger_case.py",
+      "framework": "unittest",
+      "setup": []
+    },
+    {
+      "cases": [
+        {
+          "assertions": [
+            {
+              "kind": "equality",
+              "span": {
                 "col": 9,
                 "end_col": 36,
                 "end_line": 13,

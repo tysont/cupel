@@ -99,13 +99,14 @@ fn decisions_payload_shape() {
                 cognitive: 3,
                 table: false,
                 continues: false,
+                expression: false,
                 span: None,
             }],
         }],
     });
     assert_eq!(
         json["symbols"][0]["decisions"][0],
-        json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3, "table": false, "continues": false})
+        json!({"kind": "early-return", "nesting": 2, "cyclomatic": 1, "cognitive": 3, "table": false, "continues": false, "expression": false})
     );
 }
 
@@ -118,6 +119,7 @@ fn a_decision_carries_its_span_when_known() {
         cognitive: 1,
         table: false,
         continues: false,
+        expression: false,
         span: Some(span(4)),
     });
     assert_eq!(
@@ -394,7 +396,7 @@ fn each_payload_declares_its_own_kind_and_version() {
         declared,
         [
             (FactKind::Symbols, 2),
-            (FactKind::Decisions, 2),
+            (FactKind::Decisions, 3),
             (FactKind::NormTree, 1),
             (FactKind::MutationSites, 1),
             (FactKind::TestFrames, 3),

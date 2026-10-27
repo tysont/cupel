@@ -147,7 +147,7 @@
     "git": null,
     "id": "<run-id>",
     "scope": {
-      "files": 1,
+      "files": 2,
       "languages": [
         "python"
       ],
@@ -155,7 +155,7 @@
       "roots": [
         "."
       ],
-      "symbols": 2
+      "symbols": 3
     },
     "seed": "<seed>",
     "started": "<timestamp>",

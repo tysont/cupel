@@ -89,6 +89,8 @@ templates = ["!({})"]
 
 [tests]
 framework = "go-test"
+# A helper of the package may be defined in any `_test.go` file of its directory.
+directory_helpers = true
 
 [tests.assertions]
 # Idioms captured as @assertion.idiom.<key>: a failure call and the `if` that guards it.

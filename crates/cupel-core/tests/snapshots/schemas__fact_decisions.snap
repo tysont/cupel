@@ -19,7 +19,7 @@ expression: pretty(&schema)
   "required": [
     "symbols"
   ],
-  "x-cupel-fact-version": 2,
+  "x-cupel-fact-version": 3,
   "$defs": {
     "Decision": {
       "type": "object",
@@ -39,6 +39,10 @@ expression: pretty(&schema)
           "type": "integer",
           "format": "uint32",
           "minimum": 0
+        },
+        "expression": {
+          "description": "A decision of an expression computing a value: a loop or branch that is a clause of one (a\nPython comprehension's `for` and `if`), or any decision inside a function written as one\n(a Python lambda). It decides which values the expression yields, not which statements\nrun (ADR-138 §9).",
+          "type": "boolean"
         },
         "kind": {
           "$ref": "#/$defs/DecisionKind"
@@ -70,6 +74,7 @@ expression: pretty(&schema)
         "cognitive",
         "continues",
         "cyclomatic",
+        "expression",
         "kind",
         "nesting",
         "table"

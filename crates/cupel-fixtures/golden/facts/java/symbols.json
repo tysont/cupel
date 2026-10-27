@@ -1806,6 +1806,50 @@
     },
     {
       "body": {
+        "col": 82,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      },
+      "display": "ledger.LedgerHelperTest.checkBalance",
+      "file": "src/test/java/ledger/LedgerHelperTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "checkBalance",
+      "namespace": "ledger.LedgerHelperTest",
+      "parameters": 2,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 10,
+        "line": 8
+      },
+      "visibility": "private"
+    },
+    {
+      "body": {
+        "col": 37,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 13
+      },
+      "display": "ledger.LedgerHelperTest.aHelperOfTheClassAsserts",
+      "file": "src/test/java/ledger/LedgerHelperTest.java",
+      "kind": "method",
+      "lang": "java",
+      "name": "aHelperOfTheClassAsserts",
+      "namespace": "ledger.LedgerHelperTest",
+      "parameters": 0,
+      "span": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 15,
+        "line": 12
+      },
+      "visibility": "internal"
+    },
+    {
+      "body": {
         "col": 61,
         "end_col": 6,
         "end_line": 10,

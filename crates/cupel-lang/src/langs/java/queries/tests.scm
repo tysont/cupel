@@ -111,6 +111,19 @@
   name: (identifier) @assertion.name
   (#any-of? @assertion.name "verify" "verifyNoInteractions" "verifyNoMoreInteractions")) @test.assertion
 
+; Helpers: a call of a method by plain name (`checkOption(option, "a", …)`) or on `this`, which
+; asserts as the method it names does when this file defines one that asserts (ADR-138 §9);
+; JUnit's `assert…` and `fail` names are assertions above.
+(method_invocation
+  !object
+  name: (identifier) @assertion.helper
+  (#not-match? @assertion.helper "^(assert|fail$)"))
+
+(method_invocation
+  object: (this)
+  name: (identifier) @assertion.helper
+  (#not-match? @assertion.helper "^(assert|fail$)"))
+
 ; Doubles: Mockito's `mock(X.class)` and `spy(…)`, and fields annotated `@Mock` or `@Spy`.
 (method_invocation
   name: (identifier) @_mock

@@ -7,6 +7,13 @@ use support::{Edge, EdgeRow, edge_rows, fixture, kind, kinds, produce, row, tree
 
 const FIXTURE_EDGES: &[Edge<'static>] = &[
     (
+        "setup.py",
+        1,
+        "setuptools.setup",
+        "external:setuptools",
+        false,
+    ),
+    (
         "src/deps_cycle/alpha.py",
         1,
         ".beta.BETA",
@@ -136,6 +143,20 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
         false,
     ),
     (
+        "tests/ledger_case.py",
+        1,
+        "unittest",
+        "external:unittest",
+        false,
+    ),
+    (
+        "tests/ledger_case.py",
+        3,
+        "ledger.balance",
+        "src/ledger/__init__.py",
+        false,
+    ),
+    (
         "tests/test_ledger.py",
         1,
         "unittest.mock.patch",
@@ -182,6 +203,20 @@ const FIXTURE_EDGES: &[Edge<'static>] = &[
         7,
         "ledger.report.format.render",
         "src/ledger/report/format.py",
+        false,
+    ),
+    (
+        "tests/test_ledger_case.py",
+        1,
+        "ledger_case.LedgerTestCase",
+        "tests/ledger_case.py",
+        false,
+    ),
+    (
+        "tests/test_ledger_case.py",
+        2,
+        "ledger.balance",
+        "src/ledger/__init__.py",
         false,
     ),
     (
