@@ -66,6 +66,15 @@
     (sym_lit name: (sym_name) @assertion.name))
   (#eq? @_are "are")) @test.assertion
 
+; metosin/testit: `(fact actual => expected)` and `(facts a => b c =not=> d)` assert once per arrow,
+; each an `is` of clojure.test, classified by the arrow.
+(list_lit
+  .
+  (sym_lit name: (sym_name) @_fact)
+  (sym_lit name: (sym_name) @assertion.name) @test.assertion
+  (#any-of? @_fact "fact" "facts")
+  (#any-of? @assertion.name "=>" "=not=>" "=in=>" "=eventually=>" "=eventually-in=>" "=throws=>"))
+
 ; Doubles: each var `with-redefs` rebinds, by position in its binding vector.
 (list_lit
   .

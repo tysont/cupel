@@ -76,6 +76,14 @@ seq = { kind = "truthiness", strength = "weak" }
 "some?" = { kind = "not-null", strength = "weak" }
 "thrown?" = { kind = "throws", strength = "strong" }
 "thrown-with-msg?" = { kind = "throws", strength = "strong" }
+# metosin/testit's arrows: `=>` compares with `=` (or calls a predicate it is given), `=in=>` matches
+# part of the value, `=throws=>` expects an exception.
+"=>" = { kind = "equality", strength = "strong" }
+"=eventually=>" = { kind = "equality", strength = "strong" }
+"=not=>" = { kind = "equality", strength = "weak" }
+"=in=>" = { kind = "equality", strength = "weak" }
+"=eventually-in=>" = { kind = "equality", strength = "weak" }
+"=throws=>" = { kind = "throws", strength = "strong" }
 # Idioms: `(is (not (nil? x)))`, a bare `(is x)`, and a property's `for-all` (ADR-095).
 not-nil = { kind = "not-null", strength = "weak" }
 truthy = { kind = "truthiness", strength = "weak" }

@@ -1,0 +1,144 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 1.3333333333333333,
+        "no_assertion": 1.0,
+        "weak_ratio": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 3,
+        "unit": "assertion_density",
+        "value": 1.3333333333333333
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Add an assertion to `totals-print` that pins the outcome it exercises."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "mocks": 0,
+        "remediation_mode": "add-assertion",
+        "skipped": false
+      },
+      "id": "fnd_a194fc",
+      "kind": "test.no-assertion",
+      "location": {
+        "col": 1,
+        "end_col": 30,
+        "end_line": 18,
+        "file": "test/tally/core_test.clj",
+        "line": 17
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_65f9327d97aac2ea",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_a194fc --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tally.core-test/totals-print",
+        "hash": "sh_65f9327d97aac2ea",
+        "lang": "clojure"
+      },
+      "tier": 2,
+      "title": "`tally.core-test/totals-print` asserts nothing"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_a194fc",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Add an assertion to `totals-print` that pins the outcome it exercises."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "clojure"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}
