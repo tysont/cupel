@@ -56,10 +56,13 @@ fn read_physical_memory() -> Option<u64> {
 
 /// The resident set, in bytes, of the processes that belong to the run of `pid`: its process
 /// group and every descendant, whichever group a descendant moved to (`cargo nextest` gives each
-/// test one of its own), from a sample at most `SAMPLE_AGE` old; `None` where no sample can be
-/// taken.
-pub(crate) fn resident(pid: u32) -> Option<u64> {
-    let processes = sample()?;
+/// test one of its own), from a sample taken at `not_before` or later and at most `SAMPLE_AGE`
+/// old; `None` where no sample can be taken. A child shares its parent's memory between its
+/// spawn and its `exec` on Linux (`posix_spawn` clones with `CLONE_VM`), so a sample taken while
+/// it was spawned lists it with the parent's resident set; a reader passes the instant its spawn
+/// returned and never reads that (ADR-148 §3).
+pub(crate) fn resident_since(pid: u32, not_before: Instant) -> Option<u64> {
+    let processes = sample_since(not_before)?;
     let members = members(&processes, pid);
     Some(
         processes
@@ -109,13 +112,14 @@ fn members(processes: &[Listed], pid: u32) -> BTreeSet<u32> {
     }
 }
 
-/// The latest sample, renewed when older than `SAMPLE_AGE`.
-fn sample() -> Option<Arc<Vec<Listed>>> {
+/// The latest sample, renewed when older than `SAMPLE_AGE` or taken before `not_before`.
+fn sample_since(not_before: Instant) -> Option<Arc<Vec<Listed>>> {
     let mut latest = SAMPLE
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
     if let Some(sample) = latest.as_ref()
         && sample.taken.elapsed() < SAMPLE_AGE
+        && sample.taken >= not_before
     {
         return Some(Arc::clone(&sample.processes));
     }
@@ -164,4 +168,39 @@ fn list() -> Option<Vec<Listed>> {
 #[cfg(not(unix))]
 fn list() -> Option<Vec<Listed>> {
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// When the latest shared sample was taken.
+    fn latest_taken() -> Option<Instant> {
+        SAMPLE
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .as_ref()
+            .map(|sample| sample.taken)
+    }
+
+    #[test]
+    fn a_reading_not_before_an_instant_renews_a_shared_sample_older_than_it() {
+        let me = std::process::id();
+        let start = Instant::now();
+        assert_eq!(
+            resident_since(me, start).map(|bytes| bytes > 0),
+            Some(true),
+            "ps lists this process"
+        );
+        let before = latest_taken().expect("the reading left a sample");
+        let mark = Instant::now();
+        assert_eq!(resident_since(me, mark).map(|bytes| bytes > 0), Some(true));
+        let after = latest_taken().expect("the reading left a sample");
+        assert_eq!(
+            (before <= mark, after >= mark),
+            (true, true),
+            "the sample from {:?} before the mark was reused",
+            mark.duration_since(before)
+        );
+    }
 }

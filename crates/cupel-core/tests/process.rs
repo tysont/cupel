@@ -121,9 +121,11 @@ fn survives(pid: u32) -> bool {
     }
 }
 
-/// Waits up to `HANG` for the pid a child wrote to `file`.
-fn pid_in(file: &std::path::Path) -> u32 {
-    let patience = Instant::now() + HANG;
+/// Waits up to a minute for the pid a child wrote to `file`; the child writes it within
+/// milliseconds of starting, so a minute without one means it never ran that far, and the
+/// failure names how its run ended.
+fn pid_in(file: &std::path::Path, ran: &Result<Captured, Error>) -> u32 {
+    let patience = Instant::now() + Duration::from_secs(60);
     loop {
         if let Some(pid) = std::fs::read_to_string(file)
             .ok()
@@ -131,7 +133,11 @@ fn pid_in(file: &std::path::Path) -> u32 {
         {
             return pid;
         }
-        assert!(Instant::now() < patience, "no pid in {}", file.display());
+        assert!(
+            Instant::now() < patience,
+            "no pid in {} (the run ended {ran:?})",
+            file.display()
+        );
         std::thread::sleep(Duration::from_millis(10));
     }
 }
@@ -155,7 +161,7 @@ fn cancellation_kills_a_descendant_that_left_the_childs_process_group() {
     let cancelling = cancel_when_ready(dir.path().join("pid"), cancel.clone());
     let ran = detached(dir.path(), "1", HANG).run(&cancel);
     cancelling.join().unwrap();
-    let pid = pid_in(&dir.path().join("pid"));
+    let pid = pid_in(&dir.path().join("pid"), &ran);
     let survived = survives(pid);
     if survived {
         let _ = std::process::Command::new("kill")
@@ -177,7 +183,7 @@ fn a_descendant_in_a_process_group_of_its_own_counts_against_the_memory_budget()
     )
     .memory(64 << 20)
     .run(&Cancellation::new());
-    let pid = pid_in(&dir.path().join("pid"));
+    let pid = pid_in(&dir.path().join("pid"), &ran);
     let survived = survives(pid);
     if survived {
         let _ = std::process::Command::new("kill")

@@ -169,6 +169,7 @@ impl Process {
             None
         };
         let mut child = spawn(&mut command).map_err(|error| self.failed(&error))?;
+        let spawned = Instant::now();
         // The command holds the parent's copies of a merged pipe's write end; the reader sees
         // the end of the output only once they are closed.
         drop(command);
@@ -181,7 +182,7 @@ impl Process {
             Some(reader) => (Some(read(reader)), None),
             None => (child.stdout.take().map(read), child.stderr.take().map(read)),
         };
-        let exit_code = wait(&mut child, cancel, self.grace, self.memory);
+        let exit_code = wait(&mut child, spawned, cancel, self.grace, self.memory);
         if let Some(writing) = writing {
             let _ = writing.join();
         }
@@ -219,9 +220,11 @@ fn spawn(command: &mut Command) -> std::io::Result<Child> {
 }
 
 /// Waits for `child` to exit, stopping it when `cancel` fires first (at once, or after SIGTERM
-/// and `grace`) or when its run holds more than `memory` bytes (at once).
+/// and `grace`) or when its run holds more than `memory` bytes (at once), measured from samples
+/// taken no earlier than `spawned`, when its spawn returned.
 fn wait(
     child: &mut Child,
+    spawned: Instant,
     cancel: &Cancellation,
     grace: Option<Duration>,
     memory: Option<u64>,
@@ -237,7 +240,7 @@ fn wait(
             kill(child);
             return Err(Error::Cancelled);
         }
-        if let Some(limit) = memory.filter(|limit| over(child, *limit)) {
+        if let Some(limit) = memory.filter(|limit| over(child, spawned, *limit)) {
             kill(child);
             return Err(Error::OutOfMemory { limit });
         }
@@ -246,9 +249,11 @@ fn wait(
 }
 
 /// Whether `child`'s run (its own process group, see `process_group(0)` above, and every
-/// descendant in another group) holds more than `limit` bytes of resident memory.
-fn over(child: &Child, limit: u64) -> bool {
-    memory::resident(child.id()).is_some_and(|held| held > limit)
+/// descendant in another group) holds more than `limit` bytes of resident memory, from a sample
+/// taken since `spawned`: a sample taken during the spawn lists the child, not yet `exec`ed,
+/// with the parent's memory (ADR-148 §3), which is not the run's.
+fn over(child: &Child, spawned: Instant, limit: u64) -> bool {
+    memory::resident_since(child.id(), spawned).is_some_and(|held| held > limit)
 }
 
 /// Sends SIGTERM to every process group of `child`'s run and waits up to `grace` for `child`
