@@ -29,6 +29,7 @@ fn volatile_envelope(root: &str, canonical_root: &str) -> Envelope {
         "checks": [{
             "id": "static.complexity", "status": "fail", "tier": 1, "cost": "quick",
             "score": null, "delta": null, "findings": 1, "duration_ms": 876_543,
+            "metrics": {"build_ms": 654_321.0, "score": 0.5},
             "skipped": null, "oracle": null
         }],
         "findings": [{
@@ -84,6 +85,7 @@ fn no_volatile_value_survives_redaction() {
         "987654",
         "876543",
         "765432",
+        "654321",
         "424242",
         "1.111.0-volatile",
         "0.9.999-volatile",
@@ -117,6 +119,7 @@ fn each_volatile_field_gets_its_placeholder() {
         ("/run/started", "<timestamp>"),
         ("/run/duration_ms", "<duration-ms>"),
         ("/checks/0/duration_ms", "<duration-ms>"),
+        ("/checks/0/metrics/build_ms", "<duration-ms>"),
         ("/findings/0/evidence/timing/duration_ms", "<duration-ms>"),
         ("/findings/0/evidence/actual", "<version>"),
         ("/run/seed", "<seed>"),
@@ -151,6 +154,7 @@ fn contract_fields_survive_redaction() {
         ("/run/baseline/name", json!("default")),
         ("/status", json!("fail")),
         ("/exit_code", json!(1)),
+        ("/checks/0/metrics/score", json!(0.5)),
         ("/findings/0/id", json!("fnd_7c2e1a")),
         ("/findings/0/location/file", json!("/nowhere/src/lib.rs")),
         ("/findings/0/repro", json!("cupel check --seed 42")),
@@ -284,6 +288,7 @@ fn a_sarif_log_is_redacted_where_its_envelope_would_be() {
         "987654",
         "876543",
         "765432",
+        "654321",
         "424242",
         "1.111.0-volatile",
         "deadbeefcafe",

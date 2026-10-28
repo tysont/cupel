@@ -1,16 +1,17 @@
-// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082, ADR-147, ADR-148): the mutants of one file run concurrently, one slot
-// ABOUTME: each with its share of the cores and memory, after a green reference run; each is killed or not.
+// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082, ADR-147, ADR-148, ADR-150): the mutants of one file run concurrently,
+// ABOUTME: one slot each with its share of the cores and memory, after a green reference run, each phase timed.
 use std::collections::BTreeSet;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use cupel_core::{
-    Ctx, Error, MutantOutcome, MutationStrategy, ProduceCtx, Result, RunOptions, Runner, TestRun,
-    TestSelection, WriteError, Writer, physical_memory,
+    Ctx, Error, MutantOutcome, MutationPhase, MutationStrategy, ProduceCtx, Result, RunOptions,
+    Runner, TestRun, TestSelection, WriteError, Writer, physical_memory,
 };
 
 use crate::overlay::Slot;
+use crate::phases::{Phases, Served};
 use crate::plan::Planned;
 use crate::settings::{Settings, threads};
 
@@ -29,6 +30,8 @@ pub struct Execution<'a> {
     /// What a mutant that per-test selection did not narrow runs: the whole suite, or all of it
     /// but the slow tests the runner can leave out (ADR-147).
     pub whole: &'a TestSelection,
+    /// Where every phase is recorded (ADR-150).
+    pub phases: &'a Phases,
 }
 
 /// What a mutant's run found.
@@ -92,14 +95,15 @@ impl Execution<'_> {
         let ran: Vec<Result<(TestRun, Duration)>> = std::thread::scope(|scope| {
             let handles: Vec<_> = slots
                 .iter()
-                .map(|slot| {
+                .enumerate()
+                .map(|(index, slot)| {
                     scope.spawn(move || {
                         let ctx = self.slot_ctx(slot)?;
                         for (importer, text) in run.importers {
                             write(slot, importer, text)?;
                         }
                         write(slot, run.file, source.as_bytes())?;
-                        self.timed(&ctx, &self.union(&run.mutants))
+                        self.build(index, &ctx, run)
                     })
                 })
                 .collect();
@@ -182,11 +186,12 @@ impl Execution<'_> {
                 for (importer, text) in run.importers {
                     write(slot, importer, text)?;
                 }
-                (self.reference(slot, &ctx, run)?, Holds::Renewed)
+                (self.reference(index, slot, &ctx, run)?, Holds::Renewed)
             }
             Build::Schemata { limits, .. } => (limits[index], Holds::Schemata),
         };
         let mut worker = Worker {
+            index,
             slot,
             ctx,
             limit,
@@ -213,10 +218,10 @@ impl Execution<'_> {
                 write(slot, run.file, source.as_bytes())?;
                 worker.holds = Holds::Schemata;
             }
-            return self.mutant(&worker.ctx, planned, worker.limit, id);
+            return self.mutant(worker, planned, id);
         }
         write(slot, run.file, planned.source.as_bytes())?;
-        let ran = self.mutant(&worker.ctx, planned, worker.limit, 0);
+        let ran = self.mutant(worker, planned, 0);
         write(slot, run.file, run.original)?;
         worker.holds = Holds::Original;
         ran
@@ -237,11 +242,17 @@ impl Execution<'_> {
     /// newline, which builds and loads like the original but is new to every build cache (by
     /// content or by time), so the run rebuilds what a mutant would; the timeout its mutants
     /// get. A reference that is not green means the slot does not reproduce the baseline.
-    fn reference(&self, slot: &Slot, ctx: &ProduceCtx, run: &FileRun<'_>) -> Result<Duration> {
+    fn reference(
+        &self,
+        index: usize,
+        slot: &Slot,
+        ctx: &ProduceCtx,
+        run: &FileRun<'_>,
+    ) -> Result<Duration> {
         let mut renewed = run.original.to_vec();
         renewed.push(b'\n');
         write(slot, run.file, &renewed)?;
-        let (ran, elapsed) = self.timed(ctx, &self.union(&run.mutants))?;
+        let (ran, elapsed) = self.build(index, ctx, run)?;
         if !ran.results.is_green() {
             return Err(Error::Process {
                 program: self.runner.id().to_string(),
@@ -256,11 +267,19 @@ impl Execution<'_> {
         Ok(self.limit(elapsed))
     }
 
-    /// Runs `selection` with no mutant selected; the run and its wall time. A run over the
-    /// slot's memory budget is an error naming the setting: every mutant of the file would be.
-    fn timed(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Result<(TestRun, Duration)> {
+    /// The build every mutant of `run`'s file shares, in slot `index` (`ctx` is the slot's): the
+    /// file's selected tests with no mutant, timed and recorded as the `build` phase. A run over
+    /// the slot's memory budget is an error naming the setting: every mutant of the file would
+    /// be.
+    fn build(
+        &self,
+        index: usize,
+        ctx: &ProduceCtx,
+        run: &FileRun<'_>,
+    ) -> Result<(TestRun, Duration)> {
+        let selection = self.union(&run.mutants);
         let started = Instant::now();
-        let ran = match self.runner.run(ctx, selection, &self.options(None, 0)) {
+        let ran = match self.runner.run(ctx, &selection, &self.options(None, 0)) {
             Err(Error::OutOfMemory { limit }) => {
                 return Err(Error::Process {
                     program: self.runner.id().to_string(),
@@ -273,6 +292,12 @@ impl Execution<'_> {
             }
             ran => ran?,
         };
+        let served = Served {
+            file: Some(run.file),
+            slot: Some(index),
+            tests: selected(&selection),
+        };
+        self.phases.record(MutationPhase::Build, served, started);
         Ok((ran, started.elapsed()))
     }
 
@@ -312,34 +337,50 @@ impl Execution<'_> {
         }
     }
 
-    /// Runs `planned`'s tests against it (already written, or selected by `id`) with `limit`.
-    fn mutant(&self, ctx: &ProduceCtx, planned: &Planned, limit: Duration, id: u32) -> Result<Ran> {
+    /// Runs `planned`'s tests against it (already written in `worker`'s slot, or selected by
+    /// `id`) with the worker's timeout; the `run` phase.
+    fn mutant(&self, worker: &Worker<'_>, planned: &Planned, id: u32) -> Result<Ran> {
         let selection = planned
             .tests
             .clone()
             .map_or_else(|| self.whole.clone(), TestSelection::Tests);
+        let limit = worker.limit;
         let started = Instant::now();
         let strategy = if id == 0 {
             MutationStrategy::FileCopy
         } else {
             MutationStrategy::Schemata
         };
-        let ran = match self
+        let ran = self
             .runner
-            .run(ctx, &selection, &self.options(Some(limit), id))
-        {
-            Err(Error::OutOfMemory { .. }) => {
-                return Ok(out_of_memory(started.elapsed(), strategy));
-            }
-            ran => ran?,
-        };
+            .run(&worker.ctx, &selection, &self.options(Some(limit), id));
         let elapsed = started.elapsed();
-        Ok(classify(&ran, elapsed >= limit, elapsed, strategy))
+        let served = Served {
+            file: Some(planned.file()),
+            slot: Some(worker.index),
+            tests: selected(&selection),
+        };
+        self.phases.record(MutationPhase::Run, served, started);
+        match ran {
+            Err(Error::OutOfMemory { .. }) => Ok(out_of_memory(elapsed, strategy)),
+            Err(error) => Err(error),
+            Ok(ran) => Ok(classify(&ran, elapsed >= limit, elapsed, strategy)),
+        }
+    }
+}
+
+/// How many tests `selection` names; `None` for the whole suite, however narrowed.
+fn selected(selection: &TestSelection) -> Option<usize> {
+    match selection {
+        TestSelection::Tests(ids) | TestSelection::Files(ids) => Some(ids.len()),
+        TestSelection::All | TestSelection::Except(_) => None,
     }
 }
 
 /// One slot at work on a file: where it runs, its timeout, and what the file holds now.
 struct Worker<'a> {
+    /// The slot's index among the production's.
+    index: usize,
     slot: &'a Slot,
     ctx: ProduceCtx,
     limit: Duration,

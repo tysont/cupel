@@ -1,11 +1,13 @@
 // ABOUTME: Mutant schemata (ADR-082): a language's rewriter gates every mutant of a file behind `CUPEL_MUTANT`, so the
 // ABOUTME: file builds once; the engine asks `rewriter(lang)` and runs file copies where there is none.
 use std::collections::{BTreeMap, BTreeSet};
+use std::time::Instant;
 
-use cupel_core::Result;
 use cupel_core::syntax::Span;
+use cupel_core::{MutationPhase, Result};
 
 use crate::execute::{Build, Execution, FileRun, Ran, Validation};
+use crate::phases::Served;
 
 mod rust;
 
@@ -114,7 +116,15 @@ impl Attempt<'_> {
                 .filter(|gate| !self.fallback.contains_key(&gate.id))
                 .copied()
                 .collect();
+            let started = Instant::now();
             let rewritten = self.rewriter.rewrite(&text, &open);
+            let served = Served {
+                file: Some(file),
+                ..Served::default()
+            };
+            self.execution
+                .phases
+                .record(MutationPhase::Rewrite, served, started);
             self.fallback.extend(rewritten.excluded);
             let Some(source) = rewritten.source else {
                 break;

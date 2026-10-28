@@ -8,8 +8,8 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, CheckResult, CheckStatus, CostClass, Error, ExcludedTest, FactKind, Facts, Finding,
-    LangId, MetricPer, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, ProducerId,
-    ProtectionMetric, Scope, Severity,
+    LangId, MetricPer, Mutant, MutantOutcome, MutationOutcomes, MutationPhase, MutationStrategy,
+    PhaseDuration, ProducerId, ProtectionMetric, Scope, Severity,
 };
 use serde_json::{Value, json};
 use support::{Recorded, Shape, combined, language};
@@ -152,6 +152,11 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("reused", MetricPer::Scope),
             ("schemata", MetricPer::Scope),
             ("fallback", MetricPer::Scope),
+            ("plan_ms", MetricPer::Scope),
+            ("sync_ms", MetricPer::Scope),
+            ("rewrite_ms", MetricPer::Scope),
+            ("build_ms", MetricPer::Scope),
+            ("run_ms", MetricPer::Scope),
             ("survivors", MetricPer::Symbol),
             ("mutation_score", MetricPer::Symbol),
             ("tests", MetricPer::Symbol),
@@ -306,6 +311,45 @@ fn the_result_counts_mutants_run_as_schemata_and_notes_each_fallback() {
         [
             "1 mutant ran as a file copy: inside a pattern".to_owned(),
             format!("2 mutants ran as file copies: {failed}"),
+        ]
+    );
+}
+
+/// A phase row of `phase` that took `ms`.
+fn phase(phase: MutationPhase, slot: Option<u32>, ms: u64) -> PhaseDuration {
+    PhaseDuration {
+        phase,
+        file: Some("discount.py".to_owned()),
+        slot,
+        tests: None,
+        duration_ms: ms,
+    }
+}
+
+#[test]
+fn each_phase_of_the_engines_work_is_reported_as_its_total_in_milliseconds() {
+    let check = support::check(ID);
+    let mut facts = facts(vec![mutant(6, 14, ">=", ">", MutantOutcome::Killed)]);
+    let mut outcomes = facts.get::<MutationOutcomes>().unwrap().clone();
+    outcomes.phases = vec![
+        phase(MutationPhase::Plan, None, 40),
+        phase(MutationPhase::Sync, Some(0), 300),
+        phase(MutationPhase::Sync, Some(1), 200),
+        phase(MutationPhase::Build, Some(0), 5000),
+        phase(MutationPhase::Build, Some(1), 4000),
+        phase(MutationPhase::Run, Some(0), 1500),
+    ];
+    facts.insert(outcomes).unwrap();
+    let (result, _) = support::recorded(check, &facts, scope(), json!({})).unwrap();
+    let metric = |name: &str| result.metrics.get(name).copied();
+    assert_eq!(
+        ["plan_ms", "sync_ms", "rewrite_ms", "build_ms", "run_ms"].map(metric),
+        [
+            Some(40.0),
+            Some(500.0),
+            Some(0.0),
+            Some(9000.0),
+            Some(1500.0)
         ]
     );
 }

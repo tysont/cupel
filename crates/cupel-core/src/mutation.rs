@@ -1,5 +1,5 @@
-// ABOUTME: The `MutationOutcomes` fact payload (ADR-080, ADR-082): every mutant an engine planned, what became of it,
-// ABOUTME: the tests that ran against it, how it was built, and whether its outcome came from the store.
+// ABOUTME: The `MutationOutcomes` fact payload (ADR-080, ADR-082, ADR-150): every mutant an engine planned, what became
+// ABOUTME: of it, the tests that ran against it, how it was built, whether it was reused, and the production's phases.
 use std::fmt;
 
 use schemars::JsonSchema;
@@ -30,6 +30,69 @@ pub struct MutationOutcomes {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub excluded: Vec<ExcludedTest>,
+    /// The phases the production went through, in the order they ended: its timeline, from
+    /// which each phase's total is read (ADR-150). Absent when no mutant ran.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub phases: Vec<PhaseDuration>,
+}
+
+/// One phase of a mutation production and how long it took (ADR-150).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct PhaseDuration {
+    pub phase: MutationPhase,
+    /// The file whose mutants the phase served, relative to the repository root; `None` for a
+    /// phase of the whole production (`plan`, `sync`).
+    pub file: Option<String>,
+    /// The slot the phase ran in; `None` for a phase that runs in none (`plan`, `rewrite`).
+    pub slot: Option<u32>,
+    /// How many tests the phase ran, when it ran tests selected for the file's mutants; `None`
+    /// for a phase that runs no tests, or that ran the whole suite.
+    pub tests: Option<u32>,
+    pub duration_ms: u64,
+}
+
+/// A phase of a mutation production (ADR-150).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "kebab-case")]
+pub enum MutationPhase {
+    /// Planning the mutants in focus: coverage gating, per-test selection, and the store's
+    /// history; once per production.
+    Plan,
+    /// One slot's reconciliation with the tree (ADR-080 §8); once per slot used.
+    Sync,
+    /// One file's schemata rewrite (ADR-082 §2); once per attempt.
+    Rewrite,
+    /// The run every mutant of a file shares: the schemata validation (ADR-082 §5) or a file
+    /// copy's reference run (ADR-080 §9), its build and the file's selected tests with no
+    /// mutant; once per slot the file used.
+    Build,
+    /// One mutant's test run, as long as the mutant's `duration_ms`.
+    Run,
+}
+
+impl MutationPhase {
+    /// The phase's name as it serializes.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Plan => "plan",
+            Self::Sync => "sync",
+            Self::Rewrite => "rewrite",
+            Self::Build => "build",
+            Self::Run => "run",
+        }
+    }
+
+    /// Every phase, in the order a production goes through them.
+    pub const ALL: [Self; 5] = [
+        Self::Plan,
+        Self::Sync,
+        Self::Rewrite,
+        Self::Build,
+        Self::Run,
+    ];
 }
 
 /// A test whose baseline run is longer than this, in milliseconds, is left out of every mutant
@@ -80,6 +143,7 @@ impl MutationOutcomes {
             per_test,
             mutants,
             excluded: Vec::new(),
+            phases: Vec::new(),
         }
     }
 }

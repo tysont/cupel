@@ -12,6 +12,7 @@ mod execute;
 mod history;
 pub mod mutant;
 pub mod overlay;
+mod phases;
 mod plan;
 pub mod schemata;
 pub mod settings;

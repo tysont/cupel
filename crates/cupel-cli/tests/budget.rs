@@ -242,10 +242,19 @@ fn a_run_records_how_long_its_productions_and_checks_took() {
     for expected in [
         ("tool.pytest", "run"),
         ("engine.mutation", "run"),
+        ("engine.mutation.plan", "run"),
+        ("engine.mutation.sync", "run"),
+        ("engine.mutation.build", "run"),
+        ("engine.mutation.run", "run"),
         ("tests.mutation", "1"),
     ] {
         assert!(tasks.contains(&expected), "{expected:?} in {tasks:?}");
     }
+    // Python has no schemata rewriter, so no rewrite happened and none is recorded.
+    assert!(
+        !tasks.contains(&("engine.mutation.rewrite", "run")),
+        "{tasks:?}"
+    );
 }
 
 #[test]

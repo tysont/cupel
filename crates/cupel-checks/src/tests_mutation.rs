@@ -1,5 +1,5 @@
 // ABOUTME: `tests.mutation`: scores MutationOutcomes, whoever produced them (ADR-080): surviving mutants as failures at their
-// ABOUTME: site; timeouts, runs over the memory budget, uncovered sites, slow tests left out, equivalents, fallbacks as notes.
+// ABOUTME: site; timeouts, memory, uncovered sites, slow tests, equivalents, fallbacks as notes; the engine's phases as metrics.
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::config::{ConfigError, MemoryLimit, Table, TimeLimit};
@@ -7,8 +7,8 @@ use cupel_core::syntax::{SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, ExcludedTest,
     FactKind, Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant, MutantOutcome,
-    MutationOutcomes, MutationStrategy, Plan, ProtectionMetric, Result, Scope, Score, SettingSpec,
-    Severity, SiteHash, Stability, SymbolHash, Tier,
+    MutationOutcomes, MutationPhase, MutationStrategy, Plan, ProtectionMetric, Result, Scope,
+    Score, SettingSpec, Severity, SiteHash, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -218,6 +218,16 @@ fn metrics() -> Vec<MetricSpec> {
     .into_iter()
     .map(|(name, summary)| metric(name, summary))
     .collect();
+    metrics.extend(MutationPhase::ALL.into_iter().map(|phase| {
+        metric(
+            &phase_metric(phase),
+            &format!(
+                "Milliseconds the engine spent in its {} phase this time (ADR-150): {}.",
+                phase.as_str(),
+                PHASE_SUMMARIES[phase as usize]
+            ),
+        )
+    }));
     metrics.extend([
         ranked(
             "survivors",
@@ -265,6 +275,7 @@ impl Check for TestsMutation {
             .collect();
         let conventions = facts.get::<TestConventions>().ok();
         let mut tally = Tally::default();
+        tally.time(outcomes);
         let mut by_symbol: BTreeMap<&SymbolKey, Protection<'_>> = BTreeMap::new();
         for mutant in outcomes
             .mutants
@@ -368,6 +379,21 @@ impl<'a> Protection<'a> {
     }
 }
 
+/// What each phase of the engine's work is, in `MutationPhase::ALL`'s order (so
+/// `PHASE_SUMMARIES[phase as usize]` describes it).
+const PHASE_SUMMARIES: [&str; 5] = [
+    "planning the mutants, their test selection, and the store's history",
+    "reconciling each mutation slot with the tree",
+    "rewriting each file as schemata",
+    "the build every mutant of a file shares, with the file's tests unmutated, per slot",
+    "the mutants' own test runs",
+];
+
+/// The metric that reports `phase`'s total: its name with `_ms`.
+fn phase_metric(phase: MutationPhase) -> String {
+    format!("{}_ms", phase.as_str())
+}
+
 /// What the mutants in scope added up to.
 #[derive(Default)]
 struct Tally {
@@ -379,9 +405,18 @@ struct Tally {
     schemata: u64,
     /// Mutants run as file copies where schemata could not hold them, by why.
     fallbacks: BTreeMap<String, u64>,
+    /// Milliseconds the engine spent in each phase (ADR-150).
+    phases: BTreeMap<MutationPhase, u64>,
 }
 
 impl Tally {
+    /// Adds up the production's phases.
+    fn time(&mut self, outcomes: &MutationOutcomes) {
+        for phase in &outcomes.phases {
+            *self.phases.entry(phase.phase).or_default() += phase.duration_ms;
+        }
+    }
+
     fn count(&mut self, mutant: &Mutant) {
         if mutant.outcome == MutantOutcome::Survived && mutant.equivalent.is_some() {
             self.equivalent += 1;
@@ -444,6 +479,10 @@ impl Tally {
         metrics.insert("reused".to_owned(), count(self.reused));
         metrics.insert("schemata".to_owned(), count(self.schemata));
         metrics.insert("fallback".to_owned(), count(self.fallbacks.values().sum()));
+        for phase in MutationPhase::ALL {
+            let spent = self.phases.get(&phase).copied().unwrap_or(0);
+            metrics.insert(phase_metric(phase), count(spent));
+        }
         let mut result = outcome::result(
             manifest,
             outcome::status(survived > 0),

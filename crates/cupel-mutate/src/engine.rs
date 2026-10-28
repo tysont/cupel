@@ -1,6 +1,7 @@
-// ABOUTME: `engine.mutation` (ADR-080, ADR-082): plans the mutants of `MutationSites` in focus, reuses stored outcomes,
-// ABOUTME: and runs the rest file by file in overlays, as schemata or file copies, into `MutationOutcomes`.
+// ABOUTME: `engine.mutation` (ADR-080, ADR-082, ADR-150): plans the mutants of `MutationSites` in focus, reuses stored
+// ABOUTME: outcomes, and runs the rest file by file in overlays, as schemata or file copies, timing each phase.
 use std::path::Path;
+use std::time::Instant;
 
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{
@@ -8,13 +9,14 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     Availability, CostClass, Ctx, Error, EventSink, ExcludedTest, FactKind, Langs,
-    MutationOutcomes, PerTestMap, Process, ProduceCtx, Producer, ProducerId, ProducerRegistry,
-    Result, Runner, SLOW_TEST_MS, Scope, TestResults, TestSelection, WriteError,
+    MutationOutcomes, MutationPhase, PerTestMap, Process, ProduceCtx, Producer, ProducerId,
+    ProducerRegistry, Result, Runner, SLOW_TEST_MS, Scope, TestResults, TestSelection, WriteError,
 };
 
 use crate::execute::{Execution, FileRun};
 use crate::history::History;
 use crate::overlay::Slot;
+use crate::phases::{Phases, Served};
 use crate::plan::{Inputs, Planned, digest, plan};
 use crate::schemata::{self, Rewriter};
 use crate::settings::{Settings, Strategy};
@@ -117,8 +119,11 @@ impl Producer<MutationOutcomes> for MutationEngine {
             toolchain_hash: &toolchain,
         };
         let root = &ctx.ctx.root;
+        let planning = Instant::now();
         let mut planned = plan(&inputs, &|file| read(root, file));
-        Running::new(ctx, runner, settings, symbols, &whole).run(&mut planned)?;
+        let phases = Phases::default();
+        Running::new(ctx, runner, settings, symbols, &whole, &phases)
+            .run(&mut planned, planning)?;
         let runs_whole = planned
             .iter()
             .any(|planned| planned.covered && planned.tests.is_none());
@@ -127,6 +132,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         if runs_whole {
             outcomes.excluded = excluded;
         }
+        outcomes.phases = phases.rows();
         Ok(outcomes)
     }
 }
@@ -201,17 +207,20 @@ struct Running<'a> {
     rewriter: Option<&'static dyn Rewriter>,
     /// The language being produced, which names its slots.
     lang: String,
+    /// Where every phase of the production is recorded (ADR-150).
+    phases: &'a Phases,
 }
 
 impl<'a> Running<'a> {
     /// How `ctx`'s production of `symbols`' language runs its mutants with `runner`, those
-    /// per-test selection did not narrow over `whole`.
+    /// per-test selection did not narrow over `whole`, recording its phases in `phases`.
     fn new(
         ctx: &'a ProduceCtx,
         runner: &'a dyn Runner,
         settings: Settings,
         symbols: &Symbols,
         whole: &'a TestSelection,
+        phases: &'a Phases,
     ) -> Self {
         let lang = symbols
             .symbols
@@ -228,11 +237,14 @@ impl<'a> Running<'a> {
                 Strategy::FileCopy => None,
             },
             lang,
+            phases,
         }
     }
 
-    /// Reuses what the store holds and runs the other covered mutants, file by file.
-    fn run(&self, planned: &mut [Planned]) -> Result<()> {
+    /// Reuses what the store holds and runs the other covered mutants, file by file. The plan
+    /// phase started at `planning` and ends with the history read; a production with nothing
+    /// to run records no phase.
+    fn run(&self, planned: &mut [Planned], planning: Instant) -> Result<()> {
         let history = History::load(&self.ctx.writer, planned);
         let mut to_run = Vec::new();
         for (index, mutant) in planned.iter_mut().enumerate() {
@@ -243,6 +255,8 @@ impl<'a> Running<'a> {
         if to_run.is_empty() {
             return Ok(());
         }
+        self.phases
+            .record(MutationPhase::Plan, Served::default(), planning);
         let order = history.order(planned, &to_run);
         let widest = order.iter().map(|(_, indexes)| indexes.len()).max();
         let (_claim, slots) = self.slots(widest.unwrap_or(1))?;
@@ -252,6 +266,7 @@ impl<'a> Running<'a> {
             slots: &slots,
             settings: self.settings,
             whole: self.whole,
+            phases: self.phases,
         };
         let root = &self.ctx.ctx.root;
         for (file, indexes) in order {
@@ -299,8 +314,14 @@ impl<'a> Running<'a> {
         let slots = (0..jobs.min(widest))
             .map(|index| {
                 let slot = Slot::at(slot_dir(root, &self.lang, index));
+                let started = Instant::now();
                 slot.sync(root, self.runner.outputs())
                     .map_err(|error| io(slot.root(), "", &error))?;
+                let served = Served {
+                    slot: Some(index),
+                    ..Served::default()
+                };
+                self.phases.record(MutationPhase::Sync, served, started);
                 Ok(slot)
             })
             .collect::<Result<_>>()?;

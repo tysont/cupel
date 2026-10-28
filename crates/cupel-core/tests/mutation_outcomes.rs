@@ -2,8 +2,8 @@
 // ABOUTME: count toward the score, the order mutants are kept in, and how each was built.
 use cupel_core::syntax::{MutationOperator, Span, SymbolKey};
 use cupel_core::{
-    CostClass, FactKind, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, ProducerId,
-    SiteHash, schema,
+    CostClass, FactKind, Mutant, MutantOutcome, MutationOutcomes, MutationPhase, MutationStrategy,
+    PhaseDuration, ProducerId, SiteHash, schema,
 };
 
 fn mutant(file: &str, line: u32, to: &str, outcome: MutantOutcome) -> Mutant {
@@ -125,4 +125,51 @@ fn a_mutant_stored_before_strategies_still_reads() {
     object.remove("fallback");
     let read: Mutant = serde_json::from_value(json).unwrap();
     assert_eq!((read.strategy, read.fallback), (None, None));
+}
+
+#[test]
+fn phases_are_absent_when_none_was_recorded_and_outcomes_stored_without_them_still_read() {
+    let outcomes = MutationOutcomes::new(
+        ProducerId::from("engine.mutation"),
+        None,
+        CostClass::Standard,
+        false,
+        Vec::new(),
+    );
+    let json = serde_json::to_value(&outcomes).unwrap();
+    assert!(json.get("phases").is_none(), "{json}");
+    let read: MutationOutcomes = serde_json::from_value(json).unwrap();
+    assert!(read.phases.is_empty());
+}
+
+#[test]
+fn a_phase_names_what_it_served_how_many_tests_it_ran_and_how_long_it_took() {
+    let phase = PhaseDuration {
+        phase: MutationPhase::Build,
+        file: Some("a.py".to_owned()),
+        slot: Some(1),
+        tests: Some(2),
+        duration_ms: 1200,
+    };
+    assert_eq!(
+        serde_json::to_value(&phase).unwrap(),
+        serde_json::json!({
+            "phase": "build",
+            "file": "a.py",
+            "slot": 1,
+            "tests": 2,
+            "duration_ms": 1200
+        })
+    );
+    let names: Vec<&str> = [
+        MutationPhase::Plan,
+        MutationPhase::Sync,
+        MutationPhase::Rewrite,
+        MutationPhase::Build,
+        MutationPhase::Run,
+    ]
+    .into_iter()
+    .map(MutationPhase::as_str)
+    .collect();
+    assert_eq!(names, ["plan", "sync", "rewrite", "build", "run"]);
 }

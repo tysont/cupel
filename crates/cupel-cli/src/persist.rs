@@ -2,7 +2,11 @@
 // ABOUTME: persistence hook that records every run and mirrors the suppressions file (ADR-045 §8, §10).
 use std::collections::BTreeMap;
 
-use cupel_core::{CheckId, Envelope, Measured, Metric, Suppressions, Writer};
+use cupel_core::budget::{TaskDuration, TaskShape};
+use cupel_core::{
+    CheckId, Envelope, LangId, Measured, Metric, MutationOutcomes, MutationPhase, ProducerId,
+    Suppressions, Writer,
+};
 use cupel_store::{Store, StoreError};
 
 use crate::error::CupelError;
@@ -37,8 +41,9 @@ pub fn unusable(error: &StoreError) -> CupelError {
 }
 
 /// Records `envelope` in the store with what it executed (its test runs, ADR-076 §7, its
-/// mutation outcomes, ADR-080 §10, its durations, ADR-086 §2, and its checks' per-symbol
-/// measurements, which a later comparison across symbol matches reads, ADR-131) and mirrors
+/// mutation outcomes, ADR-080 §10, its durations, ADR-086 §2, with the mutation engine's phases
+/// among them, ADR-150 §2, and its checks' per-symbol measurements, which a later comparison
+/// across symbol matches reads, ADR-131) and mirrors
 /// `suppressions` (`.cupel/suppressions.toml`, when it loads) into it. The error is for one
 /// stderr line; it never changes the run's outcome (ADR-045 §8).
 pub fn record(
@@ -56,13 +61,15 @@ pub fn record(
             .record_test_results(&envelope.run.id, lang, results)
             .map_err(|error| error.to_string())?;
     }
+    let mut durations = executed.durations.clone();
     for (lang, outcomes) in &executed.mutation_outcomes {
         store
             .record_mutants(&envelope.run.id, lang, outcomes)
             .map_err(|error| error.to_string())?;
+        durations.extend(phase_durations(lang, outcomes));
     }
     store
-        .record_durations(&envelope.run.id, &executed.durations)
+        .record_durations(&envelope.run.id, &durations)
         .map_err(|error| error.to_string())?;
     for (check, metrics) in symbol_metrics(&executed.measurements) {
         store
@@ -75,6 +82,30 @@ pub fn record(
             .map_err(|error| error.to_string())?;
     }
     Ok(())
+}
+
+/// Each phase of `outcomes`' production as a duration of its own, `<engine>.<phase>`, with the
+/// phase's total (ADR-150 §2); none for a phase the production did not go through.
+fn phase_durations(lang: &LangId, outcomes: &MutationOutcomes) -> Vec<TaskDuration> {
+    MutationPhase::ALL
+        .into_iter()
+        .filter_map(|phase| {
+            let rows: Vec<u64> = outcomes
+                .phases
+                .iter()
+                .filter(|row| row.phase == phase)
+                .map(|row| row.duration_ms)
+                .collect();
+            (!rows.is_empty()).then(|| TaskDuration {
+                shape: TaskShape::producer(
+                    &ProducerId::from(format!("{}.{}", outcomes.engine, phase.as_str())),
+                    lang,
+                    false,
+                ),
+                duration_ms: rows.iter().sum(),
+            })
+        })
+        .collect()
 }
 
 /// The measurements of symbols among `measured`, grouped by check in measured order.

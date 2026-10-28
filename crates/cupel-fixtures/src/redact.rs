@@ -147,13 +147,22 @@ fn mask(value: &mut Value, pointer: &str, placeholder: &str) {
     }
 }
 
-/// Masks every non-null `duration_ms`, at any depth.
+/// Masks every non-null `duration_ms`, at any depth, and every metric named `*_ms` (a check's
+/// report of time spent, such as `tests.mutation`'s phases, ADR-150 §3).
 fn mask_durations(value: &mut Value) {
     match value {
         Value::Object(map) => {
             for (key, child) in map.iter_mut() {
                 if key == "duration_ms" && !child.is_null() {
                     *child = DURATION.into();
+                } else if key == "metrics"
+                    && let Value::Object(metrics) = child
+                {
+                    for (name, metric) in metrics.iter_mut() {
+                        if name.ends_with("_ms") {
+                            *metric = DURATION.into();
+                        }
+                    }
                 } else {
                     mask_durations(child);
                 }
