@@ -2,7 +2,7 @@
 // ABOUTME: branches (else the `branches: unavailable` note), test code and unmeasured symbols, metrics (ADR-079).
 mod support;
 
-use cupel_core::coverage::{CoverageMap, FileCoverage};
+use cupel_core::coverage::{CoverageMap, FileCoverage, Listing};
 use cupel_core::syntax::{
     NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, TestConventions,
     TestPairing, Visibility,
@@ -149,6 +149,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             kinds: vec![
                 ("coverage.uncovered-symbol", ActionKind::WriteTest),
                 ("coverage.uncovered-branch", ActionKind::WriteTest),
+                ("coverage.unloaded-file", ActionKind::WriteTest),
             ],
             metrics: vec![
                 ("line", MetricPer::Scope),
@@ -159,7 +160,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
                 ("uncovered_lines", MetricPer::Symbol),
                 ("line_coverage", MetricPer::Symbol),
             ],
-            evidence: vec!["object"; 2],
+            evidence: vec!["object"; 3],
         }
     );
     let protection: Vec<(&str, Option<ProtectionMetric>)> = manifest
@@ -353,6 +354,51 @@ fn symbols_without_an_instrumented_line_or_in_test_files_are_not_scored() {
         json!("f_test.x")
     );
     assert_eq!(result.score.unwrap().n, 1, "one instrumented line scored");
+}
+
+/// A map that lists only the files the suite loaded (ADR-152): a symbol in a file it leaves out
+/// is an unloaded file, its span's lines all uncovered; the same map listing every file leaves
+/// the symbol unmeasured, as does a loaded-only map that lists nothing at all.
+#[test]
+fn a_symbol_in_a_file_a_loaded_only_map_leaves_out_is_an_unloaded_file() {
+    let symbols = vec![symbol("a", "f.x", 1), symbol("never", "g.x", 1)];
+    let map = CoverageMap::new(vec![FileCoverage::from_hits("f.x", &[(2, 1)], None)]);
+    let (result, findings) = run(&World::new(
+        symbols.clone(),
+        map.clone().listed(Listing::Loaded),
+    ));
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("m::never", "coverage.unloaded-file")])
+    );
+    assert_eq!(findings[0].severity, Severity::Warn);
+    assert_eq!(findings[0].action.kind, ActionKind::WriteTest);
+    assert_eq!(
+        Value::Object(findings[0].evidence.0.clone()),
+        json!({"lines": 4, "covered": 0}),
+        "the body's four lines stand in for the instrumented ones"
+    );
+    assert_eq!(result.status, CheckStatus::Fail);
+    assert_eq!(
+        result.metrics["lines"], 5.0,
+        "a's one line and never's four"
+    );
+    assert_eq!(result.metrics["line"], 0.2);
+    assert_eq!(result.metrics["uncovered"], 1.0);
+    let (result, findings) = run(&World::new(symbols.clone(), map));
+    assert!(
+        findings.is_empty(),
+        "listing every file, g.x has nothing to measure"
+    );
+    assert_eq!(result.score.unwrap().n, 1);
+    let (_, findings) = run(&World::new(
+        symbols,
+        CoverageMap::default().listed(Listing::Loaded),
+    ));
+    assert!(
+        findings.is_empty(),
+        "a map that lists nothing says nothing about g.x"
+    );
 }
 
 #[test]

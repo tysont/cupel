@@ -327,7 +327,7 @@ bench = \"go test -run=^$ -bench=. ./...\"
 
 [lang.python]
 test = \"poetry run python -m pytest\"
-coverage = \"poetry run python -m pytest --cov --cov-report=lcov:{out}\"
+coverage = \"poetry run python -m pytest --cov=. --cov-report=lcov:{out}\"
 
 [lang.rust]
 test = \"cargo test --workspace\"

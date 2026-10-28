@@ -1,0 +1,7 @@
+# The unloaded-file fixture (ADR-152): a `src/shop` package whose `shipping` module no test imports, with
+# the coverage command `cupel init` wrote before ADR-152, whose bare `--cov` names no source, so coverage.py
+# lists only the files the tests loaded. `.cupel/cache/coverage/` holds the report a real run of this
+# command left (ADR-079), which every run ingests while it is fresh. After changing a file here, delete
+# that cache and run `cupel check --only tests.coverage` here with the tool installed, then commit the new cache.
+[lang.python]
+coverage = "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov --cov-report=lcov:{out}"

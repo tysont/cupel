@@ -1,0 +1,21 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/fresh-python-unloaded",
+  "skip_dirs": [
+    ".venv",
+    "venv",
+    "__pycache__",
+    ".tox"
+  ],
+  "report": "2eeb06357669fb70cb6ddb929dfee86cdf75100ae02662e5708fce9ae443159d",
+  "files": {
+    "cupel.toml": "3b498d12b9a69f4d03bc603b3c86c2731b33daa8e86fbf6cbaf3913f9b4beb60",
+    "out.json": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+    "pyproject.toml": "1177aef86920ffc4bb8b2bb4edf0d8128db20a435c9a6697fc5ace43b080d288",
+    "src/shop/__init__.py": "b2f1857c6fb1b43cd210af8e8742ed57cd4b2f51f4624399591dc854cc20c080",
+    "src/shop/pricing.py": "8f2c888c1e9eb29515cb3391735e9e2b9102fa5c177769b65c92132f521d7f05",
+    "src/shop/shipping.py": "a342cf2cd449bb99bfbb2131f55bebce5428f8a18f39458e999d44e282f07296",
+    "tests/__init__.py": "af1349b9f5f9a1a6a0404dea36dcc9499bcb25c9adc112b7cc9a93cae41f3262",
+    "tests/test_pricing.py": "b517cad59ae3c25fa9b8b561042830638d7da8f8fd24bb8fe29b706c2cfaa202"
+  }
+}

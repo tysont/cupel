@@ -3,7 +3,7 @@
 use cupel_core::coverage::CoverageMap;
 
 use super::jacoco::source_paths;
-use super::tool::{CoverageSpec, CoverageTool};
+use super::tool::{CoverageSpec, CoverageTool, every_file};
 
 const ID: &str = "tool.jacoco-maven";
 
@@ -15,6 +15,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     version: &["mvn", "--version"],
     default_report: Some("target/site/jacoco/jacoco.xml"),
     resolve: source_paths,
+    listing: every_file,
 };
 
 inventory::submit!(crate::ToolProducer {

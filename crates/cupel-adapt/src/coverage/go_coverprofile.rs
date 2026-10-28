@@ -2,7 +2,7 @@
 // ABOUTME: by import path, mapped to paths through the root's `go.mod`; coverprofile measures no branches.
 use cupel_core::coverage::CoverageMap;
 
-use super::tool::{CoverageSpec, CoverageTool};
+use super::tool::{CoverageSpec, CoverageTool, every_file};
 
 const ID: &str = "tool.go-coverprofile";
 
@@ -14,6 +14,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     version: &["go", "version"],
     default_report: None,
     resolve: module_paths,
+    listing: every_file,
 };
 
 inventory::submit!(crate::ToolProducer {

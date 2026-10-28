@@ -1,8 +1,8 @@
 // ABOUTME: `tests.coverage`: per-symbol line and branch coverage from Symbols and a CoverageMap: symbols no test
-// ABOUTME: ran, branches no test took (only where the map measured branches), and line/branch ratios (ADR-079).
+// ABOUTME: ran, files no test loaded, branches no test took (where measured), and line/branch ratios (ADR-079, ADR-152).
 use std::collections::{BTreeMap, HashMap};
 
-use cupel_core::coverage::CoverageMap;
+use cupel_core::coverage::{CoverageMap, Listing};
 use cupel_core::syntax::{NormTree, SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
@@ -31,6 +31,16 @@ const BRANCHES_UNAVAILABLE: &str = "branches: unavailable";
 #[serde(deny_unknown_fields)]
 struct UncoveredSymbol {
     /// The symbol's instrumented lines.
+    lines: u32,
+    /// Of those, the ones that ran: none.
+    covered: u32,
+}
+
+/// Evidence of `coverage.unloaded-file`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct UnloadedFile {
+    /// The symbol's lines, which stand in for the instrumented lines the tool never listed.
     lines: u32,
     /// Of those, the ones that ran: none.
     covered: u32,
@@ -82,6 +92,11 @@ fn manifest() -> Manifest {
                 ActionKind::WriteTest,
                 "Tests ran the function but never took some of its branches.",
             ),
+            kind::<UnloadedFile>(
+                "coverage.unloaded-file",
+                ActionKind::WriteTest,
+                "No test loaded the function's file, so the coverage tool never listed it.",
+            ),
         ],
         metrics: metrics(),
         settings: SETTINGS.specs(),
@@ -90,7 +105,8 @@ fn manifest() -> Manifest {
                   language's `[lang.<id>] coverage` command runs (or a fresh report it \
                   left). Branch findings only where the tool measured branches; \
                   otherwise the result notes `branches: unavailable`. A function with \
-                  no instrumented line is not scored."
+                  no instrumented line is not scored, unless the tool lists only the files \
+                  the suite loaded: then a function in a file it left out never ran."
             .to_owned(),
     }
 }
@@ -264,6 +280,16 @@ struct Measured {
     /// `(line, hits)` of each branch in the symbol; `None` when the file's branches were not
     /// measured.
     branches: Option<Vec<(u32, u64)>>,
+    /// Whether the suite loaded the symbol's file; when it did not, `lines` are the symbol's
+    /// own, since the tool listed none.
+    loaded: bool,
+}
+
+/// The lines of `symbol` that stand in for its instrumented lines when its file was never
+/// loaded: its body's, or its declaration line alone, as `symbol_lines` reads a listed file.
+fn span_lines(symbol: &SymbolDef) -> u32 {
+    let (first, last) = (symbol.span.line, symbol.span.end_line);
+    if last > first { last - first } else { 1 }
 }
 
 impl TestsCoverage {
@@ -278,17 +304,32 @@ impl TestsCoverage {
     ) -> Option<Finding> {
         let (start, end) = (symbol.span.line, symbol.span.end_line);
         let lines = symbol_lines(inputs.coverage, symbol);
-        if lines.is_empty() {
-            return None;
-        }
-        let measured = Measured {
-            lines: u32::try_from(lines.len()).unwrap_or(u32::MAX),
-            covered: u32::try_from(lines.iter().filter(|hits| hits.hits > 0).count())
-                .unwrap_or(u32::MAX),
-            branches: inputs
-                .coverage
-                .branch_hits(&symbol.file, start, end)
-                .map(|branches| branches.iter().map(|b| (b.line, b.hits)).collect()),
+        let measured = if lines.is_empty() {
+            // A file the map leaves out has no instrumented line, unless the map lists only
+            // the files the suite loaded: then no test loaded it (ADR-152).
+            let unloaded = inputs.coverage.listing == Listing::Loaded
+                && !inputs.coverage.files.is_empty()
+                && !inputs.coverage.instruments(&symbol.file);
+            if !unloaded {
+                return None;
+            }
+            Measured {
+                lines: span_lines(symbol),
+                covered: 0,
+                branches: None,
+                loaded: false,
+            }
+        } else {
+            Measured {
+                lines: u32::try_from(lines.len()).unwrap_or(u32::MAX),
+                covered: u32::try_from(lines.iter().filter(|hits| hits.hits > 0).count())
+                    .unwrap_or(u32::MAX),
+                branches: inputs
+                    .coverage
+                    .branch_hits(&symbol.file, start, end)
+                    .map(|branches| branches.iter().map(|b| (b.line, b.hits)).collect()),
+                loaded: true,
+            }
         };
         tally.lines += u64::from(measured.lines);
         tally.covered_lines += u64::from(measured.covered);
@@ -316,8 +357,8 @@ impl TestsCoverage {
         self.finding(symbol, hash?, &measured, inputs.conventions)
     }
 
-    /// `coverage.uncovered-symbol` when nothing ran, else `coverage.uncovered-branch` when a
-    /// measured branch was never taken.
+    /// `coverage.unloaded-file` when the suite never loaded the file, `coverage.uncovered-symbol`
+    /// when nothing ran, else `coverage.uncovered-branch` when a measured branch was never taken.
     fn finding(
         &self,
         symbol: &SymbolDef,
@@ -325,12 +366,35 @@ impl TestsCoverage {
         measured: &Measured,
         conventions: Option<&TestConventions>,
     ) -> Option<Finding> {
-        let finding = if measured.covered == 0 {
+        let finding = if !measured.loaded {
+            self.unloaded_file(symbol, hash, measured.lines)
+        } else if measured.covered == 0 {
             self.uncovered_symbol(symbol, hash, measured.lines)
         } else {
             self.uncovered_branch(symbol, hash, measured.branches.as_ref()?)?
         };
         Some(with_nearest_test(finding, symbol, conventions))
+    }
+
+    fn unloaded_file(&self, symbol: &SymbolDef, hash: &SymbolHash, lines: u32) -> Finding {
+        let title = format!(
+            "`{}` is in a file no test loaded: none of its {lines} lines ran",
+            symbol.display
+        );
+        let summary = format!(
+            "Write a test that imports `{}` and calls `{}`.",
+            symbol.namespace, symbol.name
+        );
+        let evidence = UnloadedFile { lines, covered: 0 };
+        SymbolFinding::new(
+            &self.manifest,
+            "coverage.unloaded-file",
+            symbol,
+            hash,
+            evidence,
+        )
+        .described(title, summary)
+        .finding()
     }
 
     fn uncovered_symbol(&self, symbol: &SymbolDef, hash: &SymbolHash, lines: u32) -> Finding {

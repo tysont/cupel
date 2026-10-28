@@ -35,7 +35,11 @@ const CARGO_COVERAGE: Option<&str> = Some("cargo llvm-cov --lcov --output-path {
 /// Asserts the commands the table chooses for a detect fixture's root (ADR-021's defaults).
 fn assert_fixture(case: &str, path: &str, lang: &str, members: &[&str], want: &Commands) {
     let dir = fixture(case).join(path);
-    let packages: &[&str] = if lang == "go" { &["./..."] } else { &[] };
+    let packages: &[&str] = match lang {
+        "go" => &["./..."],
+        "python" => &["."],
+        _ => &[],
+    };
     assert_eq!(
         &commands(lang, &dir, members, packages),
         want,
@@ -108,6 +112,11 @@ fn node_fixtures_get_their_runner_through_their_package_manager() {
 
 #[test]
 fn python_fixtures_get_pytest_or_unittest_through_their_launcher() {
+    // A src layout's root carries `src` as its source (ADR-152), which the command measures.
+    assert_eq!(
+        commands("python", &fixture("python-pyproject"), &[], &["src"]).coverage,
+        Some("uv run python -m pytest --cov=src --cov-report=lcov:{out}".to_owned())
+    );
     assert_fixture(
         "python-pyproject",
         ".",
@@ -115,7 +124,7 @@ fn python_fixtures_get_pytest_or_unittest_through_their_launcher() {
         &[],
         &expected(
             Some("uv run python -m pytest"),
-            Some("uv run python -m pytest --cov --cov-report=lcov:{out}"),
+            Some("uv run python -m pytest --cov=. --cov-report=lcov:{out}"),
             Some("uv run python -m pytest --benchmark-only --benchmark-json={out}"),
         ),
     );
@@ -148,7 +157,7 @@ fn each_monorepo_root_gets_its_own_ecosystems_commands() {
         &[],
         &expected(
             Some("poetry run python -m pytest"),
-            Some("poetry run python -m pytest --cov --cov-report=lcov:{out}"),
+            Some("poetry run python -m pytest --cov=. --cov-report=lcov:{out}"),
             None,
         ),
     );

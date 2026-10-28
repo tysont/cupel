@@ -2,7 +2,7 @@
 // ABOUTME: --output-path {out}`), whose LCOV names files by absolute path and measures no branches on stable.
 use cupel_core::coverage::CoverageMap;
 
-use super::tool::{CoverageSpec, CoverageTool, as_written};
+use super::tool::{CoverageSpec, CoverageTool, as_written, every_file};
 
 const ID: &str = "tool.cargo-llvm-cov";
 
@@ -14,6 +14,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     version: &["cargo", "llvm-cov", "--version"],
     default_report: None,
     resolve: as_written,
+    listing: every_file,
 };
 
 inventory::submit!(crate::ToolProducer {

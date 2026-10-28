@@ -32,7 +32,7 @@
 //! [[rows.coverage]]                  # `commands` per runner, or one `command` for every runner
 //! id = "tool.pytest-cov"
 //! format = "lcov"
-//! commands = { "tool.pytest" = "<m> pytest --cov --cov-report=lcov:{out}" }
+//! commands = { "tool.pytest" = "<m> pytest --cov=<packages> --cov-report=lcov:{out}" }
 //! ```
 //!
 //! Detection rules (any one in a list selects the tool): `{ file }` exists in the root

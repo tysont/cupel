@@ -104,7 +104,7 @@ fn covered<'a>(symbols: impl Iterator<Item = &'a SymbolDef>, hits: u64) -> Cover
             }),
         }
     }
-    CoverageMap { files }
+    CoverageMap::new(files)
 }
 
 fn uncovered<'a>(symbols: impl Iterator<Item = &'a SymbolDef>) -> CoverageMap {

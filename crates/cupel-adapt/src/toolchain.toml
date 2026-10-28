@@ -165,7 +165,7 @@ command = "<m> unittest"
 [[rows.coverage]]
 id = "tool.pytest-cov"
 format = "lcov"
-commands = { "tool.pytest" = "<m> pytest --cov --cov-report=lcov:{out}" }
+commands = { "tool.pytest" = "<m> pytest --cov=<packages> --cov-report=lcov:{out}" }
 install = "<add> pytest-cov"
 
 [[rows.coverage]]

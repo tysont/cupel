@@ -2,7 +2,7 @@
 // ABOUTME: command (`c8 --reporter=lcov node --test`), whose report lands in `coverage/lcov.info`.
 use cupel_core::coverage::CoverageMap;
 
-use super::tool::{CoverageSpec, CoverageTool, as_written};
+use super::tool::{CoverageSpec, CoverageTool, as_written, every_file};
 
 const ID: &str = "tool.c8";
 
@@ -14,6 +14,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     version: &["c8", "--version"],
     default_report: Some("coverage/lcov.info"),
     resolve: as_written,
+    listing: every_file,
 };
 
 inventory::submit!(crate::ToolProducer {

@@ -1,9 +1,9 @@
 // ABOUTME: The Python joint producer (ADR-084): one pytest run with pytest-cov's test contexts, whose JUnit report is the
 // ABOUTME: baseline, whose LCOV report is the coverage, and whose contexts (`coverage json --show-contexts`) the per-test map.
-use cupel_core::{FactKind, Result};
+use cupel_core::{FactKind, LangId, Result};
 
-use super::{Suite, SuiteRun, SuiteSpec};
-use crate::coverage::{parse_lcov, placed};
+use super::{COVERAGE, Suite, SuiteRun, SuiteSpec};
+use crate::coverage::{parse_lcov, placed, pytest_cov_listing};
 use crate::per_test::Site;
 use crate::per_test::pytest_cov::coverage_of;
 use crate::report::junit;
@@ -31,15 +31,54 @@ inventory::submit!(crate::ToolProducer {
     register: |registry| registry.register_joint(Suite(&SPEC)),
 });
 
-/// The toolchain table's pytest-cov command, `<m> pytest --cov --cov-report=lcov:{out}`, with
-/// any launcher that ends in `-m` (`python -m`, `uv run python -m`) or none.
+/// The toolchain table's pytest-cov command, `<m> pytest --cov=<source> --cov-report=lcov:{out}`,
+/// with any launcher that ends in `-m` (`python -m`, `uv run python -m`) or none, and `--cov`
+/// bare (as written before ADR-152) or with a source, once or more.
 fn fuses(words: &[&str]) -> bool {
     let Some(at) = words.iter().position(|word| *word == "pytest") else {
         return false;
     };
     let launcher = &words[..at];
+    let sources = words[at + 1..]
+        .iter()
+        .take_while(|word| is_cov(word))
+        .count();
     (launcher.is_empty() || launcher.last() == Some(&"-m"))
-        && words[at..] == ["pytest", "--cov", "--cov-report=lcov:{out}"]
+        && sources > 0
+        && words[at + 1 + sources..] == ["--cov-report=lcov:{out}"]
+}
+
+fn is_cov(word: &str) -> bool {
+    word == "--cov" || word.starts_with("--cov=")
+}
+
+/// The `--cov` words the run passes: the configured command's sources, else the root's
+/// `packages` (its source directory, ADR-152), else the bare `--cov`.
+fn cov_words(site: &Site<'_>) -> Vec<String> {
+    let configured: Vec<String> = site
+        .ctx
+        .ctx
+        .lang
+        .get(&LangId::from(SPEC.lang))
+        .and_then(|table| table.get(COVERAGE)?.as_str())
+        .into_iter()
+        .flat_map(str::split_whitespace)
+        .filter(|word| {
+            word.strip_prefix("--cov=")
+                .is_some_and(|source| !source.is_empty())
+        })
+        .map(str::to_owned)
+        .collect();
+    if !configured.is_empty() {
+        return configured;
+    }
+    if site.packages.is_empty() {
+        return vec!["--cov".to_owned()];
+    }
+    site.packages
+        .iter()
+        .map(|source| format!("--cov={source}"))
+        .collect()
 }
 
 /// One pytest run with the runner's `JUnit` flags and pytest-cov's test contexts, its data file
@@ -64,16 +103,17 @@ fn run(site: &Site<'_>) -> Result<SuiteRun> {
         "junit_family=xunit1",
         "-o",
         "junit_logging=all",
-        "--cov",
-        "--cov-context=test",
     ]
     .map(str::to_owned)
     .into_iter()
+    .chain(cov_words(site))
     .chain([
+        "--cov-context=test".to_owned(),
         format!("--junitxml={}", junit.display()),
         format!("--cov-report=lcov:{}", lcov.display()),
     ])
     .collect();
+    let listing = pytest_cov_listing(&args.join(" "));
     let captured = site.run("pytest", &args, &env)?;
     let found = std::fs::read_to_string(&junit)
         .ok()
@@ -83,7 +123,7 @@ fn run(site: &Site<'_>) -> Result<SuiteRun> {
     let coverage = std::fs::read_to_string(&lcov)
         .ok()
         .and_then(|report| parse_lcov(&report).ok())
-        .map(|map| placed(map, &[&site.path], "."));
+        .map(|map| placed(map, &[&site.path], ".").listed(listing));
     let per_test = match coverage {
         Some(_) => per_test(site, &contexts, &env)?,
         None => None,
@@ -127,11 +167,14 @@ mod tests {
                 "pytest --cov --cov-report=lcov:{out}",
                 "python -m pytest --cov --cov-report=lcov:{out}",
                 "uv run python -m pytest --cov --cov-report=lcov:{out}",
+                "pytest --cov=src --cov-report=lcov:{out}",
+                "uv run python -m pytest --cov=. --cov=libs --cov-report=lcov:{out}",
                 "pytest --cov=. --cov-branch --cov-report=lcov:{out}",
+                "pytest --cov-report=lcov:{out}",
                 "PYTHONDONTWRITEBYTECODE=1 pytest --cov --cov-report=lcov:{out}",
             ]
             .map(fused),
-            [true, true, true, false, false]
+            [true, true, true, true, true, false, false, false]
         );
     }
 }

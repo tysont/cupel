@@ -2,7 +2,7 @@
 // ABOUTME: with `--lcov`), whose LCOV report, paths relative to the project, lands in `target/coverage/lcov.info` (ADR-109).
 use cupel_core::coverage::CoverageMap;
 
-use super::tool::{CoverageSpec, CoverageTool, as_written};
+use super::tool::{CoverageSpec, CoverageTool, as_written, every_file};
 
 const ID: &str = "tool.cloverage";
 
@@ -14,6 +14,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     version: &["clojure", "--version"],
     default_report: Some("target/coverage/lcov.info"),
     resolve: as_written,
+    listing: every_file,
 };
 
 inventory::submit!(crate::ToolProducer {

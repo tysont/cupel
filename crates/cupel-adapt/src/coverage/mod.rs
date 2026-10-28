@@ -40,3 +40,4 @@ pub(crate) use go_coverprofile::module_paths;
 pub use istanbul::parse_istanbul;
 pub use jacoco::parse_jacoco;
 pub use lcov::parse_lcov;
+pub(crate) use pytest_cov::listing as pytest_cov_listing;

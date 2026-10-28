@@ -3,7 +3,7 @@
 use std::fs;
 use std::path::Path;
 
-use cupel_core::coverage::CoverageMap;
+use cupel_core::coverage::{CoverageMap, Listing};
 use cupel_core::{
     Action, ActionKind, Availability, CheckId, CostClass, Ctx, Error, Event, EventSink, Evidence,
     FactKind, Finding, FindingId, LangId, Langs, Process, ProduceCtx, Producer, ProducerId, Result,
@@ -45,6 +45,9 @@ pub struct CoverageSpec {
     /// Turns the report's file names into paths below the root it ran in, for tools that name
     /// files otherwise (Go's import paths); identity for the rest.
     pub resolve: fn(CoverageMap, &Path) -> CoverageMap,
+    /// Which files the report of the configured command lists (ADR-152): every file with
+    /// executable code, or, as coverage.py's without a source, only the files the suite loaded.
+    pub listing: fn(&str) -> Listing,
 }
 
 /// A coverage producer: `spec` run, or its report ingested, once per project root.
@@ -53,6 +56,11 @@ pub struct CoverageTool(pub &'static CoverageSpec);
 /// Leaves a report's paths as the tool wrote them.
 pub fn as_written(map: CoverageMap, _: &Path) -> CoverageMap {
     map
+}
+
+/// The report lists every file with executable code, whatever the command.
+pub fn every_file(_: &str) -> Listing {
+    Listing::All
 }
 
 impl Producer<CoverageMap> for CoverageTool {
@@ -131,7 +139,10 @@ impl Producer<CoverageMap> for CoverageTool {
         _: &Scope,
         sink: &mut dyn EventSink,
     ) -> Result<CoverageMap> {
+        // Every root runs the language's one configured command, so each root's map has the
+        // same listing; the merged map keeps it.
         let mut files = Vec::new();
+        let mut listing = Listing::All;
         for (dir, _) in roots(ctx) {
             let skip_dirs = self.skip_dirs(ctx, &dir);
             let tree = Tree {
@@ -140,9 +151,11 @@ impl Producer<CoverageMap> for CoverageTool {
                 skip_dirs: &skip_dirs,
                 exclude: &ctx.ctx.exclude,
             };
-            files.extend(self.root(ctx, &tree, sink)?.files);
+            let map = self.root(ctx, &tree, sink)?;
+            listing = map.listing;
+            files.extend(map.files);
         }
-        Ok(CoverageMap::new(files))
+        Ok(CoverageMap::new(files).listed(listing))
     }
 }
 
@@ -156,42 +169,51 @@ impl CoverageTool {
         sink: &mut dyn EventSink,
     ) -> Result<CoverageMap> {
         let entry = cache_dir(&ctx.ctx.root, CACHE, self.0.id).join(entry_name(tree.dir));
-        if let Some(map) = self.cached(&entry, tree) {
+        let command = self.command(&ctx.ctx, Some(&ctx.config));
+        let listing = (self.0.listing)(command.as_deref().unwrap_or_default());
+        if let Some(map) = self.cached(&entry, tree, listing) {
             return Ok(map);
         }
         let root = canonical(&tree.root());
-        if let Some(map) = self.existing(&root, tree) {
+        if let Some(map) = self.existing(&root, tree, listing) {
             return Ok(map);
         }
-        self.run(ctx, &root, tree, sink)
+        self.run(ctx, command, &root, tree, sink)
     }
 
     /// The report in the cache entry `entry`, when it was made for this root and is fresh.
-    fn cached(&self, entry: &Path, tree: &Tree<'_>) -> Option<CoverageMap> {
+    fn cached(&self, entry: &Path, tree: &Tree<'_>, listing: Listing) -> Option<CoverageMap> {
         let (sources, written, report) = load(entry)?;
         let fresh =
             sources.dir == tree.dir && sources.fresh(tree.repo, tree.exclude, written, &report);
-        fresh.then(|| self.read(&report, &sources.ran_in, &tree.root(), tree.dir))?
+        fresh.then(|| self.read(&report, &sources.ran_in, &tree.root(), tree.dir, listing))?
     }
 
     /// The report the tool left at its default location in `root`, when it is newer than
     /// every other file there (the developer ran the tool).
-    fn existing(&self, root: &Path, tree: &Tree<'_>) -> Option<CoverageMap> {
+    fn existing(&self, root: &Path, tree: &Tree<'_>, listing: Listing) -> Option<CoverageMap> {
         let report = tree.root().join(self.0.default_report?);
         if !tree.is_newest(&report) {
             return None;
         }
-        self.read(&fs::read(&report).ok()?, root, root, tree.dir)
+        self.read(&fs::read(&report).ok()?, root, root, tree.dir, listing)
     }
 
-    /// `report`, written by the tool running in `ran_in`, with paths relative to the repository.
-    /// Names the report resolves through project files (Go import paths through `go.mod`) are
-    /// resolved in `root`, the project root here: a committed report's `ran_in` is on the
-    /// machine that made it.
-    fn read(&self, report: &[u8], ran_in: &Path, root: &Path, dir: &str) -> Option<CoverageMap> {
+    /// `report`, written by the tool running in `ran_in`, with paths relative to the repository
+    /// and the `listing` of the command that wrote it. Names the report resolves through project
+    /// files (Go import paths through `go.mod`) are resolved in `root`, the project root here: a
+    /// committed report's `ran_in` is on the machine that made it.
+    fn read(
+        &self,
+        report: &[u8],
+        ran_in: &Path,
+        root: &Path,
+        dir: &str,
+        listing: Listing,
+    ) -> Option<CoverageMap> {
         let map = parse(std::str::from_utf8(report).ok()?).ok()?;
         let map = (self.0.resolve)(map, root);
-        Some(placed(map, &[ran_in, &canonical(ran_in)], dir))
+        Some(placed(map, &[ran_in, &canonical(ran_in)], dir).listed(listing))
     }
 
     /// Runs the configured command in `root` and caches its report with the record of the
@@ -199,16 +221,16 @@ impl CoverageTool {
     fn run(
         &self,
         ctx: &ProduceCtx,
+        command: Option<String>,
         root: &Path,
         tree: &Tree<'_>,
         sink: &mut dyn EventSink,
     ) -> Result<CoverageMap> {
-        let command = self
-            .command(&ctx.ctx, Some(&ctx.config))
-            .ok_or_else(|| Error::Process {
-                program: self.0.tool.to_owned(),
-                message: format!("no `[lang.<id>] {KEY}` command is configured"),
-            })?;
+        let command = command.ok_or_else(|| Error::Process {
+            program: self.0.tool.to_owned(),
+            message: format!("no `[lang.<id>] {KEY}` command is configured"),
+        })?;
+        let listing = (self.0.listing)(&command);
         let area = ctx.writer.create_dir(
             &ctx.writer
                 .cache_dir()
@@ -233,7 +255,7 @@ impl CoverageTool {
         let map = report
             .as_deref()
             .filter(|_| captured.exit_code == Some(0))
-            .and_then(|report| self.read(report, root, root, tree.dir));
+            .and_then(|report| self.read(report, root, root, tree.dir, listing));
         let (Some(report), Some(map)) = (report, map) else {
             let failure = Failure {
                 producer: self.0.id,

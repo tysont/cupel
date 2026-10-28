@@ -658,7 +658,7 @@ fn describe_language_shows_its_toolchain_row_in_default_order() {
     assert_eq!(toolchain["coverage"][0]["format"], json!("lcov"));
     assert_eq!(
         toolchain["coverage"][0]["commands"],
-        json!([{"runner": "tool.pytest", "command": "<m> pytest --cov --cov-report=lcov:{out}"}])
+        json!([{"runner": "tool.pytest", "command": "<m> pytest --cov=<packages> --cov-report=lcov:{out}"}])
     );
     assert_eq!(toolchain["runners"][0]["install"], json!("<add> pytest"));
     assert_eq!(toolchain["runners"][1]["install"], Value::Null);

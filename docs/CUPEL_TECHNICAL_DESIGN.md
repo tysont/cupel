@@ -101,7 +101,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 
 | ID | Measures | Finding kinds | Cost | Build/wrap |
 |---|---|---|---|---|
-| `tests.coverage` | Line/branch coverage; MC/DC where tooling supports; **per-test coverage map** when available | `coverage.uncovered-symbol`, `coverage.uncovered-branch` | standard | wrap (coverage producers) |
+| `tests.coverage` | Line/branch coverage; MC/DC where tooling supports; **per-test coverage map** when available | `coverage.uncovered-symbol`, `coverage.uncovered-branch`, `coverage.unloaded-file` | standard | wrap (coverage producers) |
 | `tests.mutation` | Killed / (killed + survived + uncovered) (ADR-141); coverage-gated; differential; per-test selection; schemata for compiled langs | `mutant.survived`, `mutant.timeout`, `mutant.out-of-memory`, `mutant.uncovered`, `mutant.equivalent?` (low confidence) | standard (changed symbols) / deep (touched files) / exhaustive (tree) | build (Py, Go, Rust, TS) + wrap (PIT for JVM, Stryker optional) |
 | `tests.quality` | SCRAP-style: assertion density, weak assertions, mock density, logic in tests, duplicated setup | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | quick | build |
 | `tests.weakening` | **Diff of the test suite itself** vs base: removed assertions, skipped/disabled tests, loosened matchers, rewritten snapshots, widened `any`-style matchers | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | quick | build |

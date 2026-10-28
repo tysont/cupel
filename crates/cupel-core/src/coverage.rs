@@ -14,6 +14,22 @@ use crate::fact::{Fact, FactEntry, FactKind};
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct CoverageMap {
     pub files: Vec<FileCoverage>,
+    /// Which files the producer's report lists; a map recorded before the field existed lists
+    /// every file (ADR-152).
+    #[serde(default)]
+    pub listing: Listing,
+}
+
+/// Which files a coverage report lists (ADR-152). `tests.coverage` reads a file absent from a map
+/// by its listing: nothing to measure, or a file no test loaded.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+pub enum Listing {
+    /// Every file with executable code, ran or not: a file absent from the map has none.
+    #[default]
+    All,
+    /// Only the files the suite loaded: a file absent from the map never ran.
+    Loaded,
 }
 
 impl Fact for CoverageMap {
@@ -93,6 +109,7 @@ impl CoverageMap {
             }
         }
         Self {
+            listing: Listing::All,
             files: files
                 .into_iter()
                 .map(|(file, merged)| FileCoverage {
@@ -111,6 +128,12 @@ impl CoverageMap {
                 })
                 .collect(),
         }
+    }
+
+    /// This map with its producer's `listing`.
+    #[must_use]
+    pub fn listed(self, listing: Listing) -> Self {
+        Self { listing, ..self }
     }
 
     /// Whether the producer measured branches in any file; `tests.coverage` notes
