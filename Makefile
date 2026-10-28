@@ -16,7 +16,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline reclaim parity install dist installers version windows-check windows-test dev-setup dev-env
+.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline reclaim parity install dist installers version windows-check windows-test dev-setup dev-env inner-loop
 
 build:
 	$(CARGO) build --workspace
@@ -172,3 +172,9 @@ dev-setup:
 # The tools' environment as `export` lines, for running cargo outside make: `eval "$$(make -s dev-env)"`.
 dev-env:
 	@$(DEV_ENV) cupel_dev_env_exports
+
+# The P10 inner-loop measurement (docs/plan/p10/common.md "Measuring"): a fresh clone, a release binary,
+# `cupel check --changed --depth standard` on one changed function, cold, warm, and unchanged, as one table.
+LABEL ?= inner-loop
+inner-loop:
+	scripts/inner_loop.sh $(LABEL)
