@@ -1,5 +1,5 @@
-// ABOUTME: Integration tests for installing tools (ADR-081): `doctor --fix` with `--install`, `--no-install`,
-// ABOUTME: and neither on a pipe; failed installs; dry runs' `would_install`; and a real pip install into a venv.
+// ABOUTME: Integration tests for installing tools (ADR-081): `doctor --fix` with `--install`, `--no-install`, and neither
+// ABOUTME: on a pipe; failed installs; dry runs' `would_install`; and, behind CUPEL_NETWORK_TESTS, a real pip install into a venv.
 #![cfg(unix)]
 mod support;
 
@@ -250,8 +250,17 @@ fn scratch_venv() -> Option<(TempDir, PathBuf)> {
     Some((dir, venv))
 }
 
+/// The one test here that reaches the network: the real `python -m pip install pytest` from PyPI.
+/// It runs only when `CUPEL_NETWORK_TESTS` is set, as `make test-network` sets it (ADR-153).
 #[test]
 fn fix_with_install_installs_the_runner_into_a_scratch_venv_and_passes() {
+    if std::env::var_os("CUPEL_NETWORK_TESTS").is_none() {
+        eprintln!(
+            "SKIPPED: the network is not available to tests; set CUPEL_NETWORK_TESTS=1 or run make \
+             test-network"
+        );
+        return;
+    }
     let Some((_scratch, venv)) = scratch_venv() else {
         return;
     };

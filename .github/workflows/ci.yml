@@ -98,6 +98,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12.10"
+      # The pipx wrapper's build backend: the wrapper tests build dist/pipx with it offline (ADR-153).
+      - name: Install flit_core
+        run: python -m pip install flit_core==3.12.0
       - name: Install ShellCheck 0.11.0
         run: |
           case "$RUNNER_OS-$(uname -m)" in
@@ -111,6 +114,10 @@ jobs:
         run: make installers
         env:
           INSTALLER_TESTS_REQUIRE_TOOLS: "1"
+      # The one test that reaches the network, the real install of pytest from PyPI that
+      # `doctor --fix --install` runs, runs here and nowhere else in CI (ADR-153).
+      - name: make test-network
+        run: make test-network
       # Homebrew's own style check of the formula rendered from the fixture SHA256SUMS. It is rendered
       # under a Formula/ directory, as a tap holds it: Homebrew's RuboCop config exempts formulae from
       # the Sorbet sigil and frozen-string-literal cops by that path alone.

@@ -150,6 +150,11 @@ version:
 installers:
 	$(CARGO) test --package cupel-cli --test installers
 
+# The tests that need the network (ADR-153): the real `python -m pip install pytest` that
+# `doctor --fix --install` runs. `make test` reports them skipped; CI's installers job runs this.
+test-network:
+	CUPEL_NETWORK_TESTS=1 $(CARGO) test --package cupel-cli --test install
+
 # The Windows target (ADR-137), which CI's `windows` job runs on a Windows runner: the workspace
 # compiles for it, and the tests that need no Unix tools pass: every test of cupel-serve (the daemon's
 # transport over real named pipes) and the unit tests of the crates whose unit tests spawn no process

@@ -50,6 +50,10 @@ runs:
     - name: Install pytest and pytest-cov
       shell: bash
       run: python -m pip install pytest==9.1.1 pytest-cov==7.1.0
+    # The pipx wrapper's build backend: the installer tests build dist/pipx with it offline (ADR-153).
+    - name: Install flit_core
+      shell: bash
+      run: python -m pip install flit_core==3.12.0
     # The property framework the property engine's Python tests drive for real (P5.4, ADR-095).
     # Pinned: the gen.property fixture's everyday suite passes with a pinned seed, and which
     # inputs a seed generates can change between releases.

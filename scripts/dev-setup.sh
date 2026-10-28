@@ -25,7 +25,7 @@ staticcheck_version=2024.1.1
 python_version=3.12.10
 # The python-build-standalone release that carries CPython 3.12.10.
 python_build=20250409
-python_packages="pytest==9.1.1 pytest-cov==7.1.0 hypothesis==6.170.1 pytest-benchmark==5.1.0 mypy==2.4.0 ruff==0.17.1 icontract==2.7.3"
+python_packages="pytest==9.1.1 pytest-cov==7.1.0 hypothesis==6.170.1 pytest-benchmark==5.1.0 mypy==2.4.0 ruff==0.17.1 icontract==2.7.3 flit_core==3.12.0"
 node_version=22.23.3
 npm_packages="vitest@5.0.5 @vitest/coverage-v8@5.0.5 jest@30.5.2 fast-check@4.10.2 typescript@7.0.2 eslint@10.13.0"
 jazzer_version=4.0.0

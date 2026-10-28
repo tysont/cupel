@@ -713,6 +713,24 @@ struct Wrapper {
     env: Vec<(String, PathBuf)>,
 }
 
+/// Whether this machine's `python3` imports `module`. Without it the test reports itself skipped,
+/// unless `INSTALLER_TESTS_REQUIRE_TOOLS` is set, when it fails, as for a missing program.
+fn python_module(module: &str) -> bool {
+    let imports = Command::new("python3")
+        .args(["-c", &format!("import {module}")])
+        .output()
+        .is_ok_and(|output| output.status.success());
+    if imports {
+        return true;
+    }
+    assert!(
+        std::env::var_os("INSTALLER_TESTS_REQUIRE_TOOLS").is_none(),
+        "python3 cannot import {module} and INSTALLER_TESTS_REQUIRE_TOOLS is set"
+    );
+    eprintln!("SKIPPED: python3 cannot import {module}; this test did not run");
+    false
+}
+
 /// A copy of `dist/<name>` in `dir`, so packaging writes nothing into the repository.
 fn copy_dist(name: &str, dir: &Path) -> PathBuf {
     succeed(
@@ -766,9 +784,11 @@ impl Wrapper {
         })
     }
 
-    /// dist/pipx, installed with `pip install --target`; `None` without python3.
+    /// dist/pipx, installed with `pip install --target`, built with the `flit_core` this machine's
+    /// python3 has rather than one pip would fetch, so nothing here reaches the network (ADR-153);
+    /// `None` without python3 or flit_core.
     fn pipx() -> Option<Self> {
-        if !installed("python3") {
+        if !installed("python3") || !python_module("flit_core") {
             return None;
         }
         let dir = TempDir::new().unwrap();
@@ -776,7 +796,8 @@ impl Wrapper {
         let site = dir.path().join("site");
         succeed(
             Command::new("python3")
-                .args(["-m", "pip", "install", "--quiet", "--target"])
+                .args(["-m", "pip", "install", "--quiet", "--no-index"])
+                .args(["--no-build-isolation", "--target"])
                 .arg(&site)
                 .arg(&source)
                 .env("PIP_USER", "0")
