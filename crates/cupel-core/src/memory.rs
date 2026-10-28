@@ -170,7 +170,8 @@ fn list() -> Option<Vec<Listed>> {
     None
 }
 
-#[cfg(test)]
+/// `ps` is Unix: Windows takes no sample (`list` is `None` there), so the test is Unix-only.
+#[cfg(all(test, unix))]
 mod tests {
     use super::*;
 
