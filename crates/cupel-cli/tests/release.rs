@@ -334,7 +334,11 @@ fn release_workflow_pins_every_action_to_a_commit() {
 }
 
 /// The build job restores and saves the build cache per target, between installing the toolchain
-/// and `make dist`, so one target's cache never overwrites another's.
+/// and `make dist`, so one target's cache never overwrites another's. The key leaves out
+/// rust-cache's environment hash: it covers every toolchain `rustup toolchain list` shows, so the
+/// runner image's preinstalled stable release, which differs between runners, made a dry run's
+/// cache unreachable from the tag run; the pinned toolchain is in the key through
+/// `rust-toolchain.toml`, one of the lockfiles it hashes.
 #[test]
 fn the_build_job_caches_each_targets_build() {
     let jobs = jobs(&release_workflow());
@@ -350,12 +354,19 @@ fn the_build_job_caches_each_targets_build() {
         toolchain < cache && cache < dist && cache.is_some(),
         "toolchain {toolchain:?}, cache {cache:?}, dist {dist:?}"
     );
+    let inputs: Vec<&str> = lines[cache.unwrap() + 1..dist.unwrap()]
+        .iter()
+        .skip_while(|line| *line != "with:")
+        .skip(1)
+        .take_while(|line| !line.starts_with("- ") && !line.starts_with('#'))
+        .map(String::as_str)
+        .collect();
     assert_eq!(
-        lines[cache.unwrap() + 1..dist.unwrap()]
-            .iter()
-            .filter_map(|line| line.strip_prefix("key: "))
-            .collect::<Vec<_>>(),
-        ["${{ matrix.target }}"]
+        inputs,
+        [
+            "key: ${{ matrix.target }}",
+            "add-rust-environment-hash-key: false"
+        ]
     );
 }
 

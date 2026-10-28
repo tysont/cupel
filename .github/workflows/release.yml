@@ -65,9 +65,13 @@ jobs:
           rustup target add ${{ matrix.target }}
       # The build directory and cargo's registry, restored and saved per target. GitHub scopes a cache to the
       # ref that saved it, so a tag run restores what a run on `main` (a `workflow_dispatch` dry run) saved.
+      # The key leaves out the action's environment hash, which covers every toolchain `rustup toolchain list`
+      # shows: the image's preinstalled stable differs between runners, and made the v0.2.0 dry run's Linux
+      # caches unreachable from the tag run. The pinned toolchain is in the key through rust-toolchain.toml.
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: ${{ matrix.target }}
+          add-rust-environment-hash-key: false
       - name: Install zig 0.16.0 and cargo-zigbuild 0.23.4
         if: matrix.zig
         run: |
