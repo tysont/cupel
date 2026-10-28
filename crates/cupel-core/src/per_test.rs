@@ -113,6 +113,13 @@ impl TestCoverage {
     }
 }
 
+/// The test case name a runner's test ID ends with: its last `::`-, `/`-, or space-separated
+/// part (ADR-077 §5), by which `tests --impacted` and the suite joint (ADR-149 §3) find the
+/// case among `TestFrames`.
+pub fn case_name(id: &str) -> &str {
+    id.rsplit(['/', ' ', ':']).next().unwrap_or(id)
+}
+
 /// `line → tests` for every file of a [`PerTestMap`] (design §9.4).
 pub struct LineIndex<'a> {
     map: &'a PerTestMap,

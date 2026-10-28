@@ -1,12 +1,17 @@
-// ABOUTME: The joint producers run for real on the per-test fixtures (ADR-084): one run's three facts equal the three
-// ABOUTME: separate runs' facts, an unchanged tree is served from the cache, and a change runs the suite again.
+// ABOUTME: The joint producers run for real on the per-test fixtures (ADR-084, ADR-149): one run's three facts equal the
+// ABOUTME: separate runs' facts, an unchanged tree is served from the cache, and a range reruns only the stale tests.
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::sync::LazyLock;
 
 use cupel_core::coverage::CoverageMap;
+use cupel_core::syntax::{
+    NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, TestCase, TestFile,
+    TestFrames, Visibility,
+};
 use cupel_core::{
-    Availability, Cancellation, Ctx, FactKind, Focus, JointProducer, LangId, PerTestMap,
-    ProduceCtx, ProducerRegistry, Scope, TestResults, Upstream,
+    Availability, Cancellation, CostClass, Ctx, FactKind, Focus, JointProducer, LangId, PerTestMap,
+    ProduceCtx, Produced, ProducerRegistry, Scope, SuiteMode, SuiteReuse, TestResults,
 };
 use serde_json::Value;
 use support::{lang, produce_ctx, producer, registry};
@@ -22,6 +27,10 @@ struct Joint {
     runner: &'static str,
     coverage_producer: &'static str,
     per_test: Option<&'static str>,
+    /// The fixture's source file, and its functions (first and last line): `add`, `scale`, and
+    /// the test of each, as the language's `Symbols` would have them.
+    source: &'static str,
+    functions: &'static [(&'static str, u32, u32)],
 }
 
 const RUST: Joint = Joint {
@@ -31,6 +40,13 @@ const RUST: Joint = Joint {
     runner: "tool.cargo-nextest",
     coverage_producer: "tool.cargo-llvm-cov",
     per_test: Some("tool.llvm-cov-per-test"),
+    source: "src/lib.rs",
+    functions: &[
+        ("src/lib.rs", 4, 6),
+        ("src/lib.rs", 9, 11),
+        ("src/lib.rs", 18, 20),
+        ("src/lib.rs", 23, 25),
+    ],
 };
 
 const PYTHON: Joint = Joint {
@@ -40,6 +56,13 @@ const PYTHON: Joint = Joint {
     runner: "tool.pytest",
     coverage_producer: "tool.pytest-cov",
     per_test: Some("tool.pytest-cov-per-test"),
+    source: "calc.py",
+    functions: &[
+        ("calc.py", 4, 6),
+        ("calc.py", 9, 11),
+        ("tests/test_calc.py", 5, 6),
+        ("tests/test_calc.py", 9, 10),
+    ],
 };
 
 const GO: Joint = Joint {
@@ -49,6 +72,8 @@ const GO: Joint = Joint {
     runner: "tool.go-test",
     coverage_producer: "tool.go-coverprofile",
     per_test: None,
+    source: "calc.go",
+    functions: &[],
 };
 
 /// Every registered producer, as the binary registers them.
@@ -68,6 +93,37 @@ struct Facts {
     results: Value,
     coverage: Option<CoverageMap>,
     per_test: Option<Vec<cupel_core::TestCoverage>>,
+}
+
+impl Facts {
+    /// Which lines ran, per file: what every consumer reads of a coverage map (ADR-084 §4).
+    fn ran(&self) -> BTreeMap<String, Vec<u32>> {
+        self.coverage
+            .iter()
+            .flat_map(|map| &map.files)
+            .map(|file| {
+                let lines = file
+                    .lines
+                    .iter()
+                    .filter(|hits| hits.hits > 0)
+                    .map(|hits| hits.line)
+                    .collect();
+                (file.file.clone(), lines)
+            })
+            .collect()
+    }
+
+    /// Which lines each file instruments, per file.
+    fn instrumented(&self) -> BTreeMap<String, Vec<u32>> {
+        self.coverage
+            .iter()
+            .flat_map(|map| &map.files)
+            .map(|file| {
+                let lines = file.lines.iter().map(|hits| hits.line).collect();
+                (file.file.clone(), lines)
+            })
+            .collect()
+    }
 }
 
 impl Joint {
@@ -94,25 +150,52 @@ impl Joint {
         ctx
     }
 
+    /// [`ctx`](Self::ctx) for a run focused as `focus` says, seeing the fixture's functions as
+    /// the language's `Symbols` (the joint wants them, ADR-149 §3).
+    fn focused(&self, root: &Path, focus: Focus) -> ProduceCtx {
+        let mut ctx = self.ctx(root);
+        ctx.focus = focus;
+        ctx.upstream
+            .insert(Produced::new(symbols(self.lang, self.functions)).share());
+        ctx
+    }
+
+    /// A range scope that changed `lines` of the fixture's source file, at `depth`.
+    fn range(&self, lines: (u32, u32), depth: CostClass) -> Focus {
+        Focus {
+            depth,
+            changed: Some(BTreeMap::from([(self.source.to_owned(), vec![lines])])),
+            ..Focus::default()
+        }
+    }
+
     fn joint(&self) -> &'static dyn JointProducer {
         joint(self.id, self.lang)
     }
 
     /// The facts one joint run makes in `root`.
     fn jointly(&self, root: &Path) -> Facts {
+        self.jointly_with(&self.ctx(root)).0
+    }
+
+    /// The facts one joint run with `ctx` makes, and how its baseline was obtained.
+    fn jointly_with(&self, ctx: &ProduceCtx) -> (Facts, Option<SuiteReuse>) {
         let produced = self
             .joint()
-            .produce(&self.ctx(root), &Scope::default(), &mut Vec::new())
+            .produce(ctx, &Scope::default(), &mut Vec::new())
             .unwrap();
         let mut facts = Facts {
             results: Value::Null,
             coverage: None,
             per_test: None,
         };
+        let mut reuse = None;
         for fact in produced {
             match fact.kind() {
                 FactKind::TestResults => {
-                    facts.results = comparable(&fact.downcast::<TestResults>().unwrap());
+                    let results = fact.downcast::<TestResults>().unwrap();
+                    reuse = results.reuse.clone();
+                    facts.results = comparable(&results);
                 }
                 FactKind::CoverageMap => facts.coverage = fact.downcast::<CoverageMap>(),
                 FactKind::PerTestMap => {
@@ -121,7 +204,7 @@ impl Joint {
                 kind => panic!("unexpected {kind}"),
             }
         }
-        facts
+        (facts, reuse)
     }
 
     /// The facts the per-kind producers make in `root`, each in its own run.
@@ -147,15 +230,27 @@ impl Joint {
     }
 
     fn estimate(&self, root: &Path) -> Option<String> {
-        let ctx = self.ctx(root);
-        self.joint()
-            .estimate(&ctx.ctx, &Upstream::default(), &Focus::default())
-            .note
+        self.estimate_focused(root, &Focus::default())
+    }
+
+    /// The joint's estimate in `root` for a run focused as `focus` says, seeing the fixture's
+    /// functions.
+    fn estimate_focused(&self, root: &Path, focus: &Focus) -> Option<String> {
+        let ctx = self.focused(root, focus.clone());
+        self.joint().estimate(&ctx.ctx, &ctx.upstream, focus).note
+    }
+
+    /// Replaces `from` with `to` in `file`, which must hold it.
+    fn edit(&self, root: &Path, file: &str, from: &str, to: &str) {
+        let path = root.join(file);
+        let text = std::fs::read_to_string(&path).unwrap();
+        assert!(text.contains(from), "{from:?} in {file}");
+        std::fs::write(&path, text.replace(from, to)).unwrap();
     }
 }
 
-/// `results` without what differs between two runs of one suite: durations, and each
-/// invocation's command line and output.
+/// `results` without what differs between two runs of one suite: durations, each invocation's
+/// command line and output, and how the run was obtained.
 fn comparable(results: &TestResults) -> Value {
     let mut value = serde_json::to_value(results).unwrap();
     for test in value["tests"].as_array_mut().unwrap() {
@@ -165,7 +260,47 @@ fn comparable(results: &TestResults) -> Value {
         invocation["command"] = Value::Null;
         invocation["output"] = Value::Null;
     }
+    value["reuse"] = Value::Null;
     value
+}
+
+/// `Symbols` holding one function per `(file, first line, last line)`, named `f<line>`.
+fn symbols(lang: &str, functions: &[(&str, u32, u32)]) -> Symbols {
+    Symbols {
+        symbols: functions
+            .iter()
+            .map(|(file, line, end_line)| SymbolDef {
+                name: format!("f{line}"),
+                namespace: String::new(),
+                display: format!("f{line}"),
+                kind: SymbolKind::Function,
+                visibility: Visibility::Public,
+                lang: LangId::from(lang),
+                file: (*file).to_owned(),
+                span: span(*line, *end_line),
+                body: None,
+                parameters: 0,
+            })
+            .collect(),
+    }
+}
+
+fn span(line: u32, end_line: u32) -> Span {
+    Span {
+        line,
+        col: 1,
+        end_line,
+        end_col: 1,
+    }
+}
+
+/// How a joint's cache was reused by a run: its mode and counts.
+fn reuse(mode: SuiteMode, rerun: u64, reused: u64) -> Option<SuiteReuse> {
+    Some(SuiteReuse {
+        mode,
+        rerun,
+        reused,
+    })
 }
 
 /// The facts of one joint run and of the separate runs, each on its own copy of the fixture.
@@ -260,4 +395,291 @@ fn a_customized_coverage_command_leaves_the_joint_unconfigured() {
             key: "lang.python.coverage".to_owned()
         }
     );
+}
+
+/// A full run on a fresh copy of `joint`'s fixture, then, after `edit`, a run with `ctx_after`'s
+/// context; the second run's facts and reuse and, for comparison, a fresh full run on another
+/// copy with the same edit. `None`, reported as skipped, without the tools.
+fn after_edit(
+    joint: &Joint,
+    edit: &dyn Fn(&Path),
+    ctx_after: &dyn Fn(&Path) -> ProduceCtx,
+) -> Option<((Facts, Option<SuiteReuse>), Facts)> {
+    let dir = joint.fixture()?;
+    let root = dir.path();
+    let (_, first) = joint.jointly_with(&joint.ctx(root));
+    assert_eq!(
+        first,
+        reuse(SuiteMode::Full, 2, 0),
+        "the first run is whole"
+    );
+    edit(root);
+    let second = joint.jointly_with(&ctx_after(root));
+    let fresh = joint.fixture()?;
+    edit(fresh.path());
+    let whole = joint.jointly(fresh.path());
+    Some((second, whole))
+}
+
+/// Asserts the incremental run on `joint`'s fixture after `edit`, focused as `focus` says, was
+/// obtained as `expected` says and made the facts a whole run of the edited tree makes: the
+/// same tests with the same outcomes, the same instrumented lines, the same lines run, and the
+/// same per-test lines.
+fn assert_incremental(
+    joint: &Joint,
+    edit: &dyn Fn(&Path),
+    focus: Focus,
+    expected: Option<SuiteReuse>,
+) {
+    let Some(((second, obtained), whole)) =
+        after_edit(joint, edit, &|root| joint.focused(root, focus.clone()))
+    else {
+        return;
+    };
+    assert_eq!(obtained, expected);
+    assert_eq!(
+        (
+            &second.results,
+            second.instrumented(),
+            second.ran(),
+            &second.per_test
+        ),
+        (
+            &whole.results,
+            whole.instrumented(),
+            whole.ran(),
+            &whole.per_test
+        )
+    );
+}
+
+/// `a + b` in `add` becomes `b + a`: a change inside the function the first test covers.
+fn edit_add(joint: &'static Joint) -> impl Fn(&Path) {
+    move |root| joint.edit(root, joint.source, "a + b", "b + a")
+}
+
+#[test]
+fn a_rust_range_reruns_only_the_test_that_ran_the_changed_function() {
+    assert_incremental(
+        &RUST,
+        &edit_add(&RUST),
+        RUST.range((5, 5), CostClass::Standard),
+        reuse(SuiteMode::Incremental, 1, 1),
+    );
+}
+
+#[test]
+fn a_python_range_reruns_only_the_test_that_ran_the_changed_function() {
+    assert_incremental(
+        &PYTHON,
+        &edit_add(&PYTHON),
+        PYTHON.range((6, 6), CostClass::Standard),
+        reuse(SuiteMode::Incremental, 1, 1),
+    );
+}
+
+#[test]
+fn a_change_to_a_tests_own_body_reruns_that_test_alone() {
+    assert_incremental(
+        &RUST,
+        &|root| RUST.edit(root, RUST.source, "add(2, 3), 5", "add(3, 2), 5"),
+        RUST.range((19, 19), CostClass::Standard),
+        reuse(SuiteMode::Incremental, 1, 1),
+    );
+}
+
+#[test]
+fn a_tree_scope_or_the_deep_depth_runs_the_whole_suite() {
+    for focus in [Focus::default(), RUST.range((5, 5), CostClass::Deep)] {
+        assert_incremental(&RUST, &edit_add(&RUST), focus, reuse(SuiteMode::Full, 2, 0));
+    }
+}
+
+#[test]
+fn an_entry_measured_by_another_toolchain_runs_the_whole_suite() {
+    let Some(((_, obtained), _)) = after_edit(
+        &RUST,
+        &|root| {
+            edit_add(&RUST)(root);
+            fake_toolchain(root, "tool.llvm-cov-nextest");
+        },
+        &|root| RUST.focused(root, RUST.range((5, 5), CostClass::Standard)),
+    ) else {
+        return;
+    };
+    assert_eq!(obtained, reuse(SuiteMode::Full, 2, 0));
+}
+
+/// Rewrites the suite entry of `joint` under `root`, when there is one, as measured by another
+/// toolchain, keeping its record consistent (the record holds the report's hash).
+fn fake_toolchain(root: &Path, joint: &str) {
+    let dir = root.join(".cupel/cache/suite").join(joint);
+    let Some(entry) = std::fs::read_dir(&dir)
+        .ok()
+        .and_then(|mut entries| entries.next())
+        .map(|entry| entry.unwrap().path())
+    else {
+        return;
+    };
+    let mut report: Value =
+        serde_json::from_slice(&std::fs::read(entry.join("report")).unwrap()).unwrap();
+    report["toolchain"] = Value::from("rustc 0.0.0 nowhere");
+    let bytes = serde_json::to_vec(&report).unwrap();
+    let mut sources: Value =
+        serde_json::from_slice(&std::fs::read(entry.join("sources.json")).unwrap()).unwrap();
+    sources["report"] = Value::from(blake3::hash(&bytes).to_hex().to_string());
+    std::fs::write(entry.join("report"), bytes).unwrap();
+    std::fs::write(
+        entry.join("sources.json"),
+        serde_json::to_vec_pretty(&sources).unwrap(),
+    )
+    .unwrap();
+}
+
+#[test]
+fn a_new_test_file_runs_the_whole_suite() {
+    let Some(((second, obtained), whole)) = after_edit(
+        &RUST,
+        &|root| {
+            std::fs::create_dir_all(root.join("tests")).unwrap();
+            std::fs::write(
+                root.join("tests/twice.rs"),
+                "#[test]\nfn twice() {\n    assert_eq!(calc::add(1, 1), 2);\n}\n",
+            )
+            .unwrap();
+        },
+        &|root| RUST.focused(root, RUST.range((5, 5), CostClass::Standard)),
+    ) else {
+        return;
+    };
+    assert_eq!(
+        (obtained, second.results),
+        (reuse(SuiteMode::Full, 3, 0), whole.results)
+    );
+}
+
+#[test]
+fn an_unchanged_tree_is_served_from_the_cache_on_a_range_too() {
+    let Some(dir) = RUST.fixture() else {
+        return;
+    };
+    let root = dir.path();
+    let first = RUST.jointly(root);
+    let focus = RUST.range((5, 5), CostClass::Standard);
+    let (second, obtained) = RUST.jointly_with(&RUST.focused(root, focus.clone()));
+    assert_eq!(
+        (
+            obtained,
+            RUST.estimate_focused(root, &focus),
+            second.results
+        ),
+        (
+            reuse(SuiteMode::Cached, 0, 2),
+            Some("cached".to_owned()),
+            first.results
+        )
+    );
+}
+
+#[test]
+fn the_estimate_on_a_range_counts_the_stale_tests() {
+    let Some(dir) = RUST.fixture() else {
+        return;
+    };
+    let root = dir.path();
+    RUST.jointly(root);
+    edit_add(&RUST)(root);
+    let range = RUST.range((5, 5), CostClass::Standard);
+    assert_eq!(
+        [
+            RUST.estimate_focused(root, &range),
+            RUST.estimate_focused(root, &RUST.range((5, 5), CostClass::Deep)),
+            RUST.estimate(root),
+        ],
+        [
+            Some("incremental: 1 stale".to_owned()),
+            Some("one run".to_owned()),
+            Some("one run".to_owned()),
+        ]
+    );
+}
+
+/// `TestFrames` naming the Rust fixture's two tests, and a `NormTree` giving each the hash
+/// `hashes` says, so a run records them (ADR-149 §3).
+fn structure(hashes: [&str; 2]) -> [Produced; 2] {
+    let cases = [("adds", 18, 20), ("scales", 23, 25)];
+    let frames = TestFrames {
+        files: vec![TestFile {
+            file: "src/lib.rs".to_owned(),
+            framework: "rust-test".to_owned(),
+            setup: Vec::new(),
+            cases: cases
+                .iter()
+                .map(|(name, line, end_line)| TestCase {
+                    name: (*name).to_owned(),
+                    span: span(*line, *end_line),
+                    assertions: Vec::new(),
+                    mocks: Vec::new(),
+                    skip: None,
+                    property: None,
+                    doc: None,
+                })
+                .collect(),
+        }],
+    };
+    let norm = NormTree {
+        symbols: cases
+            .iter()
+            .zip(hashes)
+            .map(|((_, line, _), hash)| NormalizedSymbol {
+                symbol: cupel_core::syntax::SymbolKey {
+                    file: "src/lib.rs".to_owned(),
+                    line: *line,
+                    col: 1,
+                },
+                hash: hash.parse().unwrap(),
+                root: NormNode {
+                    label: "fn".to_owned(),
+                    children: Vec::new(),
+                    span: None,
+                    text: None,
+                },
+            })
+            .collect(),
+    };
+    [Produced::new(frames), Produced::new(norm)]
+}
+
+#[test]
+fn a_test_whose_recorded_structural_hash_differs_is_rerun_though_no_function_it_ran_changed() {
+    let outcomes: Vec<Option<SuiteReuse>> = ["sh_000000000000000b", "sh_000000000000000a"]
+        .into_iter()
+        .filter_map(|scales_now| {
+            let dir = RUST.fixture()?;
+            let root = dir.path();
+            let structured = |hashes: [&str; 2]| {
+                let mut ctx = RUST.focused(root, RUST.range((5, 5), CostClass::Standard));
+                for fact in structure(hashes) {
+                    ctx.upstream.insert(fact.share());
+                }
+                ctx
+            };
+            RUST.jointly_with(&structured(["sh_0000000000000001", "sh_000000000000000a"]));
+            edit_add(&RUST)(root);
+            Some(
+                RUST.jointly_with(&structured(["sh_0000000000000001", scales_now]))
+                    .1,
+            )
+        })
+        .collect();
+    // With both tests stale nothing is kept, so the run is a whole one (ADR-149 §2).
+    if !outcomes.is_empty() {
+        assert_eq!(
+            outcomes,
+            [
+                reuse(SuiteMode::Full, 2, 0),
+                reuse(SuiteMode::Incremental, 1, 1)
+            ]
+        );
+    }
 }

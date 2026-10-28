@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use cupel_core::syntax::{
     ImportTarget, ModuleGraph, SymbolDef, Symbols, TestConventions, TestFrames,
 };
-use cupel_core::{ImpactedTest, LangId, PerTestMap, TestCoverage};
+use cupel_core::{ImpactedTest, LangId, PerTestMap, TestCoverage, case_name};
 
 /// Line ranges per file (inclusive): the lines in scope, or the lines a range changed.
 pub type Regions = BTreeMap<String, Vec<(u32, u32)>>;
@@ -224,11 +224,6 @@ fn symbols_of<'a>(
         .into_iter()
         .flat_map(|symbols| &symbols.symbols)
         .filter(move |symbol| symbol.file == file)
-}
-
-/// The test case name a runner's test ID ends with: its last `::`, `/`, or space-separated part.
-fn case_name(id: &str) -> &str {
-    id.rsplit(['/', ' ', ':']).next().unwrap_or(id)
 }
 
 /// The file of the test case `frames` names as `id`'s case.

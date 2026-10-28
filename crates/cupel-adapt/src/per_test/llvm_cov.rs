@@ -14,7 +14,7 @@ use crate::coverage::{parse_lcov, placed};
 
 const ID: &str = "tool.llvm-cov-per-test";
 
-static LLVM_COV: PerTestSpec = PerTestSpec {
+pub(crate) static LLVM_COV: PerTestSpec = PerTestSpec {
     id: ID,
     languages: || Langs::Only(vec![LangId::from("rust")]),
     runner: "tool.cargo-nextest",

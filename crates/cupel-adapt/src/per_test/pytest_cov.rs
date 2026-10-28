@@ -11,7 +11,7 @@ use crate::report::listing;
 
 const ID: &str = "tool.pytest-cov-per-test";
 
-static PYTEST_COV: PerTestSpec = PerTestSpec {
+pub(crate) static PYTEST_COV: PerTestSpec = PerTestSpec {
     id: ID,
     languages: || Langs::Only(vec![LangId::from("python")]),
     runner: "tool.pytest",

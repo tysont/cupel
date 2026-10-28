@@ -1,8 +1,10 @@
 // ABOUTME: The Go joint producer (ADR-084): one `go test -json -coverprofile` run whose events are the baseline and whose
 // ABOUTME: profile is the coverage; Go's per-test map stays one run per test, refreshed by its own producer.
+use std::collections::BTreeSet;
+
 use cupel_core::{FactKind, Result};
 
-use super::{Suite, SuiteRun, SuiteSpec};
+use super::{Suite, SuiteRun, SuiteSpec, probe};
 use crate::coverage::{module_paths, parse_coverprofile, placed};
 use crate::go_test::packages;
 use crate::per_test::Site;
@@ -22,6 +24,7 @@ static SPEC: SuiteSpec = SuiteSpec {
     programs: &["go"],
     outputs: &[],
     fuses,
+    toolchain: |root| probe(root, "go", &["version"]),
     run,
 };
 
@@ -38,8 +41,9 @@ fn fuses(words: &[&str]) -> bool {
         && words[3..].iter().all(|word| !word.starts_with('-'))
 }
 
-/// One `go test -json -coverprofile` run over the root's packages.
-fn run(site: &Site<'_>) -> Result<SuiteRun> {
+/// One `go test -json -coverprofile` run over the root's packages, whatever is kept: Go has no
+/// per-test map here, so the joint always runs whole (ADR-149 §1).
+fn run(site: &Site<'_>, _: &BTreeSet<String>) -> Result<SuiteRun> {
     let profile = site.report("cover.out");
     let _ = std::fs::remove_file(&profile);
     let args: Vec<String> = ["test".to_owned(), "-json".to_owned()]

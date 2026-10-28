@@ -160,7 +160,8 @@ fn name(file: &str) -> &str {
     file.rsplit('/').next().unwrap_or(file)
 }
 
-fn extension(file: &str) -> &str {
+/// The extension of a `/`-separated path, without the dot; empty without one.
+pub(crate) fn extension(file: &str) -> &str {
     name(file).rsplit_once('.').map_or("", |(_, ext)| ext)
 }
 

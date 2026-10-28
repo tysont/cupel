@@ -126,7 +126,7 @@ pub use mutation::{
     ExcludedTest, Mutant, MutantOutcome, MutationOutcomes, MutationStrategy, SLOW_TEST_MS,
 };
 pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
-pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage};
+pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage, case_name};
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{

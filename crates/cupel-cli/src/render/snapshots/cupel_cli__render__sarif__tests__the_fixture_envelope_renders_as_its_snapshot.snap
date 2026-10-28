@@ -1,5 +1,6 @@
 ---
 source: crates/cupel-cli/src/render/sarif.rs
+assertion_line: 372
 expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
 ---
 {
@@ -63,6 +64,13 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
             },
             "seed": 42,
             "started": "2026-10-10T16:31:04Z",
+            "suite": {
+              "rust": {
+                "mode": "incremental",
+                "rerun": 3,
+                "reused": 1275
+              }
+            },
             "toolchain": {
               "cargo-llvm-cov": "0.6.12",
               "rust": "1.93.0"

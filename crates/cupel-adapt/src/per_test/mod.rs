@@ -9,7 +9,7 @@
 //! the tree it measured; a later production keeps the tests no change touched and measures only
 //! the rest (ADR-083).
 
-mod cache;
+pub(crate) mod cache;
 mod functions;
 mod go_cover;
 pub(crate) mod llvm_cov;
@@ -272,7 +272,7 @@ impl PerTest {
 
     /// What makes a cached test of the root at `root` stale for this producer, after a change
     /// that did `edits` to the functions of the files it changed.
-    fn staleness<'a>(
+    pub(crate) fn staleness<'a>(
         &self,
         root: &'a Path,
         edits: BTreeMap<String, FunctionEdit>,
@@ -290,7 +290,7 @@ impl PerTest {
 /// For each changed file of the root `dir` (at `root`) whose lines the cache holds, what the
 /// change did to its functions, as `symbols` (repository-relative) has them now; a file with no
 /// functions there, or that the change touched outside them, is left out.
-fn edits(
+pub(crate) fn edits(
     dir: &str,
     root: &Path,
     lines: &Lines,
@@ -337,6 +337,11 @@ fn measured_lines(root: &Path, tests: &[TestCoverage]) -> Lines {
         .collect()
 }
 
+/// The per-test producer `id`'s cache entry for the root `dir`, when it reads back.
+pub(crate) fn cached_tests(repo: &Path, id: &str, dir: &str) -> Option<Cached> {
+    Cached::load(&cache_dir(repo, CACHE, id).join(entry_name(dir)), dir)
+}
+
 /// The per-test producer `id`'s cached tests of the root `dir` (relative to that root), when
 /// its entry reads back and nothing under the root changed since it was written.
 pub(crate) fn fresh_tests(
@@ -345,7 +350,7 @@ pub(crate) fn fresh_tests(
     id: &str,
     dir: &str,
 ) -> Option<Vec<TestCoverage>> {
-    let cached = Cached::load(&cache_dir(repo, CACHE, id).join(entry_name(dir)), dir)?;
+    let cached = cached_tests(repo, id, dir)?;
     cached
         .changes(repo, exclude)
         .is_empty()
@@ -375,7 +380,7 @@ pub(crate) fn store_tests(
 
 /// The kept tests that are still listed, with the measured ones, which replace any kept test of
 /// the same ID.
-fn merged(keep: Vec<TestCoverage>, found: Measured) -> Vec<TestCoverage> {
+pub(crate) fn merged(keep: Vec<TestCoverage>, found: Measured) -> Vec<TestCoverage> {
     let measured: BTreeSet<&str> = found.tests.iter().map(|test| test.id.as_str()).collect();
     let mut tests: Vec<TestCoverage> = keep
         .into_iter()

@@ -1,12 +1,15 @@
 // ABOUTME: The Python joint producer (ADR-084): one pytest run with pytest-cov's test contexts, whose JUnit report is the
 // ABOUTME: baseline, whose LCOV report is the coverage, and whose contexts (`coverage json --show-contexts`) the per-test map.
+use std::collections::BTreeSet;
+use std::path::Path;
+
 use cupel_core::{FactKind, LangId, Result};
 
-use super::{COVERAGE, Suite, SuiteRun, SuiteSpec};
+use super::{COVERAGE, Suite, SuiteRun, SuiteSpec, probe};
 use crate::coverage::{parse_lcov, placed, pytest_cov_listing};
 use crate::per_test::Site;
-use crate::per_test::pytest_cov::coverage_of;
-use crate::report::junit;
+use crate::per_test::pytest_cov::{PYTEST_COV, coverage_of};
+use crate::report::{junit, listing};
 use crate::runner::finished;
 
 const ID: &str = "tool.pytest-cov-contexts";
@@ -19,10 +22,11 @@ static SPEC: SuiteSpec = SuiteSpec {
         (FactKind::CoverageMap, "tool.pytest-cov"),
         (FactKind::PerTestMap, "tool.pytest-cov-per-test"),
     ],
-    per_test: Some("tool.pytest-cov-per-test"),
+    per_test: Some(&PYTEST_COV),
     programs: &["pytest", "coverage"],
     outputs: &["__pycache__"],
     fuses,
+    toolchain,
     run,
 };
 
@@ -81,9 +85,32 @@ fn cov_words(site: &Site<'_>) -> Vec<String> {
         .collect()
 }
 
+/// The interpreter and pytest the root runs under (ADR-149 §4): `python3 --version` (or
+/// `python`'s) and `pytest --version`.
+fn toolchain(root: &Path) -> Option<String> {
+    let python =
+        probe(root, "python3", &["--version"]).or_else(|| probe(root, "python", &["--version"]))?;
+    Some(format!(
+        "{python} · {}",
+        probe(root, "pytest", &["--version"])?
+    ))
+}
+
+/// Arguments that keep pytest from writing into the tree.
+const QUIET: [&str; 2] = ["-p", "no:cacheprovider"];
+
 /// One pytest run with the runner's `JUnit` flags and pytest-cov's test contexts, its data file
-/// under `.cupel/` so the repository's own coverage configuration still applies.
-fn run(site: &Site<'_>) -> Result<SuiteRun> {
+/// under `.cupel/` so the repository's own coverage configuration still applies; over every
+/// collected test but `kept` (ADR-149 §1), named by node ID, or all of them when none is kept
+/// or none remains.
+fn run(site: &Site<'_>, kept: &BTreeSet<String>) -> Result<SuiteRun> {
+    let mut selected = Vec::new();
+    if !kept.is_empty() {
+        let mut list: Vec<String> = QUIET.map(str::to_owned).to_vec();
+        list.extend(["--collect-only".to_owned(), "-q".to_owned()]);
+        let listed = listing::pytest(&site.succeed("pytest", &list, &[])?.stdout);
+        selected = listed.into_iter().filter(|id| !kept.contains(id)).collect();
+    }
     let data = site.report(".coverage");
     let junit = site.report("junit.xml");
     let lcov = site.report("coverage.lcov");
@@ -96,24 +123,19 @@ fn run(site: &Site<'_>) -> Result<SuiteRun> {
         ("PYTHONDONTWRITEBYTECODE", "1"),
         ("COVERAGE_FILE", data_file.as_str()),
     ];
-    let args: Vec<String> = [
-        "-p",
-        "no:cacheprovider",
-        "-o",
-        "junit_family=xunit1",
-        "-o",
-        "junit_logging=all",
-    ]
-    .map(str::to_owned)
-    .into_iter()
-    .chain(cov_words(site))
-    .chain([
-        "--cov-context=test".to_owned(),
-        format!("--junitxml={}", junit.display()),
-        format!("--cov-report=lcov:{}", lcov.display()),
-    ])
-    .collect();
+    let mut args: Vec<String> = QUIET
+        .into_iter()
+        .chain(["-o", "junit_family=xunit1", "-o", "junit_logging=all"])
+        .map(str::to_owned)
+        .chain(cov_words(site))
+        .chain([
+            "--cov-context=test".to_owned(),
+            format!("--junitxml={}", junit.display()),
+            format!("--cov-report=lcov:{}", lcov.display()),
+        ])
+        .collect();
     let listing = pytest_cov_listing(&args.join(" "));
+    args.extend(selected);
     let captured = site.run("pytest", &args, &env)?;
     let found = std::fs::read_to_string(&junit)
         .ok()

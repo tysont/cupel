@@ -167,6 +167,7 @@ fn a_project_that_declares_no_contract_library_is_not_run_again() {
             invocations: Vec::new(),
             tests: Vec::new(),
             suite_hash: String::new(),
+            reuse: None,
         })
         .share(),
     );
