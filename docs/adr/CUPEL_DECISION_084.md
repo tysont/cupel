@@ -1,6 +1,6 @@
 # CUPEL_DECISION_084: One suite run for `TestResults`, `CoverageMap`, and `PerTestMap`; a cached baseline; staleness by function
 
-**Date:** 2026-10-15 · **Status:** accepted; §6 (a cached red baseline is returned as recorded) amended by [141](CUPEL_DECISION_141.md) §2 (only a green run is cached) · **Phase:** P4.4
+**Date:** 2026-10-15 · **Status:** accepted; §6 (a cached red baseline is returned as recorded) amended by [141](CUPEL_DECISION_141.md) §2 (only a green run is cached); §6 (any change under the root reruns the suite) and §8 (the dry run's suite entries) amended by [149](CUPEL_DECISION_149.md) (an incremental run on a range scope) · **Phase:** P4.4
 
 ## Context
 
