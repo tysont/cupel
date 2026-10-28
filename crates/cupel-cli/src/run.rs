@@ -1,6 +1,7 @@
 // ABOUTME: One invocation's run state: ID, start time, verb, seed, and time limit, and its envelopes.
 // ABOUTME: Successful verbs and every error path assemble their envelope here, so all share one shape.
 use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use cupel_core::matching::SymbolMatch;
@@ -225,6 +226,7 @@ impl Run {
                 budget_ms: self.budget_ms,
                 seed: self.seed,
                 toolchain: ToolchainInfo::default(),
+                suite: BTreeMap::new(),
                 config: self.config.clone(),
                 baseline: None,
             },

@@ -25,11 +25,36 @@ pub struct TestResults {
     /// Identifies the suite that ran: a blake3 hex digest of the sorted test IDs and the content
     /// of every file they name.
     pub suite_hash: String,
+    /// How a joint suite run obtained these results from its cache (ADR-149 §5); null for a
+    /// runner that runs its whole suite every time.
+    pub reuse: Option<SuiteReuse>,
 }
 
 impl Fact for TestResults {
     const KIND: FactKind = FactKind::TestResults;
-    const VERSION: u32 = 1;
+    const VERSION: u32 = 2;
+}
+
+/// How many of a joint suite run's tests ran and how many were kept from its cache (ADR-149).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct SuiteReuse {
+    pub mode: SuiteMode,
+    /// The tests that ran under instrumentation in this production.
+    pub rerun: u64,
+    /// The tests whose results and coverage came from the cache without running.
+    pub reused: u64,
+}
+
+/// What a joint suite run did.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+pub enum SuiteMode {
+    /// Every test ran.
+    Full,
+    /// The stale and new tests ran; the rest were kept from the cache (a range scope).
+    Incremental,
+    /// Nothing ran: the tree is as the cache recorded it.
+    Cached,
 }
 
 inventory::submit!(FactEntry::execution::<TestResults>("test-results").pinned_by("runner"));
@@ -116,7 +141,14 @@ impl TestResults {
             invocations,
             tests,
             suite_hash,
+            reuse: None,
         }
+    }
+
+    /// These results, obtained as `reuse` says.
+    pub fn with_reuse(mut self, reuse: SuiteReuse) -> Self {
+        self.reuse = Some(reuse);
+        self
     }
 
     /// Whether every invocation completed and no test failed or errored (ADR-075).

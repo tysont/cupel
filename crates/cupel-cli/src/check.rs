@@ -1,6 +1,6 @@
 // ABOUTME: The `check` verb and the pipeline `survey` shares: walk the tree once, resolve the scope, select
 // ABOUTME: checks, run the scheduler (or plan it), assemble the envelope, and grade it with the gate.
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use cupel_core::config::{Config, GateRuleSpec};
@@ -8,9 +8,9 @@ use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GateReference, GitInfo,
-    Job, Lang, Manifest, Measured, Outcome, PlannedInstall, PlannedWrite, ProducerRegistry, Range,
-    ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection, Status, Verb, Writer, apply_gate,
-    evaluate_gate, gate_for, next_actions,
+    Job, Lang, LangId, Manifest, Measured, Outcome, PlannedInstall, PlannedWrite, ProducerRegistry,
+    Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection, Status, SuiteReuse, Verb,
+    Writer, apply_gate, evaluate_gate, gate_for, next_actions,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -156,7 +156,7 @@ pub fn run(
         checks: catalog.checks(),
         producers: catalog.producers(),
     };
-    let mut outcome = schedule(&scheduler, &job, invocation, events)?;
+    let (mut outcome, suite) = schedule(&scheduler, &job, invocation, events)?;
     oracle.apply(&mut outcome, catalog.checks());
     let scope = ScopeInfo {
         mode: request.mode(),
@@ -168,6 +168,7 @@ pub fn run(
     Ok(CheckRun {
         scope,
         git,
+        suite,
         outcome,
     })
 }
@@ -233,14 +234,15 @@ pub(crate) fn changed_lines(
     Ok(Some(hunks))
 }
 
-/// Runs (or, for a dry run, plans) `job`, keeping the test runs it made for the store; a red
-/// baseline is the exit-4 refusal (ADR-076).
+/// Runs (or, for a dry run, plans) `job`, keeping the test runs it made for the store, and
+/// per language how a joint suite run reused its cache (ADR-149 §5); a red baseline is the
+/// exit-4 refusal (ADR-076).
 fn schedule(
     scheduler: &Scheduler<'_>,
     job: &Job<'_>,
     invocation: &Invocation<'_>,
     events: &mut dyn EventSink,
-) -> Result<Outcome, CupelError> {
+) -> Result<(Outcome, BTreeMap<LangId, SuiteReuse>), CupelError> {
     let (would_install, installed) = install_tools(invocation, scheduler.producers, job);
     let mut outcome = if invocation.dry_run {
         scheduler.plan(job, events)?
@@ -251,6 +253,7 @@ fn schedule(
     if let Some(plan) = &mut outcome.plan {
         plan.would_install = would_install;
     }
+    let suite = suites_of(&outcome);
     invocation.run.keep(Executions {
         test_results: std::mem::take(&mut outcome.test_results),
         mutation_outcomes: std::mem::take(&mut outcome.mutation_outcomes),
@@ -260,7 +263,7 @@ fn schedule(
     });
     match outcome.refused.take() {
         Some(red) => Err(CupelError::Unevaluable(Box::new(red))),
-        None => Ok(outcome),
+        None => Ok((outcome, suite)),
     }
 }
 
@@ -294,7 +297,19 @@ pub(crate) fn resolve(
 pub struct CheckRun {
     scope: ScopeInfo,
     git: Option<GitInfo>,
+    /// Per language, what the joint suite run that made its baseline reran and reused.
+    suite: BTreeMap<LangId, SuiteReuse>,
     outcome: Outcome,
+}
+
+/// Per language, how the joint suite run that made its baseline reused its cache (ADR-149 §5),
+/// from the test runs `outcome` kept.
+fn suites_of(outcome: &Outcome) -> BTreeMap<LangId, SuiteReuse> {
+    outcome
+        .test_results
+        .iter()
+        .filter_map(|(lang, results)| Some((lang.clone(), results.reuse.clone()?)))
+        .collect()
 }
 
 impl CheckRun {
@@ -354,6 +369,7 @@ impl CheckRun {
     pub fn place(&self, mut envelope: Envelope) -> Envelope {
         envelope.run.scope = Some(self.scope.clone());
         envelope.run.git.clone_from(&self.git);
+        envelope.run.suite.clone_from(&self.suite);
         envelope
     }
 }

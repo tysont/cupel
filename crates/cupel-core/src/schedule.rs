@@ -1109,6 +1109,7 @@ impl<'a> FactStore<'a> {
             lang,
             ctx: &self.root,
             depth: self.depth,
+            focus: self.focus(lang),
             upstream: self.upstream(self.made_kinds(lang).iter(), lang),
         }
     }
@@ -1201,11 +1202,12 @@ impl<'a> FactStore<'a> {
         if !needs_met {
             return None;
         }
+        self.ensure_wants(joint.wants(), lang, sink, &mut visiting);
         if let Err(error) = self.cancel.checkpoint() {
             return Some(self.keep(kind, lang, Err(error)));
         }
-        let ctx = self.produce_ctx(joint.needs().iter(), lang);
-        let estimate = joint.estimate(&self.root, &ctx.upstream);
+        let ctx = self.produce_ctx(joint.needs().iter().chain(joint.wants()), lang);
+        let estimate = joint.estimate(&self.root, &ctx.upstream, &ctx.focus);
         let scope = Scope::of_files(self.files.clone());
         let produced = self.timed(&joint.id(), lang, &estimate, sink, &mut |events| {
             joint.produce(&ctx, &scope, events)
@@ -1275,15 +1277,20 @@ impl<'a> FactStore<'a> {
             upstream: self.upstream(inputs, lang),
             seed: self.seed,
             runners: self.producers.runners(),
-            focus: Focus {
-                depth: self.depth,
-                symbols: self.selected.get(&lang.id).cloned(),
-                changed: self.changed.clone(),
-                base: self.base_commit.clone(),
-                jobs: self.jobs,
-                cases: self.cases,
-            },
+            focus: self.focus(lang),
             oracle: self.oracle.clone(),
+        }
+    }
+
+    /// What the run asks a producer of `lang` to look at (ADR-080).
+    fn focus(&self, lang: &Lang) -> Focus {
+        Focus {
+            depth: self.depth,
+            symbols: self.selected.get(&lang.id).cloned(),
+            changed: self.changed.clone(),
+            base: self.base_commit.clone(),
+            jobs: self.jobs,
+            cases: self.cases,
         }
     }
 

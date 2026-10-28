@@ -864,6 +864,7 @@ fn run_block(envelope: &Envelope, paint: &Paint) -> String {
                 .map(|baseline| format!("{} ({})", baseline.name, baseline.id)),
         ),
         ("toolchain", toolchain_line(run)),
+        ("suite", suite_line(run)),
         ("config", config_line(run)),
         (
             "cupel",
@@ -933,6 +934,23 @@ fn toolchain_line(run: &RunInfo) -> Option<String> {
         .map(|(tool, version)| format!("{tool} {version}"))
         .collect();
     (!tools.is_empty()).then(|| tools.join(" · "))
+}
+
+/// Per language whose baseline a joint suite run made, what it reran and reused (ADR-149 §5).
+fn suite_line(run: &RunInfo) -> Option<String> {
+    let suites: Vec<String> = run
+        .suite
+        .iter()
+        .map(|(lang, suite)| {
+            format!(
+                "{lang} {} · {} rerun · {} reused",
+                name(suite.mode),
+                suite.rerun,
+                suite.reused
+            )
+        })
+        .collect();
+    (!suites.is_empty()).then(|| suites.join("\n"))
 }
 
 /// The configuration's sources, then each effective setting on its own line.

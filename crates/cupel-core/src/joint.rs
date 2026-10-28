@@ -6,7 +6,7 @@ use crate::fact::FactKind;
 use crate::grade::CostClass;
 use crate::lang::Lang;
 use crate::producer::{
-    Availability, Ctx, JointProducer, ProducerRegistry, RegisteredProducer, Upstream,
+    Availability, Ctx, Focus, JointProducer, ProducerRegistry, RegisteredProducer, Upstream,
 };
 
 /// The note of an estimate that runs nothing.
@@ -22,6 +22,8 @@ pub(crate) struct Deciding<'a> {
     pub lang: &'a Lang,
     pub ctx: &'a Ctx,
     pub depth: CostClass,
+    /// What the run looks at, as a producer of the language would see it.
+    pub focus: Focus,
     /// The facts already made for the language.
     pub upstream: Upstream,
 }
@@ -90,7 +92,7 @@ impl Deciding<'_> {
             if !applies {
                 return None;
             }
-            let estimate = joint.estimate(self.ctx, &self.upstream);
+            let estimate = joint.estimate(self.ctx, &self.upstream, &self.focus);
             let cached = estimate.note.as_deref() == Some(CACHED);
             let runs = makes
                 .iter()
@@ -108,9 +110,10 @@ impl Deciding<'_> {
     }
 
     /// A dry run's entries for the suite facts `reached` holds: one per joint run, naming its
-    /// facts (`test-results+coverage+per-test-map(one run)`, or `(cached)`), then one per suite
-    /// fact made on its own (`test-results(run)`, `coverage(cached)`); and the kinds the joint
-    /// covers, whose own entries are left out.
+    /// facts and its estimate's note (`test-results+coverage+per-test-map(one run)`,
+    /// `(cached)`, or `(incremental: 3 stale)`, ADR-149 §6), then one per suite fact made on
+    /// its own (`test-results(run)`, `coverage(cached)`); and the kinds the joint covers, whose
+    /// own entries are left out.
     pub fn planned(&self, reached: &BTreeSet<FactKind>) -> (Vec<String>, BTreeSet<FactKind>) {
         let mut entries = Vec::new();
         let mut covered = BTreeSet::new();
@@ -118,13 +121,16 @@ impl Deciding<'_> {
         let joint = reached
             .iter()
             .find_map(|kind| self.joint(*kind, reached, &none));
-        if let Some((joint, cached)) = joint {
+        if let Some((joint, _)) = joint {
             let kinds: Vec<String> = joint
                 .makes()
                 .iter()
                 .map(|(kind, _)| kind.to_string())
                 .collect();
-            let how = if cached { CACHED } else { "one run" };
+            let how = joint
+                .estimate(self.ctx, &self.upstream, &self.focus)
+                .note
+                .unwrap_or_else(|| "one run".to_owned());
             entries.push(format!("{}({how})", kinds.join("+")));
             covered.extend(joint.makes().iter().map(|(kind, _)| *kind));
         }

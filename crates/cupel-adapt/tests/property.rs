@@ -67,6 +67,7 @@ fn green(runner: &str) -> Produced {
         invocations: Vec::new(),
         tests: Vec::new(),
         suite_hash: String::new(),
+        reuse: None,
     })
 }
 

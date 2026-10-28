@@ -1,16 +1,17 @@
-// ABOUTME: Joint producers (ADR-084) over synthetic producers: one run makes several facts when it saves a run, the
-// ABOUTME: per-kind producers run otherwise, pins win, a red joint baseline still refuses, and dry runs say which.
+// ABOUTME: Joint producers (ADR-084, ADR-149) over synthetic producers: one run makes several facts when it saves a run,
+// ABOUTME: the per-kind producers run otherwise, pins win, a red joint baseline still refuses, and dry runs say which.
 mod support;
 
 use std::collections::BTreeMap;
 use std::sync::{Arc, Mutex};
 
 use cupel_core::coverage::CoverageMap;
+use cupel_core::syntax::Symbols;
 use cupel_core::{
     Availability, Check, CheckCtx, CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx,
-    Estimate, EventSink, FactKind, Facts, JointProducer, LangId, Langs, Manifest, PerTestMap, Plan,
-    ProduceCtx, Produced, Producer, ProducerId, ProducerRegistry, Result, RunnerInvocation,
-    Scheduler, Scope, TestOutcome, TestResult, TestResults, Upstream, Writer,
+    Estimate, EventSink, FactKind, Facts, Focus, JointProducer, LangId, Langs, Manifest,
+    PerTestMap, Plan, ProduceCtx, Produced, Producer, ProducerId, ProducerRegistry, Result,
+    RunnerInvocation, Scheduler, Scope, TestOutcome, TestResult, TestResults, Upstream, Writer,
 };
 
 /// How many times each producer ran.
@@ -96,9 +97,12 @@ impl<F: cupel_core::Fact> Producer<F> for Single<F> {
 }
 
 /// The joint producer: all three facts, standing in for `tool.runner`, `tool.cover`, and
-/// `tool.per-test`; its baseline is red when the repository holds a file named `red`.
+/// `tool.per-test`; its baseline is red when the repository holds a file named `red`, and it
+/// estimates an incremental run on a range when the repository holds a file named
+/// `incremental` (ADR-149). It wants `Symbols` and records whether its run saw them.
 struct Joint {
     runs: Runs,
+    saw_symbols: Arc<Mutex<Option<bool>>>,
 }
 
 const MAKES: &[(FactKind, &str)] = &[
@@ -124,11 +128,18 @@ impl JointProducer for Joint {
         &[]
     }
 
-    fn estimate(&self, ctx: &Ctx, _: &Upstream) -> Estimate {
+    fn wants(&self) -> &[FactKind] {
+        &[FactKind::Symbols]
+    }
+
+    fn estimate(&self, ctx: &Ctx, _: &Upstream, focus: &Focus) -> Estimate {
+        let incremental = focus.changed.is_some() && ctx.root.join("incremental").exists();
         Estimate {
             cost: CostClass::Standard,
             note: Some(if cached_in(ctx, "tool.joint") {
                 "cached".to_owned()
+            } else if incremental {
+                "incremental: 1 stale".to_owned()
             } else {
                 "one run".to_owned()
             }),
@@ -141,6 +152,7 @@ impl JointProducer for Joint {
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<Vec<Produced>> {
         ran(&self.runs, "tool.joint");
+        *self.saw_symbols.lock().unwrap() = Some(ctx.upstream.get::<Symbols>().is_some());
         let root = &ctx.ctx.root;
         let outcome = if root.join("red").exists() {
             TestOutcome::Failed
@@ -233,12 +245,15 @@ impl Check for Passes {
     }
 }
 
-/// A repository for one scenario: markers (cache files, `red`), configuration, and what ran.
+/// A repository for one scenario: markers (cache files, `red`), configuration, whether the run
+/// is a range, and what ran.
 struct World {
     dir: tempfile::TempDir,
     toml: String,
+    ranged: bool,
     runs: Runs,
     got_map: Arc<Mutex<Option<bool>>>,
+    saw_symbols: Arc<Mutex<Option<bool>>>,
 }
 
 impl World {
@@ -250,8 +265,10 @@ impl World {
         Self {
             dir,
             toml: String::new(),
+            ranged: false,
             runs: Runs::default(),
             got_map: Arc::default(),
+            saw_symbols: Arc::default(),
         }
     }
 
@@ -290,8 +307,16 @@ impl World {
         producers.register::<cupel_core::MutationOutcomes, _>(Engine {
             got_map: Arc::clone(&self.got_map),
         });
+        let (id, cost, runs_of) = single("tool.symbols", CostClass::Quick);
+        producers.register::<Symbols, _>(Single {
+            id,
+            cost,
+            runs: runs_of,
+            make: |_| Symbols::default(),
+        });
         producers.register_joint(Joint {
             runs: Arc::clone(&self.runs),
+            saw_symbols: Arc::clone(&self.saw_symbols),
         });
         producers
     }
@@ -314,7 +339,10 @@ impl World {
                 &[],
             ))))
             .unwrap();
-        let job = support::job(&writer, &config, &checks, &["rust"]);
+        let mut job = support::job(&writer, &config, &checks, &["rust"]);
+        if self.ranged {
+            job.changed = Some(BTreeMap::from([("a.x".to_owned(), vec![(1, 1)])]));
+        }
         let scheduler = Scheduler {
             checks: &checks,
             producers: &producers,
@@ -346,8 +374,15 @@ fn counts(runs: &[(&'static str, u32)]) -> BTreeMap<&'static str, u32> {
 const BOTH: &[FactKind] = &[FactKind::TestResults, FactKind::CoverageMap];
 
 #[test]
-fn one_joint_run_makes_the_facts_two_separate_runs_would() {
-    assert_eq!(World::new(&[]).runs(BOTH), counts(&[("tool.joint", 1)]));
+fn one_joint_run_makes_the_facts_two_separate_runs_would_after_making_its_wants() {
+    let world = World::new(&[]);
+    assert_eq!(
+        (world.runs(BOTH), *world.saw_symbols.lock().unwrap()),
+        (
+            counts(&[("tool.joint", 1), ("tool.symbols", 1)]),
+            Some(true)
+        )
+    );
 }
 
 #[test]
@@ -360,8 +395,8 @@ fn the_per_kind_producers_run_when_the_joint_would_save_no_run() {
             one_fact.runs(&[FactKind::TestResults])
         ),
         (
-            counts(&[("tool.cover", 1), ("tool.runner", 1)]),
-            counts(&[("tool.runner", 1)])
+            counts(&[("tool.cover", 1), ("tool.runner", 1), ("tool.symbols", 1)]),
+            counts(&[("tool.runner", 1), ("tool.symbols", 1)])
         )
     );
 }
@@ -370,7 +405,7 @@ fn the_per_kind_producers_run_when_the_joint_would_save_no_run() {
 fn a_cached_joint_serves_a_run_that_needs_only_one_of_its_facts() {
     assert_eq!(
         World::new(&["tool.joint.cached"]).runs(&[FactKind::TestResults]),
-        counts(&[("tool.joint", 1)])
+        counts(&[("tool.joint", 1), ("tool.symbols", 1)])
     );
 }
 
@@ -380,7 +415,11 @@ fn a_pin_on_another_producer_keeps_the_separate_runs() {
     world.toml = "[lang.rust]\nrunner = \"other-runner\"\n".to_owned();
     assert_eq!(
         world.runs(BOTH),
-        counts(&[("tool.cover", 1), ("tool.other-runner", 1)])
+        counts(&[
+            ("tool.cover", 1),
+            ("tool.other-runner", 1),
+            ("tool.symbols", 1)
+        ])
     );
 }
 
@@ -393,7 +432,11 @@ fn a_red_baseline_from_a_joint_run_refuses_the_run() {
             outcome.checks.len(),
             outcome.refused.map(|red| red.lang)
         ),
-        (counts(&[("tool.joint", 1)]), 0, Some(LangId::from("rust")))
+        (
+            counts(&[("tool.joint", 1), ("tool.symbols", 1)]),
+            0,
+            Some(LangId::from("rust"))
+        )
     );
 }
 
@@ -403,7 +446,10 @@ fn a_want_the_joint_run_made_reaches_the_producer_beyond_the_depth_its_own_produ
     let runs = world.runs(&[FactKind::MutationOutcomes]);
     assert_eq!(
         (runs, *world.got_map.lock().unwrap()),
-        (counts(&[("tool.joint", 1)]), Some(true))
+        (
+            counts(&[("tool.joint", 1), ("tool.symbols", 1)]),
+            Some(true)
+        )
     );
 }
 
@@ -430,6 +476,27 @@ fn a_dry_run_plans_one_joint_run_or_says_how_each_fact_would_be_made() {
                 "test-results(run)",
                 "coverage-map(cached)",
                 "per-test-map(deep)"
+            ],
+        ]
+    );
+}
+
+#[test]
+fn a_dry_run_on_a_range_says_how_many_tests_an_incremental_joint_run_would_rerun() {
+    let mut ranged = World::new(&["incremental"]);
+    ranged.ranged = true;
+    let tree = World::new(&["incremental"]);
+    let mutation = &[FactKind::MutationOutcomes];
+    assert_eq!(
+        [ranged.planned(mutation), tree.planned(mutation)],
+        [
+            vec![
+                "mutation-outcomes",
+                "test-results+coverage-map+per-test-map(incremental: 1 stale)"
+            ],
+            vec![
+                "mutation-outcomes",
+                "test-results+coverage-map+per-test-map(one run)"
             ],
         ]
     );

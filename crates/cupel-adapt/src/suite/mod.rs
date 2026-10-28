@@ -19,8 +19,8 @@ use std::path::Path;
 
 use cupel_core::coverage::{CoverageMap, FileCoverage};
 use cupel_core::{
-    Availability, CostClass, Ctx, Estimate, EventSink, Exclude, FactKind, JointProducer, LangId,
-    Langs, PerTestMap, ProduceCtx, Produced, ProducerId, Result, RunnerInvocation, Scope,
+    Availability, CostClass, Ctx, Estimate, EventSink, Exclude, FactKind, Focus, JointProducer,
+    LangId, Langs, PerTestMap, ProduceCtx, Produced, ProducerId, Result, RunnerInvocation, Scope,
     TestCoverage, TestResult, TestResults, ToolId, Upstream, find_program,
 };
 use serde::{Deserialize, Serialize};
@@ -99,7 +99,7 @@ impl JointProducer for Suite {
     }
 
     /// One suite run, `standard`; `cached` when every root it holds an entry for is unchanged.
-    fn estimate(&self, ctx: &Ctx, _: &Upstream) -> Estimate {
+    fn estimate(&self, ctx: &Ctx, _: &Upstream, _: &Focus) -> Estimate {
         let entries = entries(&cache_dir(&ctx.root, CACHE, self.0.id));
         let cached = !entries.is_empty()
             && entries

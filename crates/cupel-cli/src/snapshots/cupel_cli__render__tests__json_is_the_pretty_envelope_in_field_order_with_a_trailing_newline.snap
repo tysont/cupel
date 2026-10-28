@@ -1,5 +1,6 @@
 ---
 source: crates/cupel-cli/src/render.rs
+assertion_line: 67
 expression: out
 ---
 {
@@ -37,6 +38,13 @@ expression: out
     "toolchain": {
       "cargo-llvm-cov": "0.6.12",
       "rust": "1.93.0"
+    },
+    "suite": {
+      "rust": {
+        "mode": "incremental",
+        "rerun": 3,
+        "reused": 1275
+      }
     },
     "config": {
       "effective": {

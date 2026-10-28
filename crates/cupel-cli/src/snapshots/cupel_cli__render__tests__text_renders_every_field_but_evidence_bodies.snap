@@ -1,5 +1,6 @@
 ---
 source: crates/cupel-cli/src/render.rs
+assertion_line: 92
 expression: "text::render(&fixture::envelope(), false)"
 ---
 cupel check: fail (exit 1)
@@ -143,6 +144,7 @@ scope     changed · 4 files · 11 symbols · roots ., web · languages rust, ty
 depth     deep · budget 20000 ms
 baseline  default (run_01J9ZZZZZZZZZZZZZZZZZZZZZZ)
 toolchain cargo-llvm-cov 0.6.12 · rust 1.93.0
+suite     rust incremental · 3 rerun · 1275 reused
 config    from flags, profile, cupel.toml
           budget: 20s
           checks: {"static.clones":{"threshold":0.82}}

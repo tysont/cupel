@@ -5,8 +5,8 @@ use std::sync::LazyLock;
 
 use cupel_core::coverage::CoverageMap;
 use cupel_core::{
-    Availability, Cancellation, Ctx, FactKind, JointProducer, LangId, PerTestMap, ProduceCtx,
-    ProducerRegistry, Scope, TestResults, Upstream,
+    Availability, Cancellation, Ctx, FactKind, Focus, JointProducer, LangId, PerTestMap,
+    ProduceCtx, ProducerRegistry, Scope, TestResults, Upstream,
 };
 use serde_json::Value;
 use support::{lang, produce_ctx, producer, registry};
@@ -148,7 +148,9 @@ impl Joint {
 
     fn estimate(&self, root: &Path) -> Option<String> {
         let ctx = self.ctx(root);
-        self.joint().estimate(&ctx.ctx, &Upstream::default()).note
+        self.joint()
+            .estimate(&ctx.ctx, &Upstream::default(), &Focus::default())
+            .note
     }
 }
 

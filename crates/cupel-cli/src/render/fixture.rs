@@ -12,8 +12,8 @@ use cupel_core::{
     PlannedWrite, ProducerId, Protection, RankedTarget, RankingDimension, Rankings, Recommendation,
     RecommendedTarget, RuleOutcome, RunInfo, RunPlan, ScopeInfo, ScopeMode, Score, SetDelta,
     SetFindings, SetMetric, Severity, SeverityCounts, SkipReason, Skipped, Stability, Status,
-    Summary, Symbol, Target, TargetValue, TestCommand, TestsReport, Tier, ToolId, ToolchainInfo,
-    ValueType, Verb, Worst,
+    SuiteMode, SuiteReuse, Summary, Symbol, Target, TargetValue, TestCommand, TestsReport, Tier,
+    ToolId, ToolchainInfo, ValueType, Verb, Worst,
 };
 use cupel_core::{OracleReport, OracleState};
 use serde_json::{Map, Value, json};
@@ -335,6 +335,14 @@ fn run_info() -> RunInfo {
             ("rust".to_owned(), "1.93.0".to_owned()),
             ("cargo-llvm-cov".to_owned(), "0.6.12".to_owned()),
         ])),
+        suite: BTreeMap::from([(
+            LangId::from("rust"),
+            SuiteReuse {
+                mode: SuiteMode::Incremental,
+                rerun: 3,
+                reused: 1_275,
+            },
+        )]),
         config: ConfigEcho {
             effective: object(json!({
                 "depth": "deep",

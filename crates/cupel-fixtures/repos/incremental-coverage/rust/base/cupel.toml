@@ -1,0 +1,5 @@
+# The incremental-coverage fixture (ADR-149): nextest and the default coverage command, so the suite joint
+# applies; a `--base` run after a change inside one function reruns only the test that covers it.
+[lang.rust]
+runner = "cargo-nextest"
+coverage = "cargo llvm-cov --lcov --output-path {out}"

@@ -21,6 +21,7 @@ pub use crate::result::{
 };
 pub use crate::scope::ScopeMode;
 pub use crate::status::{ExitCode, Status};
+use crate::test_results::SuiteReuse;
 
 /// The single output shape of every verb.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -78,6 +79,9 @@ pub struct RunInfo {
     pub budget_ms: Option<u64>,
     pub seed: u64,
     pub toolchain: ToolchainInfo,
+    /// Per language whose baseline a joint suite run made, how many tests it reran and how many
+    /// it kept from its cache (ADR-149 §5); empty when none did.
+    pub suite: BTreeMap<LangId, SuiteReuse>,
     pub config: ConfigEcho,
     pub baseline: Option<BaselineRef>,
 }

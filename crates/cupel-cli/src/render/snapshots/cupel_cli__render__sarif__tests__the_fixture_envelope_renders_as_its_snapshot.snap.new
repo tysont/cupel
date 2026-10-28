@@ -1,0 +1,1012 @@
+---
+source: crates/cupel-cli/src/render/sarif.rs
+assertion_line: 372
+expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
+---
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "automationDetails": {
+        "id": "cupel/check/run_01JA2B3C4D5E6F7G8H9J0KMNPQ"
+      },
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "exitCode": 1,
+          "exitCodeDescription": "fail",
+          "properties": {
+            "baseline": {
+              "id": "run_01J9ZZZZZZZZZZZZZZZZZZZZZZ",
+              "name": "default"
+            },
+            "budget_ms": 20000,
+            "config": {
+              "effective": {
+                "budget": "20s",
+                "checks": {
+                  "static.clones": {
+                    "threshold": 0.82
+                  }
+                },
+                "depth": "deep",
+                "format": null,
+                "lang": {},
+                "profile": "ci"
+              },
+              "sources": [
+                "flags",
+                "profile",
+                "cupel.toml"
+              ]
+            },
+            "depth": "deep",
+            "duration_ms": 48211,
+            "git": {
+              "base": "a81e4f5",
+              "branch": "feat/limit-pushdown",
+              "dirty": true,
+              "sha": "9f1c2d3"
+            },
+            "id": "run_01JA2B3C4D5E6F7G8H9J0KMNPQ",
+            "scope": {
+              "files": 4,
+              "languages": [
+                "rust",
+                "typescript"
+              ],
+              "mode": "changed",
+              "roots": [
+                ".",
+                "web"
+              ],
+              "symbols": 11
+            },
+            "seed": 42,
+            "started": "2026-10-10T16:31:04Z",
+            "suite": {
+              "rust": {
+                "mode": "incremental",
+                "rerun": 3,
+                "reused": 1275
+              }
+            },
+            "toolchain": {
+              "cargo-llvm-cov": "0.6.12",
+              "rust": "1.93.0"
+            },
+            "verb": "check"
+          },
+          "startTimeUtc": "2026-10-10T16:31:04Z"
+        }
+      ],
+      "originalUriBaseIds": {
+        "SRCROOT": {
+          "uri": "file:///work/exonym/"
+        }
+      },
+      "properties": {
+        "checks": [
+          {
+            "cost": "standard",
+            "delta": {
+              "sets": [
+                {
+                  "base": [
+                    {
+                      "display": "exonym::rewrite::Planner::push_limit",
+                      "hash": "sh_00000000000000a1",
+                      "lang": "rust"
+                    }
+                  ],
+                  "findings": {
+                    "base": [
+                      "fnd_0aa0aa"
+                    ],
+                    "head": [
+                      "fnd_7c2e1b"
+                    ]
+                  },
+                  "head": [
+                    {
+                      "display": "exonym::rewrite::Planner::push_limit_inner",
+                      "hash": "sh_00000000000000b2",
+                      "lang": "rust"
+                    },
+                    {
+                      "display": "exonym::rewrite::Planner::push_limit_outer",
+                      "hash": "sh_00000000000000c3",
+                      "lang": "rust"
+                    }
+                  ],
+                  "metrics": {
+                    "survivors": {
+                      "base": 3.0,
+                      "head": 4.0
+                    }
+                  },
+                  "similarity": 0.871
+                }
+              ],
+              "value": -0.12,
+              "vs": "baseline"
+            },
+            "duration_ms": 41000,
+            "findings": 2,
+            "id": "tests.mutation",
+            "metrics": {
+              "score": 0.71,
+              "survivors": 10.0
+            },
+            "oracle": "pg",
+            "score": {
+              "n": 34,
+              "unit": "killed_ratio",
+              "value": 0.71
+            },
+            "skipped": null,
+            "status": "fail",
+            "tier": 3
+          },
+          {
+            "cost": "exhaustive",
+            "delta": null,
+            "duration_ms": 0,
+            "findings": 0,
+            "id": "perf.bench",
+            "metrics": {},
+            "oracle": null,
+            "score": null,
+            "skipped": {
+              "est_ms": null,
+              "fact": "symbols",
+              "lang": "go",
+              "reason": "unavailable",
+              "see": "cupel doctor",
+              "tool": "cargo-criterion"
+            },
+            "status": "skipped",
+            "tier": 5
+          }
+        ],
+        "cupel": {
+          "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+          "version": "9.8.7"
+        },
+        "description": {
+          "arguments": [
+            {
+              "conflicts": [
+                "--since-baseline"
+              ],
+              "default": "baseline",
+              "env": "CUPEL_AGAINST",
+              "name": "--against",
+              "pending_step": "P2.2",
+              "positional": false,
+              "repeated": true,
+              "required": true,
+              "stability": "stable",
+              "summary": "What to compare with.",
+              "value": "enum",
+              "value_name": "TARGET",
+              "values": [
+                "baseline",
+                "head"
+              ]
+            }
+          ],
+          "examples": [
+            {
+              "command": "cupel baseline show",
+              "exit_code": 2,
+              "summary": "Show the baseline."
+            }
+          ],
+          "name": "baseline",
+          "pending_step": "P2.2",
+          "stability": "experimental",
+          "subcommands": [
+            {
+              "arguments": [
+                {
+                  "conflicts": [],
+                  "default": null,
+                  "env": null,
+                  "name": "FILE",
+                  "pending_step": null,
+                  "positional": true,
+                  "repeated": false,
+                  "required": false,
+                  "stability": "experimental",
+                  "summary": "Where to write.",
+                  "value": "path",
+                  "value_name": "FILE",
+                  "values": []
+                }
+              ],
+              "examples": [
+                {
+                  "command": "cupel baseline set FILE",
+                  "exit_code": 0,
+                  "summary": "Set it."
+                }
+              ],
+              "name": "baseline set",
+              "pending_step": null,
+              "stability": "stable",
+              "subcommands": [],
+              "summary": "Record the current run as the baseline."
+            }
+          ],
+          "subject": "command",
+          "summary": "Manage named baselines."
+        },
+        "exit_code": 1,
+        "explanation": {
+          "covering_tests": [
+            "rewrite::limit_tests::pushes_through_sort"
+          ],
+          "excerpt": {
+            "file": "src/rewrite/planner.rs",
+            "lines": [
+              {
+                "focus": false,
+                "line": 141,
+                "text": "fn push_limit(limit: u64, offset: u64) -> bool {"
+              },
+              {
+                "focus": true,
+                "line": 142,
+                "text": "    limit <= offset"
+              },
+              {
+                "focus": false,
+                "line": 143,
+                "text": "}"
+              }
+            ]
+          },
+          "metrics": [
+            {
+              "key": "cyclomatic",
+              "symbol": "sh_4b1d9e0c4b1d9e00",
+              "value": 7.0
+            },
+            {
+              "key": "score",
+              "symbol": null,
+              "value": 0.71
+            }
+          ],
+          "nearest_test_file": "tests/rewrite/limit_tests.rs",
+          "run": "run_01J9ZZZZZZZZZZZZZZZZZZZZZZ",
+          "subject": "finding",
+          "target": "fnd_7c2e1a"
+        },
+        "next_actions": [
+          {
+            "command": null,
+            "finding": "fnd_7c2e1a",
+            "kind": "write_test",
+            "priority": 1,
+            "summary": "Add a boundary test for push_limit."
+          },
+          {
+            "command": "cupel check --changed --depth deep --only gen.differential",
+            "finding": null,
+            "kind": "rerun",
+            "priority": 2,
+            "summary": "Run differential vs oracle 'pg'"
+          }
+        ],
+        "oracles": [
+          {
+            "definition": {
+              "cmd": "bc -l <<< {input}",
+              "inputs": [
+                "2 + 2"
+              ],
+              "kind": "command",
+              "lang": null,
+              "ref": null,
+              "spec": null
+            },
+            "hash": "6b1d",
+            "name": "bc",
+            "state": "changed",
+            "verified_at": "2026-10-09T08:00:00Z",
+            "verified_run": "run_01JA2B3C4D5E6F7G8H9JKMNPQR"
+          },
+          {
+            "definition": {
+              "cmd": null,
+              "inputs": [
+                "2 + 2"
+              ],
+              "kind": "ref",
+              "lang": null,
+              "ref": "v1.2.0",
+              "spec": null
+            },
+            "hash": "9e3a",
+            "name": "pg",
+            "state": "verified",
+            "verified_at": "2026-10-10T16:00:00Z",
+            "verified_run": "run_01JA2B3C4D5E6F7G8H9JKMNPQS"
+          }
+        ],
+        "plan": {
+          "est_total_ms": 140900,
+          "would_install": [
+            {
+              "command": "cargo install cargo-llvm-cov",
+              "tool": "cargo-llvm-cov"
+            }
+          ],
+          "would_run": [
+            {
+              "est_ms": 900,
+              "id": "static.crap",
+              "needs": [
+                "coverage(cached)"
+              ],
+              "note": null,
+              "targets": 11
+            },
+            {
+              "est_ms": 140000,
+              "id": "tests.mutation",
+              "needs": [
+                "coverage(fresh)",
+                "per-test-map"
+              ],
+              "note": "19/34 sites cached as killed; 15 will execute",
+              "targets": 34
+            }
+          ],
+          "would_skip": [
+            {
+              "est_ms": null,
+              "fact": null,
+              "id": "conc.dst",
+              "lang": "rust",
+              "reason": "unconfigured",
+              "see": "cupel describe conc.dst",
+              "tool": null
+            }
+          ],
+          "would_write": [
+            {
+              "diff": null,
+              "path": ".cupel/runs/run_01JA2B3C4D5E6F7G8H9J0KMNPQ.json"
+            },
+            {
+              "diff": "--- a/cupel.toml\n+++ b/cupel.toml\n@@ -1 +1 @@\n-depth = \"quick\"\n+depth = \"deep\"\n",
+              "path": "cupel.toml"
+            }
+          ]
+        },
+        "rankings": {
+          "dimensions": [
+            {
+              "check": "static.crap",
+              "entries": [
+                {
+                  "lang": "rust",
+                  "rank": 1,
+                  "target": {
+                    "display": "rewrite::Planner::push_limit",
+                    "location": {
+                      "col": 5,
+                      "end_col": 6,
+                      "end_line": 171,
+                      "file": "src/rewrite/planner.rs",
+                      "line": 140
+                    },
+                    "symbol": "sh_4b1d9e0c4b1d9e01"
+                  },
+                  "value": 42.5
+                },
+                {
+                  "lang": "typescript",
+                  "rank": 2,
+                  "target": {
+                    "display": "web/limits",
+                    "location": null,
+                    "symbol": null
+                  },
+                  "value": 12.0
+                }
+              ],
+              "measured": 11,
+              "metric": "crap",
+              "per": "symbol",
+              "summary": "CRAP score per function.",
+              "worst": "highest"
+            },
+            {
+              "check": "static.deps",
+              "entries": [],
+              "measured": 0,
+              "metric": "coupling",
+              "per": "module",
+              "summary": "Afferent plus efferent coupling per module.",
+              "worst": "highest"
+            }
+          ],
+          "recommended": 2,
+          "targets": [
+            {
+              "findings": [
+                "fnd_7c2e1a"
+              ],
+              "lang": "rust",
+              "protection": {
+                "coverage": 0.8,
+                "mutation_score": 0.5,
+                "tests": 3
+              },
+              "rank": 1,
+              "recommend": "protect",
+              "target": {
+                "display": "rewrite::Planner::push_limit",
+                "location": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 171,
+                  "file": "src/rewrite/planner.rs",
+                  "line": 140
+                },
+                "symbol": "sh_4b1d9e0c4b1d9e01"
+              },
+              "values": [
+                {
+                  "check": "static.crap",
+                  "metric": "crap",
+                  "rank": 1,
+                  "value": 42.5
+                }
+              ]
+            },
+            {
+              "findings": [],
+              "lang": "typescript",
+              "protection": {
+                "coverage": null,
+                "mutation_score": null,
+                "tests": null
+              },
+              "rank": 2,
+              "recommend": "simplify",
+              "target": {
+                "display": "web/limits",
+                "location": null,
+                "symbol": null
+              },
+              "values": []
+            }
+          ],
+          "top": 10
+        },
+        "status": "fail",
+        "summary": {
+          "findings": {
+            "fail": 6,
+            "info": 22,
+            "warn": 9
+          },
+          "gate": {
+            "evaluated": "gate.changed",
+            "result": "fail",
+            "rules": [
+              {
+                "actual": 0.71,
+                "bound": 0.8,
+                "reason": null,
+                "result": "fail",
+                "rule": "tests.mutation.score >= 0.80"
+              },
+              {
+                "actual": 0.0,
+                "bound": 0.0,
+                "reason": null,
+                "result": "pass",
+                "rule": "tests.weakening none"
+              },
+              {
+                "actual": null,
+                "bound": null,
+                "reason": "`perf.bench` did not run to completion",
+                "result": "skipped",
+                "rule": "perf.bench.regression < 5%"
+              }
+            ]
+          },
+          "new": 4,
+          "resolved": 2,
+          "suppressed": 1
+        },
+        "tests": {
+          "commands": [
+            {
+              "command": "cargo nextest run --workspace -E '(binary_id(=calc) & test(=tests::adds))'",
+              "dir": ".",
+              "lang": "rust",
+              "narrowed": true,
+              "runner": "tool.cargo-nextest"
+            },
+            {
+              "command": "npx vitest run add.test.ts",
+              "dir": "web",
+              "lang": "typescript",
+              "narrowed": true,
+              "runner": "tool.vitest"
+            }
+          ],
+          "impacted": [
+            {
+              "file": "src/lib.rs",
+              "id": "calc tests::adds",
+              "lang": "rust",
+              "reason": "covers calc::add (src/lib.rs:5)"
+            },
+            {
+              "file": "web/add.test.ts",
+              "id": "web/add.test.ts",
+              "lang": "typescript",
+              "reason": "imports web/add.ts"
+            }
+          ],
+          "languages": [
+            {
+              "fallback": null,
+              "lang": "rust",
+              "measured": 2,
+              "per_test_map": true,
+              "producer": "tool.llvm-cov-per-test",
+              "reused": 1236
+            },
+            {
+              "fallback": "no producer makes per-test-map for this language (see `cupel describe matrix`)",
+              "lang": "typescript",
+              "measured": null,
+              "per_test_map": false,
+              "producer": null,
+              "reused": null
+            }
+          ],
+          "per_test_map": false
+        },
+        "total_findings": 3,
+        "truncated": false
+      },
+      "results": [
+        {
+          "baselineState": "new",
+          "fixes": [],
+          "level": "error",
+          "locations": [
+            {
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "exonym::rewrite::Planner::push_limit_0",
+                  "kind": "function"
+                }
+              ],
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/rewrite/planner.rs",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "endColumn": 23,
+                  "endLine": 144,
+                  "startColumn": 21,
+                  "startLine": 142
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Mutant survived: `<=` → `<` at planner.rs:142\n\nNo test distinguishes limit == offset from limit < offset.\nSecond detail line."
+          },
+          "partialFingerprints": {
+            "cupel/findingId": "fnd_7c2e1a",
+            "cupel/symbolHash": "sh_4b1d9e0c4b1d9e00"
+          },
+          "properties": {
+            "action": {
+              "hints": {
+                "covering_tests": [
+                  "pushes_through_sort"
+                ],
+                "nearest_test_file": "tests/rewrite/limit_tests.rs"
+              },
+              "kind": "write_test",
+              "priority": 1,
+              "summary": "Add a test where limit == offset asserting the boundary."
+            },
+            "check": "tests.mutation",
+            "confidence": 0.95,
+            "evidence": {
+              "covering_tests": [
+                "rewrite::limit_tests::pushes_through_sort"
+              ],
+              "flaky": false,
+              "mutation": {
+                "from": "<=",
+                "operator": "relational",
+                "to": "<"
+              },
+              "note": "a long evidence string that is far longer than forty characters in total",
+              "oracle": null,
+              "tests_run": 118
+            },
+            "kind": "mutant.survived",
+            "new_since_baseline": true,
+            "repro": "cupel check --only tests.mutation --symbols sh_4b1d9e0c4b1d9e00 --seed 42",
+            "suppress": "cupel suppress fnd_7c2e1a --reason '…'",
+            "symbol": {
+              "display": "exonym::rewrite::Planner::push_limit_0",
+              "hash": "sh_4b1d9e0c4b1d9e00",
+              "lang": "rust"
+            },
+            "tier": 3
+          },
+          "ruleId": "mutant.survived",
+          "ruleIndex": 0,
+          "suppressions": []
+        },
+        {
+          "baselineState": "unchanged",
+          "fixes": [],
+          "level": "warning",
+          "locations": [
+            {
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "exonym::rewrite::Planner::push_limit_1",
+                  "kind": "function"
+                }
+              ],
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/rewrite/planner.rs",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "endColumn": 23,
+                  "endLine": 145,
+                  "startColumn": 21,
+                  "startLine": 143
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Mutant survived: `<=` → `<` at planner.rs:143\n\nNo test distinguishes limit == offset from limit < offset.\nSecond detail line."
+          },
+          "partialFingerprints": {
+            "cupel/findingId": "fnd_7c2e1b",
+            "cupel/symbolHash": "sh_4b1d9e0c4b1d9e01"
+          },
+          "properties": {
+            "action": {
+              "hints": {
+                "covering_tests": [
+                  "pushes_through_sort"
+                ],
+                "nearest_test_file": "tests/rewrite/limit_tests.rs"
+              },
+              "kind": "write_test",
+              "priority": 2,
+              "summary": "Add a test where limit == offset asserting the boundary."
+            },
+            "check": "static.crap",
+            "confidence": 0.95,
+            "evidence": {
+              "covering_tests": [
+                "rewrite::limit_tests::pushes_through_sort"
+              ],
+              "flaky": false,
+              "mutation": {
+                "from": "<=",
+                "operator": "relational",
+                "to": "<"
+              },
+              "note": "a long evidence string that is far longer than forty characters in total",
+              "oracle": null,
+              "tests_run": 118
+            },
+            "kind": "crap.high",
+            "new_since_baseline": false,
+            "repro": "cupel check --only static.crap --symbols sh_4b1d9e0c4b1d9e01 --seed 42",
+            "suppress": "cupel suppress fnd_7c2e1b --reason '…'",
+            "symbol": {
+              "display": "exonym::rewrite::Planner::push_limit_1",
+              "hash": "sh_4b1d9e0c4b1d9e01",
+              "lang": "rust"
+            },
+            "tier": 3
+          },
+          "ruleId": "crap.high",
+          "ruleIndex": 8,
+          "suppressions": []
+        },
+        {
+          "baselineState": "new",
+          "fixes": [],
+          "level": "error",
+          "locations": [
+            {
+              "logicalLocations": [
+                {
+                  "fullyQualifiedName": "exonym::rewrite::Planner::push_limit_2",
+                  "kind": "function"
+                }
+              ],
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "src/rewrite/planner.rs",
+                  "uriBaseId": "SRCROOT"
+                },
+                "region": {
+                  "endColumn": 23,
+                  "endLine": 146,
+                  "startColumn": 21,
+                  "startLine": 144
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Mutant survived: `<=` → `<` at planner.rs:144\n\nNo test distinguishes limit == offset from limit < offset.\nSecond detail line."
+          },
+          "partialFingerprints": {
+            "cupel/findingId": "fnd_7c2e1c",
+            "cupel/symbolHash": "sh_4b1d9e0c4b1d9e02"
+          },
+          "properties": {
+            "action": {
+              "hints": {
+                "covering_tests": [
+                  "pushes_through_sort"
+                ],
+                "nearest_test_file": "tests/rewrite/limit_tests.rs"
+              },
+              "kind": "write_test",
+              "priority": 3,
+              "summary": "Add a test where limit == offset asserting the boundary."
+            },
+            "check": "tests.mutation",
+            "confidence": 0.95,
+            "evidence": {
+              "covering_tests": [
+                "rewrite::limit_tests::pushes_through_sort"
+              ],
+              "flaky": false,
+              "mutation": {
+                "from": "<=",
+                "operator": "relational",
+                "to": "<"
+              },
+              "note": "a long evidence string that is far longer than forty characters in total",
+              "oracle": null,
+              "tests_run": 118
+            },
+            "kind": "mutant.timeout",
+            "new_since_baseline": true,
+            "repro": "cupel check --only tests.mutation --symbols sh_4b1d9e0c4b1d9e02 --seed 42",
+            "suppress": "cupel suppress fnd_7c2e1c --reason '…'",
+            "symbol": {
+              "display": "exonym::rewrite::Planner::push_limit_2",
+              "hash": "sh_4b1d9e0c4b1d9e02",
+              "lang": "rust"
+            },
+            "tier": 3
+          },
+          "ruleId": "mutant.timeout",
+          "ruleIndex": 1,
+          "suppressions": [
+            {
+              "kind": "external",
+              "status": "accepted"
+            }
+          ]
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "cupel",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
+              },
+              "help": {
+                "text": "Every test that ran against the mutant passed: no test tells the mutated code from the original.\n\nAction: write_test. `cupel describe finding mutant.survived` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "mutant.survived",
+              "properties": {
+                "action": "write_test",
+                "check": "tests.mutation",
+                "cost": "standard",
+                "stability": "experimental",
+                "tier": 3
+              },
+              "shortDescription": {
+                "text": "Every test that ran against the mutant passed: no test tells the mutated code from the original."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
+              },
+              "help": {
+                "text": "The tests ran past their timeout against the mutant, which usually means it loops.\n\nAction: review. `cupel describe finding mutant.timeout` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "mutant.timeout",
+              "properties": {
+                "action": "review",
+                "check": "tests.mutation",
+                "cost": "standard",
+                "stability": "experimental",
+                "tier": 3
+              },
+              "shortDescription": {
+                "text": "The tests ran past their timeout against the mutant, which usually means it loops."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
+              },
+              "help": {
+                "text": "The tests held more memory than the run's share of max_mutant_memory against the mutant and were killed (ADR-148).\n\nAction: review. `cupel describe finding mutant.out-of-memory` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "mutant.out-of-memory",
+              "properties": {
+                "action": "review",
+                "check": "tests.mutation",
+                "cost": "standard",
+                "stability": "experimental",
+                "tier": 3
+              },
+              "shortDescription": {
+                "text": "The tests held more memory than the run's share of max_mutant_memory against the mutant and were killed (ADR-148)."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
+              },
+              "help": {
+                "text": "No test runs the site, so its mutant was not run.\n\nAction: write_test. `cupel describe finding mutant.uncovered` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "mutant.uncovered",
+              "properties": {
+                "action": "write_test",
+                "check": "tests.mutation",
+                "cost": "standard",
+                "stability": "experimental",
+                "tier": 3
+              },
+              "shortDescription": {
+                "text": "No test runs the site, so its mutant was not run."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
+              },
+              "help": {
+                "text": "The mutant survived and may behave exactly as the original (ADR-004).\n\nAction: review. `cupel describe finding mutant.equivalent?` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "mutant.equivalent?",
+              "properties": {
+                "action": "review",
+                "check": "tests.mutation",
+                "cost": "standard",
+                "stability": "experimental",
+                "tier": 3
+              },
+              "shortDescription": {
+                "text": "The mutant survived and may behave exactly as the original (ADR-004)."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
+              },
+              "help": {
+                "text": "A test slower than 60 s in the baseline was left out of the mutants' runs that per-test selection did not narrow (ADR-147).\n\nAction: review. `cupel describe finding mutant.slow-test-excluded` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "mutant.slow-test-excluded",
+              "properties": {
+                "action": "review",
+                "check": "tests.mutation",
+                "cost": "standard",
+                "stability": "experimental",
+                "tier": 3
+              },
+              "shortDescription": {
+                "text": "A test slower than 60 s in the baseline was left out of the mutants' runs that per-test selection did not narrow (ADR-147)."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Runs each language's benchmarks at head and at the range's base commit and compares their samples with a Mann-Whitney U test."
+              },
+              "help": {
+                "text": "A benchmark is significantly slower, or allocates significantly more, than at the range's base commit, by at least the threshold.\n\nAction: review. `cupel describe finding perf.regression` describes the kind and its evidence, `cupel describe perf.bench` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "perf.regression",
+              "properties": {
+                "action": "review",
+                "check": "perf.bench",
+                "cost": "deep",
+                "stability": "experimental",
+                "tier": 0
+              },
+              "shortDescription": {
+                "text": "A benchmark is significantly slower, or allocates significantly more, than at the range's base commit, by at least the threshold."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Runs each language's benchmarks at head and at the range's base commit and compares their samples with a Mann-Whitney U test."
+              },
+              "help": {
+                "text": "A benchmark is significantly faster, or allocates significantly less, than at the range's base commit, by at least the threshold.\n\nAction: review. `cupel describe finding perf.improvement` describes the kind and its evidence, `cupel describe perf.bench` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "perf.improvement",
+              "properties": {
+                "action": "review",
+                "check": "perf.bench",
+                "cost": "deep",
+                "stability": "experimental",
+                "tier": 0
+              },
+              "shortDescription": {
+                "text": "A benchmark is significantly faster, or allocates significantly less, than at the range's base commit, by at least the threshold."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "CRAP per function: cyclomatic complexity weighted by missing test coverage. Limitation: CRAP exists only where coverage was measured; without a coverage map (no `[lang.<id>] coverage` command and no fresh report) the check passes with no score, no metrics, and no findings, and a function with no instrumented line is not scored. `static.complexity` reports cyclomatic complexity alone."
+              },
+              "help": {
+                "text": "CRAP is at least high (default 30): complex code that tests do not cover.\n\nAction: write_test. `cupel describe finding crap.high` describes the kind and its evidence, `cupel describe static.crap` the check, and `cupel explain <finding-id>` one finding in context."
+              },
+              "id": "crap.high",
+              "properties": {
+                "action": "write_test",
+                "check": "static.crap",
+                "cost": "quick",
+                "stability": "experimental",
+                "tier": 0
+              },
+              "shortDescription": {
+                "text": "CRAP is at least high (default 30): complex code that tests do not cover."
+              }
+            }
+          ],
+          "semanticVersion": "9.8.7",
+          "version": "9.8.7"
+        }
+      },
+      "versionControlProvenance": [
+        {
+          "branch": "feat/limit-pushdown",
+          "mappedTo": {
+            "uriBaseId": "SRCROOT"
+          },
+          "repositoryUri": "file:///work/exonym/",
+          "revisionId": "9f1c2d3"
+        }
+      ]
+    }
+  ],
+  "version": "2.1.0"
+}

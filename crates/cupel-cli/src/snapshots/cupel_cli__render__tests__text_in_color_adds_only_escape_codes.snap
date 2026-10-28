@@ -1,5 +1,6 @@
 ---
 source: crates/cupel-cli/src/render.rs
+assertion_line: 141
 expression: colored
 ---
 cupel check: [1;31mfail[0m (exit 1)
@@ -143,6 +144,7 @@ cupel check: [1;31mfail[0m (exit 1)
 [1mdepth     [0mdeep · budget 20000 ms
 [1mbaseline  [0mdefault (run_01J9ZZZZZZZZZZZZZZZZZZZZZZ)
 [1mtoolchain [0mcargo-llvm-cov 0.6.12 · rust 1.93.0
+[1msuite     [0mrust incremental · 3 rerun · 1275 reused
 [1mconfig    [0mfrom flags, profile, cupel.toml
           budget: 20s
           checks: {"static.clones":{"threshold":0.82}}

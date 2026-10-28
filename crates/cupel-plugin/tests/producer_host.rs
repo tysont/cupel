@@ -53,6 +53,7 @@ fn results() -> TestResults {
         invocations: Vec::new(),
         tests: Vec::new(),
         suite_hash: "0".to_owned(),
+        reuse: None,
     }
 }
 
