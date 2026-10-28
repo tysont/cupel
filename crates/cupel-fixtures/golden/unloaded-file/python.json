@@ -1,0 +1,193 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "tests.coverage",
+      "metrics": {
+        "line": 0.2222222222222222,
+        "lines": 9.0,
+        "uncovered": 2.0
+      },
+      "notes": [
+        "branches: unavailable (python)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 9,
+        "unit": "line_ratio",
+        "value": 0.2222222222222222
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that imports `shop.shipping` and calls `shipping_cost`."
+      },
+      "check": "tests.coverage",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "covered": 0,
+        "lines": 5
+      },
+      "id": "fnd_3b03ac",
+      "kind": "coverage.unloaded-file",
+      "location": {
+        "col": 1,
+        "end_col": 16,
+        "end_line": 9,
+        "file": "src/shop/shipping.py",
+        "line": 4
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.coverage --symbols sh_0dcb50e741848584",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_3b03ac --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shop.shipping.shipping_cost",
+        "hash": "sh_0dcb50e741848584",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`shop.shipping.shipping_cost` is in a file no test loaded: none of its 5 lines ran"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that imports `shop.shipping` and calls `free_shipping`."
+      },
+      "check": "tests.coverage",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "covered": 0,
+        "lines": 2
+      },
+      "id": "fnd_8af4e8",
+      "kind": "coverage.unloaded-file",
+      "location": {
+        "col": 1,
+        "end_col": 23,
+        "end_line": 14,
+        "file": "src/shop/shipping.py",
+        "line": 12
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.coverage --symbols sh_3d3a752a13637c9f",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_8af4e8 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "shop.shipping.free_shipping",
+        "hash": "sh_3d3a752a13637c9f",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`shop.shipping.free_shipping` is in a file no test loaded: none of its 2 lines ran"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_3b03ac",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write a test that imports `shop.shipping` and calls `shipping_cost`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_8af4e8",
+      "kind": "write_test",
+      "priority": 2,
+      "summary": "Write a test that imports `shop.shipping` and calls `free_shipping`."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "python": {
+            "coverage": "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov --cov-report=lcov:{out}"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 5,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 6
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 2
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}

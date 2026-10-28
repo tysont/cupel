@@ -54,6 +54,11 @@ fn single_ecosystem_fixtures_yield_one_root_each() {
         packages: strings(&["./..."]),
         ..plain(".", "go", &["go.mod"], GO_SKIP)
     };
+    // A Python root's package is its coverage source: itself, without a `src/` (ADR-152).
+    let python = |manifest: &str| ProjectRoot {
+        packages: strings(&["."]),
+        ..plain(".", "python", &[manifest], PYTHON_SKIP)
+    };
     let cases = [
         (
             "cargo-single",
@@ -64,14 +69,8 @@ fn single_ecosystem_fixtures_yield_one_root_each() {
             "npm-js",
             plain(".", "javascript", &["package.json"], NODE_SKIP),
         ),
-        (
-            "python-pyproject",
-            plain(".", "python", &["pyproject.toml"], PYTHON_SKIP),
-        ),
-        (
-            "python-requirements",
-            plain(".", "python", &["requirements.txt"], PYTHON_SKIP),
-        ),
+        ("python-pyproject", python("pyproject.toml")),
+        ("python-requirements", python("requirements.txt")),
     ];
     for (case, root) in cases {
         assert_eq!(all_roots(&detect_fixture(case)), [root], "{case}");

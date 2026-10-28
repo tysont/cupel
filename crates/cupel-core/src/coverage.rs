@@ -14,9 +14,11 @@ use crate::fact::{Fact, FactEntry, FactKind};
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct CoverageMap {
     pub files: Vec<FileCoverage>,
-    /// Which files the producer's report lists; a map recorded before the field existed lists
-    /// every file (ADR-152).
-    #[serde(default)]
+    /// Which files the producer's report lists (ADR-152). Absent when every file is listed, so
+    /// a map recorded before the field existed, and every map of a tool that lists every file,
+    /// reads and writes as before.
+    #[serde(default, skip_serializing_if = "Listing::is_all")]
+    #[schemars(extend("x-cupel-optional" = true))]
     pub listing: Listing,
 }
 
@@ -30,6 +32,12 @@ pub enum Listing {
     All,
     /// Only the files the suite loaded: a file absent from the map never ran.
     Loaded,
+}
+
+impl Listing {
+    fn is_all(&self) -> bool {
+        *self == Self::All
+    }
 }
 
 impl Fact for CoverageMap {

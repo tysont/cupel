@@ -25,7 +25,7 @@
     "would_skip": [],
     "would_write": [
       {
-        "diff": "--- /dev/null\n+++ b/cupel.toml\n@@ -0,0 +1,7 @@\n+# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.\n+depth = \"standard\"\n+\n+[lang.python]\n+test = \"uv run python -m pytest\"\n+coverage = \"uv run python -m pytest --cov --cov-report=lcov:{out}\"\n+bench = \"uv run python -m pytest --benchmark-only --benchmark-json={out}\"\n",
+        "diff": "--- /dev/null\n+++ b/cupel.toml\n@@ -0,0 +1,7 @@\n+# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.\n+depth = \"standard\"\n+\n+[lang.python]\n+test = \"uv run python -m pytest\"\n+coverage = \"uv run python -m pytest --cov=. --cov-report=lcov:{out}\"\n+bench = \"uv run python -m pytest --benchmark-only --benchmark-json={out}\"\n",
         "path": "cupel.toml"
       },
       {

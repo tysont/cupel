@@ -9,7 +9,9 @@
       "members": [
         "libs/units"
       ],
-      "packages": [],
+      "packages": [
+        "src"
+      ],
       "path": ".",
       "skip_dirs": [
         ".venv",

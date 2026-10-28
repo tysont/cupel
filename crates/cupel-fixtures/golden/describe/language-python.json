@@ -185,7 +185,7 @@
         {
           "commands": [
             {
-              "command": "<m> pytest --cov --cov-report=lcov:{out}",
+              "command": "<m> pytest --cov=<packages> --cov-report=lcov:{out}",
               "runner": "tool.pytest"
             }
           ],

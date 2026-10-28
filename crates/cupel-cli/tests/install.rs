@@ -250,7 +250,7 @@ fn scratch_venv() -> Option<(TempDir, PathBuf)> {
     Some((dir, venv))
 }
 
-/// The one test here that reaches the network: the real `python -m pip install pytest` from PyPI.
+/// The one test here that reaches the network: the real `python -m pip install pytest` from the package index.
 /// It runs only when `CUPEL_NETWORK_TESTS` is set, as `make test-network` sets it (ADR-153).
 #[test]
 fn fix_with_install_installs_the_runner_into_a_scratch_venv_and_passes() {

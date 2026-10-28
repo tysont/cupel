@@ -14,6 +14,11 @@ expression: pretty(&schema)
       "items": {
         "$ref": "#/$defs/FileCoverage"
       }
+    },
+    "listing": {
+      "description": "Which files the producer's report lists (ADR-152). Absent when every file is listed, so\na map recorded before the field existed, and every map of a tool that lists every file,\nreads and writes as before.",
+      "$ref": "#/$defs/Listing",
+      "x-cupel-optional": true
     }
   },
   "required": [
@@ -97,6 +102,21 @@ expression: pretty(&schema)
       "required": [
         "hits",
         "line"
+      ]
+    },
+    "Listing": {
+      "description": "Which files a coverage report lists (ADR-152). `tests.coverage` reads a file absent from a map\nby its listing: nothing to measure, or a file no test loaded.",
+      "oneOf": [
+        {
+          "description": "Every file with executable code, ran or not: a file absent from the map has none.",
+          "type": "string",
+          "const": "all"
+        },
+        {
+          "description": "Only the files the suite loaded: a file absent from the map never ran.",
+          "type": "string",
+          "const": "loaded"
+        }
       ]
     }
   }

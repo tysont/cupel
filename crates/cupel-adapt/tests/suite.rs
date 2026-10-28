@@ -36,7 +36,7 @@ const RUST: Joint = Joint {
 const PYTHON: Joint = Joint {
     id: "tool.pytest-cov-contexts",
     lang: "python",
-    coverage: "pytest --cov --cov-report=lcov:{out}",
+    coverage: "pytest --cov=. --cov-report=lcov:{out}",
     runner: "tool.pytest",
     coverage_producer: "tool.pytest-cov",
     per_test: Some("tool.pytest-cov-per-test"),

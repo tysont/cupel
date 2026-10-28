@@ -77,6 +77,36 @@
           },
           "kind": "coverage.uncovered-branch",
           "summary": "Tests ran the function but never took some of its branches."
+        },
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `coverage.unloaded-file`.",
+            "properties": {
+              "covered": {
+                "description": "Of those, the ones that ran: none.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines": {
+                "description": "The symbol's lines, which stand in for the instrumented lines the tool never listed.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "lines",
+              "covered"
+            ],
+            "title": "UnloadedFile",
+            "type": "object"
+          },
+          "kind": "coverage.unloaded-file",
+          "summary": "No test loaded the function's file, so the coverage tool never listed it."
         }
       ],
       "id": "tests.coverage",
@@ -123,7 +153,7 @@
         "coverage-map"
       ],
       "stability": "experimental",
-      "summary": "Line and branch coverage per function, from the coverage tool the language's `[lang.<id>] coverage` command runs (or a fresh report it left). Branch findings only where the tool measured branches; otherwise the result notes `branches: unavailable`. A function with no instrumented line is not scored.",
+      "summary": "Line and branch coverage per function, from the coverage tool the language's `[lang.<id>] coverage` command runs (or a fresh report it left). Branch findings only where the tool measured branches; otherwise the result notes `branches: unavailable`. A function with no instrumented line is not scored, unless the tool lists only the files the suite loaded: then a function in a file it left out never ran.",
       "tier": 2,
       "version": 1,
       "wants": [

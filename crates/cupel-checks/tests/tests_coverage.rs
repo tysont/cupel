@@ -380,11 +380,12 @@ fn a_symbol_in_a_file_a_loaded_only_map_leaves_out_is_an_unloaded_file() {
     );
     assert_eq!(result.status, CheckStatus::Fail);
     assert_eq!(
-        result.metrics["lines"], 5.0,
+        result.metrics.get("lines"),
+        Some(&5.0),
         "a's one line and never's four"
     );
-    assert_eq!(result.metrics["line"], 0.2);
-    assert_eq!(result.metrics["uncovered"], 1.0);
+    assert_eq!(result.metrics.get("line"), Some(&0.2));
+    assert_eq!(result.metrics.get("uncovered"), Some(&1.0));
     let (result, findings) = run(&World::new(symbols.clone(), map));
     assert!(
         findings.is_empty(),

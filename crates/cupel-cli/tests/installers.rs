@@ -786,7 +786,7 @@ impl Wrapper {
 
     /// dist/pipx, installed with `pip install --target`, built with the `flit_core` this machine's
     /// python3 has rather than one pip would fetch, so nothing here reaches the network (ADR-153);
-    /// `None` without python3 or flit_core.
+    /// `None` without python3 or `flit_core`.
     fn pipx() -> Option<Self> {
         if !installed("python3") || !python_module("flit_core") {
             return None;

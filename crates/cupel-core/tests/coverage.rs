@@ -1,6 +1,6 @@
 // ABOUTME: The `CoverageMap` payload (ADR-067, ADR-079): building one merges and sorts files, lines, and
 // ABOUTME: branches; symbol line coverage stays in [0, 1]; branch coverage exists only where it was measured.
-use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage};
+use cupel_core::coverage::{BranchHits, CoverageMap, FileCoverage, Listing};
 use proptest::prelude::*;
 
 fn file(name: &str, lines: &[(u32, u64)], branches: Option<&[(u32, u32, u64)]>) -> FileCoverage {
@@ -28,7 +28,8 @@ fn building_a_map_merges_records_of_one_file_adding_hits_and_sorts_everything() 
                     Some(&[(9, 0, 1), (9, 1, 3)])
                 ),
                 file("b.rs", &[(3, 1)], None),
-            ]
+            ],
+            listing: Listing::All,
         }
     );
 }
