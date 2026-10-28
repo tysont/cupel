@@ -235,13 +235,13 @@ fn wait(
         }
         if cancel.is_cancelled() {
             if let Some(grace) = grace {
-                terminate(child, grace);
+                terminate(child, spawned, grace);
             }
-            kill(child);
+            kill(child, spawned);
             return Err(Error::Cancelled);
         }
         if let Some(limit) = memory.filter(|limit| over(child, spawned, *limit)) {
-            kill(child);
+            kill(child, spawned);
             return Err(Error::OutOfMemory { limit });
         }
         std::thread::sleep(POLL);
@@ -258,12 +258,12 @@ fn over(child: &Child, spawned: Instant, limit: u64) -> bool {
 
 /// Sends SIGTERM to every process group of `child`'s run and waits up to `grace` for `child`
 /// to exit.
-fn terminate(child: &mut Child, grace: Duration) {
+fn terminate(child: &mut Child, spawned: Instant, grace: Duration) {
     #[cfg(unix)]
     {
         use nix::sys::signal::{Signal, killpg};
         use nix::unistd::Pid;
-        for group in memory::groups(child.id()) {
+        for group in memory::groups(child.id(), spawned) {
             if let Ok(pgid) = i32::try_from(group) {
                 let _ = killpg(Pid::from_raw(pgid), Signal::SIGTERM);
             }
@@ -282,7 +282,7 @@ fn terminate(child: &mut Child, grace: Duration) {
 /// own, `process_group(0)` above) and every group a descendant moved to, which `cargo nextest`
 /// gives each test. The groups are stopped first, so none forks a process the kill misses, and
 /// listed again while stopped; no descendant outlives the run or keeps its output pipes open.
-fn kill(child: &mut Child) {
+fn kill(child: &mut Child, spawned: Instant) {
     #[cfg(unix)]
     {
         use nix::sys::signal::{Signal, killpg};
@@ -294,10 +294,10 @@ fn kill(child: &mut Child) {
                 }
             }
         };
-        let mut groups = memory::groups(child.id());
+        let mut groups = memory::groups(child.id(), spawned);
         loop {
             signal_all(&groups, Signal::SIGSTOP);
-            let new: Vec<u32> = memory::groups(child.id())
+            let new: Vec<u32> = memory::groups(child.id(), spawned)
                 .into_iter()
                 .filter(|group| !groups.contains(group))
                 .collect();
