@@ -147,9 +147,11 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
         ),
         (json!(1.0), json!(0.0), json!(1.0))
     );
-    // The merged run, served from the cache for the whole tree, grades it as a fresh whole run does.
+    // The merged run, served from the cache for the whole tree, grades it as a fresh whole run
+    // does: no cache and no instrumented build, as a new checkout has.
     let (merged, _) = check(root, &tree);
     std::fs::remove_dir_all(root.join(".cupel/cache")).unwrap();
+    std::fs::remove_dir_all(root.join("target/cupel-llvm-cov")).unwrap();
     let (fresh, _) = check(root, &tree);
     assert_eq!(
         (suite(&merged), suite(&fresh), coverage(&merged)),
