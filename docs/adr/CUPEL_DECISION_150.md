@@ -1,6 +1,6 @@
 # CUPEL_DECISION_150: The mutation engine's phase breakdown
 
-**Date:** 2026-10-28 · **Status:** proposed · **Phase:** P10.2
+**Date:** 2026-10-28 · **Status:** accepted · **Phase:** P10.2
 
 ## Context
 
@@ -44,8 +44,12 @@ On a one-function change in Cupel's own repository at `standard`, the mutation e
 
 6. **Slots are seeded** (option c). Before a file's schemata validation, when some slot it uses has none of the runner's build directories (`Runner::outputs`) at its root and another has them or none has: if none has, the first slot validates alone first, with `parallelism` set to every core and the whole memory budget; then each slot without a build directory gets a copy of the first slot's (each regular file copied, a clone on APFS; links kept as links), recorded as a `seed` phase (`slot` the seeded slot, `file` the file whose validation needed it), and the remaining slots validate in parallel as before. A slot that already has a build directory, from an earlier production, is never seeded: its incremental build is the cheaper one. `MutationPhase` gains `seed` (additive; the fact's version stays 2) and `tests.mutation` the metric `seed_ms`. ADR-148 §1 is refined: the runs of a production share the cores, and a run that runs alone has them all.
 
+7. **What seeding changed** (2026-10-29, the release binary at 2d36b8f, otherwise as §5; load 37 at the start). The cold check took 1 921 s (its wall, 4 718 s, includes waiting on the heavy lock): the suite run 1 158 s, the engine 762 s for the same 3 mutants, all `schemata`, all killed. Phases: `plan` 0.2 s; `sync` 3.0 s; `seed` 30 s over 2 slots (15 s each); **`build` 1 195 s over 3 slots**, against 2 506 s; `run` 57 s, 16–21 s per mutant. The build CPU the slots spend fell by half and the engine's cold wall by 106 s (12%), but the seeded slots did not reuse what they were given: their builds took about 470 s each against about 260 s for the first slot's alone (solving the engine's wall and the build total for the two), and each seeded `target` grew to 17 GB against the first slot's 13 GB, so cargo rewrote most of the copy rather than building incrementally on it, and the copies did not stay shared on disk: one cold measurement took the volume from 71 GB free to 3.5 GB. Why cargo rebuilds a copied `target` at another path is not diagnosed (candidates: crates whose compile-time environment holds the workspace path, and everything that depends on them).
+
 ## Consequences
 
 - The timeline of a mutation production is in its fact and its totals in the store, so `scripts/inner_loop.sh`'s durations query lists `engine.mutation.sync`, `.build`, and `.run` beside the suite run and the engine, and a measurement names the phase that dominates instead of inferring it.
 - A deep run with thousands of mutants carries thousands of `run` rows that repeat each mutant's `duration_ms`; accepted for a uniform table (a row is five small fields).
 - Five metrics join `tests.mutation`'s `describe` output and the README's generated check table; nothing gates on them.
+- Seeding (§6) halves the slots' cold build work and saves 12% of the cold engine on Cupel; it saves no disk there, and a measurement's peak need stays about 90 GB (clone, instrumented build, three slots). Making the copy reusable at another path, or building only the binaries the covering tests need (option (a), once P10.3 says which binaries each test spawns), is what would.
+- A mutant's run on the P10 change is 16–23 s for its 28 covering tests, bounded by one `cupel-cli::survey` test that runs the binary (15–29 s in the baseline): with no build at all, the 15 s per mutant of P10.2's target is not reachable by the engine; it needs that test split or made faster.
