@@ -381,12 +381,13 @@ impl<'a> Protection<'a> {
 
 /// What each phase of the engine's work is, in `MutationPhase::ALL`'s order (so
 /// `PHASE_SUMMARIES[phase as usize]` describes it).
-const PHASE_SUMMARIES: [&str; 5] = [
+const PHASE_SUMMARIES: [&str; 6] = [
     "planning the mutants, their test selection, and the store's history",
     "reconciling each mutation slot with the tree",
     "rewriting each file as schemata",
     "the build every mutant of a file shares, with the file's tests unmutated, per slot",
     "the mutants' own test runs",
+    "copying the first slot's build into each slot with none of its own",
 ];
 
 /// The metric that reports `phase`'s total: its name with `_ms`.

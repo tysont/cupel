@@ -139,3 +139,63 @@ fn a_schemata_file_records_its_rewrite_before_the_build_every_mutant_shares() {
         outcomes.phases
     );
 }
+
+/// A `--config` file in `dir`: the Rust fixture's `cupel.toml` at `root` with two mutation slots.
+fn two_slots(root: &std::path::Path, dir: &std::path::Path) -> std::path::PathBuf {
+    let toml = std::fs::read_to_string(root.join("cupel.toml")).unwrap();
+    let path = dir.join("two-slots.toml");
+    std::fs::write(&path, format!("{toml}mutation = {{ jobs = 2 }}\n")).unwrap();
+    path
+}
+
+/// Each phase row as `(phase, slot)`, leaving out the plan and the slots' syncs.
+fn timeline(outcomes: &MutationOutcomes) -> Vec<(MutationPhase, Option<u32>)> {
+    outcomes
+        .phases
+        .iter()
+        .filter(|row| !matches!(row.phase, MutationPhase::Plan | MutationPhase::Sync))
+        .map(|row| (row.phase, row.slot))
+        .collect()
+}
+
+#[test]
+fn a_slot_with_no_build_of_its_own_is_seeded_from_the_first_slots_build_and_never_again() {
+    if !support::installed("cargo", "the Rust slot seeding test") {
+        return;
+    }
+    let dir = fixture("tests.mutation/rust");
+    let configs = tempfile::tempdir().unwrap();
+    let run = Run {
+        config: Some(two_slots(dir.path(), configs.path())),
+        ..Run::default()
+    };
+    let cold = produce(dir.path(), "rust", &run).unwrap();
+    let before_runs: Vec<(MutationPhase, Option<u32>)> = timeline(&cold)
+        .into_iter()
+        .filter(|(phase, _)| *phase != MutationPhase::Run)
+        .collect();
+    assert_eq!(
+        before_runs,
+        [
+            (MutationPhase::Rewrite, None),
+            (MutationPhase::Build, Some(0)),
+            (MutationPhase::Seed, Some(1)),
+            (MutationPhase::Build, Some(1)),
+        ],
+        "{:?}",
+        cold.phases
+    );
+    let seeded = cupel_mutate::slots::slot_dir(dir.path(), "rust", 1).join("target");
+    assert!(seeded.is_dir(), "{}", seeded.display());
+    let warm = produce(dir.path(), "rust", &run).unwrap();
+    assert!(
+        of(&warm, MutationPhase::Seed).is_empty(),
+        "slots with builds of their own are not seeded: {:?}",
+        warm.phases
+    );
+    assert_eq!(
+        support::summary(&warm),
+        support::summary(&cold),
+        "a seeded slot finds what a slot that built alone finds"
+    );
+}

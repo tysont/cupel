@@ -1,6 +1,6 @@
 # CUPEL_DECISION_148: A memory budget for mutant runs, and the slots' share of the test threads
 
-**Date:** 2026-10-25 · **Status:** accepted; §3 amended on 2026-10-25 (P9.9 group 1): a run's budget and kill cover every descendant, whichever process group it is in; §3 amended on 2026-10-28: the resident set is read from a sample taken since the spawn returned, and a run's group holds no process older than the child · **Phase:** P9.F7
+**Date:** 2026-10-25 · **Status:** accepted; §3 amended on 2026-10-25 (P9.9 group 1): a run's budget and kill cover every descendant, whichever process group it is in; §3 amended on 2026-10-28: the resident set is read from a sample taken since the spawn returned, and a run's group holds no process older than the child; §1 refined by [150](CUPEL_DECISION_150.md) §6: a run nothing else of the production runs beside (the first slot's build that seeds the others) has every core and the whole budget · **Phase:** P9.F7
 
 ## Context
 

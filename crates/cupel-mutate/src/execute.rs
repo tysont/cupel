@@ -90,28 +90,49 @@ enum Holds {
 impl Execution<'_> {
     /// Writes `source` (a schemata build of `run.file`) into every slot `run` uses and runs the
     /// file's tests against it with no mutant selected: the build every gated mutant shares.
+    ///
+    /// When a slot it uses has no build of its own, the first slot validates alone first, with
+    /// every core and the whole memory budget, and each slot with no build gets a copy of the
+    /// first slot's before its own validation (ADR-150 §6).
     pub fn validate(&self, run: &FileRun<'_>, source: &str) -> Result<Validation> {
         let slots = &self.slots[..self.workers(run)];
-        let ran: Vec<Result<(TestRun, Duration)>> = std::thread::scope(|scope| {
+        let outputs = self.runner.outputs();
+        let mut ran = Vec::new();
+        let mut rest = 0;
+        if slots.len() > 1 && slots.iter().any(|slot| !slot.built(outputs)) {
+            let first = self.validate_in(0, &slots[0], run, source, Share::Alone)?;
+            let green = first.0.results.is_green();
+            ran.push(Ok(first));
+            if !green {
+                return self.validation(ran);
+            }
+            for (index, slot) in slots.iter().enumerate().skip(1) {
+                if !slot.built(outputs) {
+                    self.seed(index, slot, &slots[0], run)?;
+                }
+            }
+            rest = 1;
+        }
+        ran.extend(std::thread::scope(|scope| {
             let handles: Vec<_> = slots
                 .iter()
                 .enumerate()
+                .skip(rest)
                 .map(|(index, slot)| {
-                    scope.spawn(move || {
-                        let ctx = self.slot_ctx(slot)?;
-                        for (importer, text) in run.importers {
-                            write(slot, importer, text)?;
-                        }
-                        write(slot, run.file, source.as_bytes())?;
-                        self.build(index, &ctx, run)
-                    })
+                    scope.spawn(move || self.validate_in(index, slot, run, source, Share::Slot))
                 })
                 .collect();
             handles
                 .into_iter()
                 .map(|handle| handle.join().unwrap_or_else(|_| Err(panicked())))
-                .collect()
-        });
+                .collect::<Vec<_>>()
+        }));
+        self.validation(ran)
+    }
+
+    /// What the validation runs `ran` say: each slot's timeout when every one is green, else
+    /// the first red one's output and why.
+    fn validation(&self, ran: Vec<Result<(TestRun, Duration)>>) -> Result<Validation> {
         let mut limits = Vec::new();
         for ran in ran {
             let (ran, elapsed) = ran?;
@@ -124,6 +145,42 @@ impl Execution<'_> {
             limits.push(self.limit(elapsed));
         }
         Ok(Validation::Built(limits))
+    }
+
+    /// Writes `source` and `run`'s importers into slot `index` and validates it there with
+    /// `share` of the machine.
+    fn validate_in(
+        &self,
+        index: usize,
+        slot: &Slot,
+        run: &FileRun<'_>,
+        source: &str,
+        share: Share,
+    ) -> Result<(TestRun, Duration)> {
+        let ctx = self.slot_ctx(slot)?;
+        for (importer, text) in run.importers {
+            write(slot, importer, text)?;
+        }
+        write(slot, run.file, source.as_bytes())?;
+        self.build(index, &ctx, run, share)
+    }
+
+    /// Copies `from`'s build into slot `index`, which has none; the `seed` phase.
+    fn seed(&self, index: usize, slot: &Slot, from: &Slot, run: &FileRun<'_>) -> Result<()> {
+        let started = Instant::now();
+        slot.seed(from, self.runner.outputs()).map_err(|error| {
+            Error::Write(WriteError::Io {
+                path: slot.root().to_path_buf(),
+                message: error.to_string(),
+            })
+        })?;
+        let served = Served {
+            file: Some(run.file),
+            slot: Some(index),
+            tests: None,
+        };
+        self.phases.record(MutationPhase::Seed, served, started);
+        Ok(())
     }
 
     /// Runs every mutant of `run` across the slots, each slot taking the next mutant when it is
@@ -252,7 +309,7 @@ impl Execution<'_> {
         let mut renewed = run.original.to_vec();
         renewed.push(b'\n');
         write(slot, run.file, &renewed)?;
-        let (ran, elapsed) = self.build(index, ctx, run)?;
+        let (ran, elapsed) = self.build(index, ctx, run, Share::Slot)?;
         if !ran.results.is_green() {
             return Err(Error::Process {
                 program: self.runner.id().to_string(),
@@ -276,10 +333,14 @@ impl Execution<'_> {
         index: usize,
         ctx: &ProduceCtx,
         run: &FileRun<'_>,
+        share: Share,
     ) -> Result<(TestRun, Duration)> {
         let selection = self.union(&run.mutants);
         let started = Instant::now();
-        let ran = match self.runner.run(ctx, &selection, &self.options(None, 0)) {
+        let ran = match self
+            .runner
+            .run(ctx, &selection, &self.options_for(None, 0, share))
+        {
             Err(Error::OutOfMemory { limit }) => {
                 return Err(Error::Process {
                     program: self.runner.id().to_string(),
@@ -325,7 +386,16 @@ impl Execution<'_> {
     /// set to `mutant` (0 for none), so a variable inherited from an outer run never selects a
     /// mutant here.
     fn options(&self, timeout: Option<Duration>, mutant: u32) -> RunOptions {
-        let slots = self.slots.len();
+        self.options_for(timeout, mutant, Share::Slot)
+    }
+
+    /// [`Self::options`] for a run with `share` of the machine: a slot's share, or all of it for
+    /// a run nothing else of the production runs beside (ADR-150 §6).
+    fn options_for(&self, timeout: Option<Duration>, mutant: u32, share: Share) -> RunOptions {
+        let slots = match share {
+            Share::Slot => self.slots.len(),
+            Share::Alone => 1,
+        };
         let cores = std::thread::available_parallelism().map_or(1, std::num::NonZero::get);
         RunOptions {
             env: vec![(MUTANT_VAR.to_owned(), mutant.to_string())],
@@ -367,6 +437,14 @@ impl Execution<'_> {
             Ok(ran) => Ok(classify(&ran, elapsed >= limit, elapsed, strategy)),
         }
     }
+}
+
+/// How much of the machine a run gets: its slot's share of the cores and the memory budget,
+/// or all of both when it runs alone (ADR-148 §1, ADR-150 §6).
+#[derive(Clone, Copy)]
+enum Share {
+    Slot,
+    Alone,
 }
 
 /// How many tests `selection` names; `None` for the whole suite, however narrowed.

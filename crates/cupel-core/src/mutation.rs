@@ -71,6 +71,9 @@ pub enum MutationPhase {
     Build,
     /// One mutant's test run, as long as the mutant's `duration_ms`.
     Run,
+    /// A slot with no build of its own given a copy of another slot's (ADR-150 §6); once per
+    /// slot seeded.
+    Seed,
 }
 
 impl MutationPhase {
@@ -82,16 +85,18 @@ impl MutationPhase {
             Self::Rewrite => "rewrite",
             Self::Build => "build",
             Self::Run => "run",
+            Self::Seed => "seed",
         }
     }
 
-    /// Every phase, in the order a production goes through them.
-    pub const ALL: [Self; 5] = [
+    /// Every phase, in the order they were added to the breakdown.
+    pub const ALL: [Self; 6] = [
         Self::Plan,
         Self::Sync,
         Self::Rewrite,
         Self::Build,
         Self::Run,
+        Self::Seed,
     ];
 }
 

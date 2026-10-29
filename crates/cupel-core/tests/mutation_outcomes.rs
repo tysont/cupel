@@ -167,9 +167,10 @@ fn a_phase_names_what_it_served_how_many_tests_it_ran_and_how_long_it_took() {
         MutationPhase::Rewrite,
         MutationPhase::Build,
         MutationPhase::Run,
+        MutationPhase::Seed,
     ]
     .into_iter()
     .map(MutationPhase::as_str)
     .collect();
-    assert_eq!(names, ["plan", "sync", "rewrite", "build", "run"]);
+    assert_eq!(names, ["plan", "sync", "rewrite", "build", "run", "seed"]);
 }

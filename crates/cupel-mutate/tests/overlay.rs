@@ -1,5 +1,5 @@
-// ABOUTME: Worker overlays (ADR-080 §8): a slot mirrors the tree, links ignored directories, writes mutants as private
-// ABOUTME: copies that never reach the original, restores them newer than the mutant, and follows the tree's changes.
+// ABOUTME: Worker overlays (ADR-080 §8, ADR-150 §6): a slot mirrors the tree, links ignored directories, writes mutants as
+// ABOUTME: private copies that never reach the original, restores them, follows the tree, and is seeded with a build.
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
@@ -169,4 +169,50 @@ fn a_symlink_in_the_tree_is_the_same_symlink_in_the_slot() {
         ),
         (Path::new("src").to_path_buf(), "X = 1\n".to_owned())
     );
+}
+
+#[cfg(unix)]
+#[test]
+fn a_slot_is_seeded_with_a_copy_of_the_build_it_lacks_and_keeps_the_one_it_has() {
+    let work = tempfile::tempdir().unwrap();
+    let (built, empty, own) = (
+        Slot::at(work.path().join("0")),
+        Slot::at(work.path().join("1")),
+        Slot::at(work.path().join("2")),
+    );
+    fs::create_dir_all(built.root().join("target/debug/deps")).unwrap();
+    fs::write(
+        built.root().join("target/debug/deps/lib.rlib"),
+        "artifact\n",
+    )
+    .unwrap();
+    std::os::unix::fs::symlink("deps/lib.rlib", built.root().join("target/debug/latest")).unwrap();
+    fs::create_dir_all(empty.root()).unwrap();
+    fs::create_dir_all(own.root().join("target")).unwrap();
+    fs::write(own.root().join("target/mine"), "own build\n").unwrap();
+    assert_eq!(
+        (
+            built.built(&["target"]),
+            empty.built(&["target"]),
+            own.built(&["target"])
+        ),
+        (true, false, true)
+    );
+    empty.seed(&built, &["target"]).unwrap();
+    own.seed(&built, &["target"]).unwrap();
+    assert_eq!(
+        read(empty.root(), "target/debug/deps/lib.rlib"),
+        "artifact\n"
+    );
+    assert_eq!(
+        fs::read_link(empty.root().join("target/debug/latest")).unwrap(),
+        Path::new("deps/lib.rlib")
+    );
+    fs::write(empty.root().join("target/debug/deps/lib.rlib"), "rebuilt\n").unwrap();
+    assert_eq!(
+        read(built.root(), "target/debug/deps/lib.rlib"),
+        "artifact\n"
+    );
+    assert_eq!(read(own.root(), "target/mine"), "own build\n");
+    assert!(!own.root().join("target/debug").exists());
 }

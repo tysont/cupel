@@ -303,6 +303,11 @@ expression: pretty(&schema)
           "description": "One mutant's test run, as long as the mutant's `duration_ms`.",
           "type": "string",
           "const": "run"
+        },
+        {
+          "description": "A slot with no build of its own given a copy of another slot's (ADR-150 §6); once per\nslot seeded.",
+          "type": "string",
+          "const": "seed"
         }
       ]
     },

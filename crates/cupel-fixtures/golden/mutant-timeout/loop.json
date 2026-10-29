@@ -19,6 +19,7 @@
         "run_ms": "<duration-ms>",
         "schemata": 0.0,
         "score": 0.5,
+        "seed_ms": "<duration-ms>",
         "survived": 1.0,
         "sync_ms": "<duration-ms>",
         "timeout": 2.0,
