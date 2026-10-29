@@ -1,13 +1,13 @@
 // ABOUTME: Running mutants (ADR-080 §8–9, ADR-082, ADR-147, ADR-148, ADR-150): the mutants of one file run concurrently,
-// ABOUTME: one slot each with its share of the cores and memory, after a green reference run, each phase timed.
+// ABOUTME: one slot each with its share of the cores and memory, from one build where the runner builds once, timed.
 use std::collections::BTreeSet;
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use cupel_core::{
-    Ctx, Error, MutantOutcome, MutationPhase, MutationStrategy, ProduceCtx, Result, RunOptions,
-    Runner, TestRun, TestSelection, WriteError, Writer, physical_memory,
+    BuildOutcome, Ctx, Error, MutantOutcome, MutationPhase, MutationStrategy, Prebuilt, ProduceCtx,
+    Result, RunOptions, Runner, TestRun, TestSelection, WriteError, Writer, physical_memory,
 };
 
 use crate::overlay::Slot;
@@ -67,14 +67,20 @@ pub enum Build<'a> {
         source: &'a str,
         ids: &'a [Option<u32>],
         limits: &'a [Duration],
+        /// The build every slot's gated mutants run from, when the runner builds once.
+        prebuilt: Option<&'a Prebuilt>,
     },
 }
 
-/// Whether a schemata build passed the file's tests with no mutant selected in every slot.
+/// Whether a schemata build passed the file's tests with no mutant selected.
 pub enum Validation {
-    /// Green everywhere: each slot's timeout.
-    Built(Vec<Duration>),
-    /// Red somewhere: the first red slot's output, and why it was red.
+    /// Green: each slot's timeout, and the build its gated mutants run from when the runner
+    /// built once (ADR-150 §8).
+    Built {
+        limits: Vec<Duration>,
+        prebuilt: Option<Prebuilt>,
+    },
+    /// Red: the output of the build or the first red run, and why it was red.
     Failed { output: String, reason: String },
 }
 
@@ -88,51 +94,85 @@ enum Holds {
 }
 
 impl Execution<'_> {
-    /// Writes `source` (a schemata build of `run.file`) into every slot `run` uses and runs the
-    /// file's tests against it with no mutant selected: the build every gated mutant shares.
+    /// Writes `source` (a schemata build of `run.file`) where the slots `run` uses will run it
+    /// and runs the file's tests against it with no mutant selected: the build every gated
+    /// mutant shares.
     ///
-    /// When a slot it uses has no build of its own, the first slot validates alone first, with
-    /// every core and the whole memory budget, and each slot with no build gets a copy of the
-    /// first slot's before its own validation (ADR-150 §6).
+    /// With a runner that builds once, the first slot builds alone, with every core and the
+    /// whole memory budget, the tests run once from that build, and every slot's mutants run
+    /// from it (ADR-150 §8); otherwise every slot builds and validates in parallel.
     pub fn validate(&self, run: &FileRun<'_>, source: &str) -> Result<Validation> {
         let slots = &self.slots[..self.workers(run)];
-        let outputs = self.runner.outputs();
-        let mut ran = Vec::new();
-        let mut rest = 0;
-        if slots.len() > 1 && slots.iter().any(|slot| !slot.built(outputs)) {
-            let first = self.validate_in(0, &slots[0], run, source, Share::Alone)?;
-            let green = first.0.results.is_green();
-            ran.push(Ok(first));
-            if !green {
-                return self.validation(ran);
+        let first = &slots[0];
+        let ctx = self.slot_ctx(first)?;
+        write_file(first, run, source)?;
+        let started = Instant::now();
+        let built = match self
+            .runner
+            .build(&ctx, &self.options_for(None, 0, Share::Alone))
+        {
+            Err(Error::OutOfMemory { limit }) => return Err(over_budget(self.runner, limit)),
+            built => built?,
+        };
+        let Some(built) = built else {
+            return self.validate_each(run, source, slots);
+        };
+        let served = Served {
+            file: Some(run.file),
+            slot: Some(0),
+            tests: None,
+        };
+        self.phases.record(MutationPhase::Build, served, started);
+        let prebuilt = match built {
+            BuildOutcome::Built(prebuilt) => prebuilt,
+            BuildOutcome::Failed { output } => {
+                return Ok(Validation::Failed {
+                    reason: output.clone(),
+                    output,
+                });
             }
-            for (index, slot) in slots.iter().enumerate().skip(1) {
-                if !slot.built(outputs) {
-                    self.seed(index, slot, &slots[0], run)?;
-                }
-            }
-            rest = 1;
+        };
+        let (ran, elapsed) = self.unmutated(
+            0,
+            &ctx,
+            run,
+            MutationPhase::Validate,
+            &RunOptions {
+                prebuilt: Some(prebuilt.clone()),
+                ..self.options_for(None, 0, Share::Slot)
+            },
+        )?;
+        if !ran.results.is_green() {
+            return Ok(Validation::Failed {
+                output: output(&ran),
+                reason: why_red(&ran),
+            });
         }
-        ran.extend(std::thread::scope(|scope| {
+        Ok(Validation::Built {
+            limits: vec![self.limit(elapsed); slots.len()],
+            prebuilt: Some(prebuilt),
+        })
+    }
+
+    /// Validates `source` in every one of `slots` in parallel, each building it.
+    fn validate_each(&self, run: &FileRun<'_>, source: &str, slots: &[Slot]) -> Result<Validation> {
+        let ran: Vec<Result<(TestRun, Duration)>> = std::thread::scope(|scope| {
             let handles: Vec<_> = slots
                 .iter()
                 .enumerate()
-                .skip(rest)
                 .map(|(index, slot)| {
-                    scope.spawn(move || self.validate_in(index, slot, run, source, Share::Slot))
+                    scope.spawn(move || {
+                        let ctx = self.slot_ctx(slot)?;
+                        write_file(slot, run, source)?;
+                        self.build(index, &ctx, run)
+                    })
                 })
                 .collect();
             handles
                 .into_iter()
                 .map(|handle| handle.join().unwrap_or_else(|_| Err(panicked())))
-                .collect::<Vec<_>>()
-        }));
-        self.validation(ran)
-    }
-
-    /// What the validation runs `ran` say: each slot's timeout when every one is green, else
-    /// the first red one's output and why.
-    fn validation(&self, ran: Vec<Result<(TestRun, Duration)>>) -> Result<Validation> {
+                .collect()
+        });
         let mut limits = Vec::new();
         for ran in ran {
             let (ran, elapsed) = ran?;
@@ -144,43 +184,10 @@ impl Execution<'_> {
             }
             limits.push(self.limit(elapsed));
         }
-        Ok(Validation::Built(limits))
-    }
-
-    /// Writes `source` and `run`'s importers into slot `index` and validates it there with
-    /// `share` of the machine.
-    fn validate_in(
-        &self,
-        index: usize,
-        slot: &Slot,
-        run: &FileRun<'_>,
-        source: &str,
-        share: Share,
-    ) -> Result<(TestRun, Duration)> {
-        let ctx = self.slot_ctx(slot)?;
-        for (importer, text) in run.importers {
-            write(slot, importer, text)?;
-        }
-        write(slot, run.file, source.as_bytes())?;
-        self.build(index, &ctx, run, share)
-    }
-
-    /// Copies `from`'s build into slot `index`, which has none; the `seed` phase.
-    fn seed(&self, index: usize, slot: &Slot, from: &Slot, run: &FileRun<'_>) -> Result<()> {
-        let started = Instant::now();
-        slot.seed(from, self.runner.outputs()).map_err(|error| {
-            Error::Write(WriteError::Io {
-                path: slot.root().to_path_buf(),
-                message: error.to_string(),
-            })
-        })?;
-        let served = Served {
-            file: Some(run.file),
-            slot: Some(index),
-            tests: None,
-        };
-        self.phases.record(MutationPhase::Seed, served, started);
-        Ok(())
+        Ok(Validation::Built {
+            limits,
+            prebuilt: None,
+        })
     }
 
     /// Runs every mutant of `run` across the slots, each slot taking the next mutant when it is
@@ -270,15 +277,21 @@ impl Execution<'_> {
     /// build, or written as a file copy and the original put back.
     fn one(&self, worker: &mut Worker<'_>, work: &Work<'_>, index: usize) -> Result<Ran> {
         let (run, planned, slot) = (work.run, work.run.mutants[index], worker.slot);
-        if let (Some(id), Build::Schemata { source, .. }) = (id(work.build, index), work.build) {
+        if let (
+            Some(id),
+            Build::Schemata {
+                source, prebuilt, ..
+            },
+        ) = (id(work.build, index), work.build)
+        {
             if worker.holds != Holds::Schemata {
                 write(slot, run.file, source.as_bytes())?;
                 worker.holds = Holds::Schemata;
             }
-            return self.mutant(worker, planned, id);
+            return self.mutant(worker, planned, id, *prebuilt);
         }
         write(slot, run.file, planned.source.as_bytes())?;
-        let ran = self.mutant(worker, planned, 0);
+        let ran = self.mutant(worker, planned, 0, None);
         write(slot, run.file, run.original)?;
         worker.holds = Holds::Original;
         ran
@@ -309,7 +322,7 @@ impl Execution<'_> {
         let mut renewed = run.original.to_vec();
         renewed.push(b'\n');
         write(slot, run.file, &renewed)?;
-        let (ran, elapsed) = self.build(index, ctx, run, Share::Slot)?;
+        let (ran, elapsed) = self.build(index, ctx, run)?;
         if !ran.results.is_green() {
             return Err(Error::Process {
                 program: self.runner.id().to_string(),
@@ -325,32 +338,32 @@ impl Execution<'_> {
     }
 
     /// The build every mutant of `run`'s file shares, in slot `index` (`ctx` is the slot's): the
-    /// file's selected tests with no mutant, timed and recorded as the `build` phase. A run over
-    /// the slot's memory budget is an error naming the setting: every mutant of the file would
-    /// be.
+    /// file's selected tests with no mutant, built where they run, recorded as the `build` phase.
     fn build(
         &self,
         index: usize,
         ctx: &ProduceCtx,
         run: &FileRun<'_>,
-        share: Share,
+    ) -> Result<(TestRun, Duration)> {
+        let options = self.options(None, 0);
+        self.unmutated(index, ctx, run, MutationPhase::Build, &options)
+    }
+
+    /// Runs `run`'s file's selected tests with no mutant in slot `index` with `options`, timed
+    /// and recorded as `phase`. A run over the slot's memory budget is an error naming the
+    /// setting: every mutant of the file would be.
+    fn unmutated(
+        &self,
+        index: usize,
+        ctx: &ProduceCtx,
+        run: &FileRun<'_>,
+        phase: MutationPhase,
+        options: &RunOptions,
     ) -> Result<(TestRun, Duration)> {
         let selection = self.union(&run.mutants);
         let started = Instant::now();
-        let ran = match self
-            .runner
-            .run(ctx, &selection, &self.options_for(None, 0, share))
-        {
-            Err(Error::OutOfMemory { limit }) => {
-                return Err(Error::Process {
-                    program: self.runner.id().to_string(),
-                    message: format!(
-                        "the tests of the unmutated file held more than {} MiB of memory, one \
-                         slot's share of `max_mutant_memory`; raise it or lower `mutation.jobs`",
-                        limit >> 20
-                    ),
-                });
-            }
+        let ran = match self.runner.run(ctx, &selection, options) {
+            Err(Error::OutOfMemory { limit }) => return Err(over_budget(self.runner, limit)),
             ran => ran?,
         };
         let served = Served {
@@ -358,7 +371,7 @@ impl Execution<'_> {
             slot: Some(index),
             tests: selected(&selection),
         };
-        self.phases.record(MutationPhase::Build, served, started);
+        self.phases.record(phase, served, started);
         Ok((ran, started.elapsed()))
     }
 
@@ -408,8 +421,15 @@ impl Execution<'_> {
     }
 
     /// Runs `planned`'s tests against it (already written in `worker`'s slot, or selected by
-    /// `id`) with the worker's timeout; the `run` phase.
-    fn mutant(&self, worker: &Worker<'_>, planned: &Planned, id: u32) -> Result<Ran> {
+    /// `id`, from `prebuilt` when the runner built once) with the worker's timeout; the `run`
+    /// phase.
+    fn mutant(
+        &self,
+        worker: &Worker<'_>,
+        planned: &Planned,
+        id: u32,
+        prebuilt: Option<&Prebuilt>,
+    ) -> Result<Ran> {
         let selection = planned
             .tests
             .clone()
@@ -421,9 +441,9 @@ impl Execution<'_> {
         } else {
             MutationStrategy::Schemata
         };
-        let ran = self
-            .runner
-            .run(&worker.ctx, &selection, &self.options(Some(limit), id));
+        let mut options = self.options(Some(limit), id);
+        options.prebuilt = prebuilt.cloned();
+        let ran = self.runner.run(&worker.ctx, &selection, &options);
         let elapsed = started.elapsed();
         let served = Served {
             file: Some(planned.file()),
@@ -545,6 +565,27 @@ fn output(ran: &TestRun) -> String {
         .filter_map(|invocation| invocation.output.clone())
         .collect::<Vec<_>>()
         .join("\n")
+}
+
+/// The error of an unmutated run or build over its share of the memory budget, `limit`
+/// bytes: every mutant of the file would be over it too.
+fn over_budget(runner: &dyn Runner, limit: u64) -> Error {
+    Error::Process {
+        program: runner.id().to_string(),
+        message: format!(
+            "the tests of the unmutated file held more than {} MiB of memory, one slot's share \
+             of `max_mutant_memory`; raise it or lower `mutation.jobs`",
+            limit >> 20
+        ),
+    }
+}
+
+/// Writes `run`'s importers and `source`, its file's schemata, into `slot`.
+fn write_file(slot: &Slot, run: &FileRun<'_>, source: &str) -> Result<()> {
+    for (importer, text) in run.importers {
+        write(slot, importer, text)?;
+    }
+    write(slot, run.file, source.as_bytes())
 }
 
 fn panicked() -> Error {

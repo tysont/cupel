@@ -39,6 +39,7 @@ static CLOJURE_TEST: RunnerSpec = RunnerSpec {
         executed: Executed::Report,
     },
     outputs: &["target", ".cpcache"],
+    build: None,
 };
 
 inventory::submit!(crate::ToolProducer {

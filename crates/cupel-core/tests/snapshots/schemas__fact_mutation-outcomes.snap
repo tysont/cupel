@@ -295,7 +295,7 @@ expression: pretty(&schema)
           "const": "rewrite"
         },
         {
-          "description": "The run every mutant of a file shares: the schemata validation (ADR-082 §5) or a file\ncopy's reference run (ADR-080 §9), its build and the file's selected tests with no\nmutant; once per slot the file used.",
+          "description": "The build every mutant of a file shares. With a runner that builds once (ADR-150 §8),\nthe compile alone, once per file in the first slot; otherwise the schemata validation\n(ADR-082 §5) or a file copy's reference run (ADR-080 §9), the build and the file's\nselected tests with no mutant, once per slot the file used.",
           "type": "string",
           "const": "build"
         },
@@ -305,9 +305,9 @@ expression: pretty(&schema)
           "const": "run"
         },
         {
-          "description": "A slot with no build of its own given a copy of another slot's (ADR-150 §6); once per\nslot seeded.",
+          "description": "The file's selected tests with no mutant, run once from a build made once (ADR-150 §8);\nits time sets every slot's timeout.",
           "type": "string",
-          "const": "seed"
+          "const": "validate"
         }
       ]
     },

@@ -30,6 +30,7 @@ static CARGO_TEST: RunnerSpec = RunnerSpec {
         executed: Executed::Report,
     },
     outputs: &["target"],
+    build: None,
 };
 
 inventory::submit!(crate::ToolProducer {

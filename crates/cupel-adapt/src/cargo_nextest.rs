@@ -1,9 +1,13 @@
 // ABOUTME: The `cargo nextest` runner producer: `cargo nextest run` with a tool configuration file whose `cupel`
-// ABOUTME: profile writes a JUnit report under the target directory, read by the JUnit parser.
+// ABOUTME: profile writes a JUnit report under the target directory; it builds once and reruns that build (ADR-150 §8).
 use cupel_core::{LangId, Langs, RunOptions, RunOrdering, TestResult};
 
 use crate::report::{junit, listing};
-use crate::runner::{Executed, Lister, Ran, Root, Runner, RunnerSpec, Varying, tests_flag};
+use std::path::PathBuf;
+
+use crate::runner::{
+    Builder, Executed, Lister, Ran, Record, Root, Runner, RunnerSpec, Varying, tests_flag,
+};
 
 const ID: &str = "tool.cargo-nextest";
 
@@ -38,6 +42,7 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
         executed: Executed::Unknown,
     },
     outputs: &["target"],
+    build: Some(&BUILD),
 };
 
 inventory::submit!(crate::ToolProducer {
@@ -49,22 +54,81 @@ inventory::submit!(crate::ToolProducer {
 pub(crate) const PROFILE: &str = "[profile.cupel.junit]\npath = \"junit.xml\"\nstore-success-output = false\nstore-failure-output = true\n";
 
 fn command(root: &Root) -> Vec<String> {
-    // The profile file lives in `.cupel/`; a failure to write it surfaces as nextest's error.
+    let mut command = words(&["cargo", "nextest", "run", "--workspace"]);
+    command.extend(profile(root));
+    command
+}
+
+/// The run's profile: no early stop, and the `cupel` profile from the tool configuration file,
+/// which is written here (in `.cupel/`; a failure to write it surfaces as nextest's error).
+fn profile(root: &Root) -> Vec<String> {
     let _ = std::fs::write(&root.config, PROFILE);
-    let mut command: Vec<String> = [
+    let mut words = words(&["--no-fail-fast", "--profile", "cupel", "--tool-config-file"]);
+    words.push(format!("cupel:{}", root.config.display()));
+    words
+}
+
+fn words(words: &[&str]) -> Vec<String> {
+    words.iter().map(|word| (*word).to_owned()).collect()
+}
+
+/// Building once (ADR-150 §8): nextest's record of the test binaries it built, and cargo's of
+/// the workspace, which a run elsewhere reads in place of building.
+static BUILD: Builder = Builder {
+    records: build_records,
+    command: reuse_command,
+    vary: reuse_vary,
+};
+
+/// `cargo nextest list` builds every test binary of the workspace (with the build's jobs) and
+/// prints what it built; `cargo metadata` prints the workspace.
+fn build_records(_: &Root, options: &RunOptions) -> Vec<Record> {
+    let mut list = words(&[
         "cargo",
         "nextest",
-        "run",
+        "list",
         "--workspace",
-        "--no-fail-fast",
-        "--profile",
-        "cupel",
-        "--tool-config-file",
+        "--list-type",
+        "binaries-only",
+        "--message-format",
+        "json",
+    ]);
+    if let Some(jobs) = options.parallelism {
+        list.extend(["--build-jobs".to_owned(), jobs.to_string()]);
+    }
+    vec![
+        ("binaries.json", list),
+        (
+            "cargo-metadata.json",
+            words(&["cargo", "metadata", "--format-version", "1"]),
+        ),
     ]
-    .map(str::to_owned)
-    .to_vec();
-    command.push(format!("cupel:{}", root.config.display()));
+}
+
+/// A run, in `root`, of the binaries `records` describe: no build, `root` as the workspace its
+/// tests run in, and none of cargo's build options, which nextest refuses there.
+fn reuse_command(root: &Root, records: &[PathBuf]) -> Vec<String> {
+    let mut command = words(&["cargo", "nextest", "run"]);
+    command.extend(profile(root));
+    for (flag, record) in ["--binaries-metadata", "--cargo-metadata"]
+        .into_iter()
+        .zip(records)
+    {
+        command.extend([flag.to_owned(), record.display().to_string()]);
+    }
+    command.extend([
+        "--workspace-remap".to_owned(),
+        root.dir.display().to_string(),
+    ]);
     command
+}
+
+/// A run from the build takes the run's parallelism as its test threads only.
+fn reuse_vary(options: &RunOptions) -> Vec<String> {
+    options
+        .parallelism
+        .map(|threads| vec!["--test-threads".to_owned(), threads.to_string()])
+        .unwrap_or_default()
 }
 
 /// A run's parallelism as its test threads and its build jobs; nothing for the runner's

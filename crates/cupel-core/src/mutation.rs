@@ -65,15 +65,16 @@ pub enum MutationPhase {
     Sync,
     /// One file's schemata rewrite (ADR-082 §2); once per attempt.
     Rewrite,
-    /// The run every mutant of a file shares: the schemata validation (ADR-082 §5) or a file
-    /// copy's reference run (ADR-080 §9), its build and the file's selected tests with no
-    /// mutant; once per slot the file used.
+    /// The build every mutant of a file shares. With a runner that builds once (ADR-150 §8),
+    /// the compile alone, once per file in the first slot; otherwise the schemata validation
+    /// (ADR-082 §5) or a file copy's reference run (ADR-080 §9), the build and the file's
+    /// selected tests with no mutant, once per slot the file used.
     Build,
     /// One mutant's test run, as long as the mutant's `duration_ms`.
     Run,
-    /// A slot with no build of its own given a copy of another slot's (ADR-150 §6); once per
-    /// slot seeded.
-    Seed,
+    /// The file's selected tests with no mutant, run once from a build made once (ADR-150 §8);
+    /// its time sets every slot's timeout.
+    Validate,
 }
 
 impl MutationPhase {
@@ -85,7 +86,7 @@ impl MutationPhase {
             Self::Rewrite => "rewrite",
             Self::Build => "build",
             Self::Run => "run",
-            Self::Seed => "seed",
+            Self::Validate => "validate",
         }
     }
 
@@ -96,7 +97,7 @@ impl MutationPhase {
         Self::Rewrite,
         Self::Build,
         Self::Run,
-        Self::Seed,
+        Self::Validate,
     ];
 }
 

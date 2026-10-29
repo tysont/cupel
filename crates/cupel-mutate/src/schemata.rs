@@ -130,7 +130,9 @@ impl Attempt<'_> {
                 break;
             };
             let (output, reason) = match self.execution.validate(run, &source)? {
-                Validation::Built(limits) => return self.gated(&source, &limits).map(Ok),
+                Validation::Built { limits, prebuilt } => {
+                    return self.gated(&source, &limits, prebuilt.as_ref()).map(Ok);
+                }
                 Validation::Failed { output, reason } => (output, reason),
             };
             let lines = self.rewriter.culprits(&output, file);
@@ -156,8 +158,14 @@ impl Attempt<'_> {
         Ok(Err(failed))
     }
 
-    /// Runs the mutants with `source`, validated in every slot with these `limits`.
-    fn gated(&self, source: &str, limits: &[std::time::Duration]) -> Result<Vec<Ran>> {
+    /// Runs the mutants with `source`, validated with these `limits`, from `prebuilt` when the
+    /// runner built once.
+    fn gated(
+        &self,
+        source: &str,
+        limits: &[std::time::Duration],
+        prebuilt: Option<&cupel_core::Prebuilt>,
+    ) -> Result<Vec<Ran>> {
         let ids: Vec<Option<u32>> = self
             .gates
             .iter()
@@ -167,6 +175,7 @@ impl Attempt<'_> {
             source,
             ids: &ids,
             limits,
+            prebuilt,
         };
         let ran = self.execution.run_file(self.run, &build)?;
         Ok(with_fallback(ran, self.gates, &self.fallback, None))

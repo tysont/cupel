@@ -332,6 +332,28 @@ pub struct RunOptions {
     pub seed: Option<u64>,
     /// Workers or threads; `None` for the runner's default.
     pub parallelism: Option<u32>,
+    /// A build the runner made in another copy of the tree (`Runner::build`) that this run runs
+    /// from instead of building, with its own copy as the working tree (ADR-150 §8); `None` to
+    /// build where it runs.
+    pub prebuilt: Option<Prebuilt>,
+}
+
+/// A runner's record of a build it made once for runs in other copies of the tree (ADR-150 §8):
+/// per project root, the files the runner wrote describing what it built. Only the runner that
+/// made it reads them.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Prebuilt {
+    /// Each project root (relative to the repository root, `.` for the root) and its records.
+    pub roots: Vec<(String, Vec<PathBuf>)>,
+}
+
+/// What building once made (`Runner::build`).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum BuildOutcome {
+    /// The build, for runs in other copies of the tree.
+    Built(Prebuilt),
+    /// It did not build: what the build printed, where a compiler names its errors.
+    Failed { output: String },
 }
 
 impl Default for RunOptions {
@@ -344,6 +366,7 @@ impl Default for RunOptions {
             order: RunOrder::Declared,
             seed: None,
             parallelism: None,
+            prebuilt: None,
         }
     }
 }
@@ -393,6 +416,14 @@ pub trait Runner: Producer<TestResults> {
     /// the tree must not share with the original or another copy (ADR-080 §8).
     fn outputs(&self) -> &'static [&'static str] {
         &[]
+    }
+
+    /// Builds the suite once in `ctx`'s tree, as `options` allow (its parallelism and memory),
+    /// for runs in other copies of the tree to run from (`RunOptions::prebuilt`, ADR-150 §8);
+    /// `None` when the runner always builds in the tree it runs in.
+    fn build(&self, ctx: &ProduceCtx, options: &RunOptions) -> Result<Option<BuildOutcome>> {
+        let _ = (ctx, options);
+        Ok(None)
     }
 }
 

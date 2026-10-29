@@ -31,6 +31,7 @@ static GRADLE: RunnerSpec = RunnerSpec {
         executed: Executed::Unknown,
     },
     outputs: &["build", ".gradle"],
+    build: None,
 };
 
 inventory::submit!(crate::ToolProducer {

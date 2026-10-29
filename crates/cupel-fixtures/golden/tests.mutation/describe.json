@@ -356,9 +356,9 @@
           "summary": "Milliseconds the engine spent in its run phase this time (ADR-150): the mutants' own test runs."
         },
         {
-          "name": "seed_ms",
+          "name": "validate_ms",
           "per": "scope",
-          "summary": "Milliseconds the engine spent in its seed phase this time (ADR-150): copying the first slot's build into each slot with none of its own."
+          "summary": "Milliseconds the engine spent in its validate phase this time (ADR-150): the file's tests unmutated, once, from a build made once for every slot."
         },
         {
           "name": "survivors",

@@ -1,5 +1,5 @@
-// ABOUTME: Worker overlays (ADR-080 §8, ADR-150 §6): persistent slots outside the repository that mirror its tree (clones
-// ABOUTME: or hard links, ignored entries as symlinks), seeded with another slot's build, where mutants are written.
+// ABOUTME: Worker overlays (ADR-080 §8): persistent slots outside the repository that mirror its tree (clones or
+// ABOUTME: hard links, ignored entries as symlinks), where mutants are written as private copies and restored.
 use std::collections::BTreeMap;
 use std::fs;
 use std::io;
@@ -43,25 +43,6 @@ impl Slot {
         prune(&self.root, &self.root, &wanted, &own)?;
         for (path, entry) in &wanted {
             self.place(path, entry)?;
-        }
-        Ok(())
-    }
-
-    /// Whether the slot holds a build of its own: one of the runner's build directories
-    /// `outputs` at its root.
-    pub fn built(&self, outputs: &[&str]) -> bool {
-        outputs.iter().any(|name| self.root.join(name).is_dir())
-    }
-
-    /// Gives the slot a copy of each build directory `outputs` that `from` holds at its root
-    /// and this slot does not (ADR-150 §6): every regular file copied (a clone on APFS, so the
-    /// copies share their blocks until a build writes over them), links kept as links.
-    pub fn seed(&self, from: &Self, outputs: &[&str]) -> io::Result<()> {
-        for name in outputs {
-            let (source, target) = (from.root.join(name), self.root.join(name));
-            if source.is_dir() && !target.exists() {
-                copy_tree(&source, &target)?;
-            }
         }
         Ok(())
     }
@@ -239,25 +220,6 @@ fn copy_now(source: &Path, at: &Path) -> io::Result<()> {
         .write(true)
         .open(at)?
         .set_modified(std::time::SystemTime::now())
-}
-
-/// Copies the directory `from` to `to`, which does not exist: directories made, regular files
-/// copied (clones where the filesystem makes them), symbolic links made again as they are.
-fn copy_tree(from: &Path, to: &Path) -> io::Result<()> {
-    fs::create_dir_all(to)?;
-    for entry in fs::read_dir(from)? {
-        let entry = entry?;
-        let (source, target) = (entry.path(), to.join(entry.file_name()));
-        let kind = entry.file_type()?;
-        if kind.is_dir() {
-            copy_tree(&source, &target)?;
-        } else if kind.is_symlink() {
-            link(&fs::read_link(&source)?, &target)?;
-        } else {
-            fs::copy(&source, &target)?;
-        }
-    }
-    Ok(())
 }
 
 #[cfg(unix)]

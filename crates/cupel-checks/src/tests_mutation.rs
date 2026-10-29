@@ -387,7 +387,7 @@ const PHASE_SUMMARIES: [&str; 6] = [
     "rewriting each file as schemata",
     "the build every mutant of a file shares, with the file's tests unmutated, per slot",
     "the mutants' own test runs",
-    "copying the first slot's build into each slot with none of its own",
+    "the file's tests unmutated, once, from a build made once for every slot",
 ];
 
 /// The metric that reports `phase`'s total: its name with `_ms`.

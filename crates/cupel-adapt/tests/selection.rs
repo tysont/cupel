@@ -5,8 +5,8 @@ use std::time::Duration;
 use cupel_adapt::report::listing;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, Error, LangId, ProduceCtx, Produced, ProducerId, ProducerRegistry,
-    RunOptions, RunOrder, Runner, RunnerCommand, TestOutcome, TestSelection,
+    Availability, BuildOutcome, Cancellation, Error, LangId, ProduceCtx, Produced, ProducerId,
+    ProducerRegistry, RunOptions, RunOrder, Runner, RunnerCommand, TestOutcome, TestSelection,
 };
 use cupel_fixtures::Capture;
 use support::{lang, produce_ctx, registry};
@@ -546,4 +546,91 @@ fn pytest_runs_every_test_but_one() {
         "tests/test_calc.py::test_scale",
         "tests/test_calc.py::test_add",
     );
+}
+
+/// The tests `results` ran, as `(id, outcome)`.
+fn ran(results: &cupel_core::TestResults) -> Vec<(&str, TestOutcome)> {
+    results
+        .tests
+        .iter()
+        .map(|test| (test.id.as_str(), test.outcome))
+        .collect()
+}
+
+#[test]
+fn cargo_nextest_builds_once_and_a_run_in_another_copy_of_the_tree_runs_from_that_build() {
+    let Some((_built, ctx)) = installed("tool.cargo-nextest", "rust", "rust") else {
+        return;
+    };
+    let Some((elsewhere, other)) = installed("tool.cargo-nextest", "rust", "rust") else {
+        return;
+    };
+    let registry = registry();
+    let runner = runner(&registry, "tool.cargo-nextest");
+    let Some(BuildOutcome::Built(prebuilt)) = runner.build(&ctx, &RunOptions::default()).unwrap()
+    else {
+        panic!("cargo-nextest builds once");
+    };
+    let results = runner
+        .run(
+            &other,
+            &tests(&["calc tests::adds"]),
+            &RunOptions {
+                parallelism: Some(1),
+                prebuilt: Some(prebuilt),
+                ..RunOptions::default()
+            },
+        )
+        .unwrap()
+        .results;
+    assert_eq!(ran(&results), [("calc tests::adds", TestOutcome::Passed)]);
+    let command = &results.invocations[0].command;
+    assert!(
+        command.iter().any(|word| word == "--workspace-remap"),
+        "{command:?}"
+    );
+    assert!(
+        !command
+            .iter()
+            .any(|word| word == "--workspace" || word == "--build-jobs"),
+        "{command:?}"
+    );
+    assert!(
+        !elsewhere.path().join("target/debug").exists(),
+        "the other copy built nothing"
+    );
+}
+
+#[test]
+fn a_build_that_does_not_compile_fails_with_the_compilers_errors() {
+    let Some((dir, ctx)) = installed("tool.cargo-nextest", "rust", "rust") else {
+        return;
+    };
+    let lib = dir.path().join("src/lib.rs");
+    let text = std::fs::read_to_string(&lib).unwrap();
+    std::fs::write(
+        &lib,
+        format!("{text}\npub fn broken() -> u32 {{ \"x\" }}\n"),
+    )
+    .unwrap();
+    let registry = registry();
+    let outcome = runner(&registry, "tool.cargo-nextest")
+        .build(&ctx, &RunOptions::default())
+        .unwrap();
+    let Some(BuildOutcome::Failed { output }) = outcome else {
+        panic!("the build fails: {outcome:?}");
+    };
+    assert!(output.contains("error[E0308]"), "{output}");
+    assert!(output.contains("src/lib.rs"), "{output}");
+}
+
+#[test]
+fn a_runner_that_builds_in_the_tree_it_runs_in_makes_no_build_of_its_own() {
+    let dir = tempfile::tempdir().unwrap();
+    let ctx = produce_ctx(dir.path(), "rust", Cancellation::new());
+    let registry = registry();
+    let outcome = runner(&registry, "tool.cargo-test")
+        .build(&ctx, &RunOptions::default())
+        .unwrap();
+    assert!(outcome.is_none(), "{outcome:?}");
 }

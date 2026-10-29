@@ -157,7 +157,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("rewrite_ms", MetricPer::Scope),
             ("build_ms", MetricPer::Scope),
             ("run_ms", MetricPer::Scope),
-            ("seed_ms", MetricPer::Scope),
+            ("validate_ms", MetricPer::Scope),
             ("survivors", MetricPer::Symbol),
             ("mutation_score", MetricPer::Symbol),
             ("tests", MetricPer::Symbol),
@@ -350,7 +350,7 @@ fn each_phase_of_the_engines_work_is_reported_as_its_total_in_milliseconds() {
             "rewrite_ms",
             "build_ms",
             "run_ms",
-            "seed_ms"
+            "validate_ms"
         ]
         .map(metric),
         [

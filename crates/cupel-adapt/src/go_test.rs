@@ -32,6 +32,7 @@ pub(crate) static GO_TEST: RunnerSpec = RunnerSpec {
         executed: Executed::Events(|captured| test2json::order(&captured.stdout)),
     },
     outputs: &[],
+    build: None,
 };
 
 inventory::submit!(crate::ToolProducer {

@@ -31,6 +31,7 @@ static JEST: RunnerSpec = RunnerSpec {
         executed: Executed::Unknown,
     },
     outputs: &[],
+    build: None,
 };
 
 inventory::submit!(crate::ToolProducer {

@@ -133,9 +133,9 @@ pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage, case_name}
 pub use per_test_impact::{ImpactBasis, ImpactedTest, TestCommand, TestsReport};
 pub use process::{Captured, Process, find_program};
 pub use producer::{
-    Availability, Ctx, Estimate, Focus, Install, JointProducer, ProduceCtx, Producer,
-    ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand, Runners,
-    TestRun, TestSelection, ToolProbe, Upstream,
+    Availability, BuildOutcome, Ctx, Estimate, Focus, Install, JointProducer, Prebuilt, ProduceCtx,
+    Producer, ProducerRegistry, RegisteredProducer, RunOptions, RunOrdering, Runner, RunnerCommand,
+    Runners, TestRun, TestSelection, ToolProbe, Upstream,
 };
 pub use proof::{Obligation, ObligationStatus, ProofResults, RelatedPlace};
 pub use property::{PropertyOutcome, PropertyResult, PropertyResults};

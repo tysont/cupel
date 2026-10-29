@@ -1,14 +1,14 @@
-// ABOUTME: What every runner producer shares (ADR-076, ADR-077): a `RunnerSpec` names the tool, builds the
-// ABOUTME: command for a project root, narrows it, and reads its report; `Runner` runs it per root.
+// ABOUTME: What every runner producer shares (ADR-076, ADR-077, ADR-150 §8): a `RunnerSpec` names the tool, builds the
+// ABOUTME: command for a project root, narrows it, reads its report, and may build once; `Runner` runs it per root.
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    Availability, Cancellation, Captured, CostClass, Ctx, Error, EventSink, FactKind, Install,
-    Langs, Process, ProduceCtx, Producer, ProducerId, Result, RootRun, RunOptions, RunOrder,
-    RunOrdering, RunStatus, RunnerCommand, RunnerInvocation, Scope, TestResult, TestResults,
-    TestRun, TestSelection, ToolId, ToolProbe, find_program, output_tail,
+    Availability, BuildOutcome, Cancellation, Captured, CostClass, Ctx, Error, EventSink, FactKind,
+    Install, Langs, Prebuilt, Process, ProduceCtx, Producer, ProducerId, Result, RootRun,
+    RunOptions, RunOrder, RunOrdering, RunStatus, RunnerCommand, RunnerInvocation, Scope,
+    TestResult, TestResults, TestRun, TestSelection, ToolId, ToolProbe, find_program, output_tail,
 };
 
 use crate::toolchain;
@@ -47,6 +47,26 @@ pub struct RunnerSpec {
     pub vary: &'static Varying,
     /// The directories it builds into, which no copy of the tree may share (ADR-080 §8).
     pub outputs: &'static [&'static str],
+    /// How it builds once for runs in other copies of the tree (ADR-150 §8); `None` when it
+    /// always builds in the tree it runs in.
+    pub build: Option<&'static Builder>,
+}
+
+/// One command of a build and the name of the file its standard output is kept in.
+pub type Record = (&'static str, Vec<String>);
+
+/// How a runner builds a suite once and runs it from that build in other copies of the tree
+/// (ADR-150 §8).
+pub struct Builder {
+    /// The commands that build in one root and describe what they built, each with the name of
+    /// the file its standard output is kept in, given the build's options.
+    pub records: fn(&Root, &RunOptions) -> Vec<Record>,
+    /// The command line that runs, in `root`, from the build `records` describe (in the
+    /// order `records` names them), in place of the spec's `command`.
+    pub command: fn(&Root, &[PathBuf]) -> Vec<String>,
+    /// Appended after the arguments that narrow a run from the build, in place of the
+    /// variation's own: what a run that builds nothing takes of a run's options.
+    pub vary: fn(&RunOptions) -> Vec<String>,
 }
 
 /// How a runner varies a run: its ordering, the arguments and environment a run's
@@ -331,6 +351,40 @@ impl cupel_core::Runner for Runner {
     fn outputs(&self) -> &'static [&'static str] {
         self.0.outputs
     }
+
+    fn build(&self, ctx: &ProduceCtx, options: &RunOptions) -> Result<Option<BuildOutcome>> {
+        let Some(builder) = self.0.build else {
+            return Ok(None);
+        };
+        let mut roots = Vec::new();
+        for (index, (dir, packages)) in suite_roots(ctx).into_iter().enumerate() {
+            let root = self.root(ctx, index, &dir, packages, false)?;
+            let area = root
+                .config
+                .parent()
+                .map(Path::to_path_buf)
+                .unwrap_or_default();
+            let mut records = Vec::new();
+            for (name, command) in (builder.records)(&root, options) {
+                let env: Vec<(String, String)> = options.env.clone();
+                let captured = self
+                    .process(&root, &command, &env, options.memory)
+                    .run(&ctx.cancel)?;
+                if captured.exit_code != Some(0) {
+                    let printed = format!("{}\n{}", captured.stderr, captured.stdout);
+                    return Ok(Some(BuildOutcome::Failed { output: printed }));
+                }
+                let record = area.join(name);
+                std::fs::write(&record, &captured.stdout).map_err(|error| Error::Process {
+                    program: self.0.id.to_owned(),
+                    message: format!("cannot write {}: {error}", record.display()),
+                })?;
+                records.push(record);
+            }
+            roots.push((dir, records));
+        }
+        Ok(Some(BuildOutcome::Built(Prebuilt { roots })))
+    }
 }
 
 /// How one root's run differs from the whole suite's.
@@ -440,10 +494,25 @@ impl Runner {
     ) -> Result<(RunnerInvocation, Vec<TestResult>, Vec<String>)> {
         let _ = std::fs::remove_file(&root.report);
         let vary = self.0.vary;
-        let command: Vec<String> = (self.0.command)(root)
+        let prebuilt =
+            self.0
+                .build
+                .zip(run.options.prebuilt.as_ref())
+                .and_then(|(builder, prebuilt)| {
+                    let records = prebuilt.roots.iter().find(|(built, _)| built == dir)?;
+                    Some((builder, &records.1))
+                });
+        let (base, varied) = match prebuilt {
+            Some((builder, records)) => (
+                (builder.command)(root, records),
+                (builder.vary)(run.options),
+            ),
+            None => ((self.0.command)(root), (vary.args)(run.options)),
+        };
+        let command: Vec<String> = base
             .into_iter()
             .chain(run.narrowing.iter().cloned())
-            .chain((vary.args)(run.options))
+            .chain(varied)
             .chain(run.options.args.iter().cloned())
             .collect();
         let env: Vec<(String, String)> = run

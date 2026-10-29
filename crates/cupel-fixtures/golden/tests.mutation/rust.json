@@ -19,12 +19,12 @@
         "run_ms": "<duration-ms>",
         "schemata": 5.0,
         "score": 0.6,
-        "seed_ms": "<duration-ms>",
         "survived": 1.0,
         "sync_ms": "<duration-ms>",
         "timeout": 0.0,
         "uncovered": 1.0,
-        "unviable": 0.0
+        "unviable": 0.0,
+        "validate_ms": "<duration-ms>"
       },
       "oracle": null,
       "score": {

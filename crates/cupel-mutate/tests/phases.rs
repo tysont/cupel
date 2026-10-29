@@ -140,62 +140,74 @@ fn a_schemata_file_records_its_rewrite_before_the_build_every_mutant_shares() {
     );
 }
 
-/// A `--config` file in `dir`: the Rust fixture's `cupel.toml` at `root` with two mutation slots.
-fn two_slots(root: &std::path::Path, dir: &std::path::Path) -> std::path::PathBuf {
+/// A `--config` file in `dir`: the Rust fixture's `cupel.toml` at `root` with two mutation
+/// slots, and `runner` as its runner when given.
+fn two_slots(
+    root: &std::path::Path,
+    dir: &std::path::Path,
+    runner: Option<&str>,
+) -> std::path::PathBuf {
     let toml = std::fs::read_to_string(root.join("cupel.toml")).unwrap();
+    let runner = runner.map_or_else(String::new, |runner| format!("runner = \"{runner}\"\n"));
     let path = dir.join("two-slots.toml");
-    std::fs::write(&path, format!("{toml}mutation = {{ jobs = 2 }}\n")).unwrap();
+    std::fs::write(&path, format!("{toml}{runner}mutation = {{ jobs = 2 }}\n")).unwrap();
     path
 }
 
-/// Each phase row as `(phase, slot)`, leaving out the plan and the slots' syncs.
-fn timeline(outcomes: &MutationOutcomes) -> Vec<(MutationPhase, Option<u32>)> {
-    outcomes
-        .phases
-        .iter()
-        .filter(|row| !matches!(row.phase, MutationPhase::Plan | MutationPhase::Sync))
-        .map(|row| (row.phase, row.slot))
-        .collect()
-}
-
-#[test]
-fn a_slot_with_no_build_of_its_own_is_seeded_from_the_first_slots_build_and_never_again() {
-    if !support::installed("cargo", "the Rust slot seeding test") {
-        return;
-    }
+/// The Rust fixture's outcomes in a fresh copy, with two slots and `runner`.
+fn rust_outcomes(runner: Option<&str>) -> (tempfile::TempDir, MutationOutcomes) {
     let dir = fixture("tests.mutation/rust");
     let configs = tempfile::tempdir().unwrap();
     let run = Run {
-        config: Some(two_slots(dir.path(), configs.path())),
+        config: Some(two_slots(dir.path(), configs.path(), runner)),
         ..Run::default()
     };
-    let cold = produce(dir.path(), "rust", &run).unwrap();
-    let before_runs: Vec<(MutationPhase, Option<u32>)> = timeline(&cold)
-        .into_iter()
-        .filter(|(phase, _)| *phase != MutationPhase::Run)
+    let outcomes = produce(dir.path(), "rust", &run).unwrap();
+    (dir, outcomes)
+}
+
+#[test]
+fn a_runner_that_builds_once_serves_every_slot_from_one_build_in_the_first() {
+    if !support::installed("cargo-nextest", "the Rust shared-build test") {
+        return;
+    }
+    let (dir, outcomes) = rust_outcomes(Some("cargo-nextest"));
+    let before_runs: Vec<(MutationPhase, Option<u32>)> = outcomes
+        .phases
+        .iter()
+        .filter(|row| {
+            !matches!(
+                row.phase,
+                MutationPhase::Plan | MutationPhase::Sync | MutationPhase::Run
+            )
+        })
+        .map(|row| (row.phase, row.slot))
         .collect();
     assert_eq!(
         before_runs,
         [
             (MutationPhase::Rewrite, None),
             (MutationPhase::Build, Some(0)),
-            (MutationPhase::Seed, Some(1)),
-            (MutationPhase::Build, Some(1)),
+            (MutationPhase::Validate, Some(0)),
         ],
         "{:?}",
-        cold.phases
-    );
-    let seeded = cupel_mutate::slots::slot_dir(dir.path(), "rust", 1).join("target");
-    assert!(seeded.is_dir(), "{}", seeded.display());
-    let warm = produce(dir.path(), "rust", &run).unwrap();
-    assert!(
-        of(&warm, MutationPhase::Seed).is_empty(),
-        "slots with builds of their own are not seeded: {:?}",
-        warm.phases
+        outcomes.phases
     );
     assert_eq!(
-        support::summary(&warm),
-        support::summary(&cold),
-        "a seeded slot finds what a slot that built alone finds"
+        slots(&outcomes, MutationPhase::Run),
+        BTreeSet::from([Some(0), Some(1)]),
+        "the mutants ran in both slots: {:?}",
+        outcomes.phases
+    );
+    let second = cupel_mutate::slots::slot_dir(dir.path(), "rust", 1);
+    assert!(
+        !second.join("target/debug").exists(),
+        "the second slot built nothing"
+    );
+    let (_other, alone) = rust_outcomes(None);
+    assert_eq!(
+        support::summary(&outcomes),
+        support::summary(&alone),
+        "one shared build finds what a build in every slot finds"
     );
 }

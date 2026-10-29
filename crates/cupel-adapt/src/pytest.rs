@@ -33,6 +33,7 @@ static PYTEST: RunnerSpec = RunnerSpec {
     completed_codes: &[0, 5],
     vary: &PYTHON,
     outputs: &[],
+    build: None,
 };
 
 inventory::submit!(crate::ToolProducer {
