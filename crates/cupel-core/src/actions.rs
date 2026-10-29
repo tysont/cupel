@@ -176,7 +176,9 @@ fn rule_action(rule: &GateRule, rerun: &str, checks: &[CheckResult]) -> Option<C
     }
 }
 
-/// An action for a check skipped for a reason the user can change.
+/// An action for a check skipped for a reason the user can change. A check skipped for its
+/// depth has none: the depth was the user's choice, the skip's `see` says how to run it
+/// deeper, and every run at that depth would otherwise repeat the action (ADR-154).
 fn skip_action(check: &CheckResult, rerun: &str) -> Option<Candidate> {
     let skipped = check.skipped.as_ref()?;
     let id = check.id.as_str();
@@ -234,8 +236,6 @@ fn skip_action(check: &CheckResult, rerun: &str) -> Option<Candidate> {
                     .unwrap_or_else(|| format!("cupel check --changed --only {id}")),
             ),
         )),
-        // The depth was the user's choice: the skip's `see` says how to run it deeper, and
-        // every run at that depth would otherwise repeat the action (ADR-154).
         SkipReason::Unsupported | SkipReason::Depth => None,
     }
 }
