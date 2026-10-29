@@ -81,6 +81,7 @@ fn design_envelope() -> Value {
             "scope": {"mode": "changed", "files": 4, "symbols": 11, "roots": ["."], "languages": ["rust"]},
             "depth": "standard", "budget_ms": null, "seed": 42,
             "toolchain": {"rust": "1.93.0", "cargo-llvm-cov": "0.6.12", "cargo-nextest": "0.9.80"},
+            "suite": {"rust": {"mode": "incremental", "rerun": 3, "reused": 1275}},
             "config": {"effective": {"depth": "standard"}, "sources": ["flags", "cupel.toml"]},
             "baseline": {"id": "run_01J9ZZZZZZZZZZZZZZZZZZZZZZ", "name": "default"}
         },

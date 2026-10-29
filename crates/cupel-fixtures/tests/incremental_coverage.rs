@@ -67,10 +67,15 @@ fn base() -> tempfile::TempDir {
     dir
 }
 
-/// Branch `work` with one commit that adds a comment inside `scale` and nothing else.
+/// Branch `work` with one commit that adds a comment inside `scale` and nothing else. The
+/// changed file is written anew, as a checkout writes it: a copy keeps the fixture's old
+/// modification time, which the suite cache's record would trust as unchanged (ADR-079).
 fn advance(root: &Path) {
     git(root, &[&["checkout", "--quiet", "-b", "work"]]);
     copy_repo("incremental-coverage/rust/head", root);
+    let changed = root.join("src/lib.rs");
+    let text = std::fs::read(&changed).unwrap();
+    std::fs::write(&changed, text).unwrap();
     git(
         root,
         &[&["commit", "--quiet", "--all", "-m", "comment inside scale"]],
@@ -91,10 +96,19 @@ fn suite(envelope: &Value) -> Value {
 
 /// `tests.coverage`'s result in `envelope`: its metrics and score.
 fn coverage(envelope: &Value) -> (Value, Value) {
-    let check = &envelope["checks"][0];
-    assert_eq!(check["id"], json!("tests.coverage"), "{envelope}");
+    let check = envelope["checks"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .find(|check| check["id"] == json!("tests.coverage"))
+        .unwrap_or_else(|| panic!("tests.coverage ran: {envelope}"));
     (check["metrics"].clone(), check["score"].clone())
 }
+
+/// The checks a run selects: coverage, and mutation, whose engine needs the baseline and wants
+/// the per-test map, so the suite facts are reached and the joint runs the suite once (ADR-084
+/// §2) and narrows each mutant to its covering tests (ADR-083 §6).
+const ONLY: [&str; 4] = ["--only", "tests.coverage", "--only", "tests.mutation"];
 
 #[test]
 fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_run_does() {
@@ -103,25 +117,23 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
     }
     let repo = base();
     let root = repo.path();
-    let tree = ["check", "--only", "tests.coverage", "--format", "json"];
+    let tree: Vec<&str> = ["check"]
+        .into_iter()
+        .chain(ONLY)
+        .chain(["--format", "json"])
+        .collect();
     let (whole, _) = check(root, &tree);
     assert_eq!(
         suite(&whole),
         json!({"mode": "full", "rerun": 4, "reused": 0})
     );
     advance(root);
-    let (ranged, outcome) = check(
-        root,
-        &[
-            "check",
-            "--base",
-            "main",
-            "--only",
-            "tests.coverage",
-            "--format",
-            "json",
-        ],
-    );
+    let ranged_args: Vec<&str> = ["check", "--base", "main"]
+        .into_iter()
+        .chain(ONLY)
+        .chain(["--format", "json"])
+        .collect();
+    let (ranged, outcome) = check(root, &ranged_args);
     assert_eq!(
         suite(&ranged),
         json!({"mode": "incremental", "rerun": 1, "reused": 3})

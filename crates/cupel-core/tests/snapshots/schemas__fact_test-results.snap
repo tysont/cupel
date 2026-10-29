@@ -16,6 +16,17 @@ expression: pretty(&schema)
         "$ref": "#/$defs/RunnerInvocation"
       }
     },
+    "reuse": {
+      "description": "How a joint suite run obtained these results from its cache (ADR-149 §5); null for a\nrunner that runs its whole suite every time.",
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SuiteReuse"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "runner": {
       "description": "The producer that ran the suite, such as `tool.pytest`.",
       "$ref": "#/$defs/ProducerId"
@@ -34,11 +45,12 @@ expression: pretty(&schema)
   },
   "required": [
     "invocations",
+    "reuse",
     "runner",
     "suite_hash",
     "tests"
   ],
-  "x-cupel-fact-version": 1,
+  "x-cupel-fact-version": 2,
   "$defs": {
     "ProducerId": {
       "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
@@ -85,6 +97,52 @@ expression: pretty(&schema)
         "dir",
         "exit_code",
         "output"
+      ]
+    },
+    "SuiteMode": {
+      "description": "What a joint suite run did.",
+      "oneOf": [
+        {
+          "description": "Every test ran.",
+          "type": "string",
+          "const": "full"
+        },
+        {
+          "description": "The stale and new tests ran; the rest were kept from the cache (a range scope).",
+          "type": "string",
+          "const": "incremental"
+        },
+        {
+          "description": "Nothing ran: the tree is as the cache recorded it.",
+          "type": "string",
+          "const": "cached"
+        }
+      ]
+    },
+    "SuiteReuse": {
+      "description": "How many of a joint suite run's tests ran and how many were kept from its cache (ADR-149).",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/SuiteMode"
+        },
+        "rerun": {
+          "description": "The tests that ran under instrumentation in this production.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "reused": {
+          "description": "The tests whose results and coverage came from the cache without running.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "mode",
+        "rerun",
+        "reused"
       ]
     },
     "TestOutcome": {

@@ -711,3 +711,158 @@ impl Made {
         facts
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use cupel_core::CoveredLines;
+    use cupel_core::syntax::{
+        NormNode, NormalizedSymbol, Span, SymbolDef, SymbolKey, SymbolKind, TestCase, TestFile,
+        Visibility,
+    };
+
+    use super::*;
+
+    fn test(id: &str, file: &str, lines: &[u32]) -> TestCoverage {
+        TestCoverage::new(
+            id,
+            None,
+            vec![CoveredLines {
+                file: file.to_owned(),
+                lines: lines.to_vec(),
+            }],
+        )
+    }
+
+    #[test]
+    fn a_kept_test_adds_one_hit_to_each_instrumented_line_it_ran_and_none_elsewhere() {
+        let report = CoverageMap::new(vec![FileCoverage::from_hits(
+            "src/lib.rs",
+            &[(4, 0), (5, 2), (9, 0)],
+            None,
+        )]);
+        let kept = [
+            test("a", "src/lib.rs", &[4, 5, 7]),
+            test("b", "src/lib.rs", &[4]),
+            test("c", "src/other.rs", &[1]),
+        ];
+        let merged = with_kept(report, &kept);
+        let hits: Vec<(String, Vec<(u32, u64)>)> = merged
+            .files
+            .iter()
+            .map(|file| {
+                let lines = file
+                    .lines
+                    .iter()
+                    .map(|hits| (hits.line, hits.hits))
+                    .collect();
+                (file.file.clone(), lines)
+            })
+            .collect();
+        assert_eq!(
+            hits,
+            [("src/lib.rs".to_owned(), vec![(4, 2), (5, 3), (9, 0)])]
+        );
+    }
+
+    fn span(line: u32, end_line: u32) -> Span {
+        Span {
+            line,
+            col: 1,
+            end_line,
+            end_col: 1,
+        }
+    }
+
+    /// `TestFrames`, `Symbols`, and a `NormTree` for a root `web` holding `tests/t.rs` with the
+    /// cases `adds` (lines 3–5, inside `fn adds` 3–5) and `twice` (twice, in two files).
+    fn upstream() -> Upstream {
+        let case = |name: &str, line: u32, end_line: u32| TestCase {
+            name: name.to_owned(),
+            span: span(line, end_line),
+            assertions: Vec::new(),
+            mocks: Vec::new(),
+            skip: None,
+            property: None,
+            doc: None,
+        };
+        let file = |path: &str, cases: Vec<TestCase>| TestFile {
+            file: path.to_owned(),
+            framework: "rust-test".to_owned(),
+            setup: Vec::new(),
+            cases,
+        };
+        let frames = TestFrames {
+            files: vec![
+                file(
+                    "web/tests/t.rs",
+                    vec![case("adds", 3, 5), case("twice", 8, 9)],
+                ),
+                file("web/tests/u.rs", vec![case("twice", 1, 2)]),
+            ],
+        };
+        let symbol = |line: u32, end_line: u32| SymbolDef {
+            name: "f".to_owned(),
+            namespace: String::new(),
+            display: "f".to_owned(),
+            kind: SymbolKind::Function,
+            visibility: Visibility::Private,
+            lang: LangId::from("rust"),
+            file: "web/tests/t.rs".to_owned(),
+            span: span(line, end_line),
+            body: None,
+            parameters: 0,
+        };
+        let symbols = Symbols {
+            symbols: vec![symbol(1, 12), symbol(3, 5)],
+        };
+        let norm = NormTree {
+            symbols: [(1, "sh_000000000000000f"), (3, "sh_000000000000000a")]
+                .into_iter()
+                .map(|(line, hash)| NormalizedSymbol {
+                    symbol: SymbolKey {
+                        file: "web/tests/t.rs".to_owned(),
+                        line,
+                        col: 1,
+                    },
+                    hash: hash.parse().unwrap(),
+                    root: NormNode {
+                        label: "fn".to_owned(),
+                        children: Vec::new(),
+                        span: None,
+                        text: None,
+                    },
+                })
+                .collect(),
+        };
+        let mut upstream = Upstream::default();
+        for fact in [
+            Produced::new(frames),
+            Produced::new(symbols),
+            Produced::new(norm),
+        ] {
+            upstream.insert(fact.share());
+        }
+        upstream
+    }
+
+    #[test]
+    fn a_tests_structural_hash_is_the_innermost_functions_holding_its_one_case() {
+        let hashes = structural_hashes(
+            ["t adds", "t twice", "t none"].into_iter(),
+            &upstream(),
+            "web",
+        );
+        assert_eq!(
+            hashes,
+            BTreeMap::from([(
+                "t adds".to_owned(),
+                ("tests/t.rs".to_owned(), "sh_000000000000000a".to_owned())
+            )])
+        );
+    }
+
+    #[test]
+    fn without_the_facts_no_test_has_a_structural_hash() {
+        assert!(structural_hashes(["t adds"].into_iter(), &Upstream::default(), ".").is_empty());
+    }
+}

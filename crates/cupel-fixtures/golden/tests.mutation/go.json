@@ -241,6 +241,13 @@
     },
     "seed": "<seed>",
     "started": "<timestamp>",
+    "suite": {
+      "go": {
+        "mode": "full",
+        "rerun": 2,
+        "reused": 0
+      }
+    },
     "toolchain": {},
     "verb": "check"
   },

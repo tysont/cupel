@@ -72,6 +72,7 @@
     "scope": null,
     "seed": "<seed>",
     "started": "<timestamp>",
+    "suite": {},
     "toolchain": {},
     "verb": "doctor"
   },

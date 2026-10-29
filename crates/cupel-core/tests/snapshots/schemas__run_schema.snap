@@ -2928,6 +2928,14 @@ expression: pretty(&schema)
           "description": "Start time, RFC 3339 in UTC (ADR-013).",
           "type": "string"
         },
+        "suite": {
+          "description": "Per language whose baseline a joint suite run made, how many tests it reran and how many\nit kept from its cache (ADR-149 §5); empty when none did, and for a run recorded before\nthe field existed.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/SuiteReuse"
+          },
+          "default": {}
+        },
         "toolchain": {
           "$ref": "#/$defs/ToolchainInfo"
         },
@@ -2954,6 +2962,7 @@ expression: pretty(&schema)
         "scope",
         "seed",
         "started",
+        "suite",
         "toolchain",
         "verb"
       ]
@@ -3374,6 +3383,52 @@ expression: pretty(&schema)
           "type": "string",
           "const": "plan"
         }
+      ]
+    },
+    "SuiteMode": {
+      "description": "What a joint suite run did.",
+      "oneOf": [
+        {
+          "description": "Every test ran.",
+          "type": "string",
+          "const": "full"
+        },
+        {
+          "description": "The stale and new tests ran; the rest were kept from the cache (a range scope).",
+          "type": "string",
+          "const": "incremental"
+        },
+        {
+          "description": "Nothing ran: the tree is as the cache recorded it.",
+          "type": "string",
+          "const": "cached"
+        }
+      ]
+    },
+    "SuiteReuse": {
+      "description": "How many of a joint suite run's tests ran and how many were kept from its cache (ADR-149).",
+      "type": "object",
+      "properties": {
+        "mode": {
+          "$ref": "#/$defs/SuiteMode"
+        },
+        "rerun": {
+          "description": "The tests that ran under instrumentation in this production.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "reused": {
+          "description": "The tests whose results and coverage came from the cache without running.",
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "mode",
+        "rerun",
+        "reused"
       ]
     },
     "Summary": {

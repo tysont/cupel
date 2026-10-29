@@ -136,7 +136,7 @@ fn an_output_tail_keeps_the_last_lines_without_surrounding_blank_lines() {
 }
 
 #[test]
-fn outcomes_serialize_in_kebab_case_and_the_fact_is_version_1() {
+fn outcomes_serialize_in_kebab_case_and_the_fact_is_version_2() {
     let names: Vec<String> = [
         TestOutcome::Passed,
         TestOutcome::Failed,
@@ -152,5 +152,5 @@ fn outcomes_serialize_in_kebab_case_and_the_fact_is_version_1() {
     })
     .to_vec();
     assert_eq!(names, ["passed", "failed", "skipped", "errored"]);
-    assert_eq!(schema::fact_version(FactKind::TestResults), Some(1));
+    assert_eq!(schema::fact_version(FactKind::TestResults), Some(2));
 }

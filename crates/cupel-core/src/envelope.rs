@@ -80,7 +80,10 @@ pub struct RunInfo {
     pub seed: u64,
     pub toolchain: ToolchainInfo,
     /// Per language whose baseline a joint suite run made, how many tests it reran and how many
-    /// it kept from its cache (ADR-149 §5); empty when none did.
+    /// it kept from its cache (ADR-149 §5); empty when none did, and for a run recorded before
+    /// the field existed.
+    #[serde(default)]
+    #[schemars(required)]
     pub suite: BTreeMap<LangId, SuiteReuse>,
     pub config: ConfigEcho,
     pub baseline: Option<BaselineRef>,

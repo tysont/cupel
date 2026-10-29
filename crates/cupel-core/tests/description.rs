@@ -10,7 +10,8 @@ fn envelope_with(verb: &Value, description: &Value) -> Value {
             "id": "run_01JA2B3C4D5E6F7G8H9JKMNPQR", "verb": verb,
             "started": "2026-10-10T16:31:04Z", "duration_ms": 3,
             "git": null, "scope": null, "depth": null, "budget_ms": null, "seed": 0,
-            "toolchain": {}, "config": {"effective": {}, "sources": []}, "baseline": null
+            "toolchain": {}, "suite": {}, "config": {"effective": {}, "sources": []},
+            "baseline": null
         },
         "status": "pass", "exit_code": 0, "checks": [], "findings": [],
         "summary": {"findings": {"fail": 0, "warn": 0, "info": 0},
@@ -173,6 +174,7 @@ fn run_schema_requires_the_nullable_verb_and_description() {
             "scope",
             "seed",
             "started",
+            "suite",
             "toolchain",
             "verb"
         ]

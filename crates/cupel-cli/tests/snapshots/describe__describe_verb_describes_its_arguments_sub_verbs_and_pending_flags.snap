@@ -285,6 +285,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
     "scope": null,
     "seed": "[seed]",
     "started": "[started]",
+    "suite": {},
     "toolchain": {},
     "verb": "describe"
   },

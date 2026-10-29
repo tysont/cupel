@@ -902,7 +902,9 @@ The baseline, the coverage report, and the per-test map each need the suite to r
 | Python (runner `pytest`) | `pytest --cov --cov-context=test` | baseline, coverage, per-test map |
 | Go | `go test -json -coverprofile` | baseline, coverage (the per-test map stays one run per test) |
 
-A green run is cached in `.cupel/cache/suite/` with the hash of every file under the project root. While nothing there changes, the next run reuses it and runs no test, the baseline included. A red or incomplete run is never cached: it refuses the run with exit 4 and runs again next time, since what made it red may lie outside the tree (a full disk, a missing service). Any change runs the suite again, so the mutation and flakiness engines always start from a real baseline of the tree they test. A customized coverage command, another runner (`cargo test`, `unittest`), or a pin on one keeps separate runs. `cupel check --dry-run` says which in each check's `needs`:
+A green run is cached in `.cupel/cache/suite/` with the hash of every file under the project root and the toolchain that measured it (`rustc -vV`'s release and host; the Python interpreter's and pytest's versions). While nothing there changes, the next run reuses it and runs no test, the baseline included. A red or incomplete run is never cached: it refuses the run with exit 4 and runs again next time, since what made it red may lie outside the tree (a full disk, a missing service). On a tree scope, at `--depth deep`, or under another toolchain, any change runs the suite again, so the mutation and flakiness engines always start from a real baseline of the tree they test.
+
+On a `--changed` or `--base` scope below `deep`, a Rust or Python joint with a cached run reruns only the tests the change makes stale and keeps the rest from its cache ([ADR-149](docs/adr/CUPEL_DECISION_149.md)): a test is stale when a file it covers changed inside a function it executed, when its own test case's structure changed, when a file it owns changed, or when a build or test configuration file changed (then every test is). The kept tests' results and per-test lines join the rerun tests', and the coverage report of the rerun gets a hit on every line a kept test executed, so which lines ran is what a whole run would say. A new test file still runs the whole suite. The envelope's `run.suite` says what happened per language (`{"rust": {"mode": "incremental", "rerun": 3, "reused": 1275}}`; `full` or `cached` otherwise), and the text output prints it as `suite  rust incremental · 3 rerun · 1275 reused`. A customized coverage command, another runner (`cargo test`, `unittest`), or a pin on one keeps separate runs. `cupel check --dry-run` says which in each check's `needs`:
 
 ```console
 $ cupel check --only tests.mutation --dry-run    # pytest, with the default coverage command
@@ -912,7 +914,7 @@ $ cupel check --only tests.mutation --dry-run    # coverage = "pytest --cov --co
   "needs": ["symbols", "mutation-outcomes", "test-conventions", "test-results(run)", "coverage-map(run)", "per-test-map(deep)"]
 ```
 
-With the run cached the first says `test-results+coverage-map+per-test-map(cached)`.
+With the run cached the first says `test-results+coverage-map+per-test-map(cached)`; on a range with a cached run it says `(incremental: 3 stale)`, the tests it would rerun.
 
 ### Flakiness
 

@@ -157,6 +157,7 @@
     },
     "seed": "<seed>",
     "started": "<timestamp>",
+    "suite": {},
     "toolchain": {},
     "verb": "check"
   },

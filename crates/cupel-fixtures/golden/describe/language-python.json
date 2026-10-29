@@ -317,6 +317,7 @@
     "scope": null,
     "seed": "<seed>",
     "started": "<timestamp>",
+    "suite": {},
     "toolchain": {},
     "verb": "describe"
   },
