@@ -35,6 +35,10 @@ pub enum Listing {
 }
 
 impl Listing {
+    #[allow(
+        clippy::trivially_copy_pass_by_ref,
+        reason = "serde's `skip_serializing_if` passes the field by reference"
+    )]
     fn is_all(&self) -> bool {
         *self == Self::All
     }
