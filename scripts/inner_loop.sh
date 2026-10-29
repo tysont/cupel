@@ -26,6 +26,8 @@ CLONE="$OUT/$LABEL"
 rm -rf "$CLONE"
 git clone --quiet "$HERE" "$CLONE" && cd "$CLONE" || exit 1
 git config user.email inner-loop@cupel.invalid && git config user.name inner-loop
+# `--changed` diffs against `main`: the checkout's tip, which a clone of a branch has only as `origin/<branch>`.
+[ "$(git rev-parse --abbrev-ref HEAD)" = main ] || git branch --quiet --force main HEAD
 git checkout --quiet -b inner-loop
 export CUPEL_NO_DAEMON=1
 run() {
