@@ -331,6 +331,31 @@
           "summary": "Mutants run this time as file copies in a language with schemata; the notes say why."
         },
         {
+          "name": "plan_ms",
+          "per": "scope",
+          "summary": "Milliseconds the engine spent in its plan phase this time (ADR-150): planning the mutants, their test selection, and the store's history."
+        },
+        {
+          "name": "sync_ms",
+          "per": "scope",
+          "summary": "Milliseconds the engine spent in its sync phase this time (ADR-150): reconciling each mutation slot with the tree."
+        },
+        {
+          "name": "rewrite_ms",
+          "per": "scope",
+          "summary": "Milliseconds the engine spent in its rewrite phase this time (ADR-150): rewriting each file as schemata."
+        },
+        {
+          "name": "build_ms",
+          "per": "scope",
+          "summary": "Milliseconds the engine spent in its build phase this time (ADR-150): the build every mutant of a file shares, with the file's tests unmutated, per slot."
+        },
+        {
+          "name": "run_ms",
+          "per": "scope",
+          "summary": "Milliseconds the engine spent in its run phase this time (ADR-150): the mutants' own test runs."
+        },
+        {
           "name": "survivors",
           "per": "symbol",
           "summary": "Mutants of the function that survived."
