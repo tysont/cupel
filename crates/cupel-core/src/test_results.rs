@@ -148,6 +148,7 @@ impl TestResults {
     }
 
     /// These results, obtained as `reuse` says.
+    #[must_use]
     pub fn with_reuse(mut self, reuse: SuiteReuse) -> Self {
         self.reuse = Some(reuse);
         self

@@ -155,7 +155,7 @@ impl JointProducer for Suite {
         let mut incremental = true;
         let mut stale = 0;
         for entry in &entries {
-            let Some(found) = self.entry(entry, None) else {
+            let Some(found) = Self::entry(entry, None) else {
                 cached = false;
                 incremental = false;
                 continue;
@@ -166,7 +166,7 @@ impl JointProducer for Suite {
                 continue;
             }
             cached = false;
-            match self.plan(&ctx.root, &ctx.exclude, &dir, &root, entry, upstream, focus) {
+            match self.plan(ctx, &dir, &root, entry, upstream, focus) {
                 Some(plan) => stale += plan.stale,
                 None => incremental = false,
             }
@@ -230,28 +230,24 @@ impl JointProducer for Suite {
                 packages,
                 area: ctx.writer.create_dir(&entry.join("work"))?,
             };
-            let repo = &ctx.ctx.root;
-            let exclude = &ctx.ctx.exclude;
-            let (run, mode, rerun) = match self.cached(repo, exclude, &entry, &dir) {
-                Some(kept) => (kept.run, SuiteMode::Cached, 0),
-                None => match self.plan(
-                    repo,
-                    exclude,
+            let (root_run, obtained, rerun) =
+                if let Some(kept) = self.cached(&ctx.ctx.root, &ctx.ctx.exclude, &entry, &dir) {
+                    (kept.run, SuiteMode::Cached, 0)
+                } else if let Some(plan) = self.plan(
+                    &ctx.ctx,
                     &dir,
                     &site.path,
                     &entry,
                     &ctx.upstream,
                     &ctx.focus,
                 ) {
-                    Some(plan) => self.incremental(&site, &entry, plan)?,
-                    None => {
-                        let run = self.full(&site, &entry)?;
-                        let rerun = run.tests.len() as u64;
-                        (run, SuiteMode::Full, rerun)
-                    }
-                },
-            };
-            made.add(&site, run, mode, rerun);
+                    self.incremental(&site, &entry, plan)?
+                } else {
+                    let whole = self.full(&site, &entry)?;
+                    let rerun = whole.tests.len() as u64;
+                    (whole, SuiteMode::Full, rerun)
+                };
+            made.add(&site, root_run, obtained, rerun);
         }
         Ok(made.facts(self.0, &ctx.ctx.root))
     }
@@ -272,7 +268,7 @@ impl Suite {
 
     /// The entry at `entry` (for the root `dir`, when given), when its report reads back and is
     /// of this version.
-    fn entry(&self, entry: &Path, dir: Option<&str>) -> Option<Entry> {
+    fn entry(entry: &Path, dir: Option<&str>) -> Option<Entry> {
         let (sources, written, report) = load(entry)?;
         if dir.is_some_and(|dir| dir != sources.dir) {
             return None;
@@ -306,30 +302,30 @@ impl Suite {
 
     /// The run cached in `entry` for the root `dir`, when it is fresh (see [`fresh`](Self::fresh)).
     fn cached(&self, repo: &Path, exclude: &Exclude, entry: &Path, dir: &str) -> Option<Report> {
-        let found = self.entry(entry, Some(dir))?;
+        let found = Self::entry(entry, Some(dir))?;
         Some(self.fresh(repo, exclude, found, dir)?.report)
     }
 
-    /// What an incremental run in the root `dir` (at `root`) would keep and rerun (ADR-149 §1):
+    /// What an incremental run in the root `dir` (at `root`) of the repository `ctx` describes
+    /// would keep and rerun (ADR-149 §1):
     /// `None` when the whole suite runs instead (§2): a tree scope, `deep`, no entry for this
     /// toolchain, no per-test entry, an added file that may hold a test, a change that makes
     /// every test stale, or a changed source file that no test ran.
-    #[allow(clippy::too_many_arguments)]
     fn plan(
         &self,
-        repo: &Path,
-        exclude: &Exclude,
+        ctx: &Ctx,
         dir: &str,
         root: &Path,
         entry: &Path,
         upstream: &Upstream,
         focus: &Focus,
     ) -> Option<Plan> {
+        let (repo, exclude) = (&ctx.root, &ctx.exclude);
         let spec = self.0.per_test?;
         if focus.changed.is_none() || focus.depth >= CostClass::Deep {
             return None;
         }
-        let found = self.entry(entry, Some(dir))?;
+        let found = Self::entry(entry, Some(dir))?;
         if found.report.toolchain != self.toolchain(root) {
             return None;
         }
@@ -387,7 +383,7 @@ impl Suite {
         .into_iter()
         .map(|(id, (_, hash))| (id, hash))
         .collect();
-        self.keep(site, entry, &run, hashes, before)?;
+        self.keep(site, entry, &run, hashes, &before)?;
         Ok(run)
     }
 
@@ -405,7 +401,7 @@ impl Suite {
         if plan.stale == 0 {
             let mut run = plan.recorded.run;
             run.per_test = Some(plan.keep);
-            self.keep(site, entry, &run, plan.recorded.hashes, before)?;
+            self.keep(site, entry, &run, plan.recorded.hashes, &before)?;
             return Ok((run, SuiteMode::Cached, 0));
         }
         let measured = (self.0.run)(site, &kept)?;
@@ -431,7 +427,7 @@ impl Suite {
             .map(|(id, (_, hash))| (id, hash)),
         );
         let run = merge(measured, plan.recorded.run, plan.keep);
-        self.keep(site, entry, &run, hashes, before)?;
+        self.keep(site, entry, &run, hashes, &before)?;
         Ok((run, SuiteMode::Incremental, rerun))
     }
 
@@ -457,7 +453,7 @@ impl Suite {
         entry: &Path,
         run: &SuiteRun,
         hashes: Hashes,
-        before: Sources,
+        before: &Sources,
     ) -> Result<()> {
         let whole = run.invocation.completed
             && !run.tests.iter().any(|test| test.outcome.is_failure())
@@ -466,7 +462,7 @@ impl Suite {
         if !whole {
             return Ok(());
         }
-        let mut sources = self.record(site).since(&before);
+        let mut sources = self.record(site).since(before);
         if let (Some(spec), Some(tests)) = (self.0.per_test, &run.per_test) {
             store_tests(site, spec.id, tests, sources.clone())?;
         }

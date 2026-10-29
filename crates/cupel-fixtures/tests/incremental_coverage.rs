@@ -35,13 +35,12 @@ fn tools_installed() -> bool {
     };
     let missing = producers
         .producers_for(FactKind::PerTestMap, &lang)
-        .filter_map(
+        .find_map(
             |producer| match producer.availability(&Ctx::new(std::env::temp_dir())) {
                 Availability::MissingTool { name, .. } => Some(name),
                 _ => None,
             },
-        )
-        .next();
+        );
     match missing {
         Some(tool) => {
             eprintln!(

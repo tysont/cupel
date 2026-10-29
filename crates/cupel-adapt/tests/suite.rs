@@ -194,7 +194,7 @@ impl Joint {
             match fact.kind() {
                 FactKind::TestResults => {
                     let results = fact.downcast::<TestResults>().unwrap();
-                    reuse = results.reuse.clone();
+                    reuse.clone_from(&results.reuse);
                     facts.results = comparable(&results);
                 }
                 FactKind::CoverageMap => facts.coverage = fact.downcast::<CoverageMap>(),
@@ -239,14 +239,6 @@ impl Joint {
         let ctx = self.focused(root, focus.clone());
         self.joint().estimate(&ctx.ctx, &ctx.upstream, focus).note
     }
-
-    /// Replaces `from` with `to` in `file`, which must hold it.
-    fn edit(&self, root: &Path, file: &str, from: &str, to: &str) {
-        let path = root.join(file);
-        let text = std::fs::read_to_string(&path).unwrap();
-        assert!(text.contains(from), "{from:?} in {file}");
-        std::fs::write(&path, text.replace(from, to)).unwrap();
-    }
 }
 
 /// `results` without what differs between two runs of one suite: durations, each invocation's
@@ -262,6 +254,14 @@ fn comparable(results: &TestResults) -> Value {
     }
     value["reuse"] = Value::Null;
     value
+}
+
+/// Replaces `from` with `to` in `file` under `root`, which must hold it.
+fn replace_in(root: &Path, file: &str, from: &str, to: &str) {
+    let path = root.join(file);
+    let text = std::fs::read_to_string(&path).unwrap();
+    assert!(text.contains(from), "{from:?} in {file}");
+    std::fs::write(&path, text.replace(from, to)).unwrap();
 }
 
 /// `Symbols` holding one function per `(file, first line, last line)`, named `f<line>`.
@@ -295,12 +295,12 @@ fn span(line: u32, end_line: u32) -> Span {
 }
 
 /// How a joint's cache was reused by a run: its mode and counts.
-fn reuse(mode: SuiteMode, rerun: u64, reused: u64) -> Option<SuiteReuse> {
-    Some(SuiteReuse {
+fn reuse(mode: SuiteMode, rerun: u64, reused: u64) -> SuiteReuse {
+    SuiteReuse {
         mode,
         rerun,
         reused,
-    })
+    }
 }
 
 /// The facts of one joint run and of the separate runs, each on its own copy of the fixture.
@@ -410,7 +410,7 @@ fn after_edit(
     let (_, first) = joint.jointly_with(&joint.ctx(root));
     assert_eq!(
         first,
-        reuse(SuiteMode::Full, 2, 0),
+        Some(reuse(SuiteMode::Full, 2, 0)),
         "the first run is whole"
     );
     edit(root);
@@ -425,18 +425,13 @@ fn after_edit(
 /// obtained as `expected` says and made the facts a whole run of the edited tree makes: the
 /// same tests with the same outcomes, the same instrumented lines, the same lines run, and the
 /// same per-test lines.
-fn assert_incremental(
-    joint: &Joint,
-    edit: &dyn Fn(&Path),
-    focus: Focus,
-    expected: Option<SuiteReuse>,
-) {
+fn assert_incremental(joint: &Joint, edit: &dyn Fn(&Path), focus: &Focus, expected: SuiteReuse) {
     let Some(((second, obtained), whole)) =
         after_edit(joint, edit, &|root| joint.focused(root, focus.clone()))
     else {
         return;
     };
-    assert_eq!(obtained, expected);
+    assert_eq!(obtained, Some(expected));
     assert_eq!(
         (
             &second.results,
@@ -455,7 +450,7 @@ fn assert_incremental(
 
 /// `a + b` in `add` becomes `b + a`: a change inside the function the first test covers.
 fn edit_add(joint: &'static Joint) -> impl Fn(&Path) {
-    move |root| joint.edit(root, joint.source, "a + b", "b + a")
+    move |root| replace_in(root, joint.source, "a + b", "b + a")
 }
 
 #[test]
@@ -463,7 +458,7 @@ fn a_rust_range_reruns_only_the_test_that_ran_the_changed_function() {
     assert_incremental(
         &RUST,
         &edit_add(&RUST),
-        RUST.range((5, 5), CostClass::Standard),
+        &RUST.range((5, 5), CostClass::Standard),
         reuse(SuiteMode::Incremental, 1, 1),
     );
 }
@@ -473,7 +468,7 @@ fn a_python_range_reruns_only_the_test_that_ran_the_changed_function() {
     assert_incremental(
         &PYTHON,
         &edit_add(&PYTHON),
-        PYTHON.range((6, 6), CostClass::Standard),
+        &PYTHON.range((6, 6), CostClass::Standard),
         reuse(SuiteMode::Incremental, 1, 1),
     );
 }
@@ -482,8 +477,8 @@ fn a_python_range_reruns_only_the_test_that_ran_the_changed_function() {
 fn a_change_to_a_tests_own_body_reruns_that_test_alone() {
     assert_incremental(
         &RUST,
-        &|root| RUST.edit(root, RUST.source, "add(2, 3), 5", "add(3, 2), 5"),
-        RUST.range((19, 19), CostClass::Standard),
+        &|root| replace_in(root, RUST.source, "add(2, 3), 5", "add(3, 2), 5"),
+        &RUST.range((19, 19), CostClass::Standard),
         reuse(SuiteMode::Incremental, 1, 1),
     );
 }
@@ -491,7 +486,12 @@ fn a_change_to_a_tests_own_body_reruns_that_test_alone() {
 #[test]
 fn a_tree_scope_or_the_deep_depth_runs_the_whole_suite() {
     for focus in [Focus::default(), RUST.range((5, 5), CostClass::Deep)] {
-        assert_incremental(&RUST, &edit_add(&RUST), focus, reuse(SuiteMode::Full, 2, 0));
+        assert_incremental(
+            &RUST,
+            &edit_add(&RUST),
+            &focus,
+            reuse(SuiteMode::Full, 2, 0),
+        );
     }
 }
 
@@ -507,7 +507,7 @@ fn an_entry_measured_by_another_toolchain_runs_the_whole_suite() {
     ) else {
         return;
     };
-    assert_eq!(obtained, reuse(SuiteMode::Full, 2, 0));
+    assert_eq!(obtained, Some(reuse(SuiteMode::Full, 2, 0)));
 }
 
 /// Rewrites the suite entry of `joint` under `root`, when there is one, as measured by another
@@ -554,7 +554,7 @@ fn a_new_test_file_runs_the_whole_suite() {
     };
     assert_eq!(
         (obtained, second.results),
-        (reuse(SuiteMode::Full, 3, 0), whole.results)
+        (Some(reuse(SuiteMode::Full, 3, 0)), whole.results)
     );
 }
 
@@ -574,7 +574,7 @@ fn an_unchanged_tree_is_served_from_the_cache_on_a_range_too() {
             second.results
         ),
         (
-            reuse(SuiteMode::Cached, 0, 2),
+            Some(reuse(SuiteMode::Cached, 0, 2)),
             Some("cached".to_owned()),
             first.results
         )
@@ -677,8 +677,8 @@ fn a_test_whose_recorded_structural_hash_differs_is_rerun_though_no_function_it_
         assert_eq!(
             outcomes,
             [
-                reuse(SuiteMode::Full, 2, 0),
-                reuse(SuiteMode::Incremental, 1, 1)
+                Some(reuse(SuiteMode::Full, 2, 0)),
+                Some(reuse(SuiteMode::Incremental, 1, 1))
             ]
         );
     }
