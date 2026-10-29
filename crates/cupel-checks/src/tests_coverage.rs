@@ -292,9 +292,36 @@ fn span_lines(symbol: &SymbolDef) -> u32 {
     if last > first { last - first } else { 1 }
 }
 
+/// The coverage of `symbol`: its instrumented lines and branches; or, when the map lists only
+/// the files the suite loaded and leaves its file out, its span's lines, none covered (ADR-152);
+/// `None` when it has nothing to measure.
+fn measure(symbol: &SymbolDef, coverage: &CoverageMap) -> Option<Measured> {
+    let lines = symbol_lines(coverage, symbol);
+    if lines.is_empty() {
+        let unloaded = coverage.listing == Listing::Loaded
+            && !coverage.files.is_empty()
+            && !coverage.instruments(&symbol.file);
+        return unloaded.then(|| Measured {
+            lines: span_lines(symbol),
+            covered: 0,
+            branches: None,
+            loaded: false,
+        });
+    }
+    Some(Measured {
+        lines: u32::try_from(lines.len()).unwrap_or(u32::MAX),
+        covered: u32::try_from(lines.iter().filter(|hits| hits.hits > 0).count())
+            .unwrap_or(u32::MAX),
+        branches: coverage
+            .branch_hits(&symbol.file, symbol.span.line, symbol.span.end_line)
+            .map(|branches| branches.iter().map(|b| (b.line, b.hits)).collect()),
+        loaded: true,
+    })
+}
+
 impl TestsCoverage {
-    /// Scores `symbol` when coverage instrumented a line of it, measuring its uncovered lines;
-    /// its finding, if any.
+    /// Scores `symbol` when it has lines to measure ([`measure`]), measuring its uncovered
+    /// lines; its finding, if any.
     fn score(
         &self,
         symbol: &SymbolDef,
@@ -302,35 +329,7 @@ impl TestsCoverage {
         tally: &mut Tally,
         sink: &mut dyn EventSink,
     ) -> Option<Finding> {
-        let (start, end) = (symbol.span.line, symbol.span.end_line);
-        let lines = symbol_lines(inputs.coverage, symbol);
-        let measured = if lines.is_empty() {
-            // A file the map leaves out has no instrumented line, unless the map lists only
-            // the files the suite loaded: then no test loaded it (ADR-152).
-            let unloaded = inputs.coverage.listing == Listing::Loaded
-                && !inputs.coverage.files.is_empty()
-                && !inputs.coverage.instruments(&symbol.file);
-            if !unloaded {
-                return None;
-            }
-            Measured {
-                lines: span_lines(symbol),
-                covered: 0,
-                branches: None,
-                loaded: false,
-            }
-        } else {
-            Measured {
-                lines: u32::try_from(lines.len()).unwrap_or(u32::MAX),
-                covered: u32::try_from(lines.iter().filter(|hits| hits.hits > 0).count())
-                    .unwrap_or(u32::MAX),
-                branches: inputs
-                    .coverage
-                    .branch_hits(&symbol.file, start, end)
-                    .map(|branches| branches.iter().map(|b| (b.line, b.hits)).collect()),
-                loaded: true,
-            }
-        };
+        let measured = measure(symbol, inputs.coverage)?;
         tally.lines += u64::from(measured.lines);
         tally.covered_lines += u64::from(measured.covered);
         for (_, hits) in measured.branches.iter().flatten() {
@@ -366,53 +365,45 @@ impl TestsCoverage {
         measured: &Measured,
         conventions: Option<&TestConventions>,
     ) -> Option<Finding> {
-        let finding = if !measured.loaded {
-            self.unloaded_file(symbol, hash, measured.lines)
-        } else if measured.covered == 0 {
-            self.uncovered_symbol(symbol, hash, measured.lines)
+        let finding = if measured.covered == 0 {
+            self.never_ran(symbol, hash, measured)
         } else {
             self.uncovered_branch(symbol, hash, measured.branches.as_ref()?)?
         };
         Some(with_nearest_test(finding, symbol, conventions))
     }
 
-    fn unloaded_file(&self, symbol: &SymbolDef, hash: &SymbolHash, lines: u32) -> Finding {
-        let title = format!(
-            "`{}` is in a file no test loaded: none of its {lines} lines ran",
-            symbol.display
-        );
-        let summary = format!(
-            "Write a test that imports `{}` and calls `{}`.",
-            symbol.namespace, symbol.name
-        );
-        let evidence = UnloadedFile { lines, covered: 0 };
-        SymbolFinding::new(
-            &self.manifest,
-            "coverage.unloaded-file",
-            symbol,
-            hash,
-            evidence,
-        )
-        .described(title, summary)
-        .finding()
-    }
-
-    fn uncovered_symbol(&self, symbol: &SymbolDef, hash: &SymbolHash, lines: u32) -> Finding {
-        let title = format!(
-            "`{}` never ran under test: none of its {lines} instrumented lines",
-            symbol.display
-        );
-        let summary = format!("Write a test that calls `{}`.", symbol.name);
+    /// The finding about a symbol none of whose lines ran: `coverage.uncovered-symbol`, or
+    /// `coverage.unloaded-file` when the suite never loaded its file. Both kinds' evidence is
+    /// `{lines, covered}` (`UncoveredSymbol`, `UnloadedFile`).
+    fn never_ran(&self, symbol: &SymbolDef, hash: &SymbolHash, measured: &Measured) -> Finding {
+        let lines = measured.lines;
+        let (kind, title, summary) = if measured.loaded {
+            (
+                "coverage.uncovered-symbol",
+                format!(
+                    "`{}` never ran under test: none of its {lines} instrumented lines",
+                    symbol.display
+                ),
+                format!("Write a test that calls `{}`.", symbol.name),
+            )
+        } else {
+            (
+                "coverage.unloaded-file",
+                format!(
+                    "`{}` is in a file no test loaded: none of its {lines} lines ran",
+                    symbol.display
+                ),
+                format!(
+                    "Write a test that imports `{}` and calls `{}`.",
+                    symbol.namespace, symbol.name
+                ),
+            )
+        };
         let evidence = UncoveredSymbol { lines, covered: 0 };
-        SymbolFinding::new(
-            &self.manifest,
-            "coverage.uncovered-symbol",
-            symbol,
-            hash,
-            evidence,
-        )
-        .described(title, summary)
-        .finding()
+        SymbolFinding::new(&self.manifest, kind, symbol, hash, evidence)
+            .described(title, summary)
+            .finding()
     }
 
     /// The finding about `branches` (`(line, hits)`) of a symbol that ran, when one was never

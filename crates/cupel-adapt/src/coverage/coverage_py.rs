@@ -34,3 +34,24 @@ inventory::submit!(crate::ToolProducer {
     id: ID,
     register: |registry| registry.register::<CoverageMap, _>(CoverageTool(&SPEC)),
 });
+
+#[cfg(test)]
+mod tests {
+    use cupel_core::coverage::Listing;
+
+    use super::listing;
+
+    #[test]
+    fn a_command_with_a_source_lists_every_file_and_one_without_the_loaded_ones() {
+        assert_eq!(
+            [
+                "coverage run --source=src -m unittest && coverage lcov -o {out}",
+                "python -m coverage run --source . -m unittest && python -m coverage lcov -o {out}",
+                "coverage run -m unittest && coverage lcov -o {out}",
+                "coverage run --sources-are-elsewhere -m unittest",
+            ]
+            .map(listing),
+            [Listing::All, Listing::All, Listing::Loaded, Listing::Loaded]
+        );
+    }
+}
