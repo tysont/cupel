@@ -662,7 +662,8 @@ expression: pretty(&schema)
         "unconfigured",
         "budget",
         "timeout",
-        "needs-range"
+        "needs-range",
+        "depth"
       ]
     },
     "Status": {

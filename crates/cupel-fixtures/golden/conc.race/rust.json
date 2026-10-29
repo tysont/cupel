@@ -167,7 +167,7 @@
         "budget": null,
         "checks": {},
         "default_branch": null,
-        "depth": "standard",
+        "depth": "deep",
         "format": "json",
         "gate": {
           "changed": null,
@@ -181,10 +181,11 @@
       },
       "sources": [
         "flags",
+        "cupel.toml",
         "defaults"
       ]
     },
-    "depth": "standard",
+    "depth": "deep",
     "duration_ms": "<duration-ms>",
     "git": null,
     "id": "<run-id>",

@@ -135,4 +135,7 @@ pub enum SkipReason {
     Timeout,
     // The check compares a range's base and head, and the scope has no range (ADR-056).
     NeedsRange,
+    // The producer the store would choose for one of the check's needs costs more than the run's
+    // depth, or the check's own cost when that is greater (ADR-154).
+    Depth,
 }

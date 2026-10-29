@@ -1231,3 +1231,145 @@ fn a_check_that_fails_says_why_in_its_notes() {
         )
     );
 }
+
+/// Makes a default `F` for rust at `cost`, as `id`, counting productions.
+struct Costed<F> {
+    id: &'static str,
+    cost: CostClass,
+    count: Arc<AtomicUsize>,
+    make: fn() -> F,
+}
+
+impl<F: Fact> Producer<F> for Costed<F> {
+    fn id(&self) -> ProducerId {
+        ProducerId::from(self.id)
+    }
+
+    fn languages(&self) -> Langs {
+        Langs::Only(vec![LangId::from("rust")])
+    }
+
+    fn needs(&self) -> &[FactKind] {
+        &[]
+    }
+
+    fn cost(&self) -> CostClass {
+        self.cost
+    }
+
+    fn availability(&self, _: &Ctx) -> Availability {
+        Availability::Ready
+    }
+
+    fn produce(&self, _: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<F> {
+        self.count.fetch_add(1, Ordering::SeqCst);
+        Ok((self.make)())
+    }
+}
+
+/// A world whose only `Decisions` producer is `tool.deep`, a deep one, and one check `t.races`
+/// of cost `cost` that needs `Decisions`; the count is of `tool.deep`'s productions.
+fn world_with_a_deep_need(cost: CostClass) -> (World, Arc<AtomicUsize>) {
+    let mut manifest = support::manifest("t.races", &[FactKind::Decisions], &[]);
+    manifest.cost = cost;
+    let check = TestCheck {
+        manifest,
+        body: ok,
+        spans_family: false,
+        weighted: false,
+    };
+    let dir = tempfile::tempdir().unwrap();
+    let made = Arc::new(AtomicUsize::new(0));
+    let mut producers = ProducerRegistry::default();
+    producers.register::<Symbols, _>(Counting {
+        langs: vec!["rust"],
+        count: Arc::new(AtomicUsize::new(0)),
+        make: symbols_of,
+    });
+    producers.register::<Decisions, _>(Costed {
+        id: "tool.deep",
+        cost: CostClass::Deep,
+        count: Arc::clone(&made),
+        make: Decisions::default,
+    });
+    let mut checks = CheckRegistry::default();
+    checks.register(Box::new(check)).unwrap();
+    let config = support::config_at(dir.path(), "");
+    let world = World {
+        dir,
+        checks,
+        producers,
+        symbols_made: Arc::new(AtomicUsize::new(0)),
+        config,
+    };
+    (world, made)
+}
+
+#[test]
+fn a_check_whose_need_only_a_deeper_producer_makes_is_skipped_at_the_runs_depth() {
+    let (world, made) = world_with_a_deep_need(CostClass::Standard);
+    let (outcome, events) = world.run(&["rust"], |_| {});
+    let checks = outcome.unwrap().checks;
+    assert_eq!(
+        (checks[0].status, checks[0].skipped.clone()),
+        (
+            CheckStatus::Skipped,
+            Some(Skipped {
+                reason: SkipReason::Depth,
+                fact: Some(FactKind::Decisions),
+                lang: Some(LangId::from("rust")),
+                tool: None,
+                see: Some("cupel check --depth deep --only t.races".to_owned()),
+                est_ms: None,
+            })
+        )
+    );
+    assert!(events.iter().any(|event| matches!(
+        event,
+        Event::Skip {
+            reason: SkipReason::Depth,
+            ..
+        }
+    )));
+    assert_eq!(
+        made.load(Ordering::SeqCst),
+        0,
+        "the deep producer never ran"
+    );
+}
+
+#[test]
+fn at_the_producers_depth_the_check_runs() {
+    let (world, made) = world_with_a_deep_need(CostClass::Standard);
+    let (outcome, _) = world.run(&["rust"], |job| job.depth = CostClass::Deep);
+    let checks = outcome.unwrap().checks;
+    assert_eq!(
+        (checks[0].status, made.load(Ordering::SeqCst)),
+        (CheckStatus::Pass, 1)
+    );
+}
+
+#[test]
+fn a_check_as_deep_as_its_producer_runs_below_its_depth_as_only_selects_it() {
+    let (world, made) = world_with_a_deep_need(CostClass::Deep);
+    let (outcome, _) = world.run(&["rust"], |_| {});
+    let checks = outcome.unwrap().checks;
+    assert_eq!(
+        (checks[0].status, made.load(Ordering::SeqCst)),
+        (CheckStatus::Pass, 1)
+    );
+}
+
+#[test]
+fn a_plan_lists_the_check_a_deeper_producer_would_need_as_skipped() {
+    let (world, made) = world_with_a_deep_need(CostClass::Standard);
+    let plan = world.plan(&["rust"]).plan.unwrap();
+    assert_eq!(
+        (
+            plan.would_skip.len(),
+            plan.would_skip[0].skipped.reason,
+            made.load(Ordering::SeqCst)
+        ),
+        (1, SkipReason::Depth, 0)
+    );
+}

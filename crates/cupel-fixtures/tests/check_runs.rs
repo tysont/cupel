@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::Path;
 
-use cupel_core::{CheckStatus, Envelope, ExitCode, SkipReason, Status};
+use cupel_core::{Envelope, ExitCode, SkipReason, Status};
 use cupel_fixtures::{copy_repo, run_cupel};
 
 /// A tree holding the Go and Rust fixture repositories side by side, with `config` as its
@@ -94,13 +94,15 @@ fn a_one_millisecond_timeout_on_the_fixture_tree_is_partial_with_exit_5() {
     let envelope = outcome.envelope();
     assert_eq!(envelope.status, Status::Partial);
     assert_eq!(envelope.exit_code, ExitCode::Partial);
-    let skipped = envelope
+    // Other checks may be skipped for reasons of their own (a need beyond the depth where its
+    // tool is installed, ADR-154); the unstarted ones are skipped for the timeout.
+    let reasons: Vec<SkipReason> = envelope
         .checks
         .iter()
-        .find(|result| result.status == CheckStatus::Skipped)
-        .expect("the unstarted check is skipped");
-    assert_eq!(
-        skipped.skipped.as_ref().map(|skipped| skipped.reason),
-        Some(SkipReason::Timeout)
+        .filter_map(|result| result.skipped.as_ref().map(|skipped| skipped.reason))
+        .collect();
+    assert!(
+        reasons.contains(&SkipReason::Timeout),
+        "the unstarted checks are skipped for the timeout: {reasons:?}"
     );
 }

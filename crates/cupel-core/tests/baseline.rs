@@ -145,8 +145,10 @@ impl Producer<CoverageMap> for Engine {
         &[FactKind::TestResults]
     }
 
+    /// The mutation engine's own class: a deeper one would leave the check skipped at the
+    /// default depth (ADR-154) before the baseline it is here to trigger.
     fn cost(&self) -> CostClass {
-        CostClass::Deep
+        CostClass::Standard
     }
 
     fn availability(&self, _: &Ctx) -> Availability {

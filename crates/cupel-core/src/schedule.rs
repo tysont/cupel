@@ -374,7 +374,7 @@ impl Scheduler<'_> {
             symbols,
         };
         for check in &job.selected {
-            prepared.add(job, *check, &matrix, &scopes)?;
+            prepared.add(job, *check, &matrix, &scopes, store)?;
         }
         Ok(prepared)
     }
@@ -764,14 +764,15 @@ struct Prepared<'a> {
 }
 
 impl<'a> Prepared<'a> {
-    /// `check`'s tasks, and the skip of every (check, language) the matrix or a missing range
-    /// rules out.
+    /// `check`'s tasks, and the skip of every (check, language) the matrix, the depth of a need's
+    /// producer (ADR-154), or a missing range rules out.
     fn add(
         &mut self,
         job: &Job<'a>,
         check: &'a dyn Check,
         matrix: &SupportMatrix,
         scopes: &HashMap<LangId, Scope>,
+        store: &FactStore<'_>,
     ) -> Result<()> {
         let manifest = check.manifest();
         let mut supported = Vec::new();
@@ -781,7 +782,10 @@ impl<'a> Prepared<'a> {
                 .cloned()
                 .unwrap_or(Support::Supported)
             {
-                Support::Supported => supported.push(lang.clone()),
+                Support::Supported => match beyond_depth(job, manifest, store, lang) {
+                    Some(skipped) => self.skips.push(Skip { check, skipped }),
+                    None => supported.push(lang.clone()),
+                },
                 support => self.skips.push(Skip {
                     check,
                     skipped: unsupported(&support, &lang.id),
@@ -1649,6 +1653,33 @@ fn unsupported(support: &Support, lang: &LangId) -> Skipped {
         see: Some("cupel describe matrix".to_owned()),
         est_ms: None,
     }
+}
+
+/// The `skipped` object for a check one of whose needs the store would make for `lang` with a
+/// producer that estimates its cost beyond the run's depth, or beyond the check's own cost when
+/// `--only` selected a costlier check (ADR-154); `None` when every need is within that bound.
+fn beyond_depth(
+    job: &Job<'_>,
+    manifest: &Manifest,
+    store: &FactStore<'_>,
+    lang: &Lang,
+) -> Option<Skipped> {
+    let bound = job.depth.max(manifest.cost);
+    let deciding = store.deciding(lang);
+    manifest.needs.iter().find_map(|need| {
+        let cost = deciding
+            .chosen(*need)?
+            .estimate(&store.root, &deciding.upstream)
+            .cost;
+        (cost > bound).then(|| Skipped {
+            reason: SkipReason::Depth,
+            fact: Some(*need),
+            lang: Some(lang.id.clone()),
+            tool: None,
+            see: Some(format!("cupel check --depth {cost} --only {}", manifest.id)),
+            est_ms: None,
+        })
+    })
 }
 
 /// The `skipped` object for a check that compares a range's two sides on a scope without one.

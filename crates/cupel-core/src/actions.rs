@@ -234,7 +234,9 @@ fn skip_action(check: &CheckResult, rerun: &str) -> Option<Candidate> {
                     .unwrap_or_else(|| format!("cupel check --changed --only {id}")),
             ),
         )),
-        SkipReason::Unsupported => None,
+        // The depth was the user's choice: the skip's `see` says how to run it deeper, and
+        // every run at that depth would otherwise repeat the action (ADR-154).
+        SkipReason::Unsupported | SkipReason::Depth => None,
     }
 }
 

@@ -1,0 +1,3 @@
+# The Rust race fixture runs under Miri, a deep producer: at the default depth `conc.race` would be
+# skipped for its need (ADR-154), so this fixture asks for `deep`.
+depth = "deep"
