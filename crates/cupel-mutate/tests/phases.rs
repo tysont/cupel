@@ -134,7 +134,7 @@ fn a_schemata_file_records_its_rewrite_before_the_build_every_mutant_shares() {
         .unwrap();
     assert!(rewrite < first_build, "{order:?}");
     assert!(
-        of(&outcomes, MutationPhase::Run).len() >= 1,
+        !of(&outcomes, MutationPhase::Run).is_empty(),
         "{:?}",
         outcomes.phases
     );
