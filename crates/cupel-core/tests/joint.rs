@@ -374,7 +374,7 @@ fn counts(runs: &[(&'static str, u32)]) -> BTreeMap<&'static str, u32> {
 const BOTH: &[FactKind] = &[FactKind::TestResults, FactKind::CoverageMap];
 
 #[test]
-fn one_joint_run_makes_the_facts_two_separate_runs_would_after_making_its_wants() {
+fn one_joint_run_makes_the_facts_two_separate_runs_would() {
     let world = World::new(&[]);
     assert_eq!(
         (world.runs(BOTH), *world.saw_symbols.lock().unwrap()),

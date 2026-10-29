@@ -488,9 +488,7 @@ pub trait JointProducer: Send + Sync {
     fn needs(&self) -> &[FactKind];
     /// Facts it reads when the run can afford them, made first for the same language and
     /// handed to it in `upstream` (ADR-149 §3); absent when it cannot.
-    fn wants(&self) -> &[FactKind] {
-        &[]
-    }
+    fn wants(&self) -> &[FactKind];
     /// What producing here would cost now, for a run focused as `focus` says: its note is
     /// `cached` when it would run nothing, `incremental: N stale` when it would rerun `N` tests
     /// and keep the rest (ADR-149 §6), else `one run`.

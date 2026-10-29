@@ -96,8 +96,9 @@ struct Facts {
 }
 
 impl Facts {
-    /// Which lines ran, per file: what every consumer reads of a coverage map (ADR-084 §4).
-    fn ran(&self) -> BTreeMap<String, Vec<u32>> {
+    /// Per file, the lines the coverage map instruments, or only those that ran: what every
+    /// consumer reads of a coverage map (ADR-084 §4).
+    fn lines(&self, ran_only: bool) -> BTreeMap<String, Vec<u32>> {
         self.coverage
             .iter()
             .flat_map(|map| &map.files)
@@ -105,21 +106,9 @@ impl Facts {
                 let lines = file
                     .lines
                     .iter()
-                    .filter(|hits| hits.hits > 0)
+                    .filter(|hits| !ran_only || hits.hits > 0)
                     .map(|hits| hits.line)
                     .collect();
-                (file.file.clone(), lines)
-            })
-            .collect()
-    }
-
-    /// Which lines each file instruments, per file.
-    fn instrumented(&self) -> BTreeMap<String, Vec<u32>> {
-        self.coverage
-            .iter()
-            .flat_map(|map| &map.files)
-            .map(|file| {
-                let lines = file.lines.iter().map(|hits| hits.line).collect();
                 (file.file.clone(), lines)
             })
             .collect()
@@ -435,14 +424,14 @@ fn assert_incremental(joint: &Joint, edit: &dyn Fn(&Path), focus: &Focus, expect
     assert_eq!(
         (
             &second.results,
-            second.instrumented(),
-            second.ran(),
+            second.lines(false),
+            second.lines(true),
             &second.per_test
         ),
         (
             &whole.results,
-            whole.instrumented(),
-            whole.ran(),
+            whole.lines(false),
+            whole.lines(true),
             &whole.per_test
         )
     );
@@ -454,23 +443,15 @@ fn edit_add(joint: &'static Joint) -> impl Fn(&Path) {
 }
 
 #[test]
-fn a_rust_range_reruns_only_the_test_that_ran_the_changed_function() {
-    assert_incremental(
-        &RUST,
-        &edit_add(&RUST),
-        &RUST.range((5, 5), CostClass::Standard),
-        reuse(SuiteMode::Incremental, 1, 1),
-    );
-}
-
-#[test]
-fn a_python_range_reruns_only_the_test_that_ran_the_changed_function() {
-    assert_incremental(
-        &PYTHON,
-        &edit_add(&PYTHON),
-        &PYTHON.range((6, 6), CostClass::Standard),
-        reuse(SuiteMode::Incremental, 1, 1),
-    );
+fn a_range_reruns_only_the_test_that_ran_the_changed_function() {
+    for (joint, line) in [(&RUST, 5), (&PYTHON, 6)] {
+        assert_incremental(
+            joint,
+            &edit_add(joint),
+            &joint.range((line, line), CostClass::Standard),
+            reuse(SuiteMode::Incremental, 1, 1),
+        );
+    }
 }
 
 #[test]

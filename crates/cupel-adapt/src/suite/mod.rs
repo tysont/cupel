@@ -31,8 +31,10 @@ use cupel_core::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::fresh::{Sources, Tree, cache_dir, entries, entry_name, hash, load, skip_dirs, store};
-use crate::per_test::cache::extension;
+use crate::fresh::{
+    Changes, Sources, Tree, cache_dir, entries, entry_name, hash, load, skip_dirs, store,
+};
+use crate::per_test::cache::{Cached, extension};
 use crate::per_test::{
     Measured, PerTest, PerTestSpec, Site, cached_tests, edits, fresh_tests, merged, store_tests,
 };
@@ -161,12 +163,11 @@ impl JointProducer for Suite {
                 continue;
             };
             let dir = found.sources.dir.clone();
-            let root = ctx.root.join(&dir);
             if self.fresh(&ctx.root, &ctx.exclude, found, &dir).is_some() {
                 continue;
             }
             cached = false;
-            match self.plan(ctx, &dir, &root, entry, upstream, focus) {
+            match self.plan(ctx, &dir, entry, upstream, focus) {
                 Some(plan) => stale += plan.stale,
                 None => incremental = false,
             }
@@ -230,23 +231,18 @@ impl JointProducer for Suite {
                 packages,
                 area: ctx.writer.create_dir(&entry.join("work"))?,
             };
-            let (root_run, obtained, rerun) =
-                if let Some(kept) = self.cached(&ctx.ctx.root, &ctx.ctx.exclude, &entry, &dir) {
-                    (kept.run, SuiteMode::Cached, 0)
-                } else if let Some(plan) = self.plan(
-                    &ctx.ctx,
-                    &dir,
-                    &site.path,
-                    &entry,
-                    &ctx.upstream,
-                    &ctx.focus,
-                ) {
-                    self.incremental(&site, &entry, plan)?
-                } else {
-                    let whole = self.full(&site, &entry)?;
-                    let rerun = whole.tests.len() as u64;
-                    (whole, SuiteMode::Full, rerun)
-                };
+            let (root_run, obtained, rerun) = if let Some(kept) =
+                self.cached(&ctx.ctx.root, &ctx.ctx.exclude, &entry, &dir)
+            {
+                (kept.run, SuiteMode::Cached, 0)
+            } else if let Some(plan) = self.plan(&ctx.ctx, &dir, &entry, &ctx.upstream, &ctx.focus)
+            {
+                self.incremental(&site, &entry, plan)?
+            } else {
+                let whole = self.full(&site, &entry)?;
+                let rerun = whole.tests.len() as u64;
+                (whole, SuiteMode::Full, rerun)
+            };
             made.add(&site, root_run, obtained, rerun);
         }
         Ok(made.facts(self.0, &ctx.ctx.root))
@@ -306,61 +302,31 @@ impl Suite {
         Some(self.fresh(repo, exclude, found, dir)?.report)
     }
 
-    /// What an incremental run in the root `dir` (at `root`) of the repository `ctx` describes
-    /// would keep and rerun (ADR-149 §1):
-    /// `None` when the whole suite runs instead (§2): a tree scope, `deep`, no entry for this
-    /// toolchain, no per-test entry, an added file that may hold a test, a change that makes
-    /// every test stale, or a changed source file that no test ran.
+    /// What an incremental run in the root `dir` of the repository `ctx` describes would keep and
+    /// rerun (ADR-149 §1); `None` when the whole suite runs instead (§2): see [`start`](Self::start),
+    /// or a change that makes every test stale, or one to a file that may hold a test that no
+    /// cached test ran.
     fn plan(
         &self,
         ctx: &Ctx,
         dir: &str,
-        root: &Path,
         entry: &Path,
         upstream: &Upstream,
         focus: &Focus,
     ) -> Option<Plan> {
-        let (repo, exclude) = (&ctx.root, &ctx.exclude);
-        let spec = self.0.per_test?;
-        if focus.changed.is_none() || focus.depth >= CostClass::Deep {
-            return None;
-        }
-        let found = Self::entry(entry, Some(dir))?;
-        if found.report.toolchain != self.toolchain(root) {
-            return None;
-        }
-        let cached = cached_tests(repo, spec.id, dir)?;
-        let changes = cached.changes(repo, exclude);
-        let is_source = |file: &String| spec.sources.contains(&extension(file));
-        if changes.is_empty() || changes.added.iter().any(is_source) {
-            return None;
-        }
-        let edits = edits(
-            dir,
-            root,
-            &cached.lines,
-            &changes,
-            upstream.get::<Symbols>(),
-        );
+        let (spec, found, cached, changes) = self.start(ctx, dir, entry, focus)?;
+        let root = ctx.root.join(dir);
+        let symbols = upstream.get::<Symbols>();
+        let edits = edits(dir, &root, &cached.lines, &changes, symbols);
         let refresh = PerTest(spec)
-            .staleness(root, edits)
+            .staleness(&root, edits)
             .refresh(cached.tests, &changes);
-        let current = structural_hashes(
-            found.report.run.tests.iter().map(|t| t.id.as_str()),
-            upstream,
-            dir,
-        );
-        let recorded = &found.report.hashes;
-        let (restructured, keep): (Vec<TestCoverage>, Vec<TestCoverage>) =
-            refresh.keep.into_iter().partition(|test| {
-                match (current.get(&test.id), recorded.get(&test.id)) {
-                    (Some((file, now)), Some(then)) => {
-                        changes.changed.contains(file) && now != then
-                    }
-                    _ => false,
-                }
-            });
-        let stale = refresh.stale + restructured.len();
+        let ids = found.report.run.tests.iter().map(|test| test.id.as_str());
+        let current = structural_hashes(ids, upstream, dir);
+        let (restructured, keep) =
+            restructured(refresh.keep, &current, &found.report.hashes, &changes);
+        let stale = refresh.stale + restructured;
+        let is_source = |file: &String| spec.sources.contains(&extension(file));
         if keep.is_empty() || (stale == 0 && changes.all().any(is_source)) {
             return None;
         }
@@ -369,6 +335,34 @@ impl Suite {
             stale,
             recorded: found.report,
         })
+    }
+
+    /// What an incremental run in the root `dir` starts from: the per-test producer whose rule
+    /// it applies, the suite entry, the per-test entry, and what changed since; `None` on a tree
+    /// scope, at `deep`, with no entry of this version and toolchain, no per-test entry, no
+    /// change, or an added file that may hold a test (ADR-149 §2).
+    fn start(
+        &self,
+        ctx: &Ctx,
+        dir: &str,
+        entry: &Path,
+        focus: &Focus,
+    ) -> Option<(&'static PerTestSpec, Entry, Cached, Changes)> {
+        let spec = self.0.per_test?;
+        if focus.changed.is_none() || focus.depth >= CostClass::Deep {
+            return None;
+        }
+        let found = Self::entry(entry, Some(dir))?;
+        if found.report.toolchain != self.toolchain(&ctx.root.join(dir)) {
+            return None;
+        }
+        let cached = cached_tests(&ctx.root, spec.id, dir)?;
+        let changes = cached.changes(&ctx.root, &ctx.exclude);
+        let is_source = |file: &String| spec.sources.contains(&extension(file));
+        if changes.is_empty() || changes.added.iter().any(is_source) {
+            return None;
+        }
+        Some((spec, found, cached, changes))
     }
 
     /// Runs the whole suite in the root of `site` and caches it in `entry` when it is whole.
@@ -468,7 +462,7 @@ impl Suite {
         }
         let report = serde_json::to_vec(&Report {
             version: VERSION,
-            toolchain: self.toolchain(&site.path),
+            toolchain: self.toolchain(&site.ctx.ctx.root.join(site.dir)),
             hashes,
             run: run.clone(),
         })
@@ -476,6 +470,24 @@ impl Suite {
         sources.report = hash(&report);
         store(&site.ctx.writer, entry, &report, &sources)
     }
+}
+
+/// How many tests of `keep` (kept by the per-test rule) are stale because their test case's
+/// file changed and its structural hash now differs from the one `recorded` (ADR-149 §3), and
+/// the rest; a test with either hash unknown stays kept.
+fn restructured(
+    keep: Vec<TestCoverage>,
+    current: &BTreeMap<String, (String, String)>,
+    recorded: &Hashes,
+    changes: &Changes,
+) -> (usize, Vec<TestCoverage>) {
+    let (stale, kept): (Vec<TestCoverage>, Vec<TestCoverage>) = keep.into_iter().partition(
+        |test| match (current.get(&test.id), recorded.get(&test.id)) {
+            (Some((file, now)), Some(then)) => changes.changed.contains(file) && now != then,
+            _ => false,
+        },
+    );
+    (stale.len(), kept)
 }
 
 /// `measured`, the run over the tests not in `keep`, merged with what `recorded` holds of the
@@ -760,21 +772,17 @@ mod tests {
         );
     }
 
-    fn span(line: u32, end_line: u32) -> Span {
-        Span {
-            line,
-            col: 1,
-            end_line,
-            end_col: 1,
-        }
-    }
-
-    /// `TestFrames`, `Symbols`, and a `NormTree` for a root `web` holding `tests/t.rs` with the
-    /// cases `adds` (lines 3–5, inside `fn adds` 3–5) and `twice` (twice, in two files).
-    fn upstream() -> Upstream {
+    /// `TestFrames` of a root `web`: `tests/t.rs` with the cases `adds` (lines 3–5) and
+    /// `twice` (8–9), and `tests/u.rs` with another `twice`.
+    fn frames() -> TestFrames {
         let case = |name: &str, line: u32, end_line: u32| TestCase {
             name: name.to_owned(),
-            span: span(line, end_line),
+            span: Span {
+                line,
+                col: 1,
+                end_line,
+                end_col: 1,
+            },
             assertions: Vec::new(),
             mocks: Vec::new(),
             skip: None,
@@ -787,7 +795,7 @@ mod tests {
             setup: Vec::new(),
             cases,
         };
-        let frames = TestFrames {
+        TestFrames {
             files: vec![
                 file(
                     "web/tests/t.rs",
@@ -795,44 +803,62 @@ mod tests {
                 ),
                 file("web/tests/u.rs", vec![case("twice", 1, 2)]),
             ],
-        };
-        let symbol = |line: u32, end_line: u32| SymbolDef {
-            name: "f".to_owned(),
-            namespace: String::new(),
-            display: "f".to_owned(),
-            kind: SymbolKind::Function,
-            visibility: Visibility::Private,
-            lang: LangId::from("rust"),
-            file: "web/tests/t.rs".to_owned(),
-            span: span(line, end_line),
-            body: None,
-            parameters: 0,
-        };
-        let symbols = Symbols {
-            symbols: vec![symbol(1, 12), symbol(3, 5)],
-        };
-        let norm = NormTree {
-            symbols: [(1, "sh_000000000000000f"), (3, "sh_000000000000000a")]
-                .into_iter()
-                .map(|(line, hash)| NormalizedSymbol {
-                    symbol: SymbolKey {
-                        file: "web/tests/t.rs".to_owned(),
-                        line,
-                        col: 1,
-                    },
-                    hash: hash.parse().unwrap(),
-                    root: NormNode {
-                        label: "fn".to_owned(),
-                        children: Vec::new(),
-                        span: None,
-                        text: None,
-                    },
-                })
-                .collect(),
-        };
+        }
+    }
+
+    /// The functions of `web/tests/t.rs`: a module on lines 1–12 and `adds` on 3–5, with their
+    /// `Symbols` and the `NormTree` hashes `…0f` and `…0a`.
+    fn functions() -> (Symbols, NormTree) {
+        let spans = [
+            (1, 12, "sh_000000000000000f"),
+            (3, 5, "sh_000000000000000a"),
+        ];
+        let symbols = spans
+            .iter()
+            .map(|(line, end_line, _)| SymbolDef {
+                name: "f".to_owned(),
+                namespace: String::new(),
+                display: "f".to_owned(),
+                kind: SymbolKind::Function,
+                visibility: Visibility::Private,
+                lang: LangId::from("rust"),
+                file: "web/tests/t.rs".to_owned(),
+                span: Span {
+                    line: *line,
+                    col: 1,
+                    end_line: *end_line,
+                    end_col: 1,
+                },
+                body: None,
+                parameters: 0,
+            })
+            .collect();
+        let norm = spans
+            .iter()
+            .map(|(line, _, hash)| NormalizedSymbol {
+                symbol: SymbolKey {
+                    file: "web/tests/t.rs".to_owned(),
+                    line: *line,
+                    col: 1,
+                },
+                hash: hash.parse().unwrap(),
+                root: NormNode {
+                    label: "fn".to_owned(),
+                    children: Vec::new(),
+                    span: None,
+                    text: None,
+                },
+            })
+            .collect();
+        (Symbols { symbols }, NormTree { symbols: norm })
+    }
+
+    /// [`frames`] and [`functions`] as facts already made.
+    fn upstream() -> Upstream {
+        let (symbols, norm) = functions();
         let mut upstream = Upstream::default();
         for fact in [
-            Produced::new(frames),
+            Produced::new(frames()),
             Produced::new(symbols),
             Produced::new(norm),
         ] {

@@ -121,11 +121,8 @@ pub fn run(
     resources::limit_threads(args.jobs);
     let catalog = invocation.catalog();
     let request = scope_request(args);
-    let Scoped {
-        info,
-        files: resolved,
-        ..
-    } = resolve(writer, config, &request, catalog.language_registry())?;
+    let scoped = resolve(writer, config, &request, catalog.language_registry())?;
+    let (info, resolved) = (scoped.info, scoped.files);
     let mut selected = selection(config, args).select(catalog.checks())?;
     let oracle = Selected::choose(writer, config, args.oracle.as_deref(), &mut selected)?;
     let base_files = base_files(catalog.language_registry(), &resolved);
