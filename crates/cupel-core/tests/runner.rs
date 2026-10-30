@@ -5,7 +5,7 @@ use std::time::Duration;
 use cupel_core::{
     Availability, Cancellation, CostClass, Ctx, EventSink, FactKind, Langs, ProduceCtx, Producer,
     ProducerId, ProducerRegistry, Result, RunOptions, RunOrdering, Runner, RunnerCommand, Scope,
-    TestResults, TestRun, TestSelection,
+    TestResults, TestRun, TestSelection, Writer,
 };
 
 mod support;
@@ -126,4 +126,16 @@ fn a_child_cancellation_ends_with_its_parent() {
     let child = parent.child(Duration::from_secs(3600));
     parent.cancel();
     assert_eq!((parent.is_cancelled(), child.is_cancelled()), (true, true));
+}
+
+#[test]
+fn a_runner_builds_where_it_runs_unless_it_says_it_builds_once() {
+    let dir = tempfile::tempdir().unwrap();
+    let ctx = ProduceCtx::new(
+        Ctx::new(dir.path().to_path_buf()),
+        Writer::new(dir.path(), false).unwrap().confined(),
+        Cancellation::new(),
+    );
+    let built = Listing.build(&ctx, &RunOptions::default()).unwrap();
+    assert_eq!((built, Listing.builds_once()), (None, false));
 }

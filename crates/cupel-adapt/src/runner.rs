@@ -352,6 +352,10 @@ impl cupel_core::Runner for Runner {
         self.0.outputs
     }
 
+    fn builds_once(&self) -> bool {
+        self.0.build.is_some()
+    }
+
     fn build(&self, ctx: &ProduceCtx, options: &RunOptions) -> Result<Option<BuildOutcome>> {
         let Some(builder) = self.0.build else {
             return Ok(None);
@@ -494,27 +498,7 @@ impl Runner {
     ) -> Result<(RunnerInvocation, Vec<TestResult>, Vec<String>)> {
         let _ = std::fs::remove_file(&root.report);
         let vary = self.0.vary;
-        let prebuilt =
-            self.0
-                .build
-                .zip(run.options.prebuilt.as_ref())
-                .and_then(|(builder, prebuilt)| {
-                    let records = prebuilt.roots.iter().find(|(built, _)| built == dir)?;
-                    Some((builder, &records.1))
-                });
-        let (base, varied) = match prebuilt {
-            Some((builder, records)) => (
-                (builder.command)(root, records),
-                (builder.vary)(run.options),
-            ),
-            None => ((self.0.command)(root), (vary.args)(run.options)),
-        };
-        let command: Vec<String> = base
-            .into_iter()
-            .chain(run.narrowing.iter().cloned())
-            .chain(varied)
-            .chain(run.options.args.iter().cloned())
-            .collect();
+        let command = self.command_line(root, dir, run);
         let env: Vec<(String, String)> = run
             .options
             .env
@@ -550,6 +534,32 @@ impl Runner {
             Executed::Unknown => Vec::new(),
         };
         Ok((invocation, found, order))
+    }
+
+    /// The command line of `run` in `root` (at `dir`): the spec's command, or a run from the
+    /// build `run.options.prebuilt` holds for `dir` (ADR-150 §8); then what narrows it, what
+    /// varies it, and the options' own arguments.
+    fn command_line(&self, root: &Root, dir: &str, run: &Run<'_>) -> Vec<String> {
+        let built =
+            self.0
+                .build
+                .zip(run.options.prebuilt.as_ref())
+                .and_then(|(builder, prebuilt)| {
+                    let (_, records) = prebuilt.roots.iter().find(|(built, _)| built == dir)?;
+                    Some((builder, records))
+                });
+        let (base, varied) = match built {
+            Some((builder, records)) => (
+                (builder.command)(root, records),
+                (builder.vary)(run.options),
+            ),
+            None => ((self.0.command)(root), (self.0.vary.args)(run.options)),
+        };
+        base.into_iter()
+            .chain(run.narrowing.iter().cloned())
+            .chain(varied)
+            .chain(run.options.args.iter().cloned())
+            .collect()
     }
 
     /// The process that runs `command` in `root`, with the spec's environment and `env`, and

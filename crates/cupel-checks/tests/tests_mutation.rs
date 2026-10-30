@@ -163,6 +163,11 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("tests", MetricPer::Symbol),
         ]
     );
+}
+
+#[test]
+fn the_protection_metrics_are_the_killed_ratio_and_the_tests_run() {
+    let check = support::check(ID);
     let protection: Vec<(&str, Option<ProtectionMetric>)> = check
         .manifest()
         .metrics
@@ -316,12 +321,12 @@ fn the_result_counts_mutants_run_as_schemata_and_notes_each_fallback() {
     );
 }
 
-/// A phase row of `phase` that took `ms`.
-fn phase(phase: MutationPhase, slot: Option<u32>, ms: u64) -> PhaseDuration {
+/// A phase row of `phase` in slot 0 that took `ms`.
+fn phase((phase, ms): (MutationPhase, u64)) -> PhaseDuration {
     PhaseDuration {
         phase,
         file: Some("discount.py".to_owned()),
-        slot,
+        slot: Some(0),
         tests: None,
         duration_ms: ms,
     }
@@ -329,39 +334,25 @@ fn phase(phase: MutationPhase, slot: Option<u32>, ms: u64) -> PhaseDuration {
 
 #[test]
 fn each_phase_of_the_engines_work_is_reported_as_its_total_in_milliseconds() {
-    let check = support::check(ID);
+    use MutationPhase::{Build, Plan, Run, Sync};
+    let rows = [
+        (Plan, 40),
+        (Sync, 300),
+        (Sync, 200),
+        (Build, 5000),
+        (Build, 4000),
+        (Run, 1500),
+    ];
     let mut facts = facts(vec![mutant(6, 14, ">=", ">", MutantOutcome::Killed)]);
     let mut outcomes = facts.get::<MutationOutcomes>().unwrap().clone();
-    outcomes.phases = vec![
-        phase(MutationPhase::Plan, None, 40),
-        phase(MutationPhase::Sync, Some(0), 300),
-        phase(MutationPhase::Sync, Some(1), 200),
-        phase(MutationPhase::Build, Some(0), 5000),
-        phase(MutationPhase::Build, Some(1), 4000),
-        phase(MutationPhase::Run, Some(0), 1500),
-    ];
+    outcomes.phases = rows.into_iter().map(phase).collect();
     facts.insert(outcomes).unwrap();
-    let (result, _) = support::recorded(check, &facts, scope(), json!({})).unwrap();
+    let (result, _) = support::recorded(support::check(ID), &facts, scope(), json!({})).unwrap();
     let metric = |name: &str| result.metrics.get(name).copied();
-    assert_eq!(
-        [
-            "plan_ms",
-            "sync_ms",
-            "rewrite_ms",
-            "build_ms",
-            "run_ms",
-            "validate_ms"
-        ]
-        .map(metric),
-        [
-            Some(40.0),
-            Some(500.0),
-            Some(0.0),
-            Some(9000.0),
-            Some(1500.0),
-            Some(0.0)
-        ]
-    );
+    let ran = ["plan_ms", "sync_ms", "build_ms", "run_ms"].map(metric);
+    assert_eq!(ran, [40.0, 500.0, 9000.0, 1500.0].map(Some));
+    let absent = ["rewrite_ms", "validate_ms"].map(metric);
+    assert_eq!(absent, [Some(0.0); 2], "a phase that did not occur is 0");
 }
 
 #[test]

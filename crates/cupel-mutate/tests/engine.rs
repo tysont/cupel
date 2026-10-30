@@ -112,3 +112,35 @@ fn mutants_that_end_in_an_error_leave_the_slots_holding_the_original_file() {
         "every slot used holds the original"
     );
 }
+
+/// The unmutated file's tests over their share of `max_mutant_memory` end the production with an
+/// error naming the setting: every mutant of the file would be over it too (ADR-148 §4).
+#[test]
+fn unmutated_tests_over_their_memory_share_are_an_error_naming_the_setting() {
+    if !support::installed("pytest", "the Python mutation fixture") {
+        return;
+    }
+    let dir = support::fixture("tests.mutation/python");
+    let configs = tempfile::tempdir().unwrap();
+    let toml = std::fs::read_to_string(dir.path().join("cupel.toml")).unwrap();
+    let config = configs.path().join("tight.toml");
+    std::fs::write(
+        &config,
+        format!("{toml}\n[checks.\"tests.mutation\"]\nmax_mutant_memory = \"1m\"\n"),
+    )
+    .unwrap();
+    let run = support::Run {
+        config: Some(config),
+        ..support::Run::default()
+    };
+    let Err(cupel_core::Error::Process { program, message }) =
+        support::produce(dir.path(), "python", &run)
+    else {
+        panic!("the production fails over the budget");
+    };
+    assert_eq!(program, "tool.pytest");
+    assert!(
+        message.starts_with("the tests of the unmutated file held more than 0 MiB of memory"),
+        "{message}"
+    );
+}

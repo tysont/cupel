@@ -89,14 +89,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
             return Ok(self.outcomes(ctx, None, false, Vec::new()));
         };
         let settings = Settings::read(&ctx.config, &ctx.settings)?;
-        let runner = ctx
-            .runners
-            .get(&baseline.runner)
-            .ok_or_else(|| Error::InvalidValue {
-                what: "runner for engine.mutation",
-                value: baseline.runner.to_string(),
-                expected: "a registered runner",
-            })?;
+        let runner = runner_of(ctx, baseline)?;
         let per_test = upstream
             .get::<PerTestMap>()
             .filter(|map| map.runner == baseline.runner);
@@ -121,9 +114,8 @@ impl Producer<MutationOutcomes> for MutationEngine {
         let root = &ctx.ctx.root;
         let planning = Instant::now();
         let mut planned = plan(&inputs, &|file| read(root, file));
-        let phases = Phases::default();
-        Running::new(ctx, runner, settings, symbols, &whole, &phases)
-            .run(&mut planned, planning)?;
+        let running = Running::new(ctx, runner, settings, symbols, &whole);
+        running.run(&mut planned, planning)?;
         let runs_whole = planned
             .iter()
             .any(|planned| planned.covered && planned.tests.is_none());
@@ -132,7 +124,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         if runs_whole {
             outcomes.excluded = excluded;
         }
-        outcomes.phases = phases.rows();
+        outcomes.phases = running.phases.rows();
         Ok(outcomes)
     }
 }
@@ -153,6 +145,17 @@ impl MutationEngine {
             mutants,
         )
     }
+}
+
+/// The registered runner that ran `baseline`, which runs the mutants.
+fn runner_of<'a>(ctx: &'a ProduceCtx, baseline: &TestResults) -> Result<&'a dyn Runner> {
+    ctx.runners
+        .get(&baseline.runner)
+        .ok_or_else(|| Error::InvalidValue {
+            what: "runner for engine.mutation",
+            value: baseline.runner.to_string(),
+            expected: "a registered runner",
+        })
 }
 
 /// The tests of `baseline` slower than [`SLOW_TEST_MS`], when `runner` can leave them out of a
@@ -208,19 +211,18 @@ struct Running<'a> {
     /// The language being produced, which names its slots.
     lang: String,
     /// Where every phase of the production is recorded (ADR-150).
-    phases: &'a Phases,
+    phases: Phases,
 }
 
 impl<'a> Running<'a> {
     /// How `ctx`'s production of `symbols`' language runs its mutants with `runner`, those
-    /// per-test selection did not narrow over `whole`, recording its phases in `phases`.
+    /// per-test selection did not narrow over `whole`, recording its phases.
     fn new(
         ctx: &'a ProduceCtx,
         runner: &'a dyn Runner,
         settings: Settings,
         symbols: &Symbols,
         whole: &'a TestSelection,
-        phases: &'a Phases,
     ) -> Self {
         let lang = symbols
             .symbols
@@ -237,7 +239,7 @@ impl<'a> Running<'a> {
                 Strategy::FileCopy => None,
             },
             lang,
-            phases,
+            phases: Phases::default(),
         }
     }
 
@@ -266,7 +268,7 @@ impl<'a> Running<'a> {
             slots: &slots,
             settings: self.settings,
             whole: self.whole,
-            phases: self.phases,
+            phases: &self.phases,
         };
         let root = &self.ctx.ctx.root;
         for (file, indexes) in order {

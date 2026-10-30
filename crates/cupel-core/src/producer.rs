@@ -425,6 +425,12 @@ pub trait Runner: Producer<TestResults> {
         let _ = (ctx, options);
         Ok(None)
     }
+
+    /// Whether `build` makes a build that runs elsewhere run from; a copy of the tree with no
+    /// build of its own then builds everything to run a mutant there (ADR-150 §8).
+    fn builds_once(&self) -> bool {
+        false
+    }
 }
 
 /// A producer as the registry holds it, with the fact type erased.

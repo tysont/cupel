@@ -192,6 +192,9 @@ impl Execution<'_> {
 
     /// Runs every mutant of `run` across the slots, each slot taking the next mutant when it is
     /// free, gated mutants first; the outcomes in the order of `run.mutants`.
+    ///
+    /// File copies under a runner that builds once run in the first slot alone, where the build
+    /// is: any other slot would build everything to run one (ADR-150 §8).
     pub fn run_file(&self, run: &FileRun<'_>, build: &Build<'_>) -> Result<Vec<Ran>> {
         let mut order: Vec<usize> = (0..run.mutants.len()).collect();
         order.sort_by_key(|index| id(build, *index).is_none());
@@ -205,7 +208,11 @@ impl Execution<'_> {
             found: &found,
         };
         let failures: Vec<Error> = std::thread::scope(|scope| {
-            let handles: Vec<_> = self.slots[..self.workers(run)]
+            let workers = match build {
+                Build::Copies if self.runner.builds_once() => 1,
+                _ => self.workers(run),
+            };
+            let handles: Vec<_> = self.slots[..workers]
                 .iter()
                 .enumerate()
                 .map(|(index, slot)| {

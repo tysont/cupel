@@ -171,6 +171,9 @@ impl Attempt<'_> {
             .iter()
             .map(|gate| (!self.fallback.contains_key(&gate.id)).then_some(gate.id))
             .collect();
+        if prebuilt.is_some() && ids.iter().any(Option::is_none) {
+            return self.shared(source, limits, prebuilt, &ids);
+        }
         let build = Build::Schemata {
             source,
             ids: &ids,
@@ -178,6 +181,49 @@ impl Attempt<'_> {
             prebuilt,
         };
         let ran = self.execution.run_file(self.run, &build)?;
+        Ok(with_fallback(ran, self.gates, &self.fallback, None))
+    }
+}
+
+impl Attempt<'_> {
+    /// Under a runner that built once: the gated mutants (`ids[i]` some) from the build in
+    /// every slot, then the others as file copies, each timed by its own reference, where the
+    /// build is (ADR-150 §8); the outcomes in the order of the file's mutants.
+    fn shared(
+        &self,
+        source: &str,
+        limits: &[std::time::Duration],
+        prebuilt: Option<&cupel_core::Prebuilt>,
+        ids: &[Option<u32>],
+    ) -> Result<Vec<Ran>> {
+        let (gated, copies): (Vec<usize>, Vec<usize>) =
+            (0..ids.len()).partition(|index| ids[*index].is_some());
+        let part = |indexes: &[usize]| FileRun {
+            file: self.run.file,
+            original: self.run.original,
+            importers: self.run.importers,
+            mutants: indexes
+                .iter()
+                .map(|index| self.run.mutants[*index])
+                .collect(),
+        };
+        let gated_ids: Vec<Option<u32>> = gated.iter().map(|index| ids[*index]).collect();
+        let build = Build::Schemata {
+            source,
+            ids: &gated_ids,
+            limits,
+            prebuilt,
+        };
+        let mut found: Vec<Option<Ran>> = vec![None; ids.len()];
+        let ran = self.execution.run_file(&part(&gated), &build)?;
+        for (index, ran) in gated.iter().zip(ran) {
+            found[*index] = Some(ran);
+        }
+        let ran = self.execution.run_file(&part(&copies), &Build::Copies)?;
+        for (index, ran) in copies.iter().zip(ran) {
+            found[*index] = Some(ran);
+        }
+        let ran = found.into_iter().flatten().collect();
         Ok(with_fallback(ran, self.gates, &self.fallback, None))
     }
 }

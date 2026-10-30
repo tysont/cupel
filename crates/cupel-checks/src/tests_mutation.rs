@@ -218,16 +218,7 @@ fn metrics() -> Vec<MetricSpec> {
     .into_iter()
     .map(|(name, summary)| metric(name, summary))
     .collect();
-    metrics.extend(MutationPhase::ALL.into_iter().map(|phase| {
-        metric(
-            &phase_metric(phase),
-            &format!(
-                "Milliseconds the engine spent in its {} phase this time (ADR-150): {}.",
-                phase.as_str(),
-                PHASE_SUMMARIES[phase as usize]
-            ),
-        )
-    }));
+    metrics.extend(phase_metrics());
     metrics.extend([
         ranked(
             "survivors",
@@ -389,6 +380,20 @@ const PHASE_SUMMARIES: [&str; 6] = [
     "the mutants' own test runs",
     "the file's tests unmutated, once, from a build made once for every slot",
 ];
+
+/// One metric per phase of the engine's work, its total in milliseconds (ADR-150).
+fn phase_metrics() -> impl Iterator<Item = MetricSpec> {
+    MutationPhase::ALL.into_iter().map(|phase| {
+        metric(
+            &phase_metric(phase),
+            &format!(
+                "Milliseconds the engine spent in its {} phase this time (ADR-150): {}.",
+                phase.as_str(),
+                PHASE_SUMMARIES[phase as usize]
+            ),
+        )
+    })
+}
 
 /// The metric that reports `phase`'s total: its name with `_ms`.
 fn phase_metric(phase: MutationPhase) -> String {

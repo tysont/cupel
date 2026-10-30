@@ -156,7 +156,16 @@ fn two_slots(
 
 /// The Rust fixture's outcomes in a fresh copy, with two slots and `runner`.
 fn rust_outcomes(runner: Option<&str>) -> (tempfile::TempDir, MutationOutcomes) {
+    rust_outcomes_after(runner, |_| {})
+}
+
+/// [`rust_outcomes`] after `change` to the copy.
+fn rust_outcomes_after(
+    runner: Option<&str>,
+    change: fn(&std::path::Path),
+) -> (tempfile::TempDir, MutationOutcomes) {
     let dir = fixture("tests.mutation/rust");
+    change(dir.path());
     let configs = tempfile::tempdir().unwrap();
     let run = Run {
         config: Some(two_slots(dir.path(), configs.path(), runner)),
@@ -209,5 +218,105 @@ fn a_runner_that_builds_once_serves_every_slot_from_one_build_in_the_first() {
         support::summary(&outcomes),
         support::summary(&alone),
         "one shared build finds what a build in every slot finds"
+    );
+}
+
+/// A function of the reader's name in the fixture's `src/lib.rs`, so no schemata build of it
+/// compiles and every mutant of the file runs as a file copy.
+fn taken_name(root: &std::path::Path) {
+    let lib = root.join("src/lib.rs");
+    let text = std::fs::read_to_string(&lib).unwrap();
+    std::fs::write(
+        &lib,
+        format!("{text}\n#[allow(dead_code)]\nfn cupel_mutant_id() -> u32 {{\n    7\n}}\n"),
+    )
+    .unwrap();
+}
+
+#[test]
+fn under_a_runner_that_builds_once_file_copies_run_in_the_first_slot_alone() {
+    if !support::installed("cargo-nextest", "the Rust shared-build file-copy test") {
+        return;
+    }
+    let (dir, outcomes) = rust_outcomes_after(Some("cargo-nextest"), taken_name);
+    let copies = outcomes
+        .mutants
+        .iter()
+        .filter(|mutant| mutant.strategy == Some(cupel_core::MutationStrategy::FileCopy))
+        .count();
+    assert_eq!(copies, 5, "{:?}", outcomes.mutants);
+    assert_eq!(
+        slots(&outcomes, MutationPhase::Run),
+        BTreeSet::from([Some(0)]),
+        "every file copy ran where the build is: {:?}",
+        outcomes.phases
+    );
+    let second = cupel_mutate::slots::slot_dir(dir.path(), "rust", 1);
+    assert!(
+        !second.join("target/debug").exists(),
+        "the second slot built nothing"
+    );
+}
+
+/// A greeting `String + &str`, whose `+` → `-` does not type-check under schemata, and a test
+/// that covers it.
+fn greeting(root: &std::path::Path) {
+    let lib = root.join("src/lib.rs");
+    let text = std::fs::read_to_string(&lib).unwrap();
+    std::fs::write(
+        &lib,
+        format!(
+            "{text}\n/// A greeting.\npub fn greet(name: &str) -> String {{\n    String::from(\"hi \") + name\n}}\n"
+        ),
+    )
+    .unwrap();
+    std::fs::write(
+        root.join("tests/greet.rs"),
+        "#[test]\nfn greets() {\n    assert_eq!(discount::greet(\"al\"), \"hi al\");\n}\n",
+    )
+    .unwrap();
+}
+
+#[test]
+fn under_a_runner_that_builds_once_a_gate_that_falls_back_runs_after_the_others_where_the_build_is()
+{
+    if !support::installed("cargo-nextest", "the Rust shared-build fallback test")
+        || !support::installed("cargo-llvm-cov", "the Rust shared-build fallback test")
+    {
+        return;
+    }
+    let (dir, outcomes) = rust_outcomes_after(Some("cargo-nextest"), greeting);
+    let built: Vec<(u32, String, Option<cupel_core::MutationStrategy>)> = outcomes
+        .mutants
+        .iter()
+        .filter(|mutant| mutant.outcome != cupel_core::MutantOutcome::Uncovered)
+        .map(|mutant| {
+            (
+                mutant.span.line,
+                mutant.outcome.to_string(),
+                mutant.strategy,
+            )
+        })
+        .collect();
+    let schemata = Some(cupel_core::MutationStrategy::Schemata);
+    assert_eq!(
+        built,
+        [
+            (5, "survived".to_owned(), schemata),
+            (5, "killed".to_owned(), schemata),
+            (6, "killed".to_owned(), schemata),
+            (8, "survived".to_owned(), schemata),
+            (8, "killed".to_owned(), schemata),
+            (
+                24,
+                "unviable".to_owned(),
+                Some(cupel_core::MutationStrategy::FileCopy)
+            ),
+        ]
+    );
+    let second = cupel_mutate::slots::slot_dir(dir.path(), "rust", 1);
+    assert!(
+        !second.join("target/debug").exists(),
+        "the second slot built nothing"
     );
 }

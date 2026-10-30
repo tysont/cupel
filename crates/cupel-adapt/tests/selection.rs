@@ -613,6 +613,7 @@ fn a_build_that_does_not_compile_fails_with_the_compilers_errors() {
         format!("{text}\npub fn broken() -> u32 {{ \"x\" }}\n"),
     )
     .unwrap();
+    let line = text.lines().count() + 2;
     let registry = registry();
     let outcome = runner(&registry, "tool.cargo-nextest")
         .build(&ctx, &RunOptions::default())
@@ -620,8 +621,17 @@ fn a_build_that_does_not_compile_fails_with_the_compilers_errors() {
     let Some(BuildOutcome::Failed { output }) = outcome else {
         panic!("the build fails: {outcome:?}");
     };
-    assert!(output.contains("error[E0308]"), "{output}");
-    assert!(output.contains("src/lib.rs"), "{output}");
+    let error = output.lines().find(|line| line.starts_with("error["));
+    assert_eq!(error, Some("error[E0308]: mismatched types"), "{output}");
+    let at = output
+        .lines()
+        .map(str::trim_start)
+        .find(|line| line.starts_with("--> "));
+    assert_eq!(
+        at,
+        Some(format!("--> src/lib.rs:{line}:26").as_str()),
+        "{output}"
+    );
 }
 
 #[test]
