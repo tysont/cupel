@@ -31,18 +31,24 @@
       "findings": 0,
       "id": "tests.mutation",
       "metrics": {
+        "build_ms": "<duration-ms>",
         "equivalent": 0.0,
         "executed": 1.0,
         "fallback": 0.0,
         "killed": 1.0,
         "out_of_memory": 0.0,
+        "plan_ms": "<duration-ms>",
         "reused": 0.0,
+        "rewrite_ms": "<duration-ms>",
+        "run_ms": "<duration-ms>",
         "schemata": 1.0,
         "score": 1.0,
         "survived": 0.0,
+        "sync_ms": "<duration-ms>",
         "timeout": 0.0,
         "uncovered": 0.0,
-        "unviable": 0.0
+        "unviable": 0.0,
+        "validate_ms": "<duration-ms>"
       },
       "oracle": null,
       "score": {
