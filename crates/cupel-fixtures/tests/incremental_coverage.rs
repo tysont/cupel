@@ -93,14 +93,19 @@ fn suite(envelope: &Value) -> Value {
     envelope["run"]["suite"]["rust"].clone()
 }
 
-/// `tests.coverage`'s result in `envelope`: its metrics and score.
-fn coverage(envelope: &Value) -> (Value, Value) {
-    let check = envelope["checks"]
+/// The result of check `id` in `envelope`.
+fn result<'a>(envelope: &'a Value, id: &str) -> &'a Value {
+    envelope["checks"]
         .as_array()
         .into_iter()
         .flatten()
-        .find(|check| check["id"] == json!("tests.coverage"))
-        .unwrap_or_else(|| panic!("tests.coverage ran: {envelope}"));
+        .find(|check| check["id"] == json!(id))
+        .unwrap_or_else(|| panic!("{id} ran: {envelope}"))
+}
+
+/// `tests.coverage`'s result in `envelope`: its metrics and score.
+fn coverage(envelope: &Value) -> (Value, Value) {
+    let check = result(envelope, "tests.coverage");
     (check["metrics"].clone(), check["score"].clone())
 }
 
@@ -162,4 +167,54 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
         )
     );
     outcome.assert_golden("incremental-coverage/rust");
+}
+
+/// `tests.mutation`'s metric `name` in `envelope`.
+fn mutation(envelope: &Value, name: &str) -> Value {
+    result(envelope, "tests.mutation")["metrics"][name].clone()
+}
+
+#[test]
+fn a_second_change_reuses_the_mutants_of_the_function_the_first_change_touched() {
+    if !tools_installed() {
+        return;
+    }
+    let repo = base();
+    let root = repo.path();
+    let range: Vec<&str> = ["check", "--base", "main"]
+        .into_iter()
+        .chain(ONLY)
+        .chain(["--format", "json"])
+        .collect();
+    // As the inner loop's cold run: the first range run has no cache, so it runs whole.
+    advance(root);
+    let (first, _) = check(root, &range);
+    assert_eq!(suite(&first)["mode"], json!("full"));
+    // A second commit inside `negate`, as the inner loop's warm change follows its cold one.
+    let lib = root.join("src/lib.rs");
+    let text = std::fs::read_to_string(&lib).unwrap();
+    std::fs::write(
+        &lib,
+        text.replace("    -value\n", "    // The negation.\n    -value\n"),
+    )
+    .unwrap();
+    git(
+        root,
+        &[&["commit", "--quiet", "--all", "-m", "comment inside negate"]],
+    );
+    let (second, _) = check(root, &range);
+    assert_eq!(
+        (
+            suite(&second)["mode"].clone(),
+            mutation(&second, "reused"),
+            mutation(&first, "executed")
+        ),
+        (
+            json!("incremental"),
+            mutation(&first, "executed"),
+            mutation(&first, "executed")
+        ),
+        "`scale`'s mutants, unchanged since the first range run, are reused: {}",
+        second["checks"]
+    );
 }
