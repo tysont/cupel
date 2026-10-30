@@ -15,6 +15,28 @@ test = "cargo nextest run --workspace"
 coverage = "cargo llvm-cov --lcov --output-path {out}"
 bench = "cargo bench --bench {name} -- --save-baseline {id}"
 
+# The tests that spawn the built `cupel` over fixture repositories cover, through it, most of the workspace;
+# below `deep` they rerun only for a change to the CLI, the fixtures, or the repository files they read
+# (ADR-151). The patterns leave out `cupel-fixtures::matrix declared_facts::*`, which runs in-process.
+[lang.rust.attribution.binary]
+tests = [
+  "cupel-cli::*",
+  "cupel-fixtures::matrix golden::*",
+  "cupel-fixtures::[!m]*",
+  "cupel-fixtures::m[!a]*",
+]
+files = [
+  "crates/cupel-cli",
+  "crates/cupel-fixtures",
+  "dist",
+  "plugins",
+  "scripts",
+  ".github",
+  "Makefile",
+  "README.md",
+  "cupel.toml",
+]
+
 # The deep checks' rules (ADR-129) sit at the strictest values the tree sustains: on the tree,
 # line coverage of at least 0.96 (it measures 0.968); on a change, no changed function without
 # coverage (a change with no instrumented line has a line ratio of 0, so the ratio cannot be its
