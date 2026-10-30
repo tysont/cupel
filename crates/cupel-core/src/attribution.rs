@@ -127,7 +127,7 @@ mod tests {
 
     use super::*;
 
-    fn read(value: Value) -> Result<Vec<Attribution>, String> {
+    fn read(value: &Value) -> Result<Vec<Attribution>, String> {
         let Value::Object(table) = json!({ "attribution": value }) else {
             unreachable!()
         };
@@ -136,7 +136,7 @@ mod tests {
 
     #[test]
     fn an_attribution_names_tests_by_id_glob_and_covers_the_files_under_its_paths() {
-        let found = read(json!({"binary": {
+        let found = read(&json!({"binary": {
             "tests": ["cupel-cli::*", "tests/e2e/*"],
             "files": ["crates/cupel-cli", "fixtures/**/*.toml"],
         }}))
@@ -176,7 +176,7 @@ mod tests {
             json!({"binary": {"tests": ["a["], "files": ["b"]}}),
         ]
         .into_iter()
-        .map(|value| read(value).unwrap_err())
+        .map(|value| read(&value).unwrap_err())
         .collect();
         assert_eq!(
             errors,
