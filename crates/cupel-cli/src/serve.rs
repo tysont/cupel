@@ -10,7 +10,7 @@ use std::time::{Duration, Instant};
 use cupel_core::{ActionKind, Cancellation, Envelope, ExitCode, Severity, Status, Writer};
 use cupel_serve::mcp::{self, Call, Called, Server, Tool, Tools};
 use cupel_serve::{
-    Body, Build, ClientError, Daemon, Done, Handler, Invocation, Request, ServeError, Watch,
+    Body, Build, ClientError, Daemon, Done, Handler, Invocation, Request, ServeError, Served, Watch,
 };
 use serde_json::json;
 
@@ -104,18 +104,23 @@ pub fn verb(
             );
         }
     });
+    ended(run, root, &daemon.socket, served)
+}
+
+/// The envelope of a daemon at `socket` that stopped after serving, or never served.
+fn ended(run: &Run, root: &Path, socket: &Path, served: Result<Served, ServeError>) -> Envelope {
     match served {
         Ok(served) => reported(
             run,
             Status::Pass,
             ExitCode::Pass,
-            stopped(root, &daemon.socket, Some(served.requests)),
+            stopped(root, socket, Some(served.requests)),
         ),
         Err(error) => reported(
             run,
             Status::Error,
             ExitCode::Environment,
-            unserved(root, &daemon.socket, &error),
+            unserved(root, socket, &error),
         ),
     }
 }

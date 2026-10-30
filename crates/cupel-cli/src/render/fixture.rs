@@ -351,17 +351,7 @@ fn run_info() -> RunInfo {
             ("rust".to_owned(), "1.93.0".to_owned()),
             ("cargo-llvm-cov".to_owned(), "0.6.12".to_owned()),
         ])),
-        suite: BTreeMap::from([(
-            LangId::from("rust"),
-            SuiteReuse {
-                mode: SuiteMode::Incremental,
-                rerun: 3,
-                reused: 1_275,
-                tagged: 40,
-                joint: None,
-                phases: Vec::new(),
-            },
-        )]),
+        suite: suite(),
         config: ConfigEcho {
             effective: object(json!({
                 "depth": "deep",
@@ -384,6 +374,21 @@ fn run_info() -> RunInfo {
             name: "default".to_owned(),
         }),
     }
+}
+
+/// The fixture run's Rust suite: an incremental joint run.
+fn suite() -> BTreeMap<LangId, SuiteReuse> {
+    BTreeMap::from([(
+        LangId::from("rust"),
+        SuiteReuse {
+            mode: SuiteMode::Incremental,
+            rerun: 3,
+            reused: 1_275,
+            tagged: 40,
+            joint: None,
+            phases: Vec::new(),
+        },
+    )])
 }
 
 fn checks() -> Vec<CheckResult> {

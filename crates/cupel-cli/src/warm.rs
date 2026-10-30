@@ -137,7 +137,7 @@ impl Shared {
 /// taken without waiting, as `scripts/heavy.sh` takes it for a command of default priority: not
 /// while a command holds it, nor while a command of first priority waits on its turnstile.
 fn heavy_lock() -> Option<File> {
-    let path = std::env::var_os(LOCK_VARIABLE).map_or_else(default_lock, PathBuf::from);
+    let path = lock_path(std::env::var_os(LOCK_VARIABLE));
     let mut turnstile = path.clone().into_os_string();
     turnstile.push(".turnstile");
     let turnstile = open(Path::new(&turnstile))?;
@@ -145,6 +145,11 @@ fn heavy_lock() -> Option<File> {
     let lock = open(&path)?;
     lock.try_lock().ok()?;
     Some(lock)
+}
+
+/// The heavy-command lock `variable` (`CUPEL_HEAVY_LOCK`'s value) names, else the default.
+fn lock_path(variable: Option<std::ffi::OsString>) -> PathBuf {
+    variable.map_or_else(default_lock, PathBuf::from)
 }
 
 #[cfg(unix)]
@@ -199,5 +204,28 @@ fn warm(root: &Path, changed: &[PathBuf], cancel: &Cancellation) {
                 .insert(Produced::new(ProjectInfo { roots }).share());
             let _ = joint.warm(&produce, changed);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::ffi::OsString;
+    use std::path::PathBuf;
+
+    use super::lock_path;
+
+    #[cfg(unix)]
+    #[test]
+    fn the_heavy_lock_is_the_one_the_variable_names_else_the_one_heavy_sh_takes() {
+        assert_eq!(
+            (
+                lock_path(Some(OsString::from("/var/locks/heavy.lock"))),
+                lock_path(None)
+            ),
+            (
+                PathBuf::from("/var/locks/heavy.lock"),
+                PathBuf::from("/tmp/cupel-heavy.lock")
+            )
+        );
     }
 }

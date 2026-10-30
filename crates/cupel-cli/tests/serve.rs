@@ -486,14 +486,12 @@ fn a_watched_rust_change_builds_the_instrumented_suite_once_the_heavy_lock_is_fr
     repo.write("src/lib.rs", &source.replace("a + b", "b + a"));
     // Long enough for the change to settle and a warm build to start, were the lock free.
     thread::sleep(Duration::from_secs(10));
-    assert!(
-        !instrumented(&repo),
-        "a warm build ran while the heavy lock was held"
-    );
+    let while_held = instrumented(&repo);
     held.unlock().unwrap();
-    assert!(
-        eventually(|| instrumented(&repo)),
-        "the daemon never built the instrumented suite"
+    let once_free = eventually(|| instrumented(&repo));
+    assert_eq!(
+        (while_held, once_free, daemon.status().served),
+        (false, true, 0),
+        "built while the lock was held, built once it was free, requests served"
     );
-    assert!(daemon.status().watching);
 }
