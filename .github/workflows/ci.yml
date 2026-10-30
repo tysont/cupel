@@ -77,6 +77,14 @@ jobs:
       - name: make dogfood (tree gate on main, which has no merge base to diff against)
         if: github.ref == 'refs/heads/main'
         run: make dogfood DOGFOOD_SCOPE=tree DOGFOOD_BUDGET=
+      # A failed gate's findings shorten each piece of evidence in the text above; the run's envelope
+      # under .cupel/runs/ holds them whole, such as a red baseline test's full output.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: failure()
+        with:
+          name: dogfood-runs
+          path: .cupel/runs/
+          if-no-files-found: ignore
 
   # The installers under dist/ (ADR-125) on an image with only Rust, Node, Python, and ShellCheck added:
   # install.sh, the Homebrew formula, and the npm and pipx wrappers against a fake release served
