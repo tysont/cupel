@@ -17,7 +17,7 @@ import urllib.request
 import zipfile
 
 # The release this package runs.
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 RELEASES = "https://github.com/tysont/cupel/releases"
 

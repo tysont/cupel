@@ -43,8 +43,8 @@ Each [GitHub Release](https://github.com/tysont/cupel/releases) carries one arch
 
 ```sh
 sha256sum --ignore-missing -c SHA256SUMS     # on macOS: shasum -a 256 --ignore-missing -c SHA256SUMS
-tar -xzf cupel-0.2.0-x86_64-unknown-linux-musl.tar.gz
-install cupel-0.2.0-x86_64-unknown-linux-musl/cupel ~/.local/bin/
+tar -xzf cupel-0.2.1-x86_64-unknown-linux-musl.tar.gz
+install cupel-0.2.1-x86_64-unknown-linux-musl/cupel ~/.local/bin/
 ```
 
 On Windows, extract the `.zip` and put `cupel.exe` on your PATH; `cupel serve` listens on a named pipe there ([ADR-137](docs/adr/CUPEL_DECISION_137.md)). Commands Cupel runs through `sh -c` (configured coverage and oracle commands, `--install`) need `sh` on PATH, as Git for Windows provides, and a timeout stops the command but not the processes it started. WSL runs the Linux archive without these limits.
@@ -269,26 +269,26 @@ gate      fail (gate.changed)
   fail  static.complexity none  actual 1
   pass  static.clones none  actual 0
 
-summary   37 findings · fail 7 · warn 2 · info 28 · new 0 · resolved 0 · suppressed 0
+summary   39 findings · fail 7 · warn 4 · info 28 · new 0 · resolved 0 · suppressed 0
 
 checks
   conc.race                 skipped  tier 4 · standard · 0 findings · 0 ms · skipped: unsupported (fact race-reports, lang python, see `cupel describe matrix`)
-  gen.property              pass     tier 4 · standard · score 0 falsified (n 0) · metrics falsified 0, missing 1, properties 0 · 1 finding · 70 ms
+  gen.property              pass     tier 4 · standard · score 0 falsified (n 0) · metrics falsified 0, missing 1, properties 0 · 1 finding · 50 ms
   meta.oracle-independence  pass     tier 2 · quick · score 0 independently tested share (n 0) · metrics independent 0, self_authored_only 0 · 0 findings · 0 ms · note: tests that existed before the change exercise 0 of the 0 changed functions tests run; an oracle's independence is its verification (`cupel oracle verify`) (python)
   meta.traceability         pass     tier 2 · standard · 0 findings · 0 ms · note: no requirements are configured: list their IDs as `requirements` under [checks."meta.traceability"] (python)
   perf.footprint            pass     tier 0 · quick · score 0 dependencies (n 0) · metrics artifact_bytes 0, copyleft 0, dependencies 0, vulnerable 0 · 0 findings · 13 ms · note: artifact sizes not measured: set `[lang.<id>] artifacts` to their paths or globs (python) · note: no lockfile or manifest found (python) · note: vulnerabilities not measured: set `[lang.<id>] advisories` to a directory of OSV advisories (python)
   spec.contracts            pass     tier 5 · standard · 0 findings · 0 ms · note: tool.icontract: no project root declares the contract library it reads, so no contract was checked (python)
-  static.analyze            fail     tier 1 · standard · score 5 diagnostics (n 2) · metrics diagnostics 5, errors 5 · 5 findings · 756 ms
+  static.analyze            fail     tier 1 · standard · score 5 diagnostics (n 2) · metrics diagnostics 5, errors 5 · 5 findings · 830 ms
   static.api-surface        pass     tier 0 · quick · score 0 breaking (n 3) · metrics breaking 0, widened 1 · 1 finding · 0 ms
   static.clones             pass     tier 0 · quick · score 0 pairs (n 1) · metrics clusters 0, max_jaccard 0, pairs 0 · 0 findings · 0 ms
   static.complexity         fail     tier 0 · quick · score 18 cyclomatic_max (n 2) · metrics cognitive_max 30, cyclomatic_max 18, length_max 26, nesting_max 3, params_max 5 · 1 finding · 4 ms
-  static.crap               pass     tier 0 · quick · score 0 max (n 0) · metrics max 0, mean 0 · 0 findings · 0 ms
-  static.dead-code          pass     tier 0 · quick · score 0 dead_symbols (n 2) · metrics dead_exports 1, dead_symbols 0 · 1 finding · 16 ms
+  static.crap               fail     tier 0 · quick · score 342 max (n 1) · metrics max 342, mean 342 · 1 finding · 0 ms
+  static.dead-code          pass     tier 0 · quick · score 0 dead_symbols (n 2) · metrics dead_exports 1, dead_symbols 0 · 1 finding · 14 ms
   static.deps               pass     tier 0 · quick · score 0 cycles (n 2) · metrics cycles 0, max_distance 0, violations 0 · 0 findings · 0 ms
   tests.assertion-density   pass     tier 2 · quick · score 1 assertions_per_test (n 1) · metrics assertions_per_public_function 0, assertions_per_test 1, sparse_files 0, sparse_tests 0, tested_public_functions 0 · 0 findings · 0 ms
-  tests.coverage            pass     tier 2 · standard · score 0 line_ratio (n 0) · metrics line 0, lines 0, uncovered 0 · 0 findings · 0 ms · note: branches: unavailable (python)
-  tests.flaky               pass     tier 2 · standard · score 0 unstable (n 2) · metrics flaky 0, order_dependent 0 · 0 findings · 695 ms
-  tests.mutation            pass     tier 3 · standard · score 0 killed_ratio (n 25) · metrics equivalent 0, executed 0, fallback 0, killed 0, out_of_memory 0, reused 0, schemata 0, score 0, survived 0, timeout 0, uncovered 25, unviable 0 · 25 findings · 210 ms
+  tests.coverage            fail     tier 2 · standard · score 0 line_ratio (n 22) · metrics line 0, lines 22, uncovered 1 · 1 finding · 0 ms · note: branches: unavailable (python)
+  tests.flaky               pass     tier 2 · standard · score 0 unstable (n 2) · metrics flaky 0, order_dependent 0 · 0 findings · 779 ms
+  tests.mutation            pass     tier 3 · standard · score 0 killed_ratio (n 25) · metrics build_ms 0, equivalent 0, executed 0, fallback 0, killed 0, out_of_memory 0, plan_ms 0, reused 0, rewrite_ms 0, run_ms 0, schemata 0, score 0, survived 0, sync_ms 0, timeout 0, uncovered 25, unviable 0, validate_ms 0 · 25 findings · 64 ms
   tests.quality             fail     tier 2 · quick · score 1 assertion_density (n 1) · metrics assertion_density 1, no_assertion 0, weak_ratio 1 · 1 finding · 0 ms
   tests.weakening           fail     tier 2 · quick · score 2 weakened (n 2) · metrics weakened 2 · 2 findings · 0 ms
 
@@ -296,11 +296,14 @@ fail (7)
   static.analyze
     mypy no-untyped-def: Function is missing a type annotation
       fnd_478bce · analyze.mypy.no-untyped-def · tier 1 · confidence 1
-      at src/shop/shipping.py:1:1-1
+      at src/shop/shipping.py:1:1-26:26
       evidence: level "error" · message "Function is missing a type annotation" · rule "no-untyped-def" · tool "mypy" (full: cupel explain fnd_478bce)
       action fix_bug (priority 1): Fix what mypy reports at src/shop/shipping.py:1 (no-untyped-def), or configure mypy if the rule does not apply to this project.
       repro: cupel check --only static.analyze --paths src/shop/shipping.py
       suppress: cupel suppress fnd_478bce --reason '…'
+    mypy no-untyped-def: Function is missing a return type annotation
+      fnd_677648 · analyze.mypy.no-untyped-def · tier 1 · confidence 1
+      …
     …
   tests.weakening
     `test_discount_reduces_the_total` replaced 1 exact assertion(s) with weaker ones
@@ -308,13 +311,13 @@ fail (7)
       at tests/test_pricing.py:6:1-7:47
       evidence: strong_base 1 · strong_head 0 · test "test_discount_reduces_the_total" · weak_base 0 · weak_head 1 (full: cupel explain fnd_0c6fc5)
       action restore_test (priority 1): Restore the exact expected values in `test_discount_reduces_the_total` instead of truthiness, presence, or inequality checks.
-      repro: cupel check --only tests.weakening --base 966b69ba0c1a1626e606c5b1373b6409d62843c4
+      repro: cupel check --only tests.weakening --base 8b01e28e053946898459f4337ff51f760c976fb7
       suppress: cupel suppress fnd_0c6fc5 --reason '…'
     `test_discount_rejects_a_negative_percent` is now skipped
       fnd_2b25cf · test.skipped · tier 2 · confidence 1
       …
 
-warn (2)
+warn (4)
   static.complexity
     `shop.shipping.shipping_cost` is too complex: cyclomatic 18 (max 10), cognitive 30 (max 15)
       fnd_002c9a · complexity.high · tier 0 · confidence 1
@@ -324,6 +327,12 @@ warn (2)
         deepest_block: branch > ternary > ternary at src/shop/shipping.py:5:39-5:66, nesting 2
       repro: cupel check --only static.complexity --symbols sh_7cfabd3ccaf75503
       suppress: cupel suppress fnd_002c9a --reason '…'
+  static.crap
+    `shop.shipping.shipping_cost` has CRAP 342.0 (high at 30): cyclomatic 18 with 0% coverage
+      …
+  tests.coverage
+    `shop.shipping.shipping_cost` never ran under test: none of its 22 instrumented lines
+      …
   tests.quality
     `tests.test_pricing.test_discount_reduces_the_total` asserts only weakly: 1 weak assertion(s), none pinning a value
       …
@@ -343,9 +352,11 @@ info (28)
       …
     …
 
-run       run_01M5XTV9V1H83SSR534ZNEFFR9 · started 2026-10-27T04:45:40Z · 2092 ms · seed 3214784172427479321
-git       ed909455c0e876da59cd504535298957408df7d0 · branch agent/shipping · base 966b69ba0c1a1626e606c5b1373b6409d62843c4 · clean
+run       run_01M66ESWMTBB8N6E3H2KDWCNZ8 · started 2026-10-30T13:08:21Z · 2652 ms · seed 8293632077924340691
+git       fc5a540a3e2ca9a11ed2ff63e8cbf1774f1bbeca · branch agent/shipping · base 8b01e28e053946898459f4337ff51f760c976fb7 · clean
 scope     changed · 2 files · 2 symbols · roots . · languages python
+depth     standard
+suite     python full · 2 rerun · 0 reused
 …
 
 next actions
@@ -360,14 +371,14 @@ The same check as JSON, trimmed to two checks, one finding, and one action:
 
 ```json
 {
-  "cupel": { "version": "0.2.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
+  "cupel": { "version": "0.2.1", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
   "run": {
-    "id": "run_01M5XTVBWVKJKRC293EEVPX9QN", "verb": "check",
-    "started": "2026-10-27T04:45:42Z", "duration_ms": 2058,
-    "git": { "sha": "ed909455c0e876da59cd504535298957408df7d0", "dirty": false,
-             "base": "966b69ba0c1a1626e606c5b1373b6409d62843c4", "branch": "agent/shipping" },
+    "id": "run_01M66ESZ81EZ7HN1Z8NM3YHJY0", "verb": "check",
+    "started": "2026-10-30T13:08:23Z", "duration_ms": 1303,
+    "git": { "sha": "fc5a540a3e2ca9a11ed2ff63e8cbf1774f1bbeca", "dirty": false,
+             "base": "8b01e28e053946898459f4337ff51f760c976fb7", "branch": "agent/shipping" },
     "scope": { "mode": "changed", "files": 2, "symbols": 2, "roots": ["."], "languages": ["python"] },
-    "depth": "standard", "seed": 3060524445885060845, "…": "…"
+    "depth": "standard", "seed": 5896116977636554219, "…": "…"
   },
   "status": "fail",
   "exit_code": 1,
@@ -405,7 +416,7 @@ The same check as JSON, trimmed to two checks, one finding, and one action:
     }
   ],
   "summary": {
-    "findings": { "fail": 7, "warn": 2, "info": 28 },
+    "findings": { "fail": 7, "warn": 4, "info": 28 },
     "new": 0, "resolved": 0, "suppressed": 0,
     "gate": {
       "result": "fail", "evaluated": "gate.changed",
@@ -656,7 +667,7 @@ info (1)
   doctor
     The daemon at .cupel/serve.sock serves this repository (pid 72908)
       fnd_c243c8 · doctor.daemon-running · tier 0 · confidence 1
-      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.2.0" · watching true (full: cupel explain fnd_c243c8)
+      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.2.1" · watching true (full: cupel explain fnd_c243c8)
       …
 
 $ cupel serve --stop --format text
@@ -673,7 +684,7 @@ info (1)
 
 ```console
 $ cupel check --format json > envelope.json      # cupel was rebuilt after the daemon started
-cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.2.0 (binary 56427528-1792134645316655513)) than this client (cupel 0.2.0 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
+cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.2.1 (binary 56427528-1792134645316655513)) than this client (cupel 0.2.0 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
 ```
 
 - **When the CLI uses it.** Every invocation whose repository root (`--cwd`, else the working directory) has a `.cupel/serve.sock`. It runs in its own process instead when `CUPEL_NO_DAEMON=1` is set, for `serve` itself, when an argument is not UTF-8, when the run could ask a question on the terminal (stdout is a terminal and neither `--install` nor `--no-install` is given), when `--jobs` is given (a process sizes its thread pool once), and when nothing answers on the socket (a daemon that was killed leaves its socket file behind; it is ignored).
