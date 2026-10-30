@@ -139,8 +139,14 @@ fn unmutated_tests_over_their_memory_share_are_an_error_naming_the_setting() {
         panic!("the production fails over the budget");
     };
     assert_eq!(program, "tool.pytest");
+    // The share is the budget over the slots, which follow the machine's cores: it is named,
+    // never as zero, beside the setting that sets it.
+    let share = message
+        .strip_prefix("the tests of the unmutated file held more than ")
+        .and_then(|rest| rest.split_once(" of memory, one slot's share of `max_mutant_memory`"))
+        .map(|(share, _)| share);
     assert!(
-        message.starts_with("the tests of the unmutated file held more than 0 MiB of memory"),
+        share.is_some_and(|share| share.ends_with("KiB") || share == "1 MiB"),
         "{message}"
     );
 }

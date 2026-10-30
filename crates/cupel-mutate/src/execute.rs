@@ -580,10 +580,20 @@ fn over_budget(runner: &dyn Runner, limit: u64) -> Error {
     Error::Process {
         program: runner.id().to_string(),
         message: format!(
-            "the tests of the unmutated file held more than {} MiB of memory, one slot's share \
+            "the tests of the unmutated file held more than {} of memory, one slot's share \
              of `max_mutant_memory`; raise it or lower `mutation.jobs`",
-            limit >> 20
+            size(limit)
         ),
+    }
+}
+
+/// `bytes` in MiB, or in KiB (at least 1) when under one MiB, so a small share is never named as
+/// zero.
+fn size(bytes: u64) -> String {
+    if bytes >= 1 << 20 {
+        format!("{} MiB", bytes >> 20)
+    } else {
+        format!("{} KiB", (bytes >> 10).max(1))
     }
 }
 
@@ -610,4 +620,22 @@ fn write(slot: &Slot, path: &str, bytes: &[u8]) -> Result<()> {
             message: error.to_string(),
         })
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::size;
+
+    #[test]
+    fn a_share_under_a_mebibyte_is_named_in_kibibytes_and_never_as_zero() {
+        assert_eq!(
+            (size(256 << 10), size(1 << 20), size(3 << 30), size(1)),
+            (
+                "256 KiB".to_owned(),
+                "1 MiB".to_owned(),
+                "3072 MiB".to_owned(),
+                "1 KiB".to_owned()
+            )
+        );
+    }
 }
