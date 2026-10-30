@@ -282,7 +282,7 @@ Every described entity carries `stability: stable | experimental`. Every schema'
 
 **`suppress <finding-id> --reason TEXT [--until REF|DATE]`** — Writes to `.cupel/suppressions.toml` (committable). Suppressed findings still appear with `suppressed: true` and `severity: info`. Expired suppressions reactivate and emit `suppression.expired`.
 
-**`serve [--socket PATH] [--mcp] [--watch]`** — Long-lived process holding parsed trees, fact-store connection, coverage map. CLI invocations auto-connect over the Unix socket if present (`CUPEL_NO_DAEMON=1` to bypass). `--mcp` exposes verbs as MCP tools with the same envelope. `--watch` incrementally reparses on file change.
+**`serve [--socket PATH] [--mcp] [--watch]`** — Long-lived process holding parsed trees, fact-store connection, coverage map. CLI invocations auto-connect over the Unix socket if present (`CUPEL_NO_DAEMON=1` to bypass). `--mcp` exposes verbs as MCP tools with the same envelope. `--watch` incrementally reparses on file change and keeps the coverage-instrumented build warm (ADR-155 §6).
 
 ### 6.6 Exit codes (every verb)
 

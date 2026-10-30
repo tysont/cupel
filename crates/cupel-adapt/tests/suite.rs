@@ -771,3 +771,42 @@ fn a_test_added_to_a_changed_test_file_runs_in_an_incremental_rust_run() {
     );
     assert_eq!(graded(&facts), graded(&whole));
 }
+
+/// When each test executable of the fixture's instrumented build at `root` was last written.
+fn built(root: &Path) -> BTreeMap<String, std::time::SystemTime> {
+    std::fs::read_dir(root.join("target/cupel-llvm-cov/debug/deps"))
+        .into_iter()
+        .flatten()
+        .flatten()
+        .filter(|entry| !entry.file_name().to_string_lossy().contains('.'))
+        .map(|entry| {
+            let written = entry.metadata().unwrap().modified().unwrap();
+            (entry.file_name().to_string_lossy().into_owned(), written)
+        })
+        .collect()
+}
+
+#[test]
+fn a_warm_build_after_a_source_change_leaves_the_next_run_nothing_to_build() {
+    let Some(dir) = RUST.fixture() else {
+        return;
+    };
+    let root = dir.path().canonicalize().unwrap();
+    let ctx = RUST.ctx(&root);
+    let warm = |path: &str| RUST.joint().warm(&ctx, &[root.join(path)]).unwrap();
+    assert_eq!(
+        (warm("target/debug/build/out.rs"), warm("README.md")),
+        (false, false),
+        "a change to a build output or a file no run depends on builds nothing"
+    );
+    assert!(built(&root).is_empty());
+    assert!(warm("src/lib.rs"));
+    let warmed = built(&root);
+    assert!(!warmed.is_empty());
+    RUST.jointly(&root);
+    let after: BTreeMap<String, std::time::SystemTime> = built(&root)
+        .into_iter()
+        .filter(|(name, _)| warmed.contains_key(name))
+        .collect();
+    assert_eq!(after, warmed, "the run rebuilt what the warm build made");
+}

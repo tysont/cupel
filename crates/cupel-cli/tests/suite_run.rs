@@ -141,24 +141,6 @@ fn a_suite_that_failed_once_runs_again_and_passes_on_an_unchanged_tree() {
     assert!(written(&repo).is_some(), "the green run is cached");
 }
 
-/// A copy of the Rust per-test fixture under nextest and the default coverage command, so the
-/// suite joint applies; `None` (reported as skipped) without its tools.
-fn rust_fixture() -> Option<Repo> {
-    for tool in ["cargo-llvm-cov", "cargo-nextest"] {
-        if cupel_core::find_program(tool).is_none() {
-            eprintln!("SKIPPED: {tool} not installed; the Rust joint run was not run");
-            return None;
-        }
-    }
-    let repo = Repo::new();
-    cupel_fixtures::copy_repo("per-test/rust", &repo.root());
-    repo.write(
-        "cupel.toml",
-        "[lang.rust]\nrunner = \"cargo-nextest\"\ncoverage = \"cargo llvm-cov --lcov --output-path {out}\"\n",
-    );
-    Some(repo)
-}
-
 /// The phases `envelope`'s Rust suite run names, in order, and the joint that ran them.
 fn phases(envelope: &Value) -> (Value, Vec<String>) {
     let suite = &envelope["run"]["suite"]["rust"];
@@ -193,7 +175,9 @@ fn phase_tasks(repo: &Repo) -> Vec<String> {
 
 #[test]
 fn a_rust_suite_run_records_each_phase_it_ran_and_a_cached_one_none() {
-    let Some(repo) = rust_fixture() else { return };
+    let Some(repo) = Repo::rust_joint_fixture() else {
+        return;
+    };
     let (first, ran) = check(&repo, &[]);
     let (second, cached) = check(&repo, &[]);
     assert_eq!((first, second), (0, 0), "{ran}");

@@ -74,9 +74,9 @@ pub(crate) struct SuiteSpec {
     /// One run of the suite in a root over every test but those `rerun` keeps: all of them when
     /// it keeps none.
     pub run: fn(&Site<'_>, &Rerun) -> Result<SuiteRun>,
-    /// Builds in a root (absolute and canonical) what a run there would build first (ADR-155 §5);
-    /// nothing for a joint whose run builds nothing ahead of its tests.
-    pub warm: fn(&Path, &Cancellation) -> Result<()>,
+    /// Builds in a root (absolute and canonical) what a run there would build first (ADR-155
+    /// §6); `None` for a joint whose run builds nothing ahead of its tests.
+    pub warm: Option<fn(&Path, &Cancellation) -> Result<()>>,
 }
 
 /// What one run of the suite in a root reported, relative to that root.
@@ -239,13 +239,26 @@ impl JointProducer for Suite {
         }
     }
 
-    /// What a run would build first, in every project root, one after another.
-    fn warm(&self, ctx: &ProduceCtx) -> Result<()> {
+    /// What a run would build first, one root after another, in every project root where one
+    /// of `changed` is a source or whole-suite file of the per-test producer outside the joint's
+    /// build outputs (ADR-155 §6).
+    fn warm(&self, ctx: &ProduceCtx, changed: &[PathBuf]) -> Result<bool> {
+        let (Some(warm), Some(spec)) = (self.0.warm, self.0.per_test) else {
+            return Ok(false);
+        };
+        let mut built = false;
         for (dir, _) in roots(ctx) {
             let path = ctx.ctx.root.join(&dir);
-            (self.0.warm)(&path.canonicalize().unwrap_or(path), &ctx.cancel)?;
+            let root = path.canonicalize().unwrap_or(path);
+            if changed
+                .iter()
+                .any(|path| depends_on(spec, self.0.outputs, &root, path))
+            {
+                warm(&root, &ctx.cancel)?;
+                built = true;
+            }
         }
-        Ok(())
+        Ok(built)
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<Vec<Produced>> {
@@ -544,6 +557,35 @@ impl Suite {
         sources.report = hash(&report);
         store(&site.ctx.writer, entry, &report, &sources)
     }
+}
+
+/// Whether a run of the root at `root` (canonical) depends on the file at `path`: a file below
+/// the root, outside its build `outputs`, with one of `spec`'s source extensions or one of its
+/// whole-suite names.
+fn depends_on(spec: &PerTestSpec, outputs: &[&str], root: &Path, path: &Path) -> bool {
+    let canonical = path
+        .parent()
+        .and_then(|dir| Some(dir.canonicalize().ok()?.join(path.file_name()?)));
+    let Some(inside) = [Some(path.to_path_buf()), canonical]
+        .into_iter()
+        .flatten()
+        .find_map(|path| Some(path.strip_prefix(root).ok()?.to_path_buf()))
+    else {
+        return false;
+    };
+    let output = inside
+        .components()
+        .next()
+        .is_some_and(|first| outputs.iter().any(|dir| first.as_os_str() == *dir));
+    let name = inside
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or_default();
+    let source = inside
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .is_some_and(|ext| spec.sources.contains(&ext));
+    !output && (source || spec.whole.contains(&name))
 }
 
 /// How many tests of `keep` (kept by the per-test rule) are stale because their test case's

@@ -47,6 +47,11 @@ impl Daemon {
 
     /// A daemon whose `PATH` is `path`; only a client with the same `PATH` is served.
     fn start_on_path(repo: &Repo, extra: &[&str], path: &str) -> Self {
+        Self::start_with(repo, extra, path, &[])
+    }
+
+    /// A daemon whose `PATH` is `path`, with `variables` set beside it.
+    fn start_with(repo: &Repo, extra: &[&str], path: &str, variables: &[(&str, &Path)]) -> Self {
         let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
         command
             .args(["serve", "--timeout", "300s", "--format", "json"])
@@ -60,6 +65,9 @@ impl Daemon {
             if key.starts_with("CUPEL_") {
                 command.env_remove(key);
             }
+        }
+        for (key, value) in variables {
+            command.env(key, value);
         }
         let daemon = Self {
             child: Some(command.spawn().expect("cupel serve starts")),
@@ -449,4 +457,43 @@ fn doctor_reports_a_running_daemon_and_a_stale_socket() {
         stale.stdout
     );
     assert_eq!(stale.code, 0);
+}
+
+/// Whether the instrumented build of the Rust fixture's library tests exists in `repo`.
+fn instrumented(repo: &Repo) -> bool {
+    std::fs::read_dir(repo.path("target/cupel-llvm-cov/debug/deps"))
+        .into_iter()
+        .flatten()
+        .flatten()
+        .any(|entry| {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            name.starts_with("calc-") && !name.contains('.')
+        })
+}
+
+#[test]
+fn a_watched_rust_change_builds_the_instrumented_suite_once_the_heavy_lock_is_free() {
+    let Some(repo) = Repo::rust_joint_fixture() else {
+        return;
+    };
+    let locks = tempfile::tempdir().unwrap();
+    let lock = locks.path().join("heavy.lock");
+    let held = std::fs::File::create(&lock).unwrap();
+    held.lock().unwrap();
+    let path = std::env::var("PATH").unwrap_or_default();
+    let daemon = Daemon::start_with(&repo, &["--watch"], &path, &[("CUPEL_HEAVY_LOCK", &lock)]);
+    let source = std::fs::read_to_string(repo.path("src/lib.rs")).unwrap();
+    repo.write("src/lib.rs", &source.replace("a + b", "b + a"));
+    // Long enough for the change to settle and a warm build to start, were the lock free.
+    thread::sleep(Duration::from_secs(10));
+    assert!(
+        !instrumented(&repo),
+        "a warm build ran while the heavy lock was held"
+    );
+    held.unlock().unwrap();
+    assert!(
+        eventually(|| instrumented(&repo)),
+        "the daemon never built the instrumented suite"
+    );
+    assert!(daemon.status().watching);
 }

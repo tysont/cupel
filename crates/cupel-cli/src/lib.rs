@@ -41,6 +41,7 @@ mod session;
 mod suppress;
 mod survey;
 mod tests_verb;
+mod warm;
 
 pub use app::{Environment, Output, capture_panics, run};
 pub use connect::invoke;

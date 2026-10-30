@@ -30,7 +30,7 @@ static SPEC: SuiteSpec = SuiteSpec {
     fuses: |words| words == ["cargo", "llvm-cov", "--lcov", "--output-path", "{out}"],
     toolchain,
     run,
-    warm,
+    warm: Some(warm),
 };
 
 inventory::submit!(crate::ToolProducer {

@@ -27,7 +27,7 @@ static SPEC: SuiteSpec = SuiteSpec {
     fuses,
     toolchain,
     run,
-    warm: |_, _| Ok(()),
+    warm: None,
 };
 
 inventory::submit!(crate::ToolProducer {

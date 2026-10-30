@@ -539,10 +539,11 @@ pub trait JointProducer: Send + Sync {
         scope: &Scope,
         sink: &mut dyn EventSink,
     ) -> Result<Vec<Produced>>;
-    /// Builds ahead of a run what the next run in `ctx`'s repository would build first, so it
-    /// finds it built (ADR-155 §5), as the daemon does after a change it watches; it makes no
-    /// fact and changes nothing a run reports.
-    fn warm(&self, ctx: &ProduceCtx) -> Result<()>;
+    /// Builds ahead of a run what the next run in `ctx`'s repository would build first, when
+    /// one of `changed` (absolute paths) is a file its runs depend on, so that run finds it
+    /// built (ADR-155 §6), as the daemon does after changes it watches; whether it built. It
+    /// makes no fact and changes nothing a run reports.
+    fn warm(&self, ctx: &ProduceCtx, changed: &[PathBuf]) -> Result<bool>;
 }
 
 /// Every registered producer, by the fact kind it provides, in registration order.

@@ -20,6 +20,7 @@ use crate::format::Rendering;
 use crate::problem::Problem;
 use crate::run::{Invocation as Verb, Run};
 use crate::session::{Session, Stream};
+use crate::warm::Warmer;
 use crate::{mcp as catalog, render};
 
 /// The component `serve`'s findings come from.
@@ -58,10 +59,11 @@ pub fn verb(
     (quiet, run): (bool, Runs),
     environment: &Environment,
 ) -> Envelope {
-    let requests = Requests {
+    let mut requests = Requests {
         session: Arc::clone(&environment.session),
         run,
         path: environment.path.clone(),
+        warmer: None,
     };
     if args.mcp {
         return serve_mcp(invocation, args.watch, quiet, requests, environment);
@@ -81,8 +83,14 @@ pub fn verb(
         path: environment.path.clone(),
         watch: args.watch,
     };
-    let handler = Arc::new(requests);
     let run = invocation.run;
+    if args.watch {
+        requests.warmer = Some(Warmer::start(
+            root.to_path_buf(),
+            run.cancellation().under(None),
+        ));
+    }
+    let handler = Arc::new(requests);
     let mut notices = environment.stderr.clone();
     let served = cupel_serve::serve(&daemon, handler, run.cancellation(), &mut |status| {
         if !quiet {
@@ -311,6 +319,9 @@ struct Requests {
     /// The serving process's `PATH`, where a run finds `cupel-check-*` and `cupel-produce-*`
     /// plugins (ADR-089); the daemon serves only clients with the same one.
     path: Option<String>,
+    /// What builds ahead of the runs after the watcher's changes (ADR-155 §6): the daemon's,
+    /// under `--watch`.
+    warmer: Option<Warmer>,
 }
 
 impl Requests {
@@ -357,10 +368,14 @@ impl Handler for Requests {
         stderr: Box<dyn Write + Send>,
         cancel: Cancellation,
     ) -> Done {
+        let _running = self.warmer.as_ref().map(Warmer::running);
         self.execute(self.environment(invocation, Stream::new(stderr), cancel))
     }
 
     fn changed(&self, paths: &[PathBuf]) -> u64 {
+        if let Some(warmer) = &self.warmer {
+            warmer.changed(paths);
+        }
         self.session.reparse(paths)
     }
 }
@@ -437,6 +452,7 @@ mod tests {
                 session: Arc::default(),
                 run: crate::app::run,
                 path: None,
+                warmer: None,
             },
             root: dir.path().to_path_buf(),
             variables: BTreeMap::from([(

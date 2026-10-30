@@ -3,6 +3,7 @@
 mod support;
 
 use std::collections::BTreeMap;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
 use cupel_core::coverage::CoverageMap;
@@ -150,8 +151,8 @@ impl JointProducer for Joint {
         Availability::Ready
     }
 
-    fn warm(&self, _: &ProduceCtx) -> Result<()> {
-        Ok(())
+    fn warm(&self, _: &ProduceCtx, _: &[PathBuf]) -> Result<bool> {
+        Ok(false)
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<Vec<Produced>> {

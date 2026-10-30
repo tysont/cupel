@@ -224,6 +224,24 @@ impl Repo {
         Some(repo)
     }
 
+    /// A copy of the Rust per-test fixture under nextest and the default coverage command, so
+    /// the suite joint applies (ADR-084); `None` (reported as skipped) without its tools.
+    pub fn rust_joint_fixture() -> Option<Self> {
+        for tool in ["cargo-llvm-cov", "cargo-nextest"] {
+            if cupel_core::find_program(tool).is_none() {
+                eprintln!("SKIPPED: {tool} not installed; the Rust suite joint was not run");
+                return None;
+            }
+        }
+        let repo = Self::new();
+        cupel_fixtures::copy_repo("per-test/rust", &repo.root());
+        repo.write(
+            "cupel.toml",
+            "[lang.rust]\nrunner = \"cargo-nextest\"\ncoverage = \"cargo llvm-cov --lcov --output-path {out}\"\n",
+        );
+        Some(repo)
+    }
+
     pub fn path(&self, relative: &str) -> PathBuf {
         self.root().join(relative)
     }
