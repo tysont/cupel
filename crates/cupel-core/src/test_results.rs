@@ -149,9 +149,11 @@ impl TestResults {
 
     /// These results, obtained as `reuse` says.
     #[must_use]
-    pub fn with_reuse(mut self, reuse: SuiteReuse) -> Self {
-        self.reuse = Some(reuse);
-        self
+    pub fn with_reuse(self, reuse: SuiteReuse) -> Self {
+        Self {
+            reuse: Some(reuse),
+            ..self
+        }
     }
 
     /// Whether every invocation completed and no test failed or errored (ADR-075).
