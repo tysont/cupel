@@ -1769,6 +1769,46 @@ The owner's P10 ruling (2026-10-28): P10 is the last defined phase; after it the
 - **P10.3 — open items.** (1) The warm row is 392 s, under the 10-minute floor and above the 3-minute goal; its suite run (262 s for 18 tests) is now the instrumented rebuild of `cupel-checks` and its dependents, the export, and the report, and its engine (118 s) two mutants: neither is a test count, so the next lever is the rebuild (or P10.2's engine work), not more attribution. (2) The link between the pid collision and P10.1's lost reuse is inferred (P10.1's entries are gone); the collision is reproduced and fixed, and with it the cold map holds every test. (3) `[scope] exclude` leaves `crates/cupel-fixtures/**` out of the suite cache's record (ADR-083 §2), so on Cupel a change only under the fixtures crate keeps the whole suite cached; the attribution names the crate, but its changes never reach the staleness rule. Pre-existing, not changed here. (4) Nothing checks an attribution against the tests' coverage (ADR-151 consequences); Cupel's `files` list was drawn from the paths the tagged tests join. (5) `PerTest::estimate` has no depth, so its stale count applies attributions even at `deep`; only its note's count differs, since a per-test producer's estimate is within `deep` either way. (6) P10.1 open item 3 (a copied checkout's instrumented build) stands; the new fixture test works around it as P10.1's did.
 - **P10.3 — for the integrator.** Mine alone: `docs/adr/CUPEL_DECISION_151.md`, `crates/cupel-core/src/attribution.rs`, `crates/cupel-fixtures/repos/incremental-coverage/rust/base/{src/main.rs, tests/cli.rs, tests/data/pairs.txt, cupel.toml}`, `crates/cupel-fixtures/golden/incremental-coverage/rust-attributed.json`. Shared, small hunks: `crates/cupel-core/src/exclude.rs` (`PathGlobs` factored out; `Exclude` wraps it), `crates/cupel-core/src/{lib.rs, config/file.rs (attributions checked at load), test_results.rs (SuiteReuse.tagged, serde default), per_test_impact.rs (ImpactedTest.kept)}`; `crates/cupel-adapt/src/per_test/{cache.rs (Staleness.dir and attributions, Refresh.tagged), mod.rs (staleness takes the root and attributions; `attributed`), llvm_cov.rs (the runner's `mktemp` directory and its test)}`; `crates/cupel-adapt/src/suite/mod.rs` (the plan's attribution and §3 rule, `Obtained`, `Made.tagged`); `crates/cupel-cli/src/{tests_verb.rs, tests_verb/impact.rs, render/text.rs, render/fixture.rs}`; `crates/cupel-fixtures/tests/incremental_coverage.rs`, the fixture's `src/lib.rs` header lines (base and head), `crates/cupel-fixtures/golden/incremental-coverage/rust.json`, `crates/cupel-fixtures/golden/tests.mutation/go.json`; the five render snapshots, `schemas__run_schema.snap`, `schemas__fact_test-results.snap`; `crates/cupel-core/tests/contract.rs`, `crates/cupel-adapt/tests/suite.rs` (`tagged: 0` in a `SuiteReuse` literal); `cupel.toml` (`[lang.rust.attribution.binary]`); `README.md` ("One suite run"); `docs/CUPEL_IMPLEMENTATION_PLAN.md` (this step's lines). A branch that adds a `SuiteReuse` literal adds `tagged`; one that adds an `ImpactedTest` adds `kept`; one that adds an envelope golden with `run.suite` regenerates it. P10.2 (`crates/cupel-mutate/**`) is untouched; its engine reads `PerTestMap` as before, and the runner fix changes which tests a cold map holds, so P10.2's measurement after this merge may reuse more. `docs/CUPEL_TECHNICAL_DESIGN.md` is unchanged.
 
+### Backlog batch v0.2.2
+
+**Goal:** The owner's v0.2.2 batch (2026-10-30), after `v0.2.1`: the instrumented build's cost (the warm one-function `standard` run under 3 minutes), machine load and disk across agent worktrees, the temporary-directory leak, and two misleading results; then `v0.2.2`, after which the project is in backlog maintenance and the next inputs come from real-repository use.
+
+**Status:** in progress (2026-10-30)
+
+One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the steps run in the owner's order. Push after every merge to `main`. Agent briefs: [`docs/plan/v0.2.2/`](plan/v0.2.2/common.md).
+
+#### B.1 The instrumented build's cost
+
+**Status:** pending · ADR-155
+
+- The coverage-instrumented build in a target directory of its own, compiling incrementally, kept warm by the daemon; the warm suite run measured phase by phase and its dominant phase fixed; the one-function `standard` run under 180 s warm ([brief](plan/v0.2.2/b1-instrumented-build.md)).
+
+#### B.2 Machine load and disk
+
+**Status:** pending · ADR-156
+
+- One `CARGO_TARGET_DIR` per machine for agent builds, `-j` at half the cores, `make check` under the heavy lock around its build step, a worktree's own target directory removed with it ([brief](plan/v0.2.2/b2-machine-load.md)).
+
+#### B.3 The temporary-directory leak
+
+**Status:** pending · ADR-157 if the product changes
+
+- Scoped temporary directories in every test, the spawned binary's and tools' included; a `make check` step that fails when `$TMPDIR` grows ([brief](plan/v0.2.2/b3-temp-leak.md)).
+
+#### B.4 Two misleading results
+
+**Status:** pending · ADR-158
+
+- `tests.flaky` skipped with a reason on a nextest project; `static.clones` ignoring single-statement forms behind a higher default `min_nodes`, checked against the external dogfood's true positives ([brief](plan/v0.2.2/b4-misleading-results.md)).
+
+#### B.5 Release v0.2.2
+
+**Status:** pending
+
+- The tag with the measured before/after in its notes; then backlog maintenance.
+
+#### v0.2.2 Notes
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
