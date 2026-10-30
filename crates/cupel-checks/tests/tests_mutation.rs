@@ -113,6 +113,33 @@ fn kinds(findings: &[Finding]) -> Vec<(&str, Severity, f64)> {
         .collect()
 }
 
+/// The metrics the manifest declares, in order, with what each measures.
+fn metrics() -> Vec<(&'static str, MetricPer)> {
+    vec![
+        ("score", MetricPer::Scope),
+        ("killed", MetricPer::Scope),
+        ("survived", MetricPer::Scope),
+        ("timeout", MetricPer::Scope),
+        ("out_of_memory", MetricPer::Scope),
+        ("uncovered", MetricPer::Scope),
+        ("unviable", MetricPer::Scope),
+        ("equivalent", MetricPer::Scope),
+        ("executed", MetricPer::Scope),
+        ("reused", MetricPer::Scope),
+        ("schemata", MetricPer::Scope),
+        ("fallback", MetricPer::Scope),
+        ("plan_ms", MetricPer::Scope),
+        ("sync_ms", MetricPer::Scope),
+        ("rewrite_ms", MetricPer::Scope),
+        ("build_ms", MetricPer::Scope),
+        ("run_ms", MetricPer::Scope),
+        ("validate_ms", MetricPer::Scope),
+        ("survivors", MetricPer::Symbol),
+        ("mutation_score", MetricPer::Symbol),
+        ("tests", MetricPer::Symbol),
+    ]
+}
+
 #[test]
 fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
     let check = support::check(ID);
@@ -137,37 +164,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("mutant.slow-test-excluded", ActionKind::Review),
         ]
     );
-    assert_eq!(
-        shape.metrics,
-        [
-            ("score", MetricPer::Scope),
-            ("killed", MetricPer::Scope),
-            ("survived", MetricPer::Scope),
-            ("timeout", MetricPer::Scope),
-            ("out_of_memory", MetricPer::Scope),
-            ("uncovered", MetricPer::Scope),
-            ("unviable", MetricPer::Scope),
-            ("equivalent", MetricPer::Scope),
-            ("executed", MetricPer::Scope),
-            ("reused", MetricPer::Scope),
-            ("schemata", MetricPer::Scope),
-            ("fallback", MetricPer::Scope),
-            ("plan_ms", MetricPer::Scope),
-            ("sync_ms", MetricPer::Scope),
-            ("rewrite_ms", MetricPer::Scope),
-            ("build_ms", MetricPer::Scope),
-            ("run_ms", MetricPer::Scope),
-            ("validate_ms", MetricPer::Scope),
-            ("survivors", MetricPer::Symbol),
-            ("mutation_score", MetricPer::Symbol),
-            ("tests", MetricPer::Symbol),
-        ]
-    );
-}
-
-#[test]
-fn the_protection_metrics_are_the_killed_ratio_and_the_tests_run() {
-    let check = support::check(ID);
+    assert_eq!(shape.metrics, metrics());
     let protection: Vec<(&str, Option<ProtectionMetric>)> = check
         .manifest()
         .metrics

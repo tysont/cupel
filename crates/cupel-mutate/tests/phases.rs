@@ -314,6 +314,12 @@ fn under_a_runner_that_builds_once_a_gate_that_falls_back_runs_after_the_others_
             ),
         ]
     );
+    assert_eq!(
+        slots(&outcomes, MutationPhase::Run),
+        BTreeSet::from([Some(0), Some(1)]),
+        "the gated mutants ran in both slots: {:?}",
+        outcomes.phases
+    );
     let second = cupel_mutate::slots::slot_dir(dir.path(), "rust", 1);
     assert!(
         !second.join("target/debug").exists(),
