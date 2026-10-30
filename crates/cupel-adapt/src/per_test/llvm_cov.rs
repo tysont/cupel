@@ -186,8 +186,9 @@ fn remove_profiles(target: &Path) {
 }
 
 /// The target runner nextest runs every test binary through: a test process gets a profile
-/// directory named by its process ID, which its own children inherit, and records which test
-/// it is. The runner variable is unset so that cargo runs the tests start do not use it.
+/// directory of its own, which its own children inherit, and records which test it is. `mktemp`
+/// makes the directory, since a long run reuses process IDs and two test processes may share
+/// one. The runner variable is unset so that cargo runs the tests start do not use it.
 fn runner_script(variable: &str, profiles: &Path) -> String {
     let dir = profiles.display().to_string().replace('\'', r"'\''");
     format!(
@@ -195,8 +196,7 @@ fn runner_script(variable: &str, profiles: &Path) -> String {
          # Written by Cupel (ADR-083): one profile directory per nextest test process.\n\
          unset {variable}\n\
          if [ \"$NEXTEST_TEST_PHASE\" = run ]; then\n\
-         \x20 dir='{dir}'/$$\n\
-         \x20 mkdir -p \"$dir\"\n\
+         \x20 dir=$(mktemp -d '{dir}'/test.XXXXXXXX)\n\
          \x20 printf '%s\\n%s\\n%s\\n' \"$NEXTEST_BINARY_ID\" \"$NEXTEST_TEST_NAME\" \"$1\" > \"$dir/test\"\n\
          \x20 LLVM_PROFILE_FILE=\"$dir/%p-%m.profraw\"\n\
          \x20 export LLVM_PROFILE_FILE\n\
@@ -453,8 +453,7 @@ mod tests {
             "# Written by Cupel (ADR-083): one profile directory per nextest test process.",
             "unset CARGO_TARGET_X_RUNNER",
             "if [ \"$NEXTEST_TEST_PHASE\" = run ]; then",
-            "  dir='/a/it'\\''s/profiles'/$$",
-            "  mkdir -p \"$dir\"",
+            "  dir=$(mktemp -d '/a/it'\\''s/profiles'/test.XXXXXXXX)",
             "  printf '%s\\n%s\\n%s\\n' \"$NEXTEST_BINARY_ID\" \"$NEXTEST_TEST_NAME\" \"$1\" > \"$dir/test\"",
             "  LLVM_PROFILE_FILE=\"$dir/%p-%m.profraw\"",
             "  export LLVM_PROFILE_FILE",
@@ -462,5 +461,42 @@ mod tests {
             "exec \"$@\"",
         ];
         assert_eq!(script.lines().collect::<Vec<_>>(), expected);
+    }
+
+    /// Runs the runner script written for `profiles` twice in one shell's subshells, where `$$`
+    /// is the same in both: a test process whose pid an earlier test process had, as pids wrap
+    /// during a long suite run (macOS reuses them below 99 999).
+    #[cfg(unix)]
+    #[test]
+    fn two_test_processes_with_the_same_pid_keep_their_own_profiles() {
+        use super::processes;
+        let dir = tempfile::tempdir().unwrap();
+        let profiles = dir.path().join("profiles");
+        std::fs::create_dir_all(&profiles).unwrap();
+        let script = dir.path().join("runner.sh");
+        std::fs::write(&script, runner_script("CARGO_TARGET_X_RUNNER", &profiles)).unwrap();
+        let both = format!(
+            "for name in first second; do \
+               (NEXTEST_TEST_PHASE=run NEXTEST_BINARY_ID=calc NEXTEST_TEST_NAME=$name \
+                . '{}' sh -c 'touch \"${{LLVM_PROFILE_FILE%/*}}\"/x.profraw'); \
+             done",
+            script.display()
+        );
+        let status = std::process::Command::new("sh")
+            .args(["-c", &both])
+            .status()
+            .unwrap();
+        let mut ids: Vec<String> = processes(&profiles)
+            .into_iter()
+            .map(|process| process.id)
+            .collect();
+        ids.sort();
+        assert_eq!(
+            (status.success(), ids),
+            (
+                true,
+                vec!["calc first".to_owned(), "calc second".to_owned()]
+            )
+        );
     }
 }
