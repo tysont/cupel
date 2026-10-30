@@ -924,7 +924,7 @@ tests = ["cupel-cli::*"]                          # globs over the test IDs the 
 files = ["crates/cupel-cli", "crates/cupel-fixtures"]   # paths as `[scope] exclude` writes them
 ```
 
-Below `--depth deep`, such a test reruns only when one of those files, its own files, or a build or test configuration file changed; a change elsewhere keeps its cached result and lines even when it ran the changed function, and `run.suite` counts it in `tagged` (`suite  rust incremental · 128 rerun · 2665 reused (40 by attribution)`). When only kept tests ran a change, they rerun after all, so the change is measured. Its coverage still counts everywhere coverage counts, and the mutation engine still selects it for the mutants it covers. `tests --impacted` lists it with `kept` saying which attribution kept it and leaves it out of the commands. At `--depth deep` no attribution applies.
+Below `--depth deep`, such a test reruns only when one of those files, its own files, or a build or test configuration file changed; a change elsewhere keeps its cached result and lines even when it ran the changed function, and `run.suite` counts it in `tagged` (`suite  rust incremental · 18 rerun · 2784 reused (10 by attribution)`). When only kept tests ran a change, they rerun after all, so the change is measured. Its coverage still counts everywhere coverage counts, and the mutation engine still selects it for the mutants it covers. `tests --impacted` lists it with `kept` saying which attribution kept it and leaves it out of the commands. At `--depth deep` no attribution applies.
 
 ### Flakiness
 

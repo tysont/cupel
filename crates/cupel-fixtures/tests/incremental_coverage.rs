@@ -243,6 +243,10 @@ fn a_change_to_the_data_an_attribution_names_reruns_the_binarys_test_alone() {
         root,
         &[&["commit", "--quiet", "--all", "-m", "factors swapped"]],
     );
+    // No source changed, so nothing rebuilds the instrumented build: a copy of the checkout (the
+    // daemon parity twin) would keep binaries built at this path, whose report names files
+    // outside the copy (P10.1 open item 3). The cache alone decides what reruns.
+    std::fs::remove_dir_all(root.join("target/cupel-llvm-cov")).unwrap();
     let (second, outcome) = check(root, &range);
     assert_eq!(
         suite(&second),
