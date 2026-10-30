@@ -1,6 +1,5 @@
 ---
 source: crates/cupel-cli/src/render.rs
-assertion_line: 141
 expression: colored
 ---
 cupel check: [1;31mfail[0m (exit 1)
@@ -85,9 +84,12 @@ cupel check: [1;31mfail[0m (exit 1)
         [2mstatic.crap.crap 42.5 (#1) · fnd_7c2e1a[0m
      2. simplify  web/limits  mutation - · coverage - · tests -  [2mtypescript[0m
 
-[1mtests[0m  2 impacted · per-test map: no
+[1mtests[0m  3 impacted · per-test map: no
   rust  [2mper-test map from tool.llvm-cov-per-test (2 measured, 1236 cached)[0m
   typescript  [2mfile-level impact: no producer makes per-test-map for this language (see `cupel describe matrix`)[0m
+  calc cli::adds_from_the_command_line  [2mrust[0m
+    covers calc::add (src/lib.rs:5)
+    kept: attribution binary: no change under its files
   calc tests::adds  [2mrust[0m
     covers calc::add (src/lib.rs:5)
   web/add.test.ts  [2mtypescript[0m
@@ -144,7 +146,7 @@ cupel check: [1;31mfail[0m (exit 1)
 [1mdepth     [0mdeep · budget 20000 ms
 [1mbaseline  [0mdefault (run_01J9ZZZZZZZZZZZZZZZZZZZZZZ)
 [1mtoolchain [0mcargo-llvm-cov 0.6.12 · rust 1.93.0
-[1msuite     [0mrust incremental · 3 rerun · 1275 reused
+[1msuite     [0mrust incremental · 3 rerun · 1275 reused (40 by attribution)
 [1mconfig    [0mfrom flags, profile, cupel.toml
           budget: 20s
           checks: {"static.clones":{"threshold":0.82}}

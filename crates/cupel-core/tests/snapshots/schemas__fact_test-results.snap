@@ -137,12 +137,20 @@ expression: pretty(&schema)
           "type": "integer",
           "format": "uint64",
           "minimum": 0
+        },
+        "tagged": {
+          "description": "Of `reused`, the tests their attribution kept though they executed a changed function\n(ADR-151 §4); 0 in a fact written before attributions.",
+          "type": "integer",
+          "format": "uint64",
+          "default": 0,
+          "minimum": 0
         }
       },
       "required": [
         "mode",
         "rerun",
-        "reused"
+        "reused",
+        "tagged"
       ]
     },
     "TestOutcome": {

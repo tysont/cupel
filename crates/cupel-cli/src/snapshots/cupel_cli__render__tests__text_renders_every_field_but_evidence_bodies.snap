@@ -1,6 +1,5 @@
 ---
 source: crates/cupel-cli/src/render.rs
-assertion_line: 92
 expression: "text::render(&fixture::envelope(), false)"
 ---
 cupel check: fail (exit 1)
@@ -85,9 +84,12 @@ rankings  top 10 per dimension
         static.crap.crap 42.5 (#1) · fnd_7c2e1a
      2. simplify  web/limits  mutation - · coverage - · tests -  typescript
 
-tests  2 impacted · per-test map: no
+tests  3 impacted · per-test map: no
   rust  per-test map from tool.llvm-cov-per-test (2 measured, 1236 cached)
   typescript  file-level impact: no producer makes per-test-map for this language (see `cupel describe matrix`)
+  calc cli::adds_from_the_command_line  rust
+    covers calc::add (src/lib.rs:5)
+    kept: attribution binary: no change under its files
   calc tests::adds  rust
     covers calc::add (src/lib.rs:5)
   web/add.test.ts  typescript
@@ -144,7 +146,7 @@ scope     changed · 4 files · 11 symbols · roots ., web · languages rust, ty
 depth     deep · budget 20000 ms
 baseline  default (run_01J9ZZZZZZZZZZZZZZZZZZZZZZ)
 toolchain cargo-llvm-cov 0.6.12 · rust 1.93.0
-suite     rust incremental · 3 rerun · 1275 reused
+suite     rust incremental · 3 rerun · 1275 reused (40 by attribution)
 config    from flags, profile, cupel.toml
           budget: 20s
           checks: {"static.clones":{"threshold":0.82}}

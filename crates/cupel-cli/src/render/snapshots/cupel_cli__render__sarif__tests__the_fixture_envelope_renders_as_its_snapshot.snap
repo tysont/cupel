@@ -1,6 +1,5 @@
 ---
 source: crates/cupel-cli/src/render/sarif.rs
-assertion_line: 372
 expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
 ---
 {
@@ -68,7 +67,8 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
               "rust": {
                 "mode": "incremental",
                 "rerun": 3,
-                "reused": 1275
+                "reused": 1275,
+                "tagged": 40
               }
             },
             "toolchain": {
@@ -546,14 +546,23 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
           ],
           "impacted": [
             {
+              "file": null,
+              "id": "calc cli::adds_from_the_command_line",
+              "kept": "attribution binary: no change under its files",
+              "lang": "rust",
+              "reason": "covers calc::add (src/lib.rs:5)"
+            },
+            {
               "file": "src/lib.rs",
               "id": "calc tests::adds",
+              "kept": null,
               "lang": "rust",
               "reason": "covers calc::add (src/lib.rs:5)"
             },
             {
               "file": "web/add.test.ts",
               "id": "web/add.test.ts",
+              "kept": null,
               "lang": "typescript",
               "reason": "imports web/add.ts"
             }

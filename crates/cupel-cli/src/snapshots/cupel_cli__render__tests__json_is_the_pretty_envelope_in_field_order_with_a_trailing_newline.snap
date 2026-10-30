@@ -1,6 +1,5 @@
 ---
 source: crates/cupel-cli/src/render.rs
-assertion_line: 67
 expression: out
 ---
 {
@@ -43,7 +42,8 @@ expression: out
       "rust": {
         "mode": "incremental",
         "rerun": 3,
-        "reused": 1275
+        "reused": 1275,
+        "tagged": 40
       }
     },
     "config": {
@@ -630,16 +630,25 @@ expression: out
     "per_test_map": false,
     "impacted": [
       {
+        "id": "calc cli::adds_from_the_command_line",
+        "file": null,
+        "reason": "covers calc::add (src/lib.rs:5)",
+        "lang": "rust",
+        "kept": "attribution binary: no change under its files"
+      },
+      {
         "id": "calc tests::adds",
         "file": "src/lib.rs",
         "reason": "covers calc::add (src/lib.rs:5)",
-        "lang": "rust"
+        "lang": "rust",
+        "kept": null
       },
       {
         "id": "web/add.test.ts",
         "file": "web/add.test.ts",
         "reason": "imports web/add.ts",
-        "lang": "typescript"
+        "lang": "typescript",
+        "kept": null
       }
     ],
     "commands": [

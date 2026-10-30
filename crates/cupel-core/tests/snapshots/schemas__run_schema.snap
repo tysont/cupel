@@ -1700,6 +1700,13 @@ expression: pretty(&schema)
           "description": "The runner's test ID; a test file's path where the language fell back to file impact.",
           "type": "string"
         },
+        "kept": {
+          "description": "Why a check run on this scope keeps the test's cached result instead of rerunning it,\nsuch as `attribution binary: no change under its files` (ADR-151 §4); null when it reruns.\nA kept test is left out of the commands.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "lang": {
           "$ref": "#/$defs/LangId"
         },
@@ -1711,6 +1718,7 @@ expression: pretty(&schema)
       "required": [
         "file",
         "id",
+        "kept",
         "lang",
         "reason"
       ]
@@ -3423,12 +3431,20 @@ expression: pretty(&schema)
           "type": "integer",
           "format": "uint64",
           "minimum": 0
+        },
+        "tagged": {
+          "description": "Of `reused`, the tests their attribution kept though they executed a changed function\n(ADR-151 §4); 0 in a fact written before attributions.",
+          "type": "integer",
+          "format": "uint64",
+          "default": 0,
+          "minimum": 0
         }
       },
       "required": [
         "mode",
         "rerun",
-        "reused"
+        "reused",
+        "tagged"
       ]
     },
     "Summary": {

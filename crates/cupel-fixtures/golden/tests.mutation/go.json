@@ -245,7 +245,8 @@
       "go": {
         "mode": "full",
         "rerun": 2,
-        "reused": 0
+        "reused": 0,
+        "tagged": 0
       }
     },
     "toolchain": {},
