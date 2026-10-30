@@ -196,7 +196,11 @@ impl Joint {
                     }
                     reuse = results.reuse.clone().map(|mut reuse| {
                         assert_eq!(
-                            reuse.joint.take().as_ref().map(|id| id.as_str()),
+                            reuse
+                                .joint
+                                .take()
+                                .as_ref()
+                                .map(cupel_core::ProducerId::as_str),
                             Some(self.id)
                         );
                         reuse.phases.clear();
@@ -686,6 +690,12 @@ fn a_test_whose_recorded_structural_hash_differs_is_rerun_though_no_function_it_
     }
 }
 
+/// An incremental run's facts, its reuse, and the filterset it passed nextest.
+type Incremental = (Facts, Option<SuiteReuse>, String);
+
+/// Per file, line numbers.
+type Lines = BTreeMap<String, Vec<u32>>;
+
 /// An integration test of the Rust fixture's library, in a test binary of its own.
 const OTHER: &str =
     "use calc::scale;\n\n#[test]\nfn scales_from_outside() {\n    assert_eq!(scale(3, 3), 9);\n}\n";
@@ -693,10 +703,7 @@ const OTHER: &str =
 /// The Rust fixture with `tests/other.rs`, run whole; then `edit` and the incremental run of a
 /// range that changed `file`: its facts, its reuse, and the filterset it passed nextest; and a
 /// whole run of another copy with the same edit. `None`, reported as skipped, without the tools.
-fn with_other(
-    edit: &dyn Fn(&Path),
-    file: &str,
-) -> Option<((Facts, Option<SuiteReuse>, String), Facts)> {
+fn with_other(edit: &dyn Fn(&Path), file: &str) -> Option<(Incremental, Facts)> {
     let copy = || {
         let dir = RUST.fixture()?;
         std::fs::create_dir_all(dir.path().join("tests")).unwrap();
@@ -726,13 +733,7 @@ fn with_other(
 }
 
 /// The facts an incremental run must share with a whole run of the same tree.
-fn graded(
-    facts: &Facts,
-) -> (
-    &Value,
-    BTreeMap<String, Vec<u32>>,
-    BTreeMap<String, Vec<u32>>,
-) {
+fn graded(facts: &Facts) -> (&Value, Lines, Lines) {
     (&facts.results, facts.lines(false), facts.lines(true))
 }
 

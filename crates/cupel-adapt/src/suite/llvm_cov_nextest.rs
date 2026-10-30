@@ -125,7 +125,11 @@ fn listed(root: &Path, rerun: &Rerun) -> Option<String> {
             format!("binary_id(={binary})")
         })
         .collect();
-    for file in rerun.changed.iter().filter(|file| file.ends_with(".rs")) {
+    for file in rerun
+        .changed
+        .iter()
+        .filter(|file| Path::new(file).extension().is_some_and(|ext| ext == "rs"))
+    {
         binaries.insert(targets_of(root, file)?);
     }
     (!binaries.is_empty()).then(|| binaries.into_iter().collect::<Vec<_>>().join(" | "))
