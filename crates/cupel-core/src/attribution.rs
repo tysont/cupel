@@ -35,20 +35,6 @@ impl Attribution {
     pub fn covers(&self, path: &str) -> bool {
         self.files.matches(path)
     }
-
-    /// The `files` patterns as written.
-    pub fn files(&self) -> &[String] {
-        self.files.patterns()
-    }
-}
-
-impl std::fmt::Debug for Attribution {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Attribution")
-            .field("name", &self.name)
-            .field("files", &self.files())
-            .finish_non_exhaustive()
-    }
 }
 
 /// The attributions of `lang`'s `[lang.<id>]` table, in name order; none when it has no
@@ -176,7 +162,7 @@ mod tests {
             json!({"binary": {"tests": ["a["], "files": ["b"]}}),
         ]
         .into_iter()
-        .map(|value| read(&value).unwrap_err())
+        .map(|value| read(&value).err().expect("the table is refused"))
         .collect();
         assert_eq!(
             errors,

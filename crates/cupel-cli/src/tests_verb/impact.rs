@@ -74,15 +74,13 @@ pub fn touched(regions: &Regions, symbols: Option<&Symbols>) -> u64 {
 }
 
 /// The tests `map` says execute a line of `regions`, and the tests whose own definition
-/// (`frames`) the regions touch, each with why, in ID order; those `attributions` keep marked
-/// with why (see [`kept`]).
+/// (`frames`) the regions touch, each with why, in ID order.
 pub fn by_coverage(
     map: &PerTestMap,
     regions: &Regions,
     symbols: Option<&Symbols>,
     frames: Option<&TestFrames>,
     lang: &LangId,
-    attributions: &[Attribution],
 ) -> Vec<ImpactedTest> {
     let index = map.index();
     let covering = regions.iter().flat_map(|(file, ranges)| {
@@ -95,7 +93,6 @@ pub fn by_coverage(
         })
     });
     let changed = changed_tests(map, regions, frames);
-    let restructured: BTreeSet<String> = changed.iter().map(|(test, _)| test.id.clone()).collect();
     let mut found: BTreeMap<String, ImpactedTest> = BTreeMap::new();
     for (test, reason) in covering.chain(changed) {
         found
@@ -108,22 +105,26 @@ pub fn by_coverage(
                 kept: None,
             });
     }
-    let mut impacted: Vec<ImpactedTest> = found.into_values().collect();
-    kept(&mut impacted, &restructured, regions, attributions);
-    impacted
+    found.into_values().collect()
 }
 
-/// Marks each of `impacted` that only its coverage impacts (not in `restructured`) and that
-/// `attributions` name as kept, when no file of `regions` is one its attributions name (ADR-151
-/// §2); none is kept when every impacted test would be, since a run then reruns them (§3).
-fn kept(
+/// Marks each of `impacted` that only its coverage in `map` impacts (its own definition in
+/// `frames` is outside the regions) and that `attributions` name as kept, when no file of
+/// `regions` is one its attributions name (ADR-151 §2); none is kept when every impacted test
+/// would be, since a run then reruns them (§3).
+pub fn kept(
     impacted: &mut [ImpactedTest],
-    restructured: &BTreeSet<String>,
+    map: &PerTestMap,
     regions: &Regions,
+    frames: Option<&TestFrames>,
     attributions: &[Attribution],
 ) {
+    let restructured: BTreeSet<&str> = changed_tests(map, regions, frames)
+        .into_iter()
+        .map(|(test, _)| test.id.as_str())
+        .collect();
     for test in impacted.iter_mut() {
-        if restructured.contains(&test.id) {
+        if restructured.contains(test.id.as_str()) {
             continue;
         }
         let naming: Vec<&Attribution> = attributions
@@ -309,15 +310,43 @@ mod tests {
         cupel_core::attributions(&LangId::from("rust"), &table).unwrap()
     }
 
-    /// What `kept` says of each of `ids` for a scope of `files`, with `restructured` tests.
+    /// What `kept` says of each of `ids` for a scope of `files`, where the tests of
+    /// `restructured` have their case, `runs` (lines 1–3), in `tests/cli.rs`.
     fn kept_of(ids: &[&str], files: &[&str], restructured: &[&str]) -> Vec<Option<String>> {
         let mut tests: Vec<ImpactedTest> = ids.iter().map(|id| impacted(id)).collect();
         let regions: Regions = files
             .iter()
             .map(|file| ((*file).to_owned(), vec![WHOLE]))
             .collect();
-        let restructured = restructured.iter().map(|id| (*id).to_owned()).collect();
-        kept(&mut tests, &restructured, &regions, &binary());
+        let map = PerTestMap::new(
+            cupel_core::ProducerId::from("tool.cargo-nextest"),
+            restructured
+                .iter()
+                .map(|id| TestCoverage::new(id, None, Vec::new()))
+                .collect(),
+        );
+        let frames = TestFrames {
+            files: vec![cupel_core::syntax::TestFile {
+                file: "tests/cli.rs".to_owned(),
+                framework: "rust-test".to_owned(),
+                setup: Vec::new(),
+                cases: vec![cupel_core::syntax::TestCase {
+                    name: "runs".to_owned(),
+                    span: cupel_core::syntax::Span {
+                        line: 1,
+                        col: 1,
+                        end_line: 3,
+                        end_col: 1,
+                    },
+                    assertions: Vec::new(),
+                    mocks: Vec::new(),
+                    skip: None,
+                    property: None,
+                    doc: None,
+                }],
+            }],
+        };
+        kept(&mut tests, &map, &regions, Some(&frames), &binary());
         tests.into_iter().map(|test| test.kept).collect()
     }
 
@@ -338,7 +367,7 @@ mod tests {
                 ),
                 kept_of(
                     &["calc cli::runs", "calc tests::adds"],
-                    &["src/lib.rs"],
+                    &["src/lib.rs", "tests/cli.rs"],
                     &["calc cli::runs"]
                 ),
             ],

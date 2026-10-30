@@ -242,14 +242,8 @@ impl Impact<'_, '_> {
     ) -> Chosen {
         let frames = self.fact::<TestFrames>(FactKind::TestFrames, lang);
         let attributions = self.attributions(&lang.id);
-        let impacted = impact::by_coverage(
-            map,
-            regions,
-            symbols,
-            frames.as_ref(),
-            &lang.id,
-            &attributions,
-        );
+        let mut impacted = impact::by_coverage(map, regions, symbols, frames.as_ref(), &lang.id);
+        impact::kept(&mut impacted, map, regions, frames.as_ref(), &attributions);
         let ids = impacted
             .iter()
             .filter(|test| test.kept.is_none())

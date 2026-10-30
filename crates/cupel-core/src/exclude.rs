@@ -145,3 +145,29 @@ impl JsonSchema for Exclude {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn an_exclusion_shows_and_compares_as_its_patterns() {
+        let exclude = Exclude::new(vec!["crates/a/**".to_owned()]).unwrap();
+        assert_eq!(
+            (
+                format!("{exclude:?}"),
+                exclude == Exclude::new(vec!["crates/a/**".to_owned()]).unwrap(),
+                exclude.excludes("crates/a/src/lib.rs"),
+                exclude.excludes("crates/b/target/x"),
+                exclude.excludes("crates/b/src"),
+            ),
+            (
+                r#"Exclude(["crates/a/**"])"#.to_owned(),
+                true,
+                true,
+                true,
+                false
+            )
+        );
+    }
+}
