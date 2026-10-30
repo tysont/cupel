@@ -88,10 +88,23 @@ fn check(root: &Path, args: &[&str]) -> (Value, cupel_fixtures::Outcome) {
     (serde_json::to_value(outcome.envelope()).unwrap(), outcome)
 }
 
-/// How the run's Rust suite was obtained.
+/// How the run's Rust suite was obtained, its phases by name alone, since their times differ
+/// from run to run (ADR-155 §1).
 fn suite(envelope: &Value) -> Value {
-    envelope["run"]["suite"]["rust"].clone()
+    let mut suite = envelope["run"]["suite"]["rust"].clone();
+    if let Some(phases) = suite.get_mut("phases") {
+        *phases = phases
+            .as_array()
+            .into_iter()
+            .flatten()
+            .map(|row| row["phase"].clone())
+            .collect();
+    }
+    suite
 }
+
+/// What a joint run that ran tests reports of itself beside its counts.
+const RAN: [&str; 4] = ["build", "test", "export", "report"];
 
 /// The result of check `id` in `envelope`.
 fn result<'a>(envelope: &'a Value, id: &str) -> &'a Value {
@@ -129,7 +142,7 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
     let (whole, _) = check(root, &tree);
     assert_eq!(
         suite(&whole),
-        json!({"mode": "full", "rerun": 5, "reused": 0, "tagged": 0})
+        json!({"mode": "full", "rerun": 5, "reused": 0, "tagged": 0, "joint": "tool.llvm-cov-nextest", "phases": RAN})
     );
     advance(root);
     let ranged_args: Vec<&str> = ["check", "--base", "main"]
@@ -142,7 +155,7 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
     // keeps it, since none of its files changed.
     assert_eq!(
         suite(&ranged),
-        json!({"mode": "incremental", "rerun": 1, "reused": 4, "tagged": 1})
+        json!({"mode": "incremental", "rerun": 1, "reused": 4, "tagged": 1, "joint": "tool.llvm-cov-nextest", "phases": RAN})
     );
     // The range grades `scale` alone, which `scales` covers in full.
     let (metrics, score) = coverage(&ranged);
@@ -163,8 +176,8 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
     assert_eq!(
         (suite(&merged), suite(&fresh), coverage(&merged)),
         (
-            json!({"mode": "cached", "rerun": 0, "reused": 5, "tagged": 0}),
-            json!({"mode": "full", "rerun": 5, "reused": 0, "tagged": 0}),
+            json!({"mode": "cached", "rerun": 0, "reused": 5, "tagged": 0, "joint": "tool.llvm-cov-nextest"}),
+            json!({"mode": "full", "rerun": 5, "reused": 0, "tagged": 0, "joint": "tool.llvm-cov-nextest", "phases": RAN}),
             coverage(&fresh)
         )
     );
@@ -250,7 +263,7 @@ fn a_change_to_the_data_an_attribution_names_reruns_the_binarys_test_alone() {
     let (second, outcome) = check(root, &range);
     assert_eq!(
         suite(&second),
-        json!({"mode": "incremental", "rerun": 1, "reused": 4, "tagged": 0})
+        json!({"mode": "incremental", "rerun": 1, "reused": 4, "tagged": 0, "joint": "tool.llvm-cov-nextest", "phases": RAN})
     );
     outcome.assert_golden("incremental-coverage/rust-attributed");
 }

@@ -3413,12 +3413,80 @@ expression: pretty(&schema)
         }
       ]
     },
+    "SuitePhase": {
+      "description": "A phase of a joint suite run (ADR-155 §1).",
+      "oneOf": [
+        {
+          "description": "The instrumented compile of the suite, before any test runs.",
+          "type": "string",
+          "const": "build"
+        },
+        {
+          "description": "The run of the tests not kept from the cache, with the tools' own check that the build\nis current and their listing of the tests.",
+          "type": "string",
+          "const": "test"
+        },
+        {
+          "description": "Every test process's profiles merged and exported alone (ADR-083 §1).",
+          "type": "string",
+          "const": "export"
+        },
+        {
+          "description": "The whole run's coverage report (ADR-084 §4).",
+          "type": "string",
+          "const": "report"
+        }
+      ]
+    },
+    "SuitePhaseDuration": {
+      "description": "One phase of a joint suite run in one project root and how long it took (ADR-155 §1).",
+      "type": "object",
+      "properties": {
+        "dir": {
+          "description": "The project root it ran in, relative to the repository root, `/`-separated; `.` for the\nroot.",
+          "type": "string"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        },
+        "phase": {
+          "$ref": "#/$defs/SuitePhase"
+        }
+      },
+      "required": [
+        "dir",
+        "duration_ms",
+        "phase"
+      ]
+    },
     "SuiteReuse": {
       "description": "How many of a joint suite run's tests ran and how many were kept from its cache (ADR-149).",
       "type": "object",
       "properties": {
+        "joint": {
+          "description": "The joint that ran the suite, such as `tool.llvm-cov-nextest`; absent in a fact written\nbefore it was recorded.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProducerId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-cupel-optional": true
+        },
         "mode": {
           "$ref": "#/$defs/SuiteMode"
+        },
+        "phases": {
+          "description": "The phases the run went through, one per phase per project root, in the order they\nended (ADR-155 §1); absent when nothing ran or the joint times nothing.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SuitePhaseDuration"
+          },
+          "x-cupel-optional": true
         },
         "rerun": {
           "description": "The tests that ran under instrumentation in this production.",

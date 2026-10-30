@@ -249,6 +249,7 @@
     "started": "<timestamp>",
     "suite": {
       "go": {
+        "joint": "tool.go-test-cover",
         "mode": "full",
         "rerun": 2,
         "reused": 0,

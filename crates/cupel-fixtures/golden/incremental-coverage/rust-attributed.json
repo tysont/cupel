@@ -140,7 +140,30 @@
     "started": "<timestamp>",
     "suite": {
       "rust": {
+        "joint": "tool.llvm-cov-nextest",
         "mode": "incremental",
+        "phases": [
+          {
+            "dir": ".",
+            "duration_ms": "<duration-ms>",
+            "phase": "build"
+          },
+          {
+            "dir": ".",
+            "duration_ms": "<duration-ms>",
+            "phase": "test"
+          },
+          {
+            "dir": ".",
+            "duration_ms": "<duration-ms>",
+            "phase": "export"
+          },
+          {
+            "dir": ".",
+            "duration_ms": "<duration-ms>",
+            "phase": "report"
+          }
+        ],
         "rerun": 1,
         "reused": 4,
         "tagged": 0
