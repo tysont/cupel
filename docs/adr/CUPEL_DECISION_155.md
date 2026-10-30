@@ -1,6 +1,6 @@
 # CUPEL_DECISION_155: The instrumented suite run's phase breakdown and its cost
 
-**Date:** 2026-10-30 · **Status:** proposed · **Phase:** B.1
+**Date:** 2026-10-30 · **Status:** accepted · **Phase:** B.1
 
 ## Context
 
@@ -39,3 +39,21 @@ What is known before measuring: `cargo llvm-cov` 0.9.1 never sets `CARGO_INCREME
 
 5. **An incremental Rust run lists only the binaries that can hold a test it runs** (option (b)). The joint's run gets, beside the tests it keeps, the stale tests (the cached tests it does not keep) and the changed files (ADR-149 §1). With tests kept, the filterset is `(<binaries>) & not (<kept>)`, `<binaries>` the union of `binary_id(=<b>)` for each stale test's binary (the part of its ID before the first space) and, for each changed `.rs` file, the targets it is compiled into, by the nearest enclosing directory whose `Cargo.toml` names a `[package]` `P`: below `src/`, `package(=P) & (kind(lib) | kind(bin) | kind(proc-macro))`; below `tests/`, `package(=P) & kind(test)`; anywhere else in the package (`benches/`, `examples/`), `package(=P)`. A changed `.rs` file in no package lists every binary, as before. A run with nothing kept (whole, ADR-149 §2) lists every binary, as before. The build is unchanged: every test binary is still built, so the run's tests and the per-test map are exactly what they were.
 6. **The daemon keeps the build warm.** `JointProducer` gains `warm(ctx, changed) -> Result<bool>`: build ahead of a run what the next run would build first, when one of `changed` (paths under the repository) is a file its runs depend on, and say whether it built. The Rust joint does when a changed path is a `.rs` file or one of ADR-083's whole-suite files (`Cargo.toml`, `Cargo.lock`, …) outside the root's build outputs (`target/`), and builds with the run's own arguments, environment, and target directory and the filterset `none()`, which builds every test binary and lists none; the Python and Go joints build nothing ahead of their runs. `cupel serve --watch` warms after the watcher's changes: once they settle (2 s with no further change), when no request is running, at most one warm at a time, never while the machine-wide heavy-command lock (`CUPEL_HEAVY_LOCK`, `/tmp/cupel-heavy.lock` by default, the lock `scripts/heavy.sh` takes) is held or its priority turnstile is pending, and holding that lock while it builds, so a heavy command waits for it as for any other; it is cancelled when the daemon stops. A request that starts while a warm builds waits on cargo's own lock of the target directory and finds the build done. Without `--watch` the daemon warms nothing.
+7. **What changed** (2026-10-30, `make inner-loop`: a fresh clone, the release binary, `--jobs 4`, no daemon, through the heavy lock, AC power; before on this branch as created, `main` at 12c5a6c, after on a417cbe). Each cell is wall / suite run / engine; the warm run reran 18 tests in both.
+
+   | Row | Cold | Warm | Unchanged |
+   |---|---|---|---|
+   | P10's final measurement (`main` at 8bfd45d) | 1 077 / 920 / 127 s | 342 / 270 / 61 s | 6 s |
+   | before (12c5a6c; load 14 at the cold start, 55 at the warm) | 1 451 / 1 182 / 222 s | 387 / 280 / 89 s | 6 s |
+   | after (a417cbe; load 16 at the cold start, 34 at the warm) | 2 013 / 1 770 / 197 s | **185 / 79 / 88 s** | 7 s |
+   | after, the daemon having warmed the build (by hand, below) | — | **105 / 13 / 79 s** | — |
+
+   The warm suite run's phases, before (the run of §4) and after (the inner loop's warm run): `build` 75.0 → 59.5 s, **`test` 244.8 → 5.9 s**, `export` 0.3 s → under 1 s (the script lists durations over one second), `report` 7.6 → 11.8 s. The cold run is whole, so it lists every binary as before; its wall rose with the machine's load (80 to 123 during its suite run, with a browser test workload of another project running beside it), not with this decision. **The warm row is 185 s: 5 s over the 3-minute line**, with the engine's own schemata build (61 s, ADR-150, out of this decision's scope) and the suite's instrumented build (60 s, about 200 relinks) the two largest parts. With the daemon (`cupel serve --watch`, the release binary, in the same clone after its measurement, a further comment inside `cyclomatic`): the daemon built after the change settled, and the check after it (`CUPEL_NO_DAEMON=1`, so a cold process, otherwise as the inner loop) took 105 s, its suite run 13 s with `build` 0.55 s.
+
+## Consequences
+
+- A suite run's time is in its fact, the envelope's `run.suite`, and the store, so a measurement names the phase that dominates; the inner loop's durations query lists `tool.llvm-cov-nextest.build`, `.test`, `.export`, and `.report`.
+- An incremental Rust run no longer executes the test binaries that cannot hold a test it runs, so after a rebuild it pays the first-execution scan for a handful of binaries instead of every one. A test the cache does not hold in a binary that is neither a stale test's nor a changed file's (a test generated at run time from another package's data, which no cached test ran) is not run by an incremental run; the next whole run (a tree scope, `deep`) runs it. ADR-149 §2's whole-run rules are unchanged.
+- The instrumented build remains whole (every test binary relinked after a change to a widely used crate). Building only the binaries the stale tests need waits on knowing which tests spawn which of the workspace's executables (option (c) above, ADR-150's first option).
+- The daemon, under `--watch`, spends a build after every settled source change, at most one at a time and never beside a heavy command; it takes the machine-wide lock, so a heavy command started meanwhile waits for it. `CUPEL_HEAVY_LOCK` and its default become something the product reads, not only `scripts/heavy.sh`.
+- `JointProducer` gains `warm`; a joint that builds nothing ahead of its run says so (`Ok(false)`).

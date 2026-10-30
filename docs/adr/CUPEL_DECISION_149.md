@@ -1,6 +1,6 @@
 # CUPEL_DECISION_149: The suite joint's incremental run on a range scope
 
-**Date:** 2026-10-28 · **Status:** accepted · **Phase:** P10.1
+**Date:** 2026-10-28 · **Status:** accepted; §1 (a Rust run over every test but the kept ones) refined by [155](CUPEL_DECISION_155.md) §5 (it lists only the binaries that can hold a test it runs) · **Phase:** P10.1
 
 ## Context
 
