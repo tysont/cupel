@@ -26,8 +26,8 @@ use cupel_core::syntax::{NormTree, Symbols, TestFrames};
 use cupel_core::{
     Availability, Cancellation, CostClass, Ctx, Estimate, EventSink, Exclude, FactKind, Focus,
     JointProducer, LangId, Langs, PerTestMap, Process, ProduceCtx, Produced, ProducerId, Result,
-    RunnerInvocation, Scope, SuiteMode, SuiteReuse, TestCoverage, TestResult, TestResults, ToolId,
-    Upstream, case_name, find_program,
+    RunnerInvocation, Scope, SuiteMode, SuitePhase, SuitePhaseDuration, SuiteReuse, TestCoverage,
+    TestResult, TestResults, ToolId, Upstream, case_name, find_program,
 };
 use serde::{Deserialize, Serialize};
 
@@ -73,6 +73,9 @@ pub(crate) struct SuiteSpec {
     pub toolchain: fn(&Path) -> Option<String>,
     /// One run of the suite in a root over every test but `kept`: all of them when it is empty.
     pub run: fn(&Site<'_>, &BTreeSet<String>) -> Result<SuiteRun>,
+    /// Builds in a root (absolute and canonical) what a run there would build first (ADR-155 §5);
+    /// nothing for a joint whose run builds nothing ahead of its tests.
+    pub warm: fn(&Path, &Cancellation) -> Result<()>,
 }
 
 /// What one run of the suite in a root reported, relative to that root.
@@ -86,6 +89,10 @@ pub(crate) struct SuiteRun {
     /// started no test.
     #[serde(skip)]
     pub per_test: Option<Vec<TestCoverage>>,
+    /// The phases this run went through and how long each took, in milliseconds, in the order
+    /// they ended (ADR-155 §1); empty for a joint that times nothing, and in a cached run.
+    #[serde(skip)]
+    pub phases: Vec<(SuitePhase, u64)>,
 }
 
 /// Per test ID, relative to the root, the structural hash of its definition (ADR-149 §3).
@@ -214,6 +221,15 @@ impl JointProducer for Suite {
             },
             None => Availability::Ready,
         }
+    }
+
+    /// What a run would build first, in every project root, one after another.
+    fn warm(&self, ctx: &ProduceCtx) -> Result<()> {
+        for (dir, _) in roots(ctx) {
+            let path = ctx.ctx.root.join(&dir);
+            (self.0.warm)(&path.canonicalize().unwrap_or(path), &ctx.cancel)?;
+        }
+        Ok(())
     }
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<Vec<Produced>> {
@@ -547,6 +563,7 @@ fn merge(measured: SuiteRun, recorded: SuiteRun, keep: Vec<TestCoverage>) -> Sui
         tests,
         coverage,
         per_test,
+        phases: measured.phases,
     }
 }
 
@@ -699,6 +716,8 @@ struct Made {
     /// How each root's run was obtained.
     modes: BTreeSet<SuiteMode>,
     roots: usize,
+    /// Every root's phases, in root order (ADR-155 §1).
+    phases: Vec<SuitePhaseDuration>,
 }
 
 impl Made {
@@ -709,6 +728,15 @@ impl Made {
         self.rerun += obtained.rerun;
         self.reused += (run.tests.len() as u64).saturating_sub(obtained.rerun);
         self.tagged += obtained.tagged;
+        self.phases.extend(
+            run.phases
+                .iter()
+                .map(|&(phase, duration_ms)| SuitePhaseDuration {
+                    phase,
+                    dir: site.dir.to_owned(),
+                    duration_ms,
+                }),
+        );
         self.invocations.push(run.invocation);
         self.tests
             .extend(run.tests.into_iter().map(|test| placed(test, site.dir)));
@@ -761,6 +789,8 @@ impl Made {
             rerun: self.rerun,
             reused: self.reused,
             tagged: self.tagged,
+            joint: Some(ProducerId::from(spec.id)),
+            phases: self.phases,
         };
         let mut facts = vec![Produced::new(
             TestResults::new(results_runner.clone(), self.invocations, self.tests, repo)

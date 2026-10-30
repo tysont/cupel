@@ -167,7 +167,8 @@ impl Joint {
         self.jointly_with(&self.ctx(root)).0
     }
 
-    /// The facts one joint run with `ctx` makes, and how its baseline was obtained.
+    /// The facts one joint run with `ctx` makes, and how its baseline was obtained, without the
+    /// run's phases, whose times differ from run to run; the joint is checked to be this one.
     fn jointly_with(&self, ctx: &ProduceCtx) -> (Facts, Option<SuiteReuse>) {
         let produced = self
             .joint()
@@ -183,7 +184,14 @@ impl Joint {
             match fact.kind() {
                 FactKind::TestResults => {
                     let results = fact.downcast::<TestResults>().unwrap();
-                    reuse.clone_from(&results.reuse);
+                    reuse = results.reuse.clone().map(|mut reuse| {
+                        assert_eq!(
+                            reuse.joint.take().as_ref().map(|id| id.as_str()),
+                            Some(self.id)
+                        );
+                        reuse.phases.clear();
+                        reuse
+                    });
                     facts.results = comparable(&results);
                 }
                 FactKind::CoverageMap => facts.coverage = fact.downcast::<CoverageMap>(),
@@ -290,6 +298,8 @@ fn reuse(mode: SuiteMode, rerun: u64, reused: u64) -> SuiteReuse {
         rerun,
         reused,
         tagged: 0,
+        joint: None,
+        phases: Vec::new(),
     }
 }
 

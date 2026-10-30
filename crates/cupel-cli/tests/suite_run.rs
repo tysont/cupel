@@ -1,5 +1,5 @@
-// ABOUTME: One suite run through the binary on the Python per-test fixture (ADR-084): a dry run plans one joint run
-// ABOUTME: where it would plan three, an unchanged tree reuses the cached baseline, and a red run is never cached.
+// ABOUTME: One suite run through the binary on the per-test fixtures (ADR-084): a dry run plans one joint run where it
+// ABOUTME: would plan three, an unchanged tree reuses the cached baseline, a red run is never cached, a run is timed by phase.
 mod support;
 
 use std::time::SystemTime;
@@ -139,4 +139,84 @@ fn a_suite_that_failed_once_runs_again_and_passes_on_an_unchanged_tree() {
     let (passed, envelope) = check(&repo, &[]);
     assert_eq!((failed, passed), (4, 0), "{envelope}");
     assert!(written(&repo).is_some(), "the green run is cached");
+}
+
+/// A copy of the Rust per-test fixture under nextest and the default coverage command, so the
+/// suite joint applies; `None` (reported as skipped) without its tools.
+fn rust_fixture() -> Option<Repo> {
+    for tool in ["cargo-llvm-cov", "cargo-nextest"] {
+        if cupel_core::find_program(tool).is_none() {
+            eprintln!("SKIPPED: {tool} not installed; the Rust joint run was not run");
+            return None;
+        }
+    }
+    let repo = Repo::new();
+    cupel_fixtures::copy_repo("per-test/rust", &repo.root());
+    repo.write(
+        "cupel.toml",
+        "[lang.rust]\nrunner = \"cargo-nextest\"\ncoverage = \"cargo llvm-cov --lcov --output-path {out}\"\n",
+    );
+    Some(repo)
+}
+
+/// The phases `envelope`'s Rust suite run names, in order, and the joint that ran them.
+fn phases(envelope: &Value) -> (Value, Vec<String>) {
+    let suite = &envelope["run"]["suite"]["rust"];
+    let phases = suite["phases"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|row| {
+            format!(
+                "{} {}",
+                row["phase"].as_str().unwrap(),
+                row["dir"].as_str().unwrap()
+            )
+        })
+        .collect();
+    (suite["joint"].clone(), phases)
+}
+
+/// The tasks of the store's durations named after the Rust joint's phases.
+fn phase_tasks(repo: &Repo) -> Vec<String> {
+    let mut tasks: Vec<String> = repo
+        .store()
+        .recent_durations()
+        .unwrap()
+        .into_iter()
+        .map(|(shape, _)| shape.task)
+        .filter(|task| task.starts_with("tool.llvm-cov-nextest."))
+        .collect();
+    tasks.sort();
+    tasks
+}
+
+#[test]
+fn a_rust_suite_run_records_each_phase_it_ran_and_a_cached_one_none() {
+    let Some(repo) = rust_fixture() else { return };
+    let (first, ran) = check(&repo, &[]);
+    let (second, cached) = check(&repo, &[]);
+    assert_eq!((first, second), (0, 0), "{ran}");
+    assert_eq!(
+        phases(&ran),
+        (
+            Value::from("tool.llvm-cov-nextest"),
+            ["build .", "test .", "export .", "report ."]
+                .map(str::to_owned)
+                .to_vec()
+        )
+    );
+    assert_eq!(
+        phases(&cached),
+        (Value::from("tool.llvm-cov-nextest"), Vec::new())
+    );
+    assert_eq!(
+        phase_tasks(&repo),
+        [
+            "tool.llvm-cov-nextest.build",
+            "tool.llvm-cov-nextest.export",
+            "tool.llvm-cov-nextest.report",
+            "tool.llvm-cov-nextest.test",
+        ]
+    );
 }

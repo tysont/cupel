@@ -358,6 +358,8 @@ fn run_info() -> RunInfo {
                 rerun: 3,
                 reused: 1_275,
                 tagged: 40,
+                joint: None,
+                phases: Vec::new(),
             },
         )]),
         config: ConfigEcho {

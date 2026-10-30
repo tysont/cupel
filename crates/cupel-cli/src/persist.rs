@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 use cupel_core::budget::{TaskDuration, TaskShape};
 use cupel_core::{
     CheckId, Envelope, LangId, Measured, Metric, MutationOutcomes, MutationPhase, ProducerId,
-    Suppressions, Writer,
+    SuitePhase, SuiteReuse, Suppressions, TestResults, Writer,
 };
 use cupel_store::{Store, StoreError};
 
@@ -42,7 +42,7 @@ pub fn unusable(error: &StoreError) -> CupelError {
 
 /// Records `envelope` in the store with what it executed (its test runs, ADR-076 §7, its
 /// mutation outcomes, ADR-080 §10, its durations, ADR-086 §2, with the mutation engine's phases
-/// among them, ADR-150 §2, and its checks' per-symbol measurements, which a later comparison
+/// and the suite joints' among them, ADR-150 §2 and ADR-155 §3, and its checks' per-symbol measurements, which a later comparison
 /// across symbol matches reads, ADR-131) and mirrors
 /// `suppressions` (`.cupel/suppressions.toml`, when it loads) into it. The error is for one
 /// stderr line; it never changes the run's outcome (ADR-045 §8).
@@ -56,12 +56,13 @@ pub fn record(
     store
         .record_run(envelope)
         .map_err(|error| error.to_string())?;
+    let mut durations = executed.durations.clone();
     for (lang, results) in &executed.test_results {
         store
             .record_test_results(&envelope.run.id, lang, results)
             .map_err(|error| error.to_string())?;
+        durations.extend(suite_phase_durations(lang, results));
     }
-    let mut durations = executed.durations.clone();
     for (lang, outcomes) in &executed.mutation_outcomes {
         store
             .record_mutants(&envelope.run.id, lang, outcomes)
@@ -87,22 +88,58 @@ pub fn record(
 /// Each phase of `outcomes`' production as a duration of its own, `<engine>.<phase>`, with the
 /// phase's total (ADR-150 §2); none for a phase the production did not go through.
 fn phase_durations(lang: &LangId, outcomes: &MutationOutcomes) -> Vec<TaskDuration> {
-    MutationPhase::ALL
-        .into_iter()
-        .filter_map(|phase| {
-            let rows: Vec<u64> = outcomes
-                .phases
+    let rows: Vec<(&str, u64)> = outcomes
+        .phases
+        .iter()
+        .map(|row| (row.phase.as_str(), row.duration_ms))
+        .collect();
+    let names = MutationPhase::ALL.map(MutationPhase::as_str);
+    totals(lang, outcomes.engine.as_str(), &names, &rows)
+}
+
+/// Each phase of the joint suite run that made `results` as a duration of its own,
+/// `<joint>.<phase>`, with the phase's total over its roots (ADR-155 §3); none for a phase the
+/// run did not go through, or results no timed joint made.
+fn suite_phase_durations(lang: &LangId, results: &TestResults) -> Vec<TaskDuration> {
+    let Some(SuiteReuse {
+        joint: Some(joint),
+        phases,
+        ..
+    }) = &results.reuse
+    else {
+        return Vec::new();
+    };
+    let rows: Vec<(&str, u64)> = phases
+        .iter()
+        .map(|row| (row.phase.as_str(), row.duration_ms))
+        .collect();
+    let names = SuitePhase::ALL.map(SuitePhase::as_str);
+    totals(lang, joint.as_str(), &names, &rows)
+}
+
+/// For each phase of `names` that some row of `rows` names, in that order, a duration
+/// `<producer>.<phase>` holding the total of its rows.
+fn totals(
+    lang: &LangId,
+    producer: &str,
+    names: &[&str],
+    rows: &[(&str, u64)],
+) -> Vec<TaskDuration> {
+    names
+        .iter()
+        .filter_map(|name| {
+            let times: Vec<u64> = rows
                 .iter()
-                .filter(|row| row.phase == phase)
-                .map(|row| row.duration_ms)
+                .filter(|(phase, _)| phase == name)
+                .map(|(_, ms)| *ms)
                 .collect();
-            (!rows.is_empty()).then(|| TaskDuration {
+            (!times.is_empty()).then(|| TaskDuration {
                 shape: TaskShape::producer(
-                    &ProducerId::from(format!("{}.{}", outcomes.engine, phase.as_str())),
+                    &ProducerId::from(format!("{producer}.{name}")),
                     lang,
                     false,
                 ),
-                duration_ms: rows.iter().sum(),
+                duration_ms: times.iter().sum(),
             })
         })
         .collect()

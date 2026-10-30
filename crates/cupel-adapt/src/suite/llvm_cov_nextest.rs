@@ -2,14 +2,15 @@
 // ABOUTME: per-process profiles are the per-test map (ADR-083), and whose profiles together are `cargo llvm-cov`'s report.
 use std::collections::BTreeSet;
 use std::path::Path;
+use std::time::Instant;
 
-use cupel_core::FactKind;
+use cupel_core::{FactKind, SuitePhase};
 
 use super::{Suite, SuiteRun, SuiteSpec, probe};
 use crate::cargo_nextest::{PROFILE, filterset};
 use crate::coverage::{parse_lcov, placed};
 use crate::per_test::Site;
-use crate::per_test::llvm_cov::{Instrumented, LLVM_COV};
+use crate::per_test::llvm_cov::{Instrumented, LLVM_COV, elapsed_ms, warm};
 use crate::report::junit;
 use crate::runner::finished;
 
@@ -29,6 +30,7 @@ static SPEC: SuiteSpec = SuiteSpec {
     fuses: |words| words == ["cargo", "llvm-cov", "--lcov", "--output-path", "{out}"],
     toolchain,
     run,
+    warm,
 };
 
 inventory::submit!(crate::ToolProducer {
@@ -86,10 +88,15 @@ fn run(site: &Site<'_>, kept: &BTreeSet<String>) -> cupel_core::Result<SuiteRun>
         tests: found.unwrap_or_default(),
         coverage: None,
         per_test: None,
+        phases: instrumented.phases.clone(),
     };
     if instrumented.ran() {
+        let started = Instant::now();
         run.per_test = Some(instrumented.export(site)?);
+        run.phases.push((SuitePhase::Export, elapsed_ms(started)));
+        let started = Instant::now();
         let report = instrumented.report(site)?;
+        run.phases.push((SuitePhase::Report, elapsed_ms(started)));
         run.coverage = parse_lcov(&report)
             .ok()
             .map(|map| placed(map, &[&site.path], "."));

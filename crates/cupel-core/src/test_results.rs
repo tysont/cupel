@@ -47,6 +47,58 @@ pub struct SuiteReuse {
     /// (ADR-151 §4); 0 in a fact written before attributions.
     #[serde(default)]
     pub tagged: u64,
+    /// The joint that ran the suite, such as `tool.llvm-cov-nextest`; absent in a fact written
+    /// before it was recorded.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub joint: Option<ProducerId>,
+    /// The phases the run went through, one per phase per project root, in the order they
+    /// ended (ADR-155 §1); absent when nothing ran or the joint times nothing.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub phases: Vec<SuitePhaseDuration>,
+}
+
+/// One phase of a joint suite run in one project root and how long it took (ADR-155 §1).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct SuitePhaseDuration {
+    pub phase: SuitePhase,
+    /// The project root it ran in, relative to the repository root, `/`-separated; `.` for the
+    /// root.
+    pub dir: String,
+    pub duration_ms: u64,
+}
+
+/// A phase of a joint suite run (ADR-155 §1).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize, JsonSchema,
+)]
+#[serde(rename_all = "kebab-case")]
+pub enum SuitePhase {
+    /// The instrumented compile of the suite, before any test runs.
+    Build,
+    /// The run of the tests not kept from the cache, with the tools' own check that the build
+    /// is current and their listing of the tests.
+    Test,
+    /// Every test process's profiles merged and exported alone (ADR-083 §1).
+    Export,
+    /// The whole run's coverage report (ADR-084 §4).
+    Report,
+}
+
+impl SuitePhase {
+    /// The phase's name as it serializes.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Build => "build",
+            Self::Test => "test",
+            Self::Export => "export",
+            Self::Report => "report",
+        }
+    }
+
+    /// Every phase, in the order a run goes through them.
+    pub const ALL: [Self; 4] = [Self::Build, Self::Test, Self::Export, Self::Report];
 }
 
 /// What a joint suite run did.

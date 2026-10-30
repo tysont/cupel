@@ -539,6 +539,10 @@ pub trait JointProducer: Send + Sync {
         scope: &Scope,
         sink: &mut dyn EventSink,
     ) -> Result<Vec<Produced>>;
+    /// Builds ahead of a run what the next run in `ctx`'s repository would build first, so it
+    /// finds it built (ADR-155 §5), as the daemon does after a change it watches; it makes no
+    /// fact and changes nothing a run reports.
+    fn warm(&self, ctx: &ProduceCtx) -> Result<()>;
 }
 
 /// Every registered producer, by the fact kind it provides, in registration order.

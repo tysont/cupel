@@ -4,8 +4,12 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Mutex, PoisonError};
+use std::time::Instant;
 
-use cupel_core::{CoveredLines, Error, LangId, Langs, PerTestMap, Process, Result, TestCoverage};
+use cupel_core::{
+    Cancellation, CoveredLines, Error, LangId, Langs, PerTestMap, Process, Result, SuitePhase,
+    TestCoverage,
+};
 
 use super::cache::own_file;
 use super::{Measured, PerTest, PerTestSpec, Runs, Site, covered, executed_lines, failed};
@@ -57,6 +61,83 @@ fn words(words: &[&str]) -> Vec<String> {
     words.iter().map(|word| (*word).to_owned()).collect()
 }
 
+/// The instrumented run of the suite, before the filter of the tests it keeps.
+const RUN: [&str; 6] = [
+    "llvm-cov",
+    "nextest",
+    "--no-report",
+    "--workspace",
+    "--no-fail-fast",
+    "--no-tests=pass",
+];
+
+/// The instrumented build the run makes, alone: the run's arguments with a filterset that
+/// matches no test, so nextest builds every test binary, lists none, and runs none (ADR-155
+/// §5). (`cargo llvm-cov`'s own `--no-run` means another thing and refuses `--no-report`.)
+fn build_args() -> Vec<String> {
+    let mut args = words(&RUN);
+    args.extend(["-E".to_owned(), "none()".to_owned()]);
+    args
+}
+
+/// How long cargo said its build took, in milliseconds, from the `Finished … target(s) in
+/// <time>` line it prints when the build ends (`0.35s`, `1m 52s`, `1h 02m 03s`); `None` when no
+/// build finished.
+fn build_ms(output: &str) -> Option<u64> {
+    let line = output.lines().find(|line| {
+        line.trim_start().starts_with("Finished ") && line.contains(" target(s) in ")
+    })?;
+    let (_, time) = line.rsplit_once(" in ")?;
+    time.split_whitespace().try_fold(0, |ms, part| {
+        let (number, unit) = part.split_at(part.find(|c: char| c.is_ascii_alphabetic())?);
+        let scale = match unit {
+            "h" => 3_600_000,
+            "m" => 60_000,
+            "s" => 1_000,
+            _ => return None,
+        };
+        let (whole, fraction) = number.split_once('.').unwrap_or((number, ""));
+        let thousandths: u64 = format!("{fraction:0<3}").get(..3)?.parse().ok()?;
+        Some(ms + whole.parse::<u64>().ok()? * scale + thousandths * scale / 1_000)
+    })
+}
+
+/// Builds the instrumented suite of the project root at `root` (absolute and canonical) as a
+/// run there builds it first, with the run's arguments and environment, so the next run
+/// compiles nothing (ADR-155 §5); a build that fails is the error.
+pub(crate) fn warm(root: &Path, cancel: &Cancellation) -> Result<()> {
+    let target_dir = root.join(TARGET_DIR).to_string_lossy().into_owned();
+    let mut process = Process::new("cargo", root)
+        .args(build_args())
+        .env("CARGO_LLVM_COV_TARGET_DIR", &target_dir);
+    for (key, value) in ENV {
+        process = process.env(key, value);
+    }
+    let captured = process.run(cancel)?;
+    if captured.exit_code == Some(0) {
+        Ok(())
+    } else {
+        Err(failed("cargo", &captured))
+    }
+}
+
+/// A run of `total` milliseconds as its build and its tests, when cargo said how long the
+/// build took (ADR-155 §2); a run whose build did not finish was its build alone.
+fn split(total: u64, build: Option<u64>) -> Vec<(SuitePhase, u64)> {
+    match build {
+        Some(build) => vec![
+            (SuitePhase::Build, build.min(total)),
+            (SuitePhase::Test, total.saturating_sub(build)),
+        ],
+        None => vec![(SuitePhase::Build, total)],
+    }
+}
+
+/// The milliseconds since `started`.
+pub(crate) fn elapsed_ms(started: Instant) -> u64 {
+    u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX)
+}
+
 /// One instrumented run of every test but `keep`, each test process writing its profiles into
 /// a directory of its own through the target runner, then each test's coverage exported alone.
 /// `--no-report` keeps the instrumented build between runs, so a refresh builds incrementally.
@@ -91,6 +172,8 @@ pub(crate) struct Instrumented {
     profiles: PathBuf,
     /// The build's target directory, absolute.
     target: PathBuf,
+    /// The build's and the test run's times, in milliseconds (ADR-155 §1).
+    pub phases: Vec<(SuitePhase, u64)>,
 }
 
 impl Instrumented {
@@ -109,21 +192,16 @@ impl Instrumented {
             .writer
             .write(&script, runner_script(&llvm.runner, &profiles).as_bytes())?;
         executable(&script)?;
-        let mut args = words(&[
-            "llvm-cov",
-            "nextest",
-            "--no-report",
-            "--workspace",
-            "--no-fail-fast",
-            "--no-tests=pass",
-        ]);
+        let mut args = words(&RUN);
         args.extend(extra.iter().cloned());
         let script = script.to_string_lossy().into_owned();
         let target_dir = target.to_string_lossy().into_owned();
         let mut env = ENV.to_vec();
         env.push((&llvm.runner, &script));
         env.push(("CARGO_LLVM_COV_TARGET_DIR", &target_dir));
+        let started = Instant::now();
         let captured = site.run("cargo", &args, &env)?;
+        let phases = split(elapsed_ms(started), build_ms(&captured.stderr));
         let processes = processes(&profiles);
         Ok(Self {
             command: std::iter::once("cargo".to_owned()).chain(args).collect(),
@@ -132,6 +210,7 @@ impl Instrumented {
             processes,
             profiles,
             target,
+            phases,
         })
     }
 
@@ -414,6 +493,39 @@ fn is_executable(path: &Path) -> bool {
 #[cfg(test)]
 mod tests {
     use super::runner_script;
+
+    #[test]
+    fn the_build_time_is_what_cargos_finished_line_says_in_milliseconds() {
+        use super::{SuitePhase, build_ms, split};
+        let output = |time: &str| {
+            format!(
+                "   Compiling calc v0.1.0 (/a/calc)\n    Finished `test` profile [unoptimized + \
+                 debuginfo] target(s) in {time}\n    Starting 2 tests across 1 binary\n"
+            )
+        };
+        let times: Vec<Option<u64>> = ["0.35s", "12.04s", "1m 56s", "1h 02m 03s", "7s"]
+            .into_iter()
+            .map(|time| build_ms(&output(time)))
+            .collect();
+        assert_eq!(
+            times,
+            [
+                Some(350),
+                Some(12_040),
+                Some(116_000),
+                Some(3_723_000),
+                Some(7_000)
+            ]
+        );
+        assert_eq!(build_ms("error[E0308]: mismatched types\n"), None);
+        assert_eq!(
+            (split(20_000, Some(12_040)), split(9_000, None)),
+            (
+                vec![(SuitePhase::Build, 12_040), (SuitePhase::Test, 7_960)],
+                vec![(SuitePhase::Build, 9_000)]
+            )
+        );
+    }
 
     #[cfg(unix)]
     #[test]

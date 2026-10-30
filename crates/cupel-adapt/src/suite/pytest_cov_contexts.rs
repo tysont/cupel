@@ -28,6 +28,7 @@ static SPEC: SuiteSpec = SuiteSpec {
     fuses,
     toolchain,
     run,
+    warm: |_, _| Ok(()),
 };
 
 inventory::submit!(crate::ToolProducer {
@@ -155,6 +156,7 @@ fn run(site: &Site<'_>, kept: &BTreeSet<String>) -> Result<SuiteRun> {
         tests: found.unwrap_or_default(),
         coverage,
         per_test,
+        phases: Vec::new(),
     })
 }
 

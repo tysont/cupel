@@ -156,8 +156,8 @@ pub use select::Selection;
 pub use simulation::{SimulationFailure, SimulationHarness, SimulationResults, SimulationStatus};
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};
 pub use test_results::{
-    OUTPUT_TAIL_LINES, RunnerInvocation, SuiteMode, SuiteReuse, TestOutcome, TestResult,
-    TestResults, Unevaluable, names_case, output_tail,
+    OUTPUT_TAIL_LINES, RunnerInvocation, SuiteMode, SuitePhase, SuitePhaseDuration, SuiteReuse,
+    TestOutcome, TestResult, TestResults, Unevaluable, names_case, output_tail,
 };
 pub use trace::{Trace, TraceDivergence, TraceSpec, TraceStatus, Traces};
 pub use writer::{WriteError, Writer};

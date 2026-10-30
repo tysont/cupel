@@ -150,6 +150,10 @@ impl JointProducer for Joint {
         Availability::Ready
     }
 
+    fn warm(&self, _: &ProduceCtx) -> Result<()> {
+        Ok(())
+    }
+
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<Vec<Produced>> {
         ran(&self.runs, "tool.joint");
         *self.saw_symbols.lock().unwrap() = Some(ctx.upstream.get::<Symbols>().is_some());
