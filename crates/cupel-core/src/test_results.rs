@@ -43,6 +43,10 @@ pub struct SuiteReuse {
     pub rerun: u64,
     /// The tests whose results and coverage came from the cache without running.
     pub reused: u64,
+    /// Of `reused`, the tests their attribution kept though they executed a changed function
+    /// (ADR-151 §4); 0 in a fact written before attributions.
+    #[serde(default)]
+    pub tagged: u64,
 }
 
 /// What a joint suite run did.

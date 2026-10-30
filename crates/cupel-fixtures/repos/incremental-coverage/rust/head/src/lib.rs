@@ -1,4 +1,4 @@
-//! Ledger: three functions, each covered by its own test; `add` by two.
+//! Ledger: three functions, each covered by its own test; `add` by two, `scale` also by the binary.
 
 /// The sum of `a` and `b`.
 pub fn add(a: i64, b: i64) -> i64 {

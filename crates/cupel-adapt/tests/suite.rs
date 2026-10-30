@@ -289,6 +289,7 @@ fn reuse(mode: SuiteMode, rerun: u64, reused: u64) -> SuiteReuse {
         mode,
         rerun,
         reused,
+        tagged: 0,
     }
 }
 

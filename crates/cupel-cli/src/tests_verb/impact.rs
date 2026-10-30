@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use cupel_core::syntax::{
     ImportTarget, ModuleGraph, SymbolDef, Symbols, TestConventions, TestFrames,
 };
-use cupel_core::{ImpactedTest, LangId, PerTestMap, TestCoverage, case_name};
+use cupel_core::{Attribution, ImpactedTest, LangId, PerTestMap, TestCoverage, case_name};
 
 /// Line ranges per file (inclusive): the lines in scope, or the lines a range changed.
 pub type Regions = BTreeMap<String, Vec<(u32, u32)>>;
@@ -74,13 +74,15 @@ pub fn touched(regions: &Regions, symbols: Option<&Symbols>) -> u64 {
 }
 
 /// The tests `map` says execute a line of `regions`, and the tests whose own definition
-/// (`frames`) the regions touch, each with why, in ID order.
+/// (`frames`) the regions touch, each with why, in ID order; those `attributions` keep marked
+/// with why (see [`kept`]).
 pub fn by_coverage(
     map: &PerTestMap,
     regions: &Regions,
     symbols: Option<&Symbols>,
     frames: Option<&TestFrames>,
     lang: &LangId,
+    attributions: &[Attribution],
 ) -> Vec<ImpactedTest> {
     let index = map.index();
     let covering = regions.iter().flat_map(|(file, ranges)| {
@@ -93,6 +95,7 @@ pub fn by_coverage(
         })
     });
     let changed = changed_tests(map, regions, frames);
+    let restructured: BTreeSet<String> = changed.iter().map(|(test, _)| test.id.clone()).collect();
     let mut found: BTreeMap<String, ImpactedTest> = BTreeMap::new();
     for (test, reason) in covering.chain(changed) {
         found
@@ -102,9 +105,47 @@ pub fn by_coverage(
                 file: test.file.clone().or_else(|| file_of_case(frames, &test.id)),
                 reason,
                 lang: lang.clone(),
+                kept: None,
             });
     }
-    found.into_values().collect()
+    let mut impacted: Vec<ImpactedTest> = found.into_values().collect();
+    kept(&mut impacted, &restructured, regions, attributions);
+    impacted
+}
+
+/// Marks each of `impacted` that only its coverage impacts (not in `restructured`) and that
+/// `attributions` name as kept, when no file of `regions` is one its attributions name (ADR-151
+/// §2); none is kept when every impacted test would be, since a run then reruns them (§3).
+fn kept(
+    impacted: &mut [ImpactedTest],
+    restructured: &BTreeSet<String>,
+    regions: &Regions,
+    attributions: &[Attribution],
+) {
+    for test in impacted.iter_mut() {
+        if restructured.contains(&test.id) {
+            continue;
+        }
+        let naming: Vec<&Attribution> = attributions
+            .iter()
+            .filter(|attribution| attribution.names(&test.id))
+            .collect();
+        let touched = regions
+            .keys()
+            .any(|file| naming.iter().any(|attribution| attribution.covers(file)));
+        if !naming.is_empty() && !touched {
+            let names: Vec<&str> = naming.iter().map(|found| found.name.as_str()).collect();
+            test.kept = Some(format!(
+                "attribution {}: no change under its files",
+                names.join(", ")
+            ));
+        }
+    }
+    if impacted.iter().all(|test| test.kept.is_some()) {
+        for test in impacted.iter_mut() {
+            test.kept = None;
+        }
+    }
 }
 
 /// The tests of `map` whose own definition (a case of `frames`, matched by name) the regions
@@ -178,6 +219,7 @@ pub fn by_imports(
                     file: Some(reached.to_owned()),
                     reason,
                     lang: lang.clone(),
+                    kept: None,
                 });
         }
     }
@@ -238,4 +280,74 @@ fn file_of_case(frames: Option<&TestFrames>, id: &str) -> Option<String> {
 
 fn overlaps((a_start, a_end): (u32, u32), (b_start, b_end): (u32, u32)) -> bool {
     a_start <= b_end && b_start <= a_end
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::json;
+
+    use super::*;
+
+    /// An impacted test `id`, impacted by its coverage.
+    fn impacted(id: &str) -> ImpactedTest {
+        ImpactedTest {
+            id: id.to_owned(),
+            file: None,
+            reason: "covers calc::add (src/lib.rs:5)".to_owned(),
+            lang: LangId::from("rust"),
+            kept: None,
+        }
+    }
+
+    /// The attribution `binary`: `calc cli::*`, attributed to `src/main.rs`.
+    fn binary() -> Vec<Attribution> {
+        let serde_json::Value::Object(table) = json!({"attribution": {"binary": {
+            "tests": ["calc cli::*"], "files": ["src/main.rs"],
+        }}}) else {
+            unreachable!()
+        };
+        cupel_core::attributions(&LangId::from("rust"), &table).unwrap()
+    }
+
+    /// What `kept` says of each of `ids` for a scope of `files`, with `restructured` tests.
+    fn kept_of(ids: &[&str], files: &[&str], restructured: &[&str]) -> Vec<Option<String>> {
+        let mut tests: Vec<ImpactedTest> = ids.iter().map(|id| impacted(id)).collect();
+        let regions: Regions = files
+            .iter()
+            .map(|file| ((*file).to_owned(), vec![WHOLE]))
+            .collect();
+        let restructured = restructured.iter().map(|id| (*id).to_owned()).collect();
+        kept(&mut tests, &restructured, &regions, &binary());
+        tests.into_iter().map(|test| test.kept).collect()
+    }
+
+    #[test]
+    fn an_attributed_test_impacted_by_its_coverage_alone_is_kept_unless_its_files_changed() {
+        let reason = Some("attribution binary: no change under its files".to_owned());
+        assert_eq!(
+            [
+                kept_of(
+                    &["calc cli::runs", "calc tests::adds"],
+                    &["src/lib.rs"],
+                    &[]
+                ),
+                kept_of(
+                    &["calc cli::runs", "calc tests::adds"],
+                    &["src/main.rs"],
+                    &[]
+                ),
+                kept_of(
+                    &["calc cli::runs", "calc tests::adds"],
+                    &["src/lib.rs"],
+                    &["calc cli::runs"]
+                ),
+            ],
+            [vec![reason, None], vec![None, None], vec![None, None]]
+        );
+    }
+
+    #[test]
+    fn no_test_is_kept_when_every_impacted_test_would_be() {
+        assert_eq!(kept_of(&["calc cli::runs"], &["src/lib.rs"], &[]), [None]);
+    }
 }

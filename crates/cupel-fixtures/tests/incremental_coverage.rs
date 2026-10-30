@@ -1,5 +1,5 @@
-// ABOUTME: The suite joint's incremental run end to end (ADR-149): a commit changes one function of a Rust crate whose
-// ABOUTME: suite ran whole once, and the real binary's `--base` run reruns one test, keeps three, and grades the same.
+// ABOUTME: The suite joint's incremental run end to end (ADR-149, ADR-151): a commit changes one function of a Rust crate
+// ABOUTME: whose suite ran whole once; the `--base` run reruns one test, keeps four, the binary's by its attribution.
 use std::path::Path;
 use std::process::Command;
 
@@ -129,7 +129,7 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
     let (whole, _) = check(root, &tree);
     assert_eq!(
         suite(&whole),
-        json!({"mode": "full", "rerun": 4, "reused": 0})
+        json!({"mode": "full", "rerun": 5, "reused": 0, "tagged": 0})
     );
     advance(root);
     let ranged_args: Vec<&str> = ["check", "--base", "main"]
@@ -138,9 +138,11 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
         .chain(["--format", "json"])
         .collect();
     let (ranged, outcome) = check(root, &ranged_args);
+    // `the_binary_scales_each_pair_of_its_input` ran `scale` through the binary; its attribution
+    // keeps it, since none of its files changed.
     assert_eq!(
         suite(&ranged),
-        json!({"mode": "incremental", "rerun": 1, "reused": 3})
+        json!({"mode": "incremental", "rerun": 1, "reused": 4, "tagged": 1})
     );
     // The range grades `scale` alone, which `scales` covers in full.
     let (metrics, score) = coverage(&ranged);
@@ -161,8 +163,8 @@ fn a_change_inside_one_function_reruns_its_test_alone_and_grades_as_the_whole_ru
     assert_eq!(
         (suite(&merged), suite(&fresh), coverage(&merged)),
         (
-            json!({"mode": "cached", "rerun": 0, "reused": 4}),
-            json!({"mode": "full", "rerun": 4, "reused": 0}),
+            json!({"mode": "cached", "rerun": 0, "reused": 5, "tagged": 0}),
+            json!({"mode": "full", "rerun": 5, "reused": 0, "tagged": 0}),
             coverage(&fresh)
         )
     );
@@ -217,4 +219,34 @@ fn a_second_change_reuses_the_mutants_of_the_function_the_first_change_touched()
         "`scale`'s mutants, unchanged since the first range run, are reused: {}",
         second["checks"]
     );
+}
+
+#[test]
+fn a_change_to_the_data_an_attribution_names_reruns_the_binarys_test_alone() {
+    if !tools_installed() {
+        return;
+    }
+    let repo = base();
+    let root = repo.path();
+    let range: Vec<&str> = ["check", "--base", "main"]
+        .into_iter()
+        .chain(ONLY)
+        .chain(["--format", "json"])
+        .collect();
+    advance(root);
+    let (first, _) = check(root, &range);
+    assert_eq!(suite(&first)["mode"], json!("full"));
+    // The data the binary's test hands it, each pair's factors swapped: no test's coverage
+    // names the file, its attribution does, and without it nothing would rerun.
+    std::fs::write(root.join("tests/data/pairs.txt"), "3 2\n2 -4\n").unwrap();
+    git(
+        root,
+        &[&["commit", "--quiet", "--all", "-m", "factors swapped"]],
+    );
+    let (second, outcome) = check(root, &range);
+    assert_eq!(
+        suite(&second),
+        json!({"mode": "incremental", "rerun": 1, "reused": 4, "tagged": 0})
+    );
+    outcome.assert_golden("incremental-coverage/rust-attributed");
 }

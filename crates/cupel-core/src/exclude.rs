@@ -15,17 +15,46 @@ pub const ALWAYS_EXCLUDED: [&str; 4] = [".cupel", "node_modules", "target", "ven
 
 /// Compiled exclusion patterns. A path is excluded when it, or a directory above it, matches
 /// a pattern or is named in [`ALWAYS_EXCLUDED`].
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Exclude {
+    globs: PathGlobs,
+}
+
+impl Exclude {
+    /// Compiles `patterns` with [`PathGlobs`]' rules. The error names the first pattern that is
+    /// not a valid glob.
+    pub fn new(patterns: Vec<String>) -> Result<Self, String> {
+        Ok(Self {
+            globs: PathGlobs::new(patterns, "exclude")?,
+        })
+    }
+
+    /// The patterns as written.
+    pub fn patterns(&self) -> &[String] {
+        self.globs.patterns()
+    }
+
+    /// Whether `path` (relative to the repository root, `/`-separated, a file or a directory)
+    /// is excluded.
+    pub fn excludes(&self, path: &str) -> bool {
+        path.split('/').any(|part| ALWAYS_EXCLUDED.contains(&part)) || self.globs.matches(path)
+    }
+}
+
+/// Gitignore-style path globs relative to the repository root, as `[scope] exclude` writes
+/// them and attributions name files (ADR-151).
+#[derive(Clone)]
+pub struct PathGlobs {
     patterns: Vec<String>,
     set: GlobSet,
 }
 
-impl Exclude {
+impl PathGlobs {
     /// Compiles `patterns`. A pattern containing `/` (other than a trailing one) is anchored at
     /// the repository root; any other pattern matches a name at any depth. `*` never crosses a
-    /// `/`; `**` does. The error names the first pattern that is not a valid glob.
-    pub fn new(patterns: Vec<String>) -> Result<Self, String> {
+    /// `/`; `**` does. The error names the first pattern that is not a valid glob, as a `what`
+    /// pattern.
+    pub fn new(patterns: Vec<String>, what: &str) -> Result<Self, String> {
         let mut builder = GlobSetBuilder::new();
         for pattern in &patterns {
             let trimmed = pattern.trim_end_matches('/');
@@ -37,12 +66,12 @@ impl Exclude {
             let glob = GlobBuilder::new(&anchored)
                 .literal_separator(true)
                 .build()
-                .map_err(|error| format!("invalid exclude pattern `{pattern}`: {error}"))?;
+                .map_err(|error| format!("invalid {what} pattern `{pattern}`: {error}"))?;
             builder.add(glob);
         }
         let set = builder
             .build()
-            .map_err(|error| format!("invalid exclude patterns: {error}"))?;
+            .map_err(|error| format!("invalid {what} patterns: {error}"))?;
         Ok(Self { patterns, set })
     }
 
@@ -51,14 +80,11 @@ impl Exclude {
         &self.patterns
     }
 
-    /// Whether `path` (relative to the repository root, `/`-separated, a file or a directory)
-    /// is excluded.
-    pub fn excludes(&self, path: &str) -> bool {
+    /// Whether `path` (relative to the repository root, `/`-separated, a file or a directory),
+    /// or a directory above it, matches a pattern.
+    pub fn matches(&self, path: &str) -> bool {
         let mut prefix = String::new();
         for part in path.split('/') {
-            if ALWAYS_EXCLUDED.contains(&part) {
-                return true;
-            }
             if !prefix.is_empty() {
                 prefix.push('/');
             }
@@ -71,7 +97,7 @@ impl Exclude {
     }
 }
 
-impl Default for Exclude {
+impl Default for PathGlobs {
     fn default() -> Self {
         Self {
             patterns: Vec::new(),
@@ -82,7 +108,7 @@ impl Default for Exclude {
 
 impl PartialEq for Exclude {
     fn eq(&self, other: &Self) -> bool {
-        self.patterns == other.patterns
+        self.patterns() == other.patterns()
     }
 }
 
@@ -90,13 +116,13 @@ impl Eq for Exclude {}
 
 impl fmt::Debug for Exclude {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_tuple("Exclude").field(&self.patterns).finish()
+        f.debug_tuple("Exclude").field(&self.patterns()).finish()
     }
 }
 
 impl Serialize for Exclude {
     fn serialize<S: Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        self.patterns.serialize(serializer)
+        self.patterns().serialize(serializer)
     }
 }
 

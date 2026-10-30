@@ -28,6 +28,10 @@ pub struct ImpactedTest {
     /// Why the scope impacts it, such as `covers calc::add (src/lib.rs:5)`.
     pub reason: String,
     pub lang: LangId,
+    /// Why a check run on this scope keeps the test's cached result instead of rerunning it,
+    /// such as `attribution binary: no change under its files` (ADR-151 §4); null when it reruns.
+    /// A kept test is left out of the commands.
+    pub kept: Option<String>,
 }
 
 /// A command that runs one language's impacted tests in one project root.

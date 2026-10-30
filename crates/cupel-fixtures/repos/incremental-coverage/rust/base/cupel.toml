@@ -3,3 +3,9 @@
 [lang.rust]
 runner = "cargo-nextest"
 coverage = "cargo llvm-cov --lcov --output-path {out}"
+
+# The test that spawns the binary is attributed to the binary's source, its own file, and its data (ADR-151),
+# so a change to the library it runs keeps it and a change to its data reruns it.
+[lang.rust.attribution.binary]
+tests = ["ledger::cli *"]
+files = ["src/main.rs", "tests/cli.rs", "tests/data"]

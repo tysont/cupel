@@ -7,10 +7,10 @@ use std::collections::BTreeMap;
 use cupel_core::config::Config;
 use cupel_core::syntax::{ModuleGraph, NormTree, Symbols, TestConventions, TestFrames};
 use cupel_core::{
-    Availability, Ctx, Envelope, EventSink, ExitCode, FactKind, ImpactBasis, ImpactedTest, Job,
-    Lang, LangId, PerTestMap, ProduceCtx, ProducerId, ProducerRegistry, Production, Scheduler,
-    ScopeInfo, ScopeRequest, Status, Support, SupportMatrix, TestCommand, TestSelection,
-    TestsReport, select_symbols,
+    Attribution, Availability, CostClass, Ctx, Envelope, EventSink, ExitCode, FactKind,
+    ImpactBasis, ImpactedTest, Job, Lang, LangId, PerTestMap, ProduceCtx, ProducerId,
+    ProducerRegistry, Production, Scheduler, ScopeInfo, ScopeRequest, Status, Support,
+    SupportMatrix, TestCommand, TestSelection, TestsReport, attributions, select_symbols,
 };
 
 use self::impact::Regions;
@@ -241,8 +241,20 @@ impl Impact<'_, '_> {
         symbols: Option<&Symbols>,
     ) -> Chosen {
         let frames = self.fact::<TestFrames>(FactKind::TestFrames, lang);
-        let impacted = impact::by_coverage(map, regions, symbols, frames.as_ref(), &lang.id);
-        let ids = impacted.iter().map(|test| test.id.clone()).collect();
+        let attributions = self.attributions(&lang.id);
+        let impacted = impact::by_coverage(
+            map,
+            regions,
+            symbols,
+            frames.as_ref(),
+            &lang.id,
+            &attributions,
+        );
+        let ids = impacted
+            .iter()
+            .filter(|test| test.kept.is_none())
+            .map(|test| test.id.clone())
+            .collect();
         Chosen {
             basis: ImpactBasis {
                 lang: lang.id.clone(),
@@ -308,6 +320,18 @@ impl Impact<'_, '_> {
             Some(hunks) => impact::widened(files, hunks, symbols),
             None => impact::whole(files),
         }
+    }
+
+    /// `lang`'s attributions (ADR-151), which keep tests below `--depth deep` only.
+    fn attributions(&self, lang: &LangId) -> Vec<Attribution> {
+        if self.job.depth >= CostClass::Deep {
+            return Vec::new();
+        }
+        self.ctx
+            .lang
+            .get(lang)
+            .and_then(|table| attributions(lang, table).ok())
+            .unwrap_or_default()
     }
 
     /// The fact `kind` of type `F` for `lang`, when it can be produced.

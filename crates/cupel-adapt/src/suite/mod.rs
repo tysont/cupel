@@ -36,7 +36,8 @@ use crate::fresh::{
 };
 use crate::per_test::cache::{Cached, extension};
 use crate::per_test::{
-    Measured, PerTest, PerTestSpec, Site, cached_tests, edits, fresh_tests, merged, store_tests,
+    Measured, PerTest, PerTestSpec, Site, attributed, cached_tests, edits, fresh_tests, merged,
+    store_tests,
 };
 use crate::runner::{placed, roots, under};
 
@@ -116,6 +117,8 @@ struct Plan {
     /// How many cached tests are stale: 0 when the change touched no test and no source file,
     /// so the entry is served as it is.
     stale: usize,
+    /// How many of `keep` their attribution kept though they ran a changed function (ADR-151).
+    tagged: u64,
     /// The entry's report: the recorded run (every test's result and the whole coverage) and
     /// the tests' structural hashes.
     recorded: Report,
@@ -231,19 +234,19 @@ impl JointProducer for Suite {
                 packages,
                 area: ctx.writer.create_dir(&entry.join("work"))?,
             };
-            let (root_run, obtained, rerun) = if let Some(kept) =
+            let (root_run, obtained) = if let Some(kept) =
                 self.cached(&ctx.ctx.root, &ctx.ctx.exclude, &entry, &dir)
             {
-                (kept.run, SuiteMode::Cached, 0)
+                (kept.run, Obtained::cached(0))
             } else if let Some(plan) = self.plan(&ctx.ctx, &dir, &entry, &ctx.upstream, &ctx.focus)
             {
                 self.incremental(&site, &entry, plan)?
             } else {
                 let whole = self.full(&site, &entry)?;
-                let rerun = whole.tests.len() as u64;
-                (whole, SuiteMode::Full, rerun)
+                let obtained = Obtained::full(&whole);
+                (whole, obtained)
             };
-            made.add(&site, root_run, obtained, rerun);
+            made.add(&site, root_run, &obtained);
         }
         Ok(made.facts(self.0, &ctx.ctx.root))
     }
@@ -318,21 +321,42 @@ impl Suite {
         let root = ctx.root.join(dir);
         let symbols = upstream.get::<Symbols>();
         let edits = edits(dir, &root, &cached.lines, &changes, symbols);
+        let langs = Langs::Only(vec![LangId::from(self.0.lang)]);
         let refresh = PerTest(spec)
-            .staleness(&root, edits)
+            .staleness(&root, dir, edits, attributed(ctx, &langs, focus.depth))
             .refresh(cached.tests, &changes);
         let ids = found.report.run.tests.iter().map(|test| test.id.as_str());
         let current = structural_hashes(ids, upstream, dir);
-        let (restructured, keep) =
+        let (restructured, mut keep) =
             restructured(refresh.keep, &current, &found.report.hashes, &changes);
-        let stale = refresh.stale + restructured;
+        let mut stale = refresh.stale + restructured;
+        let tagged: BTreeSet<&String> = keep
+            .iter()
+            .map(|test| &test.id)
+            .filter(|id| refresh.tagged.contains(*id))
+            .collect();
         let is_source = |file: &String| spec.sources.contains(&extension(file));
-        if keep.is_empty() || (stale == 0 && changes.all().any(is_source)) {
+        let source_changed = changes.all().any(is_source);
+        if stale == 0 && !tagged.is_empty() && source_changed {
+            // Only tagged tests ran the change: they rerun, so the run measures it (ADR-151 §3).
+            let tagged: BTreeSet<String> = tagged.into_iter().cloned().collect();
+            keep.retain(|test| !tagged.contains(&test.id));
+            stale = tagged.len();
+            return (!keep.is_empty()).then_some(Plan {
+                keep,
+                stale,
+                tagged: 0,
+                recorded: found.report,
+            });
+        }
+        if keep.is_empty() || (stale == 0 && source_changed) {
             return None;
         }
+        let tagged = tagged.len() as u64;
         Some(Plan {
             keep,
             stale,
+            tagged,
             recorded: found.report,
         })
     }
@@ -382,30 +406,34 @@ impl Suite {
     }
 
     /// Runs the tests `plan` does not keep, merges the run with what it keeps (ADR-149 §1), and
-    /// caches the merged run in `entry` when it is whole; the run, how it was obtained, and how
-    /// many tests ran. A plan with nothing stale serves the recorded run and renews its record.
+    /// caches the merged run in `entry` when it is whole; the run and how it was obtained. A
+    /// plan with nothing stale serves the recorded run and renews its record.
     fn incremental(
         &self,
         site: &Site<'_>,
         entry: &Path,
         plan: Plan,
-    ) -> Result<(SuiteRun, SuiteMode, u64)> {
+    ) -> Result<(SuiteRun, Obtained)> {
         let before = self.record(site);
         let kept: BTreeSet<String> = plan.keep.iter().map(|test| test.id.clone()).collect();
         if plan.stale == 0 {
             let mut run = plan.recorded.run;
             run.per_test = Some(plan.keep);
             self.keep(site, entry, &run, plan.recorded.hashes, &before)?;
-            return Ok((run, SuiteMode::Cached, 0));
+            return Ok((run, Obtained::cached(plan.tagged)));
         }
         let measured = (self.0.run)(site, &kept)?;
         if measured.invocation.completed && measured.per_test.is_none() {
             // The stale tests are gone: nothing ran, so nothing was reported.
             let run = self.full(site, entry)?;
-            let rerun = run.tests.len() as u64;
-            return Ok((run, SuiteMode::Full, rerun));
+            let obtained = Obtained::full(&run);
+            return Ok((run, obtained));
         }
-        let rerun = measured.tests.len() as u64;
+        let obtained = Obtained {
+            mode: SuiteMode::Incremental,
+            rerun: measured.tests.len() as u64,
+            tagged: plan.tagged,
+        };
         let mut hashes = plan.recorded.hashes.clone();
         hashes.extend(
             structural_hashes(
@@ -422,7 +450,7 @@ impl Suite {
         );
         let run = merge(measured, plan.recorded.run, plan.keep);
         self.keep(site, entry, &run, hashes, &before)?;
-        Ok((run, SuiteMode::Incremental, rerun))
+        Ok((run, obtained))
     }
 
     /// The record of the tree of `site` now.
@@ -626,6 +654,34 @@ pub(crate) fn probe(root: &Path, program: &str, args: &[&str]) -> Option<String>
     (captured.exit_code == Some(0)).then(|| captured.stdout.trim().to_owned())
 }
 
+/// How one root's run was obtained: its mode, how many tests ran, and how many of the rest their
+/// attribution kept though they ran a changed function (ADR-151 §4).
+struct Obtained {
+    mode: SuiteMode,
+    rerun: u64,
+    tagged: u64,
+}
+
+impl Obtained {
+    /// Served from the cache without running a test.
+    fn cached(tagged: u64) -> Self {
+        Self {
+            mode: SuiteMode::Cached,
+            rerun: 0,
+            tagged,
+        }
+    }
+
+    /// Every test of `run` ran.
+    fn full(run: &SuiteRun) -> Self {
+        Self {
+            mode: SuiteMode::Full,
+            rerun: run.tests.len() as u64,
+            tagged: 0,
+        }
+    }
+}
+
 /// The facts of every root so far, relative to the repository root.
 #[derive(Default)]
 struct Made {
@@ -635,21 +691,24 @@ struct Made {
     coverage: Option<Vec<FileCoverage>>,
     /// `None` once a root made no per-test map.
     per_test: Option<Vec<TestCoverage>>,
-    /// How many tests ran, and how many were kept from the cache, over every root.
+    /// How many tests ran, how many were kept from the cache, and how many of those their
+    /// attribution kept, over every root.
     rerun: u64,
     reused: u64,
+    tagged: u64,
     /// How each root's run was obtained.
     modes: BTreeSet<SuiteMode>,
     roots: usize,
 }
 
 impl Made {
-    fn add(&mut self, site: &Site<'_>, run: SuiteRun, mode: SuiteMode, rerun: u64) {
+    fn add(&mut self, site: &Site<'_>, run: SuiteRun, obtained: &Obtained) {
         let first = self.roots == 0;
         self.roots += 1;
-        self.modes.insert(mode);
-        self.rerun += rerun;
-        self.reused += (run.tests.len() as u64).saturating_sub(rerun);
+        self.modes.insert(obtained.mode);
+        self.rerun += obtained.rerun;
+        self.reused += (run.tests.len() as u64).saturating_sub(obtained.rerun);
+        self.tagged += obtained.tagged;
         self.invocations.push(run.invocation);
         self.tests
             .extend(run.tests.into_iter().map(|test| placed(test, site.dir)));
@@ -701,6 +760,7 @@ impl Made {
             mode: self.mode(),
             rerun: self.rerun,
             reused: self.reused,
+            tagged: self.tagged,
         };
         let mut facts = vec![Produced::new(
             TestResults::new(results_runner.clone(), self.invocations, self.tests, repo)

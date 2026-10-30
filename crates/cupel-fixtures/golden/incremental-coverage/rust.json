@@ -83,6 +83,18 @@
         },
         "lang": {
           "rust": {
+            "attribution": {
+              "binary": {
+                "files": [
+                  "src/main.rs",
+                  "tests/cli.rs",
+                  "tests/data"
+                ],
+                "tests": [
+                  "ledger::cli *"
+                ]
+              }
+            },
             "coverage": "cargo llvm-cov --lcov --output-path {out}",
             "runner": "cargo-nextest"
           }
@@ -124,7 +136,8 @@
       "rust": {
         "mode": "incremental",
         "rerun": 1,
-        "reused": 3
+        "reused": 4,
+        "tagged": 1
       }
     },
     "toolchain": {},

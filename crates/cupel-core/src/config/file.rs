@@ -402,6 +402,8 @@ fn lang_tables<'de, D: Deserializer<'de>>(
             let lang = validate_lang_id(lang)?;
             // A language's metamorphic relations are checked as the file loads (ADR-097 §1).
             crate::relation::relations(&lang, &table)?;
+            // So are its test attributions (ADR-151 §1).
+            crate::attribution::attributions(&lang, &table)?;
             Ok((lang, table))
         })
         .collect::<Result<_, String>>()

@@ -4,11 +4,12 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::time::SystemTime;
 
-use cupel_core::{CoveredLines, Exclude, TestCoverage};
+use cupel_core::{Attribution, CoveredLines, Exclude, TestCoverage};
 use serde::{Deserialize, Serialize};
 
 use super::functions::FunctionEdit;
 use crate::fresh::{Changes, Sources, load};
+use crate::runner::{ID_SEPARATOR, under};
 
 /// Bumped when what a cache entry holds, or what its tests mean, changes, so older entries are
 /// measured again rather than read.
@@ -82,6 +83,11 @@ pub(crate) struct Staleness<'a> {
     /// Per changed file, what the change did to its functions (ADR-084 §7); a changed file not
     /// here is stale for every test that covers it.
     pub edits: BTreeMap<String, FunctionEdit>,
+    /// The root below the repository root (`.` for the root itself), which the tests' IDs and
+    /// the changed files are relative to.
+    pub dir: &'a str,
+    /// The language's attributions (ADR-151); none at `--depth deep`.
+    pub attributions: Vec<Attribution>,
 }
 
 /// Whether a file (relative to the root) is part of a test itself.
@@ -94,31 +100,65 @@ pub(crate) struct Refresh {
     pub keep: Vec<TestCoverage>,
     /// How many cached tests must be measured again.
     pub stale: usize,
+    /// The kept tests their attribution kept though they ran a changed function (ADR-151 §4).
+    pub tagged: BTreeSet<String>,
     /// Whether to measure at all: a test is stale, or a changed file may hold a new test.
     pub measure: bool,
 }
 
 impl Staleness<'_> {
     /// The refresh of `tests` after `changes`: every test is stale when a `whole` file changed;
-    /// otherwise a test is stale when it ran a changed function of a changed file (any line of
-    /// a changed file without an edit, or a removed one) or owns a changed, added, or removed
-    /// file, and the rest are kept, their lines moved with the edits.
+    /// otherwise a test is stale when it owns a changed, added, or removed file, and, as its
+    /// attribution says when it has one (ADR-151 §2), when a changed, added, or removed file is
+    /// one its attribution names, or else when it ran a changed function of a changed file (any
+    /// line of a changed file without an edit, or a removed one). The rest are kept, their lines
+    /// moved with the edits.
     pub fn refresh(&self, tests: Vec<TestCoverage>, changes: &Changes) -> Refresh {
         let whole = changes.all().any(|file| self.whole.contains(&name(file)));
-        let (stale, keep): (Vec<TestCoverage>, Vec<TestCoverage>) =
-            tests.into_iter().partition(|test| {
-                whole
-                    || self.ran_a_change(&test.covered, &changes.changed)
-                    || changes.all().any(|file| (self.owns)(test, file))
-            });
+        let mut keep = Vec::new();
+        let mut stale = 0;
+        let mut tagged = BTreeSet::new();
+        for test in tests {
+            let ran = self.ran_a_change(&test.covered, &changes.changed);
+            let attributed = self.attributed(&test.id);
+            let named = || {
+                changes.all().any(|file| {
+                    let file = under(self.dir, file, "/");
+                    attributed.iter().any(|found| found.covers(&file))
+                })
+            };
+            let owns = changes.all().any(|file| (self.owns)(&test, file));
+            let is_stale = whole || owns || if attributed.is_empty() { ran } else { named() };
+            if is_stale {
+                stale += 1;
+                continue;
+            }
+            if ran {
+                tagged.insert(test.id.clone());
+            }
+            keep.push(self.moved(test));
+        }
         let new_tests = changes
             .all()
             .any(|file| self.sources.iter().any(|ext| extension(file) == *ext));
         Refresh {
-            keep: keep.into_iter().map(|test| self.moved(test)).collect(),
-            stale: stale.len(),
-            measure: !stale.is_empty() || new_tests,
+            keep,
+            stale,
+            tagged,
+            measure: stale > 0 || new_tests,
         }
+    }
+
+    /// The attributions that name the test `id` (relative to the root).
+    fn attributed(&self, id: &str) -> Vec<&Attribution> {
+        if self.attributions.is_empty() {
+            return Vec::new();
+        }
+        let id = under(self.dir, id, ID_SEPARATOR);
+        self.attributions
+            .iter()
+            .filter(|attribution| attribution.names(&id))
+            .collect()
     }
 
     /// Whether `covered` runs a changed function of one of the changed `files`, or any line of
@@ -213,6 +253,8 @@ mod tests {
             sources: &["py"],
             owns: Box::new(own_file),
             edits: BTreeMap::new(),
+            dir: ".",
+            attributions: Vec::new(),
         };
         let refresh = staleness.refresh(cached(), changes);
         let kept = refresh.keep.into_iter().map(|test| test.id).collect();
@@ -256,6 +298,49 @@ mod tests {
         assert_eq!(
             refreshed(&changes(&[], &["tests/conftest.py"])),
             (Vec::new(), 2, true)
+        );
+    }
+
+    /// The kept IDs, the tagged ones, and how many are stale after `changes`, with the
+    /// attribution `binary`: `tests/test_scale.py::*`, attributed to `cli.py` and `data/`.
+    fn attributed(changes: &Changes) -> (Vec<String>, Vec<String>, usize) {
+        let serde_json::Value::Object(table) = serde_json::json!({"attribution": {"binary": {
+            "tests": ["tests/test_scale.py::*"], "files": ["cli.py", "data"],
+        }}}) else {
+            unreachable!()
+        };
+        let staleness = Staleness {
+            whole: &["conftest.py"],
+            sources: &["py"],
+            owns: Box::new(|_: &TestCoverage, _: &str| false),
+            edits: BTreeMap::new(),
+            dir: ".",
+            attributions: cupel_core::attributions(&"python".into(), &table).unwrap(),
+        };
+        let refresh = staleness.refresh(cached(), changes);
+        let kept = refresh.keep.into_iter().map(|test| test.id).collect();
+        (kept, refresh.tagged.into_iter().collect(), refresh.stale)
+    }
+
+    #[test]
+    fn an_attributed_test_is_stale_only_for_a_change_to_its_attributions_files() {
+        assert_eq!(
+            [
+                attributed(&changes(&[], &["scale.py"])),
+                attributed(&changes(&[], &["data/pairs.txt"])),
+                attributed(&changes(&[], &["add.py"])),
+                attributed(&changes(&[], &["conftest.py"])),
+            ],
+            [
+                (
+                    vec![ADD.to_owned(), SCALE.to_owned()],
+                    vec![SCALE.to_owned()],
+                    0
+                ),
+                (vec![ADD.to_owned()], Vec::new(), 1),
+                (vec![SCALE.to_owned()], Vec::new(), 1),
+                (Vec::new(), Vec::new(), 2),
+            ]
         );
     }
 }

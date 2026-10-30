@@ -916,6 +916,16 @@ $ cupel check --only tests.mutation --dry-run    # coverage = "pytest --cov --co
 
 With the run cached the first says `test-results+coverage-map+per-test-map(cached)`; on a range with a cached run it says `(incremental: 3 stale)`, the tests it would rerun.
 
+A test that spawns the repository's own binary covers, through it, most of the code, so nearly any change makes it stale. An attribution names such tests by ID glob and the files they are attributed to instead ([ADR-151](docs/adr/CUPEL_DECISION_151.md)):
+
+```toml
+[lang.rust.attribution.binary]
+tests = ["cupel-cli::*"]                          # globs over the test IDs the envelope shows
+files = ["crates/cupel-cli", "crates/cupel-fixtures"]   # paths as `[scope] exclude` writes them
+```
+
+Below `--depth deep`, such a test reruns only when one of those files, its own files, or a build or test configuration file changed; a change elsewhere keeps its cached result and lines even when it ran the changed function, and `run.suite` counts it in `tagged` (`suite  rust incremental · 128 rerun · 2665 reused (40 by attribution)`). When only kept tests ran a change, they rerun after all, so the change is measured. Its coverage still counts everywhere coverage counts, and the mutation engine still selects it for the mutants it covers. `tests --impacted` lists it with `kept` saying which attribution kept it and leaves it out of the commands. At `--depth deep` no attribution applies.
+
 ### Flakiness
 
 `tests.flaky` reruns the tests the baseline ran, three times by default, with the same runner, and compares the outcomes. The reruns differ on purpose: the first two run the tests in their declared order one at a time, differing only in seed; the third runs them reversed (pytest and unittest, which take the tests in order) or in the runner's seeded shuffle (`go test -shuffle`, libtest's `--shuffle-seed`, `jest --randomize`, `vitest --sequence.shuffle`, Surefire's random class order, which otherwise runs classes alphabetically; Cupel's Clojure runner takes the reversed order); further reruns shuffle again, alternating between the runner's default parallelism and one test at a time. Every rerun's seed is derived from the run's `--seed`, so `cupel check --only tests.flaky --seed N`, which each finding gives as its `repro`, repeats the same reruns.

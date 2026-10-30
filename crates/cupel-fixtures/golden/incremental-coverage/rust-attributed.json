@@ -1,0 +1,161 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.coverage",
+      "metrics": {
+        "line": 1.0,
+        "lines": 2.0,
+        "uncovered": 0.0
+      },
+      "notes": [
+        "branches: unavailable (rust)"
+      ],
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "line_ratio",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "pass",
+      "tier": 2
+    },
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.mutation",
+      "metrics": {
+        "equivalent": 0.0,
+        "executed": 0.0,
+        "fallback": 0.0,
+        "killed": 1.0,
+        "out_of_memory": 0.0,
+        "reused": 1.0,
+        "schemata": 0.0,
+        "score": 1.0,
+        "survived": 0.0,
+        "timeout": 0.0,
+        "uncovered": 0.0,
+        "unviable": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 1,
+        "unit": "killed_ratio",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "pass",
+      "tier": 3
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [],
+  "next_actions": [],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "rust": {
+            "attribution": {
+              "binary": {
+                "files": [
+                  "src/main.rs",
+                  "tests/cli.rs",
+                  "tests/data"
+                ],
+                "tests": [
+                  "ledger::cli *"
+                ]
+              }
+            },
+            "coverage": "cargo llvm-cov --lcov --output-path {out}",
+            "runner": "cargo-nextest"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": {
+      "base": "<sha>",
+      "branch": "<branch>",
+      "dirty": "<dirty>",
+      "sha": "<sha>"
+    },
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "rust"
+      ],
+      "mode": "range",
+      "roots": [
+        "."
+      ],
+      "symbols": 1
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "suite": {
+      "rust": {
+        "mode": "incremental",
+        "rerun": 1,
+        "reused": 4,
+        "tagged": 0
+      }
+    },
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 0,
+  "truncated": false
+}

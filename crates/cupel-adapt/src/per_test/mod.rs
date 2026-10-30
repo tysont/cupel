@@ -21,9 +21,9 @@ use std::path::{Path, PathBuf};
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::Symbols;
 use cupel_core::{
-    Availability, Captured, CostClass, CoveredLines, Ctx, Error, Estimate, EventSink, FactKind,
-    Langs, PerTestMap, Process, ProduceCtx, Producer, ProducerId, Result, Scope, TestCoverage,
-    ToolId, ToolProbe, Upstream, find_program, output_tail,
+    Attribution, Availability, Captured, CostClass, CoveredLines, Ctx, Error, Estimate, EventSink,
+    FactKind, Langs, PerTestMap, Process, ProduceCtx, Producer, ProducerId, Result, Scope,
+    TestCoverage, ToolId, ToolProbe, Upstream, attributions, find_program, output_tail,
 };
 
 use self::cache::{Cached, Lines, Staleness, report};
@@ -144,7 +144,10 @@ impl Producer<PerTestMap> for PerTest {
                 &changes,
                 upstream.get::<Symbols>(),
             );
-            let refresh = self.staleness(&root, edits).refresh(cached.tests, &changes);
+            let attributed = attributed(ctx, &(self.0.languages)(), CostClass::Standard);
+            let refresh = self
+                .staleness(&root, &dir, edits, attributed)
+                .refresh(cached.tests, &changes);
             stale += refresh.stale;
             measure |= refresh.measure;
             found = true;
@@ -247,8 +250,9 @@ impl PerTest {
                 }
                 let symbols = ctx.upstream.get::<Symbols>();
                 let edits = edits(site.dir, &site.path, &cached.lines, &changes, symbols);
+                let attributed = attributed(&ctx.ctx, &(self.0.languages)(), ctx.focus.depth);
                 let refresh = self
-                    .staleness(&site.path, edits)
+                    .staleness(&site.path, site.dir, edits, attributed)
                     .refresh(cached.tests, &changes);
                 (refresh.keep, refresh.measure)
             }
@@ -270,12 +274,15 @@ impl PerTest {
         Ok((tests, measured))
     }
 
-    /// What makes a cached test of the root at `root` stale for this producer, after a change
-    /// that did `edits` to the functions of the files it changed.
+    /// What makes a cached test of the root `dir` (at `root`) stale for this producer, after a
+    /// change that did `edits` to the functions of the files it changed, with the language's
+    /// `attributions` (ADR-151).
     pub(crate) fn staleness<'a>(
         &self,
         root: &'a Path,
+        dir: &'a str,
         edits: BTreeMap<String, FunctionEdit>,
+        attributions: Vec<Attribution>,
     ) -> Staleness<'a> {
         let owns = self.0.owns;
         Staleness {
@@ -283,8 +290,27 @@ impl PerTest {
             sources: self.0.sources,
             owns: Box::new(move |test: &TestCoverage, file: &str| owns(root, test, file)),
             edits,
+            dir,
+            attributions,
         }
     }
+}
+
+/// The attributions `ctx` configures for `langs` (ADR-151 §1), which apply below `deep` (§2).
+pub(crate) fn attributed(ctx: &Ctx, langs: &Langs, depth: CostClass) -> Vec<Attribution> {
+    if depth >= CostClass::Deep {
+        return Vec::new();
+    }
+    ctx.lang
+        .iter()
+        .filter(|(lang, _)| match langs {
+            Langs::Any => true,
+            Langs::Only(ids) => ids.contains(lang),
+            // No per-test producer declares its languages by family.
+            Langs::Family(_) => false,
+        })
+        .flat_map(|(lang, table)| attributions(lang, table).unwrap_or_default())
+        .collect()
 }
 
 /// For each changed file of the root `dir` (at `root`) whose lines the cache holds, what the

@@ -247,22 +247,32 @@ fn oracles() -> Vec<OracleReport> {
     ]
 }
 
-/// One language chose by per-test coverage and one fell back to file-level impact (ADR-077).
+/// One language chose by per-test coverage, keeping one test by its attribution (ADR-151), and
+/// one fell back to file-level impact (ADR-077).
 fn tests() -> TestsReport {
     TestsReport {
         per_test_map: false,
         impacted: vec![
             ImpactedTest {
+                id: "calc cli::adds_from_the_command_line".to_owned(),
+                file: None,
+                reason: "covers calc::add (src/lib.rs:5)".to_owned(),
+                lang: LangId::from("rust"),
+                kept: Some("attribution binary: no change under its files".to_owned()),
+            },
+            ImpactedTest {
                 id: "calc tests::adds".to_owned(),
                 file: Some("src/lib.rs".to_owned()),
                 reason: "covers calc::add (src/lib.rs:5)".to_owned(),
                 lang: LangId::from("rust"),
+                kept: None,
             },
             ImpactedTest {
                 id: "web/add.test.ts".to_owned(),
                 file: Some("web/add.test.ts".to_owned()),
                 reason: "imports web/add.ts".to_owned(),
                 lang: LangId::from("typescript"),
+                kept: None,
             },
         ],
         commands: vec![
@@ -341,6 +351,7 @@ fn run_info() -> RunInfo {
                 mode: SuiteMode::Incremental,
                 rerun: 3,
                 reused: 1_275,
+                tagged: 40,
             },
         )]),
         config: ConfigEcho {

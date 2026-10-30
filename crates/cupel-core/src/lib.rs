@@ -5,6 +5,7 @@
 
 mod actions;
 mod analyzer;
+mod attribution;
 mod base;
 mod bench;
 pub mod budget;
@@ -72,6 +73,7 @@ mod writer;
 
 pub use actions::{NEXT_ACTIONS, next_actions};
 pub use analyzer::{AnalyzerLevel, AnalyzerReport, AnalyzerResult, AnalyzerRun, AnalyzerStatus};
+pub use attribution::{ATTRIBUTION_KEY, Attribution, attributions};
 pub use base::{BaseTree, Range};
 pub use bench::{BenchBase, BenchSamples, Benchmark};
 pub use cancel::Cancellation;
@@ -100,7 +102,7 @@ pub use envelope::{
 };
 pub use error::{ArgumentError, Error, Result};
 pub use event::{Event, EventSink, JsonlSink};
-pub use exclude::{ALWAYS_EXCLUDED, Exclude};
+pub use exclude::{ALWAYS_EXCLUDED, Exclude, PathGlobs};
 pub use explanation::{Excerpt, ExcerptLine, ExplainSubject, Explanation, Metric};
 pub use fact::{Fact, FactEntry, FactKind, Produced, SharedFact};
 pub use facts::Facts;

@@ -448,6 +448,9 @@ fn tests_block(tests: &TestsReport, paint: &Paint) -> String {
     for test in &tests.impacted {
         let _ = writeln!(out, "  {}  {}", test.id, paint.dim(&test.lang.to_string()));
         let _ = writeln!(out, "    {}", test.reason);
+        if let Some(kept) = &test.kept {
+            let _ = writeln!(out, "    kept: {kept}");
+        }
     }
     for command in &tests.commands {
         let scope = if command.narrowed {
@@ -936,14 +939,20 @@ fn toolchain_line(run: &RunInfo) -> Option<String> {
     (!tools.is_empty()).then(|| tools.join(" · "))
 }
 
-/// Per language whose baseline a joint suite run made, what it reran and reused (ADR-149 §5).
+/// Per language whose baseline a joint suite run made, what it reran and reused (ADR-149 §5),
+/// and how many of the reused its attributions kept (ADR-151 §4).
 fn suite_line(run: &RunInfo) -> Option<String> {
     let suites: Vec<String> = run
         .suite
         .iter()
         .map(|(lang, suite)| {
+            let tagged = if suite.tagged == 0 {
+                String::new()
+            } else {
+                format!(" ({} by attribution)", suite.tagged)
+            };
             format!(
-                "{lang} {} · {} rerun · {} reused",
+                "{lang} {} · {} rerun · {} reused{tagged}",
                 name(suite.mode),
                 suite.rerun,
                 suite.reused
