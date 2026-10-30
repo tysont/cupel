@@ -71,8 +71,9 @@ pub(crate) struct SuiteSpec {
     /// The toolchain the suite runs under in a root (ADR-149 §4), recorded with its entry;
     /// `None` when it cannot be asked.
     pub toolchain: fn(&Path) -> Option<String>,
-    /// One run of the suite in a root over every test but `kept`: all of them when it is empty.
-    pub run: fn(&Site<'_>, &BTreeSet<String>) -> Result<SuiteRun>,
+    /// One run of the suite in a root over every test but those `rerun` keeps: all of them when
+    /// it keeps none.
+    pub run: fn(&Site<'_>, &Rerun) -> Result<SuiteRun>,
     /// Builds in a root (absolute and canonical) what a run there would build first (ADR-155 §5);
     /// nothing for a joint whose run builds nothing ahead of its tests.
     pub warm: fn(&Path, &Cancellation) -> Result<()>,
@@ -93,6 +94,19 @@ pub(crate) struct SuiteRun {
     /// they ended (ADR-155 §1); empty for a joint that times nothing, and in a cached run.
     #[serde(skip)]
     pub phases: Vec<(SuitePhase, u64)>,
+}
+
+/// What an incremental run reruns (ADR-149 §1): every test but `kept`; the default, keeping
+/// none, is a whole run.
+#[derive(Debug, Default)]
+pub(crate) struct Rerun {
+    /// The cached tests it keeps, by ID relative to the root.
+    pub kept: BTreeSet<String>,
+    /// The cached tests it runs again, by ID relative to the root.
+    pub stale: BTreeSet<String>,
+    /// The files changed or added since the entry, relative to the root: a test the cache does
+    /// not hold can only be in one of them (ADR-155 §5).
+    pub changed: BTreeSet<String>,
 }
 
 /// Per test ID, relative to the root, the structural hash of its definition (ADR-149 §3).
@@ -129,6 +143,8 @@ struct Plan {
     /// The entry's report: the recorded run (every test's result and the whole coverage) and
     /// the tests' structural hashes.
     recorded: Report,
+    /// The files changed or added since the entry, relative to the root.
+    changed: BTreeSet<String>,
 }
 
 /// A joint producer: `spec` run once per project root of its language.
@@ -363,6 +379,7 @@ impl Suite {
                 stale,
                 tagged: 0,
                 recorded: found.report,
+                changed: changes.all().cloned().collect(),
             });
         }
         if keep.is_empty() || (stale == 0 && source_changed) {
@@ -374,6 +391,7 @@ impl Suite {
             stale,
             tagged,
             recorded: found.report,
+            changed: changes.all().cloned().collect(),
         })
     }
 
@@ -408,7 +426,7 @@ impl Suite {
     /// Runs the whole suite in the root of `site` and caches it in `entry` when it is whole.
     fn full(&self, site: &Site<'_>, entry: &Path) -> Result<SuiteRun> {
         let before = self.record(site);
-        let run = (self.0.run)(site, &BTreeSet::new())?;
+        let run = (self.0.run)(site, &Rerun::default())?;
         let hashes = structural_hashes(
             run.tests.iter().map(|test| test.id.as_str()),
             &site.ctx.upstream,
@@ -438,7 +456,19 @@ impl Suite {
             self.keep(site, entry, &run, plan.recorded.hashes, &before)?;
             return Ok((run, Obtained::cached(plan.tagged)));
         }
-        let measured = (self.0.run)(site, &kept)?;
+        let rerun = Rerun {
+            stale: plan
+                .recorded
+                .run
+                .tests
+                .iter()
+                .map(|test| test.id.clone())
+                .filter(|id| !kept.contains(id))
+                .collect(),
+            kept: kept.clone(),
+            changed: plan.changed,
+        };
+        let measured = (self.0.run)(site, &rerun)?;
         if measured.invocation.completed && measured.per_test.is_none() {
             // The stale tests are gone: nothing ran, so nothing was reported.
             let run = self.full(site, entry)?;

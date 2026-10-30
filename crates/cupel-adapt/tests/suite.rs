@@ -170,6 +170,12 @@ impl Joint {
     /// The facts one joint run with `ctx` makes, and how its baseline was obtained, without the
     /// run's phases, whose times differ from run to run; the joint is checked to be this one.
     fn jointly_with(&self, ctx: &ProduceCtx) -> (Facts, Option<SuiteReuse>) {
+        let (facts, reuse, _) = self.jointly_commanded(ctx);
+        (facts, reuse)
+    }
+
+    /// [`jointly_with`](Self::jointly_with), and the command line of the run's last invocation.
+    fn jointly_commanded(&self, ctx: &ProduceCtx) -> (Facts, Option<SuiteReuse>, Vec<String>) {
         let produced = self
             .joint()
             .produce(ctx, &Scope::default(), &mut Vec::new())
@@ -180,10 +186,14 @@ impl Joint {
             per_test: None,
         };
         let mut reuse = None;
+        let mut command = Vec::new();
         for fact in produced {
             match fact.kind() {
                 FactKind::TestResults => {
                     let results = fact.downcast::<TestResults>().unwrap();
+                    if let Some(last) = results.invocations.last() {
+                        command.clone_from(&last.command);
+                    }
                     reuse = results.reuse.clone().map(|mut reuse| {
                         assert_eq!(
                             reuse.joint.take().as_ref().map(|id| id.as_str()),
@@ -201,7 +211,7 @@ impl Joint {
                 kind => panic!("unexpected {kind}"),
             }
         }
-        (facts, reuse)
+        (facts, reuse, command)
     }
 
     /// The facts the per-kind producers make in `root`, each in its own run.
@@ -674,4 +684,90 @@ fn a_test_whose_recorded_structural_hash_differs_is_rerun_though_no_function_it_
             ]
         );
     }
+}
+
+/// An integration test of the Rust fixture's library, in a test binary of its own.
+const OTHER: &str =
+    "use calc::scale;\n\n#[test]\nfn scales_from_outside() {\n    assert_eq!(scale(3, 3), 9);\n}\n";
+
+/// The Rust fixture with `tests/other.rs`, run whole; then `edit` and the incremental run of a
+/// range that changed `file`: its facts, its reuse, and the filterset it passed nextest; and a
+/// whole run of another copy with the same edit. `None`, reported as skipped, without the tools.
+fn with_other(
+    edit: &dyn Fn(&Path),
+    file: &str,
+) -> Option<((Facts, Option<SuiteReuse>, String), Facts)> {
+    let copy = || {
+        let dir = RUST.fixture()?;
+        std::fs::create_dir_all(dir.path().join("tests")).unwrap();
+        std::fs::write(dir.path().join("tests/other.rs"), OTHER).unwrap();
+        Some(dir)
+    };
+    let dir = copy()?;
+    let root = dir.path();
+    let (_, first) = RUST.jointly_with(&RUST.ctx(root));
+    assert_eq!(
+        first,
+        Some(reuse(SuiteMode::Full, 3, 0)),
+        "the first run is whole"
+    );
+    edit(root);
+    let focus = Focus {
+        depth: CostClass::Standard,
+        changed: Some(BTreeMap::from([(file.to_owned(), vec![(1, 40)])])),
+        ..Focus::default()
+    };
+    let (facts, obtained, command) = RUST.jointly_commanded(&RUST.focused(root, focus));
+    let fresh = copy()?;
+    edit(fresh.path());
+    let whole = RUST.jointly(fresh.path());
+    let filterset = command.last().cloned().unwrap_or_default();
+    Some(((facts, obtained, filterset), whole))
+}
+
+/// The facts an incremental run must share with a whole run of the same tree.
+fn graded(
+    facts: &Facts,
+) -> (
+    &Value,
+    BTreeMap<String, Vec<u32>>,
+    BTreeMap<String, Vec<u32>>,
+) {
+    (&facts.results, facts.lines(false), facts.lines(true))
+}
+
+#[test]
+fn an_incremental_rust_run_lists_only_the_binaries_that_can_hold_a_test_it_runs() {
+    let Some(((facts, obtained, filterset), whole)) = with_other(&edit_add(&RUST), "src/lib.rs")
+    else {
+        return;
+    };
+    assert_eq!(obtained, Some(reuse(SuiteMode::Incremental, 1, 2)));
+    assert!(
+        filterset.starts_with(
+            "((package(=calc) & (kind(lib) | kind(bin) | kind(proc-macro))) | binary_id(=calc)) & not ("
+        ),
+        "{filterset}"
+    );
+    assert_eq!(graded(&facts), graded(&whole));
+}
+
+#[test]
+fn a_test_added_to_a_changed_test_file_runs_in_an_incremental_rust_run() {
+    let add_test = |root: &Path| {
+        let path = root.join("tests/other.rs");
+        let text = std::fs::read_to_string(&path).unwrap();
+        let added = "\n#[test]\nfn adds_from_outside() {\n    assert_eq!(calc::add(1, 1), 2);\n}\n";
+        std::fs::write(&path, text + added).unwrap();
+    };
+    let Some(((facts, obtained, filterset), whole)) = with_other(&add_test, "tests/other.rs")
+    else {
+        return;
+    };
+    assert_eq!(obtained, Some(reuse(SuiteMode::Incremental, 2, 2)));
+    assert!(
+        filterset.contains("(package(=calc) & kind(test))"),
+        "{filterset}"
+    );
+    assert_eq!(graded(&facts), graded(&whole));
 }

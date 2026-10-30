@@ -1,11 +1,10 @@
 // ABOUTME: The Python joint producer (ADR-084): one pytest run with pytest-cov's test contexts, whose JUnit report is the
 // ABOUTME: baseline, whose LCOV report is the coverage, and whose contexts (`coverage json --show-contexts`) the per-test map.
-use std::collections::BTreeSet;
 use std::path::Path;
 
 use cupel_core::{FactKind, LangId, Result};
 
-use super::{COVERAGE, Suite, SuiteRun, SuiteSpec, probe};
+use super::{COVERAGE, Rerun, Suite, SuiteRun, SuiteSpec, probe};
 use crate::coverage::{parse_lcov, placed, pytest_cov_listing};
 use crate::per_test::Site;
 use crate::per_test::pytest_cov::{PYTEST_COV, coverage_of};
@@ -104,7 +103,8 @@ const QUIET: [&str; 2] = ["-p", "no:cacheprovider"];
 /// under `.cupel/` so the repository's own coverage configuration still applies; over every
 /// collected test but `kept` (ADR-149 §1), named by node ID, or all of them when none is kept
 /// or none remains.
-fn run(site: &Site<'_>, kept: &BTreeSet<String>) -> Result<SuiteRun> {
+fn run(site: &Site<'_>, rerun: &Rerun) -> Result<SuiteRun> {
+    let kept = &rerun.kept;
     let mut selected = Vec::new();
     if !kept.is_empty() {
         let mut list: Vec<String> = QUIET.map(str::to_owned).to_vec();
