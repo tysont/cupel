@@ -1798,7 +1798,7 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
 
 #### B.4 Two misleading results
 
-**Status:** complete (2026-10-31, FINAL_SHA; [ADR-158](adr/CUPEL_DECISION_158.md)) · `tests.flaky` on nextest is skipped `unsupported`, naming the runner · `static.clones`' default `min_nodes` is 23 with no single-statement rule, on the owner's ruling: 9 of the external dogfood's 368 true rows lost, all 20 to 22 nodes; Cupel's tree 155 pairs / 17 clusters
+**Status:** complete (2026-10-31, b16eec1; [ADR-158](adr/CUPEL_DECISION_158.md)) · `tests.flaky` on nextest is skipped `unsupported`, naming the runner · `static.clones`' default `min_nodes` is 23 with no single-statement rule, on the owner's ruling: 9 of the external dogfood's 368 true rows lost, all 20 to 22 nodes; Cupel's tree 155 pairs / 17 clusters
 
 - `tests.flaky` skipped with a reason on a nextest project; `static.clones` ignoring single-statement forms behind a higher default `min_nodes`, checked against the external dogfood's true positives ([brief](plan/v0.2.2/b4-misleading-results.md)).
 
@@ -1901,7 +1901,14 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
     
     Fixed at 862028a: the tool travels as text, the comment moved to `combined_notes`' doc, one `rerunning(runner)` helper.
   - **At 862028a:** exit 0, gate `pass`, 1 445 s.
-  - **At the final commit:** FINAL_DOGFOOD
+  - **At b16eec1, 2026-10-31 19:02Z, 1 483 s: exit 0, gate `pass`** on every rule:
+    - `static.clones.pairs` 155 against base 164, `clusters` 17 against 17;
+    - `static.complexity` 0, `cyclomatic_max` 10;
+    - `static.deps` 0, cycles 0;
+    - `tests.quality` 0;
+    - `tests.coverage.line` 0.971;
+    - `static.crap.max` 20.
+  - `suite rust full · 2857 rerun`; `make check` green at b16eec1 (2 858, 0 failed). `make reclaim` after each run. The commit after b16eec1 only fills these two lines.
 - **B.4 — open items.**
   1. **The baseline.** `.cupel/baseline.json` must be a clean tree run on `main` (`dogfood.rs` pins it), so the lower clone count (155 pairs) is exported by the integrator after the merge: `make dogfood DOGFOOD_SCOPE=tree`, then `make baseline`.
   2. **`as_str` accessors still pair.** `SuitePhase::as_str`-shaped accessors (35 to 42 nodes) still pair under the ruling, so a new accessor of that shape still joins Cupel's `as_str` clusters and the tree gate's `clusters <= base` would still catch it.
