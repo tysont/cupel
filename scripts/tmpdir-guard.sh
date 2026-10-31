@@ -7,7 +7,8 @@
 # The directory is made under the caller's TMPDIR (/tmp without one) and removed afterwards whatever
 # the command did, so the caller's TMPDIR is as it was. Only the command and the processes it starts
 # write there, so what is left is theirs and not another process's on the machine. Each entry left is
-# named on stderr: the top-level name, and for `cupel-mutate` each repository's slot directory under it.
+# named on stderr: the top-level name, and for `cupel-mutate` each repository's slot directory under it
+# (the slots' root itself is the machine's and stays once made, so left empty it is not a leak).
 # A command that fails returns its own exit code; one that succeeds but leaves anything returns 1.
 
 set -u
@@ -27,7 +28,7 @@ left=$(
 	cd "$guarded" || exit 0
 	for entry in .[!.]* ..?* *; do
 		[ -e "$entry" ] || [ -L "$entry" ] || continue
-		if [ "$entry" = cupel-mutate ] && [ -d "$entry" ] && [ -n "$(ls -A "$entry")" ]; then
+		if [ "$entry" = cupel-mutate ] && [ -d "$entry" ]; then
 			for slots in "$entry"/.[!.]* "$entry"/..?* "$entry"/*; do
 				[ -e "$slots" ] && echo "$slots"
 			done

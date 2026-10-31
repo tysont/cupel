@@ -89,6 +89,19 @@ fn a_command_that_leaves_a_directory_fails_naming_it() {
     assert_eq!(entries(tmp.path()), Vec::<String>::new());
 }
 
+/// The mutation slots' root, `cupel-mutate`, is the machine's and stays once made; left empty, it is not
+/// a leak.
+#[test]
+fn an_empty_mutation_slot_root_passes() {
+    let tmp = TempDir::new().unwrap();
+    let output = guarded(tmp.path(), r#"mkdir "$TMPDIR/cupel-mutate""#);
+    assert_eq!(
+        (output.status.code(), text(&output.stderr).as_str()),
+        (Some(0), "")
+    );
+    assert_eq!(entries(tmp.path()), Vec::<String>::new());
+}
+
 /// A command that fails returns its own exit code, whatever it left.
 #[test]
 fn a_failing_command_returns_its_exit_code() {
