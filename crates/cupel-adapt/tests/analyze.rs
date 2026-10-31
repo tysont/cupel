@@ -9,6 +9,7 @@ use cupel_core::{
     AnalyzerLevel, AnalyzerReport, AnalyzerStatus, Availability, Cancellation, FactKind, Scope,
     find_program,
 };
+use cupel_fixtures::own_tmpdir::in_own_tmpdir;
 
 const ID: &str = "tool.analyzers";
 
@@ -106,66 +107,73 @@ fn ran(tool: &str, results: &[(&str, AnalyzerLevel, &str, u32)]) -> Analyzed {
     )
 }
 
+/// An analyzer node runs keeps node's compile cache in the temporary directory, so the test
+/// runs in one of its own.
 #[test]
 fn each_language_reports_exactly_its_fixture_s_planted_results() {
-    use AnalyzerLevel::{Error, Warning};
-    let cases: [(&str, &[&str], Summary); 5] = [
-        (
-            "rust",
-            &["src/lib.rs"],
-            vec![ran(
-                "clippy",
-                &[("needless_return", Warning, "src/lib.rs", 2)],
-            )],
-        ),
-        (
-            "python",
-            // `rates.py` is untyped and its stub `rates.pyi` typed: mypy reads the stub.
-            &["ledger.py", "rates.py"],
-            vec![
-                ran("mypy", &[("arg-type", Error, "ledger.py", 9)]),
-                ran("ruff", &[("F401", Warning, "ledger.py", 1)]),
-            ],
-        ),
-        (
-            "javascript",
-            &["ledger.js"],
-            vec![ran(
-                "eslint",
-                &[
-                    ("eqeqeq", Error, "ledger.js", 2),
-                    ("no-unused-vars", Error, "ledger.js", 5),
-                ],
-            )],
-        ),
-        (
-            "typescript",
-            &["ledger.ts"],
-            vec![
-                ran("tsc", &[("TS2345", Error, "ledger.ts", 5)]),
+    in_own_tmpdir(
+        "each_language_reports_exactly_its_fixture_s_planted_results",
+        || {
+            use AnalyzerLevel::{Error, Warning};
+            let cases: [(&str, &[&str], Summary); 5] = [
                 (
-                    "eslint".to_owned(),
-                    AnalyzerStatus::Unconfigured,
-                    Vec::new(),
+                    "rust",
+                    &["src/lib.rs"],
+                    vec![ran(
+                        "clippy",
+                        &[("needless_return", Warning, "src/lib.rs", 2)],
+                    )],
                 ),
-            ],
-        ),
-        (
-            "go",
-            &["ledger.go"],
-            vec![
-                ran("go-vet", &[("printf", Warning, "ledger.go", 6)]),
-                ran("staticcheck", &[("SA5009", Error, "ledger.go", 6)]),
-            ],
-        ),
-    ];
-    for (lang, files, expected) in cases {
-        let Some(dir) = fixture(lang) else {
-            return;
-        };
-        let report = analyze(dir.path(), lang, files);
-        assert_eq!(summary(&report), expected, "{lang}");
-    }
+                (
+                    "python",
+                    // `rates.py` is untyped and its stub `rates.pyi` typed: mypy reads the stub.
+                    &["ledger.py", "rates.py"],
+                    vec![
+                        ran("mypy", &[("arg-type", Error, "ledger.py", 9)]),
+                        ran("ruff", &[("F401", Warning, "ledger.py", 1)]),
+                    ],
+                ),
+                (
+                    "javascript",
+                    &["ledger.js"],
+                    vec![ran(
+                        "eslint",
+                        &[
+                            ("eqeqeq", Error, "ledger.js", 2),
+                            ("no-unused-vars", Error, "ledger.js", 5),
+                        ],
+                    )],
+                ),
+                (
+                    "typescript",
+                    &["ledger.ts"],
+                    vec![
+                        ran("tsc", &[("TS2345", Error, "ledger.ts", 5)]),
+                        (
+                            "eslint".to_owned(),
+                            AnalyzerStatus::Unconfigured,
+                            Vec::new(),
+                        ),
+                    ],
+                ),
+                (
+                    "go",
+                    &["ledger.go"],
+                    vec![
+                        ran("go-vet", &[("printf", Warning, "ledger.go", 6)]),
+                        ran("staticcheck", &[("SA5009", Error, "ledger.go", 6)]),
+                    ],
+                ),
+            ];
+            for (lang, files, expected) in cases {
+                let Some(dir) = fixture(lang) else {
+                    return;
+                };
+                let report = analyze(dir.path(), lang, files);
+                assert_eq!(summary(&report), expected, "{lang}");
+            }
+        },
+    );
 }
 
 #[test]
@@ -236,25 +244,32 @@ fn an_analyzer_that_fails_is_recorded_with_its_output_and_the_others_still_run()
     );
 }
 
+/// An analyzer node runs keeps node's compile cache in the temporary directory, so the test
+/// runs in one of its own.
 #[test]
 fn analyzing_writes_nothing_in_the_tree_but_cargo_s_target() {
-    for (lang, file) in [
-        ("python", "ledger.py"),
-        ("typescript", "ledger.ts"),
-        ("javascript", "ledger.js"),
-        ("go", "ledger.go"),
-    ] {
-        let Some(dir) = fixture(lang) else {
-            return;
-        };
-        let before = listing(dir.path());
-        analyze(dir.path(), lang, &[file]);
-        let after: Vec<String> = listing(dir.path())
-            .into_iter()
-            .filter(|path| !path.starts_with(".cupel"))
-            .collect();
-        assert_eq!(after, before, "{lang}");
-    }
+    in_own_tmpdir(
+        "analyzing_writes_nothing_in_the_tree_but_cargo_s_target",
+        || {
+            for (lang, file) in [
+                ("python", "ledger.py"),
+                ("typescript", "ledger.ts"),
+                ("javascript", "ledger.js"),
+                ("go", "ledger.go"),
+            ] {
+                let Some(dir) = fixture(lang) else {
+                    return;
+                };
+                let before = listing(dir.path());
+                analyze(dir.path(), lang, &[file]);
+                let after: Vec<String> = listing(dir.path())
+                    .into_iter()
+                    .filter(|path| !path.starts_with(".cupel"))
+                    .collect();
+                assert_eq!(after, before, "{lang}");
+            }
+        },
+    );
 }
 
 /// Every path under `root`, relative to it, sorted.

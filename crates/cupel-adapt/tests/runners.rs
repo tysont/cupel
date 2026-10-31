@@ -7,6 +7,7 @@ use cupel_core::{
     TestResults,
 };
 use cupel_fixtures::copy_repo;
+use cupel_fixtures::own_tmpdir::in_own_tmpdir;
 use support::{lang, produce_ctx, registry, runner};
 
 use TestOutcome::{Passed, Skipped};
@@ -337,9 +338,13 @@ fn unittest_runs_the_python_fixture() {
     assert_runs(&UNITTEST);
 }
 
+/// Jest keeps a cache per project path in the temporary directory, so the test runs in one of
+/// its own.
 #[test]
 fn jest_runs_the_javascript_fixture() {
-    assert_runs(&JEST);
+    in_own_tmpdir("jest_runs_the_javascript_fixture", || {
+        assert_runs(&JEST);
+    });
 }
 
 #[test]

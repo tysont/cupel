@@ -70,3 +70,11 @@ fn a_failing_body_fails_its_test_with_the_childs_output() {
     assert!(stderr.contains("the body failed"), "{stderr}");
     assert_eq!(entries(tmp.path()), Vec::<String>::new());
 }
+
+/// A name that matches no test of the binary fails the call: the child would otherwise pass having
+/// run nothing.
+#[test]
+#[should_panic(expected = "the child ran no test named no_such_test")]
+fn a_name_that_matches_no_test_fails() {
+    in_own_tmpdir("no_such_test", || {});
+}

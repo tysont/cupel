@@ -23,7 +23,7 @@ pub fn is_child() -> bool {
 ///
 /// # Panics
 ///
-/// When the child cannot start or its test fails.
+/// When the child cannot start, its test fails, or it ran no test named `test`.
 pub fn in_own_tmpdir(test: &str, body: impl FnOnce()) {
     if is_child() {
         body();
@@ -44,6 +44,11 @@ pub fn in_own_tmpdir(test: &str, body: impl FnOnce()) {
     assert!(
         output.status.success(),
         "{test} failed in its own temporary directory:\n{stdout}{stderr}"
+    );
+    // Both libtest and libtest-mimic end with `test result: ok. 1 passed; ...` for one test run.
+    assert!(
+        stdout.contains(" 1 passed;"),
+        "the child ran no test named {test}:\n{stdout}"
     );
     eprint!("{stderr}");
 }
