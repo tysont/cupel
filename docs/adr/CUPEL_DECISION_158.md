@@ -27,18 +27,57 @@ The owner's v0.2.2 ruling names two results that mislead.
   - A body the producer gives no span for (Clojure, whose `defn` has no separate body node, and any tree without spans) is compared as before.
 - *Size.* `min_nodes` is the only size floor; `min_lines` (4) already admits a four-line setter. The value is chosen from the node counts below.
 
-**§2, the data** (static.clones at dee39a5 and with this change on the eight repositories of `docs/dogfood/`, at the reports' commits; `check --only static.clones --no-install` through `scripts/heavy.sh`, no tool run).
+**§2, the data.** `check --only static.clones --no-install` on the eight repositories of `docs/dogfood/` at the reports' commits, through `scripts/heavy.sh`; no tool ran (each envelope's `toolchain` is empty). Two builds: `dee39a5` (before), and `dee39a5` with the single-statement rule above, run at the default `min_nodes` 20 and at 23, 25, and 30 set by `--config`. A report row judged true is *lost* when its location is a member of a clone group before and of none after. Each cell gives pairs / clusters / findings, then true rows lost.
 
-The report rows judged true at 20 to 25 nodes are the same shapes the ruling excludes:
+| Repository | True rows | Before | Rule, 20 | Rule, 23 | Rule, 25 | Rule, 30 |
+| --- | --- | --- | --- | --- | --- | --- |
+| apache/commons-cli | 48 | 78 / 6 / 48 | 74 / 6 / 44, 4 | 64 / 5 / 39, 9 | 64 / 5 / 39, 9 | 61 / 5 / 36, 12 |
+| cljfx/cljfx | 12 | 14 / 1 / 12 | 14 / 1 / 12, 0 | 13 / 1 / 11, 1 | 12 / 1 / 10, 2 | 11 / 1 / 9, 3 |
+| gvergnaud/ts-pattern | 46 | 167 / 14 / 46 | 148 / 11 / 35, 11 | 148 / 11 / 35, 11 | 148 / 11 / 35, 11 | 147 / 11 / 34, 12 |
+| more-itertools | 42 | 56 / 3 / 42 | 52 / 3 / 38, 4 | 52 / 3 / 38, 4 | 52 / 3 / 38, 4 | 50 / 3 / 36, 6 |
+| PyCQA/pyflakes | 4 | 132 / 14 / 26 | 122 / 13 / 25, 0 | 121 / 13 / 24, 0 | 79 / 9 / 20, 0 | 74 / 8 / 17, 0 |
+| rust-itertools | 66 | 98 / 11 / 67 | 37 / 4 / 29, 37 | 37 / 4 / 29, 37 | 37 / 4 / 29, 37 | 37 / 4 / 29, 37 |
+| serde-rs/json | 86 | 586 / 20 / 102 | 140 / 5 / 36, 54 | 140 / 5 / 36, 54 | 140 / 5 / 36, 54 | 139 / 5 / 35, 55 |
+| spf13/cobra | 64 | 207 / 31 / 65 | 197 / 29 / 59, 6 | 197 / 29 / 59, 6 | 197 / 29 / 59, 6 | 197 / 29 / 59, 6 |
+| **Total** | 368 | 1 338 / 100 / 408, 0 | 784 / 72 / 278, 116 | 772 / 71 / 271, 122 | 729 / 67 / 266, 123 | 716 / 66 / 255, 131 |
 
-- commons-cli `CommandLine.Builder.setDeprecatedHandler` and its `DefaultParser` twin (`this.x = x; return this;`, 21 nodes, type 1).
-- commons-cli `OptionFormatter.Builder`'s four `set…Prefix` setters (21 nodes, a cluster).
-- commons-cli `CommandLine.addArg` / `addOption` (`if (x != null) { xs.add(x); }`, 20 nodes, one statement).
-- cobra `Command.preRun` / `postRun` (one `for` statement, 22 nodes).
-- cljfx `table-sort-policy` (one `cond`, 21 nodes).
-- serde_json `test_write_str` / `test_write_bool` (three statements, 25 nodes).
+Every true row was found before. Without the rule, from the before envelopes (a group survives when at least two of its members reach the floor), `min_nodes` alone would lose 9 true rows at 23, 10 at 25, and 24 at 30.
 
-ADR-138 §3 calls a measurement true when the value it states about the code is correct, whatever a maintainer would do, so a correctly measured trivial setter pair is a true row. The ruling's two rules therefore cannot keep every true row: removing such pairs is what the ruling asks for. The before/after table and the rows each setting loses are in the plan's B.4 Notes; §2's Decision waits on the owner choosing between them.
+- The 9 rows lost at 23 are members of 20 to 22 nodes, the shapes the ruling excludes. They are commons-cli's builder setters (7 rows), cobra's `preRun`/`postRun`, and cljfx's `table-sort-policy`.
+- The 116 rows the rule alone loses have members of 20 to 1 813 nodes, median 51; 11 are over 100 nodes. They are one statement that holds the whole body:
+  - a `match` (serde_json's `Deserializer` methods);
+  - a `loop` (itertools `FlattenOk::next`/`next_back`, 162 nodes, 33 lines);
+  - a `for` (more-itertools `TestRunningMin`/`Max.test_basic`, 125 nodes, 20 lines);
+  - a call with a closure (itertools' bench functions);
+  - a `return match(…)…` chain (ts-pattern's benchmark `handle`, 1 813 nodes).
+  
+  Many are duplication a maintainer would extract.
+
+On Cupel's own tree (`cupel.toml`'s scope, which leaves out the fixtures) the before binary finds 162 pairs and 17 clusters (the baseline holds 164 and 17). The rule leaves 87 pairs and 11 clusters, removing 39 groups. Among them:
+
+- both `as_str` accessor clusters (`OracleKind::as_str` with `Setting::key` and `env_var`, 35 nodes; `Format::as_str` with `TimeUnit::suffix`, `CostClass::est_ms_per_target`, and `OracleState::as_str`, 39 to 42 nodes);
+- the pair `TestResults::with_reuse` (now the struct update `Self { reuse: Some(reuse), ..self }`, one statement, 21 nodes) with `NormNode::at`;
+- the check constructors `StaticClones::new` and its kin (one struct expression, 85 to 127 nodes);
+- Rust tests that are one `assert_eq!` (92 to 121 nodes).
+
+What each recorded case needs:
+
+- `SuitePhase::as_str` as a four-arm `match` is one statement of the same 35-to-42-node shape, so only the rule skips it.
+- `with_reuse` as first written (`self.reuse = Some(reuse); self`, two statements, 22 nodes) is not one statement, so only `min_nodes` of at least 23 skips it.
+
+ADR-138 §3 calls a measurement true when the value it states about the code is correct, whatever a maintainer would do, so a correctly measured trivial setter pair is a true row. No setting of the ruling's two rules keeps every true row; the question for the owner is which losses are intended:
+
+- **(A) As ruled: the rule and `min_nodes` 23.**
+  - It skips both recorded cases.
+  - It loses 122 true rows: 116 to the rule, 6 more to the floor.
+- **(B) `min_nodes` 23 alone.**
+  - It skips `with_reuse` as first written.
+  - It loses 9 true rows, all 20-to-22-node setters and guards of the kind ruled out.
+  - It keeps the `as_str` clusters and every large single-statement clone.
+- **(C) The rule limited to small single statements (below about 50 nodes) and `min_nodes` 23.**
+  - It skips both recorded cases.
+  - It would keep the large single-statement clones.
+  - It is not measured, and its cut is one more number to choose.
 
 ## Decision
 
@@ -47,7 +86,7 @@ ADR-138 §3 calls a measurement true when the value it states about the code is 
    - The scheduler reports a check that ends in it as `skipped` with `reason: unsupported`, `fact`, `tool`, `lang`, and `see: cupel describe <check>`. The message goes into the check's notes as an error's would. It is not an error and does not make the run partial.
    - `engine.flake` returns it for a baseline whose runner's ordering is `Fixed`: fact `test-reruns`, the runner's tool (`cargo-nextest`), and "engine.flake does not rerun tool.cargo-nextest: it runs each test in its own process, so the order of the tests cannot change an outcome".
    - A baseline runner that is not registered at all stays `Error::InvalidValue`: that is a broken configuration. The engine's behaviour on every runner it reruns is unchanged.
-2. **`static.clones`**: proposed, pending the owner's ruling (see Context and the plan's B.4 Notes).
+2. **`static.clones`**: proposed, not implemented on the branch. The single-statement rule exists as a tested change set aside (the plan's B.4 Notes say where) until the owner chooses between (A), (B), and (C) above; `min_nodes` stays 20.
 
 ## Consequences
 
