@@ -86,7 +86,7 @@ impl Producer<TestReruns> for FlakeEngine {
         if runner.ordering() == RunOrdering::Fixed {
             return Err(Error::Unsupported {
                 fact: FactKind::TestReruns,
-                tool: runner.tool(&ctx.ctx).map(|probe| probe.name),
+                tool: runner.tool(&ctx.ctx).map(|probe| probe.name.to_string()),
                 message: format!(
                     "{ID} does not rerun {}: it runs each test in its own process, so the \
                      order of the tests cannot change an outcome",

@@ -4,7 +4,6 @@ use std::path::PathBuf;
 
 use crate::config::error::ConfigError;
 use crate::fact::FactKind;
-use crate::id::ToolId;
 
 /// Errors raised by cupel-core.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -65,7 +64,7 @@ pub enum Error {
     #[error("{message}")]
     Unsupported {
         fact: FactKind,
-        tool: Option<ToolId>,
+        tool: Option<String>,
         message: String,
     },
     /// A plugin broke the protocol or failed without reporting (ADR-089 §6).

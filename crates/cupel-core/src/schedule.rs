@@ -16,7 +16,7 @@ use crate::fact::{FactKind, SharedFact};
 use crate::facts::Facts;
 use crate::finding::{Finding, Severity};
 use crate::grade::CostClass;
-use crate::id::{CheckId, LangId, RunId};
+use crate::id::{CheckId, LangId, RunId, ToolId};
 use crate::joint::Deciding;
 use crate::lang::Lang;
 use crate::matching::{self, SymbolMatch};
@@ -1483,7 +1483,6 @@ impl<'a> CheckRun<'a> {
     /// `skips` are the languages the support matrix or a missing range ruled out.
     fn finish(self, mut skips: Vec<Skipped>, sink: &mut dyn EventSink) -> Finished {
         let manifest = self.check.manifest();
-        // A skipped language's notes say why as a failed one's do (ADR-158).
         let notes = combined_notes(&self.results);
         let (skipped, ran): (Vec<CheckResult>, Vec<CheckResult>) = self
             .results
@@ -1544,7 +1543,8 @@ impl<'a> CheckRun<'a> {
     }
 }
 
-/// Every language's notes, sorted, each once.
+/// Every language's notes, sorted, each once; a skipped language's say why as a failed one's do
+/// (ADR-158).
 fn combined_notes(results: &[CheckResult]) -> Vec<String> {
     let notes: BTreeSet<&String> = results.iter().flat_map(|result| &result.notes).collect();
     notes.into_iter().cloned().collect()
@@ -1681,7 +1681,7 @@ fn unsupported_here(error: &Error, task: &Task<'_>) -> Option<Skipped> {
         reason: SkipReason::Unsupported,
         fact: Some(*fact),
         lang: Some(task.lang.id.clone()),
-        tool: tool.clone(),
+        tool: tool.as_deref().map(ToolId::from),
         see: Some(format!("cupel describe {}", task.check.manifest().id)),
         est_ms: None,
     })

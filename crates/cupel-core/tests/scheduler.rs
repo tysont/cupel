@@ -21,7 +21,7 @@ use cupel_core::{
     CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence, Fact, FactKind,
     Facts, Finding, FindingId, Job, LangId, Langs, Location, Manifest, Measurement, Outcome, Plan,
     ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result, Scheduler, Scope, Score,
-    Severity, SkipReason, Skipped, SymbolSelector, Target, Tier, ToolId, Writer,
+    Severity, SkipReason, Skipped, SymbolSelector, Target, Tier, Writer,
 };
 
 // ---------------------------------------------------------------- fixtures
@@ -1236,7 +1236,7 @@ fn a_check_that_fails_says_why_in_its_notes() {
 fn unsupported(_: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
     Err(Error::Unsupported {
         fact: FactKind::TestReruns,
-        tool: Some(ToolId::from("fake-runner")),
+        tool: Some("fake-runner".to_owned()),
         message: "engine.alpha does not rerun tool.alpha".to_owned(),
     })
 }

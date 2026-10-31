@@ -184,18 +184,18 @@ fn baseline_of(runner: &str) -> Produced {
     ))
 }
 
+/// The error the engine returns for a Rust baseline that `runner` ran.
+fn rerunning(runner: &str) -> Error {
+    let dir = tempfile::tempdir().unwrap();
+    let ctx = produce_ctx(dir.path(), 1, json!({}), vec![baseline_of(runner)]);
+    engine_produce(&ctx, "rust").unwrap_err()
+}
+
 /// nextest runs each test in its own process, so no order of its tests can change an outcome:
 /// the reruns are unsupported for its baseline, naming the runner and its tool (ADR-158).
 #[test]
 fn a_runner_whose_order_cannot_matter_is_unsupported_naming_it() {
-    let dir = tempfile::tempdir().unwrap();
-    let ctx = produce_ctx(
-        dir.path(),
-        1,
-        json!({}),
-        vec![baseline_of("tool.cargo-nextest")],
-    );
-    let error = engine_produce(&ctx, "rust").unwrap_err();
+    let error = rerunning("tool.cargo-nextest");
     let Error::Unsupported {
         fact,
         tool,
@@ -205,10 +205,10 @@ fn a_runner_whose_order_cannot_matter_is_unsupported_naming_it() {
         panic!("{error:?}")
     };
     assert_eq!(
-        (fact, tool.map(|tool| tool.to_string()), message.as_str()),
+        (fact, tool.as_deref(), message.as_str()),
         (
             FactKind::TestReruns,
-            Some("cargo-nextest".to_owned()),
+            Some("cargo-nextest"),
             "engine.flake does not rerun tool.cargo-nextest: it runs each test in its own \
              process, so the order of the tests cannot change an outcome"
         )
@@ -217,9 +217,7 @@ fn a_runner_whose_order_cannot_matter_is_unsupported_naming_it() {
 
 #[test]
 fn a_runner_that_is_not_registered_is_an_error_naming_it() {
-    let dir = tempfile::tempdir().unwrap();
-    let ctx = produce_ctx(dir.path(), 1, json!({}), vec![baseline_of("tool.absent")]);
-    let error = engine_produce(&ctx, "rust").unwrap_err();
+    let error = rerunning("tool.absent");
     let Error::InvalidValue { what, value, .. } = error else {
         panic!("{error:?}")
     };
