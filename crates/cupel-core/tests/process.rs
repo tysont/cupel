@@ -184,10 +184,12 @@ fn cancellation_kills_a_descendant_that_left_the_childs_process_group() {
 fn a_descendant_in_a_process_group_of_its_own_counts_against_the_memory_budget() {
     let dir = tempfile::tempdir().unwrap();
     let started = Instant::now();
-    // Held for 20 s: a budget that does not see the descendant lets the run end by itself.
+    // Held for 20 s: a budget that does not see the descendant lets the run end by itself. The
+    // size is a variable: perl folds a repetition of constants as it compiles, so the 256 MiB
+    // would be held before the descendant left the child's group and wrote its pid.
     let ran = detached(
         dir.path(),
-        "$x = \"x\" x (256 * 1024 * 1024)",
+        "my $n = 256 * 1024 * 1024; $x = \"x\" x $n",
         Duration::from_secs(20),
     )
     .memory(64 << 20)
