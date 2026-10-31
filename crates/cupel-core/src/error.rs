@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 use crate::config::error::ConfigError;
 use crate::fact::FactKind;
+use crate::id::ToolId;
 
 /// Errors raised by cupel-core.
 #[derive(Debug, Clone, PartialEq, Eq, thiserror::Error)]
@@ -58,6 +59,15 @@ pub enum Error {
     /// An external program could not be started.
     #[error("cannot run `{program}`: {message}")]
     Process { program: String, message: String },
+    /// A producer cannot make `fact` here for a reason only the run shows, such as the runner
+    /// the baseline used; the checks that need it are skipped `unsupported`, naming `tool`
+    /// (ADR-158).
+    #[error("{message}")]
+    Unsupported {
+        fact: FactKind,
+        tool: Option<ToolId>,
+        message: String,
+    },
     /// A plugin broke the protocol or failed without reporting (ADR-089 §6).
     #[error("plugin `{plugin}`: {problem}")]
     Plugin { plugin: String, problem: String },

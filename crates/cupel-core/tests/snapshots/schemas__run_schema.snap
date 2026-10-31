@@ -2535,7 +2535,7 @@ expression: pretty(&schema)
           ]
         },
         "tool": {
-          "description": "The missing tool, for `unavailable`.",
+          "description": "The missing tool, for `unavailable`; for `unsupported`, the tool the fact cannot be made\nwith, when a producer names one (ADR-158).",
           "anyOf": [
             {
               "$ref": "#/$defs/ToolId"
@@ -3346,7 +3346,7 @@ expression: pretty(&schema)
           ]
         },
         "tool": {
-          "description": "The missing tool, for `unavailable`.",
+          "description": "The missing tool, for `unavailable`; for `unsupported`, the tool the fact cannot be made\nwith, when a producer names one (ADR-158).",
           "anyOf": [
             {
               "$ref": "#/$defs/ToolId"

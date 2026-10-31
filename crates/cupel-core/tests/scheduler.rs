@@ -21,7 +21,7 @@ use cupel_core::{
     CheckResult, CheckStatus, CostClass, Ctx, Error, Event, EventSink, Evidence, Fact, FactKind,
     Facts, Finding, FindingId, Job, LangId, Langs, Location, Manifest, Measurement, Outcome, Plan,
     ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result, Scheduler, Scope, Score,
-    Severity, SkipReason, Skipped, SymbolSelector, Target, Tier, Writer,
+    Severity, SkipReason, Skipped, SymbolSelector, Target, Tier, ToolId, Writer,
 };
 
 // ---------------------------------------------------------------- fixtures
@@ -1228,6 +1228,45 @@ fn a_check_that_fails_says_why_in_its_notes() {
                 "cannot run `tool.alpha`: the overlay did not reproduce the baseline (go)"
                     .to_owned()
             ]
+        )
+    );
+}
+
+/// Fails as a check whose producer cannot make a fact it needs here does (ADR-158).
+fn unsupported(_: &CheckCtx, _: &Facts, _: &mut dyn EventSink) -> Result<CheckResult> {
+    Err(Error::Unsupported {
+        fact: FactKind::TestReruns,
+        tool: Some(ToolId::from("fake-runner")),
+        message: "engine.alpha does not rerun tool.alpha".to_owned(),
+    })
+}
+
+#[test]
+fn a_fact_unsupported_here_skips_the_check_naming_the_fact_and_tool() {
+    let world = World::new(
+        vec![check("t.unsupported", &[FactKind::Symbols], unsupported)],
+        "",
+    );
+    let result = world.run(&["go"], |_| {}).0.unwrap().checks[0].clone();
+    let skipped = result.skipped.unwrap();
+    assert_eq!(
+        (
+            result.status,
+            skipped.reason,
+            skipped.fact,
+            skipped.tool.map(|tool| tool.to_string()),
+            skipped.lang.map(|lang| lang.to_string()),
+            skipped.see,
+            result.notes,
+        ),
+        (
+            CheckStatus::Skipped,
+            SkipReason::Unsupported,
+            Some(FactKind::TestReruns),
+            Some("fake-runner".to_owned()),
+            Some("go".to_owned()),
+            Some("cupel describe t.unsupported".to_owned()),
+            vec!["engine.alpha does not rerun tool.alpha (go)".to_owned()],
         )
     );
 }

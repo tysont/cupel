@@ -76,13 +76,24 @@ impl Producer<TestReruns> for FlakeEngine {
         let runner = ctx
             .runners
             .get(&baseline.runner)
-            .filter(|runner| runner.ordering() != RunOrdering::Fixed)
             .ok_or_else(|| Error::InvalidValue {
                 what: "runner for engine.flake",
                 value: baseline.runner.to_string(),
                 expected: "a runner the flake engine reruns: tool.cargo-test, tool.go-test, \
                            tool.pytest, tool.unittest, tool.vitest, or tool.jest",
             })?;
+        // One process per test: no order of the tests can change an outcome (ADR-158).
+        if runner.ordering() == RunOrdering::Fixed {
+            return Err(Error::Unsupported {
+                fact: FactKind::TestReruns,
+                tool: runner.tool(&ctx.ctx).map(|probe| probe.name),
+                message: format!(
+                    "{ID} does not rerun {}: it runs each test in its own process, so the \
+                     order of the tests cannot change an outcome",
+                    baseline.runner
+                ),
+            });
+        }
         let explicit = runner.ordering() == RunOrdering::Explicit;
         let mut runs: Vec<TestRerun> = Vec::new();
         for planned in schedule(ctx.seed, rerun_count(&ctx.config)?) {

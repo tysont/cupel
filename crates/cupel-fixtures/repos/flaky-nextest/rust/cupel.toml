@@ -1,0 +1,4 @@
+# The flake-on-nextest fixture (ADR-158): nextest runs each test in its own process, so the
+# flake engine cannot rerun them in another order and `tests.flaky` is skipped, naming nextest.
+[lang.rust]
+runner = "cargo-nextest"

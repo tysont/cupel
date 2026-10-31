@@ -568,7 +568,13 @@ impl<'a, 'j> Execution<'a, 'j> {
             }
             Err(error) => {
                 // What failed, so the run says why without a rerun; a timeout says so already.
-                let mut result = ended(status_of(&error), None);
+                let skipped = unsupported_here(&error, task);
+                let status = if skipped.is_some() {
+                    CheckStatus::Skipped
+                } else {
+                    status_of(&error)
+                };
+                let mut result = ended(status, skipped);
                 if error != Error::Cancelled {
                     result.notes.push(error.to_string());
                 }
@@ -1477,6 +1483,8 @@ impl<'a> CheckRun<'a> {
     /// `skips` are the languages the support matrix or a missing range ruled out.
     fn finish(self, mut skips: Vec<Skipped>, sink: &mut dyn EventSink) -> Finished {
         let manifest = self.check.manifest();
+        // A skipped language's notes say why as a failed one's do (ADR-158).
+        let notes = combined_notes(&self.results);
         let (skipped, ran): (Vec<CheckResult>, Vec<CheckResult>) = self
             .results
             .into_iter()
@@ -1486,6 +1494,7 @@ impl<'a> CheckRun<'a> {
         let result = if ran.is_empty() && !skips.is_empty() {
             CheckResult {
                 duration_ms,
+                notes,
                 ..skipped_entry(self.check, skips)
             }
         } else {
@@ -1519,7 +1528,7 @@ impl<'a> CheckRun<'a> {
                 duration_ms,
                 skipped: cut,
                 oracle: None,
-                notes: combined_notes(&ran),
+                notes,
             }
         };
         sink.emit(Event::CheckEnd {
@@ -1536,8 +1545,8 @@ impl<'a> CheckRun<'a> {
 }
 
 /// Every language's notes, sorted, each once.
-fn combined_notes(ran: &[CheckResult]) -> Vec<String> {
-    let notes: BTreeSet<&String> = ran.iter().flat_map(|result| &result.notes).collect();
+fn combined_notes(results: &[CheckResult]) -> Vec<String> {
+    let notes: BTreeSet<&String> = results.iter().flat_map(|result| &result.notes).collect();
     notes.into_iter().cloned().collect()
 }
 
@@ -1660,6 +1669,22 @@ fn unsupported(support: &Support, lang: &LangId) -> Skipped {
         see: Some("cupel describe matrix".to_owned()),
         est_ms: None,
     }
+}
+
+/// The `skipped` object for `task`'s check when `error` says a fact it reads cannot be made
+/// here (ADR-158); `None` for any other error.
+fn unsupported_here(error: &Error, task: &Task<'_>) -> Option<Skipped> {
+    let Error::Unsupported { fact, tool, .. } = error else {
+        return None;
+    };
+    Some(Skipped {
+        reason: SkipReason::Unsupported,
+        fact: Some(*fact),
+        lang: Some(task.lang.id.clone()),
+        tool: tool.clone(),
+        see: Some(format!("cupel describe {}", task.check.manifest().id)),
+        est_ms: None,
+    })
 }
 
 /// The `skipped` object for a check one of whose needs the store would make for `lang` with a

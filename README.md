@@ -949,7 +949,7 @@ Below `--depth deep`, such a test reruns only when one of those files, its own f
 flake_runs = 5      # reruns per check run; 0 turns them off
 ```
 
-The reruns repeat the whole suite (impacted-test selection is not built yet), so they cost about three baseline runs. `cargo nextest` runs each test in its own process, where order cannot matter; with it as the runner, the flake engine does not rerun and `tests.flaky` ends in `error` for that language.
+The reruns repeat the whole suite (impacted-test selection is not built yet), so they cost about three baseline runs. `cargo nextest` runs each test in its own process, where order cannot matter; with it as the runner, the flake engine does not rerun, and `tests.flaky` is skipped for that language as `unsupported`, naming the fact (`test-reruns`) and the tool (`cargo-nextest`), with the reason in its notes.
 
 ## Property tests
 

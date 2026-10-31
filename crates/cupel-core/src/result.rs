@@ -116,7 +116,8 @@ pub struct Skipped {
     /// The missing fact, for `unsupported`.
     pub fact: Option<FactKind>,
     pub lang: Option<LangId>,
-    /// The missing tool, for `unavailable`.
+    /// The missing tool, for `unavailable`; for `unsupported`, the tool the fact cannot be made
+    /// with, when a producer names one (ADR-158).
     pub tool: Option<ToolId>,
     /// A command that explains the reason.
     pub see: Option<String>,

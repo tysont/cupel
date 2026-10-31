@@ -184,8 +184,10 @@ fn baseline_of(runner: &str) -> Produced {
     ))
 }
 
+/// nextest runs each test in its own process, so no order of its tests can change an outcome:
+/// the reruns are unsupported for its baseline, naming the runner and its tool (ADR-158).
 #[test]
-fn a_runner_the_engine_cannot_rerun_is_an_error_naming_it() {
+fn a_runner_whose_order_cannot_matter_is_unsupported_naming_it() {
     let dir = tempfile::tempdir().unwrap();
     let ctx = produce_ctx(
         dir.path(),
@@ -194,12 +196,36 @@ fn a_runner_the_engine_cannot_rerun_is_an_error_naming_it() {
         vec![baseline_of("tool.cargo-nextest")],
     );
     let error = engine_produce(&ctx, "rust").unwrap_err();
+    let Error::Unsupported {
+        fact,
+        tool,
+        message,
+    } = error
+    else {
+        panic!("{error:?}")
+    };
+    assert_eq!(
+        (fact, tool.map(|tool| tool.to_string()), message.as_str()),
+        (
+            FactKind::TestReruns,
+            Some("cargo-nextest".to_owned()),
+            "engine.flake does not rerun tool.cargo-nextest: it runs each test in its own \
+             process, so the order of the tests cannot change an outcome"
+        )
+    );
+}
+
+#[test]
+fn a_runner_that_is_not_registered_is_an_error_naming_it() {
+    let dir = tempfile::tempdir().unwrap();
+    let ctx = produce_ctx(dir.path(), 1, json!({}), vec![baseline_of("tool.absent")]);
+    let error = engine_produce(&ctx, "rust").unwrap_err();
     let Error::InvalidValue { what, value, .. } = error else {
         panic!("{error:?}")
     };
     assert_eq!(
         (what, value.as_str()),
-        ("runner for engine.flake", "tool.cargo-nextest")
+        ("runner for engine.flake", "tool.absent")
     );
 }
 
