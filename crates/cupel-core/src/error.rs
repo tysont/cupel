@@ -45,9 +45,9 @@ pub enum Error {
     #[error("cancelled: the run's time limit passed")]
     Cancelled,
     /// The run's processes held more memory than the run's budget allows (ADR-148); they
-    /// were killed.
-    #[error("stopped: the run held more than {limit} bytes of memory")]
-    OutOfMemory { limit: u64 },
+    /// were killed. `held` names each process the budget counted, one per line.
+    #[error("stopped: the run held more than {limit} bytes of memory, in:\n{held}")]
+    OutOfMemory { limit: u64, held: String },
     /// A file write was refused or failed (ADR-020).
     #[error(transparent)]
     Write(#[from] WriteError),

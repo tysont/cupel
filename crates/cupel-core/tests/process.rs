@@ -93,7 +93,16 @@ fn a_child_whose_group_holds_more_than_its_memory_budget_is_killed_with_the_grou
         HANG.as_secs()
     );
     let ran = shell(&holds).memory(64 << 20).run(&Cancellation::new());
-    assert_eq!(ran, Err(Error::OutOfMemory { limit: 64 << 20 }));
+    let Err(Error::OutOfMemory { limit, held }) = ran else {
+        panic!("the run was not stopped for its memory: {ran:?}");
+    };
+    assert_eq!(limit, 64 << 20);
+    // Each process the budget counted, by pid, command, and resident size.
+    assert!(
+        held.lines()
+            .any(|process| process.contains("perl") && process.contains(" MiB")),
+        "the held processes name the perl and its size: {held}"
+    );
     assert!(
         started.elapsed() < HANG,
         "stopped after {:?}",
@@ -190,10 +199,14 @@ fn a_descendant_in_a_process_group_of_its_own_counts_against_the_memory_budget()
             .args(["-9", &pid.to_string()])
             .status();
     }
+    let stopped_at = match &ran {
+        Err(Error::OutOfMemory { limit, .. }) => Some(*limit),
+        _ => None,
+    };
     assert_eq!(
-        (ran, survived),
-        (Err(Error::OutOfMemory { limit: 64 << 20 }), false),
-        "after {:?}",
+        (stopped_at, survived),
+        (Some(64 << 20), false),
+        "the run ended {ran:?} after {:?}",
         started.elapsed()
     );
 }

@@ -403,8 +403,9 @@ fn a_run_whose_processes_hold_more_than_its_memory_budget_is_stopped_as_out_of_m
         },
     );
     assert_eq!(
-        ran.map(|run| run.results.tests.len()),
-        Err(Error::OutOfMemory { limit: 1 })
+        ran.map(|run| run.results.tests.len())
+            .map_err(|error| matches!(error, Error::OutOfMemory { limit: 1, .. })),
+        Err(true)
     );
 }
 

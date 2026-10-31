@@ -240,20 +240,24 @@ fn wait(
             kill(child, spawned);
             return Err(Error::Cancelled);
         }
-        if let Some(limit) = memory.filter(|limit| over(child, spawned, *limit)) {
+        if let Some((limit, held)) =
+            memory.and_then(|limit| Some((limit, over(child, spawned, limit)?)))
+        {
             kill(child, spawned);
-            return Err(Error::OutOfMemory { limit });
+            return Err(Error::OutOfMemory { limit, held });
         }
         std::thread::sleep(POLL);
     }
 }
 
-/// Whether `child`'s run (its own process group, see `process_group(0)` above, and every
-/// descendant in another group) holds more than `limit` bytes of resident memory, from a sample
-/// taken since `spawned`: a sample taken during the spawn lists the child, not yet `exec`ed,
-/// with the parent's memory (ADR-148 §3), which is not the run's.
-fn over(child: &Child, spawned: Instant, limit: u64) -> bool {
-    memory::resident_since(child.id(), spawned).is_some_and(|held| held > limit)
+/// The processes of `child`'s run (its own process group, see `process_group(0)` above, and every
+/// descendant in another group), described one per line, when they hold more than `limit` bytes
+/// of resident memory, from a sample taken since `spawned`: a sample taken during the spawn lists
+/// the child, not yet `exec`ed, with the parent's memory (ADR-148 §3), which is not the run's.
+fn over(child: &Child, spawned: Instant, limit: u64) -> Option<String> {
+    memory::resident_since(child.id(), spawned)
+        .filter(|held| held.bytes() > limit)
+        .map(|held| held.to_string())
 }
 
 /// Sends SIGTERM to every process group of `child`'s run and waits up to `grace` for `child`

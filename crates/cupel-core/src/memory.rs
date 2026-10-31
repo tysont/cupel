@@ -12,7 +12,7 @@ const SAMPLE_AGE: Duration = Duration::from_millis(200);
 const AGE_SLACK: Duration = Duration::from_secs(1);
 
 /// One running process as `ps` lists it.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 struct Listed {
     pid: u32,
     ppid: u32,
@@ -21,6 +21,48 @@ struct Listed {
     rss: u64,
     /// How long ago the process started, to the second.
     age: Duration,
+    /// Its command's name.
+    command: String,
+}
+
+/// The processes of a child's run from one sample, as the memory budget counts them.
+#[derive(Debug, Clone)]
+pub(crate) struct Held {
+    processes: Vec<Listed>,
+}
+
+impl Held {
+    /// Their resident set in bytes.
+    pub(crate) fn bytes(&self) -> u64 {
+        self.processes.iter().map(|process| process.rss).sum()
+    }
+}
+
+/// One line per process: its pid, command, and resident set, then its parent, group, and age, which
+/// name why the budget counted it.
+impl std::fmt::Display for Held {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (index, process) in self.processes.iter().enumerate() {
+            if index > 0 {
+                writeln!(f)?;
+            }
+            let size = if process.rss >= 1 << 20 {
+                format!("{} MiB", process.rss >> 20)
+            } else {
+                format!("{} KiB", process.rss >> 10)
+            };
+            write!(
+                f,
+                "pid {} `{}` {size} (parent {}, group {}, {} s old)",
+                process.pid,
+                process.command,
+                process.ppid,
+                process.pgid,
+                process.age.as_secs()
+            )?;
+        }
+        Ok(())
+    }
 }
 
 /// Every running process, as of `taken`.
@@ -60,7 +102,7 @@ fn read_physical_memory() -> Option<u64> {
     None
 }
 
-/// The resident set, in bytes, of the processes that belong to the run of `pid`: its process
+/// The processes that belong to the run of `pid`, with their resident sets: its process
 /// group and every descendant, whichever group a descendant moved to (`cargo nextest` gives each
 /// test one of its own), from a sample taken at `not_before` or later and at most `SAMPLE_AGE`
 /// old; `None` where no sample can be taken. A child shares its parent's memory between its
@@ -68,16 +110,16 @@ fn read_physical_memory() -> Option<u64> {
 /// it was spawned lists it with the parent's resident set; a reader passes the instant its spawn
 /// returned and never reads that (ADR-148 §3). `not_before` is also when the child was spawned,
 /// which bounds the age of a process its group may hold.
-pub(crate) fn resident_since(pid: u32, not_before: Instant) -> Option<u64> {
+pub(crate) fn resident_since(pid: u32, not_before: Instant) -> Option<Held> {
     let processes = sample_since(not_before)?;
     let members = members(&processes, pid, age_since(not_before));
-    Some(
-        processes
+    Some(Held {
+        processes: processes
             .iter()
             .filter(|process| members.contains(&process.pid))
-            .map(|process| process.rss)
-            .sum(),
-    )
+            .cloned()
+            .collect(),
+    })
 }
 
 /// The process groups the run of `pid`, spawned at `spawned`, spans, from a new sample: `pid`'s
@@ -150,13 +192,14 @@ fn sample_since(not_before: Instant) -> Option<Arc<Vec<Listed>>> {
 }
 
 /// Every running process from `ps`, which macOS and Linux both print as the pid, the parent's
-/// pid, the group ID, the resident set in KiB, and the elapsed time since it started; `None`
-/// where `ps` cannot run.
+/// pid, the group ID, the resident set in KiB, the elapsed time since it started, and the command
+/// (last, as it may hold spaces); `None` where `ps` cannot run.
 #[cfg(unix)]
 fn list() -> Option<Vec<Listed>> {
     let output = std::process::Command::new("ps")
         .args([
-            "-A", "-o", "pid=", "-o", "ppid=", "-o", "pgid=", "-o", "rss=", "-o", "etime=",
+            "-A", "-o", "pid=", "-o", "ppid=", "-o", "pgid=", "-o", "rss=", "-o", "etime=", "-o",
+            "comm=",
         ])
         .output()
         .ok()?;
@@ -166,7 +209,7 @@ fn list() -> Option<Vec<Listed>> {
     let mut processes = Vec::new();
     for line in String::from_utf8_lossy(&output.stdout).lines() {
         let fields: Vec<&str> = line.split_whitespace().collect();
-        if let [pid, ppid, pgid, kib, etime] = fields[..]
+        if let [pid, ppid, pgid, kib, etime, ref command @ ..] = fields[..]
             && let (Ok(pid), Ok(ppid), Ok(pgid), Ok(kib), Some(age)) = (
                 pid.parse::<u32>(),
                 ppid.parse::<u32>(),
@@ -181,6 +224,7 @@ fn list() -> Option<Vec<Listed>> {
                 pgid,
                 rss: kib.saturating_mul(1024),
                 age,
+                command: command.join(" "),
             });
         }
     }
@@ -223,6 +267,7 @@ mod tests {
             pgid: group,
             rss: 1,
             age: Duration::from_secs(age_secs),
+            command: String::new(),
         }
     }
 
@@ -238,6 +283,33 @@ mod tests {
         assert_eq!(
             members(&processes, 10, Duration::from_secs(2)),
             BTreeSet::from([10, 30, 40])
+        );
+    }
+
+    #[test]
+    fn held_processes_are_named_one_per_line_with_their_size_parent_group_and_age() {
+        let held = Held {
+            processes: vec![
+                Listed {
+                    rss: 300 << 20,
+                    command: "perl".to_string(),
+                    ..listed(11, 10, 11, 3)
+                },
+                Listed {
+                    rss: 512 << 10,
+                    command: "sh".to_string(),
+                    ..listed(10, 1, 10, 4)
+                },
+            ],
+        };
+        assert_eq!(
+            (held.bytes(), held.to_string()),
+            (
+                (300 << 20) + (512 << 10),
+                "pid 11 `perl` 300 MiB (parent 10, group 11, 3 s old)\n\
+                 pid 10 `sh` 512 KiB (parent 1, group 10, 4 s old)"
+                    .to_string()
+            )
         );
     }
 
@@ -277,13 +349,16 @@ mod tests {
         let me = std::process::id();
         let start = Instant::now();
         assert_eq!(
-            resident_since(me, start).map(|bytes| bytes > 0),
+            resident_since(me, start).map(|held| held.bytes() > 0),
             Some(true),
             "ps lists this process"
         );
         let before = latest_taken().expect("the reading left a sample");
         let mark = Instant::now();
-        assert_eq!(resident_since(me, mark).map(|bytes| bytes > 0), Some(true));
+        assert_eq!(
+            resident_since(me, mark).map(|held| held.bytes() > 0),
+            Some(true)
+        );
         let after = latest_taken().expect("the reading left a sample");
         assert_eq!(
             (before <= mark, after >= mark),

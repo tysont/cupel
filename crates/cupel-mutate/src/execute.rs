@@ -111,7 +111,7 @@ impl Execution<'_> {
             .runner
             .build(&ctx, &self.options_for(None, 0, Share::Alone))
         {
-            Err(Error::OutOfMemory { limit }) => return Err(over_budget(self.runner, limit)),
+            Err(Error::OutOfMemory { limit, .. }) => return Err(over_budget(self.runner, limit)),
             built => built?,
         };
         let Some(built) = built else {
@@ -370,7 +370,7 @@ impl Execution<'_> {
         let selection = self.union(&run.mutants);
         let started = Instant::now();
         let ran = match self.runner.run(ctx, &selection, options) {
-            Err(Error::OutOfMemory { limit }) => return Err(over_budget(self.runner, limit)),
+            Err(Error::OutOfMemory { limit, .. }) => return Err(over_budget(self.runner, limit)),
             ran => ran?,
         };
         let served = Served {
