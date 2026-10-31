@@ -87,18 +87,16 @@ pub enum SuitePhase {
 }
 
 impl SuitePhase {
-    /// The phase's name as it serializes.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::Build => "build",
-            Self::Test => "test",
-            Self::Export => "export",
-            Self::Report => "report",
-        }
-    }
-
     /// Every phase, in the order a run goes through them.
     pub const ALL: [Self; 4] = [Self::Build, Self::Test, Self::Export, Self::Report];
+
+    /// Each phase's name as it serializes, in the order of [`Self::ALL`].
+    const NAMES: [&'static str; 4] = ["build", "test", "export", "report"];
+
+    /// The phase's name as it serializes.
+    pub fn as_str(self) -> &'static str {
+        Self::NAMES[self as usize]
+    }
 }
 
 /// What a joint suite run did.

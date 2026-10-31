@@ -3,7 +3,7 @@
 use std::fs;
 
 use cupel_core::{
-    FactKind, OUTPUT_TAIL_LINES, ProducerId, RunnerInvocation, TestOutcome, TestResult,
+    FactKind, OUTPUT_TAIL_LINES, ProducerId, RunnerInvocation, SuitePhase, TestOutcome, TestResult,
     TestResults, output_tail, schema,
 };
 
@@ -153,4 +153,21 @@ fn outcomes_serialize_in_kebab_case_and_the_fact_is_version_2() {
     .to_vec();
     assert_eq!(names, ["passed", "failed", "skipped", "errored"]);
     assert_eq!(schema::fact_version(FactKind::TestResults), Some(2));
+}
+
+#[test]
+fn each_suite_phase_is_named_as_it_serializes() {
+    let names: Vec<(String, &str)> = SuitePhase::ALL
+        .iter()
+        .map(|phase| (serde_json::to_string(phase).unwrap(), phase.as_str()))
+        .collect();
+    assert_eq!(
+        names,
+        vec![
+            ("\"build\"".to_owned(), "build"),
+            ("\"test\"".to_owned(), "test"),
+            ("\"export\"".to_owned(), "export"),
+            ("\"report\"".to_owned(), "report"),
+        ]
+    );
 }
