@@ -150,3 +150,20 @@ fn unmutated_tests_over_their_memory_share_are_an_error_naming_the_setting() {
         "{message}"
     );
 }
+
+/// A fixture copy's mutation slots, made under the machine's temporary directory by the production,
+/// are removed with the copy, so no test leaves a slot directory behind.
+#[test]
+fn a_fixture_copys_mutation_slots_are_removed_with_it() {
+    let Some((dir, _)) = support::python() else {
+        return;
+    };
+    let slots = cupel_mutate::slots::slot_dir(dir.path(), "python", 0)
+        .ancestors()
+        .nth(2)
+        .unwrap()
+        .to_path_buf();
+    assert!(slots.is_dir(), "{} is made", slots.display());
+    drop(dir);
+    assert!(!slots.exists(), "{} is removed", slots.display());
+}

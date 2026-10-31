@@ -155,7 +155,7 @@ fn two_slots(
 }
 
 /// The Rust fixture's outcomes in a fresh copy, with two slots and `runner`.
-fn rust_outcomes(runner: Option<&str>) -> (tempfile::TempDir, MutationOutcomes) {
+fn rust_outcomes(runner: Option<&str>) -> (support::Fixture, MutationOutcomes) {
     rust_outcomes_after(runner, |_| {})
 }
 
@@ -163,7 +163,7 @@ fn rust_outcomes(runner: Option<&str>) -> (tempfile::TempDir, MutationOutcomes) 
 fn rust_outcomes_after(
     runner: Option<&str>,
     change: fn(&std::path::Path),
-) -> (tempfile::TempDir, MutationOutcomes) {
+) -> (support::Fixture, MutationOutcomes) {
     let dir = fixture("tests.mutation/rust");
     change(dir.path());
     let configs = tempfile::tempdir().unwrap();

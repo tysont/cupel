@@ -25,11 +25,38 @@ pub fn lang(id: &str) -> Lang {
     Registries::shared().lang(id)
 }
 
+/// A copy of a fixture repository in a temporary directory. A production in it keeps its mutation
+/// slots under the machine's temporary directory, by the copy's path (ADR-080 §8); they and the copy
+/// are removed when it is dropped.
+pub struct Fixture {
+    dir: tempfile::TempDir,
+}
+
+impl Fixture {
+    /// The copy's root.
+    pub fn path(&self) -> &Path {
+        self.dir.path()
+    }
+}
+
+impl Drop for Fixture {
+    fn drop(&mut self) {
+        // The repository's slot directory: `<root>/<repository key>/<language>/<index>`. A copy
+        // no production ran in has none.
+        if let Some(slots) = cupel_mutate::slots::slot_dir(self.path(), "-", 0)
+            .ancestors()
+            .nth(2)
+        {
+            let _ = std::fs::remove_dir_all(slots);
+        }
+    }
+}
+
 /// A copy of `repos/<name>`.
-pub fn fixture(name: &str) -> tempfile::TempDir {
+pub fn fixture(name: &str) -> Fixture {
     let dir = tempfile::tempdir().unwrap();
     cupel_fixtures::copy_repo(name, dir.path());
-    dir
+    Fixture { dir }
 }
 
 /// What a run at `depth`, over a range that changed `changed`, with `--config` `config`, would
@@ -117,12 +144,12 @@ pub fn with_outcome(outcomes: &MutationOutcomes, outcome: MutantOutcome) -> Vec<
 
 /// A copy of the Python mutation fixture and its outcomes at the default depth; `None` (reported
 /// as skipped) without pytest.
-pub fn python() -> Option<(tempfile::TempDir, MutationOutcomes)> {
+pub fn python() -> Option<(Fixture, MutationOutcomes)> {
     python_at(&Run::default())
 }
 
 /// [`python`] in a run like `run`.
-fn python_at(run: &Run) -> Option<(tempfile::TempDir, MutationOutcomes)> {
+fn python_at(run: &Run) -> Option<(Fixture, MutationOutcomes)> {
     if !installed("pytest", "the Python mutation fixture") {
         return None;
     }
@@ -141,7 +168,7 @@ pub fn deep() -> Run {
 
 /// [`python`] at `deep`, when its mutants ran by a per-test map; `None` (reported as skipped)
 /// without pytest-cov.
-pub fn python_per_test() -> Option<(tempfile::TempDir, MutationOutcomes)> {
+pub fn python_per_test() -> Option<(Fixture, MutationOutcomes)> {
     python_at(&deep()).filter(|(_, outcomes)| {
         if !outcomes.per_test {
             eprintln!("SKIPPED: pytest-cov not installed; per-test selection was not run");
