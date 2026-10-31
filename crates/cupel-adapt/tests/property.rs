@@ -11,7 +11,7 @@ use cupel_core::{
 };
 use cupel_fixtures::copy_repo;
 use cupel_fixtures::matrix::Registries;
-use cupel_fixtures::own_tmpdir::in_own_tmpdir;
+use cupel_fixtures::own_tmpdir::ran_in_own_tmpdir;
 
 /// The seed the matrix goldens run with.
 const SEED: u64 = cupel_fixtures::matrix::SEED;
@@ -324,13 +324,9 @@ fn hypothesis_runs_with_the_budget_under_pytest() {
 /// own.
 #[test]
 fn fast_check_runs_with_the_budget_under_jest_and_vitest() {
-    in_own_tmpdir(
-        "fast_check_runs_with_the_budget_under_jest_and_vitest",
-        fast_check_runs_with_the_budget,
-    );
-}
-
-fn fast_check_runs_with_the_budget() {
+    if ran_in_own_tmpdir("fast_check_runs_with_the_budget_under_jest_and_vitest") {
+        return;
+    }
     for (runner, lang) in [("tool.jest", "javascript"), ("tool.vitest", "typescript")] {
         let Some(results) = budgeted(runner, lang, None) else {
             continue;

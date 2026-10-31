@@ -5,7 +5,7 @@ mod support;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use support::{recipe, workspace};
+use support::{recipe, shellcheck, workspace};
 use tempfile::TempDir;
 
 fn script() -> PathBuf {
@@ -38,19 +38,9 @@ fn entries(dir: &Path) -> Vec<String> {
 
 #[test]
 fn the_script_passes_shellcheck() {
-    if cupel_core::find_program("shellcheck").is_none() {
-        eprintln!("SKIPPED: shellcheck not installed; this test did not run");
-        return;
+    if let Some(found) = shellcheck("scripts/tmpdir-guard.sh") {
+        assert_eq!(found, (Some(0), String::new()));
     }
-    let output = Command::new("shellcheck")
-        .args(["--shell=sh", "scripts/tmpdir-guard.sh"])
-        .current_dir(workspace())
-        .output()
-        .unwrap();
-    assert_eq!(
-        (output.status.code(), text(&output.stdout).as_str()),
-        (Some(0), "")
-    );
 }
 
 /// The command runs with a fresh directory under the caller's as its TMPDIR, which is gone after it.
@@ -114,11 +104,14 @@ fn a_failing_command_returns_its_exit_code() {
 /// `make check` runs its lint, tests, and docs under the guard.
 #[test]
 fn make_check_runs_its_tests_under_the_guard() {
-    assert!(
-        recipe("check").contains(
-            &"@scripts/tmpdir-guard.sh $(MAKE) --no-print-directory lint test doc".to_owned()
-        ),
-        "{:#?}",
-        recipe("check")
+    let check = recipe("check");
+    let guarded: Vec<&String> = check
+        .iter()
+        .filter(|line| line.contains("lint test doc"))
+        .collect();
+    assert_eq!(
+        guarded,
+        ["@scripts/tmpdir-guard.sh $(MAKE) --no-print-directory lint test doc"],
+        "{check:#?}"
     );
 }

@@ -163,7 +163,12 @@ fn a_fixture_copys_mutation_slots_are_removed_with_it() {
         .nth(2)
         .unwrap()
         .to_path_buf();
-    assert!(slots.is_dir(), "{} is made", slots.display());
+    let made = slots.is_dir();
     drop(dir);
-    assert!(!slots.exists(), "{} is removed", slots.display());
+    assert_eq!(
+        (made, slots.exists()),
+        (true, false),
+        "{} is made, then removed",
+        slots.display()
+    );
 }

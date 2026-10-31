@@ -11,7 +11,7 @@ use cupel_core::{
 };
 use cupel_fixtures::copy_repo;
 use cupel_fixtures::matrix::Registries;
-use cupel_fixtures::own_tmpdir::in_own_tmpdir;
+use cupel_fixtures::own_tmpdir::ran_in_own_tmpdir;
 use serde_json::json;
 
 use TestOutcome::{Failed, Passed};
@@ -361,18 +361,19 @@ fn cargo_test_reruns_shuffle_with_the_seed() {
     );
 }
 
-/// Jest keeps a cache per project path in the temporary directory, so the test runs in one of
-/// its own.
+/// Jest keeps a cache per project path in the temporary directory, so the test runs in one of its
+/// own.
 #[test]
 fn jest_reruns_randomize_with_the_seed() {
-    in_own_tmpdir("jest_reruns_randomize_with_the_seed", || {
-        assert_reruns(
-            "tool.jest",
-            "javascript",
-            "ledger.test.js > balance starts at zero",
-            "settle.test.js > settles on every other run",
-        );
-    });
+    if ran_in_own_tmpdir("jest_reruns_randomize_with_the_seed") {
+        return;
+    }
+    assert_reruns(
+        "tool.jest",
+        "javascript",
+        "ledger.test.js > balance starts at zero",
+        "settle.test.js > settles on every other run",
+    );
 }
 
 #[test]

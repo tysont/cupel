@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Output, Stdio};
 use std::sync::mpsc;
 
-use support::{HANG, eventually, recipe, workspace};
+use support::{HANG, eventually, recipe, shellcheck, workspace};
 use tempfile::TempDir;
 
 fn script() -> PathBuf {
@@ -50,19 +50,9 @@ fn repository() -> TempDir {
 
 #[test]
 fn the_script_passes_shellcheck() {
-    if cupel_core::find_program("shellcheck").is_none() {
-        eprintln!("SKIPPED: shellcheck not installed; this test did not run");
-        return;
+    if let Some(found) = shellcheck("scripts/heavy.sh") {
+        assert_eq!(found, (Some(0), String::new()));
     }
-    let output = Command::new("shellcheck")
-        .args(["--shell=sh", "scripts/heavy.sh"])
-        .current_dir(workspace())
-        .output()
-        .unwrap();
-    assert_eq!(
-        (output.status.code(), text(&output.stdout).as_str()),
-        (Some(0), "")
-    );
 }
 
 #[test]

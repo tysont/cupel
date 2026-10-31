@@ -11,7 +11,7 @@ use cupel_core::{
     Availability, Cancellation, Ctx, Event, FactKind, LangId, ProduceCtx, Produced,
     ProducerRegistry, RegisteredProducer, Scope, ToolId, Writer,
 };
-use cupel_fixtures::own_tmpdir::in_own_tmpdir;
+use cupel_fixtures::own_tmpdir::ran_in_own_tmpdir;
 use cupel_fixtures::{Capture, copy_repo, repo_path};
 use serde_json::{Map, Value, json};
 use support::registry;
@@ -452,12 +452,12 @@ const EXPECTED: [Expected; 8] = [
 /// own.
 #[test]
 fn every_configured_coverage_tool_covers_its_fixture_and_caches_a_fresh_report() {
-    in_own_tmpdir(
+    if ran_in_own_tmpdir(
         "every_configured_coverage_tool_covers_its_fixture_and_caches_a_fresh_report",
-        || {
-            for expected in &EXPECTED {
-                assert_covers(expected);
-            }
-        },
-    );
+    ) {
+        return;
+    }
+    for expected in &EXPECTED {
+        assert_covers(expected);
+    }
 }

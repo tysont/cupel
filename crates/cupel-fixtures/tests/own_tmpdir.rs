@@ -1,9 +1,9 @@
-// ABOUTME: Tests for `cupel_fixtures::own_tmpdir`: a test body run in a child of its test binary whose TMPDIR the call
+// ABOUTME: Tests for `cupel_fixtures::own_tmpdir`: a test run again in a child of its test binary whose TMPDIR the call
 // ABOUTME: owns, so what the tools it starts keep there goes when it ends, and a failing body fails the test.
 use std::path::Path;
 use std::process::Command;
 
-use cupel_fixtures::own_tmpdir::{in_own_tmpdir, is_child};
+use cupel_fixtures::own_tmpdir::{is_child, ran_in_own_tmpdir};
 use tempfile::TempDir;
 
 /// This binary's test `name`, run alone with `tmp` as its TMPDIR.
@@ -28,10 +28,11 @@ fn entries(dir: &Path) -> Vec<String> {
 /// The body leaves a directory in its TMPDIR, as jest leaves its cache; the call removes it.
 #[test]
 fn a_body_that_leaves_a_directory() {
-    in_own_tmpdir("a_body_that_leaves_a_directory", || {
-        assert!(is_child());
-        std::fs::create_dir(std::env::temp_dir().join("jest_left")).unwrap();
-    });
+    if ran_in_own_tmpdir("a_body_that_leaves_a_directory") {
+        return;
+    }
+    assert!(is_child());
+    std::fs::create_dir(std::env::temp_dir().join("jest_left")).unwrap();
 }
 
 /// The body fails.
@@ -40,7 +41,10 @@ fn a_body_that_fails() {
     if !is_child() && std::env::var_os("OWN_TMPDIR_FAIL").is_none() {
         return;
     }
-    in_own_tmpdir("a_body_that_fails", || panic!("the body failed"));
+    if ran_in_own_tmpdir("a_body_that_fails") {
+        return;
+    }
+    panic!("the body failed");
 }
 
 #[test]
@@ -76,5 +80,5 @@ fn a_failing_body_fails_its_test_with_the_childs_output() {
 #[test]
 #[should_panic(expected = "the child ran no test named no_such_test")]
 fn a_name_that_matches_no_test_fails() {
-    in_own_tmpdir("no_such_test", || {});
+    let _ = ran_in_own_tmpdir("no_such_test");
 }

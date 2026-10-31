@@ -484,6 +484,24 @@ pub fn workspace() -> PathBuf {
         .unwrap()
 }
 
+/// `shellcheck`'s exit code and report on the POSIX shell script at `path` under the workspace;
+/// `None` (reported as skipped) without `shellcheck`.
+pub fn shellcheck(path: &str) -> Option<(Option<i32>, String)> {
+    if cupel_core::find_program("shellcheck").is_none() {
+        eprintln!("SKIPPED: shellcheck not installed; this test did not run");
+        return None;
+    }
+    let output = std::process::Command::new("shellcheck")
+        .args(["--shell=sh", path])
+        .current_dir(workspace())
+        .output()
+        .unwrap();
+    Some((
+        output.status.code(),
+        String::from_utf8_lossy(&output.stdout).into_owned(),
+    ))
+}
+
 /// The recipe of `target` in the Makefile: its lines, trimmed.
 pub fn recipe(target: &str) -> Vec<String> {
     let makefile = fs::read_to_string(workspace().join("Makefile")).unwrap();

@@ -7,7 +7,7 @@ use cupel_core::{CheckId, LangId, Support};
 use cupel_fixtures::matrix::{
     Registries, fixture_repo, run_with_declared_facts, stale_goldens, verify_pair,
 };
-use cupel_fixtures::own_tmpdir::in_own_tmpdir;
+use cupel_fixtures::own_tmpdir::ran_in_own_tmpdir;
 use cupel_fixtures::{GoldenMode, Goldens};
 use libtest_mimic::{Arguments, Failed, Trial};
 
@@ -72,13 +72,12 @@ fn runs_given_only_its_declared_facts(check: &CheckId, lang: &LangId) -> Result<
     else {
         return Ok(());
     };
-    let mut outcome = Ok(());
-    in_own_tmpdir(&format!("declared_facts::{check}/{lang}"), || {
-        outcome = run_with_declared_facts(&pair)
-            .map(drop)
-            .map_err(|problem| format!("{}: {problem}", pair.golden()).into());
-    });
-    outcome
+    if ran_in_own_tmpdir(&format!("declared_facts::{check}/{lang}")) {
+        return Ok(());
+    }
+    run_with_declared_facts(&pair)
+        .map(drop)
+        .map_err(|problem| format!("{}: {problem}", pair.golden()).into())
 }
 
 /// No golden under a check's directory is left that no pair, check, or survey claims.
