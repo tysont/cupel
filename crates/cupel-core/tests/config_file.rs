@@ -31,7 +31,7 @@ coverage = "pnpm vitest run --coverage --coverage.reporter=lcov"
 [checks."static.clones"]
 threshold = 0.82
 min_lines = 4
-min_nodes = 20
+min_nodes = 23
 
 [checks."static.deps".layers]            # layering policy
 order = ["domain", "app", "infra"]        # infra may depend on app may depend on domain, not reverse

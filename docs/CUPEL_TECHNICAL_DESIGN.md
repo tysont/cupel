@@ -39,7 +39,7 @@ All three share one architecture: a Python CLI that walks a tree, auto-detects s
 | Tool | What it does | Key mechanics |
 |---|---|---|
 | **crapper** | CRAP score `CC² × (1 − coverage)³ + CC` per function | Runs each language's coverage tool itself; `--no-coverage`, `--use-existing-coverage`, `--changed`, `--threshold N` (exit 2). Identity is positional — a rename is a new entry. |
-| **dryer** | Clone detection | Normalizes each function's AST (drops locals, fields, literals, keywords; keeps call names, operators, tree shape), builds structural fingerprints per subtree, scores pairs by Jaccard. Default threshold 0.82, min 4 lines / 20 nodes. Same-language only. |
+| **dryer** | Clone detection | Normalizes each function's AST (drops locals, fields, literals, keywords; keeps call names, operators, tree shape), builds structural fingerprints per subtree, scores pairs by Jaccard. Default threshold 0.82, min 4 lines / 23 nodes. Same-language only. |
 | **mutator** | Mutation testing | Small operator set (boolean flips, relational/equality swaps, `+/-`, `*//`, `&&/\|\|`, `0/1`). Coverage-gated: uncovered sites are not run. Workers get a private copy of the mutated file, rest of tree symlinked. Differential: reruns only survivors and functions whose text hash changed. Exit 0 all killed / 2 baseline red / 3 survivors. Timeout 10× baseline. |
 | **scrap** | Test-code quality (SCRAP = CRAP for tests) | Size, branching, mocking, weak assertions, duplicated scaffolding; reports a refactor pressure, remediation mode, and *actionability class for an AI assistant*. |
 
@@ -324,7 +324,7 @@ coverage = "pnpm vitest run --coverage --coverage.reporter=lcov"
 [checks."static.clones"]
 threshold = 0.82
 min_lines = 4
-min_nodes = 20
+min_nodes = 23
 
 [checks."static.deps".layers]            # layering policy
 order = ["domain", "app", "infra"]        # infra may depend on app may depend on domain, not reverse

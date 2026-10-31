@@ -1577,7 +1577,7 @@ depth = "quick"
 | `perf.bench` | `significance_percent` | `5` | The Mann-Whitney U test's level, in percent: a change with a lower p is significant. |
 | `static.clones` | `threshold` | `0.82` | The least Jaccard similarity of two symbols' fingerprint sets that makes a clone, greater than 0 and at most 1. |
 | `static.clones` | `min_lines` | `4` | The fewest lines a symbol must span to be compared. |
-| `static.clones` | `min_nodes` | `20` | The fewest normalized-tree nodes a symbol must have to be compared. |
+| `static.clones` | `min_nodes` | `23` | The fewest normalized-tree nodes a symbol must have to be compared. |
 | `static.complexity` | `cyclomatic_max` | `10` | The highest cyclomatic complexity a symbol may have; above it is complexity.high. |
 | `static.complexity` | `cognitive_max` | `15` | The highest cognitive complexity a symbol may have; above it is complexity.high. |
 | `static.complexity` | `nesting_max` | `4` | The deepest control-flow nesting a symbol may have; deeper is nesting.deep. |

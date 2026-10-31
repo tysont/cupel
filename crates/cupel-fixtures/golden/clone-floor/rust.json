@@ -1,0 +1,219 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 0.0,
+        "max_jaccard": 1.0,
+        "pairs": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "pairs",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract what `as_str` and `as_str` share into one function and call it from both."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "edits": [],
+        "jaccard": 1.0,
+        "left": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 55,
+          "file": "src/lib.rs",
+          "hash": "sh_ebb42be613fec8e6",
+          "lang": "rust",
+          "line": 49,
+          "lines": 7,
+          "nodes": 35,
+          "symbol": "OracleKind::as_str"
+        },
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 1,
+            "values": [
+              "Ref",
+              "Build"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "\"ref\"",
+              "\"build\""
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 1,
+            "values": [
+              "Command",
+              "Test"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "\"command\"",
+              "\"test\""
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 1,
+            "values": [
+              "Spec",
+              "Report"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "\"spec\"",
+              "\"report\""
+            ]
+          }
+        ],
+        "right": {
+          "col": 5,
+          "end_col": 6,
+          "end_line": 74,
+          "file": "src/lib.rs",
+          "hash": "sh_ebb42be613fec8e6",
+          "lang": "rust",
+          "line": 68,
+          "lines": 7,
+          "nodes": 35,
+          "symbol": "Phase::as_str"
+        },
+        "threshold": 0.82
+      },
+      "id": "fnd_c291aa",
+      "kind": "clone.pair",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 55,
+        "file": "src/lib.rs",
+        "line": 49
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_ebb42be613fec8e6",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_c291aa --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "OracleKind::as_str",
+        "hash": "sh_ebb42be613fec8e6",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`OracleKind::as_str` and `Phase::as_str` (src/lib.rs:68) are type-2 clones (jaccard 1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_c291aa",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract what `as_str` and `as_str` share into one function and call it from both."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "suite": {},
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

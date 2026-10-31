@@ -37,10 +37,12 @@ struct Settings {
     min_nodes: u32,
 }
 
+/// `min_nodes` 23 leaves out four-line setters and guards (20 to 22 nodes), which pair by shape
+/// alone, and keeps every larger clone the external dogfood judged true (ADR-158).
 const DEFAULTS: Settings = Settings {
     threshold: 0.82,
     min_lines: 4,
-    min_nodes: 20,
+    min_nodes: 23,
 };
 
 impl Settings {

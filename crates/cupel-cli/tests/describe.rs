@@ -345,7 +345,7 @@ fn describe_check_lists_its_settings_with_their_defaults() {
         [
             ("threshold", &json!(0.82)),
             ("min_lines", &json!(4)),
-            ("min_nodes", &json!(20))
+            ("min_nodes", &json!(23))
         ]
     );
 }

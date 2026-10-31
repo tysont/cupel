@@ -701,7 +701,7 @@
           "summary": "The fewest lines a symbol must span to be compared."
         },
         {
-          "default": 20,
+          "default": 23,
           "name": "min_nodes",
           "summary": "The fewest normalized-tree nodes a symbol must have to be compared."
         }
