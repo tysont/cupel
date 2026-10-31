@@ -7,6 +7,7 @@ use cupel_core::{CheckId, LangId, Support};
 use cupel_fixtures::matrix::{
     Registries, fixture_repo, run_with_declared_facts, stale_goldens, verify_pair,
 };
+use cupel_fixtures::own_tmpdir::in_own_tmpdir;
 use cupel_fixtures::{GoldenMode, Goldens};
 use libtest_mimic::{Arguments, Failed, Trial};
 
@@ -62,7 +63,8 @@ fn golden_or_skip(check: &CheckId, lang: &LangId) -> Result<(), Failed> {
 }
 
 /// A supported pair's check runs given exactly the facts its manifest declares; a pair that is
-/// not supported has nothing to run.
+/// not supported has nothing to run. The producers run in this process, so the pair runs in a
+/// child with a temporary directory of its own, which takes the tools' caches with it.
 fn runs_given_only_its_declared_facts(check: &CheckId, lang: &LangId) -> Result<(), Failed> {
     let Some(pair) = Registries::shared()
         .fixture_pair(check, lang)
@@ -70,9 +72,13 @@ fn runs_given_only_its_declared_facts(check: &CheckId, lang: &LangId) -> Result<
     else {
         return Ok(());
     };
-    run_with_declared_facts(&pair)
-        .map(drop)
-        .map_err(|problem| format!("{}: {problem}", pair.golden()).into())
+    let mut outcome = Ok(());
+    in_own_tmpdir(&format!("declared_facts::{check}/{lang}"), || {
+        outcome = run_with_declared_facts(&pair)
+            .map(drop)
+            .map_err(|problem| format!("{}: {problem}", pair.golden()).into());
+    });
+    outcome
 }
 
 /// No golden under a check's directory is left that no pair, check, or survey claims.

@@ -23,6 +23,9 @@
 //! exactly its declared facts. [`evidence`] validates finding evidence against manifest schemas
 //! (ADR-043).
 //!
+//! [`own_tmpdir`] runs a test whose producers run in its own process in a child of its test binary
+//! with a temporary directory of its own, so the caches the tools they start keep there go with it.
+//!
 //! Everything golden about one check lives in its own directory (ADR-074), so checks added in
 //! parallel never edit the same file:
 //!
@@ -44,6 +47,7 @@ pub mod conformance;
 mod golden;
 pub mod matrix;
 mod mcp_parity;
+pub mod own_tmpdir;
 pub mod parity;
 mod redact;
 mod repos;
