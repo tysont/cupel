@@ -1774,7 +1774,7 @@ The owner's P10 ruling (2026-10-28): P10 is the last defined phase; after it the
 
 **Goal:** The owner's v0.2.2 batch (2026-10-30), after `v0.2.1`: the instrumented build's cost (the warm one-function `standard` run under 3 minutes), machine load and disk across agent worktrees, the temporary-directory leak, and two misleading results; then `v0.2.2`, after which the project is in backlog maintenance and the next inputs come from real-repository use.
 
-**Status:** in progress (2026-10-30)
+**Status:** complete (2026-10-31); the project is in backlog maintenance
 
 One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the steps run in the owner's order. Push after every merge to `main`. Agent briefs: [`docs/plan/v0.2.2/`](plan/v0.2.2/common.md).
 
@@ -1804,7 +1804,7 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
 
 #### B.5 Release v0.2.2
 
-**Status:** pending
+**Status:** complete (2026-10-31) · version 0.2.2; the warm one-function `standard` run 166 s without a daemon (342 s in 0.2.1), under the 3-minute line; the tag waits on a green CI
 
 - The tag with the measured before/after in its notes; then backlog maintenance.
 
@@ -1933,6 +1933,23 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
   - A check that skips a language now shows that language's notes in its entry.
   - A branch that adds a clone fixture of 20 to 22 nodes sees it uncompared at the default.
   - The single-statement-rule stash was dropped, as directed.
+- **B.5 — measurement.** `make inner-loop` on `main` at 4cbb9b7 (the baseline refreshed after ADR-158), release binary, AC power, 174 GB free, nothing else of Cupel's running; the machine's 1-minute load was 5 at the start and 50 to 67 during the cold run's whole suite, its own. Wall / suite run / engine:
+
+  | Release | Cold | Warm | Unchanged |
+  |---|---|---|---|
+  | 0.2.1 (P10's final row) | 1 077 / 920 / 127 s | 342 / 270 / 61 s | 6 s |
+  | **0.2.2** | **1 166 / 979 / 154 s** | **166 / 72 / 80 s** | **9 s** |
+
+  The warm suite's phases: `build` 51.2 s, `test` 6.9 s, `report` 11.6 s; the engine's `build` 53.1 s, `run` 26.5 s, `validate` 11.3 s. The cold run is whole by design (every binary listed); its rise is within the load. B.1's daemon row (105 s, the instrumented build warmed by `cupel serve --watch`) stands.
+- **B.5 — three CI failures on the way.**
+  1. `a_descendant_in_a_process_group_of_its_own_counts_against_the_memory_budget` (ubuntu, three times since 2026-10-28): the out-of-memory error now names each process the budget counted (dee39a5), and CI run 41237509875 showed `perl` at 125 MiB, 0 s old, still in the shell's group. perl folds `"x" x (256 * 1024 * 1024)` when it compiles, before `setpgrp` and the pid file, so the budget was right and the test raced its own allocation; it allocates from a variable now (ad8ced2). ADR-148 §3 records it.
+  2. `a_file_copy_production_plans_once_syncs_each_slot_builds_in_each_and_runs_each_mutant` (the same run): a mutant's run phase read the clock a second time after the mutant's own reading, 1 ms apart once; the phase records the mutant's measurement (`Phases::took`, f37b501, a unit test).
+  3. `a_mutant_that_never_finishes_times_out` (a local tree dogfood at f37b501): the two mutants that finish timed out at the 2 s floor while the dogfood's deep suite held the machine at a 1-minute load of up to 127; it passed on the rerun. An open item.
+- **B.5 — README.** The check example recaptured from the 0.2.2 release binary on the shop repository: every line the README shows is unchanged but the version (summary 39 findings, fail 7, as in 0.2.1); the JSON excerpt's fields all present. The version names in the install lines, the JSON excerpt, and the daemon examples move to 0.2.2.
+- **B.5 — open items.**
+  1. **A timeout test under load.** `a_mutant_that_never_finishes_times_out` decides killed against timeout by a 2 s floor of wall time, so a machine at a load of 100+ can turn a finishing mutant into a timeout.
+  2. **The tree dogfood's own load.** On this 8-core machine a deep tree dogfood (`make dogfood` from the primary checkout, not an agent checkout, so not at half the cores) drives the 1-minute load to 127; ADR-156's cap covers agent checkouts only.
+  3. **B.2's deviation** (one shared target directory rejected on measurement, ADR-156) awaits the owner's ruling, as reported.
 
 ## 4. Cross-phase checklist
 
