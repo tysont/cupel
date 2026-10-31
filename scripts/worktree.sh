@@ -9,7 +9,9 @@ fail() {
 }
 
 usage="usage: worktree.sh add NAME [BASE] | worktree.sh remove NAME"
-[ $# -ge 2 ] && [ -n "$2" ] || fail "$usage"
+if [ $# -lt 2 ] || [ -z "$2" ]; then
+	fail "$usage"
+fi
 action=$1
 name=$2
 
