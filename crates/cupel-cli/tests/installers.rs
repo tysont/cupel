@@ -11,7 +11,6 @@ use std::net::{TcpListener, TcpStream};
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::sync::OnceLock;
 
 use serde_json::{Value, json};
 use support::{Outcome, Repo, installed, workspace};
@@ -188,33 +187,14 @@ fn files(dir: &Path) -> Vec<String> {
     found
 }
 
-/// The host's release archive, holding the `cupel` binary this test crate was built with.
-fn host_archive() -> &'static (TempDir, PathBuf) {
-    static ARCHIVE: OnceLock<(TempDir, PathBuf)> = OnceLock::new();
-    ARCHIVE.get_or_init(|| {
-        let targets = Targets::read();
-        let host = targets.host();
-        let stage = TempDir::new().unwrap();
-        let dir = stage.path().join(targets.dir(host));
-        fs::create_dir(&dir).unwrap();
-        fs::copy(env!("CARGO_BIN_EXE_cupel"), dir.join("cupel")).unwrap();
-        let archive = stage.path().join(targets.archive(VERSION, host));
-        succeed(
-            Command::new("tar")
-                .arg("-czf")
-                .arg(&archive)
-                .arg("-C")
-                .arg(stage.path())
-                .arg(targets.dir(host)),
-        );
-        (stage, archive)
-    })
-}
-
 /// A release served over HTTP from a temporary directory, laid out as GitHub Releases serves
-/// one: each file under both `download/v<version>/` and `latest/download/`.
+/// one: each file under both `download/v<version>/` and `latest/download/`. The directory, the
+/// host's archive staged in it included, is removed when the release is dropped; the server then
+/// answers 404.
 struct Release {
     _root: TempDir,
+    /// The host's release archive, holding the `cupel` binary this test crate was built with.
+    archive: PathBuf,
     url: String,
 }
 
@@ -222,37 +202,53 @@ impl Release {
     /// The host's archive with a SHA256SUMS that gives `digest` (its own when `None`).
     fn publish(digest: Option<&str>) -> Self {
         let targets = Targets::read();
-        let (_, archive) = host_archive();
-        let actual = sha256(archive);
-        let sums = targets.sums(VERSION, digest.unwrap_or(&actual));
+        let host = targets.host();
         let root = TempDir::new().unwrap();
+        let stage = root.path().join("stage");
+        let dir = stage.join(targets.dir(host));
+        fs::create_dir_all(&dir).unwrap();
+        fs::copy(env!("CARGO_BIN_EXE_cupel"), dir.join("cupel")).unwrap();
+        let archive = stage.join(targets.archive(VERSION, host));
+        succeed(
+            Command::new("tar")
+                .arg("-czf")
+                .arg(&archive)
+                .arg("-C")
+                .arg(&stage)
+                .arg(targets.dir(host)),
+        );
+        let actual = sha256(&archive);
+        let sums = targets.sums(VERSION, digest.unwrap_or(&actual));
+        let served = root.path().join("served");
         for prefix in [
             format!("download/v{VERSION}"),
             "latest/download".to_string(),
         ] {
-            let dir = root.path().join(prefix);
+            let dir = served.join(prefix);
             fs::create_dir_all(&dir).unwrap();
-            fs::hard_link(archive, dir.join(archive.file_name().unwrap())).unwrap();
+            fs::hard_link(&archive, dir.join(archive.file_name().unwrap())).unwrap();
             fs::write(dir.join(&targets.checksums), &sums).unwrap();
         }
-        let url = serve(root.path().to_path_buf());
-        Self { _root: root, url }
+        let url = serve(served);
+        Self {
+            _root: root,
+            archive,
+            url,
+        }
     }
 }
 
 /// The release as published.
-fn release() -> &'static Release {
-    static RELEASE: OnceLock<Release> = OnceLock::new();
-    RELEASE.get_or_init(|| Release::publish(None))
+fn release() -> Release {
+    Release::publish(None)
 }
 
 /// The digest `tampered()`'s SHA256SUMS gives the host's archive.
 const WRONG_DIGEST: &str = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 /// The release with a SHA256SUMS whose digest for the host's archive is wrong.
-fn tampered() -> &'static Release {
-    static RELEASE: OnceLock<Release> = OnceLock::new();
-    RELEASE.get_or_init(|| Release::publish(Some(WRONG_DIGEST)))
+fn tampered() -> Release {
+    Release::publish(Some(WRONG_DIGEST))
 }
 
 /// Serves the files under `root` on a local port until the test process exits; its base URL.
@@ -407,7 +403,8 @@ fn the_install_script_installs_the_latest_release_and_says_what_to_add_to_path()
     let home = TempDir::new().unwrap();
     let dir = home.path().join("tools");
     let targets = Targets::read();
-    let url = &release().url;
+    let release = release();
+    let url = &release.url;
     let outcome = succeed(install_script(url, home.path()).env("CUPEL_INSTALL_DIR", &dir));
     assert_eq!(version_of(&dir.join("cupel")), format!("cupel {VERSION}\n"));
     let dir = dir.display();
@@ -431,7 +428,8 @@ fn the_install_script_installs_the_latest_release_and_says_what_to_add_to_path()
 fn the_install_script_installs_into_local_bin_and_says_nothing_of_path_when_it_is_on_it() {
     let home = TempDir::new().unwrap();
     let dir = home.path().join(".local/bin");
-    let outcome = succeed(install_script(&release().url, home.path()).env("PATH", path_with(&dir)));
+    let release = release();
+    let outcome = succeed(install_script(&release.url, home.path()).env("PATH", path_with(&dir)));
     assert_eq!(version_of(&dir.join("cupel")), format!("cupel {VERSION}\n"));
     assert_eq!(
         outcome.stdout,
@@ -446,7 +444,8 @@ fn the_install_script_installs_into_local_bin_and_says_nothing_of_path_when_it_i
 fn the_install_script_installs_the_version_cupel_version_names() {
     let home = TempDir::new().unwrap();
     let targets = Targets::read();
-    let url = &release().url;
+    let release = release();
+    let url = &release.url;
     let outcome =
         succeed(install_script(url, home.path()).env("CUPEL_VERSION", format!("v{VERSION}")));
     assert_eq!(
@@ -476,9 +475,10 @@ fn the_install_script_refuses_an_archive_whose_checksum_differs_and_installs_not
     let home = TempDir::new().unwrap();
     let targets = Targets::read();
     let archive = targets.archive(VERSION, targets.host());
-    let url = &tampered().url;
+    let tampered = tampered();
+    let url = &tampered.url;
     let outcome = outcome(&mut install_script(url, home.path()));
-    let actual = sha256(&host_archive().1);
+    let actual = sha256(&tampered.archive);
     assert_eq!(
         (outcome.code, outcome.stderr),
         (
@@ -503,12 +503,13 @@ fn fake_uname(system: &str, machine: &str) -> TempDir {
     dir
 }
 
-/// install.sh's stderr on a machine whose `uname` prints `system` and `machine`.
-fn install_on(system: &str, machine: &str) -> Outcome {
+/// install.sh's stderr, installing from the release at `url`, on a machine whose `uname` prints
+/// `system` and `machine`.
+fn install_on(url: &str, system: &str, machine: &str) -> Outcome {
     let home = TempDir::new().unwrap();
     let uname = fake_uname(system, machine);
     outcome(
-        install_script(&release().url, home.path())
+        install_script(url, home.path())
             .env("CUPEL_INSTALL_DIR", home.path().join("bin"))
             .env("PATH", path_with(uname.path())),
     )
@@ -517,8 +518,12 @@ fn install_on(system: &str, machine: &str) -> Outcome {
 #[test]
 fn the_install_script_downloads_each_unix_targets_archive() {
     let targets = Targets::read();
-    let url = &release().url;
-    let downloads: Vec<String> = targets.unix().map(first_download).collect();
+    let release = release();
+    let url = &release.url;
+    let downloads: Vec<String> = targets
+        .unix()
+        .map(|target| first_download(url, target))
+        .collect();
     let expected: Vec<String> = targets
         .unix()
         .map(|target| {
@@ -529,16 +534,17 @@ fn the_install_script_downloads_each_unix_targets_archive() {
     assert_eq!(downloads, expected);
 }
 
-/// The first line install.sh writes to stderr on `target`, which names the download.
-fn first_download(target: &Target) -> String {
+/// The first line install.sh writes to stderr on `target`, installing from the release at `url`,
+/// which names the download.
+fn first_download(url: &str, target: &Target) -> String {
     let (system, machine) = target.uname();
-    let stderr = install_on(system, machine).stderr;
+    let stderr = install_on(url, system, machine).stderr;
     stderr.lines().next().unwrap_or_default().to_string()
 }
 
 #[test]
 fn the_install_script_names_a_platform_without_a_release() {
-    let outcome = install_on("SunOS", "sparc");
+    let outcome = install_on(&release().url, "SunOS", "sparc");
     assert_eq!(
         (outcome.code, outcome.stderr),
         (
@@ -704,7 +710,8 @@ fn each_wrapper_is_the_cupel_cli_package_and_installs_the_cupel_command() {
 }
 
 /// A wrapper installed from its directory under dist/ into a temporary prefix, as its package
-/// manager installs it from the registry.
+/// manager installs it from the registry. The package manager and the launcher run with `TMPDIR`
+/// in the wrapper's directory, so what they keep there (node's compile cache) goes with it.
 struct Wrapper {
     dir: TempDir,
     /// The `cupel` command the package manager put on the prefix's `bin`.
@@ -731,6 +738,13 @@ fn python_module(module: &str) -> bool {
     false
 }
 
+/// `dir/tmp`, made: a wrapper's temporary directory.
+fn temporary(dir: &Path) -> PathBuf {
+    let tmp = dir.join("tmp");
+    fs::create_dir(&tmp).unwrap();
+    tmp
+}
+
 /// A copy of `dist/<name>` in `dir`, so packaging writes nothing into the repository.
 fn copy_dist(name: &str, dir: &Path) -> PathBuf {
     succeed(
@@ -751,11 +765,13 @@ impl Wrapper {
         let dir = TempDir::new().unwrap();
         let source = copy_dist("npm", dir.path());
         let cache = dir.path().join("npm-cache");
+        let tmp = temporary(dir.path());
         let npm = |args: &[&OsStr]| {
             succeed(
                 Command::new("npm")
                     .args(args)
                     .env("npm_config_cache", &cache)
+                    .env("TMPDIR", &tmp)
                     .current_dir(dir.path()),
             )
         };
@@ -780,7 +796,7 @@ impl Wrapper {
         Some(Self {
             dir,
             launcher,
-            env: Vec::new(),
+            env: vec![("TMPDIR".to_string(), tmp)],
         })
     }
 
@@ -794,12 +810,14 @@ impl Wrapper {
         let dir = TempDir::new().unwrap();
         let source = copy_dist("pipx", dir.path());
         let site = dir.path().join("site");
+        let tmp = temporary(dir.path());
         succeed(
             Command::new("python3")
                 .args(["-m", "pip", "install", "--quiet", "--no-index"])
                 .args(["--no-build-isolation", "--target"])
                 .arg(&site)
                 .arg(&source)
+                .env("TMPDIR", &tmp)
                 .env("PIP_USER", "0")
                 .env("PIP_DISABLE_PIP_VERSION_CHECK", "1")
                 .env("PIP_NO_INPUT", "1"),
@@ -808,7 +826,10 @@ impl Wrapper {
         Some(Self {
             dir,
             launcher,
-            env: vec![("PYTHONPATH".to_string(), site)],
+            env: vec![
+                ("PYTHONPATH".to_string(), site),
+                ("TMPDIR".to_string(), tmp),
+            ],
         })
     }
 
@@ -858,10 +879,9 @@ fn ran(outcome: Outcome) -> Ran {
     (outcome.code, outcome.stdout, outcome.stderr)
 }
 
-/// Two `cupel --version` runs through `wrapper` with an empty cache: each run, and the files
-/// cached after the first.
-fn version_twice(wrapper: &Wrapper) -> (Ran, Vec<String>, Ran) {
-    let url = &release().url;
+/// Two `cupel --version` runs through `wrapper` with an empty cache, from the release at `url`:
+/// each run, and the files cached after the first.
+fn version_twice(wrapper: &Wrapper, url: &str) -> (Ran, Vec<String>, Ran) {
     let first = ran(run(&mut wrapper.command(url), &["--version"]));
     let cached = files(&wrapper.cache());
     let second = ran(run(&mut wrapper.command(url), &["--version"]));
@@ -869,8 +889,7 @@ fn version_twice(wrapper: &Wrapper) -> (Ran, Vec<String>, Ran) {
 }
 
 /// What `version_twice` sees: one download, then the cached binary alone.
-fn downloaded_once() -> (Ran, Vec<String>, Ran) {
-    let url = &release().url;
+fn downloaded_once(url: &str) -> (Ran, Vec<String>, Ran) {
     let (archive, cached) = host_download();
     let version = format!("cupel {VERSION}\n");
     (
@@ -899,24 +918,24 @@ fn failing_gate() -> Repo {
 }
 
 /// `cupel check` on `failing_gate()` through `wrapper`: its exit code and the envelope's gate result.
-fn failing_check(wrapper: &Wrapper) -> (i32, Value) {
+fn failing_check(wrapper: &Wrapper, url: &str) -> (i32, Value) {
     let repo = failing_gate();
-    let outcome = repo.run_with(&mut wrapper.command(&release().url), &["check"]);
+    let outcome = repo.run_with(&mut wrapper.command(url), &["check"]);
     let envelope = outcome.envelope();
     (outcome.code, envelope["summary"]["gate"]["result"].clone())
 }
 
 /// `cupel --version` through `wrapper` against the tampered release, and the files it cached.
-fn tampered_version(wrapper: &Wrapper) -> (Ran, Vec<String>) {
-    let outcome = run(&mut wrapper.command(&tampered().url), &["--version"]);
+fn tampered_version(wrapper: &Wrapper, tampered: &Release) -> (Ran, Vec<String>) {
+    let outcome = run(&mut wrapper.command(&tampered.url), &["--version"]);
     (ran(outcome), files(&wrapper.cache()))
 }
 
 /// What `tampered_version` sees: exit 3, the mismatch named, and nothing cached.
-fn refused() -> (Ran, Vec<String>) {
-    let url = &tampered().url;
+fn refused(tampered: &Release) -> (Ran, Vec<String>) {
+    let url = &tampered.url;
     let (archive, _) = host_download();
-    let actual = sha256(&host_archive().1);
+    let actual = sha256(&tampered.archive);
     let stderr = format!(
         "cupel: downloading {url}/download/v{VERSION}/{archive}\n\
          cupel: checksum mismatch for {archive}: SHA256SUMS has {WRONG_DIGEST}, the download is {actual}\n"
@@ -964,18 +983,22 @@ fn wrappers() -> Vec<(&'static str, Wrapper)> {
 /// nothing; the release is then downloaded once and run; and a failing gate exits 1.
 #[test]
 fn each_wrapper_refuses_a_bad_checksum_downloads_once_and_forwards_the_exit_code() {
+    let (release, tampered) = (release(), tampered());
     let wrappers = wrappers();
     let seen: Vec<_> = wrappers
         .iter()
         .map(|(name, wrapper)| {
-            let refusal = tampered_version(wrapper);
-            let runs = version_twice(wrapper);
-            (*name, refusal, runs, failing_check(wrapper))
+            let refusal = tampered_version(wrapper, &tampered);
+            let runs = version_twice(wrapper, &release.url);
+            (*name, refusal, runs, failing_check(wrapper, &release.url))
         })
         .collect();
     let expected: Vec<_> = wrappers
         .iter()
-        .map(|(name, _)| (*name, refused(), downloaded_once(), (1, json!("fail"))))
+        .map(|(name, _)| {
+            let downloaded = downloaded_once(&release.url);
+            (*name, refused(&tampered), downloaded, (1, json!("fail")))
+        })
         .collect();
     assert_eq!(seen, expected);
 }
