@@ -1,7 +1,9 @@
 // ABOUTME: Tests for scripts/tmpdir-guard.sh, which `make check` runs its lint, tests, and docs under: a temporary
 // ABOUTME: directory of their own as TMPDIR, and a failure naming whatever they left in it.
+#![cfg(unix)]
 mod support;
 
+use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
@@ -36,8 +38,11 @@ fn entries(dir: &Path) -> Vec<String> {
     names
 }
 
+/// `make check` runs the script directly, so it is executable; and it passes `shellcheck`.
 #[test]
-fn the_script_passes_shellcheck() {
+fn the_script_is_executable_and_passes_shellcheck() {
+    let mode = std::fs::metadata(script()).unwrap().permissions().mode();
+    assert_eq!(mode & 0o111, 0o111, "{mode:o}");
     if let Some(found) = shellcheck("scripts/tmpdir-guard.sh") {
         assert_eq!(found, (Some(0), String::new()));
     }

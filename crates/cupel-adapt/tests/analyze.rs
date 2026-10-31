@@ -107,10 +107,20 @@ fn ran(tool: &str, results: &[(&str, AnalyzerLevel, &str, u32)]) -> Analyzed {
     )
 }
 
-/// Each language's fixture, the files it analyzes, and what each of its analyzers reports there.
-fn planted() -> [(&'static str, &'static [&'static str], Summary); 5] {
+/// What a run reports of `tool` when the fixture does not configure it.
+fn unconfigured(tool: &str) -> Analyzed {
+    (tool.to_owned(), AnalyzerStatus::Unconfigured, Vec::new())
+}
+
+/// The analyzers node runs keep node's compile cache in the temporary directory, so the test runs in
+/// one of its own.
+#[test]
+fn each_language_reports_exactly_its_fixture_s_planted_results() {
     use AnalyzerLevel::{Error, Warning};
-    [
+    if ran_in_own_tmpdir("each_language_reports_exactly_its_fixture_s_planted_results") {
+        return;
+    }
+    let cases: [(&str, &[&str], Summary); 5] = [
         (
             "rust",
             &["src/lib.rs"],
@@ -144,11 +154,7 @@ fn planted() -> [(&'static str, &'static [&'static str], Summary); 5] {
             &["ledger.ts"],
             vec![
                 ran("tsc", &[("TS2345", Error, "ledger.ts", 5)]),
-                (
-                    "eslint".to_owned(),
-                    AnalyzerStatus::Unconfigured,
-                    Vec::new(),
-                ),
+                unconfigured("eslint"),
             ],
         ),
         (
@@ -159,17 +165,8 @@ fn planted() -> [(&'static str, &'static [&'static str], Summary); 5] {
                 ran("staticcheck", &[("SA5009", Error, "ledger.go", 6)]),
             ],
         ),
-    ]
-}
-
-/// The analyzers node runs keep node's compile cache in the temporary directory, so the test runs in
-/// one of its own.
-#[test]
-fn each_language_reports_exactly_its_fixture_s_planted_results() {
-    if ran_in_own_tmpdir("each_language_reports_exactly_its_fixture_s_planted_results") {
-        return;
-    }
-    for (lang, files, expected) in planted() {
+    ];
+    for (lang, files, expected) in cases {
         let Some(dir) = fixture(lang) else {
             return;
         };
