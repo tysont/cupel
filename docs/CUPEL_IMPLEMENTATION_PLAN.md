@@ -1798,7 +1798,7 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
 
 #### B.4 Two misleading results
 
-**Status:** pending · ADR-158
+**Status:** in progress (2026-10-31, d0a6483; [ADR-158](adr/CUPEL_DECISION_158.md)) · §1 complete: `tests.flaky` on nextest is skipped `unsupported`, naming the runner · §2 (`static.clones`) stopped for the owner: the single-statement rule loses 116 of the external dogfood's 368 true rows, `min_nodes` 23 alone about 9; the rule is set aside, not on the branch
 
 - `tests.flaky` skipped with a reason on a nextest project; `static.clones` ignoring single-statement forms behind a higher default `min_nodes`, checked against the external dogfood's true positives ([brief](plan/v0.2.2/b4-misleading-results.md)).
 
@@ -1838,6 +1838,56 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
 - **B.3 — dogfood.** `make dogfood` (`scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep --budget 30m --gate --no-install --skip tests.flaky --skip conc.race --format text`). At aaa6047: exit 5, gate `fail` on this branch's tests only (`tests.weakening` 1: the property test's assertions moved into a helper; `static.complexity` 2: two wrapped tests over 60 lines; `static.clones` 1: two shellcheck tests; `tests.quality` 3), fixed in 634422e (the guard became an early return, so no test body moved) and 1e5d69e (the planted-results table kept literal, the shellcheck tests made different in what they pin). At 1e5d69e, 2026-10-31 08:03Z, 1 204 s: **exit 0, gate `pass`**, every rule passing (`static.complexity` 0 with `cyclomatic_max` 4, `length_max` 59, `static.clones` 0, `tests.quality` 0, `tests.weakening` 0, `tests.coverage` 0 uncovered, `tests.mutation.score` 1 with no mutant, the changed Rust being test code); `suite rust full · 2851 rerun`. Warnings, not gated: `tests.assertion-density` on `each_language_reports_…` (2 assertions in 59 lines, as before) and `runners.rs` (43 %, as before), `api.breaking` ×3 for the test-only `cupel-mutate` `support::fixture`, `python`, `python_per_test` returning `Fixture` (every caller updated); informational: `api.widened` ×4 for the new `support` items, `fuzz.target-missing`. `make reclaim` after each.
 - **B.3 — open items.** (1) Tests outside `make check` (a dogfood's or a mutation run's suite under nextest) are not guarded; they no longer leak what this branch found, but a new leak shows only in `make check`. (2) `ran_in_own_tmpdir` costs one process per guarded test (and per supported `declared_facts` pair) and takes the test's name as a string, which a rename must update (a wrong name fails the test: "ran no test named"). (3) A test that starts a tool in its own process and does not call `ran_in_own_tmpdir` leaks into the run's `TMPDIR`; the guard names it. (4) The shared caches already on this machine (`$TMPDIR/jest_dx` with 348 maps, `node-compile-cache` 351 MB, written also by other projects) are not cleaned; delete them once if wanted. (5) The real-`$TMPDIR` count is a snapshot of names; sizes inside shared caches were not compared.
 - **B.3 — for the integrator.** Mine: `scripts/tmpdir-guard.sh`, `crates/cupel-cli/tests/tmpdir_guard.rs`, `crates/cupel-fixtures/src/own_tmpdir.rs`, `crates/cupel-fixtures/tests/own_tmpdir.rs`. Shared: `Makefile` (`check`'s guarded line and comment), `README.md` (`make check` row), `crates/cupel-cli/tests/{installers.rs, heavy_lock.rs, support/mod.rs (recipe, shellcheck)}`, `crates/cupel-fixtures/{src/lib.rs (own_tmpdir), tests/matrix.rs}`, `crates/cupel-mutate/tests/{support/mod.rs (Fixture), engine.rs, phases.rs}`, `crates/cupel-adapt/tests/{analyze.rs, coverage_producers.rs, flake.rs, proof.rs, property.rs, runners.rs}`, this plan. No product crate's `src`, golden, schema, or workflow changed. A branch that edits `check`'s `lint test doc` line edits `heavy_lock.rs` and `tmpdir_guard.rs`, which pin it. A new test that runs a producer in the test process and starts a tool (jest, vitest, node, eslint, tsc, Dafny, …) begins with `if ran_in_own_tmpdir("<its name>") { return; }`; a new test that runs the mutation engine in its process takes its copy from `support::fixture`. `make check` now fails on anything a test leaves in `$TMPDIR`, so a branch merged after this one may show its own leak there first. Until this merges, the rule in `common.md` ("delete `$TMPDIR/.tmp*` … after each `make check`") still applies to other checkouts.
+- **B.4 — design.** [ADR-158](adr/CUPEL_DECISION_158.md).
+  - **§1 (accepted; amends ADR-078): `tests.flaky` on a runner whose order cannot matter is skipped.**
+    - `cupel_core::Error` gains `Unsupported { fact, tool, message }`: a producer cannot make its fact here, for a reason only the run shows.
+    - The scheduler reports a check that ends in it as `skipped`, `reason: unsupported`, with `fact`, `tool`, `lang`, and `see: cupel describe <check>`, and the message in the check's notes. A skipped language's notes are now kept (they were dropped). The skip is not an error and does not make the run partial.
+    - `engine.flake` returns it for a baseline runner whose ordering is `Fixed` (cargo-nextest): fact `test-reruns`, tool `cargo-nextest`, "engine.flake does not rerun tool.cargo-nextest: it runs each test in its own process, so the order of the tests cannot change an outcome".
+    - An unregistered baseline runner stays `Error::InvalidValue`. Runners the engine reruns are untouched.
+    - `Skipped.tool`'s doc names the `unsupported` use; the schema changes only in that description. README's flakiness paragraph says so.
+  - **§2 (proposed, not on the branch): `static.clones`.** The single-statement rule is built and tested:
+    - The body is the tree node spanning `Symbols`' `body` span. It is one statement when it has at most one child, and that child is not a list (children each starting on a line after the one before ends, as Go's `statement_list`).
+    - A body with no span, Clojure's included, is compared as before.
+  - **Stopped as instructed:** the rule loses report rows judged true. ADR-158's table:
+    - Over 368 true rows on the eight repositories, the rule alone loses 116 (members of 20 to 1 813 nodes, median 51: whole bodies that are one `match`, `loop`, `for`, closure call, or `return` chain).
+    - With `min_nodes` 23 it loses 122.
+    - `min_nodes` 23 alone would lose about 9, all 20-to-22-node setters and guards, the kind the ruling targets.
+  - **The recorded cases:**
+    - `SuitePhase::as_str`'s shape (the two `as_str` clusters, 35 to 42 nodes) is skipped only by the rule.
+    - `with_reuse` as first written (22 nodes, two statements) only by `min_nodes` ≥ 23.
+    - `with_reuse` as now written (one struct update, 21 nodes) still pairs with `NormNode::at` at the current defaults.
+  - **For the owner:** options (A) as ruled, (B) `min_nodes` 23 alone, (C) the rule only below about 50 nodes plus 23 (unmeasured).
+  - **The set-aside change:**
+    - `git stash list` on this repository: "B.4 §2 single-statement rule for static.clones (ADR-158 §2, proposed; awaiting the owner's ruling)". It holds `static_clones.rs` (`one_statement`, `spanning`, `listed`) and three tests in `crates/cupel-checks/tests/static_clones.rs` (`a_symbol_whose_body_is_one_statement_is_not_compared` and `a_body_that_wraps_its_statements_in_one_list_counts_the_lists_statements` seen failing first, the one-statement forms clustering with the real pair; `a_body_the_tree_does_not_locate_is_compared` a guard that passed before and after).
+    - Also saved as a patch in the agent's scratchpad.
+- **B.4 — tests.** 2 853 before (`make check` at dee39a5, 0 failed), 2 856 after (`make check` at d0a6483, 0 failed).
+  - New:
+    - `cupel-core/tests/scheduler.rs` `a_fact_unsupported_here_skips_the_check_naming_the_fact_and_tool`: a check ending in `Error::Unsupported` is `skipped`, `unsupported`, with fact, tool, language, `see`, and its note. It failed first with no `skipped`, then on the dropped note.
+    - `cupel-adapt/tests/flake.rs` `a_runner_whose_order_cannot_matter_is_unsupported_naming_it` replaces `a_runner_the_engine_cannot_rerun_is_an_error_naming_it`. It failed first on `InvalidValue`.
+    - `a_runner_that_is_not_registered_is_an_error_naming_it` keeps the error for an unknown runner.
+    - `cupel-fixtures/tests/flaky_nextest.rs` `tests_flaky_on_nextest_is_skipped_naming_the_runner_not_an_error`, over the fixture `repos/flaky-nextest/rust` (`[lang.rust] runner = "cargo-nextest"`; the nextest baseline runs green). It failed first with the check not skipped. Golden `golden/flaky-nextest/rust.json`: `status: skipped`, `reason: unsupported`, `fact: test-reruns`, `tool: cargo-nextest`, `see: cupel describe tests.flaky`, the note.
+  - Changed: `schemas__run_schema.snap`, only `Skipped.tool`'s description. No other golden or snapshot changed.
+- **B.4 — the external clone rerun.**
+  - **Method.** ADR-138's repositories at the reports' commits, cloned fresh under the agent's scratchpad (git only). `check --only static.clones --no-install --format json` from each clone's root, one `scripts/heavy.sh` invocation per run. Debug builds: `dee39a5` before, and `dee39a5` with the set-aside rule at `min_nodes` 20, 23, 25, and 30 (`--config`). No tool ran: every envelope's `toolchain` is `{}`; the scope was tree-sitter parsing only.
+  - **Before.** Every one of the 368 rows the reports judged true is a member of a clone group: commons-cli 48, cljfx 12, ts-pattern 46, more-itertools 42, pyflakes 4, itertools 66, serde_json 86, cobra 64.
+  - **After.** Totals in pairs / clusters / findings, then true rows lost:
+    - before: 1 338 / 100 / 408, 0 lost;
+    - rule at 20: 784 / 72 / 278, 116 lost;
+    - rule at 23: 772 / 71 / 271, 122 lost;
+    - rule at 25: 729 / 67 / 266, 123 lost;
+    - rule at 30: 716 / 66 / 255, 131 lost.
+    
+    Per repository in ADR-158.
+  - **Cupel's tree** (`check --only static.clones`): 162 pairs and 17 clusters before (the baseline holds 164 and 17), 87 and 11 with the rule at 20.
+- **B.4 — open items.**
+  1. §2 waits on the owner choosing between ADR-158's (A), (B), and (C). Then the chosen change goes on, with:
+     - a `trivial-clones` fixture case (an `as_str`-shaped pair, `with_reuse`-shaped setters, and a real pair that stays);
+     - the describe goldens and README's settings row if `min_nodes` moves;
+     - the design doc's "20 nodes" (§3 table, §6.7 example);
+     - a tree dogfood and the baseline refresh.
+  2. **The baseline.** `.cupel/baseline.json` must be a tree run on `main` (`dogfood.rs` pins `branch: main` and `dirty: false`), so a lower clone count is exported by the integrator after the merge (`make dogfood DOGFOOD_SCOPE=tree`, then `make baseline`), not from this branch.
+  3. Python's `if`/`else` lays its parts on separate lines, so the rule as built reads a one-`if` Python body as several statements and keeps comparing it.
+  4. Clojure gives no `body` span, so its one-form bodies are always compared.
 
 ## 4. Cross-phase checklist
 
