@@ -1685,10 +1685,13 @@ All automation goes through `make`.
 
 `make dev-setup` installs the pinned tool environment the tests, goldens, and gates need: every runner, coverage tool, analyzer, fuzzer, JVM build tool, and verifier CI installs, at CI's versions, under `~/.cache/cupel/dev-tools` (or `CUPEL_DEV_TOOLS`); a second run only verifies them. `make check` and every other target run with those tools first on `PATH`, and `eval "$(make -s dev-env)"` gives a shell that runs cargo directly the same environment ([ADR-139](docs/adr/CUPEL_DECISION_139.md)).
 
+In an agent checkout, a linked git worktree, that environment also caps cargo's jobs and nextest's and libtest's test threads at half the cores (`CARGO_BUILD_JOBS`, `NEXTEST_TEST_THREADS`, `RUST_TEST_THREADS`), and `make check` compiles everything it runs in one step under `scripts/heavy.sh`'s machine-wide lock before running its lint, tests, and docs outside it. The main checkout, a single clone, and CI keep every core and take no lock for a check. Each checkout builds into its own `target/`: one target directory shared by checkouts of this workspace lets cargo judge one branch's build fresh with another branch's code ([ADR-156](docs/adr/CUPEL_DECISION_156.md)). Create and remove agent worktrees with `make worktree NAME=<name> [BASE=<ref>]` and `make worktree-remove NAME=<name>` (`scripts/worktree.sh`), not `git worktree add` and `remove`: removal also deletes the mutation slots the worktree's runs left under `$TMPDIR/cupel-mutate`, one of which holds a whole build.
+
 | Target | Does |
 |---|---|
 | `make dev-setup` | install or verify the pinned development tools and print each one's version |
-| `make check` | fmt, clippy with `-D warnings`, every test, rustdoc with `-D warnings`, and a check that the build left the tree clean; the pre-commit bar |
+| `make check` | fmt, clippy with `-D warnings`, every test, rustdoc with `-D warnings`, and a check that the build left the tree clean; the pre-commit bar. In an agent checkout its build step (`make check-build`) runs under the machine-wide lock first |
+| `make worktree NAME=<name>`, `make worktree-remove NAME=<name>` | add `.claude/worktrees/<name>` in the main checkout on branch `<name>` (from `BASE`, `main` by default, unless the branch exists); remove it with its build and its mutation slots, keeping the branch |
 | `make test` | `cargo test --workspace`; `UPDATE_GOLDENS=1 make test` rewrites golden envelopes |
 | `make lint`, `make fmt` | `cargo fmt --check` and clippy; `cargo fmt` |
 | `make build`, `make doc` | build the workspace; build its rustdoc |

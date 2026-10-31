@@ -1,11 +1,39 @@
 #!/bin/sh
-# ABOUTME: The environment of the pinned development tools (ADR-139): PATH and each tool's home and cache under
-# ABOUTME: $CUPEL_DEV_TOOLS. Source it (`. scripts/dev-env.sh`); the Makefile reads `cupel_dev_env` for every target.
+# ABOUTME: The environment of the pinned development tools (ADR-139) and of an agent checkout's cap on cores (ADR-156).
+# ABOUTME: Source it (`. scripts/dev-env.sh`); the Makefile reads `cupel_dev_env` and `cupel_dev_agent` for every target.
 
-# cupel_dev_env prints NAME=VALUE for each variable the development tools need, one per line, and nothing
+# cupel_dev_env prints NAME=VALUE for each variable of the development environment, one per line: the
+# tools' and, in an agent checkout, the cap's.
+cupel_dev_env() {
+	cupel_dev_tools_env
+	cupel_dev_cap
+}
+
+# cupel_dev_agent succeeds in a linked git worktree, which is where agents work; the integrator's checkout, a
+# human's clone, and CI's checkout are not linked worktrees (ADR-156 §2).
+cupel_dev_agent() {
+	cupel_dev_git_dir=$(git rev-parse --absolute-git-dir 2>/dev/null) || return 1
+	cupel_dev_common_dir=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null) || return 1
+	[ "$cupel_dev_git_dir" != "$cupel_dev_common_dir" ]
+}
+
+# cupel_dev_cap prints, in an agent checkout, cargo's jobs and nextest's and libtest's test threads at half the
+# online cores (at least one), so agents' builds and tests leave the machine room; elsewhere nothing. Every build
+# and test run below make reads them, those Cupel's tests start included; an explicit flag still wins.
+cupel_dev_cap() {
+	cupel_dev_agent || return 0
+	cupel_dev_half=$(($(getconf _NPROCESSORS_ONLN) / 2))
+	[ "$cupel_dev_half" -ge 1 ] || cupel_dev_half=1
+	echo "CARGO_BUILD_JOBS=$cupel_dev_half"
+	echo "NEXTEST_TEST_THREADS=$cupel_dev_half"
+	echo "RUST_TEST_THREADS=$cupel_dev_half"
+	unset cupel_dev_half
+}
+
+# cupel_dev_tools_env prints NAME=VALUE for each variable the development tools need, one per line, and nothing
 # when the tools directory does not exist (as on a CI runner, whose setup steps put the same tools on PATH).
 # PATH gains, in front, each tool directory that exists and is not on it already.
-cupel_dev_env() {
+cupel_dev_tools_env() {
 	cupel_dev_tools=${CUPEL_DEV_TOOLS:-$HOME/.cache/cupel/dev-tools}
 	[ -d "$cupel_dev_tools" ] || return 0
 	case $cupel_dev_tools in

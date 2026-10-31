@@ -6,7 +6,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use support::{installed, jobs, workflow, workspace};
+use support::{git, half_the_cores, installed, jobs, main_checkout, workflow, workspace};
 use tempfile::TempDir;
 
 fn dev_setup_script() -> String {
@@ -256,12 +256,85 @@ fn dev_env(tools: &Path) -> Vec<String> {
         .collect()
 }
 
-/// Without a tools directory, as on a CI runner, the Makefile changes no variable: the runner's
-/// own `JAVA_HOME` and `PATH` stand.
+/// The variables of the agent checkout's cap (ADR-156 §2), which `make dev-env` adds in a linked
+/// worktree whether or not the tools are installed.
+const CAP: [&str; 3] = [
+    "CARGO_BUILD_JOBS",
+    "NEXTEST_TEST_THREADS",
+    "RUST_TEST_THREADS",
+];
+
+/// The export lines that are not the cap's.
+fn tool_exports(exports: Vec<String>) -> Vec<String> {
+    exports
+        .into_iter()
+        .filter(|line| {
+            !CAP.iter()
+                .any(|name| line.starts_with(&format!("export {name}=")))
+        })
+        .collect()
+}
+
+/// Without a tools directory, as on a CI runner, the Makefile changes no tool variable: the
+/// runner's own `JAVA_HOME` and `PATH` stand.
 #[test]
 fn dev_env_exports_nothing_without_the_tools_directory() {
     let dir = TempDir::new().unwrap();
-    assert_eq!(dev_env(&dir.path().join("absent")), Vec::<String>::new());
+    assert_eq!(
+        tool_exports(dev_env(&dir.path().join("absent"))),
+        Vec::<String>::new()
+    );
+}
+
+/// `scripts/dev-env.sh`'s variables in `dir`, with no tools directory: `NAME=VALUE` lines.
+fn dev_env_in(dir: &Path) -> Vec<String> {
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg(r#". "$0" && cupel_dev_env"#)
+        .arg(workspace().join("scripts/dev-env.sh"))
+        .env("CUPEL_DEV_TOOLS", dir.join("absent-tools"))
+        .current_dir(dir)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    String::from_utf8(output.stdout)
+        .unwrap()
+        .lines()
+        .map(str::to_owned)
+        .collect()
+}
+
+/// An agent works in a linked worktree; there cargo's jobs, nextest's threads, and libtest's
+/// threads are half the cores, so two agents' builds and tests leave the machine room (ADR-156 §2).
+#[test]
+fn dev_env_caps_a_linked_worktree_at_half_the_cores() {
+    let main = main_checkout();
+    let agent = main.path().join("agent");
+    git(
+        main.path(),
+        &["worktree", "add", "--quiet", "-b", "agent", "agent"],
+    );
+    let half = half_the_cores();
+    assert_eq!(
+        dev_env_in(&agent),
+        [
+            format!("CARGO_BUILD_JOBS={half}"),
+            format!("NEXTEST_TEST_THREADS={half}"),
+            format!("RUST_TEST_THREADS={half}"),
+        ]
+    );
+}
+
+/// The integrator's checkout, a human's clone, and CI's checkout are not linked worktrees and keep
+/// every core.
+#[test]
+fn dev_env_leaves_a_main_checkout_every_core() {
+    let main = main_checkout();
+    assert_eq!(dev_env_in(main.path()), Vec::<String>::new());
 }
 
 /// With a tools directory, PATH gains the directory of each tool that is there, in front, and each
@@ -283,19 +356,19 @@ fn dev_env_puts_the_installed_tools_first_on_path() {
         path.starts_with(&format!("{t}/bin:{t}/node/bin:{t}/jdk/bin:")),
         "{path}"
     );
-    let others: Vec<&String> = exports
-        .iter()
+    let others: Vec<String> = tool_exports(exports)
+        .into_iter()
         .filter(|line| !line.starts_with("export PATH="))
         .collect();
     assert_eq!(
         others,
         vec![
-            &format!("export JAVA_HOME='{t}/jdk'"),
-            &format!("export MAVEN_ARGS='-Dmaven.repo.local={t}/m2/repository'"),
-            &format!("export GRADLE_USER_HOME='{t}/gradle-home'"),
-            &format!("export CLJ_CONFIG='{t}/clojure-config'"),
-            &format!("export CLJ_CACHE='{t}/clojure-cache'"),
-            &format!("export KANI_HOME='{t}/kani-home'"),
+            format!("export JAVA_HOME='{t}/jdk'"),
+            format!("export MAVEN_ARGS='-Dmaven.repo.local={t}/m2/repository'"),
+            format!("export GRADLE_USER_HOME='{t}/gradle-home'"),
+            format!("export CLJ_CONFIG='{t}/clojure-config'"),
+            format!("export CLJ_CACHE='{t}/clojure-cache'"),
+            format!("export KANI_HOME='{t}/kani-home'"),
         ]
     );
 }

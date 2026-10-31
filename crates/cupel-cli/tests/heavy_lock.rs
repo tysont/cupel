@@ -25,6 +25,7 @@ fn heavy(dir: &Path, lock: &Path, args: &[&str]) -> Command {
         .env("CUPEL_HEAVY_LOCK", lock)
         .env("CUPEL_HEAVY_PRIORITY", "default")
         .env("CUPEL_HEAVY_MIN_FREE_GB", "0")
+        .env_remove("CUPEL_HEAVY_HELD")
         .current_dir(dir);
     command
 }
@@ -78,6 +79,45 @@ fn make_dogfood_runs_through_the_script() {
     assert_eq!(
         recipe.split_whitespace().take(2).collect::<Vec<_>>(),
         ["scripts/heavy.sh", "$(CARGO)"]
+    );
+}
+
+/// The recipe of `target` in the Makefile: its lines, trimmed.
+fn recipe(target: &str) -> Vec<String> {
+    let makefile = fs::read_to_string(workspace().join("Makefile")).unwrap();
+    makefile
+        .lines()
+        .skip_while(|line| !line.starts_with(&format!("{target}:")))
+        .skip(1)
+        .take_while(|line| line.starts_with('\t'))
+        .map(|line| line.trim().to_owned())
+        .collect()
+}
+
+/// In an agent checkout `make check` compiles everything it runs in one step under the lock, before
+/// its lint, tests, and docs run outside it against what was built (ADR-156 §3); elsewhere it takes
+/// no lock.
+#[test]
+fn make_check_builds_under_the_lock_in_an_agent_checkout_before_it_tests() {
+    let check = recipe("check");
+    let locked = check
+        .iter()
+        .position(|line| {
+            line == "$(if $(AGENT_CHECKOUT),scripts/heavy.sh $(MAKE) --no-print-directory check-build)"
+        })
+        .expect("the check's build step through the script in an agent checkout");
+    let tested = check
+        .iter()
+        .position(|line| line == "@$(MAKE) --no-print-directory lint test doc")
+        .expect("lint, test, and doc");
+    assert!(locked < tested, "{check:#?}");
+    assert_eq!(
+        recipe("check-build"),
+        [
+            "$(CARGO) clippy --workspace --all-targets -- -D warnings",
+            "$(CARGO) test --workspace --no-run",
+            "RUSTDOCFLAGS=\"-D warnings\" $(CARGO) doc --workspace --no-deps",
+        ]
     );
 }
 
@@ -253,5 +293,59 @@ fn a_command_from_a_deleted_working_tree_refuses_to_start() {
     assert_eq!(
         text(&output.stderr).lines().last(),
         Some("heavy.sh: the working tree this command was started from no longer exists")
+    );
+}
+
+/// A command under the lock that runs another heavy command on the same lock (a check inside a
+/// chain that holds it, a dogfood's check) runs it at once instead of waiting on itself (ADR-156 §4).
+#[test]
+fn a_command_on_the_lock_its_caller_holds_runs_at_once() {
+    let repo = repository();
+    let lock = repo.path().join("lock");
+    let nested = format!("sh '{}' sh -c 'echo nested; exit 4'", script().display());
+    let outer = heavy(repo.path(), &lock, &["sh", "-c", &nested])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let (said, heard) = mpsc::channel();
+    std::thread::spawn(move || said.send(outer.wait_with_output().unwrap()));
+    let output = heard
+        .recv_timeout(HANG)
+        .expect("the nested command runs without waiting on its caller");
+    assert_eq!(
+        (
+            output.status.code(),
+            text(&output.stdout),
+            text(&output.stderr)
+        ),
+        (Some(4), "nested\n".to_owned(), String::new())
+    );
+}
+
+/// Holding one lock is no claim on another: a nested command naming a lock someone else holds waits
+/// for it as any command does.
+#[test]
+fn a_command_on_another_lock_than_its_callers_still_waits() {
+    let mut held = held_lock("holding");
+    let other = held.repo.path().join("other-lock");
+    let nested = format!(
+        "CUPEL_HEAVY_LOCK='{}' sh '{}' sh -c 'echo end nested >> {}'",
+        held.lock.display(),
+        script().display(),
+        held.log.display()
+    );
+    let mut outer = heavy(held.repo.path(), &other, &["sh", "-c", &nested])
+        .stderr(Stdio::piped())
+        .spawn()
+        .unwrap();
+    let waiting = first_stderr_line(&mut outer);
+    fs::write(&held.release, "").unwrap();
+    assert!(held.holder.wait().unwrap().success());
+    assert!(outer.wait().unwrap().success());
+    assert!(waiting.contains("waiting for"), "{waiting}");
+    assert_eq!(
+        fs::read_to_string(&held.log).unwrap(),
+        "start holding\nend holding\nend nested\n"
     );
 }

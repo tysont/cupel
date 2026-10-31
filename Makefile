@@ -11,12 +11,17 @@ CUPEL_DEV_TOOLS ?= $(HOME)/.cache/cupel/dev-tools
 DEV_ENV = CUPEL_DEV_TOOLS='$(CUPEL_DEV_TOOLS)' sh -c '. "$$0" && $$1' $(CURDIR)/scripts/dev-env.sh
 $(foreach variable,$(shell $(DEV_ENV) cupel_dev_env),$(eval export $(variable)))
 
+# An agent checkout (a linked git worktree, ADR-156 §2) builds and tests at half the cores (the variables
+# `cupel_dev_env` adds there) and runs `make check`'s build step under scripts/heavy.sh. Every other checkout,
+# CI's included, has every core and takes no lock for a check.
+AGENT_CHECKOUT := $(shell $(DEV_ENV) cupel_dev_agent && echo yes)
+
 # A fingerprint of the working tree: status (including untracked files) plus the content diff.
 TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git hash-object --stdin
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check clean-check dogfood baseline reclaim parity install dist installers version windows-check windows-test dev-setup dev-env inner-loop
+.PHONY: build test lint fmt doc matrix readme check check-build clean-check worktree worktree-remove dogfood baseline reclaim parity install dist installers version windows-check windows-test dev-setup dev-env inner-loop
 
 build:
 	$(CARGO) build --workspace
@@ -54,11 +59,22 @@ parity:
 	DAEMON_PARITY=1 MCP_PARITY=1 $(CARGO) test --package cupel-fixtures
 
 # The pre-commit bar. The tree is fingerprinted before the build so clean-check can
-# verify the build itself wrote nothing outside .gitignore (see ADR-010).
+# verify the build itself wrote nothing outside .gitignore (see ADR-010). In an agent checkout
+# everything the check compiles is compiled first, in one step under the machine-wide lock
+# (scripts/heavy.sh, at the caller's priority), and the lint, tests, and docs then run outside it
+# against what was built (ADR-156 §3).
 check:
 	@mkdir -p target && $(TREE_STATE) > $(TREE_STATE_FILE)
+	$(if $(AGENT_CHECKOUT),scripts/heavy.sh $(MAKE) --no-print-directory check-build)
 	@$(MAKE) --no-print-directory lint test doc
 	@$(MAKE) --no-print-directory clean-check EXPECTED_TREE_STATE="$$(cat $(TREE_STATE_FILE))"
+
+# Everything `make check` compiles: clippy's analysis, the test binaries, and the rustdoc. After it,
+# `lint`, `test`, and `doc` find their builds fresh (doctests still compile as they run).
+check-build:
+	$(CARGO) clippy --workspace --all-targets -- -D warnings
+	$(CARGO) test --workspace --no-run
+	RUSTDOCFLAGS="-D warnings" $(CARGO) doc --workspace --no-deps
 
 # Fails when the working tree differs from EXPECTED_TREE_STATE; with no expectation
 # (as in CI on a fresh checkout) the tree must be completely clean.
@@ -94,7 +110,8 @@ DOGFOOD_BUDGET ?= 30m
 # dogfoods from every checkout on the machine, and the external test suites run beside them, run one
 # at a time (the mutation engine's slots default to half the cores, at most four), the integrator's
 # chains first (CUPEL_HEAVY_PRIORITY=first); it refuses to start from a working tree that was deleted
-# under the invoking shell. `make check` takes no lock: the suite is deterministic under load (ADR-145).
+# under the invoking shell. `make check` takes the lock only in an agent checkout and only around its
+# build step (ADR-156 §3); the suite is deterministic under load (ADR-145).
 # The tree gate's `base` rules compare with the committed baseline, `.cupel/baseline.json`, a
 # tree run on `main` (ADR-140); it is imported first so a fresh store (a CI runner's, or one just
 # deleted) has the reference. `make baseline` refreshes it from the last tree run here.
@@ -173,6 +190,18 @@ windows-test:
 # CUPEL_DEV_TOOLS. A second run installs nothing; each run ends with each tool's version.
 dev-setup:
 	CUPEL_DEV_TOOLS='$(CUPEL_DEV_TOOLS)' $(CURDIR)/scripts/dev-setup.sh
+
+# Agent worktrees (ADR-156 §5): `make worktree NAME=<name> [BASE=<ref>]` adds `.claude/worktrees/<name>`
+# in the main checkout on branch <name> (made from BASE, `main` by default, unless it exists);
+# `make worktree-remove NAME=<name>` removes it with its build and the mutation slots that are its alone,
+# and keeps the branch.
+BASE ?= main
+
+worktree:
+	scripts/worktree.sh add $(NAME) $(BASE)
+
+worktree-remove:
+	scripts/worktree.sh remove $(NAME)
 
 # The tools' environment as `export` lines, for running cargo outside make: `eval "$$(make -s dev-env)"`.
 dev-env:

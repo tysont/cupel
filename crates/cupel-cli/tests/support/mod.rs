@@ -525,3 +525,52 @@ pub fn installed(program: &str) -> bool {
     eprintln!("SKIPPED: {program} not installed; this test did not run");
     false
 }
+
+/// `git ARGS` in `dir`, which must succeed; its standard output, trimmed.
+pub fn git(dir: &Path, args: &[&str]) -> String {
+    let output = std::process::Command::new("git")
+        .args([
+            "-c",
+            "user.name=Cupel",
+            "-c",
+            "user.email=cupel@example.com",
+        ])
+        .args(args)
+        .current_dir(dir)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "git {args:?}: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    String::from_utf8_lossy(&output.stdout).trim().to_owned()
+}
+
+/// A main checkout with one commit on `main`, as the repository the agents' worktrees are made from.
+pub fn main_checkout() -> TempDir {
+    let dir = TempDir::new().unwrap();
+    git(dir.path(), &["init", "--quiet", "--initial-branch=main"]);
+    fs::write(
+        dir.path().join(".gitignore"),
+        "/target/\n/.claude/worktrees/\n",
+    )
+    .unwrap();
+    git(dir.path(), &["add", ".gitignore"]);
+    git(dir.path(), &["commit", "--quiet", "-m", "first"]);
+    dir
+}
+
+/// Half the machine's online cores, at least one: the cap an agent checkout builds and tests with
+/// (ADR-156 §2).
+pub fn half_the_cores() -> u32 {
+    let output = std::process::Command::new("getconf")
+        .arg("_NPROCESSORS_ONLN")
+        .output()
+        .unwrap();
+    let cores: u32 = String::from_utf8_lossy(&output.stdout)
+        .trim()
+        .parse()
+        .unwrap();
+    (cores / 2).max(1)
+}
