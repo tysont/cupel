@@ -1690,7 +1690,7 @@ In an agent checkout, a linked git worktree, that environment also caps cargo's 
 | Target | Does |
 |---|---|
 | `make dev-setup` | install or verify the pinned development tools and print each one's version |
-| `make check` | fmt, clippy with `-D warnings`, every test, rustdoc with `-D warnings`, and a check that the build left the tree clean; the pre-commit bar. In an agent checkout its build step (`make check-build`) runs under the machine-wide lock first |
+| `make check` | fmt, clippy with `-D warnings`, every test, rustdoc with `-D warnings`, and a check that the build left the tree clean; the pre-commit bar. The lint, tests, and docs run under `scripts/tmpdir-guard.sh`, with a temporary directory of their own as `TMPDIR`, and the check fails naming anything they leave in it. In an agent checkout its build step (`make check-build`) runs under the machine-wide lock first |
 | `make worktree NAME=<name>`, `make worktree-remove NAME=<name>` | add `.claude/worktrees/<name>` in the main checkout on branch `<name>` (from `BASE`, `main` by default, unless the branch exists); remove it with its build and its mutation slots, keeping the branch |
 | `make test` | `cargo test --workspace`; `UPDATE_GOLDENS=1 make test` rewrites golden envelopes |
 | `make lint`, `make fmt` | `cargo fmt --check` and clippy; `cargo fmt` |
