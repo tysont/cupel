@@ -1798,7 +1798,7 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
 
 #### B.4 Two misleading results
 
-**Status:** in progress (2026-10-31, d0a6483; [ADR-158](adr/CUPEL_DECISION_158.md)) · §1 complete: `tests.flaky` on nextest is skipped `unsupported`, naming the runner · §2 (`static.clones`) stopped for the owner: the single-statement rule loses 116 of the external dogfood's 368 true rows, `min_nodes` 23 alone about 9; the rule is set aside, not on the branch
+**Status:** in progress (2026-10-31, 862028a; [ADR-158](adr/CUPEL_DECISION_158.md)) · §1 complete: `tests.flaky` on nextest is skipped `unsupported`, naming the runner · §2 (`static.clones`) stopped for the owner: the single-statement rule loses 116 of the external dogfood's 368 true rows, `min_nodes` 23 alone about 9; the rule is set aside, not on the branch
 
 - `tests.flaky` skipped with a reason on a nextest project; `static.clones` ignoring single-statement forms behind a higher default `min_nodes`, checked against the external dogfood's true positives ([brief](plan/v0.2.2/b4-misleading-results.md)).
 
@@ -1860,13 +1860,28 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
   - **The set-aside change:**
     - `git stash list` on this repository: "B.4 §2 single-statement rule for static.clones (ADR-158 §2, proposed; awaiting the owner's ruling)". It holds `static_clones.rs` (`one_statement`, `spanning`, `listed`) and three tests in `crates/cupel-checks/tests/static_clones.rs` (`a_symbol_whose_body_is_one_statement_is_not_compared` and `a_body_that_wraps_its_statements_in_one_list_counts_the_lists_statements` seen failing first, the one-statement forms clustering with the real pair; `a_body_the_tree_does_not_locate_is_compared` a guard that passed before and after).
     - Also saved as a patch in the agent's scratchpad.
-- **B.4 — tests.** 2 853 before (`make check` at dee39a5, 0 failed), 2 856 after (`make check` at d0a6483, 0 failed).
+- **B.4 — tests.** 2 853 before (`make check` at dee39a5, 0 failed), 2 856 after (`make check` at d0a6483 and again at 862028a, 0 failed).
   - New:
     - `cupel-core/tests/scheduler.rs` `a_fact_unsupported_here_skips_the_check_naming_the_fact_and_tool`: a check ending in `Error::Unsupported` is `skipped`, `unsupported`, with fact, tool, language, `see`, and its note. It failed first with no `skipped`, then on the dropped note.
     - `cupel-adapt/tests/flake.rs` `a_runner_whose_order_cannot_matter_is_unsupported_naming_it` replaces `a_runner_the_engine_cannot_rerun_is_an_error_naming_it`. It failed first on `InvalidValue`.
     - `a_runner_that_is_not_registered_is_an_error_naming_it` keeps the error for an unknown runner.
     - `cupel-fixtures/tests/flaky_nextest.rs` `tests_flaky_on_nextest_is_skipped_naming_the_runner_not_an_error`, over the fixture `repos/flaky-nextest/rust` (`[lang.rust] runner = "cargo-nextest"`; the nextest baseline runs green). It failed first with the check not skipped. Golden `golden/flaky-nextest/rust.json`: `status: skipped`, `reason: unsupported`, `fact: test-reruns`, `tool: cargo-nextest`, `see: cupel describe tests.flaky`, the note.
   - Changed: `schemas__run_schema.snap`, only `Skipped.tool`'s description. No other golden or snapshot changed.
+- **B.4 — dogfood.**
+  - **Command:** `CUPEL_HEAVY_PRIORITY=first DOGFOOD_SCOPE=tree DOGFOOD_BUDGET= make dogfood`, the integrator's command for this branch (`check --depth deep --gate --no-install --skip tests.flaky --skip conc.race --skip tests.mutation`).
+  - **At c6597c9:** exit 2, gate `fail`, all on this branch's code:
+    - `static.complexity` 1: `CheckRun::finish` at 61 lines, the new comment;
+    - `static.deps` 1, cycle `error.rs` → `id.rs` → `error.rs`: `Error::Unsupported` held a `ToolId`;
+    - `tests.quality` 1: the two new engine tests repeated three setup statements.
+  - **The fixes, at 862028a:** the tool travels as text and the scheduler makes the `ToolId`; the comment moved to `combined_notes`' doc; one `rerunning(runner)` helper.
+  - **At 862028a, 2026-10-31 13:38Z, 1 445 s: exit 0, gate `pass`** on every rule:
+    - `static.complexity` 0, `cyclomatic_max` 10;
+    - `static.clones.pairs` 162 against base 164, `clusters` 17 against 17;
+    - `static.deps` 0, cycles 0;
+    - `tests.quality` 0;
+    - `tests.coverage.line` 0.971;
+    - `static.crap.max` 20.
+  - `suite rust full · 2855 rerun`. `make reclaim` after each run.
 - **B.4 — the external clone rerun.**
   - **Method.** ADR-138's repositories at the reports' commits, cloned fresh under the agent's scratchpad (git only). `check --only static.clones --no-install --format json` from each clone's root, one `scripts/heavy.sh` invocation per run. Debug builds: `dee39a5` before, and `dee39a5` with the set-aside rule at `min_nodes` 20, 23, 25, and 30 (`--config`). No tool ran: every envelope's `toolchain` is `{}`; the scope was tree-sitter parsing only.
   - **Before.** Every one of the 368 rows the reports judged true is a member of a clone group: commons-cli 48, cljfx 12, ts-pattern 46, more-itertools 42, pyflakes 4, itertools 66, serde_json 86, cobra 64.
@@ -1888,6 +1903,21 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
   2. **The baseline.** `.cupel/baseline.json` must be a tree run on `main` (`dogfood.rs` pins `branch: main` and `dirty: false`), so a lower clone count is exported by the integrator after the merge (`make dogfood DOGFOOD_SCOPE=tree`, then `make baseline`), not from this branch.
   3. Python's `if`/`else` lays its parts on separate lines, so the rule as built reads a one-`if` Python body as several statements and keeps comparing it.
   4. Clojure gives no `body` span, so its one-form bodies are always compared.
+- **B.4 — for the integrator.** Merge through 862028a and this plan commit; §2 is not on the branch.
+  - Mine:
+    - `docs/adr/CUPEL_DECISION_158.md`;
+    - `crates/cupel-fixtures/{repos/flaky-nextest/rust/*, golden/flaky-nextest/rust.json, tests/flaky_nextest.rs}`.
+  - Shared:
+    - `crates/cupel-core/src/{error.rs (Error::Unsupported), schedule.rs (unsupported_here, finish keeps a skipped language's notes, combined_notes), result.rs (Skipped.tool's doc)}`;
+    - `crates/cupel-core/tests/{scheduler.rs, snapshots/schemas__run_schema.snap}`;
+    - `crates/cupel-adapt/{src/flake/mod.rs, tests/flake.rs}`;
+    - `docs/adr/CUPEL_DECISION_078.md` (status line);
+    - `README.md` (the flakiness paragraph);
+    - this plan.
+  - A branch that adds an `Error` variant takes the new one into any exhaustive match; none exists in the workspace today.
+  - A check that skips a language now shows that language's notes in its entry.
+  - The `.cupel/baseline.json` refresh waits on §2: this branch leaves the clone counts as they were (162 / 17).
+  - §2's set-aside change is the stash named in **B.4 — design**. If the owner rules, it starts from there: (A) applies as is with `min_nodes` 23; (B) needs only the default changed; (C) needs a size cut added to `one_statement`.
 
 ## 4. Cross-phase checklist
 
