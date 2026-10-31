@@ -457,7 +457,7 @@ impl Execution<'_> {
             slot: Some(worker.index),
             tests: selected(&selection),
         };
-        self.phases.record(MutationPhase::Run, served, started);
+        self.phases.took(MutationPhase::Run, served, elapsed);
         match ran {
             Err(Error::OutOfMemory { .. }) => Ok(out_of_memory(elapsed, strategy)),
             Err(error) => Err(error),
