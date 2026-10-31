@@ -62,11 +62,12 @@ parity:
 # verify the build itself wrote nothing outside .gitignore (see ADR-010). In an agent checkout
 # everything the check compiles is compiled first, in one step under the machine-wide lock
 # (scripts/heavy.sh, at the caller's priority), and the lint, tests, and docs then run outside it
-# against what was built (ADR-156 §3).
+# against what was built (ADR-156 §3). The lint, tests, and docs run under scripts/tmpdir-guard.sh: with a
+# temporary directory of their own as TMPDIR, the check failing when they leave anything in it.
 check:
 	@mkdir -p target && $(TREE_STATE) > $(TREE_STATE_FILE)
 	$(if $(AGENT_CHECKOUT),scripts/heavy.sh $(MAKE) --no-print-directory check-build)
-	@$(MAKE) --no-print-directory lint test doc
+	@scripts/tmpdir-guard.sh $(MAKE) --no-print-directory lint test doc
 	@$(MAKE) --no-print-directory clean-check EXPECTED_TREE_STATE="$$(cat $(TREE_STATE_FILE))"
 
 # Everything `make check` compiles: clippy's analysis, the test binaries, and the rustdoc. After it,

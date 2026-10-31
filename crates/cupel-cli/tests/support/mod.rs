@@ -484,6 +484,18 @@ pub fn workspace() -> PathBuf {
         .unwrap()
 }
 
+/// The recipe of `target` in the Makefile: its lines, trimmed.
+pub fn recipe(target: &str) -> Vec<String> {
+    let makefile = fs::read_to_string(workspace().join("Makefile")).unwrap();
+    makefile
+        .lines()
+        .skip_while(|line| !line.starts_with(&format!("{target}:")))
+        .skip(1)
+        .take_while(|line| line.starts_with('\t'))
+        .map(|line| line.trim().to_owned())
+        .collect()
+}
+
 /// A workflow under `.github/workflows`, by file name.
 pub fn workflow(name: &str) -> String {
     fs::read_to_string(

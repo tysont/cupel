@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Output, Stdio};
 use std::sync::mpsc;
 
-use support::{HANG, eventually, workspace};
+use support::{HANG, eventually, recipe, workspace};
 use tempfile::TempDir;
 
 fn script() -> PathBuf {
@@ -82,18 +82,6 @@ fn make_dogfood_runs_through_the_script() {
     );
 }
 
-/// The recipe of `target` in the Makefile: its lines, trimmed.
-fn recipe(target: &str) -> Vec<String> {
-    let makefile = fs::read_to_string(workspace().join("Makefile")).unwrap();
-    makefile
-        .lines()
-        .skip_while(|line| !line.starts_with(&format!("{target}:")))
-        .skip(1)
-        .take_while(|line| line.starts_with('\t'))
-        .map(|line| line.trim().to_owned())
-        .collect()
-}
-
 /// In an agent checkout `make check` compiles everything it runs in one step under the lock, before
 /// its lint, tests, and docs run outside it against what was built (ADR-156 §3); elsewhere it takes
 /// no lock.
@@ -108,7 +96,9 @@ fn make_check_builds_under_the_lock_in_an_agent_checkout_before_it_tests() {
         .expect("the check's build step through the script in an agent checkout");
     let tested = check
         .iter()
-        .position(|line| line == "@$(MAKE) --no-print-directory lint test doc")
+        .position(|line| {
+            line == "@scripts/tmpdir-guard.sh $(MAKE) --no-print-directory lint test doc"
+        })
         .expect("lint, test, and doc");
     assert!(locked < tested, "{check:#?}");
     assert_eq!(
