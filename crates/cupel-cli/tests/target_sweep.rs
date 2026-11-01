@@ -8,7 +8,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use support::{assert_runnable_script, recipe, workspace};
+use support::{assert_executable, assert_shellcheck_clean, recipe, workspace};
 use tempfile::TempDir;
 
 fn script() -> PathBuf {
@@ -71,7 +71,8 @@ fn sweep(dir: &Path, bin: &Path, cap: &str) -> Output {
 /// `make check` runs the script directly, so it is executable; and it passes `shellcheck`.
 #[test]
 fn the_script_is_executable_and_passes_shellcheck() {
-    assert_runnable_script("scripts/target-sweep.sh");
+    assert_executable("scripts/target-sweep.sh");
+    assert_shellcheck_clean("scripts/target-sweep.sh");
 }
 
 /// A build directory under the cap is left alone: cargo-sweep does not run and nothing is printed.

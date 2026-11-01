@@ -502,15 +502,18 @@ pub fn shellcheck(path: &str) -> Option<(Option<i32>, String)> {
     ))
 }
 
-/// Asserts that the script at `path` under the workspace is executable, as `make` runs it directly,
-/// and that `shellcheck` reports nothing on it.
+/// Asserts that the script at `path` under the workspace is executable, as `make` runs it directly.
 #[cfg(unix)]
-pub fn assert_runnable_script(path: &str) {
+pub fn assert_executable(path: &str) {
     let mode = fs::metadata(workspace().join(path))
         .unwrap()
         .permissions()
         .mode();
     assert_eq!(mode & 0o111, 0o111, "{path}: {mode:o}");
+}
+
+/// Asserts that `shellcheck` reports nothing on the script at `path` under the workspace.
+pub fn assert_shellcheck_clean(path: &str) {
     if let Some(found) = shellcheck(path) {
         assert_eq!(found, (Some(0), String::new()), "{path}");
     }

@@ -6,7 +6,7 @@ mod support;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use support::{assert_runnable_script, recipe, workspace};
+use support::{assert_executable, assert_shellcheck_clean, recipe, workspace};
 use tempfile::TempDir;
 
 fn script() -> PathBuf {
@@ -68,7 +68,8 @@ fn entries(dir: &Path) -> Vec<String> {
 /// `make check` runs the script directly, so it is executable; and it passes `shellcheck`.
 #[test]
 fn the_script_is_executable_and_passes_shellcheck() {
-    assert_runnable_script("scripts/tmpdir-guard.sh");
+    assert_executable("scripts/tmpdir-guard.sh");
+    assert_shellcheck_clean("scripts/tmpdir-guard.sh");
 }
 
 /// The command runs with a fresh directory under the caller's as its TMPDIR, which is gone after it.
