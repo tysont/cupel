@@ -270,6 +270,24 @@
                 ],
                 "type": "object"
               },
+              "shape": {
+                "anyOf": [
+                  {
+                    "description": "What every member of a clone group is, when that explains their likeness (ADR-158 §3).",
+                    "oneOf": [
+                      {
+                        "const": "enum-mapping",
+                        "description": "An `as_str`-style accessor: the body is one match or switch whose arms each map a\npattern to a constant. Such accessors share their shape by necessity, so the group is\nreported at `info` and left out of the counts.",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "`enum-mapping` when both symbols map enum variants to constants (ADR-158 §3); absent\notherwise."
+              },
               "threshold": {
                 "format": "double",
                 "type": "number"
@@ -500,6 +518,24 @@
                 },
                 "type": "array"
               },
+              "shape": {
+                "anyOf": [
+                  {
+                    "description": "What every member of a clone group is, when that explains their likeness (ADR-158 §3).",
+                    "oneOf": [
+                      {
+                        "const": "enum-mapping",
+                        "description": "An `as_str`-style accessor: the body is one match or switch whose arms each map a\npattern to a constant. Such accessors share their shape by necessity, so the group is\nreported at `info` and left out of the counts.",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "`enum-mapping` when every member maps enum variants to constants (ADR-158 §3); absent\notherwise."
+              },
               "threshold": {
                 "format": "double",
                 "type": "number"
@@ -667,17 +703,17 @@
         {
           "name": "pairs",
           "per": "scope",
-          "summary": "Pairs of symbols at least `threshold` similar."
+          "summary": "Pairs of symbols at least `threshold` similar, apart from enum mappings."
         },
         {
           "name": "clusters",
           "per": "scope",
-          "summary": "Groups of three or more similar symbols."
+          "summary": "Groups of three or more similar symbols, apart from enum mappings."
         },
         {
           "name": "max_jaccard",
           "per": "scope",
-          "summary": "The highest similarity of any pair."
+          "summary": "The highest similarity of any pair, apart from enum mappings."
         },
         {
           "name": "cluster_size",

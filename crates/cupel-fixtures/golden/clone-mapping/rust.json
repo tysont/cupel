@@ -1,0 +1,296 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "static.clones",
+      "metrics": {
+        "clusters": 0.0,
+        "max_jaccard": 0.0,
+        "pairs": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 3,
+        "unit": "pairs",
+        "value": 3.0
+      },
+      "skipped": null,
+      "status": "pass",
+      "tier": 0
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "common_subtree": {
+            "location": {
+              "col": 5,
+              "end_col": 6,
+              "end_line": 18,
+              "file": "src/lib.rs",
+              "line": 13
+            },
+            "nodes": 30,
+            "others": [
+              {
+                "location": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 35,
+                  "file": "src/lib.rs",
+                  "line": 30
+                },
+                "symbol": "Phase::as_str"
+              },
+              {
+                "location": {
+                  "col": 5,
+                  "end_col": 6,
+                  "end_line": 52,
+                  "file": "src/lib.rs",
+                  "line": 47
+                },
+                "symbol": "Reuse::as_str"
+              }
+            ],
+            "parameters": [
+              {
+                "kind": "identifier",
+                "occurrences": 1,
+                "values": [
+                  "Reference",
+                  "Build",
+                  "Fresh"
+                ]
+              },
+              {
+                "kind": "literal",
+                "occurrences": 1,
+                "values": [
+                  "\"reference\"",
+                  "\"build\"",
+                  "\"fresh\""
+                ]
+              },
+              {
+                "kind": "identifier",
+                "occurrences": 1,
+                "values": [
+                  "Command",
+                  "Test",
+                  "Cached"
+                ]
+              },
+              {
+                "kind": "literal",
+                "occurrences": 1,
+                "values": [
+                  "\"command\"",
+                  "\"test\"",
+                  "\"cached\""
+                ]
+              }
+            ],
+            "share": 1.0
+          }
+        },
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the structure `as_str` shares with 2 other symbols into one function and call it from each."
+      },
+      "check": "static.clones",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "clone_type": 2,
+        "edits": [],
+        "max_jaccard": 1.0,
+        "members": [
+          {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 18,
+            "file": "src/lib.rs",
+            "hash": "sh_8b86a0050c3bc648",
+            "lang": "rust",
+            "line": 13,
+            "lines": 6,
+            "nodes": 30,
+            "symbol": "Source::as_str"
+          },
+          {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 35,
+            "file": "src/lib.rs",
+            "hash": "sh_8b86a0050c3bc648",
+            "lang": "rust",
+            "line": 30,
+            "lines": 6,
+            "nodes": 30,
+            "symbol": "Phase::as_str"
+          },
+          {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 52,
+            "file": "src/lib.rs",
+            "hash": "sh_8b86a0050c3bc648",
+            "lang": "rust",
+            "line": 47,
+            "lines": 6,
+            "nodes": 30,
+            "symbol": "Reuse::as_str"
+          }
+        ],
+        "min_jaccard": 1.0,
+        "pairs": 3,
+        "renamed": [
+          {
+            "kind": "identifier",
+            "occurrences": 1,
+            "values": [
+              "Reference",
+              "Build",
+              "Fresh"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "\"reference\"",
+              "\"build\"",
+              "\"fresh\""
+            ]
+          },
+          {
+            "kind": "identifier",
+            "occurrences": 1,
+            "values": [
+              "Command",
+              "Test",
+              "Cached"
+            ]
+          },
+          {
+            "kind": "literal",
+            "occurrences": 1,
+            "values": [
+              "\"command\"",
+              "\"test\"",
+              "\"cached\""
+            ]
+          }
+        ],
+        "shape": "enum-mapping",
+        "threshold": 0.82
+      },
+      "id": "fnd_c2096d",
+      "kind": "clone.cluster",
+      "location": {
+        "col": 5,
+        "end_col": 6,
+        "end_line": 18,
+        "file": "src/lib.rs",
+        "line": 13
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only static.clones --symbols sh_8b86a0050c3bc648",
+      "severity": "info",
+      "suppress": "cupel suppress fnd_c2096d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "Source::as_str",
+        "hash": "sh_8b86a0050c3bc648",
+        "lang": "rust"
+      },
+      "tier": 0,
+      "title": "`Source::as_str` and 2 other symbols are clones of one another (jaccard 1.00–1.00)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_c2096d",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract the structure `as_str` shares with 2 other symbols into one function and call it from each."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 1,
+      "languages": [
+        "rust"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 3
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "suite": {},
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 1,
+      "warn": 0
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

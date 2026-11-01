@@ -7,7 +7,7 @@ use std::hash::{Hash, Hasher};
 use cupel_core::config::{ConfigError, Table};
 use cupel_core::hint::{self, CommonSubtree, Parameter, ParameterKind, PlacedSubtree};
 use cupel_core::similarity::{Fingerprints, Similar, combine, mix, search, token_digest};
-use cupel_core::syntax::{NormNode, NormTree, SymbolDef, Symbols};
+use cupel_core::syntax::{NormNode, NormTree, Span, SymbolDef, Symbols};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
@@ -174,6 +174,10 @@ struct ClonePair {
     threshold: f64,
     left: Member,
     right: Member,
+    /// `enum-mapping` when both symbols map enum variants to constants (ADR-158 §3); absent
+    /// otherwise.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    shape: Option<Shape>,
 }
 
 /// Evidence of `clone.cluster`.
@@ -196,6 +200,20 @@ struct CloneCluster {
     /// reverse; empty otherwise.
     edits: Vec<Edit>,
     threshold: f64,
+    /// `enum-mapping` when every member maps enum variants to constants (ADR-158 §3); absent
+    /// otherwise.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    shape: Option<Shape>,
+}
+
+/// What every member of a clone group is, when that explains their likeness (ADR-158 §3).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
+#[serde(rename_all = "kebab-case")]
+enum Shape {
+    /// An `as_str`-style accessor: the body is one match or switch whose arms each map a
+    /// pattern to a constant. Such accessors share their shape by necessity, so the group is
+    /// reported at `info` and left out of the counts.
+    EnumMapping,
 }
 
 pub struct StaticClones {
@@ -251,6 +269,7 @@ fn comparable<'a>(facts: &'a Facts, settings: &Settings) -> Result<Vec<Compared<
                 root,
                 prints: Fingerprints::of(root),
                 tokens: token_digest(root),
+                mapping: enum_mapping(symbol, root),
             })
         })
         .filter(|compared| compared.prints.nodes >= settings.min_nodes)
@@ -280,9 +299,18 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
 /// The metrics this check reports: gate keys, then what `survey` ranks.
 fn metrics() -> Vec<MetricSpec> {
     vec![
-        metric("pairs", "Pairs of symbols at least `threshold` similar."),
-        metric("clusters", "Groups of three or more similar symbols."),
-        metric("max_jaccard", "The highest similarity of any pair."),
+        metric(
+            "pairs",
+            "Pairs of symbols at least `threshold` similar, apart from enum mappings.",
+        ),
+        metric(
+            "clusters",
+            "Groups of three or more similar symbols, apart from enum mappings.",
+        ),
+        metric(
+            "max_jaccard",
+            "The highest similarity of any pair, apart from enum mappings.",
+        ),
         ranked(
             "cluster_size",
             MetricPer::Group,
@@ -325,6 +353,7 @@ impl Check for StaticClones {
         };
         let groups = groups(compared.len(), &pairs);
         let mut findings = 0;
+        let mut warned = false;
         let mut reported = Reported::default();
         for group in &groups {
             let in_scope = group
@@ -335,12 +364,15 @@ impl Check for StaticClones {
                 findings += 1;
                 sink.emit(Event::Finding(Box::new(report.finding(group))));
                 sink.measure(report.size(group));
-                reported.include(group);
+                if report.shape(group).is_none() {
+                    warned = true;
+                    reported.include(group);
+                }
             }
         }
         Ok(outcome::result(
             &self.manifest,
-            outcome::status(findings > 0),
+            outcome::status(warned),
             Some(Score {
                 value: f64::from(u32::try_from(pairs.len()).unwrap_or(u32::MAX)),
                 unit: "pairs".to_owned(),
@@ -378,6 +410,8 @@ struct Compared<'a> {
     prints: Fingerprints,
     /// The digest of its tokens, which only a type-1 copy shares (ADR-136).
     tokens: Option<u64>,
+    /// Whether it maps enum variants to constants (ADR-158 §3).
+    mapping: bool,
 }
 
 fn lines(symbol: &SymbolDef) -> u32 {
@@ -439,7 +473,8 @@ fn root(parent: &mut [usize], mut index: usize) -> usize {
     index
 }
 
-/// The `scope` metrics over the groups reported (ADR-063).
+/// The `scope` metrics over the groups reported (ADR-063), apart from enum mappings, which are
+/// reported at `info` (ADR-158 §3).
 #[derive(Default)]
 struct Reported {
     pairs: usize,
@@ -494,13 +529,17 @@ impl Report<'_> {
             .parse()
             .expect("sixteen hex digits make a valid site hash");
         let id = FindingId::compute(&self.check.manifest.id, kind, first.hash, Some(&site));
+        let severity = match self.shape(group) {
+            Some(Shape::EnumMapping) => Severity::Info,
+            None => Severity::Warn,
+        };
         Finding {
             suppress: format!("cupel suppress {id} --reason '…'"),
             repro: format!("cupel check --only {ID} --symbols {}", first.hash),
             id,
             check: self.check.manifest.id.clone(),
             kind: kind.to_owned(),
-            severity: Severity::Warn,
+            severity,
             confidence: 1.0,
             tier: self.check.manifest.tier,
             symbol: Some(Symbol {
@@ -521,6 +560,15 @@ impl Report<'_> {
             new_since_baseline: false,
             suppressed: false,
         }
+    }
+
+    /// What every member of `group` is, when that explains their likeness (ADR-158 §3).
+    fn shape(&self, group: &Group) -> Option<Shape> {
+        group
+            .members
+            .iter()
+            .all(|index| self.compared[*index].mapping)
+            .then_some(Shape::EnumMapping)
     }
 
     /// The remediation hints of a `kind` finding about `group`: a cluster's common subtree
@@ -587,6 +635,7 @@ impl Report<'_> {
             threshold: self.settings.threshold,
             left: member(left),
             right: member(right),
+            shape: (left.mapping && right.mapping).then_some(Shape::EnumMapping),
         });
         (PAIR, title, summary, evidence)
     }
@@ -630,6 +679,7 @@ impl Report<'_> {
             renamed,
             edits,
             threshold: self.settings.threshold,
+            shape: self.shape(group),
         });
         (CLUSTER, title, summary, evidence)
     }
@@ -876,6 +926,91 @@ fn parameters(first: &NormNode, others: &[&NormNode]) -> Vec<Parameter> {
         }
     }
     found
+}
+
+/// Whether `symbol`, whose normalized tree is `root`, maps enum variants to constants, as an
+/// `as_str` accessor does (ADR-158 §3): from its body (the node spanning the body its producer
+/// names), past constants and punctuation, one node at a time, it reaches a table. A symbol
+/// whose body is not named is not one. The test is on shapes alone, so it holds in every
+/// language: Rust's `match`, Python's `match`, Go's and TypeScript's `switch`.
+fn enum_mapping(symbol: &SymbolDef, root: &NormNode) -> bool {
+    let Some(mut node) = symbol.body.and_then(|body| spanning(root, body)) else {
+        return false;
+    };
+    let mut parent: Option<&NormNode> = None;
+    loop {
+        if table(node, parent) {
+            return true;
+        }
+        let mut rest = node
+            .children
+            .iter()
+            .filter(|child| !punctuation(child) && !constant(child));
+        match (rest.next(), rest.next()) {
+            (Some(only), None) => {
+                parent = Some(node);
+                node = only;
+            }
+            _ => return false,
+        }
+    }
+}
+
+/// The node of `root` whose span is `span`.
+fn spanning(root: &NormNode, span: Span) -> Option<&NormNode> {
+    if root.span == Some(span) {
+        return Some(root);
+    }
+    root.children.iter().find_map(|child| spanning(child, span))
+}
+
+/// A table: two or more arms of one label, every other child a constant or punctuation, and a
+/// constant (what is matched) beside the arms or beside the table in `parent`. A body that is a
+/// list of statements has no parent here, so constant assignments are not a table.
+fn table(node: &NormNode, parent: Option<&NormNode>) -> bool {
+    let Some(parent) = parent else {
+        return false;
+    };
+    let arms: Vec<&NormNode> = node.children.iter().filter(|child| arm(child)).collect();
+    let matched = |holder: &NormNode| {
+        holder
+            .children
+            .iter()
+            .any(|child| !std::ptr::eq(child, node) && !arm(child) && constant(child))
+    };
+    arms.len() >= 2
+        && arms.iter().all(|arm| arm.label == arms[0].label)
+        && node
+            .children
+            .iter()
+            .all(|child| arm(child) || constant(child) || punctuation(child))
+        && (matched(node) || matched(parent))
+}
+
+/// An arm: a pattern, then exactly one constant besides punctuation (`Self::Ref => "ref"`,
+/// `case K.REF: return "ref"`).
+fn arm(node: &NormNode) -> bool {
+    let Some((_, rest)) = node.children.split_first() else {
+        return false;
+    };
+    let mut values = rest.iter().filter(|child| !punctuation(child));
+    matches!((values.next(), values.next()), (Some(value), None) if constant(value))
+}
+
+/// A constant: an identifier or literal, a node with no children (a keyword such as `self`), a
+/// path of identifiers (`Kind::Ref`), or one constant with only punctuation beside it
+/// (`return "ref"`, `-1`). A call or an operation on two operands is not one.
+fn constant(node: &NormNode) -> bool {
+    if node.children.is_empty() || node.children.iter().all(|child| child.label == "$id") {
+        return true;
+    }
+    let mut inner = node.children.iter().filter(|child| !punctuation(child));
+    matches!((inner.next(), inner.next()), (Some(only), None) if constant(only))
+}
+
+/// A leaf that is an operator or punctuation (`=>`, `-`, `&`): no letters or digits.
+fn punctuation(node: &NormNode) -> bool {
+    node.children.is_empty() && !node.label.chars().any(char::is_alphanumeric)
 }
 
 fn member(compared: &Compared<'_>) -> Member {

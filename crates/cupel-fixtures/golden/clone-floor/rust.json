@@ -8,8 +8,8 @@
       "id": "static.clones",
       "metrics": {
         "clusters": 0.0,
-        "max_jaccard": 1.0,
-        "pairs": 1.0
+        "max_jaccard": 0.0,
+        "pairs": 0.0
       },
       "oracle": null,
       "score": {
@@ -18,7 +18,7 @@
         "value": 1.0
       },
       "skipped": null,
-      "status": "fail",
+      "status": "pass",
       "tier": 0
     }
   ],
@@ -118,6 +118,7 @@
           "nodes": 35,
           "symbol": "Phase::as_str"
         },
+        "shape": "enum-mapping",
         "threshold": 0.82
       },
       "id": "fnd_c291aa",
@@ -131,7 +132,7 @@
       },
       "new_since_baseline": false,
       "repro": "cupel check --only static.clones --symbols sh_ebb42be613fec8e6",
-      "severity": "warn",
+      "severity": "info",
       "suppress": "cupel suppress fnd_c291aa --reason '…'",
       "suppressed": false,
       "symbol": {
@@ -205,8 +206,8 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 0,
-      "warn": 1
+      "info": 1,
+      "warn": 0
     },
     "gate": null,
     "new": 0,

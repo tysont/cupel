@@ -9,7 +9,7 @@ use cupel_core::syntax::{
 };
 use cupel_core::{
     ActionKind, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding, FindingId,
-    LangId, Location, MetricPer, Scope, SiteHash, SymbolHash,
+    LangId, Location, MetricPer, Scope, Severity, SiteHash, SymbolHash,
 };
 use serde_json::{Value, json};
 use support::{Recorded, combined, language};
@@ -97,6 +97,8 @@ struct Def {
     name: &'static str,
     line: u32,
     lines: u32,
+    /// The span of the symbol's body, which its producer names; none for most tests.
+    body: Option<Span>,
     root: NormNode,
 }
 
@@ -107,6 +109,7 @@ fn def(file: &'static str, name: &'static str, line: u32, root: NormNode) -> Def
         name,
         line,
         lines: 12,
+        body: None,
         root,
     }
 }
@@ -127,7 +130,7 @@ impl Def {
                 end_line: self.line + self.lines - 1,
                 end_col: 2,
             },
-            body: None,
+            body: self.body,
             parameters: 2,
         }
     }
@@ -1084,5 +1087,206 @@ fn a_cluster_with_a_changed_member_is_type_3_with_that_members_edits() {
             edit("removed", "m::three", 1),
             edit("inserted", "m::three", 1)
         ])
+    );
+}
+
+// ---------------------------------------------------------------- enum mappings (ADR-158 §3)
+
+/// The span of a mapping's block, which its symbol names as its body.
+const BODY: Span = Span {
+    line: 2,
+    col: 5,
+    end_line: 8,
+    end_col: 6,
+};
+
+/// `$id::$id => value`.
+fn arm(value: NormNode) -> NormNode {
+    NormNode::new(
+        "arm",
+        vec![
+            NormNode::new(
+                "pattern",
+                vec![NormNode::leaf("$id"), NormNode::leaf("$id")],
+            ),
+            NormNode::leaf("=>"),
+            value,
+        ],
+    )
+}
+
+/// A function whose body (a block spanning `BODY`) is `match $id { arms }`, then `after`.
+fn matching(arms: Vec<NormNode>, after: Vec<NormNode>) -> NormNode {
+    let statement = NormNode::new(
+        "match",
+        vec![NormNode::leaf("$id"), NormNode::new("arms", arms)],
+    );
+    with_body(function(vec![statement].into_iter().chain(after).collect()))
+}
+
+/// `root`, a `function`, with its block spanning `BODY`.
+fn with_body(mut root: NormNode) -> NormNode {
+    let block = root.children.pop().unwrap();
+    root.children.push(block.at(BODY));
+    root
+}
+
+/// `return value`.
+fn returned(value: NormNode) -> NormNode {
+    NormNode::new("return", vec![value])
+}
+
+/// A symbol whose producer names its body.
+fn mapped(file: &'static str, name: &'static str, line: u32, root: NormNode) -> Def {
+    Def {
+        body: Some(BODY),
+        ..def(file, name, line, root)
+    }
+}
+
+/// Three accessors mapping variants to names, `as_str`-style: each arm's value is a literal, a
+/// path, or a returned literal.
+fn three_mappings() -> [Def; 3] {
+    let accessor = || {
+        matching(
+            vec![
+                arm(NormNode::leaf("$lit")),
+                arm(NormNode::new(
+                    "path",
+                    vec![NormNode::leaf("$id"), NormNode::leaf("$id")],
+                )),
+                arm(returned(NormNode::leaf("$lit"))),
+            ],
+            vec![],
+        )
+    };
+    [
+        mapped("a.x", "one", 1, accessor()),
+        mapped("b.x", "two", 1, accessor()),
+        mapped("c.x", "three", 1, accessor()),
+    ]
+}
+
+#[test]
+fn enum_mappings_cluster_at_info_with_their_shape_and_leave_the_counts() {
+    let defs = three_mappings();
+    let (result, findings) = run(&defs);
+    assert_eq!(findings.len(), 1, "{findings:#?}");
+    let finding = &findings[0];
+    assert_eq!(
+        (
+            finding.kind.as_str(),
+            finding.severity,
+            &finding.evidence.0["shape"]
+        ),
+        ("clone.cluster", Severity::Info, &json!("enum-mapping"))
+    );
+    assert_eq!(result.status, CheckStatus::Pass);
+    assert_eq!(
+        result.metrics,
+        [
+            ("clusters".to_owned(), 0.0),
+            ("max_jaccard".to_owned(), 0.0),
+            ("pairs".to_owned(), 0.0),
+        ]
+        .into()
+    );
+}
+
+#[test]
+fn a_mapping_with_a_constant_after_its_match_is_still_a_mapping() {
+    let accessor = || {
+        matching(
+            vec![
+                arm(NormNode::leaf("$lit")),
+                arm(NormNode::leaf("$lit")),
+                arm(NormNode::leaf("$lit")),
+            ],
+            vec![returned(NormNode::leaf("$lit"))],
+        )
+    };
+    let defs = [
+        mapped("a.x", "one", 1, accessor()),
+        mapped("b.x", "two", 1, accessor()),
+    ];
+    let (finding, evidence) = the_finding(&defs);
+    assert_eq!(
+        (finding.severity, &evidence["shape"]),
+        (Severity::Info, &json!("enum-mapping"))
+    );
+}
+
+#[test]
+fn matches_whose_arms_compute_are_warnings_without_a_shape() {
+    let dispatch = || {
+        matching(
+            vec![
+                arm(call("f")),
+                arm(call("g")),
+                arm(NormNode::new(
+                    "binary",
+                    vec![
+                        NormNode::leaf("$id"),
+                        NormNode::leaf("+"),
+                        NormNode::leaf("$lit"),
+                    ],
+                )),
+            ],
+            vec![],
+        )
+    };
+    let defs = [
+        mapped("a.x", "one", 1, dispatch()),
+        mapped("b.x", "two", 1, dispatch()),
+    ];
+    let (result, findings) = run(&defs);
+    assert_eq!(findings.len(), 1, "{findings:#?}");
+    assert_eq!(
+        (findings[0].severity, findings[0].evidence.0.get("shape")),
+        (Severity::Warn, None)
+    );
+    assert_eq!(result.status, CheckStatus::Fail);
+}
+
+#[test]
+fn a_group_with_a_member_whose_body_is_not_known_is_a_warning() {
+    let [one, two, three] = three_mappings();
+    let unknown = Def {
+        body: None,
+        ..three
+    };
+    let (finding, evidence) = the_finding(&[one, two, unknown]);
+    assert_eq!(
+        (finding.severity, evidence.get("shape")),
+        (Severity::Warn, None)
+    );
+}
+
+#[test]
+fn a_block_of_constant_statements_without_a_match_is_not_a_mapping() {
+    let assignments = || {
+        with_body(function(
+            (0..6)
+                .map(|_| {
+                    NormNode::new(
+                        "assignment",
+                        vec![
+                            NormNode::leaf("$id"),
+                            NormNode::leaf("="),
+                            NormNode::leaf("$lit"),
+                        ],
+                    )
+                })
+                .collect(),
+        ))
+    };
+    let defs = [
+        mapped("a.x", "one", 1, assignments()),
+        mapped("b.x", "two", 1, assignments()),
+    ];
+    let (finding, evidence) = the_finding(&defs);
+    assert_eq!(
+        (finding.severity, evidence.get("shape")),
+        (Severity::Warn, None)
     );
 }
