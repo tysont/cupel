@@ -1262,6 +1262,45 @@ fn a_group_with_a_member_whose_body_is_not_known_is_a_warning() {
     );
 }
 
+/// A struct literal whose fields are constants (`Span { line, col: 1, end_col: 1, … }`) is not
+/// a mapping: a field's name is a lone identifier, not a pattern.
+#[test]
+fn a_struct_literal_of_constant_fields_is_not_a_mapping() {
+    let literal = || {
+        let field = || {
+            NormNode::new(
+                "field",
+                vec![
+                    NormNode::leaf("$id"),
+                    NormNode::leaf(":"),
+                    NormNode::leaf("$lit"),
+                ],
+            )
+        };
+        let fields = std::iter::once(NormNode::leaf("{"))
+            .chain(std::iter::once(NormNode::new(
+                "shorthand",
+                vec![NormNode::leaf("$id")],
+            )))
+            .chain((0..6).map(|_| field()))
+            .chain(std::iter::once(NormNode::leaf("}")))
+            .collect();
+        with_body(function(vec![NormNode::new(
+            "struct",
+            vec![NormNode::leaf("$id"), NormNode::new("fields", fields)],
+        )]))
+    };
+    let defs = [
+        mapped("a.x", "one", 1, literal()),
+        mapped("b.x", "two", 1, literal()),
+    ];
+    let (finding, evidence) = the_finding(&defs);
+    assert_eq!(
+        (finding.severity, evidence.get("shape")),
+        (Severity::Warn, None)
+    );
+}
+
 #[test]
 fn a_block_of_constant_statements_without_a_match_is_not_a_mapping() {
     let assignments = || {

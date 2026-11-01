@@ -988,11 +988,15 @@ fn table(node: &NormNode, parent: Option<&NormNode>) -> bool {
 }
 
 /// An arm: a pattern, then exactly one constant besides punctuation (`Self::Ref => "ref"`,
-/// `case K.REF: return "ref"`).
+/// `case K.REF: return "ref"`). A lone identifier first is a field's name (`col: 1` in a struct
+/// or object literal), not a pattern.
 fn arm(node: &NormNode) -> bool {
-    let Some((_, rest)) = node.children.split_first() else {
+    let Some((pattern, rest)) = node.children.split_first() else {
         return false;
     };
+    if pattern.label == "$id" && pattern.children.is_empty() {
+        return false;
+    }
     let mut values = rest.iter().filter(|child| !punctuation(child));
     matches!((values.next(), values.next()), (Some(value), None) if constant(value))
 }

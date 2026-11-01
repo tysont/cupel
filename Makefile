@@ -65,8 +65,9 @@ parity:
 # against what was built (ADR-156 §3). The build step, lint, tests, and docs run under scripts/tmpdir-guard.sh:
 # with a temporary directory of their own as TMPDIR, the check failing when they leave anything in it. First,
 # scripts/target-sweep.sh brings the checkout's build directory under TARGET_CAP when it has grown past it
-# (ADR-156 §6).
-TARGET_CAP ?= 40GB
+# (ADR-156 §6). The cap is above what one check and dogfood build (about 53 GB: the debug build and the
+# coverage build), so a sweep removes only what no current build uses.
+TARGET_CAP ?= 64GB
 
 check:
 	@scripts/target-sweep.sh $(TARGET_CAP)
