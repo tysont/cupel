@@ -1804,7 +1804,7 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
 
 #### B.5 Release v0.2.2
 
-**Status:** complete (2026-10-31) · version 0.2.2; the warm one-function `standard` run 166 s without a daemon (342 s in 0.2.1), under the 3-minute line; the tag waits on a green CI
+**Status:** complete (2026-10-31) · version 0.2.2; the warm one-function `standard` run 166 s without a daemon (342 s in 0.2.1), under the 3-minute line; tagged `v0.2.2` at e92e09d after a green CI (41250612492); the release run 41254793790 built all five targets, and the release was verified as for 0.2.1: checksums and `release.sh verify` on all five archives, the x86_64 macOS binary under Rosetta, `install.sh` on this Mac, in ubuntu x86_64 and in alpine arm64 (`init --dry-run`), and `cargo binstall` in rust:1.92-bookworm
 
 - The tag with the measured before/after in its notes; then backlog maintenance.
 
