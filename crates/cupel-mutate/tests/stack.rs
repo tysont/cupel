@@ -151,10 +151,17 @@ fn a_mutant_that_never_finishes_times_out() {
         "from count import count\n\n\ndef test_counts():\n    assert count(3) == 3\n",
     )
     .unwrap();
+    // Every mutant's timeout is 15 s, whatever its reference run took: the factor alone would give
+    // each a hundred thousand times it, and `max_mutant_timeout` cuts that at 15 s, far above the
+    // 2 s floor and above what a run that ends takes on a loaded machine. So only the two mutants
+    // that loop forever time out.
     let toml = fs::read_to_string(dir.path().join("cupel.toml")).unwrap();
     fs::write(
         dir.path().join("cupel.toml"),
-        format!("{toml}mutation = {{ timeout_factor = 3 }}\n"),
+        format!(
+            "{toml}mutation = {{ timeout_factor = 100000 }}\n\n\
+             [checks.\"tests.mutation\"]\nmax_mutant_timeout = \"15s\"\n"
+        ),
     )
     .unwrap();
     let outcomes = produce(dir.path(), "python", &Run::default()).unwrap();
