@@ -187,6 +187,66 @@ fn a_mutant_that_never_finishes_times_out() {
     );
 }
 
+/// The entries of the temporary directory, and of each directory directly in it, whose names start
+/// with `prefix`.
+fn temporary(prefix: &str) -> Vec<String> {
+    let entries = |dir: &Path| -> Vec<std::path::PathBuf> {
+        fs::read_dir(dir)
+            .map(|read| read.flatten().map(|entry| entry.path()).collect())
+            .unwrap_or_default()
+    };
+    entries(&std::env::temp_dir())
+        .into_iter()
+        .flat_map(|path| {
+            let inner = if path.is_dir() {
+                entries(&path)
+            } else {
+                Vec::new()
+            };
+            std::iter::once(path).chain(inner)
+        })
+        .filter(|path| {
+            path.file_name()
+                .is_some_and(|name| name.to_string_lossy().starts_with(prefix))
+        })
+        .map(|path| path.display().to_string())
+        .collect()
+}
+
+/// A mutant run's processes write in a temporary directory of the run's own, removed when the run
+/// ends, so what they leave there does not outlive it: the fixture's test removes what it made only
+/// when it passes, so each mutant that fails it or is killed at its timeout leaves its directory.
+#[test]
+fn what_a_mutant_run_leaves_in_its_temporary_directory_is_removed() {
+    if !python_tools() {
+        return;
+    }
+    let dir = fixture("tests.mutation/python");
+    let prefix = format!("cupel-left-{}-", std::process::id());
+    fs::write(
+        dir.path().join("count.py"),
+        "def count(n):\n    i = 0\n    while i < n:\n        i += 1\n    return i\n",
+    )
+    .unwrap();
+    fs::write(
+        dir.path().join("tests/test_count.py"),
+        format!(
+            "import shutil\nimport tempfile\n\nfrom count import count\n\n\n\
+             def test_counts():\n    made = tempfile.mkdtemp(prefix=\"{prefix}\")\n    \
+             assert count(3) == 3\n    shutil.rmtree(made)\n"
+        ),
+    )
+    .unwrap();
+    let outcomes = produce(dir.path(), "python", &Run::default()).unwrap();
+    assert!(
+        outcomes
+            .mutants
+            .iter()
+            .any(|mutant| mutant.symbol.file == "count.py")
+    );
+    assert_eq!(temporary(&prefix), Vec::<String>::new());
+}
+
 #[test]
 fn standard_depth_with_a_range_mutates_only_the_symbols_it_changed() {
     if !python_tools() {

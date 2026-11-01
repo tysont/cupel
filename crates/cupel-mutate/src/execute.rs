@@ -10,6 +10,8 @@ use cupel_core::{
     Result, RunOptions, Runner, TestRun, TestSelection, WriteError, Writer, physical_memory,
 };
 
+use tempfile::TempDir;
+
 use crate::overlay::Slot;
 use crate::phases::{Phases, Served};
 use crate::plan::Planned;
@@ -107,10 +109,11 @@ impl Execution<'_> {
         let ctx = self.slot_ctx(first)?;
         write_file(first, run, source)?;
         let started = Instant::now();
-        let built = match self
-            .runner
-            .build(&ctx, &self.options_for(None, 0, Share::Alone))
-        {
+        let tmp = scratch()?;
+        let built = match self.runner.build(
+            &ctx,
+            &within(&self.options_for(None, 0, Share::Alone), &tmp),
+        ) {
             Err(Error::OutOfMemory { limit, .. }) => return Err(over_budget(self.runner, limit)),
             built => built?,
         };
@@ -369,7 +372,8 @@ impl Execution<'_> {
     ) -> Result<(TestRun, Duration)> {
         let selection = self.union(&run.mutants);
         let started = Instant::now();
-        let ran = match self.runner.run(ctx, &selection, options) {
+        let tmp = scratch()?;
+        let ran = match self.runner.run(ctx, &selection, &within(options, &tmp)) {
             Err(Error::OutOfMemory { limit, .. }) => return Err(over_budget(self.runner, limit)),
             ran => ran?,
         };
@@ -450,7 +454,10 @@ impl Execution<'_> {
         };
         let mut options = self.options(Some(limit), id);
         options.prebuilt = prebuilt.cloned();
-        let ran = self.runner.run(&worker.ctx, &selection, &options);
+        let tmp = scratch()?;
+        let ran = self
+            .runner
+            .run(&worker.ctx, &selection, &within(&options, &tmp));
         let elapsed = started.elapsed();
         let served = Served {
             file: Some(planned.file()),
@@ -603,6 +610,31 @@ fn write_file(slot: &Slot, run: &FileRun<'_>, source: &str) -> Result<()> {
         write(slot, importer, text)?;
     }
     write(slot, run.file, source.as_bytes())
+}
+
+/// A temporary directory of one run's own, removed when it drops, so what the run's processes
+/// leave in it (a run killed at its timeout or memory budget leaves whatever it made) does not
+/// outlive the run. Its name is short: a test's socket under it must fit a socket's path.
+fn scratch() -> Result<TempDir> {
+    tempfile::Builder::new()
+        .prefix("cm")
+        .rand_bytes(4)
+        .tempdir()
+        .map_err(|error| {
+            Error::Write(WriteError::Io {
+                path: std::env::temp_dir(),
+                message: error.to_string(),
+            })
+        })
+}
+
+/// `options` with `tmp` as the run's `TMPDIR`.
+fn within(options: &RunOptions, tmp: &TempDir) -> RunOptions {
+    let mut options = options.clone();
+    options
+        .env
+        .push(("TMPDIR".to_owned(), tmp.path().display().to_string()));
+    options
 }
 
 fn panicked() -> Error {
