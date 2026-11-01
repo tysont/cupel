@@ -68,7 +68,7 @@ fn make_dogfood_runs_through_the_script() {
         .expect("a dogfood recipe line that runs check");
     assert_eq!(
         recipe.split_whitespace().take(2).collect::<Vec<_>>(),
-        ["scripts/heavy.sh", "$(CARGO)"]
+        ["$(DOGFOOD_CAP)", "scripts/heavy.sh"]
     );
 }
 
@@ -81,7 +81,8 @@ fn make_check_builds_under_the_lock_in_an_agent_checkout_before_it_tests() {
     let locked = check
         .iter()
         .position(|line| {
-            line == "$(if $(AGENT_CHECKOUT),scripts/heavy.sh $(MAKE) --no-print-directory check-build)"
+            line == "$(if $(AGENT_CHECKOUT),scripts/heavy.sh scripts/tmpdir-guard.sh $(MAKE) \
+                     --no-print-directory check-build)"
         })
         .expect("the check's build step through the script in an agent checkout");
     let tested = check

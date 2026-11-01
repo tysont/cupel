@@ -19,6 +19,9 @@ zig_version=0.16.0
 shellcheck_version=0.11.0
 # Not in CI: it lints the workflows, and ShellCheck the shell in them, before a push.
 actionlint_version=1.7.12
+# Not in CI: `make check` runs it only on a build directory over its cap (scripts/target-sweep.sh), and a
+# runner's fresh build never is.
+sweep_version=0.8.0
 # ci.yml's go-version '1.23' resolves to 1.23.12, the final 1.23 release.
 go_version=1.23.12
 staticcheck_version=2024.1.1
@@ -253,6 +256,7 @@ cargo_tool cargo-llvm-cov "$llvm_cov_version"
 cargo_tool cargo-fuzz "$cargo_fuzz_version"
 cargo_tool hyperfine "$hyperfine_version"
 cargo_tool cargo-zigbuild "$zigbuild_version"
+cargo_tool cargo-sweep "$sweep_version"
 cargo_tool kani-verifier "$kani_version"
 
 # `cargo kani setup` downloads Kani's bundle into KANI_HOME and installs the nightly it needs.
@@ -414,6 +418,7 @@ report cargo-llvm-cov "$llvm_cov_version" "$(found cargo llvm-cov --version | wo
 report cargo-fuzz "$cargo_fuzz_version" "$(found cargo fuzz --version | word 2)"
 report hyperfine "$hyperfine_version" "$(found hyperfine --version | word 2)"
 report cargo-zigbuild "$zigbuild_version" "$(found cargo-zigbuild --version | word 2)"
+report cargo-sweep "$sweep_version" "$(found cargo-sweep --version | word 2)"
 report kani "$kani_version" "$(found cargo kani --version | word 4)"
 report "kani bundle" "$kani_version" "$([ -d "$KANI_HOME/kani-$kani_version" ] && echo "$kani_version")"
 report go "go$go_version" "$(found go version | word 3)"

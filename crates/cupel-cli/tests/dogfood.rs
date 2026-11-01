@@ -8,6 +8,10 @@ fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
 }
 
+/// The tree gate's first command: the committed baseline, imported into the store.
+const IMPORT: &str = "cargo run --quiet --package cupel-cli -- baseline import \
+                      .cupel/baseline.json --write --format text >/dev/null\n";
+
 /// The commands `make -n dogfood <vars>` would run, with `cargo` for `$(CARGO)` (a test runs with
 /// `CARGO` set to the toolchain's own path). The suite itself runs under make, in `make check` and
 /// in the dogfood's own baseline run, whose command-line variables (`DOGFOOD_BUDGET=` in CI)
@@ -32,6 +36,32 @@ fn dogfood(vars: &[&str]) -> String {
     String::from_utf8(output.stdout).unwrap()
 }
 
+/// The half-cores cap every dogfood runs under, in any checkout (ADR-156 §7), as the variables
+/// make puts before the command.
+fn cap() -> String {
+    let output = Command::new("getconf")
+        .arg("_NPROCESSORS_ONLN")
+        .output()
+        .unwrap();
+    let cores: usize = String::from_utf8(output.stdout)
+        .unwrap()
+        .trim()
+        .parse()
+        .unwrap();
+    let half = (cores / 2).max(1);
+    format!("CARGO_BUILD_JOBS={half} NEXTEST_TEST_THREADS={half} RUST_TEST_THREADS={half}")
+}
+
+/// The gate's command: at half the cores, under the heavy lock, and under the temporary-directory
+/// guard, which keeps this checkout's mutation slots across runs.
+fn gated(check: &str) -> String {
+    format!(
+        "{} scripts/heavy.sh scripts/tmpdir-guard.sh --slots-of . cargo run --quiet --package \
+         cupel-cli -- check {check} --format text\n",
+        cap()
+    )
+}
+
 /// On a branch, the changed gate at `deep`: everything deep selects but the flake engine, which
 /// reruns the whole suite serially and cannot rerun nextest, and the race detector, which cannot
 /// run Cupel's process-spawning tests under Miri. A local run is bounded by `DOGFOOD_BUDGET`.
@@ -39,8 +69,10 @@ fn dogfood(vars: &[&str]) -> String {
 fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
     assert_eq!(
         dogfood(&[]),
-        "scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
-         --budget 30m --gate --no-install --skip tests.flaky --skip conc.race --format text\n"
+        gated(
+            "--changed --depth deep --budget 30m --gate --no-install --skip tests.flaky --skip \
+             conc.race"
+        )
     );
 }
 
@@ -51,10 +83,11 @@ fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
 fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
     assert_eq!(
         dogfood(&["DOGFOOD_SCOPE=tree"]),
-        "cargo run --quiet --package cupel-cli -- baseline import .cupel/baseline.json --write \
-         --format text >/dev/null\n\
-         scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --depth deep --budget 30m \
-         --gate --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
+        IMPORT.to_owned()
+            + &gated(
+                "--depth deep --budget 30m --gate --no-install --skip tests.flaky --skip \
+                 conc.race --skip tests.mutation"
+            )
     );
 }
 
@@ -63,15 +96,15 @@ fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
 fn an_empty_dogfood_budget_runs_the_full_deep_set() {
     assert_eq!(
         dogfood(&["DOGFOOD_BUDGET="]),
-        "scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --changed --depth deep \
-         --gate --no-install --skip tests.flaky --skip conc.race --format text\n"
+        gated("--changed --depth deep --gate --no-install --skip tests.flaky --skip conc.race")
     );
     assert_eq!(
         dogfood(&["DOGFOOD_SCOPE=tree", "DOGFOOD_BUDGET="]),
-        "cargo run --quiet --package cupel-cli -- baseline import .cupel/baseline.json --write \
-         --format text >/dev/null\n\
-         scripts/heavy.sh cargo run --quiet --package cupel-cli -- check --depth deep --gate \
-         --no-install --skip tests.flaky --skip conc.race --skip tests.mutation --format text\n"
+        IMPORT.to_owned()
+            + &gated(
+                "--depth deep --gate --no-install --skip tests.flaky --skip conc.race --skip \
+                 tests.mutation"
+            )
     );
 }
 

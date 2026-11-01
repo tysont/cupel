@@ -1,5 +1,5 @@
-// ABOUTME: Tests for scripts/tmpdir-guard.sh, which `make check` runs its lint, tests, and docs under: a temporary
-// ABOUTME: directory of their own as TMPDIR, and a failure naming whatever they left in it.
+// ABOUTME: Tests for scripts/tmpdir-guard.sh, which `make check`'s suites and `make dogfood`'s gate run under: a temporary
+// ABOUTME: directory of their own as TMPDIR, a failure naming whatever they left in it, and the dogfood's slots kept.
 #![cfg(unix)]
 mod support;
 
@@ -26,6 +26,34 @@ fn guarded(tmp: &Path, script: &str) -> Output {
         .env("TMPDIR", tmp)
         .output()
         .unwrap()
+}
+
+/// `scripts/tmpdir-guard.sh --slots-of REPO sh -c SCRIPT` with `tmp` as the caller's temporary
+/// directory and `REPO` as the script's first argument.
+fn guarded_keeping(tmp: &Path, repo: &Path, script: &str) -> Output {
+    Command::new("sh")
+        .arg(self::script())
+        .arg("--slots-of")
+        .arg(repo)
+        .args(["sh", "-c", script, "sh"])
+        .arg(repo.canonicalize().unwrap())
+        .env("TMPDIR", tmp)
+        .output()
+        .unwrap()
+}
+
+/// Makes the slot directory `key` of the repository at `repo` under `tmp`, as the mutation engine
+/// does (ADR-141 §3), with one file in its first slot.
+fn slots(tmp: &Path, key: &str, repo: &Path) -> PathBuf {
+    let dir = tmp.join("cupel-mutate").join(key);
+    std::fs::create_dir_all(dir.join("rust/0")).unwrap();
+    std::fs::write(dir.join("rust/0/built"), "built\n").unwrap();
+    std::fs::write(
+        dir.join("repository"),
+        repo.canonicalize().unwrap().display().to_string(),
+    )
+    .unwrap();
+    dir
 }
 
 /// The names of what `dir` holds.
@@ -93,6 +121,67 @@ fn an_empty_mutation_slot_root_passes() {
     assert_eq!(
         (output.status.code(), text(&output.stderr).as_str()),
         (Some(0), "")
+    );
+    assert_eq!(entries(tmp.path()), Vec::<String>::new());
+}
+
+/// With `--slots-of REPO`, the slots the mutation engine keeps for REPO in the caller's temporary
+/// directory are in the command's for it to use, and are back in the caller's afterwards with what
+/// the command added; they are not a leak.
+#[test]
+fn the_named_repositorys_slots_are_lent_to_the_command_and_kept() {
+    let tmp = TempDir::new().unwrap();
+    let repo = TempDir::new().unwrap();
+    let kept = slots(tmp.path(), "aaaaaaaaaaaaaaaa", repo.path());
+    let output = guarded_keeping(
+        tmp.path(),
+        repo.path(),
+        r#"slot=$TMPDIR/cupel-mutate/aaaaaaaaaaaaaaaa/rust/0 && cat "$slot/built" && echo again > "$slot/again""#,
+    );
+    assert_eq!(
+        (output.status.code(), text(&output.stdout), text(&output.stderr)),
+        (Some(0), "built\n".to_owned(), String::new())
+    );
+    assert_eq!(entries(&kept.join("rust/0")), ["again", "built"]);
+    assert_eq!(entries(tmp.path()), ["cupel-mutate"]);
+}
+
+/// Slots the command makes for REPO, on a first run, are kept in the caller's temporary directory.
+#[test]
+fn slots_the_command_makes_for_the_named_repository_are_kept() {
+    let tmp = TempDir::new().unwrap();
+    let repo = TempDir::new().unwrap();
+    let output = guarded_keeping(
+        tmp.path(),
+        repo.path(),
+        r#"dir=$TMPDIR/cupel-mutate/bbbbbbbbbbbbbbbb && mkdir -p "$dir/rust/0" && printf '%s' "$1" > "$dir/repository""#,
+    );
+    assert_eq!(
+        (output.status.code(), text(&output.stderr)),
+        (Some(0), String::new())
+    );
+    assert_eq!(
+        entries(&tmp.path().join("cupel-mutate/bbbbbbbbbbbbbbbb")),
+        ["repository", "rust"]
+    );
+}
+
+/// Slots of any other repository the command makes are still a leak, named and removed.
+#[test]
+fn another_repositorys_slots_are_still_a_leak() {
+    let tmp = TempDir::new().unwrap();
+    let repo = TempDir::new().unwrap();
+    let other = TempDir::new().unwrap();
+    let script = format!(
+        r#"dir=$TMPDIR/cupel-mutate/cccccccccccccccc && mkdir -p "$dir" && printf '%s' '{}' > "$dir/repository""#,
+        other.path().canonicalize().unwrap().display()
+    );
+    let output = guarded_keeping(tmp.path(), repo.path(), &script);
+    let stderr = text(&output.stderr);
+    assert_eq!(output.status.code(), Some(1), "{stderr}");
+    assert!(
+        stderr.ends_with("left 1 entries in its temporary directory:\ncupel-mutate/cccccccccccccccc\n"),
+        "{stderr}"
     );
     assert_eq!(entries(tmp.path()), Vec::<String>::new());
 }

@@ -62,11 +62,16 @@ parity:
 # verify the build itself wrote nothing outside .gitignore (see ADR-010). In an agent checkout
 # everything the check compiles is compiled first, in one step under the machine-wide lock
 # (scripts/heavy.sh, at the caller's priority), and the lint, tests, and docs then run outside it
-# against what was built (ADR-156 §3). The lint, tests, and docs run under scripts/tmpdir-guard.sh: with a
-# temporary directory of their own as TMPDIR, the check failing when they leave anything in it.
+# against what was built (ADR-156 §3). The build step, lint, tests, and docs run under scripts/tmpdir-guard.sh:
+# with a temporary directory of their own as TMPDIR, the check failing when they leave anything in it. First,
+# scripts/target-sweep.sh brings the checkout's build directory under TARGET_CAP when it has grown past it
+# (ADR-156 §6).
+TARGET_CAP ?= 40GB
+
 check:
+	@scripts/target-sweep.sh $(TARGET_CAP)
 	@mkdir -p target && $(TREE_STATE) > $(TREE_STATE_FILE)
-	$(if $(AGENT_CHECKOUT),scripts/heavy.sh $(MAKE) --no-print-directory check-build)
+	$(if $(AGENT_CHECKOUT),scripts/heavy.sh scripts/tmpdir-guard.sh $(MAKE) --no-print-directory check-build)
 	@scripts/tmpdir-guard.sh $(MAKE) --no-print-directory lint test doc
 	@$(MAKE) --no-print-directory clean-check EXPECTED_TREE_STATE="$$(cat $(TREE_STATE_FILE))"
 
@@ -113,15 +118,20 @@ DOGFOOD_BUDGET ?= 30m
 # chains first (CUPEL_HEAVY_PRIORITY=first); it refuses to start from a working tree that was deleted
 # under the invoking shell. `make check` takes the lock only in an agent checkout and only around its
 # build step (ADR-156 §3); the suite is deterministic under load (ADR-145).
+# Every dogfood, in any checkout, builds and tests at half the cores (DOGFOOD_CAP, ADR-156 §7), and runs
+# under scripts/tmpdir-guard.sh as `make check`'s suites do, failing when the gate or the suite it runs
+# leaves anything in its temporary directory; this checkout's mutation slots stay in the caller's
+# temporary directory across runs (`--slots-of .`).
 # The tree gate's `base` rules compare with the committed baseline, `.cupel/baseline.json`, a
 # tree run on `main` (ADR-140); it is imported first so a fresh store (a CI runner's, or one just
 # deleted) has the reference. `make baseline` refreshes it from the last tree run here.
 CUPEL = $(CARGO) run --quiet --package cupel-cli --
 BASELINE = .cupel/baseline.json
+DOGFOOD_CAP := $(shell $(DEV_ENV) cupel_dev_half_cores)
 
 dogfood:
 	$(if $(filter tree,$(DOGFOOD_SCOPE)),$(CUPEL) baseline import $(BASELINE) --write --format text >/dev/null)
-	scripts/heavy.sh $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep $(if $(DOGFOOD_BUDGET),--budget $(DOGFOOD_BUDGET) )--gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
+	$(DOGFOOD_CAP) scripts/heavy.sh scripts/tmpdir-guard.sh --slots-of . $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep $(if $(DOGFOOD_BUDGET),--budget $(DOGFOOD_BUDGET) )--gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
 
 # After a green `make dogfood DOGFOOD_SCOPE=tree`: the store's baseline becomes that run and is
 # exported to the committed file, so the ratchets move with the commit that lowered them.

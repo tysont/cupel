@@ -17,11 +17,17 @@ cupel_dev_agent() {
 	[ "$cupel_dev_git_dir" != "$cupel_dev_common_dir" ]
 }
 
-# cupel_dev_cap prints, in an agent checkout, cargo's jobs and nextest's and libtest's test threads at half the
-# online cores (at least one), so agents' builds and tests leave the machine room; elsewhere nothing. Every build
-# and test run below make reads them, those Cupel's tests start included; an explicit flag still wins.
+# cupel_dev_cap prints, in an agent checkout, the half-cores cap (cupel_dev_half_cores), so agents' builds and
+# tests leave the machine room; elsewhere nothing. Every build and test run below make reads it, those Cupel's
+# tests start included; an explicit flag still wins.
 cupel_dev_cap() {
 	cupel_dev_agent || return 0
+	cupel_dev_half_cores
+}
+
+# cupel_dev_half_cores prints cargo's jobs and nextest's and libtest's test threads at half the online cores (at
+# least one), in any checkout. `make dogfood` runs under it everywhere (ADR-156 §7).
+cupel_dev_half_cores() {
 	cupel_dev_half=$(($(getconf _NPROCESSORS_ONLN) / 2))
 	[ "$cupel_dev_half" -ge 1 ] || cupel_dev_half=1
 	echo "CARGO_BUILD_JOBS=$cupel_dev_half"
