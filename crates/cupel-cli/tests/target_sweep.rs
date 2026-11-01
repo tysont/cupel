@@ -8,7 +8,7 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use support::{recipe, shellcheck, workspace};
+use support::{assert_runnable_script, recipe, workspace};
 use tempfile::TempDir;
 
 fn script() -> PathBuf {
@@ -71,11 +71,7 @@ fn sweep(dir: &Path, bin: &Path, cap: &str) -> Output {
 /// `make check` runs the script directly, so it is executable; and it passes `shellcheck`.
 #[test]
 fn the_script_is_executable_and_passes_shellcheck() {
-    let mode = fs::metadata(script()).unwrap().permissions().mode();
-    assert_eq!(mode & 0o111, 0o111, "{mode:o}");
-    if let Some(found) = shellcheck("scripts/target-sweep.sh") {
-        assert_eq!(found, (Some(0), String::new()));
-    }
+    assert_runnable_script("scripts/target-sweep.sh");
 }
 
 /// A build directory under the cap is left alone: cargo-sweep does not run and nothing is printed.
@@ -85,7 +81,11 @@ fn a_build_directory_under_the_cap_is_left_alone() {
     fake_sweep(&bin);
     let output = sweep(dir.path(), &bin, "1MB");
     assert_eq!(
-        (output.status.code(), text(&output.stdout), text(&output.stderr)),
+        (
+            output.status.code(),
+            text(&output.stdout),
+            text(&output.stderr)
+        ),
         (Some(0), String::new(), String::new())
     );
     assert!(!dir.path().join("swept").exists());

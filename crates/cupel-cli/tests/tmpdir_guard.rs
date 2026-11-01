@@ -3,11 +3,10 @@
 #![cfg(unix)]
 mod support;
 
-use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
-use support::{recipe, shellcheck, workspace};
+use support::{assert_runnable_script, recipe, workspace};
 use tempfile::TempDir;
 
 fn script() -> PathBuf {
@@ -69,11 +68,7 @@ fn entries(dir: &Path) -> Vec<String> {
 /// `make check` runs the script directly, so it is executable; and it passes `shellcheck`.
 #[test]
 fn the_script_is_executable_and_passes_shellcheck() {
-    let mode = std::fs::metadata(script()).unwrap().permissions().mode();
-    assert_eq!(mode & 0o111, 0o111, "{mode:o}");
-    if let Some(found) = shellcheck("scripts/tmpdir-guard.sh") {
-        assert_eq!(found, (Some(0), String::new()));
-    }
+    assert_runnable_script("scripts/tmpdir-guard.sh");
 }
 
 /// The command runs with a fresh directory under the caller's as its TMPDIR, which is gone after it.
@@ -139,7 +134,11 @@ fn the_named_repositorys_slots_are_lent_to_the_command_and_kept() {
         r#"slot=$TMPDIR/cupel-mutate/aaaaaaaaaaaaaaaa/rust/0 && cat "$slot/built" && echo again > "$slot/again""#,
     );
     assert_eq!(
-        (output.status.code(), text(&output.stdout), text(&output.stderr)),
+        (
+            output.status.code(),
+            text(&output.stdout),
+            text(&output.stderr)
+        ),
         (Some(0), "built\n".to_owned(), String::new())
     );
     assert_eq!(entries(&kept.join("rust/0")), ["again", "built"]);
@@ -180,7 +179,9 @@ fn another_repositorys_slots_are_still_a_leak() {
     let stderr = text(&output.stderr);
     assert_eq!(output.status.code(), Some(1), "{stderr}");
     assert!(
-        stderr.ends_with("left 1 entries in its temporary directory:\ncupel-mutate/cccccccccccccccc\n"),
+        stderr.ends_with(
+            "left 1 entries in its temporary directory:\ncupel-mutate/cccccccccccccccc\n"
+        ),
         "{stderr}"
     );
     assert_eq!(entries(tmp.path()), Vec::<String>::new());
