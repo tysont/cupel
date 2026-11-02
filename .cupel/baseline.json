@@ -1,23 +1,23 @@
 {
   "cupel": {
-    "version": "0.2.1",
+    "version": "0.2.2",
     "schema": "https://tysont.github.io/cupel/schema/v1/run.json"
   },
   "run": {
-    "id": "run_01M69SA6DH3XVR9BRC4JF9NPH5",
+    "id": "run_01M6CW50SM7D876GE0ZSK5HTR9",
     "verb": "check",
-    "started": "2026-10-31T20:09:44Z",
-    "duration_ms": 1585012,
+    "started": "2026-11-02T00:57:04Z",
+    "duration_ms": 1697375,
     "git": {
-      "sha": "881079463d8c5c18d46b7694906d869f89c3fb16",
+      "sha": "758bbe617f9fed4bcefe6e9102ba540a7ba25ff8",
       "dirty": false,
       "base": null,
       "branch": "main"
     },
     "scope": {
       "mode": "tree",
-      "files": 592,
-      "symbols": 7920,
+      "files": 593,
+      "symbols": 7974,
       "roots": [
         "."
       ],
@@ -31,12 +31,12 @@
     },
     "depth": "deep",
     "budget_ms": null,
-    "seed": 2531755413109938938,
+    "seed": 17270247720620552025,
     "toolchain": {},
     "suite": {
       "rust": {
         "mode": "full",
-        "rerun": 2857,
+        "rerun": 2876,
         "reused": 0,
         "tagged": 0,
         "joint": "tool.llvm-cov-nextest",
@@ -44,22 +44,22 @@
           {
             "phase": "build",
             "dir": ".",
-            "duration_ms": 82000
+            "duration_ms": 61000
           },
           {
             "phase": "test",
             "dir": ".",
-            "duration_ms": 929280
+            "duration_ms": 994341
           },
           {
             "phase": "export",
             "dir": ".",
-            "duration_ms": 77671
+            "duration_ms": 108032
           },
           {
             "phase": "report",
             "dir": ".",
-            "duration_ms": 13777
+            "duration_ms": 21936
           }
         ]
       }
@@ -145,7 +145,7 @@
       ]
     },
     "baseline": {
-      "id": "run_01M5DJ7HDSRGNQ7RPMRBEB580Y",
+      "id": "run_01M69SA6DH3XVR9BRC4JF9NPH5",
       "name": "default"
     }
   },
@@ -237,7 +237,7 @@
         "value": 0.0
       },
       "findings": 329,
-      "duration_ms": 427520,
+      "duration_ms": 454181,
       "skipped": null,
       "oracle": null
     },
@@ -303,7 +303,7 @@
         "value": 0.0
       },
       "findings": 0,
-      "duration_ms": 110,
+      "duration_ms": 212,
       "skipped": null,
       "oracle": null,
       "notes": [
@@ -333,7 +333,7 @@
         "value": 0.0
       },
       "findings": 0,
-      "duration_ms": 391,
+      "duration_ms": 514,
       "skipped": null,
       "oracle": null,
       "notes": [
@@ -359,7 +359,7 @@
       "metrics": {},
       "delta": null,
       "findings": 0,
-      "duration_ms": 5,
+      "duration_ms": 4,
       "skipped": null,
       "oracle": null,
       "notes": [
@@ -385,7 +385,7 @@
         "value": 0.0
       },
       "findings": 0,
-      "duration_ms": 27688,
+      "duration_ms": 28142,
       "skipped": null,
       "oracle": null,
       "notes": [
@@ -420,19 +420,19 @@
       "score": {
         "value": 155.0,
         "unit": "pairs",
-        "n": 6293
+        "n": 6339
       },
       "metrics": {
-        "clusters": 17.0,
+        "clusters": 15.0,
         "max_jaccard": 1.0,
-        "pairs": 155.0
+        "pairs": 145.0
       },
       "delta": {
         "vs": "baseline",
-        "value": -9.0
+        "value": 0.0
       },
       "findings": 85,
-      "duration_ms": 1248,
+      "duration_ms": 1052,
       "skipped": null,
       "oracle": null
     },
@@ -444,7 +444,7 @@
       "score": {
         "value": 10.0,
         "unit": "cyclomatic_max",
-        "n": 7920
+        "n": 7974
       },
       "metrics": {
         "cognitive_max": 15.0,
@@ -458,7 +458,7 @@
         "value": 0.0
       },
       "findings": 0,
-      "duration_ms": 997,
+      "duration_ms": 1091,
       "skipped": null,
       "oracle": null
     },
@@ -470,18 +470,18 @@
       "score": {
         "value": 20.0,
         "unit": "max",
-        "n": 4182
+        "n": 4194
       },
       "metrics": {
         "max": 20.0,
-        "mean": 2.1421869131592213
+        "mean": 2.1451132032445623
       },
       "delta": {
         "vs": "baseline",
         "value": 0.0
       },
-      "findings": 490,
-      "duration_ms": 2157,
+      "findings": 492,
+      "duration_ms": 2133,
       "skipped": null,
       "oracle": null
     },
@@ -493,7 +493,7 @@
       "score": {
         "value": 0.0,
         "unit": "dead_symbols",
-        "n": 7920
+        "n": 7974
       },
       "metrics": {
         "dead_exports": 0.0,
@@ -504,7 +504,7 @@
         "value": 0.0
       },
       "findings": 0,
-      "duration_ms": 6338,
+      "duration_ms": 6561,
       "skipped": null,
       "oracle": null
     },
@@ -516,7 +516,7 @@
       "score": {
         "value": 0.0,
         "unit": "cycles",
-        "n": 592
+        "n": 593
       },
       "metrics": {
         "cycles": 0.0,
@@ -528,7 +528,7 @@
         "value": 0.0
       },
       "findings": 0,
-      "duration_ms": 173,
+      "duration_ms": 215,
       "skipped": null,
       "oracle": null
     },
@@ -538,23 +538,23 @@
       "tier": 2,
       "cost": "quick",
       "score": {
-        "value": 2.633130962705984,
+        "value": 2.631669535283993,
         "unit": "assertions_per_test",
-        "n": 2306
+        "n": 2324
       },
       "metrics": {
-        "assertions_per_public_function": 6.2079326923076925,
-        "assertions_per_test": 2.633130962705984,
+        "assertions_per_public_function": 6.237695078031212,
+        "assertions_per_test": 2.631669535283993,
         "sparse_files": 28.0,
         "sparse_tests": 216.0,
-        "tested_public_functions": 832.0
+        "tested_public_functions": 833.0
       },
       "delta": {
         "vs": "baseline",
-        "value": 0.06921393424481703
+        "value": -0.0014614274219906245
       },
       "findings": 244,
-      "duration_ms": 591,
+      "duration_ms": 741,
       "skipped": null,
       "oracle": null
     },
@@ -564,21 +564,21 @@
       "tier": 2,
       "cost": "standard",
       "score": {
-        "value": 0.971472225710578,
+        "value": 0.9708018533205326,
         "unit": "line_ratio",
-        "n": 47778
+        "n": 47914
       },
       "metrics": {
-        "line": 0.971472225710578,
-        "lines": 47778.0,
+        "line": 0.9708018533205326,
+        "lines": 47914.0,
         "uncovered": 42.0
       },
       "delta": {
         "vs": "baseline",
-        "value": 0.002715009620428921
+        "value": -0.000670372390045415
       },
       "findings": 42,
-      "duration_ms": 2068,
+      "duration_ms": 2262,
       "skipped": null,
       "oracle": null,
       "notes": [
@@ -591,21 +591,21 @@
       "tier": 2,
       "cost": "quick",
       "score": {
-        "value": 2.633130962705984,
+        "value": 2.631669535283993,
         "unit": "assertion_density",
-        "n": 2306
+        "n": 2324
       },
       "metrics": {
-        "assertion_density": 2.633130962705984,
+        "assertion_density": 2.631669535283993,
         "no_assertion": 0.0,
-        "weak_ratio": 0.11182476943346507
+        "weak_ratio": 0.11281883584041856
       },
       "delta": {
         "vs": "baseline",
-        "value": 0.06921393424481703
+        "value": -0.0014614274219906245
       },
       "findings": 0,
-      "duration_ms": 99,
+      "duration_ms": 109,
       "skipped": null,
       "oracle": null
     },
@@ -1774,8 +1774,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 47,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 4
       },
       "action": {
@@ -1920,8 +1920,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 3
       },
       "action": {
@@ -2588,7 +2588,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-adapt/src/coverage/tool.rs",
       "suppress": "cupel suppress fnd_3ac6d7 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -2810,8 +2810,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 3
       },
       "action": {
@@ -3047,7 +3047,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_c69964a56067a105",
       "suppress": "cupel suppress fnd_f203ad --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -3368,7 +3368,7 @@
       "id": "fnd_cdb895",
       "check": "static.clones",
       "kind": "clone.pair",
-      "severity": "warn",
+      "severity": "info",
       "confidence": 1.0,
       "tier": 0,
       "symbol": {
@@ -3495,6 +3495,7 @@
           "nodes": 49,
           "symbol": "config::gate::Comparison::symbol"
         },
+        "shape": "enum-mapping",
         "threshold": 0.82
       },
       "action": {
@@ -5409,8 +5410,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 47,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 4
       },
       "action": {
@@ -5524,8 +5525,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 44,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 6
       },
       "action": {
@@ -7813,7 +7814,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_2d0cdb5556ed64e6",
       "suppress": "cupel suppress fnd_04c451 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -7838,8 +7839,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 5
       },
       "action": {
@@ -7914,8 +7915,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 5
       },
       "action": {
@@ -8004,7 +8005,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_d2b8eec1f275cb9f",
       "suppress": "cupel suppress fnd_ad8324 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -8201,7 +8202,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-adapt/src/per_test/llvm_cov.rs",
       "suppress": "cupel suppress fnd_57b833 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -8240,7 +8241,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_ed0ee5a6e3c132a4",
       "suppress": "cupel suppress fnd_72f83c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -8367,7 +8368,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_6a66955d6444310d",
       "suppress": "cupel suppress fnd_b40335 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -8406,7 +8407,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_1d237ea820811200",
       "suppress": "cupel suppress fnd_e0a4bf --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -10793,7 +10794,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-adapt/src/runner.rs",
       "suppress": "cupel suppress fnd_d9e25f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -10988,7 +10989,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_bbd173f96e2ffb25",
       "suppress": "cupel suppress fnd_bcf4b0 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11027,7 +11028,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_c5bb46d41a77852f",
       "suppress": "cupel suppress fnd_0fe64b --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11066,7 +11067,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_f6bc7a6c5e45ebe1",
       "suppress": "cupel suppress fnd_e03e9e --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11105,7 +11106,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_c55635869c4c3cca",
       "suppress": "cupel suppress fnd_9647b5 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11183,7 +11184,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_536e15d792ead6a0",
       "suppress": "cupel suppress fnd_5fcef7 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11218,7 +11219,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-adapt/src/suite/llvm_cov_nextest.rs",
       "suppress": "cupel suppress fnd_e7a2fe --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11257,7 +11258,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_879f65ce2fd1b04f",
       "suppress": "cupel suppress fnd_6f49af --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11296,7 +11297,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_f93e3302290800ac",
       "suppress": "cupel suppress fnd_73f5c4 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11335,7 +11336,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_069770535fe0dd8a",
       "suppress": "cupel suppress fnd_0bf7ec --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11374,7 +11375,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_46b578e83711c673",
       "suppress": "cupel suppress fnd_3bd068 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11413,7 +11414,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_8752640bf87c892f",
       "suppress": "cupel suppress fnd_e9de60 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11452,7 +11453,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_d70da3c83d089c69",
       "suppress": "cupel suppress fnd_13df8b --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11477,8 +11478,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 3
       },
       "action": {
@@ -11489,7 +11490,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-adapt/src/suite/mod.rs",
       "suppress": "cupel suppress fnd_83e13a --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11524,7 +11525,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-adapt/src/suite/mod.rs",
       "suppress": "cupel suppress fnd_3c3028 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11563,7 +11564,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_841e09056966e697",
       "suppress": "cupel suppress fnd_7bc1ce --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -11602,7 +11603,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_fca329ec1c725c4c",
       "suppress": "cupel suppress fnd_300742 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -13195,8 +13196,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 47,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 4
       },
       "action": {
@@ -13477,8 +13478,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 16
       },
       "action": {
@@ -13734,7 +13735,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-adapt/tests/suite.rs",
       "suppress": "cupel suppress fnd_4f75c5 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -13769,7 +13770,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-adapt/tests/suite.rs",
       "suppress": "cupel suppress fnd_fb00e7 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -13804,7 +13805,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-adapt/tests/suite.rs",
       "suppress": "cupel suppress fnd_1b4307 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -15079,7 +15080,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_037dbfe32fd4ee57",
       "suppress": "cupel suppress fnd_496447 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -15118,7 +15119,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_a4b6451204805277",
       "suppress": "cupel suppress fnd_6be052 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -16849,9 +16850,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 281,
+        "line": 300,
         "col": 1,
-        "end_line": 292,
+        "end_line": 320,
         "end_col": 2
       },
       "title": "`static_clones::metrics` and `tests_quality::metrics` (crates/cupel-checks/src/tests_quality.rs:225) are type-2 clones (jaccard 1.00)",
@@ -16863,12 +16864,12 @@
         "left": {
           "col": 1,
           "end_col": 2,
-          "end_line": 292,
+          "end_line": 320,
           "file": "crates/cupel-checks/src/static_clones.rs",
           "hash": "sh_95551cdd7c748d85",
           "lang": "rust",
-          "line": 281,
-          "lines": 12,
+          "line": 300,
+          "lines": 21,
           "nodes": 32,
           "symbol": "static_clones::metrics"
         },
@@ -16885,7 +16886,7 @@
             "kind": "literal",
             "occurrences": 1,
             "values": [
-              "\"Pairs of symbols at least `threshold` similar.\"",
+              "\"Pairs of symbols at least `threshold` similar, apart from enum mappings.\"",
               "\"Assertions per test in scope; the score.\""
             ]
           },
@@ -16901,7 +16902,7 @@
             "kind": "literal",
             "occurrences": 1,
             "values": [
-              "\"Groups of three or more similar symbols.\"",
+              "\"Groups of three or more similar symbols, apart from enum mappings.\"",
               "\"Weak assertions as a share of all assertions in scope.\""
             ]
           },
@@ -16917,7 +16918,7 @@
             "kind": "literal",
             "occurrences": 1,
             "values": [
-              "\"The highest similarity of any pair.\"",
+              "\"The highest similarity of any pair, apart from enum mappings.\"",
               "\"Tests in scope that assert nothing.\""
             ]
           },
@@ -16985,9 +16986,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 299,
+        "line": 327,
         "col": 5,
-        "end_line": 302,
+        "end_line": 330,
         "end_col": 6
       },
       "title": "`static_clones::StaticClones::plan` and `static_deps::StaticDeps::plan` (crates/cupel-checks/src/static_deps.rs:186) are type-3 clones (jaccard 0.86)",
@@ -17000,9 +17001,9 @@
             "location": {
               "col": 21,
               "end_col": 33,
-              "end_line": 301,
+              "end_line": 329,
               "file": "crates/cupel-checks/src/static_clones.rs",
-              "line": 301
+              "line": 329
             },
             "nodes": 1,
             "symbol": "static_deps::StaticDeps::plan"
@@ -17024,11 +17025,11 @@
         "left": {
           "col": 5,
           "end_col": 6,
-          "end_line": 302,
+          "end_line": 330,
           "file": "crates/cupel-checks/src/static_clones.rs",
           "hash": "sh_6920f009b6cf7496",
           "lang": "rust",
-          "line": 299,
+          "line": 327,
           "lines": 4,
           "nodes": 57,
           "symbol": "static_clones::StaticClones::plan"
@@ -17073,9 +17074,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 360,
+        "line": 392,
         "col": 5,
-        "end_line": 365,
+        "end_line": 397,
         "end_col": 6
       },
       "title": "`static_clones::StaticClones::combine_metric` and `static_deps::StaticDeps::combine_metric` (crates/cupel-checks/src/static_deps.rs:252) are type-2 clones (jaccard 1.00)",
@@ -17087,11 +17088,11 @@
         "left": {
           "col": 5,
           "end_col": 6,
-          "end_line": 365,
+          "end_line": 397,
           "file": "crates/cupel-checks/src/static_clones.rs",
           "hash": "sh_e20e770d79880cc7",
           "lang": "rust",
-          "line": 360,
+          "line": 392,
           "lines": 6,
           "nodes": 47,
           "symbol": "static_clones::StaticClones::combine_metric"
@@ -17145,9 +17146,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 389,
+        "line": 423,
         "col": 1,
-        "end_line": 395,
+        "end_line": 429,
         "end_col": 2
       },
       "title": "`static_clones::nested` has CRAP 5.0 (watch at 5, high at 30)",
@@ -17184,9 +17185,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 406,
+        "line": 440,
         "col": 1,
-        "end_line": 431,
+        "end_line": 465,
         "end_col": 2
       },
       "title": "`static_clones::groups` has CRAP 5.0 (watch at 5, high at 30)",
@@ -17223,9 +17224,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 649,
+        "line": 699,
         "col": 5,
-        "end_line": 692,
+        "end_line": 742,
         "end_col": 6
       },
       "title": "`static_clones::Differences::of` has CRAP 8.0 (watch at 5, high at 30)",
@@ -17245,7 +17246,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_e0b92411ee5de6d4",
       "suppress": "cupel suppress fnd_cba330 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -17262,9 +17263,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 700,
+        "line": 750,
         "col": 1,
-        "end_line": 727,
+        "end_line": 777,
         "end_col": 2
       },
       "title": "`static_clones::align` has CRAP 6.0 (watch at 5, high at 30)",
@@ -17284,7 +17285,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_d3b6b7880928d92c",
       "suppress": "cupel suppress fnd_cc1163 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -17301,9 +17302,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 731,
+        "line": 781,
         "col": 1,
-        "end_line": 755,
+        "end_line": 805,
         "end_col": 2
       },
       "title": "`static_clones::common_subsequence` has CRAP 8.0 (watch at 5, high at 30)",
@@ -17323,7 +17324,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_30af13fdf53f3edb",
       "suppress": "cupel suppress fnd_dae007 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -17340,9 +17341,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 766,
+        "line": 816,
         "col": 1,
-        "end_line": 808,
+        "end_line": 858,
         "end_col": 2
       },
       "title": "`static_clones::common_subtree` has CRAP 5.0 (watch at 5, high at 30)",
@@ -17362,7 +17363,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_e7b299e21b719ed2",
       "suppress": "cupel suppress fnd_68ff83 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -17379,9 +17380,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 813,
+        "line": 863,
         "col": 5,
-        "end_line": 832,
+        "end_line": 882,
         "end_col": 6
       },
       "title": "`static_clones::shapes::visit` has CRAP 5.0 (watch at 5, high at 30)",
@@ -17401,7 +17402,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_f69e150b345baaa3",
       "suppress": "cupel suppress fnd_d604a3 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -17418,9 +17419,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/src/static_clones.rs",
-        "line": 840,
+        "line": 890,
         "col": 1,
-        "end_line": 879,
+        "end_line": 929,
         "end_col": 2
       },
       "title": "`static_clones::parameters` has CRAP 7.0 (watch at 5, high at 30)",
@@ -17440,6 +17441,84 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_6937b6f76f1007bd",
       "suppress": "cupel suppress fnd_530568 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_51c9f7",
+      "check": "static.crap",
+      "kind": "crap.watch",
+      "severity": "info",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "static_clones::enum_mapping",
+        "hash": "sh_2ac04a7cafcf0ee2",
+        "lang": "rust"
+      },
+      "location": {
+        "file": "crates/cupel-checks/src/static_clones.rs",
+        "line": 936,
+        "col": 1,
+        "end_line": 957,
+        "end_col": 2
+      },
+      "title": "`static_clones::enum_mapping` has CRAP 6.0 (watch at 5, high at 30)",
+      "detail": null,
+      "evidence": {
+        "coverage": 1.0,
+        "crap": 6.0,
+        "cyclomatic": 6,
+        "high": 30,
+        "watch": 5
+      },
+      "action": {
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `enum_mapping` when changing it: keep its CRAP below 30 with tests or simpler control flow.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.crap --symbols sh_2ac04a7cafcf0ee2",
+      "suppress": "cupel suppress fnd_51c9f7 --reason '…'",
+      "new_since_baseline": true,
+      "suppressed": false
+    },
+    {
+      "id": "fnd_b77ea0",
+      "check": "static.crap",
+      "kind": "crap.watch",
+      "severity": "info",
+      "confidence": 1.0,
+      "tier": 0,
+      "symbol": {
+        "display": "static_clones::table",
+        "hash": "sh_273e9b780016a841",
+        "lang": "rust"
+      },
+      "location": {
+        "file": "crates/cupel-checks/src/static_clones.rs",
+        "line": 970,
+        "col": 1,
+        "end_line": 988,
+        "end_col": 2
+      },
+      "title": "`static_clones::table` has CRAP 8.0 (watch at 5, high at 30)",
+      "detail": null,
+      "evidence": {
+        "coverage": 1.0,
+        "crap": 8.0,
+        "cyclomatic": 8,
+        "high": 30,
+        "watch": 5
+      },
+      "action": {
+        "kind": "review",
+        "priority": 2,
+        "summary": "Review `table` when changing it: keep its CRAP below 30 with tests or simpler control flow.",
+        "hints": {}
+      },
+      "repro": "cupel check --only static.crap --symbols sh_273e9b780016a841",
+      "suppress": "cupel suppress fnd_b77ea0 --reason '…'",
       "new_since_baseline": true,
       "suppressed": false
     },
@@ -17552,7 +17631,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_2257c7c2152d6cbc",
       "suppress": "cupel suppress fnd_c852a1 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -17986,7 +18065,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_1b561c15c43fd864",
       "suppress": "cupel suppress fnd_68c38d --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18208,7 +18287,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_4bd122537327c1c9",
       "suppress": "cupel suppress fnd_c25e0b --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18424,7 +18503,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_1545b367bc5a0ec6",
       "suppress": "cupel suppress fnd_b164df --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18463,7 +18542,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_de76e48f227572cc",
       "suppress": "cupel suppress fnd_eca968 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18502,7 +18581,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_92b51e38dbfcbb8a",
       "suppress": "cupel suppress fnd_cac40c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18541,7 +18620,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_dd097075522bd6e5",
       "suppress": "cupel suppress fnd_8cbdb2 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18580,7 +18659,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_5ea077721884c095",
       "suppress": "cupel suppress fnd_14c71e --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18658,7 +18737,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_c4db8efb40d98206",
       "suppress": "cupel suppress fnd_c9a7b4 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18736,7 +18815,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_5af5203b3cbb7707",
       "suppress": "cupel suppress fnd_dbf735 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -18775,7 +18854,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_35284009fbca12e5",
       "suppress": "cupel suppress fnd_6036b5 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -19009,7 +19088,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_33bc0fcfbc2a685b",
       "suppress": "cupel suppress fnd_2e04f7 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -19087,7 +19166,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_33831a7de60d6ec0",
       "suppress": "cupel suppress fnd_4dc79d --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -19126,7 +19205,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_f0cda5fcd4ade63d",
       "suppress": "cupel suppress fnd_1a71fe --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -19606,8 +19685,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 3
       },
       "action": {
@@ -19670,9 +19749,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/tests/static_clones.rs",
-        "line": 234,
+        "line": 237,
         "col": 1,
-        "end_line": 249,
+        "end_line": 252,
         "end_col": 2
       },
       "title": "`crates::cupel-checks::tests::static_clones::the_manifest_states_its_known_limitation` and `crates::cupel-checks::tests::static_dead_code::the_manifest_states_its_known_limitation` (crates/cupel-checks/tests/static_dead_code.rs:270) are type-2 clones (jaccard 1.00)",
@@ -19684,11 +19763,11 @@
         "left": {
           "col": 1,
           "end_col": 2,
-          "end_line": 249,
+          "end_line": 252,
           "file": "crates/cupel-checks/tests/static_clones.rs",
           "hash": "sh_874a0fed8a91bc50",
           "lang": "rust",
-          "line": 234,
+          "line": 237,
           "lines": 16,
           "nodes": 47,
           "symbol": "crates::cupel-checks::tests::static_clones::the_manifest_states_its_known_limitation"
@@ -19750,9 +19829,9 @@
       },
       "location": {
         "file": "crates/cupel-checks/tests/static_clones.rs",
-        "line": 687,
+        "line": 690,
         "col": 1,
-        "end_line": 704,
+        "end_line": 707,
         "end_col": 2
       },
       "title": "`crates::cupel-checks::tests::static_clones::counts_add_up_across_families_and_similarity_takes_the_largest` and `crates::cupel-checks::tests::static_deps::counts_add_up_across_languages_and_distance_takes_the_largest` (crates/cupel-checks/tests/static_deps.rs:650) are type-2 clones (jaccard 1.00)",
@@ -19764,11 +19843,11 @@
         "left": {
           "col": 1,
           "end_col": 2,
-          "end_line": 704,
+          "end_line": 707,
           "file": "crates/cupel-checks/tests/static_clones.rs",
           "hash": "sh_6b4592bcae462436",
           "lang": "rust",
-          "line": 687,
+          "line": 690,
           "lines": 18,
           "nodes": 92,
           "symbol": "crates::cupel-checks::tests::static_clones::counts_add_up_across_families_and_similarity_takes_the_largest"
@@ -20315,7 +20394,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-checks/tests/static_complexity.rs",
       "suppress": "cupel suppress fnd_3c40f0 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -20639,7 +20718,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-checks/tests/static_dead_code.rs",
       "suppress": "cupel suppress fnd_a0935b --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -20674,7 +20753,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-checks/tests/static_dead_code.rs",
       "suppress": "cupel suppress fnd_ea511a --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -20709,7 +20788,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-checks/tests/static_dead_code.rs",
       "suppress": "cupel suppress fnd_9baa18 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -20849,7 +20928,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-checks/tests/static_deps.rs",
       "suppress": "cupel suppress fnd_8825bc --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -21240,7 +21319,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_4ac9fe450bb08bf7",
       "suppress": "cupel suppress fnd_d53d78 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -22437,7 +22516,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_5b8b22e81c410551",
       "suppress": "cupel suppress fnd_79ebfd --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -23028,7 +23107,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_ae16cef3f534afd6",
       "suppress": "cupel suppress fnd_ca20e1 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -25625,7 +25704,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_93e6c31f73bb33de",
       "suppress": "cupel suppress fnd_e08d9a --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -26713,7 +26792,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_2536929246b99c77",
       "suppress": "cupel suppress fnd_c4f55c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -26830,7 +26909,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_49d9282e2610f96a",
       "suppress": "cupel suppress fnd_617bf2 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -27557,8 +27636,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 45,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 5
       },
       "action": {
@@ -27643,7 +27722,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-cli/src/render/text/remedy.rs",
       "suppress": "cupel suppress fnd_cc16be --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -27682,7 +27761,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-cli/src/render/text/remedy.rs",
       "suppress": "cupel suppress fnd_6b8c7f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -28004,7 +28083,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_a968a6f15b637ae5",
       "suppress": "cupel suppress fnd_aa1f5d --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -28804,7 +28883,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-cli/src/tests_verb/impact.rs",
       "suppress": "cupel suppress fnd_8cb9c5 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -28843,7 +28922,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_52d092b3b0315f58",
       "suppress": "cupel suppress fnd_5d88f6 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -28962,7 +29041,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_b3dd00c5b631d952",
       "suppress": "cupel suppress fnd_3188ef --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -28997,7 +29076,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-cli/src/tests_verb/impact.rs",
       "suppress": "cupel suppress fnd_d5e5ef --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -29036,7 +29115,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_8f834e78335aba63",
       "suppress": "cupel suppress fnd_2be6a4 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -29096,8 +29175,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 4
       },
       "action": {
@@ -29178,7 +29257,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-cli/tests/describe.rs",
       "suppress": "cupel suppress fnd_7e8716 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -29560,7 +29639,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-cli/tests/installers.rs",
       "suppress": "cupel suppress fnd_e56876 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -29630,7 +29709,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-cli/tests/release.rs",
       "suppress": "cupel suppress fnd_da8654 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -29700,7 +29779,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-cli/tests/serve.rs",
       "suppress": "cupel suppress fnd_398028 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -30056,7 +30135,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_10220c859ef1097a",
       "suppress": "cupel suppress fnd_b3e90f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -30097,7 +30176,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-core/src/attribution.rs",
       "suppress": "cupel suppress fnd_d0bb53 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -30122,8 +30201,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 3
       },
       "action": {
@@ -30134,7 +30213,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-core/src/attribution.rs",
       "suppress": "cupel suppress fnd_fb4dfe --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -30169,7 +30248,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-core/src/attribution.rs",
       "suppress": "cupel suppress fnd_f59108 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -30535,7 +30614,7 @@
       "id": "fnd_e62977",
       "check": "static.clones",
       "kind": "clone.cluster",
-      "severity": "warn",
+      "severity": "info",
       "confidence": 1.0,
       "tier": 0,
       "symbol": {
@@ -30652,6 +30731,7 @@
             ]
           }
         ],
+        "shape": "enum-mapping",
         "threshold": 0.82
       },
       "action": {
@@ -31187,7 +31267,7 @@
       "id": "fnd_b42df9",
       "check": "static.clones",
       "kind": "clone.cluster",
-      "severity": "warn",
+      "severity": "info",
       "confidence": 1.0,
       "tier": 0,
       "symbol": {
@@ -31286,6 +31366,7 @@
         "min_jaccard": 0.857,
         "pairs": 6,
         "renamed": [],
+        "shape": "enum-mapping",
         "threshold": 0.82
       },
       "action": {
@@ -31578,7 +31659,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_f9ee12f27db06bd0",
       "suppress": "cupel suppress fnd_3063d1 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -31773,7 +31854,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_07050851c202e59c",
       "suppress": "cupel suppress fnd_b1f12d --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -32467,7 +32548,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-core/src/hint.rs",
       "suppress": "cupel suppress fnd_c1c00c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -32506,7 +32587,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-core/src/hint.rs",
       "suppress": "cupel suppress fnd_a4c9a6 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -32545,7 +32626,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_a390787d9a9c2d39",
       "suppress": "cupel suppress fnd_57a7ae --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -32584,7 +32665,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_fcdc60d6b8e21ef5",
       "suppress": "cupel suppress fnd_18adcd --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -32937,7 +33018,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_9a514c8e1daa502d",
       "suppress": "cupel suppress fnd_cb0318 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -32976,7 +33057,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_a78ef90d0f76c5fc",
       "suppress": "cupel suppress fnd_fe5fd4 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -33011,7 +33092,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-core/src/memory.rs",
       "suppress": "cupel suppress fnd_9aa8c5 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -33247,7 +33328,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-core/src/per_test.rs",
       "suppress": "cupel suppress fnd_41634c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -33286,7 +33367,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_c468c7fac9a51285",
       "suppress": "cupel suppress fnd_56cf13 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -33364,7 +33445,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_32748a1ac54c19da",
       "suppress": "cupel suppress fnd_41306b --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -33403,7 +33484,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_21ef3a1f6754e3b5",
       "suppress": "cupel suppress fnd_81bfca --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -33948,7 +34029,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_86e1fa4d9f1bca14",
       "suppress": "cupel suppress fnd_520a11 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -34065,7 +34146,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_42128235e3898c57",
       "suppress": "cupel suppress fnd_48bd93 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -34104,7 +34185,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_70e959af9b59ee3d",
       "suppress": "cupel suppress fnd_b90e0c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -34260,7 +34341,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_1fce9edbcedbfa9f",
       "suppress": "cupel suppress fnd_182243 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -34613,7 +34694,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-core/src/scope.rs",
       "suppress": "cupel suppress fnd_544f59 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -35870,7 +35951,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-core/tests/coverage.rs",
       "suppress": "cupel suppress fnd_97e58c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -36117,8 +36198,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 43,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 7
       },
       "action": {
@@ -36647,8 +36728,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 8
       },
       "action": {
@@ -36952,9 +37033,9 @@
       "symbol": null,
       "location": {
         "file": "crates/cupel-core/tests/process.rs",
-        "line": 430,
+        "line": 432,
         "col": 1,
-        "end_line": 458,
+        "end_line": 460,
         "end_col": 2
       },
       "title": "`a_program_another_process_still_holds_open_for_writing_is_run_once_it_is_closed` makes 1 assertion(s) in 29 lines (max 20 lines per assertion)",
@@ -36999,8 +37080,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 9
       },
       "action": {
@@ -37326,7 +37407,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-core/tests/scheduler.rs",
       "suppress": "cupel suppress fnd_9d77a7 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -37857,7 +37938,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_259616f50e29daf5",
       "suppress": "cupel suppress fnd_88b29d --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -37974,7 +38055,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_99809225ab7a4d0d",
       "suppress": "cupel suppress fnd_3e86ac --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -38052,7 +38133,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_aecae20bebf7f5a1",
       "suppress": "cupel suppress fnd_2e231f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -38589,7 +38670,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_d93b093751e4ddb1",
       "suppress": "cupel suppress fnd_c45a9c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -38710,7 +38791,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_206b2487b03eb64d",
       "suppress": "cupel suppress fnd_5a7376 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -39535,7 +39616,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_39a661de6b7b13b8",
       "suppress": "cupel suppress fnd_3f65d1 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -39963,7 +40044,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_ae867f727a38aeea",
       "suppress": "cupel suppress fnd_a96873 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -40430,7 +40511,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_41fdc3ab416f2f32",
       "suppress": "cupel suppress fnd_735725 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -40705,7 +40786,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_fd9bf4cfc7de37d0",
       "suppress": "cupel suppress fnd_acd89c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -40744,7 +40825,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_5983da5775d03c09",
       "suppress": "cupel suppress fnd_30d885 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -41565,7 +41646,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_0694c3edcf10d2d4",
       "suppress": "cupel suppress fnd_43ec18 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -41604,7 +41685,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_4861b30c4c1105f1",
       "suppress": "cupel suppress fnd_18d0a1 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -41682,7 +41763,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_b81d113917b890cc",
       "suppress": "cupel suppress fnd_a48bc2 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -41799,7 +41880,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_a84214df0b6c489f",
       "suppress": "cupel suppress fnd_f41c19 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42314,7 +42395,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-lang/src/references.rs",
       "suppress": "cupel suppress fnd_253711 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42353,7 +42434,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_b5984598913f91bb",
       "suppress": "cupel suppress fnd_b7c548 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42392,7 +42473,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_08f2be289825cdff",
       "suppress": "cupel suppress fnd_43bdac --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42431,7 +42512,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_c6c67679da0649c4",
       "suppress": "cupel suppress fnd_e30a8a --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42470,7 +42551,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_0520f5f20cc80b54",
       "suppress": "cupel suppress fnd_75bf7d --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42509,7 +42590,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_d656682775990fc3",
       "suppress": "cupel suppress fnd_e5cdac --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42548,7 +42629,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_06da874f2c271652",
       "suppress": "cupel suppress fnd_d394b6 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42587,7 +42668,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_8fe2a2fc64471d30",
       "suppress": "cupel suppress fnd_5bf500 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42626,7 +42707,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_73d94a1fcc3adb4f",
       "suppress": "cupel suppress fnd_77d7f1 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42665,7 +42746,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_4d0f92093aef488a",
       "suppress": "cupel suppress fnd_fe774f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -42782,7 +42863,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_4deb2a783cd15ccb",
       "suppress": "cupel suppress fnd_7aeb78 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -43054,7 +43135,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_aefab2edffabfb02",
       "suppress": "cupel suppress fnd_c97d25 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -43093,7 +43174,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_98a613e2e1db4747",
       "suppress": "cupel suppress fnd_f8975f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -43132,7 +43213,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_7cb0f0f923fe13b7",
       "suppress": "cupel suppress fnd_f2da26 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -43171,7 +43252,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_0f91d4c39af40bec",
       "suppress": "cupel suppress fnd_6b2562 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -43409,7 +43490,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_f115d70204917379",
       "suppress": "cupel suppress fnd_f72e9e --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -43434,8 +43515,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 48,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 11
       },
       "action": {
@@ -45132,7 +45213,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_769de65696e982b8",
       "suppress": "cupel suppress fnd_e8b4cf --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -46102,15 +46183,15 @@
         "end_line": 145,
         "end_col": 2
       },
-      "title": "`crates/cupel-lang/tests/go_decisions.rs` makes 1.18 assertion(s) per test, 44% of the repository's 2.63 (min 50%)",
+      "title": "`crates/cupel-lang/tests/go_decisions.rs` makes 1.18 assertion(s) per test, 45% of the repository's 2.63 (min 50%)",
       "detail": null,
       "evidence": {
         "assertions": 13,
         "file_density_percent_min": 50,
         "file_tests_min": 3,
-        "percent": 44,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "percent": 45,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 11
       },
       "action": {
@@ -46853,8 +46934,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 48,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 7
       },
       "action": {
@@ -47767,7 +47848,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_adc4d0a197c14842",
       "suppress": "cupel suppress fnd_1776ff --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -47957,7 +48038,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/go_tests.rs",
       "suppress": "cupel suppress fnd_601ee4 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -47992,7 +48073,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/java_tests.rs",
       "suppress": "cupel suppress fnd_fc5a84 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -48630,8 +48711,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 49,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 13
       },
       "action": {
@@ -48994,8 +49075,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 47,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 8
       },
       "action": {
@@ -49171,8 +49252,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 47,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 8
       },
       "action": {
@@ -49619,7 +49700,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_6d04932adda8d597",
       "suppress": "cupel suppress fnd_a02a8e --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -49742,7 +49823,7 @@
       },
       "repro": "cupel check --only static.clones --symbols sh_55812702cfcaca92",
       "suppress": "cupel suppress fnd_143051 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -49812,7 +49893,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/references.rs",
       "suppress": "cupel suppress fnd_2a5ddb --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -49847,7 +49928,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/references.rs",
       "suppress": "cupel suppress fnd_0d3b82 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -49865,15 +49946,15 @@
         "end_line": 186,
         "end_col": 2
       },
-      "title": "`crates/cupel-lang/tests/rust_decisions.rs` makes 1.18 assertion(s) per test, 44% of the repository's 2.63 (min 50%)",
+      "title": "`crates/cupel-lang/tests/rust_decisions.rs` makes 1.18 assertion(s) per test, 45% of the repository's 2.63 (min 50%)",
       "detail": null,
       "evidence": {
         "assertions": 13,
         "file_density_percent_min": 50,
         "file_tests_min": 3,
-        "percent": 44,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "percent": 45,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 11
       },
       "action": {
@@ -49954,7 +50035,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/rust_decisions.rs",
       "suppress": "cupel suppress fnd_c072b4 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -49979,8 +50060,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 46,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 9
       },
       "action": {
@@ -50131,7 +50212,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/rust_modules.rs",
       "suppress": "cupel suppress fnd_3adb9d --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -50236,7 +50317,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/rust_symbols.rs",
       "suppress": "cupel suppress fnd_a7f03c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -50306,7 +50387,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/rust_tests.rs",
       "suppress": "cupel suppress fnd_5a3db2 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -50341,7 +50422,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/rust_tests.rs",
       "suppress": "cupel suppress fnd_5d5c3e --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -50376,7 +50457,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-lang/tests/scaffold.rs",
       "suppress": "cupel suppress fnd_796262 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -50401,8 +50482,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 47,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 4
       },
       "action": {
@@ -50508,8 +50589,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 5
       },
       "action": {
@@ -50705,7 +50786,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_ef0cedef2fb2b54d",
       "suppress": "cupel suppress fnd_1815ea --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -50788,7 +50869,7 @@
       "suppressed": false
     },
     {
-      "id": "fnd_7deb13",
+      "id": "fnd_55b844",
       "check": "static.crap",
       "kind": "crap.watch",
       "severity": "info",
@@ -50796,21 +50877,21 @@
       "tier": 0,
       "symbol": {
         "display": "execute::Execution::validate",
-        "hash": "sh_df829837097a5534",
+        "hash": "sh_a7717f02beea0436",
         "lang": "rust"
       },
       "location": {
         "file": "crates/cupel-mutate/src/execute.rs",
-        "line": 104,
+        "line": 106,
         "col": 5,
-        "end_line": 155,
+        "end_line": 158,
         "end_col": 6
       },
-      "title": "`execute::Execution::validate` has CRAP 7.1 (watch at 5, high at 30)",
+      "title": "`execute::Execution::validate` has CRAP 7.3 (watch at 5, high at 30)",
       "detail": null,
       "evidence": {
-        "coverage": 0.8666666666666667,
-        "crap": 7.116148148148148,
+        "coverage": 0.8163265306122449,
+        "crap": 7.303623490212411,
         "cyclomatic": 7,
         "high": 30,
         "watch": 5
@@ -50821,8 +50902,8 @@
         "summary": "Review `validate` when changing it: keep its CRAP below 30 with tests or simpler control flow.",
         "hints": {}
       },
-      "repro": "cupel check --only static.crap --symbols sh_df829837097a5534",
-      "suppress": "cupel suppress fnd_7deb13 --reason '…'",
+      "repro": "cupel check --only static.crap --symbols sh_a7717f02beea0436",
+      "suppress": "cupel suppress fnd_55b844 --reason '…'",
       "new_since_baseline": true,
       "suppressed": false
     },
@@ -50840,16 +50921,16 @@
       },
       "location": {
         "file": "crates/cupel-mutate/src/execute.rs",
-        "line": 252,
+        "line": 255,
         "col": 5,
-        "end_line": 281,
+        "end_line": 284,
         "end_col": 6
       },
-      "title": "`execute::Execution::work` has CRAP 7.0 (watch at 5, high at 30)",
+      "title": "`execute::Execution::work` has CRAP 7.1 (watch at 5, high at 30)",
       "detail": null,
       "evidence": {
-        "coverage": 1.0,
-        "crap": 7.0,
+        "coverage": 0.8571428571428571,
+        "crap": 7.142857142857143,
         "cyclomatic": 7,
         "high": 30,
         "watch": 5
@@ -50862,11 +50943,11 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_05f0a1f519e05d8e",
       "suppress": "cupel suppress fnd_7610d2 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
-      "id": "fnd_7ea6c1",
+      "id": "fnd_fd8b1f",
       "check": "static.crap",
       "kind": "crap.watch",
       "severity": "info",
@@ -50874,21 +50955,21 @@
       "tier": 0,
       "symbol": {
         "display": "execute::Execution::mutant",
-        "hash": "sh_57150f68400d1a93",
+        "hash": "sh_ba17afacefc9fd25",
         "lang": "rust"
       },
       "location": {
         "file": "crates/cupel-mutate/src/execute.rs",
-        "line": 433,
+        "line": 437,
         "col": 5,
-        "end_line": 466,
+        "end_line": 473,
         "end_col": 6
       },
-      "title": "`execute::Execution::mutant` has CRAP 5.0 (watch at 5, high at 30)",
+      "title": "`execute::Execution::mutant` has CRAP 5.1 (watch at 5, high at 30)",
       "detail": null,
       "evidence": {
-        "coverage": 0.9666666666666668,
-        "crap": 5.000925925925926,
+        "coverage": 0.8285714285714286,
+        "crap": 5.125947521865889,
         "cyclomatic": 5,
         "high": 30,
         "watch": 5
@@ -50899,8 +50980,8 @@
         "summary": "Review `mutant` when changing it: keep its CRAP below 30 with tests or simpler control flow.",
         "hints": {}
       },
-      "repro": "cupel check --only static.crap --symbols sh_57150f68400d1a93",
-      "suppress": "cupel suppress fnd_7ea6c1 --reason '…'",
+      "repro": "cupel check --only static.crap --symbols sh_ba17afacefc9fd25",
+      "suppress": "cupel suppress fnd_fd8b1f --reason '…'",
       "new_since_baseline": true,
       "suppressed": false
     },
@@ -50918,16 +50999,16 @@
       },
       "location": {
         "file": "crates/cupel-mutate/src/execute.rs",
-        "line": 515,
+        "line": 522,
         "col": 1,
-        "end_line": 541,
+        "end_line": 548,
         "end_col": 2
       },
-      "title": "`execute::classify` has CRAP 5.0 (watch at 5, high at 30)",
+      "title": "`execute::classify` has CRAP 5.3 (watch at 5, high at 30)",
       "detail": null,
       "evidence": {
-        "coverage": 1.0,
-        "crap": 5.0,
+        "coverage": 0.76,
+        "crap": 5.3456,
         "cyclomatic": 5,
         "high": 30,
         "watch": 5
@@ -50957,9 +51038,9 @@
       },
       "location": {
         "file": "crates/cupel-mutate/src/execute.rs",
-        "line": 608,
+        "line": 640,
         "col": 1,
-        "end_line": 613,
+        "end_line": 645,
         "end_col": 2
       },
       "title": "`execute::panicked` never ran under test: none of its 5 instrumented lines",
@@ -51169,7 +51250,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_1fae08ee094a5a2a",
       "suppress": "cupel suppress fnd_56a265 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -51405,7 +51486,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_126a73690672a4f5",
       "suppress": "cupel suppress fnd_7e2f7f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -51606,7 +51687,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_4b04541aeba319ef",
       "suppress": "cupel suppress fnd_ab0f5f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -51953,7 +52034,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_aae8dfd3c68e48f9",
       "suppress": "cupel suppress fnd_62372a --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -51994,7 +52075,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-mutate/src/settings.rs",
       "suppress": "cupel suppress fnd_afbc05 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52035,7 +52116,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-mutate/src/slots.rs",
       "suppress": "cupel suppress fnd_71dfeb --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52076,7 +52157,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-mutate/src/slots.rs",
       "suppress": "cupel suppress fnd_55924c --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52117,7 +52198,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-mutate/src/slots.rs",
       "suppress": "cupel suppress fnd_f3f0d0 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52156,7 +52237,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_e3b03084aa2e4ad9",
       "suppress": "cupel suppress fnd_d78547 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52195,7 +52276,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_92d3a680d5ea2145",
       "suppress": "cupel suppress fnd_3d0343 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52236,7 +52317,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-mutate/src/slots.rs",
       "suppress": "cupel suppress fnd_14a68f --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52277,7 +52358,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-mutate/src/slots.rs",
       "suppress": "cupel suppress fnd_715fd2 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52347,7 +52428,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-mutate/tests/slots.rs",
       "suppress": "cupel suppress fnd_30b9c2 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52382,7 +52463,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-mutate/tests/slots.rs",
       "suppress": "cupel suppress fnd_617a6a --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52417,7 +52498,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-mutate/tests/slots.rs",
       "suppress": "cupel suppress fnd_f307f4 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -52432,15 +52513,15 @@
         "file": "crates/cupel-mutate/tests/stack.rs",
         "line": 139,
         "col": 1,
-        "end_line": 181,
+        "end_line": 188,
         "end_col": 2
       },
-      "title": "`a_mutant_that_never_finishes_times_out` makes 1 assertion(s) in 43 lines (max 20 lines per assertion)",
+      "title": "`a_mutant_that_never_finishes_times_out` makes 1 assertion(s) in 50 lines (max 20 lines per assertion)",
       "detail": null,
       "evidence": {
         "assertions": 1,
-        "lines": 43,
-        "lines_per_assertion": 43,
+        "lines": 50,
+        "lines_per_assertion": 50,
         "lines_per_assertion_max": 20,
         "test": "a_mutant_that_never_finishes_times_out"
       },
@@ -52752,8 +52833,8 @@
         "file_density_percent_min": 50,
         "file_tests_min": 3,
         "percent": 38,
-        "repository_assertions": 6110,
-        "repository_tests": 2326,
+        "repository_assertions": 6154,
+        "repository_tests": 2344,
         "tests": 4
       },
       "action": {
@@ -53251,7 +53332,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_6f6ee1edd03977a5",
       "suppress": "cupel suppress fnd_a8c33b --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -53690,7 +53771,7 @@
       },
       "repro": "cupel check --only static.crap --symbols sh_7ddc06d4234f7624",
       "suppress": "cupel suppress fnd_9a642a --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -53807,7 +53888,7 @@
       },
       "repro": "cupel check --only gen.property --paths crates/cupel-serve/src/transport/pipe.rs",
       "suppress": "cupel suppress fnd_7b04cd --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -53842,7 +53923,7 @@
       },
       "repro": "cupel check --only tests.assertion-density --paths crates/cupel-serve/tests/server.rs",
       "suppress": "cupel suppress fnd_bb58b1 --reason '…'",
-      "new_since_baseline": true,
+      "new_since_baseline": false,
       "suppressed": false
     },
     {
@@ -54210,11 +54291,11 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "warn": 371,
-      "info": 820
+      "warn": 368,
+      "info": 825
     },
-    "new": 164,
-    "resolved": 84,
+    "new": 4,
+    "resolved": 2,
     "suppressed": 0,
     "gate": {
       "result": "pass",
@@ -54236,14 +54317,14 @@
         },
         {
           "rule": "static.clones.pairs <= base",
-          "actual": 155.0,
-          "bound": 164.0,
+          "actual": 145.0,
+          "bound": 155.0,
           "result": "pass",
           "reason": null
         },
         {
           "rule": "static.clones.clusters <= base",
-          "actual": 17.0,
+          "actual": 15.0,
           "bound": 17.0,
           "result": "pass",
           "reason": null
@@ -54285,7 +54366,7 @@
         },
         {
           "rule": "tests.coverage.line >= 0.96",
-          "actual": 0.971472225710578,
+          "actual": 0.9708018533205326,
           "bound": 0.96,
           "result": "pass",
           "reason": null
@@ -54317,72 +54398,72 @@
   "next_actions": [
     {
       "priority": 1,
-      "finding": "fnd_57b833",
+      "finding": "fnd_6ea0f0",
       "kind": "strengthen_assertion",
-      "summary": "Assert what `two_test_processes_with_the_same_pid_keep_their_own_profiles` exercises as it goes, or split it into tests that each pin one outcome.",
+      "summary": "Assert what `a_missing_analyzer_is_recorded_with_how_to_install_it` exercises as it goes, or split it into tests that each pin one outcome.",
       "command": null
     },
     {
       "priority": 2,
-      "finding": "fnd_e7a2fe",
+      "finding": "fnd_ca3619",
       "kind": "strengthen_assertion",
-      "summary": "Assert what `a_run_lists_the_stale_tests_binaries_and_the_targets_of_each_changed_rust_file` exercises as it goes, or split it into tests that each pin one outcome.",
+      "summary": "Assert what `clippy_keeps_coded_compiler_messages_at_their_primary_span` exercises as it goes, or split it into tests that each pin one outcome.",
       "command": null
     },
     {
       "priority": 3,
-      "finding": "fnd_83e13a",
+      "finding": "fnd_3beb92",
       "kind": "strengthen_assertion",
-      "summary": "Pin more of what the tests in `crates/cupel-adapt/src/suite/mod.rs` exercise: they assert less than the rest of the suite.",
+      "summary": "Assert what `a_result_line_split_across_events_is_joined_by_package` exercises as it goes, or split it into tests that each pin one outcome.",
       "command": null
     },
     {
       "priority": 4,
-      "finding": "fnd_3c3028",
-      "kind": "strengthen_assertion",
-      "summary": "Assert what `a_kept_test_adds_one_hit_to_each_instrumented_line_it_ran_and_none_elsewhere` exercises as it goes, or split it into tests that each pin one outcome.",
+      "finding": "fnd_6a66a4",
+      "kind": "write_test",
+      "summary": "Write a test that calls `failed`.",
       "command": null
     },
     {
       "priority": 5,
-      "finding": "fnd_4f75c5",
-      "kind": "strengthen_assertion",
-      "summary": "Assert what `an_unchanged_tree_is_served_from_the_cache_on_a_range_too` exercises as it goes, or split it into tests that each pin one outcome.",
+      "finding": "fnd_3564a4",
+      "kind": "write_test",
+      "summary": "Write a test that calls `io_error`.",
       "command": null
     },
     {
       "priority": 6,
-      "finding": "fnd_fb00e7",
-      "kind": "strengthen_assertion",
-      "summary": "Assert what `the_estimate_on_a_range_counts_the_stale_tests` exercises as it goes, or split it into tests that each pin one outcome.",
+      "finding": "fnd_398089",
+      "kind": "write_test",
+      "summary": "Write a test that calls `list_command`.",
       "command": null
     },
     {
       "priority": 7,
-      "finding": "fnd_1b4307",
+      "finding": "fnd_f20fba",
       "kind": "strengthen_assertion",
-      "summary": "Assert what `a_test_whose_recorded_structural_hash_differs_is_rerun_though_no_function_it_ran_changed` exercises as it goes, or split it into tests that each pin one outcome.",
+      "summary": "Pin more of what the tests in `crates/cupel-adapt/src/contracts/icontract.rs` exercise: they assert less than the rest of the suite.",
       "command": null
     },
     {
       "priority": 8,
-      "finding": "fnd_3c40f0",
+      "finding": "fnd_1bc605",
       "kind": "strengthen_assertion",
-      "summary": "Assert what `a_complex_function_names_its_deepest_block_with_the_path_to_it_and_what_it_weighs` exercises as it goes, or split it into tests that each pin one outcome.",
+      "summary": "Assert what `every_violation_of_the_capture_is_read_with_its_kind_function_and_values` exercises as it goes, or split it into tests that each pin one outcome.",
       "command": null
     },
     {
       "priority": 9,
-      "finding": "fnd_a0935b",
+      "finding": "fnd_e38fb7",
       "kind": "strengthen_assertion",
-      "summary": "Assert what `a_reference_resolved_to_one_symbol_does_not_keep_its_namesakes_alive` exercises as it goes, or split it into tests that each pin one outcome.",
+      "summary": "Assert what `a_library_is_declared_by_a_manifest_of_a_root_or_a_member` exercises as it goes, or split it into tests that each pin one outcome.",
       "command": null
     },
     {
       "priority": 10,
-      "finding": "fnd_ea511a",
+      "finding": "fnd_2bbb18",
       "kind": "strengthen_assertion",
-      "summary": "Assert what `a_reference_inside_its_own_body_is_recursion_but_one_in_its_signature_counts` exercises as it goes, or split it into tests that each pin one outcome.",
+      "summary": "Pin more of what the tests in `crates/cupel-adapt/src/contracts/rust.rs` exercise: they assert less than the rest of the suite.",
       "command": null
     }
   ],
@@ -54393,5 +54474,5 @@
   "tests": null,
   "oracles": null,
   "truncated": false,
-  "total_findings": 1191
+  "total_findings": 1193
 }
