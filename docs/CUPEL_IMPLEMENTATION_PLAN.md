@@ -1951,6 +1951,40 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
   2. **The tree dogfood's own load.** On this 8-core machine a deep tree dogfood (`make dogfood` from the primary checkout, not an agent checkout, so not at half the cores) drives the 1-minute load to 127; ADR-156's cap covers agent checkouts only.
   3. **B.2's deviation** (one shared target directory rejected on measurement, ADR-156) awaits the owner's ruling, as reported.
 
+### Backlog batch v0.2.3
+
+**Goal:** The owner's v0.2.3 batch (2026-11-01), after accepting `v0.2.2`: disk bounds on per-checkout builds, the timeout test under load, half the cores for every dogfood, enum mappings as `info` clones, the temporary-directory guard on every suite, then `v0.2.3`. Afterwards the project is in maintenance, and the next inputs come from real-repository use.
+
+**Status:** in progress
+
+One workstream builds or tests at a time; the integrator ran the batch alone, on branch `v0.2.3`, gated by `make check` and the tree dogfood, and merged once.
+
+1. **Disk bounds** ([ADR-156](adr/CUPEL_DECISION_156.md) §7).
+   - Worktree removal already deleted the worktree's `target/` (§5, tested).
+   - `scripts/target-sweep.sh` runs cargo-sweep 0.8.0 (pinned by `make dev-setup`) under the heavy lock when `target/` is over `TARGET_CAP` (64GB). It is the first line of `make check`.
+   - Seven tests in `crates/cupel-cli/tests/target_sweep.rs`.
+   - Measured: a 71.4 GB `target/` lost 41.10 GiB at 40 GB. One check plus dogfood builds 53 GB, so at 40 GB the next check swept 28.15 GiB and rebuilt everything; hence 64 GB.
+2. **The timeout test** (b56479b).
+   - `a_mutant_that_never_finishes_times_out` gives every mutant a 15 s timeout (`max_mutant_timeout` over a factor of 100 000), far above the 2 s floor.
+   - Passed 3 of 3 at a 1-minute load of 145 to 300 (about 82 s each, against 17.8 s idle) with 140 busy loops running beside it.
+   - Before the change, synthetic load did not reproduce the failure (it passed at loads of 106 to 327); the recorded failure is v0.2.2's B.5 open item 1.
+3. **Half the cores for every dogfood** (ADR-156 §8).
+   - `cupel_dev_half_cores` in `scripts/dev-env.sh`; `make dogfood` runs under it in any checkout.
+   - A deep tree dogfood from the primary checkout peaked at a 1-minute load of 52.9 (mean 25.2), against 127 before.
+4. **Enum mappings** ([ADR-158](adr/CUPEL_DECISION_158.md) §3).
+   - `static.clones` reports a group whose members all map a pattern to a constant in one table at `info`, with `shape: "enum-mapping"`, outside `pairs`, `clusters`, and `max_jaccard`.
+   - Fixture `repos/clone-mapping/rust` (three 30-node `as_str` accessors, one `info` cluster) and golden.
+   - Six unit tests, the `clone-floor` tests and goldens updated.
+   - The tree dogfood found one false positive, a struct literal of constant fields (fixed: a lone identifier is a field's name, not a pattern).
+   - Cupel's tree: three groups are mappings (one pair and the two `as_str` clusters, 10 pairs), so `pairs` is 145 and `clusters` 15, against 155 and 17.
+5. **Option C** of ADR-158 §2: deferred with a one-line note, no rerun.
+6. **The guard on every suite** (ADR-156 §9).
+   - `scripts/tmpdir-guard.sh --slots-of REPO` lends the checkout's mutation slots to the guarded run and takes them back.
+   - `make dogfood` and an agent checkout's check build step run under the guard; three new guard tests.
+   - The changed dogfood's first guarded run named 47 leaked directories: mutant runs that fail or are killed never remove their tests' temporary directories. Each run in a slot now has a `TMPDIR` of its own, removed when it ends (`what_a_mutant_run_leaves_in_its_temporary_directory_is_removed`, red with 19 left before the change).
+   - Also found by the changed dogfood: `tests.weakening` flagged the script test whose two assertions had moved into one shared helper; they are two again.
+7. **`v0.2.3`.** Pending.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

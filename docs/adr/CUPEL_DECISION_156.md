@@ -1,6 +1,6 @@
 # CUPEL_DECISION_156: Agent checkouts: per-checkout builds, half the cores, the heavy lock around the check's build
 
-**Date:** 2026-10-30 · **Status:** accepted · **Phase:** B.2
+**Date:** 2026-10-30 · **Status:** accepted; amended 2026-11-01 (v0.2.3): the owner accepted per-checkout build directories as recorded, and §7 to §9 are added · **Phase:** B.2
 
 ## Context
 
@@ -31,12 +31,29 @@ The ruling's mechanism works as the owner described (cargo's lock serialized the
 
 ## Decision
 
-1. **Each checkout builds into its own `target/`**, as today; there is no shared target directory. The owner's "one `CARGO_TARGET_DIR` per machine" is not adopted, on the measurements in Context (3) and (4); disk is bounded instead by removing worktrees with §5 and by `make reclaim`. The ruling's other parts are adopted as below.
+1. **Each checkout builds into its own `target/`**, as today; there is no shared target directory. The owner's "one `CARGO_TARGET_DIR` per machine" is not adopted, on the measurements in Context (3) and (4); disk is bounded instead by removing worktrees with §5, by the sweep in §7, and by `make reclaim`. The ruling's other parts are adopted as below.
 2. **An agent checkout is a linked git worktree.** `scripts/dev-env.sh` gains `cupel_dev_agent` (true in a linked worktree) and `cupel_dev_cap`, which prints `CARGO_BUILD_JOBS`, `NEXTEST_TEST_THREADS`, and `RUST_TEST_THREADS`, each half the online cores (`getconf _NPROCESSORS_ONLN`, at least 1), in an agent checkout and nothing elsewhere; `cupel_dev_env` prints them whether or not the tools directory exists. So every `make` target in an agent worktree runs capped, `eval "$(make -s dev-env)"` gives a by-hand shell the same cap, and the integrator's checkout, a human's clone, and CI keep every core.
 3. **`make check` in an agent checkout runs `scripts/heavy.sh $(MAKE) check-build` first**, at the caller's priority (a merge chain's `CUPEL_HEAVY_PRIORITY=first` passes through), then `lint test doc` outside the lock as before, then `clean-check`. Elsewhere `make check` is unchanged. `make check-build` is the target that compiles everything `make check` runs. A dogfood waiting behind a check's build step takes the lock in the same turnstile order as behind any heavy command; a prioritized chain still goes first. `heavy.sh` and its 40 GB floor now also guard an agent's check.
 4. **`scripts/heavy.sh` is re-entrant per lock.** It exports `CUPEL_HEAVY_HELD=<lock path>` to the command it runs; a call whose lock is the one named there runs its command at once, without the floor check, the turnstile, or the wait. A call naming another lock waits as before.
 5. **`scripts/worktree.sh` creates and removes agent worktrees** (also `make worktree NAME=<name> [BASE=<ref>]` and `make worktree-remove NAME=<name>`). `add` runs `git worktree add` at `<main checkout>/.claude/worktrees/<name>` on branch `<name>`, created from `BASE` (default `main`) unless it exists. `remove` deletes the slots the mutation engine keeps for that worktree under `$TMPDIR/cupel-mutate` (each slot directory names its repository in its `repository` file, ADR-141 §3; slot 0 holds a whole build of the workspace, 15 GB after a dogfood), then `git worktree remove --force`, which deletes the worktree with its ignored files: its `target/`, the coverage build under it, and `.cupel/`. The branch stays. `remove` refuses to run from inside the worktree it removes.
-6. **The coverage build and the mutation slots stay per checkout.** `target/cupel-llvm-cov` is under the checkout's `target/` (ADR-084 §4, ADR-155 §2) and goes with the worktree; the slots are per repository path (ADR-080 §8) and go with §5. `make reclaim`'s paths and `heavy.sh`'s floor are unchanged and still describe where the bytes are.
+6. **The coverage build and the mutation slots stay per checkout.** `target/cupel-llvm-cov` is under the checkout's `target/` (ADR-084 §4, ADR-155 §2) and goes with the worktree; the slots are per repository path (ADR-080 §8) and go with §5. `make reclaim`'s paths and `heavy.sh`'s floor are unchanged and still describe where the bytes are. Both builds are inside what §7 sweeps.
+
+7. **`make check` first caps the checkout's build directory** (the owner's v0.2.3 ruling: "remove a checkout's build directory when its worktree is removed, and add a sweep … capping total build-directory size, run from make check").
+   - Removal is §5's: `git worktree remove --force` deletes the worktree's `target/`, and `remove_deletes_the_worktree_its_build_and_its_slots_and_keeps_the_branch` holds it.
+   - The sweep is `scripts/target-sweep.sh CAP`, the first line of `make check`, at `TARGET_CAP` (default 64GB). Over the cap it runs `cargo-sweep sweep --maxsize CAP .` (cargo-sweep 0.8.0, pinned by `make dev-setup`), which removes artifacts oldest first in every profile under `target/`, the coverage build's included, until the directory is under the cap. Under the cap, or with no `target/`, it does nothing.
+   - It runs under `heavy.sh`, so no dogfood of the checkout reads the build while it goes, with the free-space floor off, since it frees space. Over the cap without cargo-sweep, the check fails naming `make dev-setup`.
+   - CI does not install cargo-sweep: a fresh runner's `target/` is under the cap.
+   - The cap is above one check and dogfood's builds, so a sweep removes only builds nothing current uses. Measured on the primary checkout: after a full check and tree dogfood, `target/` held 53 GB (`debug/` 30 GB, half of it incremental caches; `target/cupel-llvm-cov` 23 GB). The first sweep, at 40 GB, took a 71.4 GB `target/` down by 41.10 GiB. At 40 GB the next check swept 28.15 GiB and rebuilt everything, so the default is 64 GB.
+8. **Every dogfood runs at half the cores**, the primary checkout's and CI's included (the owner's v0.2.3 ruling).
+   - `scripts/dev-env.sh` gains `cupel_dev_half_cores`, which prints §2's three variables at half the online cores in any checkout; `cupel_dev_cap` is it, in an agent checkout only.
+   - `make dogfood` runs its `cupel check` under it (`DOGFOOD_CAP`), whatever the checkout.
+   - A deep tree dogfood from the primary checkout of the eight-core machine peaked at a 1-minute load of 52.9 (mean 25.2, 130 samples 15 s apart), against 127 uncapped (v0.2.2's B.5).
+   - CI's dogfood runs at 2 of the runner's 4 cores.
+9. **Every suite `make check` runs, and the dogfood, run under `scripts/tmpdir-guard.sh`** (the owner's v0.2.3 ruling).
+   - Outside an agent checkout the check's build step, lint, tests, and docs already ran under it; an agent checkout's locked build step now does too.
+   - `make dogfood` runs its `cupel check` under it with `--slots-of .`. The mutation slots the engine keeps for this checkout (ADR-141 §3, named by their `repository` file) are moved into the guarded directory before the run and back after, with what the run added. So the dogfood reuses them, keeps them across runs, and does not count them as a leak; another repository's slots there still are one. The moves are renames on one volume.
+   - The guard found a leak in the product. A mutant run that fails its tests, or is killed at its timeout or memory budget, never removes the temporary directories its tests made. A deep changed dogfood left 47.
+   - Each run in a mutation slot now gets a temporary directory of its own as `TMPDIR` (`cm` and four random characters, short, so a test's socket path under it still fits), removed when the run ends.
 
 ## Consequences
 
@@ -44,4 +61,8 @@ The ruling's mechanism works as the owner described (cargo's lock serialized the
 - Disk is not held once: each live worktree still holds its own build (15 to 30 GB, double after a coverage run). Removing merged worktrees with `scripts/worktree.sh remove` is what bounds it, and it no longer leaves a 15 GB slot build behind in `$TMPDIR`.
 - Halving the test threads lengthens an agent's `make check`; the integrator's checkout and CI are unaffected.
 - `heavy.sh` exports one more `CUPEL_*` variable; the fixture harness already strips `CUPEL_*` from every `cupel` it runs, and `cupel` reads only the names it knows.
+- A checkout's `target/` stays under `TARGET_CAP` after every `make check`. A sweep over the cap costs the next build what it removed: the oldest artifacts, which no current build uses when the cap is above the working set.
+- A dogfood of the primary checkout takes about twice as long on the eight-core machine and leaves the other half free; CI's dogfood also runs at half its cores.
+- `make parity` is not under the guard: `make check` does not run it.
+- A mutation run, Cupel's or a user's, no longer leaves a failed or killed mutant's temporary files in `$TMPDIR`. A run's `TMPDIR` is a directory in the caller's `TMPDIR`, not in the slot.
 - A successor that wants disk held once needs a content-addressed cache of compiled units (a compiler cache keyed by inputs, not by modification times), not a shared target directory; the measurements in Context are its acceptance test: a second worktree with an older edit must build its own code.
