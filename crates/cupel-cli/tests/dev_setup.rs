@@ -231,11 +231,11 @@ const USES_SHELLCHECK: &str = "- uses: ./.github/actions/shellcheck";
 /// shellcheck action: a runner image's own release reports what the pinned one does not.
 #[test]
 fn the_tools_action_installs_shellcheck_through_the_shellcheck_action() {
-    assert!(
-        action("tools")
-            .lines()
-            .any(|line| line.trim() == USES_SHELLCHECK)
-    );
+    let uses = action("tools")
+        .lines()
+        .filter(|line| line.trim() == USES_SHELLCHECK)
+        .count();
+    assert_eq!(uses, 1);
 }
 
 /// The installers job, which lints the installers, installs `ShellCheck` through the shellcheck action too.
@@ -246,7 +246,11 @@ fn the_installers_job_installs_shellcheck_through_the_shellcheck_action() {
         .iter()
         .find(|(name, _)| name == "installers")
         .expect("an `installers` job");
-    assert!(installers.iter().any(|line| line == USES_SHELLCHECK));
+    let uses = installers
+        .iter()
+        .filter(|line| *line == USES_SHELLCHECK)
+        .count();
+    assert_eq!(uses, 1);
 }
 
 /// The shellcheck action pins the release scripts/dev-setup.sh pins, and no other.

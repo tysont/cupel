@@ -1292,6 +1292,34 @@ fn a_switch_whose_cases_on_bare_identifiers_return_constants_is_a_mapping() {
     );
 }
 
+/// Only a lone identifier can be a field's name: arms whose patterns are literals mapped to constants
+/// (`"ref" => 1`) are a mapping.
+#[test]
+fn a_match_on_literal_patterns_whose_arms_are_constants_is_a_mapping() {
+    let accessor = || {
+        let arm = || {
+            NormNode::new(
+                "arm",
+                vec![
+                    NormNode::leaf("$lit"),
+                    NormNode::leaf("=>"),
+                    NormNode::leaf("$lit"),
+                ],
+            )
+        };
+        matching((0..4).map(|_| arm()).collect(), vec![])
+    };
+    let defs = [
+        mapped("a.x", "one", 1, accessor()),
+        mapped("b.x", "two", 1, accessor()),
+    ];
+    let (finding, evidence) = the_finding(&defs);
+    assert_eq!(
+        (finding.severity, &evidence["shape"]),
+        (Severity::Info, &json!("enum-mapping"))
+    );
+}
+
 /// A struct literal whose fields are constants (`Span { line, col: 1, end_col: 1, … }`) is not
 /// a mapping: a field's name is a lone identifier, not a pattern.
 #[test]
