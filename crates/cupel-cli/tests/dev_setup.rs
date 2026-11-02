@@ -1,5 +1,5 @@
-// ABOUTME: Tests for the development tool environment (ADR-139): every version ci.yml, its tools action, and release.yml's build job pin
-// ABOUTME: appears in scripts/dev-setup.sh, the scripts pass ShellCheck, and `make dev-env` exports only tools that exist.
+// ABOUTME: Tests for the development tool environment (ADR-139): every version ci.yml, its actions, and release.yml's build job pin
+// ABOUTME: appears in scripts/dev-setup.sh, CI and PATH have its ShellCheck, the scripts pass it, and `make dev-env` exports only tools that exist.
 mod support;
 
 use std::fs;
@@ -86,12 +86,23 @@ fn steps(lines: &[String]) -> Vec<&[String]> {
         .collect()
 }
 
-/// The composite action that installs the tools ci.yml's `check` and `dogfood` jobs share.
-fn tools_action() -> String {
-    fs::read_to_string(workspace().join(".github/actions/tools/action.yml")).unwrap()
+/// The version scripts/dev-setup.sh pins for `tool`: its `<tool>_version=` line.
+fn pinned(tool: &str) -> String {
+    let key = format!("{tool}_version=");
+    dev_setup_script()
+        .lines()
+        .find_map(|line| line.strip_prefix(&key))
+        .unwrap_or_else(|| panic!("scripts/dev-setup.sh pins no {tool}"))
+        .to_owned()
 }
 
-/// Every pin the development environment mirrors: ci.yml's jobs but `windows` and its tools action, and the steps of
+/// The composite action `name` under .github/actions: `tools`, which installs the tools ci.yml's `check` and
+/// `dogfood` jobs share, or `shellcheck`, which installs the pinned ShellCheck.
+fn action(name: &str) -> String {
+    fs::read_to_string(workspace().join(format!(".github/actions/{name}/action.yml"))).unwrap()
+}
+
+/// Every pin the development environment mirrors: ci.yml's jobs but `windows` and its actions, and the steps of
 /// release.yml's `build` job that run on Linux or macOS (`make dist` is the local route to them). The Windows-only
 /// job and step (`choco install make`) and the publish jobs, which only CI runs, are not mirrored.
 fn workflow_pins() -> Vec<(String, String)> {
@@ -101,7 +112,8 @@ fn workflow_pins() -> Vec<(String, String)> {
         .filter(|(name, _)| name != "windows")
         .flat_map(|(_, lines)| pins(lines.iter().map(String::as_str)))
         .collect();
-    all.extend(pins(tools_action().lines()));
+    all.extend(pins(action("tools").lines()));
+    all.extend(pins(action("shellcheck").lines()));
     let release = jobs(&workflow("release.yml"));
     let (_, build) = release
         .iter()
@@ -204,13 +216,67 @@ fn pins_what_it_installs(line: &str) -> bool {
 /// `21` resolves to one release, which scripts/dev-setup.sh names exactly.
 #[test]
 fn ci_pins_every_package_and_runtime_it_installs() {
-    let ci = workflow("ci.yml") + &tools_action();
+    let ci = workflow("ci.yml") + &action("tools") + &action("shellcheck");
     let unpinned: Vec<&str> = ci
         .lines()
         .map(str::trim)
         .filter(|line| !pins_what_it_installs(line))
         .collect();
     assert_eq!(unpinned, Vec::<&str>::new());
+}
+
+/// Every job that lints the shell scripts installs ShellCheck through the shellcheck action, which installs the
+/// release scripts/dev-setup.sh pins: a runner image's own release reports what the pinned one does not.
+#[test]
+fn ci_installs_the_shellcheck_release_dev_setup_pins() {
+    let uses = "- uses: ./.github/actions/shellcheck";
+    let ci = jobs(&workflow("ci.yml"));
+    let installers = ci
+        .iter()
+        .find(|(name, _)| name == "installers")
+        .map(|(_, lines)| lines)
+        .expect("an `installers` job");
+    let shellcheck = action("shellcheck");
+    let versions: Vec<String> = pins(shellcheck.lines())
+        .into_iter()
+        .map(|(_, version)| version)
+        .collect();
+    assert_eq!(
+        (
+            action("tools").lines().any(|line| line.trim() == uses),
+            installers.iter().any(|line| line == uses),
+            versions.is_empty(),
+            versions
+                .iter()
+                .all(|version| *version == pinned("shellcheck")),
+        ),
+        (true, true, false, true),
+        "the tools action and the installers job use the shellcheck action, which pins only {}: {versions:?}",
+        pinned("shellcheck")
+    );
+}
+
+/// The ShellCheck the tests lint with is the release scripts/dev-setup.sh pins, so a lint passes here exactly when
+/// it passes in CI: run `make dev-setup` (which puts it first on `make`'s PATH) when this fails.
+#[test]
+fn the_shellcheck_on_path_is_the_release_dev_setup_pins() {
+    if !installed("shellcheck") {
+        return;
+    }
+    let output = Command::new("shellcheck")
+        .arg("--version")
+        .output()
+        .unwrap();
+    let text = String::from_utf8_lossy(&output.stdout).into_owned();
+    let version = text
+        .lines()
+        .find_map(|line| line.strip_prefix("version: "))
+        .unwrap_or_else(|| panic!("`shellcheck --version` names no version: {text}"));
+    assert_eq!(
+        version,
+        pinned("shellcheck"),
+        "the ShellCheck on PATH is not the release scripts/dev-setup.sh pins; run `make dev-setup`"
+    );
 }
 
 #[test]

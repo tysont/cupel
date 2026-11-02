@@ -109,15 +109,7 @@ jobs:
       # The pipx wrapper's build backend: the wrapper tests build dist/pipx with it offline (ADR-153).
       - name: Install flit_core
         run: python -m pip install flit_core==3.12.0
-      - name: Install ShellCheck 0.11.0
-        run: |
-          case "$RUNNER_OS-$(uname -m)" in
-            Linux-*) asset=shellcheck-v0.11.0.linux.x86_64.tar.xz ;;
-            macOS-arm64) asset=shellcheck-v0.11.0.darwin.aarch64.tar.xz ;;
-            *) asset=shellcheck-v0.11.0.darwin.x86_64.tar.xz ;;
-          esac
-          curl -sSfL "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/$asset" | tar -xJ -C "$RUNNER_TEMP"
-          echo "$RUNNER_TEMP/shellcheck-v0.11.0" >> "$GITHUB_PATH"
+      - uses: ./.github/actions/shellcheck
       - name: make installers
         run: make installers
         env:

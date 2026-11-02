@@ -9,6 +9,9 @@ description: Installs the pinned tools the test suite and the dogfood run for re
 runs:
   using: composite
   steps:
+    # The ShellCheck the shell-script tests lint with, at the release scripts/dev-setup.sh pins rather than the
+    # runner image's.
+    - uses: ./.github/actions/shellcheck
     # The test runners the runner producers' integration tests drive for real (P3.1); without
     # them those tests report SKIPPED instead of running.
     - name: Install cargo-nextest

@@ -1,0 +1,19 @@
+# ABOUTME: Installs ShellCheck at the version scripts/dev-setup.sh pins, ahead of a runner image's own on PATH, so CI
+# ABOUTME: lints the shell scripts with the release developers run; the tools action and ci.yml's installers job use it.
+# A runner image's ShellCheck is whatever release the image ships (Ubuntu's was 0.9.0), and releases differ in what
+# they report. crates/cupel-cli/tests/dev_setup.rs fails while the ShellCheck on PATH is not the pinned release.
+name: shellcheck
+description: Installs the pinned ShellCheck
+runs:
+  using: composite
+  steps:
+    - name: Install ShellCheck 0.11.0
+      shell: bash
+      run: |
+        case "$RUNNER_OS-$(uname -m)" in
+          Linux-*) asset=shellcheck-v0.11.0.linux.x86_64.tar.xz ;;
+          macOS-arm64) asset=shellcheck-v0.11.0.darwin.aarch64.tar.xz ;;
+          *) asset=shellcheck-v0.11.0.darwin.x86_64.tar.xz ;;
+        esac
+        curl -sSfL "https://github.com/koalaman/shellcheck/releases/download/v0.11.0/$asset" | tar -xJ -C "$RUNNER_TEMP"
+        echo "$RUNNER_TEMP/shellcheck-v0.11.0" >> "$GITHUB_PATH"
