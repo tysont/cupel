@@ -41,11 +41,12 @@ guarded=$(mktemp -d "$parent/cupel.XXXXXX") || exit 2
 move() {
 	[ -n "$repo" ] || return 0
 	for owner in "$1"/cupel-mutate/*/repository; do
-		[ -f "$owner" ] && [ "$(cat "$owner")" = "$repo" ] || continue
-		slots=${owner%/repository}
-		mkdir -p "$2/cupel-mutate"
-		rm -rf "$2/cupel-mutate/${slots##*/}"
-		mv "$slots" "$2/cupel-mutate/"
+		if [ -f "$owner" ] && [ "$(cat "$owner")" = "$repo" ]; then
+			slots=${owner%/repository}
+			mkdir -p "$2/cupel-mutate"
+			rm -rf "$2/cupel-mutate/${slots##*/}"
+			mv "$slots" "$2/cupel-mutate/"
+		fi
 	done
 }
 
