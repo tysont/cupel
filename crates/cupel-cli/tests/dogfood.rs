@@ -64,19 +64,20 @@ fn gated(check: &str) -> String {
 
 /// On a branch, the changed gate at `deep`: everything deep selects but the flake engine, which
 /// reruns the whole suite serially and cannot rerun nextest, and the race detector, which cannot
-/// run Cupel's process-spawning tests under Miri. A local run is bounded by `DOGFOOD_BUDGET`.
+/// run Cupel's process-spawning tests under Miri. A local run is bounded by `DOGFOOD_BUDGET`, two hours by
+/// default: a change to one source file took 83 minutes, mutation included (ADR-129).
 #[test]
 fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
     assert_eq!(
         dogfood(&[]),
         gated(
-            "--changed --depth deep --budget 30m --gate --no-install --skip tests.flaky --skip \
+            "--changed --depth deep --budget 120m --gate --no-install --skip tests.flaky --skip \
              conc.race"
         )
     );
 }
 
-/// On `main`, the tree gate at `deep`, without mutating the whole tree, under the same budget,
+/// On `main`, the tree gate at `deep`, without mutating the whole tree, under a budget of 30 minutes,
 /// against the committed baseline (ADR-140), imported first so a fresh store has the reference
 /// the `base` rules need.
 #[test]

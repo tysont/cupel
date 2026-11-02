@@ -104,8 +104,10 @@ DOGFOOD_SCOPE ?= changed
 
 # A local dogfood runs under a wall-clock budget, so it ends in bounded time and lists what the
 # budget left out (exit 5 when it left anything out); CI clears it with `DOGFOOD_BUDGET=` and runs
-# every check the depth selects (ADR-129).
-DOGFOOD_BUDGET ?= 30m
+# every check the depth selects (ADR-129). The changed gate's two hours let mutation finish on an
+# ordinary change (one source file took 83 minutes); a much larger diff still ends partial. The
+# tree gate, which does not mutate, keeps 30 minutes.
+DOGFOOD_BUDGET ?= $(if $(filter tree,$(DOGFOOD_SCOPE)),30m,120m)
 
 # The gate runs at `--depth deep` (ADR-129). `tests.flaky` is skipped: the flake engine reruns the
 # whole suite three times, one test at a time, and does not rerun cargo-nextest, Cupel's runner.
