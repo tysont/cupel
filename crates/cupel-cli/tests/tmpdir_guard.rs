@@ -72,26 +72,10 @@ fn the_script_is_executable_and_passes_shellcheck() {
     assert_shellcheck_clean("scripts/tmpdir-guard.sh");
 }
 
-/// The guarded TMPDIR is one short name, `c.` and six characters, below the caller's: a guarded mutation run nests
-/// its own TMPDIR and a test's repository below it, and the socket a daemon test makes in that repository must still
-/// fit macOS's 103-character socket path (canonical `$TMPDIR` 57, this 9, the run's 7, the repository's 11,
-/// `.cupel/serve.sock` 17: 101).
-#[test]
-fn the_guarded_temporary_directory_is_one_short_name_below_the_callers() {
-    let tmp = TempDir::new().unwrap();
-    let output = guarded(tmp.path(), "printf %s \"$TMPDIR\"");
-    let inner = text(&output.stdout);
-    let name = inner
-        .strip_prefix(&format!("{}/", tmp.path().display()))
-        .unwrap_or_else(|| panic!("{inner} is not directly under {}", tmp.path().display()));
-    assert_eq!(
-        (name.len(), name.starts_with("c."), name.contains('/')),
-        (8, true, false),
-        "{name}"
-    );
-}
-
-/// The command runs with a fresh directory under the caller's as its TMPDIR, which is gone after it.
+/// The command runs with a fresh directory under the caller's as its TMPDIR, which is gone after it. Its name is
+/// short, `c.` and six characters: a guarded mutation run nests its own TMPDIR and a test's repository below it, and
+/// the socket a daemon test makes in that repository must still fit macOS's 103-character socket path (canonical
+/// `$TMPDIR` 57, this 9, the run's 7, the repository's 11, `.cupel/serve.sock` 17: 101).
 #[test]
 fn a_command_that_leaves_nothing_passes_and_its_temporary_directory_goes() {
     let tmp = TempDir::new().unwrap();
@@ -102,6 +86,8 @@ fn a_command_that_leaves_nothing_passes_and_its_temporary_directory_goes() {
     assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
     let inner = PathBuf::from(text(&output.stdout));
     assert_eq!(inner.parent(), Some(tmp.path()), "{}", inner.display());
+    let name = inner.file_name().unwrap().to_string_lossy().into_owned();
+    assert_eq!((name.len(), &name[..2]), (8, "c."), "{name}");
     assert!(!inner.exists(), "{} is removed", inner.display());
     assert_eq!(entries(tmp.path()), Vec::<String>::new());
 }

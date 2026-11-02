@@ -1292,22 +1292,29 @@ fn a_switch_whose_cases_on_bare_identifiers_return_constants_is_a_mapping() {
     );
 }
 
+/// `label` of `first`, `separator`, and a literal: an arm `$lit => $lit` or a field `$id: $lit`.
+fn constant_after(label: &str, first: &str, separator: &str) -> NormNode {
+    NormNode::new(
+        label,
+        vec![
+            NormNode::leaf(first),
+            NormNode::leaf(separator),
+            NormNode::leaf("$lit"),
+        ],
+    )
+}
+
 /// Only a lone identifier can be a field's name: arms whose patterns are literals mapped to constants
 /// (`"ref" => 1`) are a mapping.
 #[test]
 fn a_match_on_literal_patterns_whose_arms_are_constants_is_a_mapping() {
     let accessor = || {
-        let arm = || {
-            NormNode::new(
-                "arm",
-                vec![
-                    NormNode::leaf("$lit"),
-                    NormNode::leaf("=>"),
-                    NormNode::leaf("$lit"),
-                ],
-            )
-        };
-        matching((0..4).map(|_| arm()).collect(), vec![])
+        matching(
+            (0..4)
+                .map(|_| constant_after("arm", "$lit", "=>"))
+                .collect(),
+            vec![],
+        )
     };
     let defs = [
         mapped("a.x", "one", 1, accessor()),
@@ -1325,16 +1332,7 @@ fn a_match_on_literal_patterns_whose_arms_are_constants_is_a_mapping() {
 #[test]
 fn a_struct_literal_of_constant_fields_is_not_a_mapping() {
     let literal = || {
-        let field = || {
-            NormNode::new(
-                "field",
-                vec![
-                    NormNode::leaf("$id"),
-                    NormNode::leaf(":"),
-                    NormNode::leaf("$lit"),
-                ],
-            )
-        };
+        let field = || constant_after("field", "$id", ":");
         let fields = std::iter::once(NormNode::leaf("{"))
             .chain(std::iter::once(NormNode::new(
                 "shorthand",
