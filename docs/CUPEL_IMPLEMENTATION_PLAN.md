@@ -1990,6 +1990,38 @@ One workstream builds or tests at a time; the integrator ran the batch alone, on
    - Tagged `v0.2.3` at ad79c11; the release run 41383720684 built all five targets.
    - Verified as for 0.2.2: checksums and `release.sh verify` on all five archives, the x86_64 macOS binary under Rosetta, `install.sh` on this Mac, in ubuntu x86_64 and in alpine arm64 (`init --dry-run`), and `cargo binstall` in rust:1.92-bookworm.
 
+### Housekeeping batch after v0.2.3
+
+**Goal:** The owner's housekeeping batch (2026-11-01), after accepting `v0.2.3`: six items on `main`, no release tag. The next inputs come from real-repository use.
+
+**Status:** complete on `main`; no tag.
+
+The integrator ran the batch alone on branch `housekeeping`, gated by `make check`, the tree dogfood, and `make parity`, and merged once.
+
+1. **ShellCheck in CI** (744fb7b, 5f89143, 4cd3a49).
+   - `.github/actions/shellcheck` installs the release `scripts/dev-setup.sh` pins (0.11.0), ahead of the runner image's. The tools action, used by the `check` and `dogfood` jobs, uses it, and so does the `installers` job, in place of its inline step.
+   - `the_shellcheck_on_path_is_the_release_dev_setup_pins` fails while the ShellCheck on PATH is another release. With a stand-in printing `version: 0.9.0` first on PATH, it failed.
+   - Three more tests pin each job's use of the action and the action's version.
+2. **`make parity` under the guard** (8efac2d; ADR-156 §9). Its build and its suite run under `scripts/tmpdir-guard.sh`.
+3. **A cut check and the gate.** No code change; the rule as it stands:
+   - Any check the budget cuts, `tests.mutation` included, makes the run `partial` (exit 5).
+   - Rules on a cut check evaluate as `skipped`, so the gate does not pass. This is the intended contract: partial means incomplete evidence, never a pass.
+   - The changed gate's local budget is now 120 m, so mutation completes on an ordinary diff (2b82a29; ADR-129, amended). Measured unbudgeted at half the cores:
+     - This batch's diff (one source file, 6 mutants) took 5 003 s, of which `tests.mutation` took 4 955 s from an empty slot.
+     - The v0.2.3 diff ran mutation for 8 696 s without finishing.
+   - An exit 5 on an unusually large diff is correct and stays. The tree gate keeps 30 m.
+   - Measuring found two problems that stopped mutation on this machine:
+     - The guard's directory name pushed a daemon test's socket path to 105 characters, over macOS's 103. So the reference run failed `serve_mcp_runs_beside_a_socket_daemon_and_takes_no_socket_flags` on every guarded changed dogfood that selected it. The guard's directory is `c.XXXXXX` now (19027f0; ADR-156 §9).
+     - macOS's `dirhelper` (daily at 03:35, files older than 3 days in `$TMPDIR`) deleted build-script outputs in a mutation slot whose cargo fingerprints still read fresh, so the slot could not build. The slot was removed by hand. Not fixed (open item).
+   - The changed dogfood's survivor (`&&` → `||` in `arm`) is killed by `a_match_on_literal_patterns_whose_arms_are_constants_is_a_mapping`.
+4. **The original timeout-flake cause** (v0.2.2 B.5 open item 1) is closed as unconfirmed: synthetic load never reproduced it, and b56479b removed the test's dependence on wall-clock time.
+5. **Enum mappings** (5a031d2; ADR-158 §3, amended).
+   - A lone identifier whose value is a statement around one constant is a case's pattern. So TypeScript's `case Ref: return "ref"` is an arm, and fixture `repos/clone-mapping/typescript` (three 26-node `switch` accessors) is one `info` cluster shaped `enum-mapping`, with its golden. Before the fix it paired at `warn`.
+   - ADR-158 records both known limits: any other `pattern, constant` construct beside a constant, and telling a lone identifier apart by its value alone. The statements about Rust's bare-identifier arms and about returned object literals were checked on real files.
+6. **No branch named like a tag** (e616ed8).
+   - Deleted the `v0.2.3` and `release-0.2.3` branches; both were merged and local only.
+   - `scripts/release.sh branch NAME` refuses a name starting with `v`, and `scripts/worktree.sh add` calls it. `release.sh version` refuses to run while such a branch exists.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
