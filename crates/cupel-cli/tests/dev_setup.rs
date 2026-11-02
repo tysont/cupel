@@ -97,7 +97,7 @@ fn pinned(tool: &str) -> String {
 }
 
 /// The composite action `name` under .github/actions: `tools`, which installs the tools ci.yml's `check` and
-/// `dogfood` jobs share, or `shellcheck`, which installs the pinned ShellCheck.
+/// `dogfood` jobs share, or `shellcheck`, which installs the pinned `ShellCheck`.
 fn action(name: &str) -> String {
     fs::read_to_string(workspace().join(format!(".github/actions/{name}/action.yml"))).unwrap()
 }
@@ -225,38 +225,46 @@ fn ci_pins_every_package_and_runtime_it_installs() {
     assert_eq!(unpinned, Vec::<&str>::new());
 }
 
-/// Every job that lints the shell scripts installs ShellCheck through the shellcheck action, which installs the
-/// release scripts/dev-setup.sh pins: a runner image's own release reports what the pinned one does not.
+const USES_SHELLCHECK: &str = "- uses: ./.github/actions/shellcheck";
+
+/// The check and dogfood jobs lint the shell scripts with the `ShellCheck` their tools action installs through the
+/// shellcheck action: a runner image's own release reports what the pinned one does not.
 #[test]
-fn ci_installs_the_shellcheck_release_dev_setup_pins() {
-    let uses = "- uses: ./.github/actions/shellcheck";
-    let ci = jobs(&workflow("ci.yml"));
-    let installers = ci
-        .iter()
-        .find(|(name, _)| name == "installers")
-        .map(|(_, lines)| lines)
-        .expect("an `installers` job");
-    let shellcheck = action("shellcheck");
-    let versions: Vec<String> = pins(shellcheck.lines())
-        .into_iter()
-        .map(|(_, version)| version)
-        .collect();
-    assert_eq!(
-        (
-            action("tools").lines().any(|line| line.trim() == uses),
-            installers.iter().any(|line| line == uses),
-            versions.is_empty(),
-            versions
-                .iter()
-                .all(|version| *version == pinned("shellcheck")),
-        ),
-        (true, true, false, true),
-        "the tools action and the installers job use the shellcheck action, which pins only {}: {versions:?}",
-        pinned("shellcheck")
+fn the_tools_action_installs_shellcheck_through_the_shellcheck_action() {
+    assert!(
+        action("tools")
+            .lines()
+            .any(|line| line.trim() == USES_SHELLCHECK)
     );
 }
 
-/// The ShellCheck the tests lint with is the release scripts/dev-setup.sh pins, so a lint passes here exactly when
+/// The installers job, which lints the installers, installs `ShellCheck` through the shellcheck action too.
+#[test]
+fn the_installers_job_installs_shellcheck_through_the_shellcheck_action() {
+    let ci = jobs(&workflow("ci.yml"));
+    let (_, installers) = ci
+        .iter()
+        .find(|(name, _)| name == "installers")
+        .expect("an `installers` job");
+    assert!(installers.iter().any(|line| line == USES_SHELLCHECK));
+}
+
+/// The shellcheck action pins the release scripts/dev-setup.sh pins, and no other.
+#[test]
+fn the_shellcheck_action_pins_the_release_dev_setup_pins() {
+    let versions: Vec<String> = pins(action("shellcheck").lines())
+        .into_iter()
+        .map(|(_, version)| version)
+        .collect();
+    assert!(!versions.is_empty());
+    assert_eq!(
+        versions,
+        vec![pinned("shellcheck"); versions.len()],
+        "the shellcheck action pins only scripts/dev-setup.sh's release"
+    );
+}
+
+/// The `ShellCheck` the tests lint with is the release scripts/dev-setup.sh pins, so a lint passes here exactly when
 /// it passes in CI: run `make dev-setup` (which puts it first on `make`'s PATH) when this fails.
 #[test]
 fn the_shellcheck_on_path_is_the_release_dev_setup_pins() {
