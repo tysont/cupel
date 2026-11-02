@@ -1955,9 +1955,9 @@ One workstream builds or tests at a time (P10 Notes "P10 — machine load"); the
 
 **Goal:** The owner's v0.2.3 batch (2026-11-01), after accepting `v0.2.2`: disk bounds on per-checkout builds, the timeout test under load, half the cores for every dogfood, enum mappings as `info` clones, the temporary-directory guard on every suite, then `v0.2.3`. Afterwards the project is in maintenance, and the next inputs come from real-repository use.
 
-**Status:** in progress
+**Status:** complete (2026-11-01, ad79c11) · version 0.2.3; tagged `v0.2.3` after a green CI (41378909723); the release run 41383720684 built all five targets, verified as for 0.2.2
 
-One workstream builds or tests at a time; the integrator ran the batch alone, on branch `v0.2.3`, gated by `make check` and the tree dogfood, and merged once.
+One workstream builds or tests at a time; the integrator ran the batch alone, on branch `v0.2.3`, gated by `make check` and the tree dogfood, and merged once; the release commits, on `release-0.2.3`, were gated the same way.
 
 1. **Disk bounds** ([ADR-156](adr/CUPEL_DECISION_156.md) §7).
    - Worktree removal already deleted the worktree's `target/` (§5, tested).
@@ -1983,7 +1983,12 @@ One workstream builds or tests at a time; the integrator ran the batch alone, on
    - `make dogfood` and an agent checkout's check build step run under the guard; three new guard tests.
    - The changed dogfood's first guarded run named 47 leaked directories: mutant runs that fail or are killed never remove their tests' temporary directories. Each run in a slot now has a `TMPDIR` of its own, removed when it ends (`what_a_mutant_run_leaves_in_its_temporary_directory_is_removed`, red with 19 left before the change).
    - Also found by the changed dogfood: `tests.weakening` flagged the script test whose two assertions had moved into one shared helper; they are two again.
-7. **`v0.2.3`.** Pending.
+7. **`v0.2.3`.**
+   - Version 0.2.3 in the manifests, the installers, and the README's version names; the README's check example is unchanged under the 0.2.3 binary.
+   - CI on the batch's merge failed twice. Once was transient: the Ubuntu runner ran out of disk, which did not recur. Once was real: the runner image's shellcheck 0.9.0 reads SC2015 in `scripts/tmpdir-guard.sh`, where the pinned 0.11.0 does not. The slot test is an `if` now, which is clean under both (ad79c11).
+   - CI on ad79c11 is green. Its dogfood job, at 2 of the runner's 4 cores, took 35 min.
+   - Tagged `v0.2.3` at ad79c11; the release run 41383720684 built all five targets.
+   - Verified as for 0.2.2: checksums and `release.sh verify` on all five archives, the x86_64 macOS binary under Rosetta, `install.sh` on this Mac, in ubuntu x86_64 and in alpine arm64 (`init --dry-run`), and `cargo binstall` in rust:1.92-bookworm.
 
 ## 4. Cross-phase checklist
 
