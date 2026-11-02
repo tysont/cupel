@@ -53,10 +53,11 @@ readme:
 # copy of its directory and must print the same after redaction. MCP parity (ADR-121): each run
 # of a verb an MCP tool serves also goes through that tool's call to a `cupel serve --mcp` on
 # another copy and must return the same envelope and stderr. It runs the fixture suite twice or
-# three times over, so it is its own target; CI runs it after `make check`.
+# three times over, so it is its own target; CI runs it after `make check`. Its build and its tests
+# run under the temporary-directory guard, as every suite `make check` runs does (ADR-156 §9).
 parity:
-	$(CARGO) build --package cupel-cli
-	DAEMON_PARITY=1 MCP_PARITY=1 $(CARGO) test --package cupel-fixtures
+	scripts/tmpdir-guard.sh $(CARGO) build --package cupel-cli
+	DAEMON_PARITY=1 MCP_PARITY=1 scripts/tmpdir-guard.sh $(CARGO) test --package cupel-fixtures
 
 # The pre-commit bar. The tree is fingerprinted before the build so clean-check can
 # verify the build itself wrote nothing outside .gitignore (see ADR-010). In an agent checkout

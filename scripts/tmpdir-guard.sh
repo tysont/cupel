@@ -1,6 +1,6 @@
 #!/bin/sh
 # ABOUTME: Runs a command with a fresh temporary directory of its own as TMPDIR and fails when the command leaves
-# ABOUTME: anything in it, naming what it left; `make check` runs its build, lint, tests, and docs under it, and `make dogfood` its gate.
+# ABOUTME: anything in it, naming what it left; `make check` runs its build, lint, tests, and docs under it, `make parity` its suite, and `make dogfood` its gate.
 #
 # Usage: scripts/tmpdir-guard.sh [--slots-of REPO] COMMAND [ARG...]
 #

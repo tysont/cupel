@@ -1,6 +1,6 @@
 # CUPEL_DECISION_156: Agent checkouts: per-checkout builds, half the cores, the heavy lock around the check's build
 
-**Date:** 2026-10-30 · **Status:** accepted; amended 2026-11-01 (v0.2.3): the owner accepted per-checkout build directories as recorded, and §7 to §9 are added · **Phase:** B.2
+**Date:** 2026-10-30 · **Status:** accepted; amended 2026-11-01 (v0.2.3): the owner accepted per-checkout build directories as recorded, and §7 to §9 are added; amended 2026-11-02: `make parity` runs under the guard (§9) · **Phase:** B.2
 
 ## Context
 
@@ -52,6 +52,7 @@ The ruling's mechanism works as the owner described (cargo's lock serialized the
 9. **Every suite `make check` runs, and the dogfood, run under `scripts/tmpdir-guard.sh`** (the owner's v0.2.3 ruling).
    - Outside an agent checkout the check's build step, lint, tests, and docs already ran under it; an agent checkout's locked build step now does too.
    - `make dogfood` runs its `cupel check` under it with `--slots-of .`. The mutation slots the engine keeps for this checkout (ADR-141 §3, named by their `repository` file) are moved into the guarded directory before the run and back after, with what the run added. So the dogfood reuses them, keeps them across runs, and does not count them as a leak; another repository's slots there still are one. The moves are renames on one volume.
+   - `make parity` runs its build and its daemon and MCP parity suite under it (the owner's ruling, 2026-11-02).
    - The guard found a leak in the product. A mutant run that fails its tests, or is killed at its timeout or memory budget, never removes the temporary directories its tests made. A deep changed dogfood left 47.
    - Each run in a mutation slot now gets a temporary directory of its own as `TMPDIR` (`cm` and four random characters, short, so a test's socket path under it still fits), removed when the run ends.
 
@@ -63,6 +64,6 @@ The ruling's mechanism works as the owner described (cargo's lock serialized the
 - `heavy.sh` exports one more `CUPEL_*` variable; the fixture harness already strips `CUPEL_*` from every `cupel` it runs, and `cupel` reads only the names it knows.
 - A checkout's `target/` stays under `TARGET_CAP` after every `make check`. A sweep over the cap costs the next build what it removed: the oldest artifacts, which no current build uses when the cap is above the working set.
 - A dogfood of the primary checkout takes about twice as long on the eight-core machine and leaves the other half free; CI's dogfood also runs at half its cores.
-- `make parity` is not under the guard: `make check` does not run it.
+- `make parity` runs under the guard too (2026-11-02), though `make check` does not run it, so every suite CI runs is guarded.
 - A mutation run, Cupel's or a user's, no longer leaves a failed or killed mutant's temporary files in `$TMPDIR`. A run's `TMPDIR` is a directory in the caller's `TMPDIR`, not in the slot.
 - A successor that wants disk held once needs a content-addressed cache of compiled units (a compiler cache keyed by inputs, not by modification times), not a shared target directory; the measurements in Context are its acceptance test: a second worktree with an older edit must build its own code.

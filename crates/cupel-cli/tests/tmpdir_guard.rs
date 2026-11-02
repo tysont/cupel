@@ -197,6 +197,18 @@ fn a_failing_command_returns_its_exit_code() {
     assert_eq!(entries(tmp.path()), Vec::<String>::new());
 }
 
+/// `make parity` builds and runs the fixture suite under the guard, as `make check` runs its tests.
+#[test]
+fn make_parity_runs_under_the_guard() {
+    assert_eq!(
+        recipe("parity"),
+        [
+            "scripts/tmpdir-guard.sh $(CARGO) build --package cupel-cli",
+            "DAEMON_PARITY=1 MCP_PARITY=1 scripts/tmpdir-guard.sh $(CARGO) test --package cupel-fixtures",
+        ]
+    );
+}
+
 /// `make check` runs its lint, tests, and docs under the guard.
 #[test]
 fn make_check_runs_its_tests_under_the_guard() {
