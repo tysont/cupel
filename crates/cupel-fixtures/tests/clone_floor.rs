@@ -1,5 +1,5 @@
 // ABOUTME: static.clones' size floor and enum mappings end to end (ADR-158): 22-node setters do not pair, 35-node
-// ABOUTME: `match` accessors pair at info, and three 30-node `as_str` accessors are an info cluster shaped `enum-mapping`.
+// ABOUTME: `match` accessors pair at info, and three `as_str` (Rust) or `switch` (TypeScript) accessors are an info cluster shaped `enum-mapping`.
 use std::path::Path;
 use std::process::Command;
 
@@ -137,4 +137,26 @@ fn three_30_node_as_str_accessors_are_a_cluster_at_info_shaped_enum_mapping() {
         [("info".to_owned(), json!("enum-mapping"))]
     );
     outcome.assert_golden("clone-mapping/rust");
+}
+
+#[test]
+fn three_switch_accessors_on_bare_constants_are_a_cluster_at_info_shaped_enum_mapping() {
+    let dir = fixture("clone-mapping/typescript", None);
+    let outcome = clones(dir.path());
+    let member = |symbol: &str| (symbol.to_owned(), 26);
+    assert_eq!(
+        groups(&outcome),
+        [vec![
+            member("names.sourceName"),
+            member("names.phaseName"),
+            member("names.reuseName")
+        ]],
+        "{}",
+        outcome.stdout
+    );
+    assert_eq!(
+        shapes(&outcome),
+        [("info".to_owned(), json!("enum-mapping"))]
+    );
+    outcome.assert_golden("clone-mapping/typescript");
 }

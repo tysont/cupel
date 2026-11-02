@@ -1262,6 +1262,36 @@ fn a_group_with_a_member_whose_body_is_not_known_is_a_warning() {
     );
 }
 
+/// `case $id: return value`, a case on a bare identifier (TypeScript's `case Ref: return "ref"`).
+fn case(value: NormNode) -> NormNode {
+    NormNode::new("case", vec![NormNode::leaf("$id"), returned(value)])
+}
+
+/// A `switch` whose cases are bare identifiers is a mapping like one on paths: an identifier
+/// whose value is a statement around a constant is a case's pattern, not a field's name.
+#[test]
+fn a_switch_whose_cases_on_bare_identifiers_return_constants_is_a_mapping() {
+    let accessor = || {
+        let cases = (0..5).map(|_| case(NormNode::leaf("$lit"))).collect();
+        with_body(function(vec![NormNode::new(
+            "switch",
+            vec![
+                NormNode::new("parenthesized", vec![NormNode::leaf("$id")]),
+                NormNode::new("cases", cases),
+            ],
+        )]))
+    };
+    let defs = [
+        mapped("a.x", "one", 1, accessor()),
+        mapped("b.x", "two", 1, accessor()),
+    ];
+    let (finding, evidence) = the_finding(&defs);
+    assert_eq!(
+        (finding.severity, &evidence["shape"]),
+        (Severity::Info, &json!("enum-mapping"))
+    );
+}
+
 /// A struct literal whose fields are constants (`Span { line, col: 1, end_col: 1, … }`) is not
 /// a mapping: a field's name is a lone identifier, not a pattern.
 #[test]

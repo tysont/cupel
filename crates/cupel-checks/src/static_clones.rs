@@ -988,17 +988,24 @@ fn table(node: &NormNode, parent: Option<&NormNode>) -> bool {
 }
 
 /// An arm: a pattern, then exactly one constant besides punctuation (`Self::Ref => "ref"`,
-/// `case K.REF: return "ref"`). A lone identifier first is a field's name (`col: 1` in a struct
-/// or object literal), not a pattern.
+/// `case K.REF: return "ref"`). A lone identifier first is a case's pattern when its value is a
+/// statement around one constant (`case Ref: return "ref"`); with the constant itself as its value
+/// it is a field's name (`col: 1` in a struct or object literal).
 fn arm(node: &NormNode) -> bool {
     let Some((pattern, rest)) = node.children.split_first() else {
         return false;
     };
-    if pattern.label == "$id" && pattern.children.is_empty() {
-        return false;
-    }
     let mut values = rest.iter().filter(|child| !punctuation(child));
-    matches!((values.next(), values.next()), (Some(value), None) if constant(value))
+    let (Some(value), None) = (values.next(), values.next()) else {
+        return false;
+    };
+    let field_name = pattern.label == "$id" && pattern.children.is_empty() && !statement(value);
+    constant(value) && !field_name
+}
+
+/// A statement around one constant: a node whose one child is a constant (`return "ref"`).
+fn statement(node: &NormNode) -> bool {
+    matches!(node.children.as_slice(), [only] if constant(only))
 }
 
 /// A constant: an identifier or literal, a node with no children (a keyword such as `self`), a
