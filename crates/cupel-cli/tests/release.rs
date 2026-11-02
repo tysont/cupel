@@ -1,5 +1,5 @@
 // ABOUTME: Tests for scripts/release.sh, which `make dist` and the release workflow use to package the binary:
-// ABOUTME: the tag-to-version check, archive names and layout, SHA256SUMS, the static check, and workflow action pins.
+// ABOUTME: the tag-to-version check, no branch named like a tag, archive names and layout, SHA256SUMS, the static check, and action pins.
 #![cfg(unix)]
 mod support;
 
@@ -113,6 +113,59 @@ fn version_rejects_a_tag_that_differs_from_the_crate_version() {
         format!(
             "release.sh: tag v999.0.0 does not match the crate version {VERSION} (expected v{VERSION})\n"
         )
+    );
+}
+
+#[test]
+fn branch_refuses_a_name_like_a_release_tag() {
+    let output = release(&["branch", "v1.2.3"]);
+    assert_eq!(output.status.code(), Some(1));
+    assert_eq!(
+        stderr(&output),
+        "release.sh: \"v1.2.3\" is named like a release tag (v*): a branch of that name makes pushing the tag ambiguous\n"
+    );
+}
+
+#[test]
+fn branch_accepts_any_other_name() {
+    let output = release(&["branch", "housekeeping"]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(stdout(&output), "");
+}
+
+/// A git repository of version 1.2.3 holding a copy of the release script, with one commit.
+fn versioned_repository() -> TempDir {
+    let dir = TempDir::new().unwrap();
+    fs::create_dir(dir.path().join("scripts")).unwrap();
+    fs::copy(script(), dir.path().join("scripts/release.sh")).unwrap();
+    fs::write(
+        dir.path().join("Cargo.toml"),
+        "[workspace.package]\nversion = \"1.2.3\"\n",
+    )
+    .unwrap();
+    for args in [
+        &["init", "--quiet", "--initial-branch", "main"][..],
+        &["add", "."],
+        &["commit", "--quiet", "-m", "c"],
+    ] {
+        support::git(dir.path(), args);
+    }
+    dir
+}
+
+#[test]
+fn version_refuses_to_run_while_a_branch_is_named_like_a_release_tag() {
+    let dir = versioned_repository();
+    support::git(dir.path(), &["branch", "v1.2.3"]);
+    let output = Command::new("sh")
+        .arg(dir.path().join("scripts/release.sh"))
+        .args(["version", "v1.2.3"])
+        .output()
+        .unwrap();
+    assert_eq!(output.status.code(), Some(1));
+    assert_eq!(
+        stderr(&output),
+        "release.sh: these branches are named like a release tag (v*), which makes pushing the tag ambiguous; rename or delete them:\nv1.2.3\n"
     );
 }
 

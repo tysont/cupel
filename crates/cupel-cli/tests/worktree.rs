@@ -68,6 +68,22 @@ fn the_script_passes_shellcheck() {
     );
 }
 
+/// A branch named like a release tag makes pushing the tag ambiguous, so `add` makes none.
+#[test]
+fn add_refuses_a_name_like_a_release_tag() {
+    let tmp = TempDir::new().unwrap();
+    let main = main_checkout();
+    let output = worktree(main.path(), tmp.path(), &["add", "v1.2.3"]);
+    assert_eq!(
+        (output.status.code(), text(&output.stderr)),
+        (
+            Some(1),
+            "release.sh: \"v1.2.3\" is named like a release tag (v*): a branch of that name makes pushing the tag ambiguous\n".to_owned()
+        )
+    );
+    assert_eq!(git(main.path(), &["branch", "--list", "v*"]), "");
+}
+
 /// `add NAME` makes `.claude/worktrees/NAME` in the main checkout on a new branch `NAME` from `main`.
 #[test]
 fn add_makes_a_worktree_on_a_new_branch_from_main() {

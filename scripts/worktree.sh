@@ -24,6 +24,7 @@ path=$main/.claude/worktrees/$name
 
 case $action in
 add)
+	sh "$(dirname "$0")/release.sh" branch "$name"
 	base=${3:-main}
 	if git show-ref --verify --quiet "refs/heads/$name"; then
 		git worktree add "$path" "$name"

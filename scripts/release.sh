@@ -1,6 +1,6 @@
 #!/bin/sh
 # ABOUTME: Release packaging for the cupel binary (ADR-124): the crate version and tag check, one target's archive,
-# ABOUTME: SHA256SUMS, the archive layout check, and the static-binary check. `make dist` and release.yml call it.
+# ABOUTME: SHA256SUMS, the layout and static-binary checks, and no branch named like a tag. `make dist`, release.yml, worktree.sh call it.
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
@@ -18,6 +18,7 @@ usage: release.sh version [TAG]               print the crate version; with TAG,
        release.sh sums DIR                      write DIR/SHA256SUMS over every archive in DIR
        release.sh verify ARCHIVE                fail unless ARCHIVE holds exactly the binary, LICENSE, and README.md
        release.sh static BINARY                 fail unless BINARY is a statically linked ELF executable
+       release.sh branch NAME                   fail if NAME is a release tag's name (v*), which no branch may take
 EOF
 	exit 2
 }
@@ -48,6 +49,25 @@ sha256() {
 		sha256sum "$@"
 	else
 		shasum -a 256 "$@"
+	fi
+}
+
+# A branch named like a release tag (v*) makes `git push REMOTE vX.Y.Z` ambiguous between the two refs, so no
+# branch may take such a name: `branch` refuses one before scripts/worktree.sh makes it, and `version` refuses
+# to run while the repository has one.
+branch() {
+	case "$1" in
+	v*) fail "\"$1\" is named like a release tag (v*): a branch of that name makes pushing the tag ambiguous" ;;
+	esac
+}
+
+# Fails while the repository has a local branch named like a release tag; outside a git checkout (an
+# unpacked source archive) there is none.
+no_tag_branches() {
+	found=$(git -C "$root" for-each-ref --format='%(refname:short)' 'refs/heads/v*' 2>/dev/null) || return 0
+	if [ -n "$found" ]; then
+		printf 'release.sh: these branches are named like a release tag (v*), which makes pushing the tag ambiguous; rename or delete them:\n%s\n' "$found" >&2
+		exit 1
 	fi
 }
 
@@ -172,6 +192,7 @@ command=$1
 shift
 case "$command" in
 version)
+	no_tag_branches
 	if [ "${1:-}" = --set ]; then
 		[ $# -eq 2 ] || usage
 		set_version "$2"
@@ -184,5 +205,6 @@ package) [ $# -eq 3 ] || usage; package "$@" ;;
 sums) [ $# -eq 1 ] || usage; sums "$(cd "$1" && pwd)" ;;
 verify) [ $# -eq 1 ] || usage; verify "$1" ;;
 static) [ $# -eq 1 ] || usage; static "$1" ;;
+branch) [ $# -eq 1 ] || usage; branch "$1" ;;
 *) usage ;;
 esac
