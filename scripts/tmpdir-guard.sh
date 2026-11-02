@@ -32,9 +32,11 @@ if [ "${1:-}" = --slots-of ]; then
 fi
 [ "$#" -gt 0 ] || usage
 
+# The directory's name is short: a guarded mutation run nests its own TMPDIR and a test's repository below it, and
+# a socket a test makes there must still fit macOS's 103-character socket path.
 parent=${TMPDIR:-/tmp}
 parent=${parent%/}
-guarded=$(mktemp -d "$parent/cupel.XXXXXX") || exit 2
+guarded=$(mktemp -d "$parent/c.XXXXXX") || exit 2
 
 # move FROM TO: moves REPO's slot directories under FROM/cupel-mutate to TO/cupel-mutate, replacing any
 # of the same name there.

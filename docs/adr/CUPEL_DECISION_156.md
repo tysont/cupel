@@ -1,6 +1,6 @@
 # CUPEL_DECISION_156: Agent checkouts: per-checkout builds, half the cores, the heavy lock around the check's build
 
-**Date:** 2026-10-30 · **Status:** accepted; amended 2026-11-01 (v0.2.3): the owner accepted per-checkout build directories as recorded, and §7 to §9 are added; amended 2026-11-02: `make parity` runs under the guard (§9) · **Phase:** B.2
+**Date:** 2026-10-30 · **Status:** accepted; amended 2026-11-01 (v0.2.3): the owner accepted per-checkout build directories as recorded, and §7 to §9 are added; amended 2026-11-02: `make parity` runs under the guard, whose directory's name is short (§9) · **Phase:** B.2
 
 ## Context
 
@@ -53,6 +53,7 @@ The ruling's mechanism works as the owner described (cargo's lock serialized the
    - Outside an agent checkout the check's build step, lint, tests, and docs already ran under it; an agent checkout's locked build step now does too.
    - `make dogfood` runs its `cupel check` under it with `--slots-of .`. The mutation slots the engine keeps for this checkout (ADR-141 §3, named by their `repository` file) are moved into the guarded directory before the run and back after, with what the run added. So the dogfood reuses them, keeps them across runs, and does not count them as a leak; another repository's slots there still are one. The moves are renames on one volume.
    - `make parity` runs its build and its daemon and MCP parity suite under it (the owner's ruling, 2026-11-02).
+   - The guard names its directory `c.` and six characters (2026-11-02). Under the `cupel.` name, a guarded mutation run's reference run failed `serve_mcp_runs_beside_a_socket_daemon_and_takes_no_socket_flags` on every changed dogfood that selected it. The run's `TMPDIR` nests below the guard's, and the test's daemon socket in its repository took 105 characters (canonical `$TMPDIR` 57, the guard's 13, the run's 7, the repository's 11, `.cupel/serve.sock` 17), over macOS's 103. So the daemon never listened, and `tests.mutation` errored after two hours. At 9 characters it is 101. Unguarded it is 92, so a user's mutation run was never affected.
    - The guard found a leak in the product. A mutant run that fails its tests, or is killed at its timeout or memory budget, never removes the temporary directories its tests made. A deep changed dogfood left 47.
    - Each run in a mutation slot now gets a temporary directory of its own as `TMPDIR` (`cm` and four random characters, short, so a test's socket path under it still fits), removed when the run ends.
 
