@@ -453,8 +453,10 @@ fn a_check_every_language_skips_alike_has_one_entry_naming_no_language() {
     );
 }
 
+/// Languages skipped for different reasons report the one a deadline cut (here Rust's, cancelled) before the first
+/// language's (Go's, unsupported): the cut is what makes the run partial, and what a rerun needs.
 #[test]
-fn languages_skipped_for_different_reasons_keep_the_first_languages_reason() {
+fn languages_skipped_for_different_reasons_report_the_cut_before_another_languages_reason() {
     let world = World::new(
         vec![check(
             "t.deep",
@@ -471,7 +473,7 @@ fn languages_skipped_for_different_reasons_keep_the_first_languages_reason() {
     let skipped = checks[0].skipped.as_ref().unwrap();
     assert_eq!(
         (skipped.reason, skipped.lang.as_ref()),
-        (SkipReason::Unsupported, Some(&LangId::from("go")))
+        (SkipReason::Timeout, Some(&LangId::from("rust")))
     );
 }
 

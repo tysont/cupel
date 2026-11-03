@@ -1503,9 +1503,7 @@ impl<'a> CheckRun<'a> {
                 .any(|finding| finding.severity != Severity::Info);
             let cut = skips
                 .into_iter()
-                .filter(|skipped| {
-                    matches!(skipped.reason, SkipReason::Timeout | SkipReason::Budget)
-                })
+                .filter(cut)
                 .min_by(|a, b| a.lang.cmp(&b.lang));
             let status = ran
                 .iter()
@@ -1621,21 +1619,8 @@ fn same(a: &dyn Check, b: &dyn Check) -> bool {
 
 /// The one entry of a check every language skipped (ADR-064): the first language's skip in
 /// language-ID order, naming no language when every language was skipped alike.
-fn skipped_entry(check: &dyn Check, mut skips: Vec<Skipped>) -> CheckResult {
-    skips.sort_by(|a, b| a.lang.cmp(&b.lang));
-    let alike = |a: &Skipped, b: &Skipped| {
-        (a.reason, &a.fact, &a.tool, &a.see) == (b.reason, &b.fact, &b.tool, &b.see)
-    };
-    let mut skipped = skips.first().cloned();
-    if let Some(first) = skipped.as_mut()
-        && skips.len() > 1
-        && skips.iter().all(|other| alike(first, other))
-    {
-        first.lang = None;
-        first.est_ms = first
-            .est_ms
-            .map(|_| skips.iter().filter_map(|skip| skip.est_ms).sum());
-    }
+fn skipped_entry(check: &dyn Check, skips: Vec<Skipped>) -> CheckResult {
+    let skipped = reported(skips);
     let manifest = check.manifest();
     CheckResult {
         id: manifest.id.clone(),
@@ -1651,6 +1636,32 @@ fn skipped_entry(check: &dyn Check, mut skips: Vec<Skipped>) -> CheckResult {
         oracle: None,
         notes: Vec::new(),
     }
+}
+
+/// The skip a check's entry reports. One that cut work (`timeout`, `budget`) comes before any other: it is what
+/// makes the run partial, and its estimate is what a rerun needs. Otherwise, the first by language. Skips alike
+/// but for their language are one, with no language and their estimates summed.
+fn reported(mut skips: Vec<Skipped>) -> Option<Skipped> {
+    skips.sort_by(|a, b| (!cut(a), &a.lang).cmp(&(!cut(b), &b.lang)));
+    let alike = |a: &Skipped, b: &Skipped| {
+        (a.reason, &a.fact, &a.tool, &a.see) == (b.reason, &b.fact, &b.tool, &b.see)
+    };
+    let mut skipped = skips.first().cloned();
+    if let Some(first) = skipped.as_mut()
+        && skips.len() > 1
+        && skips.iter().all(|other| alike(first, other))
+    {
+        first.lang = None;
+        first.est_ms = first
+            .est_ms
+            .map(|_| skips.iter().filter_map(|skip| skip.est_ms).sum());
+    }
+    skipped
+}
+
+/// Whether `skipped` is work a deadline cut: the budget's, or `--timeout`'s.
+fn cut(skipped: &Skipped) -> bool {
+    matches!(skipped.reason, SkipReason::Timeout | SkipReason::Budget)
 }
 
 /// The `skipped` object for a pair the support matrix rules out.
@@ -1793,4 +1804,47 @@ fn declared_settings(checks: &CheckRegistry) -> Vec<(FactKind, String, CheckId)>
         }
     }
     declared
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn skip(reason: SkipReason, lang: &str, est_ms: Option<u64>) -> Skipped {
+        Skipped {
+            reason,
+            fact: None,
+            lang: Some(LangId::from(lang)),
+            tool: None,
+            see: None,
+            est_ms,
+        }
+    }
+
+    /// A check whose Rust work the budget cut and that no other language supports reports the cut, not the first
+    /// language's reason: the cut is what makes the run partial, and its estimate is what a rerun needs.
+    #[test]
+    fn a_cut_is_reported_before_another_languages_reason() {
+        let reported = reported(vec![
+            skip(SkipReason::Unconfigured, "clojure", None),
+            skip(SkipReason::Budget, "rust", Some(9_000)),
+        ]);
+        assert_eq!(
+            reported.map(|skipped| (skipped.reason, skipped.lang, skipped.est_ms)),
+            Some((SkipReason::Budget, Some(LangId::from("rust")), Some(9_000)))
+        );
+    }
+
+    /// Skips alike but for their language are one with no language and their estimates summed.
+    #[test]
+    fn skips_alike_but_for_language_are_one() {
+        let reported = reported(vec![
+            skip(SkipReason::Budget, "rust", Some(2)),
+            skip(SkipReason::Budget, "go", Some(3)),
+        ]);
+        assert_eq!(
+            reported.map(|skipped| (skipped.reason, skipped.lang, skipped.est_ms)),
+            Some((SkipReason::Budget, None, Some(5)))
+        );
+    }
 }
