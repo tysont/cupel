@@ -2022,6 +2022,37 @@ The integrator ran the batch alone on branch `housekeeping`, gated by `make chec
    - Deleted the `v0.2.3` and `release-0.2.3` branches; both were merged and local only.
    - `scripts/release.sh branch NAME` refuses a name starting with `v`, and `scripts/worktree.sh add` calls it. `release.sh version` refuses to run while such a branch exists.
 
+### Batch v0.2.4
+
+**Goal:** The owner's v0.2.4 batch (2026-11-02), after accepting the housekeeping batch: mutation slots out of `$TMPDIR`, the Linux ENOENT in `cupel-mutate::phases`, one unbudgeted changed dogfood on the final tree, then `v0.2.4`.
+
+**Status:** in progress.
+
+The integrator ran the batch alone on branch `batch-0.2.4`, gated by `make check` and the tree dogfood.
+
+1. **Slots in the repository** ([ADR-159](adr/CUPEL_DECISION_159.md)).
+   - Slots live in `<repository>/.cupel/work/slots/<lang>/<n>/`. `.cupel/.gitignore` already ignores it, and the OS never prunes it, as macOS's `dirhelper` pruned a slot's build-script outputs under `$TMPDIR`.
+   - `claim` makes the directory: no lock, no records, no reclaim of other repositories' slots.
+   - `cupel doctor` reports this repository's slots.
+   - `scripts/target-sweep.sh` counts each slot's `target/` against `TARGET_CAP`, now 96GB, and sweeps each build to its share.
+   - `worktree.sh remove` leaves slots to the worktree's removal.
+   - Socket headroom:
+     - The guard makes its directory under `/tmp` and lends no slots (`--slots-of` is gone).
+     - A daemon test's socket is 57 characters under the guard and 92 in an unguarded mutation run, against macOS's 103.
+     - `cupel_fixtures::assert_socket_fits` fails any socket path over 100 characters, at every site a test makes Cupel create one. Under v0.2.3's nesting, the MCP daemon test now fails at once naming its 101-character path.
+2. **The Linux ENOENT.**
+   - Cause: a claim reclaiming other repositories' slots treated a directory another claim had just made, before its lock file existed, as a gone repository's, and removed it while that claim built in it.
+   - Neither candidate held: parallel tests never shared a slot path, and no copy read a dropped source.
+   - Reproduction in `rust:1.92-bookworm` at 16 test threads:
+     - The suite's binary run 200 times did not hit it (the window is microseconds). It did fail twice another way: a surviving mutant timed out under the load, fixed in 7e86007 with a 15 s mutant timeout in the two-slot config.
+     - The regression test `claims_made_at_once_keep_the_slots_each_made` (16 claims at once, 200 rounds) failed 20 of 20 runs on main's `slots.rs` and 0 of 20 after item 1.
+   - Item 1 removes the cause: no claim touches another repository's slots. No retries.
+   - Found by the gate along the way:
+     - The first tree dogfood under its local 30-minute budget ended  with  cut. The integrator's gate had always cleared the budget, as CI does. Its entry read "unconfigured (lang clojure)": a check skipped in every language reported the first language's reason. It now reports a skip a deadline cut first (bc94bbb0).
+     - The ten unbudgeted tree runs before it took 19 to 36 minutes, so the tree gate's budget is 45 minutes (ADR-129, amended).
+3. **Changed dogfood on the final tree, unbudgeted:** pending.
+4. **`v0.2.4`:** pending.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
