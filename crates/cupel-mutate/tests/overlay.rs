@@ -67,6 +67,21 @@ fn a_slot_mirrors_the_tree_and_links_what_the_tree_ignores() {
     assert_eq!(read(root, "fixtures/.cupel/cache/report"), "committed\n");
 }
 
+/// A slot lives in the tree's own `.cupel/work/slots/` (ADR-159); the tree's `.cupel/` is the slot's own, so a sync
+/// neither walks into the slot nor links the tree's `.cupel/` into it.
+#[test]
+fn a_slot_inside_the_trees_cupel_directory_mirrors_the_tree_and_not_itself() {
+    let repo = repository();
+    let slot = Slot::at(repo.path().join(".cupel/work/slots/python/0"));
+    slot.sync(repo.path(), &[]).unwrap();
+    slot.sync(repo.path(), &[]).unwrap();
+    assert_eq!(
+        read(slot.root(), "src/calc.py"),
+        "def add(a, b):\n    return a + b\n"
+    );
+    assert!(!slot.root().join(".cupel").exists());
+}
+
 #[test]
 fn a_mutant_is_a_private_copy_and_the_original_never_changes() {
     let Synced { repo, slot, _work } = synced(&[]);

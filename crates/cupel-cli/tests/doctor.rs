@@ -285,23 +285,19 @@ fn a_configured_runner_that_is_not_installed_warns_without_failing() {
     );
 }
 
-/// Writes the slot directory `name` under `tmp`'s `cupel-mutate/` for the repository at
-/// `repository`, holding `bytes` in one slot.
-fn slots(tmp: &std::path::Path, name: &str, repository: &str, bytes: usize) {
-    let dir = tmp.join("cupel-mutate").join(name);
-    std::fs::create_dir_all(dir.join("python/0")).unwrap();
-    std::fs::write(dir.join("repository"), repository).unwrap();
-    std::fs::write(dir.join("python/0/build.out"), vec![b'x'; bytes]).unwrap();
+/// Writes `bytes` into slot 0 of `lang` in the repository's `.cupel/work/slots/` (ADR-159).
+fn slots(repo: &Repo, lang: &str, bytes: usize) {
+    let slot = repo.root().join(".cupel/work/slots").join(lang).join("0");
+    std::fs::create_dir_all(&slot).unwrap();
+    std::fs::write(slot.join("build.out"), vec![b'x'; bytes]).unwrap();
 }
 
 #[test]
-fn doctor_reports_the_mutation_slots_and_the_repositories_they_belong_to() {
-    let tmp = tempfile::tempdir().unwrap();
+fn doctor_reports_the_repositorys_mutation_slots_and_what_they_hold() {
     let repo = Repo::new();
-    let kept = repo.root().display().to_string();
-    slots(tmp.path(), "a", &kept, 2_048);
-    slots(tmp.path(), "b", "/no/such/repository", 1_000);
-    let outcome = repo.run_with(cupel().env("TMPDIR", tmp.path()), &["doctor"]);
+    slots(&repo, "python", 2_048);
+    slots(&repo, "rust", 1_000);
+    let outcome = repo.run(&["doctor"]);
     let envelope = outcome.envelope();
     let finding = envelope["findings"]
         .as_array()
@@ -309,37 +305,19 @@ fn doctor_reports_the_mutation_slots_and_the_repositories_they_belong_to() {
         .iter()
         .find(|finding| finding["kind"] == "doctor.mutation-slots")
         .unwrap_or_else(|| panic!("{envelope}"));
+    let root = repo.root().join(".cupel/work/slots").display().to_string();
     assert_eq!(finding["severity"], "info");
-    let evidence = &finding["evidence"];
-    let total = evidence["bytes"].as_u64().unwrap();
-    assert!((3_048..3_048 + 1_024).contains(&total), "{evidence}");
-    let mut repositories: Vec<(Value, Value)> = evidence["repositories"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|slots| (slots["repository"].clone(), slots["exists"].clone()))
-        .collect();
-    repositories.sort_by_key(|(path, _)| path.to_string());
+    assert_eq!(finding["evidence"], json!({"root": root, "bytes": 3_048}));
     assert_eq!(
-        repositories,
-        [
-            (json!("/no/such/repository"), json!(false)),
-            (json!(kept), json!(true))
-        ]
-    );
-    let title = finding["title"].as_str().unwrap();
-    assert!(
-        title.starts_with("Mutation slots hold 3.")
-            && title.contains(" KiB for 2 repositories under "),
-        "{title}"
+        finding["title"],
+        json!(format!("Mutation slots hold 3.0 KiB in {root}"))
     );
 }
 
 #[test]
 fn doctor_says_nothing_of_mutation_slots_when_there_are_none() {
-    let tmp = tempfile::tempdir().unwrap();
     let repo = Repo::new();
-    let outcome = repo.run_with(cupel().env("TMPDIR", tmp.path()), &["doctor"]);
+    let outcome = repo.run(&["doctor"]);
     let kinds = support::finding_fields(&outcome.envelope(), "kind");
     let reported = kinds
         .iter()

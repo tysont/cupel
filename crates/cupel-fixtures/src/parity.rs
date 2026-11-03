@@ -153,6 +153,7 @@ impl Daemon {
     /// with `dir` as its temporary directory, as a cold run has its own.
     fn start(dir: &Path) -> Self {
         let socket = dir.join("d.sock");
+        crate::assert_socket_fits(&socket);
         let mut command = Command::new(assert_cmd::cargo::cargo_bin("cupel"));
         command
             .args([

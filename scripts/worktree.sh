@@ -1,6 +1,6 @@
 #!/bin/sh
-# ABOUTME: Creates an agent worktree under the main checkout's .claude/worktrees, and removes one together with what
-# ABOUTME: it alone holds outside itself, its mutation slots (ADR-156 §5). `make worktree` and `make worktree-remove` run it.
+# ABOUTME: Creates an agent worktree under the main checkout's .claude/worktrees, and removes one with its build and its
+# ABOUTME: mutation slots, all inside it (ADR-156 §5, ADR-159). `make worktree` and `make worktree-remove` run it.
 set -eu
 
 fail() {
@@ -38,19 +38,8 @@ remove)
 	case $(pwd -P)/ in
 	"$path"/*) fail "cannot remove $path from inside it; run this from the main checkout" ;;
 	esac
-	# The mutation engine keeps each repository's slots under $TMPDIR/cupel-mutate/<key>, naming the
-	# repository's canonical path in the slot directory's `repository` file (ADR-141 §3); slot 0
-	# holds a whole build of the workspace.
-	slots=${TMPDIR:-/tmp}
-	for owner in "${slots%/}"/cupel-mutate/*/repository; do
-		[ -f "$owner" ] || continue
-		if [ "$(cat "$owner")" = "$path" ]; then
-			rm -rf "${owner%/repository}"
-			echo "worktree.sh: removed the mutation slots ${owner%/repository}"
-		fi
-	done
 	# --force: the worktree goes with its untracked and ignored files, its target/ (the coverage
-	# build under it included) and .cupel/. The branch stays.
+	# build under it included) and .cupel/, its mutation slots with it (ADR-159). The branch stays.
 	git worktree remove --force "$path"
 	echo "worktree.sh: removed $path"
 	;;

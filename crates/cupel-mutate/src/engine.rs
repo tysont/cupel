@@ -303,8 +303,8 @@ impl<'a> Running<'a> {
     }
 
     /// The slots for files of at most `widest` mutants, each synced with the tree: as many as
-    /// the settings allow, no more than the run's `--jobs` (ADR-086 §11); held by the claim
-    /// until the production ends (ADR-141 §3).
+    /// the settings allow, no more than the run's `--jobs` (ADR-086 §11), in the repository's
+    /// `.cupel/work/slots/` (ADR-159).
     fn slots(&self, widest: usize) -> Result<(Claim, Vec<Slot>)> {
         let root = &self.ctx.ctx.root;
         let claim = claim(root).map_err(|error| io(root, "", &error))?;

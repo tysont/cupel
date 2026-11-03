@@ -364,7 +364,7 @@ fn serve_mcp_runs_beside_a_socket_daemon_and_takes_no_socket_flags() {
         .spawn()
         .unwrap();
     assert!(
-        appears(&root.join(".cupel/serve.sock")),
+        appears(&support::daemon_socket(&root)),
         "the daemon listens"
     );
     let result = mcp.call(2, "check", &json!({"only": ["static.complexity"]}));

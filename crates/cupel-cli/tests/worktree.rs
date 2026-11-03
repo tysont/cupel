@@ -1,5 +1,5 @@
 // ABOUTME: Tests for scripts/worktree.sh, which creates agent worktrees under the main checkout's .claude/worktrees
-// ABOUTME: and removes them with what they alone hold outside it: their mutation slots (ADR-156 §5).
+// ABOUTME: and removes them with their build and their mutation slots (ADR-156 §5, ADR-159).
 mod support;
 
 use std::fs;
@@ -26,16 +26,6 @@ fn text(bytes: &[u8]) -> String {
 
 fn succeeded(output: &Output) -> bool {
     output.status.success()
-}
-
-/// A slot directory under `tmp/cupel-mutate` named `key`, owned by the repository at `repo`, as the
-/// mutation engine leaves one (ADR-141 §3): its `repository` file and a build in slot 0.
-fn slots(tmp: &Path, key: &str, repo: &Path) -> PathBuf {
-    let dir = tmp.join("cupel-mutate").join(key);
-    fs::create_dir_all(dir.join("rust/0/target/debug")).unwrap();
-    fs::write(dir.join("rust/0/target/debug/cupel"), "a build\n").unwrap();
-    fs::write(dir.join("repository"), repo.to_string_lossy().as_bytes()).unwrap();
-    dir
 }
 
 /// A main checkout and the agent worktree `name` the script added to it.
@@ -113,22 +103,22 @@ fn add_from_a_worktree_checks_out_an_existing_branch_under_the_main_checkout() {
     assert_eq!(git(&second, &["branch", "--show-current"]), "existing");
 }
 
-/// `remove NAME` deletes the worktree with its ignored build and the mutation slots that belong to
-/// it, and leaves another repository's slots and the branch.
+/// `remove NAME` deletes the worktree with its ignored build and its mutation slots, which live in its own
+/// `.cupel/work/slots/` (ADR-159), and leaves the branch.
 #[test]
 fn remove_deletes_the_worktree_its_build_and_its_slots_and_keeps_the_branch() {
     let tmp = TempDir::new().unwrap();
     let (main, path) = added("done", tmp.path());
-    fs::create_dir_all(path.join("target/cupel-llvm-cov")).unwrap();
-    fs::write(path.join("target/cupel-llvm-cov/build"), "coverage\n").unwrap();
-    let own = slots(tmp.path(), "aaaaaaaaaaaaaaaa", &path);
-    let other = slots(tmp.path(), "bbbbbbbbbbbbbbbb", main.path());
+    for (dir, file) in [
+        ("target/cupel-llvm-cov", "build"),
+        (".cupel/work/slots/rust/0/target/debug", "cupel"),
+    ] {
+        fs::create_dir_all(path.join(dir)).unwrap();
+        fs::write(path.join(dir).join(file), "built\n").unwrap();
+    }
     let output = worktree(main.path(), tmp.path(), &["remove", "done"]);
     assert!(succeeded(&output), "{}", text(&output.stderr));
-    assert_eq!(
-        (path.exists(), own.exists(), other.exists()),
-        (false, false, true)
-    );
+    assert!(!path.exists());
     assert_eq!(git(main.path(), &["branch", "--list", "done"]), "done");
     assert!(!git(main.path(), &["worktree", "list"]).contains("done"));
 }

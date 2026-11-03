@@ -573,6 +573,24 @@ pub fn installed(program: &str) -> bool {
     false
 }
 
+/// The names of what `dir` holds, sorted.
+pub fn entries(dir: &Path) -> Vec<String> {
+    let mut names: Vec<String> = fs::read_dir(dir)
+        .unwrap()
+        .map(|entry| entry.unwrap().file_name().to_string_lossy().into_owned())
+        .collect();
+    names.sort();
+    names
+}
+
+/// Where a daemon for the repository at `root` listens, `.cupel/serve.sock`, after checking the path fits the bound
+/// on socket paths (ADR-159). Every test that starts a daemon or makes its socket takes the path from here.
+pub fn daemon_socket(root: &Path) -> PathBuf {
+    let socket = root.join(".cupel/serve.sock");
+    cupel_fixtures::assert_socket_fits(&socket);
+    socket
+}
+
 /// `git ARGS` in `dir`, which must succeed; its standard output, trimmed.
 pub fn git(dir: &Path, args: &[&str]) -> String {
     let output = std::process::Command::new("git")

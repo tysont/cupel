@@ -71,7 +71,7 @@ impl Daemon {
         }
         let daemon = Self {
             child: Some(command.spawn().expect("cupel serve starts")),
-            socket: repo.root().join(".cupel/serve.sock"),
+            socket: support::daemon_socket(&repo.root()),
         };
         assert!(
             eventually(|| daemon.try_status().is_some()),
@@ -245,7 +245,7 @@ fn a_run_with_jobs_is_local_because_a_process_sizes_its_thread_pool_once() {
 fn a_stale_socket_file_is_ignored_and_the_run_is_local() {
     let repo = repo();
     std::fs::create_dir_all(repo.path(".cupel")).unwrap();
-    drop(std::os::unix::net::UnixListener::bind(repo.path(".cupel/serve.sock")).unwrap());
+    drop(std::os::unix::net::UnixListener::bind(support::daemon_socket(&repo.root())).unwrap());
     let outcome = repo.run(&CHECK);
     assert_eq!((outcome.code, outcome.stderr.as_str()), (0, ""));
     assert_eq!(outcome.envelope()["checks"][0]["status"], json!("fail"));
@@ -449,7 +449,7 @@ fn doctor_reports_a_running_daemon_and_a_stale_socket() {
     drop(daemon);
 
     std::fs::create_dir_all(repo.path(".cupel")).unwrap();
-    drop(std::os::unix::net::UnixListener::bind(repo.path(".cupel/serve.sock")).unwrap());
+    drop(std::os::unix::net::UnixListener::bind(support::daemon_socket(&repo.root())).unwrap());
     let stale = cold(&repo, &["doctor", "--format", "json"]);
     assert!(
         kinds(&stale).contains(&"doctor.daemon-stale".to_owned()),

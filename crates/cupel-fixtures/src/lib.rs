@@ -54,6 +54,7 @@ mod redact;
 mod repos;
 mod run;
 mod sarif;
+mod sockets;
 
 pub use captures::Capture;
 pub use cupel_plugin::evidence;
@@ -62,3 +63,4 @@ pub use redact::{redact, redact_sarif};
 pub use repos::{copy_repo, repo_path};
 pub use run::{Outcome, run_cupel, run_cupel_measuring};
 pub use sarif::sarif_problems;
+pub use sockets::{SOCKET_PATH_MAX, assert_socket_fits};

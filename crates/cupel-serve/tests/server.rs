@@ -134,6 +134,14 @@ impl Running {
     /// A daemon for `root`.
     fn start(root: &Path, watch: bool) -> Self {
         let socket = root.join(".cupel/serve.sock");
+        // The bound on socket paths cupel_fixtures::assert_socket_fits checks for every other test (ADR-159):
+        // three under macOS's 103-character limit. This crate's tests cannot depend on cupel-fixtures, which
+        // depends on it.
+        assert!(
+            socket.as_os_str().len() <= 100,
+            "{} is over 100 characters",
+            socket.display()
+        );
         let script = Arc::new(Script::default());
         let stop = Cancellation::new();
         let (ready, started) = mpsc::channel();

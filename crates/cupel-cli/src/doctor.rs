@@ -18,7 +18,7 @@ use crate::install::{self, Planned, probe};
 use crate::problem::Problem;
 use crate::project;
 use crate::routes;
-use crate::run::{Invocation, rfc3339};
+use crate::run::Invocation;
 use crate::serve;
 use crate::suppress;
 
@@ -57,7 +57,7 @@ pub fn run(invocation: &Invocation<'_>, fix: bool) -> Envelope {
     }
     problems.extend(cupel_dir(writer));
     problems.extend(daemon(writer.root()));
-    problems.extend(mutation_slots(&cupel_mutate::slots::root()));
+    problems.extend(mutation_slots(&cupel_mutate::slots::root(writer.root())));
     let (requirements, unresolved) = needed(config, writer);
     problems.extend(unresolved);
     let mut probed = probe_all(&requirements);
@@ -499,46 +499,25 @@ fn daemon(root: &Path) -> Option<Problem> {
     })
 }
 
-/// The mutation slots under `root` (ADR-141 §3), when there are any: how much they hold in all,
-/// and each repository's path, whether it still exists, its size, and its last use.
+/// The repository's mutation slots at `root` (ADR-159), when there are any: how much they hold.
 fn mutation_slots(root: &Path) -> Option<Problem> {
-    let slots = cupel_mutate::slots::usage(root);
-    if slots.is_empty() {
+    if !root.is_dir() {
         return None;
     }
-    let total: u64 = slots.iter().map(|slots| slots.bytes).sum();
+    let bytes = cupel_mutate::slots::measure(root);
     let shown = root.display().to_string();
-    let repositories: Vec<serde_json::Value> = slots
-        .iter()
-        .map(|slots| {
-            json!({
-                "repository": slots.repository.as_ref().map(|path| path.display().to_string()),
-                "exists": slots.exists,
-                "bytes": slots.bytes,
-                "last_used": rfc3339(slots.used),
-            })
-        })
-        .collect();
-    let count = match slots.len() {
-        1 => "1 repository".to_owned(),
-        n => format!("{n} repositories"),
-    };
     Some(Problem {
         check: "doctor",
         kind: "doctor.mutation-slots",
         subject: shown.clone(),
         severity: Severity::Info,
-        title: format!(
-            "Mutation slots hold {} for {count} under {shown}",
-            bytes_shown(total)
-        ),
+        title: format!("Mutation slots hold {} in {shown}", bytes_shown(bytes)),
         detail: Some(
-            "Mutation runs keep their slots between runs so builds are incremental. A run \
-             removes the slots of repositories that are gone or unused for 7 days, and the \
-             least recently used while all slots hold more than 32 GiB."
+            "Mutation runs keep their slots between runs, in the repository's \
+             .cupel/work/slots/, so builds are incremental."
                 .to_owned(),
         ),
-        evidence: json!({"root": shown, "bytes": total, "repositories": repositories}),
+        evidence: json!({"root": shown, "bytes": bytes}),
         action: ActionKind::Review,
         fix: "Nothing to do; removing the directory frees the space now, and the next mutation \
               run rebuilds what it needs."

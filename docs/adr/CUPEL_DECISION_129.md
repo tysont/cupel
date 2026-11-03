@@ -1,6 +1,6 @@
 # CUPEL_DECISION_129: Cupel's own gate at `--depth deep`: changed on every push, tree on `main`, a local budget, and the deep rules
 
-**Date:** 2026-10-20 · **Status:** accepted; §5's mutation score (1 when nothing was scored) counts uncovered mutants as scored since [141](CUPEL_DECISION_141.md) §1; amended 2026-11-02: the changed gate's local budget is two hours, the tree gate's stays 30 minutes · **Phase:** P9.0
+**Date:** 2026-10-20 · **Status:** accepted; §5's mutation score (1 when nothing was scored) counts uncovered mutants as scored since [141](CUPEL_DECISION_141.md) §1; amended 2026-11-02: the changed gate's local budget is two hours, the tree gate's 45 minutes (v0.2.4) · **Phase:** P9.0
 
 ## Context
 
@@ -36,7 +36,9 @@ Two findings follow. A deep run's cost is the suite, not the checks: on the tree
 - A change to one source file (`static_clones.rs`, 6 mutants, the suite's coverage reused) took 5 003 s. `tests.mutation` alone took 4 955 s from an empty slot: 266 s to build, 1 182 s to validate, and the rest to run the selected tests against each mutant. A fresh coverage run adds about 20 minutes.
 - The v0.2.3 batch's diff (8 source files) ran `tests.mutation` for 8 696 s before it stopped, so a batch-sized diff does not fit any budget a developer waits for.
 
-The changed gate's default is therefore 120 minutes: an ordinary change fits even with a fresh coverage run, and a batch-sized diff is still cut and exits 5. The tree gate does not mutate and keeps 30 minutes.
+The changed gate's default is therefore 120 minutes: an ordinary change fits even with a fresh coverage run, and a batch-sized diff is still cut and exits 5. The tree gate does not mutate and kept 30 minutes.
+
+**The tree gate's budget, amended 2026-11-02 (v0.2.4).** The first tree dogfood run under the 30-minute default (the gate had always cleared it, as CI does) ended `partial`: the suite under coverage took 1 029 s and `gen.property` 362 s, and `tests.coverage` was cut. The ten unbudgeted tree runs before it, from 2026-10-31 to 2026-11-02, took 1 126 to 2 137 s. The tree gate's default is therefore 45 minutes, above the slowest of them.
 
 **Gate rule values.** The design's example values (`static.crap.max < 30`, `perf.bench.regression < 5%`) or the tree's own measured values. The plan asks for the strictest values the tree sustains, so the measured ones, rounded down where the metric moves with test timing.
 

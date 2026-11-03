@@ -3,7 +3,6 @@
 mod support;
 
 use std::collections::BTreeMap;
-use std::path::Path;
 use std::time::{Duration, Instant};
 
 use cupel_core::budget::{TaskDuration, TaskShape};
@@ -173,21 +172,8 @@ fn a_run_cut_by_its_budget_ends_within_the_budget_and_the_cut_task_s_stop() {
     eprintln!("budget 10 s: the run's clock {duration:?}, wall {elapsed:?}");
 }
 
-/// The mutation slots a run with `TMPDIR` at `tmp` left for Python, by name.
-fn slots(tmp: &Path) -> Vec<String> {
-    let mut found = Vec::new();
-    for repo in std::fs::read_dir(tmp.join("cupel-mutate")).unwrap() {
-        let python = repo.unwrap().path().join("python");
-        for slot in std::fs::read_dir(python).unwrap() {
-            found.push(slot.unwrap().file_name().to_string_lossy().into_owned());
-        }
-    }
-    found.sort();
-    found
-}
-
-/// Runs `check --only tests.mutation` with three mutation slots configured, `extra` arguments,
-/// and `TMPDIR` at a fresh directory; the slots it used.
+/// Runs `check --only tests.mutation` in a fresh copy of the fixture with three mutation slots
+/// configured and `extra` arguments; the slots it used.
 fn mutation_slots(extra: &[&str]) -> Option<Vec<String>> {
     let repo = fixture()?;
     let tmp = tempfile::tempdir().unwrap();
@@ -214,7 +200,9 @@ fn mutation_slots(extra: &[&str]) -> Option<Vec<String>> {
         by_id(&envelope["checks"])["tests.mutation"]["metrics"]["executed"],
         json!(5.0)
     );
-    Some(slots(tmp.path()))
+    Some(support::entries(
+        &repo.root().join(".cupel/work/slots/python"),
+    ))
 }
 
 #[test]

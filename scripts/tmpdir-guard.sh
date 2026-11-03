@@ -2,73 +2,37 @@
 # ABOUTME: Runs a command with a fresh temporary directory of its own as TMPDIR and fails when the command leaves
 # ABOUTME: anything in it, naming what it left; `make check` runs its build, lint, tests, and docs under it, `make parity` its suite, and `make dogfood` its gate.
 #
-# Usage: scripts/tmpdir-guard.sh [--slots-of REPO] COMMAND [ARG...]
+# Usage: scripts/tmpdir-guard.sh COMMAND [ARG...]
 #
-# The directory is made under the caller's TMPDIR (/tmp without one) and removed afterwards whatever
-# the command did, so the caller's TMPDIR is as it was. Only the command and the processes it starts
-# write there, so what is left is theirs and not another process's on the machine. Each entry left is
-# named on stderr: the top-level name, and for `cupel-mutate` each repository's slot directory under it
-# (the slots' root itself is the machine's and stays once made, so left empty it is not a leak).
-# A command that fails returns its own exit code; one that succeeds but leaves anything returns 1.
+# The directory is made under /tmp, whatever the caller's TMPDIR, and removed afterwards whatever the
+# command did, so the caller's TMPDIR is as it was. Only the command and the processes it starts write
+# there, so what is left is theirs and not another process's on the machine. Each top-level entry left
+# is named on stderr. A command that fails returns its own exit code; one that succeeds but leaves
+# anything returns 1.
 #
-# With --slots-of REPO, the mutation slots the engine keeps for the repository at REPO (ADR-141 §3: each
-# repository's slot directory under `cupel-mutate` names it in its `repository` file) are the caller's
-# to keep across runs, as a dogfood's are: they are moved into the command's directory before it runs
-# and back to the caller's after, with whatever the command added, and are not a leak. Both directories
-# are on one volume, so each move is a rename.
+# The directory's path is short: a guarded mutation run nests its own TMPDIR and a test's repository
+# below it, and a socket a test makes there must fit macOS's 103-character socket path with room to
+# spare. Under macOS's per-user TMPDIR (57 characters) it would not.
 
 set -u
 
-usage() {
-	echo "usage: scripts/tmpdir-guard.sh [--slots-of REPO] COMMAND [ARG...]" >&2
+[ "$#" -gt 0 ] || {
+	echo "usage: scripts/tmpdir-guard.sh COMMAND [ARG...]" >&2
 	exit 2
 }
 
-repo=
-if [ "${1:-}" = --slots-of ]; then
-	[ "$#" -ge 3 ] || usage
-	repo=$(cd "$2" && pwd -P) || exit 2
-	shift 2
-fi
-[ "$#" -gt 0 ] || usage
+guarded=$(mktemp -d /tmp/c.XXXXXX) || exit 2
 
-# The directory's name is short: a guarded mutation run nests its own TMPDIR and a test's repository below it, and
-# a socket a test makes there must still fit macOS's 103-character socket path.
-parent=${TMPDIR:-/tmp}
-parent=${parent%/}
-guarded=$(mktemp -d "$parent/c.XXXXXX") || exit 2
+# An interrupted command leaves nothing behind.
+trap 'rm -rf "$guarded"; exit 130' INT TERM
 
-# move FROM TO: moves REPO's slot directories under FROM/cupel-mutate to TO/cupel-mutate, replacing any
-# of the same name there.
-move() {
-	[ -n "$repo" ] || return 0
-	for owner in "$1"/cupel-mutate/*/repository; do
-		if [ -f "$owner" ] && [ "$(cat "$owner")" = "$repo" ]; then
-			slots=${owner%/repository}
-			mkdir -p "$2/cupel-mutate"
-			rm -rf "$2/cupel-mutate/${slots##*/}"
-			mv "$slots" "$2/cupel-mutate/"
-		fi
-	done
-}
-
-# An interrupted command still gives the slots back and leaves nothing behind.
-trap 'move "$guarded" "$parent"; rm -rf "$guarded"; exit 130' INT TERM
-
-move "$parent" "$guarded"
 TMPDIR=$guarded "$@"
 status=$?
-move "$guarded" "$parent"
 
 left=$(
 	cd "$guarded" || exit 0
 	for entry in .[!.]* ..?* *; do
-		[ -e "$entry" ] || [ -L "$entry" ] || continue
-		if [ "$entry" = cupel-mutate ] && [ -d "$entry" ]; then
-			for slots in "$entry"/.[!.]* "$entry"/..?* "$entry"/*; do
-				[ -e "$slots" ] && echo "$slots"
-			done
-		else
+		if [ -e "$entry" ] || [ -L "$entry" ]; then
 			echo "$entry"
 		fi
 	done

@@ -26,8 +26,7 @@ pub fn lang(id: &str) -> Lang {
 }
 
 /// A copy of a fixture repository in a temporary directory. A production in it keeps its mutation
-/// slots under the machine's temporary directory, by the copy's path (ADR-080 §8); they and the copy
-/// are removed when it is dropped.
+/// slots in the copy's `.cupel/work/slots/` (ADR-159), so they go with the copy when it is dropped.
 pub struct Fixture {
     dir: tempfile::TempDir,
 }
@@ -36,19 +35,6 @@ impl Fixture {
     /// The copy's root.
     pub fn path(&self) -> &Path {
         self.dir.path()
-    }
-}
-
-impl Drop for Fixture {
-    fn drop(&mut self) {
-        // The repository's slot directory: `<root>/<repository key>/<language>/<index>`. A copy
-        // no production ran in has none.
-        if let Some(slots) = cupel_mutate::slots::slot_dir(self.path(), "-", 0)
-            .ancestors()
-            .nth(2)
-        {
-            let _ = std::fs::remove_dir_all(slots);
-        }
     }
 }
 

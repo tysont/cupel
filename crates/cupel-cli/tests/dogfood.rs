@@ -53,10 +53,10 @@ fn cap() -> String {
 }
 
 /// The gate's command: at half the cores, under the heavy lock, and under the temporary-directory
-/// guard, which keeps this checkout's mutation slots across runs.
+/// guard.
 fn gated(check: &str) -> String {
     format!(
-        "{} scripts/heavy.sh scripts/tmpdir-guard.sh --slots-of . cargo run --quiet --package \
+        "{} scripts/heavy.sh scripts/tmpdir-guard.sh cargo run --quiet --package \
          cupel-cli -- check {check} --format text\n",
         cap()
     )
@@ -77,7 +77,7 @@ fn make_dogfood_runs_the_changed_gate_at_deep_depth_under_the_budget() {
     );
 }
 
-/// On `main`, the tree gate at `deep`, without mutating the whole tree, under a budget of 30 minutes,
+/// On `main`, the tree gate at `deep`, without mutating the whole tree, under a budget of 45 minutes,
 /// against the committed baseline (ADR-140), imported first so a fresh store has the reference
 /// the `base` rules need.
 #[test]
@@ -86,7 +86,7 @@ fn make_dogfood_runs_the_tree_gate_at_deep_depth_without_mutating_the_tree() {
         dogfood(&["DOGFOOD_SCOPE=tree"]),
         IMPORT.to_owned()
             + &gated(
-                "--depth deep --budget 30m --gate --no-install --skip tests.flaky --skip \
+                "--depth deep --budget 45m --gate --no-install --skip tests.flaky --skip \
                  conc.race --skip tests.mutation"
             )
     );

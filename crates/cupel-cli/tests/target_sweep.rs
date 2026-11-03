@@ -1,5 +1,5 @@
-// ABOUTME: Tests for scripts/target-sweep.sh, which `make check` runs first: when the checkout's build directory is
-// ABOUTME: over the cap it runs cargo-sweep under the heavy lock to bring it back under, and otherwise does nothing.
+// ABOUTME: Tests for scripts/target-sweep.sh, which `make check` runs first: when the checkout's builds (target/ and its
+// ABOUTME: mutation slots') are over the cap it runs cargo-sweep under the heavy lock to bring them under, and otherwise does nothing.
 #![cfg(unix)]
 mod support;
 
@@ -108,9 +108,30 @@ fn a_build_directory_over_the_cap_is_swept_to_it_under_the_heavy_lock() {
         )
     );
     assert!(
-        text(&output.stderr).starts_with("target-sweep.sh: target/ holds 2 MB, over the 1MB cap;"),
+        text(&output.stderr)
+            .starts_with("target-sweep.sh: the builds hold 2 MB, over the 1MB cap;"),
         "{}",
         text(&output.stderr)
+    );
+}
+
+/// The mutation slots' builds, in `.cupel/work/slots/<lang>/<n>/target` (ADR-159), count toward the cap with
+/// `target/`; over it, each build is swept to its share of the cap, by what it holds.
+#[test]
+fn the_mutation_slots_builds_count_toward_the_cap_and_each_is_swept_to_its_share() {
+    let (dir, bin) = checkout(2048);
+    let slot = dir.path().join(".cupel/work/slots/rust/0");
+    fs::create_dir_all(slot.join("target/debug")).unwrap();
+    fs::write(slot.join("target/debug/cupel"), vec![0u8; 6 * 1024 * 1024]).unwrap();
+    fake_sweep(&bin);
+    let output = sweep(dir.path(), &bin, "4MB");
+    assert_eq!(output.status.code(), Some(0), "{}", text(&output.stderr));
+    let held = dir.path().join("heavy.lock").display().to_string();
+    assert_eq!(
+        fs::read_to_string(dir.path().join("swept")).unwrap(),
+        format!(
+            "sweep --maxsize 1MB . held={held}\nsweep --maxsize 3MB .cupel/work/slots/rust/0 held={held}\n"
+        )
     );
 }
 

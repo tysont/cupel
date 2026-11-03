@@ -65,10 +65,11 @@ parity:
 # (scripts/heavy.sh, at the caller's priority), and the lint, tests, and docs then run outside it
 # against what was built (ADR-156 §3). The build step, lint, tests, and docs run under scripts/tmpdir-guard.sh:
 # with a temporary directory of their own as TMPDIR, the check failing when they leave anything in it. First,
-# scripts/target-sweep.sh brings the checkout's build directory under TARGET_CAP when it has grown past it
-# (ADR-156 §6). The cap is above what one check and dogfood build (about 53 GB: the debug build and the
-# coverage build), so a sweep removes only what no current build uses.
-TARGET_CAP ?= 64GB
+# scripts/target-sweep.sh brings the checkout's builds, target/ and its mutation slots' in .cupel/work/slots/,
+# under TARGET_CAP when they have grown past it (ADR-156 §6, ADR-159). The cap is above what one check and
+# dogfood build (about 53 GB: the debug build and the coverage build) and what a changed dogfood's Rust slot
+# builds beside them (about 39 GB), so a sweep removes only what no current build uses.
+TARGET_CAP ?= 96GB
 
 check:
 	@scripts/target-sweep.sh $(TARGET_CAP)
@@ -106,8 +107,8 @@ DOGFOOD_SCOPE ?= changed
 # budget left out (exit 5 when it left anything out); CI clears it with `DOGFOOD_BUDGET=` and runs
 # every check the depth selects (ADR-129). The changed gate's two hours let mutation finish on an
 # ordinary change (one source file took 83 minutes); a much larger diff still ends partial. The
-# tree gate, which does not mutate, keeps 30 minutes.
-DOGFOOD_BUDGET ?= $(if $(filter tree,$(DOGFOOD_SCOPE)),30m,120m)
+# tree gate, which does not mutate, has 45 minutes: unbudgeted, it took 19 to 36.
+DOGFOOD_BUDGET ?= $(if $(filter tree,$(DOGFOOD_SCOPE)),45m,120m)
 
 # The gate runs at `--depth deep` (ADR-129). `tests.flaky` is skipped: the flake engine reruns the
 # whole suite three times, one test at a time, and does not rerun cargo-nextest, Cupel's runner.
@@ -124,8 +125,8 @@ DOGFOOD_BUDGET ?= $(if $(filter tree,$(DOGFOOD_SCOPE)),30m,120m)
 # build step (ADR-156 §3); the suite is deterministic under load (ADR-145).
 # Every dogfood, in any checkout, builds and tests at half the cores (DOGFOOD_CAP, ADR-156 §7), and runs
 # under scripts/tmpdir-guard.sh as `make check`'s suites do, failing when the gate or the suite it runs
-# leaves anything in its temporary directory; this checkout's mutation slots stay in the caller's
-# temporary directory across runs (`--slots-of .`).
+# leaves anything in its temporary directory; this checkout's mutation slots stay in its own
+# .cupel/work/slots/ across runs (ADR-159).
 # The tree gate's `base` rules compare with the committed baseline, `.cupel/baseline.json`, a
 # tree run on `main` (ADR-140); it is imported first so a fresh store (a CI runner's, or one just
 # deleted) has the reference. `make baseline` refreshes it from the last tree run here.
@@ -135,7 +136,7 @@ DOGFOOD_CAP := $(shell $(DEV_ENV) cupel_dev_half_cores)
 
 dogfood:
 	$(if $(filter tree,$(DOGFOOD_SCOPE)),$(CUPEL) baseline import $(BASELINE) --write --format text >/dev/null)
-	$(DOGFOOD_CAP) scripts/heavy.sh scripts/tmpdir-guard.sh --slots-of . $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep $(if $(DOGFOOD_BUDGET),--budget $(DOGFOOD_BUDGET) )--gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
+	$(DOGFOOD_CAP) scripts/heavy.sh scripts/tmpdir-guard.sh $(CARGO) run --quiet --package cupel-cli -- check $(if $(filter tree,$(DOGFOOD_SCOPE)),,--changed )--depth deep $(if $(DOGFOOD_BUDGET),--budget $(DOGFOOD_BUDGET) )--gate --no-install --skip tests.flaky --skip conc.race $(if $(filter tree,$(DOGFOOD_SCOPE)),--skip tests.mutation )--format text
 
 # After a green `make dogfood DOGFOOD_SCOPE=tree`: the store's baseline becomes that run and is
 # exported to the committed file, so the ratchets move with the commit that lowered them.
