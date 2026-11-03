@@ -43,8 +43,8 @@ Each [GitHub Release](https://github.com/tysont/cupel/releases) carries one arch
 
 ```sh
 sha256sum --ignore-missing -c SHA256SUMS     # on macOS: shasum -a 256 --ignore-missing -c SHA256SUMS
-tar -xzf cupel-0.2.3-x86_64-unknown-linux-musl.tar.gz
-install cupel-0.2.3-x86_64-unknown-linux-musl/cupel ~/.local/bin/
+tar -xzf cupel-0.2.4-x86_64-unknown-linux-musl.tar.gz
+install cupel-0.2.4-x86_64-unknown-linux-musl/cupel ~/.local/bin/
 ```
 
 On Windows, extract the `.zip` and put `cupel.exe` on your PATH; `cupel serve` listens on a named pipe there ([ADR-137](docs/adr/CUPEL_DECISION_137.md)). Commands Cupel runs through `sh -c` (configured coverage and oracle commands, `--install`) need `sh` on PATH, as Git for Windows provides, and a timeout stops the command but not the processes it started. WSL runs the Linux archive without these limits.
@@ -371,7 +371,7 @@ The same check as JSON, trimmed to two checks, one finding, and one action:
 
 ```json
 {
-  "cupel": { "version": "0.2.3", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
+  "cupel": { "version": "0.2.4", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
   "run": {
     "id": "run_01M66ESZ81EZ7HN1Z8NM3YHJY0", "verb": "check",
     "started": "2026-10-30T13:08:23Z", "duration_ms": 1303,
@@ -667,7 +667,7 @@ info (1)
   doctor
     The daemon at .cupel/serve.sock serves this repository (pid 72908)
       fnd_c243c8 · doctor.daemon-running · tier 0 · confidence 1
-      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.2.3" · watching true (full: cupel explain fnd_c243c8)
+      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.2.4" · watching true (full: cupel explain fnd_c243c8)
       …
 
 $ cupel serve --stop --format text
@@ -684,7 +684,7 @@ info (1)
 
 ```console
 $ cupel check --format json > envelope.json      # cupel was rebuilt after the daemon started
-cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.2.3 (binary 56427528-1792134645316655513)) than this client (cupel 0.2.1 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
+cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.2.4 (binary 56427528-1792134645316655513)) than this client (cupel 0.2.1 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
 ```
 
 - **When the CLI uses it.** Every invocation whose repository root (`--cwd`, else the working directory) has a `.cupel/serve.sock`. It runs in its own process instead when `CUPEL_NO_DAEMON=1` is set, for `serve` itself, when an argument is not UTF-8, when the run could ask a question on the terminal (stdout is a terminal and neither `--install` nor `--no-install` is given), when `--jobs` is given (a process sizes its thread pool once), and when nothing answers on the socket (a daemon that was killed leaves its socket file behind; it is ignored).
