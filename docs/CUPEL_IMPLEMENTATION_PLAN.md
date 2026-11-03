@@ -2026,7 +2026,7 @@ The integrator ran the batch alone on branch `housekeeping`, gated by `make chec
 
 **Goal:** The owner's v0.2.4 batch (2026-11-02), after accepting the housekeeping batch: mutation slots out of `$TMPDIR`, the Linux ENOENT in `cupel-mutate::phases`, one unbudgeted changed dogfood on the final tree, then `v0.2.4`.
 
-**Status:** in progress.
+**Status:** complete.
 
 The integrator ran the batch alone on branch `batch-0.2.4`, gated by `make check` and the tree dogfood.
 
@@ -2056,8 +2056,12 @@ The integrator ran the batch alone on branch `batch-0.2.4`, gated by `make check
      - Rerun with a 40-minute cap on a cleared cache (a stored timeout is reused under a larger cap, ADR-147 §1): 5 killed and 2 survived.
      - The survivors were the skipped entry's `findings: 0` and `duration_ms: 0`, which no test pinned. They are now pinned, and both mutants are killed (44f8e65).
    - `tests.weakening` (17) and `static.api-surface` (6 breaking) name the reclaim, its records, `--slots-of`, and their tests, which ADR-159 removed. Each is intended.
-4. **`v0.2.4`:** pending.
-4. **`v0.2.4`:** pending.
+4. **`v0.2.4`** tagged at 6d9ed32 after the gate (`make check`, the unbudgeted tree dogfood: pass, coverage 0.9715, 145 clone pairs as at base) and CI green on it. Verified as for 0.2.3:
+   - Every archive matches `SHA256SUMS` and passes `release.sh verify`.
+   - Both macOS binaries report `cupel 0.2.4`, the x86_64 one under Rosetta.
+   - `install.sh` installs `cupel 0.2.4` on the Mac, and in `ubuntu:24.04` x86_64 and `alpine:3.20` arm64, where `init --dry-run` runs.
+   - `cargo binstall --git` in `rust:1.92-bookworm` downloads the release binary.
+   - The registry publishes stay skipped (ADR-146, owner-held tokens).
 
 ## 4. Cross-phase checklist
 
