@@ -2048,9 +2048,15 @@ The integrator ran the batch alone on branch `batch-0.2.4`, gated by `make check
      - The regression test `claims_made_at_once_keep_the_slots_each_made` (16 claims at once, 200 rounds) failed 20 of 20 runs on main's `slots.rs` and 0 of 20 after item 1.
    - Item 1 removes the cause: no claim touches another repository's slots. No retries.
    - Found by the gate along the way:
-     - The first tree dogfood under its local 30-minute budget ended  with  cut. The integrator's gate had always cleared the budget, as CI does. Its entry read "unconfigured (lang clojure)": a check skipped in every language reported the first language's reason. It now reports a skip a deadline cut first (bc94bbb0).
+     - The first tree dogfood under its local 30-minute budget ended `partial` with `tests.coverage` cut. The integrator's gate had always cleared the budget, as CI does. Its entry read "unconfigured (lang clojure)": a check skipped in every language reported the first language's reason. It now reports a skip a deadline cut first (bc94bbb0).
      - The ten unbudgeted tree runs before it took 19 to 36 minutes, so the tree gate's budget is 45 minutes (ADR-129, amended).
-3. **Changed dogfood on the final tree, unbudgeted:** pending.
+3. **Changed dogfood on the final tree, unbudgeted** (`--base 92b8c9c --depth deep --gate`, 4 jobs and 4 test threads, 94 minutes):
+   - `tests.mutation` scored 0.4 over 5. The mutants were `slots::measure`'s: one survived and two were uncovered. `measure` now reads each entry's metadata once, and tests cover a missing directory and nested files beside symbolic links. All of its mutants are killed (70b24ee9).
+   - 7 mutants of `schedule.rs` (`CheckRun::finish`, `skipped_entry`, `reported`) timed out at the 120 s `max_mutant_timeout` (ADR-147). Nearly every test in the workspace covers them, and nextest starts on the slow `cupel-cli` binaries, so the cut came before the `cupel-core` tests that kill them in milliseconds. These were not hangs.
+     - Rerun with a 40-minute cap on a cleared cache (a stored timeout is reused under a larger cap, ADR-147 §1): 5 killed and 2 survived.
+     - The survivors were the skipped entry's `findings: 0` and `duration_ms: 0`, which no test pinned. They are now pinned, and both mutants are killed (44f8e65).
+   - `tests.weakening` (17) and `static.api-surface` (6 breaking) name the reclaim, its records, `--slots-of`, and their tests, which ADR-159 removed. Each is intended.
+4. **`v0.2.4`:** pending.
 4. **`v0.2.4`:** pending.
 
 ## 4. Cross-phase checklist
