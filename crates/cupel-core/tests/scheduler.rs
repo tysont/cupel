@@ -400,7 +400,16 @@ fn a_check_no_language_supports_has_one_skipped_entry_with_the_missing_fact() {
     let (outcome, _) = world.run(&["go"], |_| {});
     let checks = outcome.unwrap().checks;
     assert_eq!(checks.len(), 1);
-    assert_eq!(checks[0].status, CheckStatus::Skipped);
+    // It never ran: no findings, no time, no score.
+    assert_eq!(
+        (
+            checks[0].status,
+            checks[0].findings,
+            checks[0].duration_ms,
+            &checks[0].score
+        ),
+        (CheckStatus::Skipped, 0, 0, &None)
+    );
     assert_eq!(
         checks[0].skipped,
         Some(Skipped {
