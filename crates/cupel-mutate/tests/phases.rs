@@ -141,7 +141,9 @@ fn a_schemata_file_records_its_rewrite_before_the_build_every_mutant_shares() {
 }
 
 /// A `--config` file in `dir`: the Rust fixture's `cupel.toml` at `root` with two mutation
-/// slots, and `runner` as its runner when given.
+/// slots, and `runner` as its runner when given. Every mutant's timeout is 15 s, whatever its
+/// reference run took: no mutant of the fixture loops, so none times out even on a loaded machine,
+/// where the factor alone can turn a surviving mutant's slow run into a timeout.
 fn two_slots(
     root: &std::path::Path,
     dir: &std::path::Path,
@@ -150,7 +152,14 @@ fn two_slots(
     let toml = std::fs::read_to_string(root.join("cupel.toml")).unwrap();
     let runner = runner.map_or_else(String::new, |runner| format!("runner = \"{runner}\"\n"));
     let path = dir.join("two-slots.toml");
-    std::fs::write(&path, format!("{toml}{runner}mutation = {{ jobs = 2 }}\n")).unwrap();
+    std::fs::write(
+        &path,
+        format!(
+            "{toml}{runner}mutation = {{ jobs = 2, timeout_factor = 100000 }}\n\n\
+             [checks.\"tests.mutation\"]\nmax_mutant_timeout = \"15s\"\n"
+        ),
+    )
+    .unwrap();
     path
 }
 
