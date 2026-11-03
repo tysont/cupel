@@ -50,10 +50,15 @@ pub fn measure(dir: &Path) -> u64 {
     };
     entries
         .flatten()
-        .map(|entry| match entry.file_type() {
-            Ok(kind) if kind.is_dir() => measure(&entry.path()),
-            Ok(kind) if kind.is_file() => entry.metadata().map_or(0, |meta| meta.len()),
-            _ => 0,
+        .filter_map(|entry| Some((entry.metadata().ok()?, entry)))
+        .map(|(meta, entry)| {
+            if meta.is_dir() {
+                measure(&entry.path())
+            } else if meta.is_file() {
+                meta.len()
+            } else {
+                0
+            }
         })
         .sum()
 }

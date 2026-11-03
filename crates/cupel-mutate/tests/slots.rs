@@ -35,6 +35,30 @@ fn a_claim_makes_the_repositorys_slot_directory() {
     assert_eq!(measure(claim.dir()), 4_096);
 }
 
+/// A directory that is not there holds nothing.
+#[test]
+fn measuring_a_directory_that_is_not_there_is_zero() {
+    let repo = tempfile::tempdir().unwrap();
+    assert_eq!(measure(&repo.path().join("missing")), 0);
+}
+
+/// `measure` sums the regular files in every directory below, and counts a symbolic link as nothing, whether it
+/// names a file or a directory: what it names is not the slot's.
+#[cfg(unix)]
+#[test]
+fn measuring_sums_nested_files_and_follows_no_symbolic_link() {
+    let (repo, outside) = (tempfile::tempdir().unwrap(), tempfile::tempdir().unwrap());
+    fs::write(outside.path().join("large"), vec![b'x'; 4_096]).unwrap();
+    let slots = repo.path().join("slots");
+    fs::create_dir_all(slots.join("rust/0/target")).unwrap();
+    fs::write(slots.join("rust/0/a"), b"abc").unwrap();
+    fs::write(slots.join("rust/0/target/b"), b"defgh").unwrap();
+    std::os::unix::fs::symlink(outside.path().join("large"), slots.join("rust/0/file-link"))
+        .unwrap();
+    std::os::unix::fs::symlink(outside.path(), slots.join("rust/dir-link")).unwrap();
+    assert_eq!(measure(&slots), 8);
+}
+
 /// What a claim of `repo`'s slots that writes a build into its first slot found once every claim had built: `None`
 /// when its build is there, else what went wrong.
 fn claimed_and_built(repo: &Path, start: &Barrier, built_all: &Barrier) -> Option<String> {
