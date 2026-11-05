@@ -2063,6 +2063,34 @@ The integrator ran the batch alone on branch `batch-0.2.4`, gated by `make check
    - `cargo binstall --git` in `rust:1.92-bookworm` downloads the release binary.
    - The registry publishes stay skipped (ADR-146, owner-held tokens).
 
+### Batch v0.2.5
+
+**Goal:** The owner's v0.2.5 batch (2026-11-04), after accepting v0.2.4: test ordering for mutants, the stale branch, then `v0.2.5`. The next inputs come from real-repo use.
+
+**Status:** in progress.
+
+The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check` and the tree dogfood.
+
+1. **Test ordering for mutants** ([ADR-160](adr/CUPEL_DECISION_160.md)).
+   - A mutant that per-test selection narrowed runs its selected tests one at a time. They run fastest first by baseline duration, unknown durations last, until one decides the mutant.
+   - Each test's own cap is `timeout_factor` times its baseline (at least 2 s), plus the runner's start-up for one test, which each slot measures once per file. `max_mutant_timeout` bounds the whole sequence.
+   - Outcomes:
+     - A failing test kills the mutant.
+     - A test past its own cap that normally finishes in under a quarter of it is a hang. It kills the mutant and is named in `hung`.
+     - Running out of time for slowness is `timeout`: outcome unknown, unscored. `slowest` names up to three of the tests it did not complete, and `mutant.timeout`'s action names them.
+   - A stored timeout is not reused.
+   - Whole-suite mutants run as before.
+   - Fixture `tests.mutation/python-ordering`:
+     - A hot path that a fast test and a 6 s test both kill. The fast test sorts after the slow one by name, so only ordering by duration runs it first. Every mutant is killed by the fast test alone in under 3 s.
+     - A loop whose two endless mutants are killed as hangs naming their test.
+     - Both tests failed with the sequence turned off.
+   - A warm single-test nextest run costs 0.7 to 1.2 s here.
+   - The seven `schedule.rs` mutants that v0.2.4's changed deep dogfood timed out, rerun at `--depth deep` under the default 120 s cap on a cleared store: all 7 killed, 3.1 s of mutant runs in all, no timeout.
+   - The stack tests compare a killed mutant's tests as the covering tests it stopped within, since which of two 1 ms tests runs first is the baseline's noise.
+2. **`p2-static-checks`** deleted (merged into main).
+3. **Slot disk use** (17 GB) accepted as the build cache under the existing cap; no change.
+4. **`v0.2.5`:** pending.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
