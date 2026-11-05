@@ -72,8 +72,8 @@ struct TimedOut {
     mutation: Mutation,
     /// Up to three of the selected tests that had not completed when the cap ran out, slowest
     /// first (ADR-160); absent when the mutant ran its tests as one run.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    slowest: Vec<UnfinishedTest>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    slowest: Option<Vec<UnfinishedTest>>,
 }
 
 /// Evidence of `mutant.slow-test-excluded`.
@@ -692,7 +692,7 @@ fn note(mutant: &Mutant, file: &str, mutation: Mutation) -> Option<Note> {
             "mutant.timeout",
             serde_json::to_value(TimedOut {
                 mutation,
-                slowest: mutant.slowest.clone(),
+                slowest: (!mutant.slowest.is_empty()).then(|| mutant.slowest.clone()),
             }),
             format!("Mutant timed out: {change} at {at}"),
             timed_out(&change, &at, &mutant.slowest),

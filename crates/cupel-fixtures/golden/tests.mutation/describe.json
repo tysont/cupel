@@ -68,7 +68,7 @@
           "evidence": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": false,
-            "description": "Evidence of `mutant.timeout`, `mutant.out-of-memory`, and `mutant.uncovered`.",
+            "description": "Evidence of `mutant.timeout`.",
             "properties": {
               "mutation": {
                 "additionalProperties": false,
@@ -93,12 +93,41 @@
                   "operator"
                 ],
                 "type": "object"
+              },
+              "slowest": {
+                "description": "Up to three of the selected tests that had not completed when the cap ran out, slowest\nfirst (ADR-160); absent when the mutant ran its tests as one run.",
+                "items": {
+                  "description": "A test a mutant's run had not completed when its cap ran out (ADR-160).",
+                  "properties": {
+                    "baseline_ms": {
+                      "description": "Its duration in the baseline run; `None` when the baseline did not time it.",
+                      "format": "uint64",
+                      "minimum": 0,
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "id": {
+                      "description": "The runner's ID of the test.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ],
+                  "type": "object"
+                },
+                "type": [
+                  "array",
+                  "null"
+                ]
               }
             },
             "required": [
               "mutation"
             ],
-            "title": "Site",
+            "title": "TimedOut",
             "type": "object"
           },
           "kind": "mutant.timeout",
@@ -109,7 +138,7 @@
           "evidence": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": false,
-            "description": "Evidence of `mutant.timeout`, `mutant.out-of-memory`, and `mutant.uncovered`.",
+            "description": "Evidence of `mutant.out-of-memory` and `mutant.uncovered`.",
             "properties": {
               "mutation": {
                 "additionalProperties": false,
@@ -150,7 +179,7 @@
           "evidence": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": false,
-            "description": "Evidence of `mutant.timeout`, `mutant.out-of-memory`, and `mutant.uncovered`.",
+            "description": "Evidence of `mutant.out-of-memory` and `mutant.uncovered`.",
             "properties": {
               "mutation": {
                 "additionalProperties": false,
