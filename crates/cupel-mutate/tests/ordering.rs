@@ -52,6 +52,14 @@ fn of<T>(
         .collect()
 }
 
+/// The hot path's one mutant.
+const SCALED: &str = "6 *→/";
+
+/// A row of `of` for the hot path's one mutant.
+fn scaled<T>(value: T) -> Vec<(String, T)> {
+    vec![(SCALED.to_owned(), value)]
+}
+
 /// Every mutant of the hot path is killed by the fast test alone, which runs first: the slow test, which would kill
 /// it too after six seconds, never runs, and each mutant is decided in a fraction of that.
 #[test]
@@ -59,23 +67,25 @@ fn the_fast_killing_test_runs_first_and_kills_a_hot_path_mutant_in_seconds() {
     let Some(outcomes) = ordering(|_| {}) else {
         return;
     };
-    let hot = of(&outcomes, "hot.py", |mutant| {
-        (
-            mutant.outcome,
-            mutant.tests.clone(),
-            mutant.killing_tests.clone(),
-            mutant.hung.clone(),
-            mutant.duration_ms.is_some_and(|ms| ms < 3_000),
-        )
-    });
-    let killed_fast = (
-        MutantOutcome::Killed,
-        vec![FAST.to_owned()],
-        vec![FAST.to_owned()],
-        None,
-        true,
+    let fast = vec![FAST.to_owned()];
+    assert_eq!(
+        of(&outcomes, "hot.py", |mutant| mutant.outcome),
+        scaled(MutantOutcome::Killed)
     );
-    assert_eq!(hot, [("6 *→/".to_owned(), killed_fast)]);
+    assert_eq!(
+        of(&outcomes, "hot.py", |mutant| mutant.tests.clone()),
+        scaled(fast.clone())
+    );
+    assert_eq!(
+        of(&outcomes, "hot.py", |mutant| mutant.killing_tests.clone()),
+        scaled(fast)
+    );
+    assert_eq!(
+        of(&outcomes, "hot.py", |mutant| mutant.hung.clone()),
+        scaled(None)
+    );
+    let quick = |mutant: &cupel_core::Mutant| mutant.duration_ms.is_some_and(|ms| ms < 3_000);
+    assert_eq!(of(&outcomes, "hot.py", quick), scaled(true));
 }
 
 /// A mutant that makes the countdown's loop never end is killed when its fast test passes its own cap, named as the
@@ -85,52 +95,67 @@ fn a_loop_that_never_ends_is_a_hang_that_kills_and_names_its_test() {
     let Some(outcomes) = ordering(|_| {}) else {
         return;
     };
-    let decided = of(&outcomes, "countdown.py", |mutant| {
-        (mutant.outcome, mutant.hung.clone())
-    });
-    let failed = (MutantOutcome::Killed, None);
-    let hung = (MutantOutcome::Killed, Some(COUNTDOWN.to_owned()));
+    let killed = MutantOutcome::Killed;
+    let lines = [
+        "6 0→1", "7 >→>=", "7 0→1", "8 -→+", "8 1→0", "9 +→-", "9 1→0",
+    ];
     assert_eq!(
-        decided,
-        [
-            ("6 0→1".to_owned(), failed.clone()),
-            ("7 >→>=".to_owned(), failed.clone()),
-            ("7 0→1".to_owned(), failed.clone()),
-            ("8 -→+".to_owned(), hung.clone()),
-            ("8 1→0".to_owned(), hung),
-            ("9 +→-".to_owned(), failed.clone()),
-            ("9 1→0".to_owned(), failed),
-        ]
+        of(&outcomes, "countdown.py", |mutant| mutant.outcome),
+        lines.map(|line| (line.to_owned(), killed))
     );
+    let (none, countdown) = (None, Some(COUNTDOWN.to_owned()));
+    let hung = [
+        none.clone(),
+        none.clone(),
+        none.clone(),
+        countdown.clone(),
+        countdown,
+        none.clone(),
+        none,
+    ];
+    assert_eq!(
+        of(&outcomes, "countdown.py", |mutant| mutant.hung.clone()),
+        lines
+            .map(str::to_owned)
+            .into_iter()
+            .zip(hung)
+            .collect::<Vec<_>>()
+    );
+}
+
+/// The ordering fixture without its fast tests and with three seconds for a mutant's whole run.
+fn capped(root: &Path) {
+    remove(
+        root,
+        &[
+            "tests/test_without_waiting.py",
+            "tests/test_countdown.py",
+            "countdown.py",
+        ],
+    );
+    let toml = fs::read_to_string(root.join("cupel.toml")).unwrap();
+    let capped = format!("{toml}\n[checks.\"tests.mutation\"]\nmax_mutant_timeout = \"3s\"\n");
+    fs::write(root.join("cupel.toml"), capped).unwrap();
 }
 
 /// With only the slow test covering the hot path and three seconds for a mutant's whole run, the slow test cannot
 /// finish: each mutant is a timeout, not killed and not scored, naming the slow test and its baseline duration.
 #[test]
 fn a_mutant_whose_tests_cannot_finish_within_the_cap_is_a_timeout_naming_the_slowest() {
-    let Some(outcomes) = ordering(|root| {
-        remove(
-            root,
-            &[
-                "tests/test_without_waiting.py",
-                "tests/test_countdown.py",
-                "countdown.py",
-            ],
-        );
-        let toml = fs::read_to_string(root.join("cupel.toml")).unwrap();
-        let capped = format!("{toml}\n[checks.\"tests.mutation\"]\nmax_mutant_timeout = \"3s\"\n");
-        fs::write(root.join("cupel.toml"), capped).unwrap();
-    }) else {
+    let Some(outcomes) = ordering(capped) else {
         return;
     };
-    let timed_out = of(&outcomes, "hot.py", |mutant| {
-        let slowest: Vec<(&str, bool)> = mutant
-            .slowest
-            .iter()
-            .map(|test| (test.id.as_str(), test.baseline_ms >= Some(6_000)))
-            .collect();
-        (mutant.outcome, format!("{slowest:?}"))
-    });
-    let slow = (MutantOutcome::Timeout, format!("{:?}", [(SLOW, true)]));
-    assert_eq!(timed_out, [("6 *→/".to_owned(), slow)]);
+    assert_eq!(
+        of(&outcomes, "hot.py", |mutant| mutant.outcome),
+        scaled(MutantOutcome::Timeout)
+    );
+    let slowest = |mutant: &cupel_core::Mutant| -> Vec<String> {
+        mutant.slowest.iter().map(|test| test.id.clone()).collect()
+    };
+    assert_eq!(
+        of(&outcomes, "hot.py", slowest),
+        scaled(vec![SLOW.to_owned()])
+    );
+    let timed = |mutant: &cupel_core::Mutant| mutant.slowest[0].baseline_ms >= Some(6_000);
+    assert_eq!(of(&outcomes, "hot.py", timed), scaled(true));
 }

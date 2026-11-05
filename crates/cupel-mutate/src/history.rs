@@ -183,6 +183,14 @@ mod tests {
         planned
     }
 
+    /// What the store holds for `planned` with `outcome`.
+    fn stored_as(planned: &Planned, outcome: MutantOutcome) -> Mutant {
+        Mutant {
+            outcome,
+            ..planned.mutant.clone()
+        }
+    }
+
     /// The history that holds `stored` under the key `k`, and no last outcomes.
     fn holding(stored: Mutant) -> History {
         History {
@@ -194,8 +202,7 @@ mod tests {
     #[test]
     fn a_stored_outcome_under_the_same_key_is_reused() {
         let mut fresh = keyed();
-        let mut stored = fresh.mutant.clone();
-        stored.outcome = MutantOutcome::Survived;
+        let mut stored = stored_as(&fresh, MutantOutcome::Survived);
         stored.tests = vec!["t".to_owned()];
         stored.strategy = Some(MutationStrategy::Schemata);
         let history = holding(stored);
@@ -223,13 +230,11 @@ mod tests {
     /// (ADR-160 §9).
     #[test]
     fn a_stored_timeout_runs_again_and_a_stored_hang_keeps_its_test() {
+        let timed_out = stored_as(&keyed(), MutantOutcome::Timeout);
+        assert!(!holding(timed_out).reuse(&mut keyed()));
         let mut fresh = keyed();
-        let mut timed_out = fresh.mutant.clone();
-        timed_out.outcome = MutantOutcome::Timeout;
-        let mut hung = fresh.mutant.clone();
-        hung.outcome = MutantOutcome::Killed;
+        let mut hung = stored_as(&fresh, MutantOutcome::Killed);
         hung.hung = Some("t".to_owned());
-        assert!(!holding(timed_out).reuse(&mut fresh.clone()));
         assert!(holding(hung).reuse(&mut fresh));
         assert_eq!(
             (fresh.mutant.outcome, fresh.mutant.hung.as_deref()),
