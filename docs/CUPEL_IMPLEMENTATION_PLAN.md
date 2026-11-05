@@ -2067,7 +2067,7 @@ The integrator ran the batch alone on branch `batch-0.2.4`, gated by `make check
 
 **Goal:** The owner's v0.2.5 batch (2026-11-04), after accepting v0.2.4: test ordering for mutants, the stale branch, then `v0.2.5`. The next inputs come from real-repo use.
 
-**Status:** in progress.
+**Status:** complete.
 
 The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check` and the tree dogfood.
 
@@ -2091,7 +2091,15 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
    - The stack tests compare a killed mutant's tests as the covering tests it stopped within, since which of two 1 ms tests runs first is the baseline's noise.
 2. **`p2-static-checks`** deleted (merged into main).
 3. **Slot disk use** (17 GB) accepted as the build cache under the existing cap; no change.
-4. **`v0.2.5`:** pending.
+4. **`v0.2.5`** tagged at a25d9c1 after the third gate and CI green on it. The CI dogfood's changed deep gate ran this batch's own files under the new ordering.
+   - The first two gates' tree dogfoods failed on this batch's own code, as item 1 records.
+   - The third gate passed: `make check`, and the unbudgeted tree dogfood with coverage 0.9713 and 145 clone pairs, as at base.
+   - Verified as for 0.2.4:
+     - Every archive matches `SHA256SUMS` and passes `release.sh verify`.
+     - Both macOS binaries report `cupel 0.2.5`, the x86_64 one under Rosetta.
+     - `install.sh` installs `cupel 0.2.5` on the Mac, and in `ubuntu:24.04` x86_64 and `alpine:3.20` arm64, where `init --dry-run` runs.
+     - `cargo binstall --git` in `rust:1.92-bookworm` downloads the release binary.
+     - The registry publishes stay skipped (ADR-146).
 
 ## 4. Cross-phase checklist
 
