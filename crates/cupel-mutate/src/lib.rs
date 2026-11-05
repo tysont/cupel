@@ -15,6 +15,7 @@ pub mod overlay;
 mod phases;
 mod plan;
 pub mod schemata;
+pub mod sequence;
 pub mod settings;
 pub mod slots;
 

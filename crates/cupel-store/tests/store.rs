@@ -864,6 +864,8 @@ fn mutant(site: &str, to: &str, outcome: MutantOutcome, key: Option<&str>) -> Mu
         cache_key: key.map(str::to_owned),
         strategy: None,
         fallback: None,
+        hung: None,
+        slowest: Vec::new(),
     }
 }
 

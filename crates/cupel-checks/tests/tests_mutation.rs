@@ -9,7 +9,7 @@ use cupel_core::syntax::{
 use cupel_core::{
     ActionKind, CheckResult, CheckStatus, CostClass, Error, ExcludedTest, FactKind, Facts, Finding,
     LangId, MetricPer, Mutant, MutantOutcome, MutationOutcomes, MutationPhase, MutationStrategy,
-    PhaseDuration, ProducerId, ProtectionMetric, Scope, Severity,
+    PhaseDuration, ProducerId, ProtectionMetric, Scope, Severity, UnfinishedTest,
 };
 use serde_json::{Value, json};
 use support::{Recorded, Shape, combined, language};
@@ -61,6 +61,8 @@ fn mutant(line: u32, col: u32, from: &str, to: &str, outcome: MutantOutcome) -> 
         cache_key: None,
         strategy: None,
         fallback: None,
+        hung: None,
+        slowest: Vec::new(),
     }
 }
 
@@ -373,6 +375,46 @@ fn timeouts_and_uncovered_mutants_are_notes_and_unviable_ones_are_not_reported()
         (0.0, 1),
         "the uncovered mutant is missed"
     );
+}
+
+/// A mutant whose selected tests could not all run within the cap names the slowest of them, in its evidence and its
+/// action (ADR-160 §8), so `next_actions` says which tests to speed up; it stays out of the score.
+#[test]
+fn a_timeout_names_the_slowest_tests_it_did_not_complete() {
+    let mut timed_out = mutant(7, 24, "10", "11", MutantOutcome::Timeout);
+    timed_out.slowest = vec![
+        UnfinishedTest {
+            id: "tests/test_large.py::test_large".to_owned(),
+            baseline_ms: Some(42_500),
+        },
+        UnfinishedTest {
+            id: "tests/test_new.py::test_new".to_owned(),
+            baseline_ms: None,
+        },
+    ];
+    let (result, recorded) = run(vec![
+        timed_out,
+        mutant(8, 12, "*", "/", MutantOutcome::Killed),
+    ]);
+    let finding = &recorded.findings[0];
+    assert_eq!(
+        (finding.kind.as_str(), &finding.evidence.0["slowest"]),
+        (
+            "mutant.timeout",
+            &json!([
+                {"id": "tests/test_large.py::test_large", "baseline_ms": 42_500},
+                {"id": "tests/test_new.py::test_new", "baseline_ms": null}
+            ])
+        )
+    );
+    assert_eq!(
+        finding.action.summary,
+        "Review `10` → `11` at discount.py:7: its selected tests could not all run within \
+         `max_mutant_timeout`; the slowest are `tests/test_large.py::test_large` (42.5 s) and \
+         `tests/test_new.py::test_new` (not timed). Speed them up, or raise `max_mutant_timeout`."
+    );
+    let score = result.score.unwrap();
+    assert_eq!((score.value, score.n), (1.0, 1));
 }
 
 #[test]

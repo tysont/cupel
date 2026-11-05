@@ -1,6 +1,6 @@
 # CUPEL_DECISION_147: A hard cap on a mutant's run, and slow tests left out of whole-suite mutant runs
 
-**Date:** 2026-10-24 · **Status:** accepted; §1 amended by [148](CUPEL_DECISION_148.md) (a mutant's run is bounded in memory as well as time, and the slots share the cores) · **Phase:** P9.F6
+**Date:** 2026-10-24 · **Status:** accepted; §1 amended by [148](CUPEL_DECISION_148.md) (a mutant's run is bounded in memory as well as time, and the slots share the cores); §1 amended by [160](CUPEL_DECISION_160.md) (a narrowed mutant's tests run one at a time, each under its own cap, within this cap over the whole run) · **Phase:** P9.F6
 
 ## Context
 

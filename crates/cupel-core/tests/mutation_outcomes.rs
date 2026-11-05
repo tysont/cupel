@@ -33,6 +33,8 @@ fn mutant(file: &str, line: u32, to: &str, outcome: MutantOutcome) -> Mutant {
         cache_key: None,
         strategy: None,
         fallback: None,
+        hung: None,
+        slowest: Vec::new(),
     }
 }
 

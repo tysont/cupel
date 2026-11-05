@@ -8,7 +8,7 @@ use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, ExcludedTest,
     FactKind, Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant, MutantOutcome,
     MutationOutcomes, MutationPhase, MutationStrategy, Plan, ProtectionMetric, Result, Scope,
-    Score, SettingSpec, Severity, SiteHash, Stability, SymbolHash, Tier,
+    Score, SettingSpec, Severity, SiteHash, Stability, SymbolHash, Tier, UnfinishedTest,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -58,11 +58,22 @@ struct Survived {
     tests_run: u32,
 }
 
-/// Evidence of `mutant.timeout`, `mutant.out-of-memory`, and `mutant.uncovered`.
+/// Evidence of `mutant.out-of-memory` and `mutant.uncovered`.
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 struct Site {
     mutation: Mutation,
+}
+
+/// Evidence of `mutant.timeout`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct TimedOut {
+    mutation: Mutation,
+    /// Up to three of the selected tests that had not completed when the cap ran out, slowest
+    /// first (ADR-160); absent when the mutant ran its tests as one run.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    slowest: Vec<UnfinishedTest>,
 }
 
 /// Evidence of `mutant.slow-test-excluded`.
@@ -116,7 +127,7 @@ fn manifest() -> Manifest {
                 "Every test that ran against the mutant passed: no test tells the mutated \
                  code from the original.",
             ),
-            kind::<Site>(
+            kind::<TimedOut>(
                 "mutant.timeout",
                 ActionKind::Review,
                 "The tests ran past their timeout against the mutant, which usually means it \
@@ -679,9 +690,12 @@ fn note(mutant: &Mutant, file: &str, mutation: Mutation) -> Option<Note> {
         ),
         (MutantOutcome::Timeout, _) => (
             "mutant.timeout",
-            serde_json::to_value(Site { mutation }),
+            serde_json::to_value(TimedOut {
+                mutation,
+                slowest: mutant.slowest.clone(),
+            }),
             format!("Mutant timed out: {change} at {at}"),
-            format!("Review {change} at {at}: the tests ran past their timeout against it."),
+            timed_out(&change, &at, &mutant.slowest),
         ),
         (MutantOutcome::OutOfMemory, _) => (
             "mutant.out-of-memory",
@@ -710,6 +724,37 @@ fn note(mutant: &Mutant, file: &str, mutation: Mutation) -> Option<Note> {
         title,
         summary,
     })
+}
+
+/// What a timeout's action says: the tests ran past their timeout or, when the mutant ran its
+/// tests one at a time (ADR-160), which of those it did not complete were slowest.
+fn timed_out(change: &str, at: &str, slowest: &[UnfinishedTest]) -> String {
+    let named: Vec<String> = slowest
+        .iter()
+        .map(|test| match test.baseline_ms {
+            #[allow(
+                clippy::cast_precision_loss,
+                reason = "a test's duration in milliseconds stays far below 2^52"
+            )]
+            Some(ms) => format!("`{}` ({:.1} s)", test.id, ms as f64 / 1000.0),
+            None => format!("`{}` (not timed)", test.id),
+        })
+        .collect();
+    let (verb, list) = match named.split_last() {
+        Some((last, [])) => ("is", last.clone()),
+        Some((last, [first])) => ("are", format!("{first} and {last}")),
+        Some((last, rest)) => ("are", format!("{}, and {last}", rest.join(", "))),
+        None => {
+            return format!(
+                "Review {change} at {at}: the tests ran past their timeout against it."
+            );
+        }
+    };
+    format!(
+        "Review {change} at {at}: its selected tests could not all run within \
+         `max_mutant_timeout`; the slowest {verb} {list}. Speed them up, or raise \
+         `max_mutant_timeout`."
+    )
 }
 
 /// The operator's name as it serializes, such as `relational`.

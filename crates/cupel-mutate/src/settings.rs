@@ -27,7 +27,7 @@ pub const MAX_MUTANT_MEMORY: &str = "max_mutant_memory";
 pub const DEFAULT_MAX_MUTANT_MEMORY: &str = "50%";
 
 /// The shortest timeout a mutant's run gets (design §9.3).
-const TIMEOUT_FLOOR: Duration = Duration::from_secs(2);
+pub(crate) const TIMEOUT_FLOOR: Duration = Duration::from_secs(2);
 
 /// How the engine mutates and runs.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

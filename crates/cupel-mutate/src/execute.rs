@@ -1,13 +1,14 @@
-// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082, ADR-147, ADR-148, ADR-150): the mutants of one file run concurrently,
-// ABOUTME: one slot each with its share of the cores and memory, from one build where the runner builds once, timed.
-use std::collections::BTreeSet;
+// ABOUTME: Running mutants (ADR-080 §8–9, ADR-082, ADR-147, ADR-148, ADR-150, ADR-160): the mutants of one file run
+// ABOUTME: concurrently, one slot each with its share of the cores and memory, a narrowed one's tests one at a time, timed.
+use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use cupel_core::{
     BuildOutcome, Ctx, Error, MutantOutcome, MutationPhase, MutationStrategy, Prebuilt, ProduceCtx,
-    Result, RunOptions, Runner, TestRun, TestSelection, WriteError, Writer, physical_memory,
+    Result, RunOptions, Runner, TestRun, TestSelection, UnfinishedTest, WriteError, Writer,
+    physical_memory,
 };
 
 use tempfile::TempDir;
@@ -15,6 +16,7 @@ use tempfile::TempDir;
 use crate::overlay::Slot;
 use crate::phases::{Phases, Served};
 use crate::plan::Planned;
+use crate::sequence::{self, Caps, Test, Verdict};
 use crate::settings::{Settings, threads};
 
 /// The environment variable that selects a schemata mutant at run time (ADR-082); `0` selects
@@ -34,6 +36,8 @@ pub struct Execution<'a> {
     pub whole: &'a TestSelection,
     /// Where every phase is recorded (ADR-150).
     pub phases: &'a Phases,
+    /// Each test's duration in the baseline, which orders a narrowed mutant's tests (ADR-160).
+    pub baseline: &'a BTreeMap<String, Duration>,
 }
 
 /// What a mutant's run found.
@@ -46,6 +50,10 @@ pub struct Ran {
     pub strategy: MutationStrategy,
     /// Why it was built as a file copy in a file with schemata.
     pub fallback: Option<String>,
+    /// The test whose hang killed it (ADR-160).
+    pub hung: Option<String>,
+    /// For a timeout, the slowest of the tests it had not completed (ADR-160).
+    pub slowest: Vec<UnfinishedTest>,
 }
 
 /// One file's mutants and the files a slot rewrites around them.
@@ -250,25 +258,32 @@ impl Execution<'_> {
         self.slots.len().min(run.mutants.len())
     }
 
-    /// One slot's work on a file: the reference (unless the schemata build was validated),
-    /// then mutants until none is left, then the original file back.
+    /// One slot's work on a file: the reference (unless the schemata build was validated), the
+    /// runner's start-up for one test, then mutants until none is left, then the original file
+    /// back.
     fn work(&self, index: usize, slot: &Slot, work: &Work<'_>) -> Result<()> {
         let (run, build) = (work.run, work.build);
         let ctx = self.slot_ctx(slot)?;
-        let (limit, holds) = match build {
+        let (reference, limit, holds, prebuilt) = match build {
             Build::Copies => {
                 for (importer, text) in run.importers {
                     write(slot, importer, text)?;
                 }
-                (self.reference(index, slot, &ctx, run)?, Holds::Renewed)
+                let reference = self.reference(index, slot, &ctx, run)?;
+                (reference, self.limit(reference), Holds::Renewed, None)
             }
-            Build::Schemata { limits, .. } => (limits[index], Holds::Schemata),
+            Build::Schemata {
+                limits, prebuilt, ..
+            } => (Duration::ZERO, limits[index], Holds::Schemata, *prebuilt),
         };
+        let startup = self.startup(slot, &ctx, run, prebuilt)?;
         let mut worker = Worker {
             index,
             slot,
             ctx,
             limit,
+            reference,
+            startup,
             holds,
         };
         while let Some(&mutant) = work.order.get(work.next.fetch_add(1, Ordering::SeqCst)) {
@@ -320,8 +335,8 @@ impl Execution<'_> {
 
     /// Runs the tests of `run`'s mutants against the unmutated file with one more trailing
     /// newline, which builds and loads like the original but is new to every build cache (by
-    /// content or by time), so the run rebuilds what a mutant would; the timeout its mutants
-    /// get. A reference that is not green means the slot does not reproduce the baseline.
+    /// content or by time), so the run rebuilds what a mutant would; how long it took. A
+    /// reference that is not green means the slot does not reproduce the baseline.
     fn reference(
         &self,
         index: usize,
@@ -344,7 +359,53 @@ impl Execution<'_> {
                 ),
             });
         }
-        Ok(self.limit(elapsed))
+        Ok(elapsed)
+    }
+
+    /// The runner's start-up for a run of one test in `slot` (ADR-160 §3): the wall time of the
+    /// fastest test `run`'s narrowed mutants select, run alone with no mutant (from `prebuilt`
+    /// when the runner built once); `None` when per-test selection narrowed none of them. A run
+    /// that is not green means the slot does not reproduce the baseline.
+    fn startup(
+        &self,
+        slot: &Slot,
+        ctx: &ProduceCtx,
+        run: &FileRun<'_>,
+        prebuilt: Option<&Prebuilt>,
+    ) -> Result<Option<Duration>> {
+        let ids: BTreeSet<&String> = run
+            .mutants
+            .iter()
+            .filter_map(|planned| planned.tests.as_ref())
+            .flatten()
+            .collect();
+        let ids: Vec<String> = ids.into_iter().cloned().collect();
+        let Some(fastest) = sequence::order(&ids, self.baseline).into_iter().next() else {
+            return Ok(None);
+        };
+        let mut options = self.options(None, 0);
+        options.prebuilt = prebuilt.cloned();
+        let selection = TestSelection::Tests(vec![fastest.id]);
+        let started = Instant::now();
+        let tmp = scratch()?;
+        let ran = match self.runner.run(ctx, &selection, &within(&options, &tmp)) {
+            Err(Error::OutOfMemory { limit, .. }) => return Err(over_budget(self.runner, limit)),
+            ran => ran?,
+        };
+        let elapsed = started.elapsed();
+        if !ran.results.is_green() {
+            return Err(Error::Process {
+                program: self.runner.id().to_string(),
+                message: format!(
+                    "the unmutated `{}` does not pass its fastest test alone in the mutation \
+                     overlay at {}: {}",
+                    run.file,
+                    slot.root().display(),
+                    why_red(&ran)
+                ),
+            });
+        }
+        Ok(Some(elapsed))
     }
 
     /// The build every mutant of `run`'s file shares, in slot `index` (`ctx` is the slot's): the
@@ -432,8 +493,8 @@ impl Execution<'_> {
     }
 
     /// Runs `planned`'s tests against it (already written in `worker`'s slot, or selected by
-    /// `id`, from `prebuilt` when the runner built once) with the worker's timeout; the `run`
-    /// phase.
+    /// `id`, from `prebuilt` when the runner built once): one at a time when per-test selection
+    /// narrowed them, else together with the worker's timeout; the `run` phase.
     fn mutant(
         &self,
         worker: &Worker<'_>,
@@ -441,6 +502,19 @@ impl Execution<'_> {
         id: u32,
         prebuilt: Option<&Prebuilt>,
     ) -> Result<Ran> {
+        if let (Some(tests), Some(startup)) = (&planned.tests, worker.startup) {
+            let sequence = Sequence {
+                tests: sequence::order(tests, self.baseline),
+                caps: Caps {
+                    factor: self.settings.timeout_factor,
+                    startup,
+                    overall: self.settings.max_mutant_timeout,
+                },
+                id,
+                prebuilt,
+            };
+            return self.sequence(worker, planned, &sequence);
+        }
         let selection = planned
             .tests
             .clone()
@@ -473,6 +547,179 @@ impl Execution<'_> {
     }
 }
 
+impl Execution<'_> {
+    /// Runs `sequence`'s tests against the mutant in `worker`'s slot one at a time, fastest
+    /// first, until one decides it (ADR-160 §6): a failure or a hang kills it, a run out of time
+    /// for slowness leaves it a timeout, and it survives when every test passes.
+    fn sequence(
+        &self,
+        worker: &Worker<'_>,
+        planned: &Planned,
+        sequence: &Sequence<'_>,
+    ) -> Result<Ran> {
+        let strategy = if sequence.id == 0 {
+            MutationStrategy::FileCopy
+        } else {
+            MutationStrategy::Schemata
+        };
+        let started = Instant::now();
+        let mut found = Found {
+            outcome: MutantOutcome::Survived,
+            tests: Vec::new(),
+            killing_tests: Vec::new(),
+            strategy,
+            hung: None,
+            slowest: Vec::new(),
+        };
+        for (position, test) in sequence.tests.iter().enumerate() {
+            // A file copy's first run rebuilds the mutant, which the reference run also did.
+            let build = if position == 0 && strategy == MutationStrategy::FileCopy {
+                worker.reference
+            } else {
+                Duration::ZERO
+            };
+            let limit = sequence.caps.limit(test, started.elapsed(), build);
+            let run = match self.one_test(worker, test, limit.timeout, sequence)? {
+                Some(run) => found.add(run),
+                None => return Ok(self.ran(worker, planned, found.out_of_memory(), started)),
+            };
+            let verdict = sequence::verdict(&run, limit, test, &sequence.caps);
+            match verdict {
+                Verdict::Passed => {}
+                Verdict::Failed => {
+                    return Ok(self.ran(worker, planned, found.killed(None), started));
+                }
+                Verdict::Hung => {
+                    found.killing_tests = vec![test.id.clone()];
+                    let hung = Some(test.id.clone());
+                    return Ok(self.ran(worker, planned, found.killed(hung), started));
+                }
+                Verdict::Slow => {
+                    let slowest = sequence::slowest(&sequence.tests[position..]);
+                    return Ok(self.ran(worker, planned, found.timed_out(slowest), started));
+                }
+                Verdict::Unviable => {
+                    return Ok(self.ran(
+                        worker,
+                        planned,
+                        found.ended(MutantOutcome::Unviable),
+                        started,
+                    ));
+                }
+            }
+        }
+        Ok(self.ran(
+            worker,
+            planned,
+            found.ended(MutantOutcome::Survived),
+            started,
+        ))
+    }
+
+    /// Runs `test` alone against `sequence`'s mutant with `timeout`; what it reported, or
+    /// `None` when the run went over its memory budget.
+    fn one_test(
+        &self,
+        worker: &Worker<'_>,
+        test: &Test,
+        timeout: Duration,
+        sequence: &Sequence<'_>,
+    ) -> Result<Option<(TestRun, bool)>> {
+        let mut options = self.options(Some(timeout), sequence.id);
+        options.prebuilt = sequence.prebuilt.cloned();
+        let selection = TestSelection::Tests(vec![test.id.clone()]);
+        let started = Instant::now();
+        let tmp = scratch()?;
+        match self
+            .runner
+            .run(&worker.ctx, &selection, &within(&options, &tmp))
+        {
+            Err(Error::OutOfMemory { .. }) => Ok(None),
+            Err(error) => Err(error),
+            Ok(ran) => Ok(Some((ran, started.elapsed() >= timeout))),
+        }
+    }
+
+    /// What `found` makes of `planned`'s run that began at `started`, recorded as its `run`
+    /// phase over the tests per-test selection chose.
+    fn ran(&self, worker: &Worker<'_>, planned: &Planned, found: Found, started: Instant) -> Ran {
+        let elapsed = started.elapsed();
+        let served = Served {
+            file: Some(planned.file()),
+            slot: Some(worker.index),
+            tests: planned.tests.as_ref().map(Vec::len),
+        };
+        self.phases.took(MutationPhase::Run, served, elapsed);
+        Ran {
+            outcome: found.outcome,
+            tests: found.tests,
+            killing_tests: found.killing_tests,
+            duration_ms: u64::try_from(elapsed.as_millis()).unwrap_or(u64::MAX),
+            strategy: found.strategy,
+            fallback: None,
+            hung: found.hung,
+            slowest: found.slowest,
+        }
+    }
+}
+
+/// A narrowed mutant's tests and how they run (ADR-160).
+struct Sequence<'a> {
+    /// In the order they run.
+    tests: Vec<Test>,
+    caps: Caps,
+    /// The mutant's schemata id; 0 for a file copy.
+    id: u32,
+    prebuilt: Option<&'a Prebuilt>,
+}
+
+/// What a sequence has found so far.
+struct Found {
+    outcome: MutantOutcome,
+    tests: Vec<String>,
+    killing_tests: Vec<String>,
+    strategy: MutationStrategy,
+    hung: Option<String>,
+    slowest: Vec<UnfinishedTest>,
+}
+
+impl Found {
+    /// Adds what one test's run reported; what it says of that test.
+    fn add(&mut self, (ran, reached): (TestRun, bool)) -> sequence::Run {
+        let results = &ran.results;
+        self.tests
+            .extend(results.tests.iter().map(|test| test.id.clone()));
+        self.killing_tests
+            .extend(results.failures().map(|test| test.id.clone()));
+        sequence::Run {
+            failed: results.failures().next().is_some(),
+            complete: results.incomplete().next().is_none(),
+            reached,
+        }
+    }
+
+    fn killed(mut self, hung: Option<String>) -> Self {
+        self.outcome = MutantOutcome::Killed;
+        self.hung = hung;
+        self
+    }
+
+    fn timed_out(mut self, slowest: Vec<UnfinishedTest>) -> Self {
+        self.outcome = MutantOutcome::Timeout;
+        self.slowest = slowest;
+        self
+    }
+
+    fn out_of_memory(self) -> Self {
+        self.ended(MutantOutcome::OutOfMemory)
+    }
+
+    fn ended(mut self, outcome: MutantOutcome) -> Self {
+        self.outcome = outcome;
+        self
+    }
+}
+
 /// How much of the machine a run gets: its slot's share of the cores and the memory budget,
 /// or all of both when it runs alone (ADR-148 §1, ADR-150 §6).
 #[derive(Clone, Copy)]
@@ -495,7 +742,14 @@ struct Worker<'a> {
     index: usize,
     slot: &'a Slot,
     ctx: ProduceCtx,
+    /// The timeout of a mutant that runs its selection as one run.
     limit: Duration,
+    /// How long the file's reference run took, its build included; zero for a validated
+    /// schemata build.
+    reference: Duration,
+    /// The runner's start-up for a run of one test; `None` when no mutant of the file is
+    /// narrowed.
+    startup: Option<Duration>,
     holds: Holds,
 }
 
@@ -544,6 +798,8 @@ fn classify(
         duration_ms: u64::try_from(elapsed.as_millis()).unwrap_or(u64::MAX),
         strategy,
         fallback: None,
+        hung: None,
+        slowest: Vec::new(),
     }
 }
 
@@ -556,6 +812,8 @@ fn out_of_memory(elapsed: Duration, strategy: MutationStrategy) -> Ran {
         duration_ms: u64::try_from(elapsed.as_millis()).unwrap_or(u64::MAX),
         strategy,
         fallback: None,
+        hung: None,
+        slowest: Vec::new(),
     }
 }
 

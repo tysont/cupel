@@ -1,0 +1,4 @@
+# The ordering fixture (ADR-160): a hot-path function that a fast test and a slow one both cover and kill, and a
+# loop whose mutants never end. Run at --depth deep, so per-test selection narrows each mutant to its tests.
+[lang.python]
+coverage = "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov=. --cov-branch --cov-report=lcov:{out}"

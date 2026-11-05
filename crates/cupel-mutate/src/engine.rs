@@ -1,7 +1,8 @@
 // ABOUTME: `engine.mutation` (ADR-080, ADR-082, ADR-150): plans the mutants of `MutationSites` in focus, reuses stored
 // ABOUTME: outcomes, and runs the rest file by file in overlays, as schemata or file copies, timing each phase.
+use std::collections::BTreeMap;
 use std::path::Path;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{
@@ -147,6 +148,15 @@ impl MutationEngine {
     }
 }
 
+/// Each test's duration in `baseline`, for the tests it timed.
+fn durations(baseline: Option<&TestResults>) -> BTreeMap<String, Duration> {
+    baseline
+        .into_iter()
+        .flat_map(|baseline| &baseline.tests)
+        .filter_map(|test| Some((test.id.clone(), Duration::from_millis(test.duration_ms?))))
+        .collect()
+}
+
 /// The registered runner that ran `baseline`, which runs the mutants.
 fn runner_of<'a>(ctx: &'a ProduceCtx, baseline: &TestResults) -> Result<&'a dyn Runner> {
     ctx.runners
@@ -212,6 +222,8 @@ struct Running<'a> {
     lang: String,
     /// Where every phase of the production is recorded (ADR-150).
     phases: Phases,
+    /// Each test's duration in the baseline (ADR-160).
+    baseline: BTreeMap<String, Duration>,
 }
 
 impl<'a> Running<'a> {
@@ -240,6 +252,7 @@ impl<'a> Running<'a> {
             },
             lang,
             phases: Phases::default(),
+            baseline: durations(ctx.upstream.get::<TestResults>()),
         }
     }
 
@@ -269,6 +282,7 @@ impl<'a> Running<'a> {
             settings: self.settings,
             whole: self.whole,
             phases: &self.phases,
+            baseline: &self.baseline,
         };
         let root = &self.ctx.ctx.root;
         for (file, indexes) in order {
@@ -297,6 +311,8 @@ impl<'a> Running<'a> {
                 mutant.duration_ms = Some(ran.duration_ms);
                 mutant.strategy = Some(ran.strategy);
                 mutant.fallback = ran.fallback;
+                mutant.hung = ran.hung;
+                mutant.slowest = ran.slowest;
             }
         }
         Ok(())

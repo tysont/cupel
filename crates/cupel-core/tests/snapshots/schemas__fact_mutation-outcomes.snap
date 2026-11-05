@@ -142,6 +142,13 @@ expression: pretty(&schema)
           "description": "The source text replaced.",
           "type": "string"
         },
+        "hung": {
+          "description": "The test whose hang killed it: it ran past its own cap though it normally finishes well\ninside it (ADR-160); `None` otherwise.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "killing_tests": {
           "description": "Of `tests`, those that failed or errored.",
           "type": "array",
@@ -161,6 +168,13 @@ expression: pretty(&schema)
         },
         "site_hash": {
           "$ref": "#/$defs/SiteHash"
+        },
+        "slowest": {
+          "description": "For a `timeout`, up to three of its selected tests that had not completed when the cap ran\nout, slowest first (ADR-160); empty otherwise.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/UnfinishedTest"
+          }
         },
         "span": {
           "description": "Where `from` is, in the symbol's file.",
@@ -211,11 +225,13 @@ expression: pretty(&schema)
         "equivalent",
         "fallback",
         "from",
+        "hung",
         "killing_tests",
         "operator",
         "outcome",
         "reused",
         "site_hash",
+        "slowest",
         "span",
         "strategy",
         "symbol",
@@ -440,6 +456,29 @@ expression: pretty(&schema)
         "col",
         "file",
         "line"
+      ]
+    },
+    "UnfinishedTest": {
+      "description": "A test a mutant's run had not completed when its cap ran out (ADR-160).",
+      "type": "object",
+      "properties": {
+        "baseline_ms": {
+          "description": "Its duration in the baseline run; `None` when the baseline did not time it.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "id": {
+          "description": "The runner's ID of the test.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "baseline_ms",
+        "id"
       ]
     }
   }

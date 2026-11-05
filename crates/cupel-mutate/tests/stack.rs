@@ -81,6 +81,38 @@ fn tests_run(outcomes: &MutationOutcomes) -> Vec<(u32, &str, Vec<&str>)> {
         .collect()
 }
 
+/// Each mutant as `(line, to, the tests it was narrowed to)`, read from the tests run against it. A narrowed mutant
+/// runs its tests one at a time, fastest first, and stops at the first that kills it (ADR-160), and which of two
+/// tests of about the same duration runs first is the baseline's noise. So a killed mutant whose tests are all of
+/// `covering`'s for it and end with its killing test is reported with `covering`'s tests; any other, with those it ran.
+fn narrowed<'a>(
+    outcomes: &'a MutationOutcomes,
+    covering: &[(u32, &'static str, Vec<&'static str>)],
+) -> Vec<(u32, &'a str, Vec<&'a str>)> {
+    outcomes
+        .mutants
+        .iter()
+        .map(|m| {
+            let mut ran: Vec<&str> = m.tests.iter().map(String::as_str).collect();
+            let expected = covering
+                .iter()
+                .find(|(line, to, _)| (*line, *to) == (m.span.line, m.to.as_str()))
+                .map(|(_, _, tests)| tests.clone());
+            let stopped = m.outcome == MutantOutcome::Killed
+                && m.tests
+                    .last()
+                    .is_some_and(|last| m.killing_tests.contains(last));
+            ran.sort_unstable();
+            match expected {
+                Some(tests) if stopped && ran.iter().all(|test| tests.contains(test)) => {
+                    (m.span.line, m.to.as_str(), tests)
+                }
+                _ => (m.span.line, m.to.as_str(), ran),
+            }
+        })
+        .collect()
+}
+
 /// The fixture's mutants, each with exactly the tests that cover its line.
 fn covering_tests() -> Vec<(u32, &'static str, Vec<&'static str>)> {
     vec![
@@ -98,7 +130,7 @@ fn with_a_per_test_map_a_mutant_runs_only_the_tests_that_cover_it() {
     let Some((_dir, outcomes)) = support::python_per_test() else {
         return;
     };
-    assert_eq!(tests_run(&outcomes), covering_tests());
+    assert_eq!(narrowed(&outcomes, &covering_tests()), covering_tests());
 }
 
 #[test]
@@ -112,7 +144,7 @@ fn at_standard_a_cached_per_test_map_selects_each_mutants_tests() {
         (outcomes.depth, outcomes.per_test),
         (CostClass::Standard, true)
     );
-    assert_eq!(tests_run(&outcomes), covering_tests());
+    assert_eq!(narrowed(&outcomes, &covering_tests()), covering_tests());
 }
 
 #[test]

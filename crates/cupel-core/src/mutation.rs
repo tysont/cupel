@@ -191,6 +191,23 @@ pub struct Mutant {
     /// otherwise.
     #[serde(default)]
     pub fallback: Option<String>,
+    /// The test whose hang killed it: it ran past its own cap though it normally finishes well
+    /// inside it (ADR-160); `None` otherwise.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub hung: Option<String>,
+    /// For a `timeout`, up to three of its selected tests that had not completed when the cap ran
+    /// out, slowest first (ADR-160); empty otherwise.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub slowest: Vec<UnfinishedTest>,
+}
+
+/// A test a mutant's run had not completed when its cap ran out (ADR-160).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct UnfinishedTest {
+    /// The runner's ID of the test.
+    pub id: String,
+    /// Its duration in the baseline run; `None` when the baseline did not time it.
+    pub baseline_ms: Option<u64>,
 }
 
 /// How a mutant was built (ADR-082).

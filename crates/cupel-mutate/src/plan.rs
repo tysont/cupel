@@ -215,6 +215,8 @@ impl Planner<'_, '_> {
                         cache_key: key,
                         strategy: None,
                         fallback: None,
+                        hung: None,
+                        slowest: Vec::new(),
                     },
                     source: mutated,
                     tests: selection.tests.clone(),
