@@ -4,7 +4,7 @@ use std::fs;
 use std::path::Path;
 use std::sync::Barrier;
 
-use cupel_mutate::slots::{claim, measure, slot_dir};
+use cupel_mutate::slots::{claim, measure, root, slot_dir};
 
 /// The bytes of the build a test wrote into the first Python slot of the slots in `dir`; 0 when it is gone.
 fn built(dir: &Path) -> u64 {
@@ -16,6 +16,7 @@ fn built(dir: &Path) -> u64 {
 #[test]
 fn a_slot_lives_in_the_repository_under_cupel_work_slots_by_language() {
     let repo = tempfile::tempdir().unwrap();
+    assert_eq!(root(repo.path()), repo.path().join(".cupel/work/slots"));
     assert_eq!(
         slot_dir(repo.path(), "python", 2),
         repo.path().join(".cupel/work/slots/python/2")
@@ -35,11 +36,13 @@ fn a_claim_makes_the_repositorys_slot_directory() {
     assert_eq!(measure(claim.dir()), 4_096);
 }
 
-/// A directory that is not there holds nothing.
+/// A directory that is not there holds nothing, and neither does a path that is a file, not a directory.
 #[test]
 fn measuring_a_directory_that_is_not_there_is_zero() {
     let repo = tempfile::tempdir().unwrap();
     assert_eq!(measure(&repo.path().join("missing")), 0);
+    fs::write(repo.path().join("file"), b"not a directory").unwrap();
+    assert_eq!(measure(&repo.path().join("file")), 0);
 }
 
 /// `measure` sums the regular files in every directory below, and counts a symbolic link as nothing, whether it

@@ -41,46 +41,28 @@ fn tests_run_fastest_first_with_unknown_durations_last_and_ties_by_id() {
     );
 }
 
-/// A test's own cap is the factor times its baseline, at least 2 s, plus the start-up; the overall cap left cuts it.
+/// The limit of a run: its timeout, and whether that is the test's own cap.
+fn limit(timeout: f64, own: bool) -> Limit {
+    Limit {
+        timeout: secs(timeout),
+        own,
+    }
+}
+
+/// A test's own cap is the factor times its baseline, at least 2 s, plus the start-up, and a rebuilding run's
+/// allowance; the overall cap left cuts it, and is all a test of unknown duration gets.
 #[test]
 fn a_tests_timeout_is_its_own_cap_unless_the_overall_cap_left_is_less() {
     let caps = caps();
-    let cases = [
-        (test("fast", Some(0.01)), secs(0.0), secs(0.0)),
-        (test("medium", Some(1.0)), secs(0.0), secs(0.0)),
-        (test("medium", Some(1.0)), secs(115.0), secs(0.0)),
-        (test("unknown", None), secs(20.0), secs(0.0)),
-        (test("rebuilt", Some(1.0)), secs(0.0), secs(30.0)),
-    ];
-    let limits: Vec<Limit> = cases
-        .iter()
-        .map(|(test, spent, build)| caps.limit(test, *spent, *build))
-        .collect();
-    assert_eq!(
-        limits,
-        [
-            Limit {
-                timeout: secs(2.5),
-                own: true
-            },
-            Limit {
-                timeout: secs(10.5),
-                own: true
-            },
-            Limit {
-                timeout: secs(5.0),
-                own: false
-            },
-            Limit {
-                timeout: secs(100.0),
-                own: false
-            },
-            Limit {
-                timeout: secs(40.5),
-                own: true
-            },
-        ]
-    );
+    let (fast, medium) = (test("fast", Some(0.01)), test("medium", Some(1.0)));
+    let zero = secs(0.0);
+    assert_eq!(caps.limit(&fast, zero, zero), limit(2.5, true));
+    assert_eq!(caps.limit(&medium, zero, zero), limit(10.5, true));
+    assert_eq!(caps.limit(&medium, secs(115.0), zero), limit(5.0, false));
+    assert_eq!(caps.limit(&medium, zero, secs(30.0)), limit(40.5, true));
+    let unknown = test("unknown", None);
+    assert_eq!(caps.limit(&unknown, secs(20.0), zero), limit(100.0, false));
+    assert_eq!(caps.limit(&fast, secs(130.0), zero), limit(0.0, false));
 }
 
 fn run(failed: bool, complete: bool, reached: bool) -> Run {

@@ -2083,9 +2083,11 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
    - Fixture `tests.mutation/python-ordering`:
      - A hot path that a fast test and a 6 s test both kill. The fast test sorts after the slow one by name, so only ordering by duration runs it first. Every mutant is killed by the fast test alone in under 3 s.
      - A loop whose two endless mutants are killed as hangs naming their test.
+     - A copy capped at 3 s in which only the 6 s test covers the hot path: its mutant is a `timeout` naming that test, with its baseline duration, as the slowest.
      - Both tests failed with the sequence turned off.
    - A warm single-test nextest run costs 0.7 to 1.2 s here.
    - The seven `schedule.rs` mutants that v0.2.4's changed deep dogfood timed out, rerun at `--depth deep` under the default 120 s cap on a cleared store: all 7 killed, 3.1 s of mutant runs in all, no timeout.
+   - The first gate's tree dogfood found a 64-line `sequence`, two cloned setters on its state (one never run), loops in the two ordering tests, a sparse limit test, and a shared setup in the history tests. All are fixed.
    - The stack tests compare a killed mutant's tests as the covering tests it stopped within, since which of two 1 ms tests runs first is the baseline's noise.
 2. **`p2-static-checks`** deleted (merged into main).
 3. **Slot disk use** (17 GB) accepted as the build cache under the existing cap; no change.

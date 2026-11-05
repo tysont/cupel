@@ -176,18 +176,29 @@ mod tests {
         );
     }
 
+    /// A planned mutant of `a.py` stored under the key `k`.
+    fn keyed() -> Planned {
+        let mut planned = planned("a.py", "sh_00000000000000a1", "0000000000000001", 1);
+        planned.mutant.cache_key = Some("k".to_owned());
+        planned
+    }
+
+    /// The history that holds `stored` under the key `k`, and no last outcomes.
+    fn holding(stored: Mutant) -> History {
+        History {
+            stored: BTreeMap::from([("k".to_owned(), stored)]),
+            last: BTreeMap::new(),
+        }
+    }
+
     #[test]
     fn a_stored_outcome_under_the_same_key_is_reused() {
-        let mut fresh = planned("a.py", "sh_00000000000000a1", "0000000000000001", 1);
-        fresh.mutant.cache_key = Some("k".to_owned());
+        let mut fresh = keyed();
         let mut stored = fresh.mutant.clone();
         stored.outcome = MutantOutcome::Survived;
         stored.tests = vec!["t".to_owned()];
         stored.strategy = Some(MutationStrategy::Schemata);
-        let history = History {
-            stored: BTreeMap::from([("k".to_owned(), stored)]),
-            last: BTreeMap::new(),
-        };
+        let history = holding(stored);
         assert!(history.reuse(&mut fresh));
         assert_eq!(
             (
@@ -212,19 +223,14 @@ mod tests {
     /// (ADR-160 §9).
     #[test]
     fn a_stored_timeout_runs_again_and_a_stored_hang_keeps_its_test() {
-        let mut fresh = planned("a.py", "sh_00000000000000a1", "0000000000000001", 1);
-        fresh.mutant.cache_key = Some("k".to_owned());
+        let mut fresh = keyed();
         let mut timed_out = fresh.mutant.clone();
         timed_out.outcome = MutantOutcome::Timeout;
         let mut hung = fresh.mutant.clone();
         hung.outcome = MutantOutcome::Killed;
         hung.hung = Some("t".to_owned());
-        let history = |stored: Mutant| History {
-            stored: BTreeMap::from([("k".to_owned(), stored)]),
-            last: BTreeMap::new(),
-        };
-        assert!(!history(timed_out).reuse(&mut fresh.clone()));
-        assert!(history(hung).reuse(&mut fresh));
+        assert!(!holding(timed_out).reuse(&mut fresh.clone()));
+        assert!(holding(hung).reuse(&mut fresh));
         assert_eq!(
             (fresh.mutant.outcome, fresh.mutant.hung.as_deref()),
             (MutantOutcome::Killed, Some("t"))

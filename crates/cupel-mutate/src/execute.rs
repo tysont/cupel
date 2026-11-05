@@ -549,8 +549,7 @@ impl Execution<'_> {
 
 impl Execution<'_> {
     /// Runs `sequence`'s tests against the mutant in `worker`'s slot one at a time, fastest
-    /// first, until one decides it (ADR-160 §6): a failure or a hang kills it, a run out of time
-    /// for slowness leaves it a timeout, and it survives when every test passes.
+    /// first, until one decides it (ADR-160 §6); the `run` phase.
     fn sequence(
         &self,
         worker: &Worker<'_>,
@@ -571,49 +570,50 @@ impl Execution<'_> {
             hung: None,
             slowest: Vec::new(),
         };
+        self.decide(worker, sequence, &mut found, started)?;
+        Ok(self.ran(worker, planned, found, started))
+    }
+
+    /// Runs `sequence`'s tests into `found` until one decides the mutant: a failure or a hang
+    /// kills it, a run out of time for slowness leaves it a timeout, a run over its memory
+    /// budget or one that did not build or load ends it; it survives when every test passes.
+    fn decide(
+        &self,
+        worker: &Worker<'_>,
+        sequence: &Sequence<'_>,
+        found: &mut Found,
+        started: Instant,
+    ) -> Result<()> {
         for (position, test) in sequence.tests.iter().enumerate() {
             // A file copy's first run rebuilds the mutant, which the reference run also did.
-            let build = if position == 0 && strategy == MutationStrategy::FileCopy {
+            let build = if position == 0 && found.strategy == MutationStrategy::FileCopy {
                 worker.reference
             } else {
                 Duration::ZERO
             };
             let limit = sequence.caps.limit(test, started.elapsed(), build);
-            let run = match self.one_test(worker, test, limit.timeout, sequence)? {
-                Some(run) => found.add(run),
-                None => return Ok(self.ran(worker, planned, found.out_of_memory(), started)),
+            let Some(ran) = self.one_test(worker, test, limit.timeout, sequence)? else {
+                found.outcome = MutantOutcome::OutOfMemory;
+                return Ok(());
             };
-            let verdict = sequence::verdict(&run, limit, test, &sequence.caps);
-            match verdict {
-                Verdict::Passed => {}
-                Verdict::Failed => {
-                    return Ok(self.ran(worker, planned, found.killed(None), started));
-                }
+            let run = found.add(ran);
+            found.outcome = match sequence::verdict(&run, limit, test, &sequence.caps) {
+                Verdict::Passed => continue,
+                Verdict::Failed => MutantOutcome::Killed,
                 Verdict::Hung => {
                     found.killing_tests = vec![test.id.clone()];
-                    let hung = Some(test.id.clone());
-                    return Ok(self.ran(worker, planned, found.killed(hung), started));
+                    found.hung = Some(test.id.clone());
+                    MutantOutcome::Killed
                 }
                 Verdict::Slow => {
-                    let slowest = sequence::slowest(&sequence.tests[position..]);
-                    return Ok(self.ran(worker, planned, found.timed_out(slowest), started));
+                    found.slowest = sequence::slowest(&sequence.tests[position..]);
+                    MutantOutcome::Timeout
                 }
-                Verdict::Unviable => {
-                    return Ok(self.ran(
-                        worker,
-                        planned,
-                        found.ended(MutantOutcome::Unviable),
-                        started,
-                    ));
-                }
-            }
+                Verdict::Unviable => MutantOutcome::Unviable,
+            };
+            return Ok(());
         }
-        Ok(self.ran(
-            worker,
-            planned,
-            found.ended(MutantOutcome::Survived),
-            started,
-        ))
+        Ok(())
     }
 
     /// Runs `test` alone against `sequence`'s mutant with `timeout`; what it reported, or
@@ -696,27 +696,6 @@ impl Found {
             complete: results.incomplete().next().is_none(),
             reached,
         }
-    }
-
-    fn killed(mut self, hung: Option<String>) -> Self {
-        self.outcome = MutantOutcome::Killed;
-        self.hung = hung;
-        self
-    }
-
-    fn timed_out(mut self, slowest: Vec<UnfinishedTest>) -> Self {
-        self.outcome = MutantOutcome::Timeout;
-        self.slowest = slowest;
-        self
-    }
-
-    fn out_of_memory(self) -> Self {
-        self.ended(MutantOutcome::OutOfMemory)
-    }
-
-    fn ended(mut self, outcome: MutantOutcome) -> Self {
-        self.outcome = outcome;
-        self
     }
 }
 
