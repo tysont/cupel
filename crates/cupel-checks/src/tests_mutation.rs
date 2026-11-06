@@ -130,8 +130,9 @@ fn manifest() -> Manifest {
             kind::<TimedOut>(
                 "mutant.timeout",
                 ActionKind::Review,
-                "The tests ran past their timeout against the mutant, which usually means it \
-                 loops.",
+                "The mutant was not decided within its time cap, so its outcome is unknown: a \
+                 run of the whole suite reached its timeout, which usually means it loops, or \
+                 its selected tests could not all run within max_mutant_timeout (ADR-160).",
             ),
             kind::<Site>(
                 "mutant.out-of-memory",

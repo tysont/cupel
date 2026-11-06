@@ -853,7 +853,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
                 "text": "Mutates the code in scope and runs the tests that cover each mutant; a mutant every test passes against survived. Score: killed / (killed + survived + uncovered): a site no test runs is not run and counts as missed (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
               },
               "help": {
-                "text": "The tests ran past their timeout against the mutant, which usually means it loops.\n\nAction: review. `cupel describe finding mutant.timeout` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
+                "text": "The mutant was not decided within its time cap, so its outcome is unknown: a run of the whole suite reached its timeout, which usually means it loops, or its selected tests could not all run within max_mutant_timeout (ADR-160).\n\nAction: review. `cupel describe finding mutant.timeout` describes the kind and its evidence, `cupel describe tests.mutation` the check, and `cupel explain <finding-id>` one finding in context."
               },
               "id": "mutant.timeout",
               "properties": {
@@ -864,7 +864,7 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
                 "tier": 3
               },
               "shortDescription": {
-                "text": "The tests ran past their timeout against the mutant, which usually means it loops."
+                "text": "The mutant was not decided within its time cap, so its outcome is unknown: a run of the whole suite reached its timeout, which usually means it loops, or its selected tests could not all run within max_mutant_timeout (ADR-160)."
               }
             },
             {

@@ -1031,7 +1031,7 @@ Without a `coverage` command a language's `tests.coverage` is skipped as `unconf
 
 - `mutant.survived` (fails the check): every test that ran against the mutant passed. The finding sits at the mutated site and names the change (`from`, `to`, `operator`), the tests that missed it (`covering_tests`), and the nearest test file. Write a test that fails on the mutant.
 - `mutant.uncovered` (a note): no test runs the site, so its mutant was not run.
-- `mutant.timeout` (a note): the tests ran past their timeout against the mutant, which usually means it loops.
+- `mutant.timeout` (a note): the mutant was not decided within its time cap, so its outcome is unknown. A mutant that ran the whole suite reached its timeout, which usually means it loops; a mutant whose selected tests ran one at a time could not run them all within `max_mutant_timeout`, and the finding names the slowest it did not complete (see Timeouts below). A test that hangs well inside its own cap kills the mutant instead ([ADR-160](docs/adr/CUPEL_DECISION_160.md)).
 - `mutant.out-of-memory` (a note): the tests held more memory than the run's share of `max_mutant_memory` against the mutant and were killed, which usually means it loops while allocating.
 - `mutant.equivalent?` (a note, confidence 0.3): the mutant survived but may behave exactly as the original — today, swapping `+`/`-` before a literal `0` or `*`/`/` before a literal `1`. It is left out of the score; suppress it once you agree.
 - `mutant.slow-test-excluded` (a note): a test that took more than 60 seconds in the baseline was left out of every mutant run that per-test selection did not narrow (see Timeouts below); the finding names the test and its baseline duration.

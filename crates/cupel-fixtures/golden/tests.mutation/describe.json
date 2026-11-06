@@ -131,7 +131,7 @@
             "type": "object"
           },
           "kind": "mutant.timeout",
-          "summary": "The tests ran past their timeout against the mutant, which usually means it loops."
+          "summary": "The mutant was not decided within its time cap, so its outcome is unknown: a run of the whole suite reached its timeout, which usually means it loops, or its selected tests could not all run within max_mutant_timeout (ADR-160)."
         },
         {
           "action": "review",
