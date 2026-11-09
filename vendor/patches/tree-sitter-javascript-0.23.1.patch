@@ -1,0 +1,31 @@
+diff --git a/grammar.js b/grammar.js
+index 3311b30..5d0110b 100644
+--- a/grammar.js
++++ b/grammar.js
+@@ -611,6 +611,8 @@ module.exports = grammar({
+     _jsx_child: $ => choice(
+       $.jsx_text,
+       $.html_character_reference,
++      // A `&` that starts no character reference is text, as JSX compilers read it.
++      alias('&', $.jsx_text),
+       $._jsx_element,
+       $.jsx_expression,
+     ),
+@@ -676,6 +678,8 @@ module.exports = grammar({
+         repeat(choice(
+           alias($.unescaped_double_jsx_string_fragment, $.string_fragment),
+           $.html_character_reference,
++          // A `&` that starts no character reference is part of the string.
++          alias(token.immediate('&'), $.string_fragment),
+         )),
+         '"',
+       ),
+@@ -684,6 +688,8 @@ module.exports = grammar({
+         repeat(choice(
+           alias($.unescaped_single_jsx_string_fragment, $.string_fragment),
+           $.html_character_reference,
++          // A `&` that starts no character reference is part of the string.
++          alias(token.immediate('&'), $.string_fragment),
+         )),
+         '\'',
+       ),

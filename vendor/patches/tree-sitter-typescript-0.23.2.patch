@@ -1,0 +1,14 @@
+diff --git a/common/define-grammar.js b/common/define-grammar.js
+index efb0b76..75a98db 100644
+--- a/common/define-grammar.js
++++ b/common/define-grammar.js
+@@ -943,7 +943,8 @@ module.exports = function defineGrammar(dialect) {
+         'boolean',
+         'string',
+         'symbol',
+-        alias(seq('unique', 'symbol'), 'unique symbol'),
++        // One token, so `unique` stays an identifier everywhere it is not followed by `symbol`.
++        alias(token(seq('unique', /\s+/, 'symbol')), 'unique symbol'),
+         'void',
+         'unknown',
+         'string',
