@@ -5,3 +5,8 @@ crates/cupel-checks/src/lib.rs merge=union
 crates/cupel-core/src/fact/kind.rs merge=union
 crates/cupel-core/src/lib.rs merge=union
 crates/cupel-lang/src/lib.rs merge=union
+# The vendored grammars are third-party and their parsers generated (ADR-161).
+vendor/** linguist-vendored
+vendor/**/src/parser.c linguist-generated -diff
+vendor/**/src/grammar.json linguist-generated
+vendor/**/src/node-types.json linguist-generated
