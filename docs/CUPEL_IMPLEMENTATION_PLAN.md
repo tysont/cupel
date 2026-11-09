@@ -2101,6 +2101,156 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
      - `cargo binstall --git` in `rust:1.92-bookworm` downloads the release binary.
      - The registry publishes stay skipped (ADR-146).
 
+### Batch v0.2.6: Molten field trial
+
+**Goal:** The owner's request (2026-11-09): test Cupel against the surface area of a real repository, the owner's `../molten`, one area at a time. In each area, find Cupel's bugs and fix them, and write every true issue in Molten to one file, `../molten/cupel.md`, for Molten's own agent to pick up.
+
+**Status:** in progress. Area 0 complete (2026-11-09); Area 1 next, awaiting the owner's go-ahead.
+
+**Molten.** A pnpm TypeScript monorepo on Cloudflare Workers, at `fbafa8f5`:
+- `apps/agent`: 461 source files, 230 test files. `agent-do.ts` alone is 34,551 lines.
+- `apps/web`: 277 and 86, tested under `@cloudflare/vitest-pool-workers`.
+- `packages/shared`: 147 and 53.
+- `apps/cli`: 70 and 26.
+- `poc`: 6 and 1.
+- `containers/sandbox`: plain JS, tested with `node --test`.
+- Five tiers: unit (`pnpm test:ci`, run in Molten's CI without secrets; CI leaves `@molten/web` out); `tests/api` and `tests/e2e`, which run against deployed environments; Playwright; and fast-check property tests (`*.property.test.ts`).
+
+#### Rules for every area
+
+1. **Where.**
+   - Cupel runs only in a `git clone --local` of Molten under the scratchpad, never in the owner's checkout. Each area records the Molten commit it ran against; the clone moves only at an area's start.
+   - The only write to `../molten` is `cupel.md`. It is not committed there; Molten's agent owns it.
+2. **What never runs.**
+   - `tests/api`, `tests/e2e`, and Playwright specs (they reach deployed environments).
+   - Any Molten `make` target, `scripts/`, `wrangler` command, or anything taking `ENV=`.
+3. **Executing Molten's tests** (Areas 6 to 10).
+   - Only after `pnpm install --frozen-lockfile` in the clone.
+   - Under `env -i` with `PATH` and a scratch `HOME`, so no credential (Wrangler login, `.env`, API keys) reaches a test.
+   - One package at a time, safest first: `packages/shared`, `apps/cli`, `poc`, `apps/agent`, then `apps/web` (Area 10 decides whether it is safe at all).
+   - Through `scripts/heavy.sh`, and with 40 GB free.
+4. **The loop in each area.**
+   1. Run the area's commands with the Cupel `main` of the moment, a release build.
+   2. Triage every finding kind the area covers against Molten's source. Read 10 per kind, or all if fewer, and class each as true, false, or noise (true but not worth an agent's time). Record the counts and the estimated precision in this section's notes.
+   3. For each false class, write a minimal fixture under `crates/cupel-fixtures` that reproduces it, and watch it fail. Fix it, watch it pass, write an ADR when a rule changes, then run the gate (`make check` and the tree dogfood), merge, push, and wait for CI green.
+   4. Rerun the area on Molten. Record the counts before and after.
+   5. Append each true Molten issue, checked by hand, to `../molten/cupel.md` under the area's heading. Give it an ID (`M<area>-<n>`), status `open`, its locations, the evidence, and a suggested fix. Group repeated instances into one entry with a table. Move items out of "Pending verification" as areas settle them.
+   6. Collect calibration questions (a default limit, whether a matcher is weak, whether a class of finding belongs in tests) and ask the owner them together at the area's end. Never change a default on a guess.
+5. **An area is done** when every false class it found is fixed or deferred by an ADR, the owner has answered its calibration questions, and `cupel.md` holds its true findings.
+
+#### Areas
+
+0. **Static baseline** (complete, 2026-11-09).
+   - `survey --depth quick`: 6 s, 1.2 GB peak, 1,077 files, 10,763 symbols, 5,198 findings.
+   - True: the oversized functions and file, and 8 dead functions. These are `cupel.md` M0-1 to M0-3.
+   - Cupel defects that Areas 1 to 4 own:
+     - B1: false parse errors on 12 files.
+     - B2: entry points unseen.
+     - B3: file-level mocks charged to every test.
+     - B4: assertion helpers and `test.describe` missed.
+     - B5: `import type` edges make cycles.
+     - B6: dependencies 15 against 145 declared.
+1. **Parsing** (B1).
+   - `tree-sitter-typescript` 0.23.2 rejects:
+     - a bare `&` in JSX text and in JSX attribute strings (11 `.tsx` files);
+     - an identifier `unique` before `.` in `.ts` (`i < unique.length`; `secret-store.ts`).
+   - TypeScript accepts all three; reproduced in a five-file repository.
+   - Options, chosen by ADR: a newer upstream release that fixes them; a patched grammar vendored in the workspace; or neither, with an ADR naming the limitation.
+   - Done when Molten has 0 `lang.parse-error`, and a conformance fixture holds each construct.
+2. **Entry points and dead code** (B2).
+   - About 80 of 91 `dead.symbol` findings are false. Cupel does not see these as roots:
+     - `wrangler.toml`'s `main` (both Workers' `index.ts`/`index.tsx`);
+     - a Dockerfile's `CMD`/`ENTRYPOINT`/`COPY`'d script (`containers/sandbox/server.js`).
+   - Then check the other roots a Workers repository has:
+     - `export default { fetch, scheduled, queue }` handlers;
+     - Durable Object and Workflow classes named in `wrangler.toml` bindings (`class_name`);
+     - `package.json` `main`, `bin`, and `node <file>` scripts.
+   - Then triage `dead.export`.
+3. **Test facts for Vitest and Playwright** (B3, B4).
+   - Charge a hoisted `vi.mock` (and the `vi.fn` in its factory) to the file, not to each test.
+   - Follow assertions into `const helper = (…) => { expect(…) }`.
+   - Treat Playwright's `test.describe`, `test.step`, and `test.skip` as what they are.
+   - Recognize `vi.mocked`, `vi.spyOn`, and `expect.soft`.
+   - Then calibrate, as owner questions:
+     - whether `toContain` or `toMatch` with a literal, and `toMatchObject`, are weak (1,222 `test.weak-assertion` findings, 31% of tests);
+     - the mock-heavy thresholds;
+     - whether `test.duplicate-setup` and `test.logic` read well on Vitest suites.
+   - Then triage `tests.assertion-density`.
+4. **Structure on TypeScript and TSX** (B5).
+   - `static.deps`:
+     - whether an `import type` edge counts toward a cycle (an ADR);
+     - the `.js` specifiers that name `.ts` files;
+     - `tsconfig` `paths` aliases;
+     - workspace imports (`@molten/shared`) resolved across packages;
+     - layering rules Molten could declare (`apps/*` → `packages/shared`, never the reverse).
+   - `static.complexity` on JSX:
+     - whether cognitive 692 and cyclomatic 447 count JSX `&&` and ternaries as Molten's authors would;
+     - `function.long` for components.
+   - `static.clones`: triage the about 115 non-test clones. Ask the owner whether clones inside test files (540 of 655) should be reported, reported apart, or weighted.
+5. **Setup on a pnpm workspace** (B6).
+   - `init`:
+     - one root per package rather than one at `.`;
+     - per-package test and coverage commands (`pnpm --filter <pkg> test`);
+     - leaving out `tests/api` and `tests/e2e` (deployed-environment tiers);
+     - `node --test` for `containers/sandbox` (supported, or skipped with a reason);
+     - the Python scripts.
+   - `doctor` on the result.
+   - `perf.footprint` reads every workspace `package.json` and `pnpm-lock.yaml` (dependencies, licenses, advisories).
+   - `static.analyze` runs `tsc` and ESLint with Molten's own configurations after the install; triage what they report against Molten's CI, which already runs both.
+   - `cupel serve` on Molten: warm-run times for `survey` and `check --changed`.
+6. **Coverage**, one package at a time: `packages/shared`, `apps/cli`, `poc`, then `apps/agent`.
+   - `tests.coverage`: Vitest's v8 provider, lcov.
+     - Check `coverage.uncovered-symbol` and `coverage.unloaded-file` by hand.
+     - Check that `static.crap` now scores.
+     - Check that `survey`'s targets put the right functions first.
+   - Record each package's coverage run time.
+7. **Mutation.**
+   - `packages/shared` at `--depth standard`.
+   - Then `apps/agent` at `--changed` over a recent Molten pull request, under a budget.
+   - Check:
+     - the per-test map from Vitest (it narrows each mutant, and ADR-160's ordering applies);
+     - a sample of survivors by hand (a survivor is truly untested behavior);
+     - timeouts and hangs;
+     - cost per mutant;
+     - slot disk use for a pnpm workspace.
+8. **Ranges, by replaying Molten's history.**
+   - For about 10 recent merged pull requests, run `cupel check --base <parent> --depth standard` at the merge commit. Use the clone's history; nothing is pushed.
+   - Read `tests.weakening`, `static.api-surface`, `meta.oracle-independence`, and the changed gate's verdict.
+   - Compare them with what each pull request did, and with any later fix or revert of it. The question is whether the gate would have caught what the follow-up fixed.
+   - Propose a `[gate.changed]` for Molten in `cupel.md`.
+9. **Flakiness and properties.**
+   - `tests.flaky` on `packages/shared` and `apps/agent`.
+   - `gen.property` on the existing fast-check tests (`checkpoint-delivery`, `exit-paths`), and calibration of `property.missing` for TypeScript.
+10. **The Workers pool and the sandbox.**
+    - Decide whether `apps/web`'s `@cloudflare/vitest-pool-workers` suite can run safely in the clone: no remote bindings (a Workers AI binding is always remote), and nothing reachable without credentials.
+    - Then coverage and mutation there, or a documented skip.
+    - `containers/sandbox` under `node --test`, if Area 5 supports it.
+11. **An agent with Cupel as its stopping rule.**
+    - In the clone, on a branch, an agent takes 2 or 3 open `cupel.md` items: a dead function, a type-only cycle, a split of one long function. It stops only when `cupel check --changed --gate` exits 0, under the `[gate.changed]` Area 8 proposed.
+    - Record:
+      - iterations to green;
+      - detours caused by false or noisy findings;
+      - whether each `repro` confirmed a fix;
+      - wall time.
+    - Nothing is pushed to Molten; the branch stays in the clone.
+12. **`v0.2.6`.**
+    - Rerun every area on Molten's current commit. Put a before-and-after table at the top of `cupel.md`.
+    - Tag `v0.2.6`, verify the release as for 0.2.5, confirm CI green, stop.
+
+#### Notes
+
+- **Area 0** (2026-11-09, Molten `fbafa8f5`, Cupel `d3fc602a`). Findings by kind:
+  - `test.mock-heavy` 1,404: 516 carry file-level module mocks (B3).
+  - `test.weak-assertion` 1,222: 1,057 are `custom` (`toContain`, `toMatch`, comparisons), 115 `toMatchObject`.
+  - `function.long` 559 and `complexity.high` 488: true.
+  - Clones 655: 540 in tests.
+  - `test.logic` 262 and `test.duplicate-setup` 202: not yet triaged.
+  - `dead.symbol` 91: about 80 false (B2), 8 true.
+  - `test.no-assertion` 33: includes arrow-helper and `test.describe` false positives (B4).
+  - `dep.cycle` 7: at least 2 type-only (B5).
+  - `lang.parse-error` 12: all false (B1).
+  - `perf.footprint` counted 15 dependencies (B6).
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
