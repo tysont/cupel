@@ -98,6 +98,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         let excluded = excluded(ctx, runner, baseline);
         let whole = whole_suite(&excluded);
         let suite_hash = whole_suite_hash(baseline, &excluded);
+        let reachable = reachable(&ctx.ctx, scope);
         let inputs = Inputs {
             sites,
             symbols,
@@ -107,7 +108,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
             frames: upstream.get::<TestFrames>(),
             per_test,
             focus: &ctx.focus,
-            scope,
+            scope: &reachable,
             operators: settings.operators,
             suite_hash: &suite_hash,
             toolchain_hash: &toolchain,
@@ -403,6 +404,16 @@ fn toolchain_hash(ctx: &ProduceCtx, runner: &dyn Runner) -> String {
         })
         .unwrap_or_default();
     digest(&[ENGINE_VERSION, runner.id().as_str(), &version])
+}
+
+/// The part of `scope` a test run can reach: with configured roots, the files under one of
+/// them, since every directory a runner runs in is one (ADR-167, ADR-173); else all of it.
+fn reachable(ctx: &Ctx, scope: &Scope) -> Scope {
+    if ctx.roots.is_empty() {
+        return scope.clone();
+    }
+    let dirs: Vec<&str> = ctx.roots.iter().map(|root| root.path.as_str()).collect();
+    scope.under(&dirs)
 }
 
 fn io(root: &Path, file: &str, error: &std::io::Error) -> Error {

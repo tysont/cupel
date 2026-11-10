@@ -2371,6 +2371,13 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - `cupel-core/tests/budget_runs.rs`: a cut production that returns its fact is not timed.
   - Open: a mutant whose run the cut reaches is lost even if it was about to finish (at most one per slot).
 
+- **B14, Area 7's budgeted run** (2026-11-10, [ADR-173](adr/CUPEL_DECISION_173.md)).
+  - B13 held on Molten: `--budget 25m` left 730 of 18 165 mutants `not-run`, the check was `partial` with a score and the note, and its 47 survivors were stored.
+  - The gap it showed: with `[roots]` narrowed to `packages/shared`, the engine planned mutants over the whole tree, so 17 157 mutants in other packages counted as uncovered, and the score was 0.0075 instead of shared's 0.47.
+  - Now, with configured roots, the engine plans only files under them (`Scope::under`, `engine::reachable`).
+  - Test: `cupel-core/tests/scope.rs`.
+  - Also seen: building the mutation slots took 872 s of the 25 minutes, for a package of a 487-dependency workspace.
+
 - **Open, from Areas 6 and 7** (2026-11-10).
   - **Cross-root test reach.** With per-package roots, a root's coverage and mutation run only that root's tests. So code another root's tests exercise looks uncovered: shared's `shellQuote` is tested from `apps/agent`, and shared's coverage counts only shared's own files. Two options: let a root's coverage and mutation use the tests of the roots that import it (through the module graph), or report such code as covered elsewhere.
   - **String and regex code.** Neither operator set mutates string or regex literals, so escaping and quoting helpers get no default mutants. This is by design, to keep equivalent mutants down. Calibration question for the owner: an opt-in `strings` operator (a literal to `""`, edits to regex quantifiers and classes).

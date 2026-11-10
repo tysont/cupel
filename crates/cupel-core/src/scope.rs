@@ -47,6 +47,34 @@ impl Scope {
             .as_ref()
             .map_or_else(|| self.files.contains(&key.file), |keys| keys.contains(key))
     }
+
+    /// The part of the scope under one of `dirs`, relative to the repository root (`.` is all
+    /// of it): a run's configured roots, where its tests can reach (ADR-173).
+    #[must_use]
+    pub fn under(&self, dirs: &[&str]) -> Self {
+        let held = |file: &str| {
+            dirs.iter().any(|dir| {
+                let dir = dir.trim_start_matches("./").trim_end_matches('/');
+                dir == "."
+                    || dir.is_empty()
+                    || file
+                        .strip_prefix(dir)
+                        .is_some_and(|rest| rest.starts_with('/'))
+            })
+        };
+        Self {
+            files: self
+                .files
+                .iter()
+                .filter(|file| held(file))
+                .cloned()
+                .collect(),
+            symbols: self
+                .symbols
+                .as_ref()
+                .map(|keys| keys.iter().filter(|key| held(&key.file)).cloned().collect()),
+        }
+    }
 }
 
 /// The scope flags of design §6.4, as given.

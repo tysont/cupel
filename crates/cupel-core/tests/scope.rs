@@ -310,3 +310,32 @@ fn symbol_selectors_match_display_names_either_separator_and_hashes() {
     );
     assert!(SymbolSelector::parse("sh_123").is_err(), "a malformed hash");
 }
+
+/// The part of a scope under some directories keeps their files and symbols and drops the rest:
+/// `lib` holds `lib/c.rs` but not `library/x.rs`, and `.` holds everything (ADR-173).
+#[test]
+fn a_scope_under_directories_keeps_only_what_they_hold() {
+    let key = |file: &str| cupel_core::syntax::SymbolKey {
+        file: file.to_owned(),
+        line: 1,
+        col: 1,
+    };
+    let mut files = tree();
+    files.push("library/x.rs".to_owned());
+    let scope = cupel_core::Scope::of_files(files.clone());
+    assert_eq!(scope.under(&["lib", "src/"]).files, tree());
+    assert_eq!(scope.under(&["."]).files, files);
+    assert_eq!(scope.under(&[]).files, Vec::<String>::new());
+    let symbols = cupel_core::Scope {
+        files: Vec::new(),
+        symbols: Some([key("lib/c.rs"), key("library/x.rs")].into()),
+    };
+    let under = symbols.under(&["lib"]);
+    assert_eq!(
+        (
+            under.includes(&key("lib/c.rs")),
+            under.includes(&key("library/x.rs"))
+        ),
+        (true, false)
+    );
+}
