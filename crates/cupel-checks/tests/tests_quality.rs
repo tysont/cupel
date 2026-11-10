@@ -227,6 +227,7 @@ impl World {
                     framework: "x-test".to_owned(),
                     setup: Vec::new(),
                     cases: vec![frame],
+                    mocks: Vec::new(),
                 }),
             }
         }

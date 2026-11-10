@@ -76,6 +76,7 @@ fn frames(files: Vec<(&str, Vec<TestCase>)>) -> TestFrames {
                 framework: "x".to_owned(),
                 setup: Vec::new(),
                 cases,
+                mocks: Vec::new(),
             })
             .collect(),
     }

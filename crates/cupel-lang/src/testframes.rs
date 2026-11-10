@@ -40,8 +40,9 @@
 //!
 //! An assertion, mock, skip, or property captured in the same match as a `@test.case` belongs to that
 //! case (attributes and decorators sit outside the function they mark); otherwise it belongs
-//! to the innermost case containing it. A mock outside every case (a module-level mock)
-//! belongs to every case in the file. Only files with at least one case are reported.
+//! to the innermost case containing it. A mock outside every case (a module-level mock) is the
+//! file's, in `TestFile::mocks`, and no case's (ADR-164). Only files with at least one case are
+//! reported.
 use std::collections::{BTreeMap, HashSet};
 
 use cupel_core::FactKind;
@@ -111,7 +112,7 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
             assert_through(&mut case.assertions, *class, called(node));
         }
     }
-    attach_mocks(&mut cases, parsed, &found);
+    let file_mocks = attach_mocks(&mut cases, parsed, &found);
     attach_skips(&mut cases, parsed, &found);
     attach_properties(&mut cases, &found);
     attach_docs(&mut cases, &found);
@@ -143,6 +144,7 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
                     doc: doc(parsed, &case.docs),
                 })
                 .collect(),
+            mocks: file_mocks,
         }],
     }
 }
@@ -485,8 +487,9 @@ fn directory(file: &str) -> &str {
     file.rsplit_once('/').map_or("", |(dir, _)| dir)
 }
 
-/// Attaches mocks to their case, or to every case when outside all of them.
-fn attach_mocks(cases: &mut Cases<'_>, parsed: &Parsed, found: &[Match<'_, '_>]) {
+/// Attaches each mock to its case; returns the mocks outside every case, which are the file's
+/// (ADR-164).
+fn attach_mocks(cases: &mut Cases<'_>, parsed: &Parsed, found: &[Match<'_, '_>]) -> Vec<Mock> {
     let mut seen = HashSet::new();
     let mut mocks = Vec::new();
     for m in found {
@@ -503,20 +506,14 @@ fn attach_mocks(cases: &mut Cases<'_>, parsed: &Parsed, found: &[Match<'_, '_>])
         };
         mocks.push((owner(cases, m, node), mock));
     }
+    let mut file = Vec::new();
     for (owner, mock) in mocks {
-        match owner {
-            Some(id) => {
-                if let Some(case) = cases.get_mut(&id) {
-                    case.mocks.push(mock);
-                }
-            }
-            None => {
-                for case in cases.values_mut() {
-                    case.mocks.push(mock.clone());
-                }
-            }
+        match owner.and_then(|id| cases.get_mut(&id)) {
+            Some(case) => case.mocks.push(mock),
+            None => file.push(mock),
         }
     }
+    file
 }
 
 /// Attaches each skip marker to its case; a case keeps its first.

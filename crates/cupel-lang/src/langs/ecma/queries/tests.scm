@@ -68,18 +68,28 @@
   (#any-of? @test.skip "xit" "xtest"))
 
 (call_expression
-  function: [
-    (identifier) @_test
-    (member_expression
-      object: (identifier) @_test
-      property: (property_identifier))
-  ]
+  function: (identifier) @_test
   arguments: (arguments
     .
     (string) @test.name
     .
     [(arrow_function) (function_expression)] @test.case)
   (#any-of? @_test "it" "test" "specify" "fit"))
+
+; `test.only(…)`, `it.concurrent(…)`: a case through a modifier. Playwright's `test.describe` is a
+; suite, `test.step` a part of its case, and the rest set up the file's cases, so none is a case.
+(call_expression
+  function: (member_expression
+    object: (identifier) @_test
+    property: (property_identifier) @_modifier)
+  arguments: (arguments
+    .
+    (string) @test.name
+    .
+    [(arrow_function) (function_expression)] @test.case)
+  (#any-of? @_test "it" "test" "specify" "fit")
+  (#not-any-of? @_modifier "describe" "step" "beforeEach" "afterEach" "beforeAll" "afterAll"
+    "use" "extend" "fixme"))
 
 ; Property tests: fast-check's runners, `fc.assert(…)` and `fc.check(…)`, generate the case's
 ; inputs (ADR-095). `fc.assert` throws the shrunk counterexample, so it is also an assertion;
@@ -206,6 +216,12 @@
 (call_expression
   function: (identifier) @assertion.name
   (#eq? @assertion.name "assert")) @test.assertion
+
+; A call by plain name, which asserts when it names a function of this file that asserts
+; (`const before = (a, b) => { expect(…) }`, then `before(x, y)` in a case).
+(call_expression
+  function: (identifier) @assertion.helper
+  (#not-any-of? @assertion.helper "expect" "assert" "it" "test" "specify" "describe" "require"))
 
 ; Mocks: module mocks name the module, spies the method, other doubles their factory.
 (call_expression

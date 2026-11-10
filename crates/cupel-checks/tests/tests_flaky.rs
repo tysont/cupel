@@ -76,6 +76,7 @@ fn frames(names: &[&str]) -> TestFrames {
                     doc: None,
                 })
                 .collect(),
+            mocks: Vec::new(),
         }],
     }
 }

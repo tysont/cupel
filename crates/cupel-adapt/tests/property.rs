@@ -94,6 +94,7 @@ fn frames(file: &str, property: Option<&str>) -> Produced {
                 property: property.map(str::to_owned),
                 doc: None,
             }],
+            mocks: Vec::new(),
         }],
     })
 }

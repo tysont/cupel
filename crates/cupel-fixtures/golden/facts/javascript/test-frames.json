@@ -30,6 +30,7 @@
       ],
       "file": "src/inline.js",
       "framework": "vitest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -155,6 +156,7 @@
       ],
       "file": "test/decide.test.js",
       "framework": "node-test",
+      "mocks": [],
       "setup": []
     },
     {
@@ -222,6 +224,7 @@
       ],
       "file": "test/format.spec.js",
       "framework": "mocha",
+      "mocks": [],
       "setup": []
     },
     {
@@ -471,6 +474,7 @@
       ],
       "file": "test/math.quality.test.js",
       "framework": "vitest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -489,17 +493,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "adds two numbers",
           "property": null,
           "skip": null,
@@ -524,17 +518,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "is truthy for non-zero sums",
           "property": null,
           "skip": null,
@@ -559,17 +543,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "returns a defined value",
           "property": null,
           "skip": null,
@@ -594,17 +568,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "does not return zero",
           "property": null,
           "skip": null,
@@ -629,17 +593,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "handles huge numbers",
           "property": null,
           "skip": {
@@ -661,17 +615,7 @@
         {
           "assertions": [],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "can be called without checking",
           "property": null,
           "skip": null,
@@ -696,17 +640,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "rejects empty amounts",
           "property": null,
           "skip": null,
@@ -731,17 +665,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "throws on nothing",
           "property": null,
           "skip": null,
@@ -766,17 +690,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "matches the range snapshot",
           "property": null,
           "skip": null,
@@ -804,15 +718,6 @@
           "mocks": [
             {
               "span": {
-                "col": 1,
-                "end_col": 29,
-                "end_line": 5,
-                "line": 5
-              },
-              "target": "../src/report.cjs"
-            },
-            {
-              "span": {
                 "col": 17,
                 "end_col": 24,
                 "end_line": 54,
@@ -834,6 +739,17 @@
       ],
       "file": "test/math.test.js",
       "framework": "vitest",
+      "mocks": [
+        {
+          "span": {
+            "col": 1,
+            "end_col": 29,
+            "end_line": 5,
+            "line": 5
+          },
+          "target": "../src/report.cjs"
+        }
+      ],
       "setup": [
         {
           "col": 3,
@@ -883,6 +799,7 @@
       ],
       "file": "test/properties.test.js",
       "framework": "vitest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -901,17 +818,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 73,
-                "end_line": 3,
-                "line": 3
-              },
-              "target": "../src/format.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "joins one line per entry",
           "property": null,
           "skip": null,
@@ -936,17 +843,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 73,
-                "end_line": 3,
-                "line": 3
-              },
-              "target": "../src/format.cjs"
-            }
-          ],
+          "mocks": [],
           "name": "formats currency symbols",
           "property": null,
           "skip": {
@@ -968,6 +865,17 @@
       ],
       "file": "test/report.test.js",
       "framework": "jest",
+      "mocks": [
+        {
+          "span": {
+            "col": 1,
+            "end_col": 73,
+            "end_line": 3,
+            "line": 3
+          },
+          "target": "../src/format.cjs"
+        }
+      ],
       "setup": []
     }
   ]

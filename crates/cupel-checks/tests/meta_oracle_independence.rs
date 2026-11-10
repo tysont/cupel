@@ -58,6 +58,7 @@ fn frames(cases: Vec<TestCase>) -> TestFrames {
             framework: "pytest".to_owned(),
             setup: Vec::new(),
             cases,
+            mocks: Vec::new(),
         }],
     }
 }

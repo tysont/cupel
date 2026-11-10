@@ -89,6 +89,7 @@
       ],
       "file": "src/pricing.rs",
       "framework": "rust-test",
+      "mocks": [],
       "setup": [
         {
           "col": 5,
@@ -275,6 +276,7 @@
       ],
       "file": "tests/ledger.rs",
       "framework": "rust-test",
+      "mocks": [],
       "setup": []
     },
     {
@@ -307,6 +309,7 @@
       ],
       "file": "tests/properties.rs",
       "framework": "rust-test",
+      "mocks": [],
       "setup": []
     },
     {
@@ -731,6 +734,7 @@
       ],
       "file": "tests/quality_signals.rs",
       "framework": "rust-test",
+      "mocks": [],
       "setup": []
     }
   ]

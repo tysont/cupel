@@ -75,6 +75,7 @@
       ],
       "file": "src/__tests__/pricing.test.ts",
       "framework": "jest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -107,6 +108,7 @@
       ],
       "file": "src/inline.ts",
       "framework": "vitest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -356,6 +358,7 @@
       ],
       "file": "src/math.quality.test.ts",
       "framework": "vitest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -374,17 +377,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 20,
-                "end_line": 4,
-                "line": 4
-              },
-              "target": "./legacy"
-            }
-          ],
+          "mocks": [],
           "name": "adds two numbers",
           "property": null,
           "skip": null,
@@ -409,17 +402,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 20,
-                "end_line": 4,
-                "line": 4
-              },
-              "target": "./legacy"
-            }
-          ],
+          "mocks": [],
           "name": "is truthy for non-zero sums",
           "property": null,
           "skip": null,
@@ -444,17 +427,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 20,
-                "end_line": 4,
-                "line": 4
-              },
-              "target": "./legacy"
-            }
-          ],
+          "mocks": [],
           "name": "returns a defined value",
           "property": null,
           "skip": null,
@@ -479,17 +452,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 20,
-                "end_line": 4,
-                "line": 4
-              },
-              "target": "./legacy"
-            }
-          ],
+          "mocks": [],
           "name": "does not return zero",
           "property": null,
           "skip": null,
@@ -514,17 +477,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 20,
-                "end_line": 4,
-                "line": 4
-              },
-              "target": "./legacy"
-            }
-          ],
+          "mocks": [],
           "name": "handles huge numbers",
           "property": null,
           "skip": {
@@ -546,17 +499,7 @@
         {
           "assertions": [],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 20,
-                "end_line": 4,
-                "line": 4
-              },
-              "target": "./legacy"
-            }
-          ],
+          "mocks": [],
           "name": "can be called without checking",
           "property": null,
           "skip": null,
@@ -581,17 +524,7 @@
             }
           ],
           "doc": null,
-          "mocks": [
-            {
-              "span": {
-                "col": 1,
-                "end_col": 20,
-                "end_line": 4,
-                "line": 4
-              },
-              "target": "./legacy"
-            }
-          ],
+          "mocks": [],
           "name": "matches its snapshot",
           "property": null,
           "skip": null,
@@ -619,15 +552,6 @@
           "mocks": [
             {
               "span": {
-                "col": 1,
-                "end_col": 20,
-                "end_line": 4,
-                "line": 4
-              },
-              "target": "./legacy"
-            },
-            {
-              "span": {
                 "col": 21,
                 "end_col": 56,
                 "end_line": 45,
@@ -649,6 +573,17 @@
       ],
       "file": "src/math.test.ts",
       "framework": "vitest",
+      "mocks": [
+        {
+          "span": {
+            "col": 1,
+            "end_col": 20,
+            "end_line": 4,
+            "line": 4
+          },
+          "target": "./legacy"
+        }
+      ],
       "setup": [
         {
           "col": 3,
@@ -688,6 +623,7 @@
       ],
       "file": "src/widget.test.tsx",
       "framework": "vitest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -778,6 +714,7 @@
       ],
       "file": "test/decide.test.ts",
       "framework": "node-test",
+      "mocks": [],
       "setup": []
     },
     {
@@ -820,6 +757,7 @@
       ],
       "file": "test/properties.test.ts",
       "framework": "vitest",
+      "mocks": [],
       "setup": []
     }
   ]

@@ -2105,7 +2105,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 **Goal:** The owner's request (2026-11-09): test Cupel against the surface area of a real repository, the owner's `../molten`, one area at a time. In each area, find Cupel's bugs and fix them, and write every true issue in Molten to one file, `../molten/cupel.md`, for Molten's own agent to pick up.
 
-**Status:** in progress. Areas 0, 1, 1b, and 2 complete (2026-11-09); Area 3 next.
+**Status:** in progress. Areas 0, 1, 1b, and 2 complete (2026-11-09); Area 3's fixes are done and its calibration questions are with the owner; Area 4 next.
 
 **Molten.** A pnpm TypeScript monorepo on Cloudflare Workers, at `fbafa8f5`:
 - `apps/agent`: 461 source files, 230 test files. `agent-do.ts` alone is 34,551 lines.
@@ -2287,6 +2287,20 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - False: a Vitest `globalSetup` file and a Python keyring module loaded by configuration (limitations in ADR-163).
     - Two unproven, left out.
   - Precision of `dead.symbol` on Molten: before, about 9 of 91; now 14 of 15.
+- **Area 3** (2026-11-09, [ADR-164](adr/CUPEL_DECISION_164.md)).
+  - `TestFile.mocks` holds the doubles outside every case (superseding ADR-027's rule that charged them to every case).
+  - The ECMA query captures `@assertion.helper`.
+  - Playwright's `test.describe`, `test.step`, and hooks are neither cases nor closures; `test.describe` is a suite scope.
+  - Tests: three in `cupel-lang/tests/ecma_tests.rs` and one in `ecma_symbols.rs` failed first and pass now.
+  - A regression caught on Molten before commit: with `test.describe` no longer a case, its callback was still a closure symbol and became `dead.symbol` (+26). `symbols.scm` now makes it a scope.
+  - Molten:
+    - `test.mock-heavy` 1,404 → 35, and the remaining ones are a test's own doubles.
+    - `test.no-assertion` 33 → 2, both true (M3-1).
+    - `test.weak-assertion` 1,221, `test.logic` 260, and `test.duplicate-setup` 200: detected as defined; samples checked.
+  - Calibration questions for the owner:
+    - whether `toContain`/`toMatch` with a literal, and `toMatchObject`, are weak;
+    - whether a loop over cases with an assertion in it is test logic at `logic_max = 0`;
+    - whether three shared leading statements is duplicate setup.
 
 ## 4. Cross-phase checklist
 

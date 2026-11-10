@@ -344,6 +344,7 @@ mod tests {
                     property: None,
                     doc: None,
                 }],
+                mocks: Vec::new(),
             }],
         };
         kept(&mut tests, &map, &regions, Some(&frames), &binary());

@@ -196,6 +196,14 @@ expression: pretty(&schema)
           "description": "The test framework, such as `pytest` or `vitest`.",
           "type": "string"
         },
+        "mocks": {
+          "description": "Test doubles created outside every case (a module-level `vi.mock`, a class-level `@Mock`\nfield): installed for the whole file, and no one case's (ADR-164).",
+          "type": "array",
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Mock"
+          }
+        },
         "setup": {
           "description": "Setup and fixture blocks shared by the file's cases.",
           "type": "array",
@@ -208,6 +216,7 @@ expression: pretty(&schema)
         "cases",
         "file",
         "framework",
+        "mocks",
         "setup"
       ]
     }

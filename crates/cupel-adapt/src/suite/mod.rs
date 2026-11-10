@@ -956,6 +956,7 @@ mod tests {
             framework: "rust-test".to_owned(),
             setup: Vec::new(),
             cases,
+            mocks: Vec::new(),
         };
         TestFrames {
             files: vec![

@@ -315,6 +315,10 @@ pub struct TestFile {
     /// Setup and fixture blocks shared by the file's cases.
     pub setup: Vec<Span>,
     pub cases: Vec<TestCase>,
+    /// Test doubles created outside every case (a module-level `vi.mock`, a class-level `@Mock`
+    /// field): installed for the whole file, and no one case's (ADR-164).
+    #[serde(default)]
+    pub mocks: Vec<Mock>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

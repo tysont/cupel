@@ -4,7 +4,7 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 12,
+      "findings": 11,
       "id": "tests.quality",
       "metrics": {
         "assertion_density": 1.0,
@@ -414,7 +414,7 @@
       "detail": null,
       "evidence": {
         "actionability": "guided",
-        "mocks": 1,
+        "mocks": 0,
         "remediation_mode": "add-assertion",
         "skipped": false
       },
@@ -439,51 +439,6 @@
       },
       "tier": 2,
       "title": "`math.add.can be called without checking` asserts nothing"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Use real collaborators or simple fakes for some of the doubles in `is consumed by a spy`, or split it, so it checks behavior rather than wiring."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "judgment",
-        "assertions": 1,
-        "density": 66,
-        "mock_density_max": 50,
-        "mocks": 2,
-        "mocks_min": 2,
-        "remediation_mode": "decouple",
-        "targets": [
-          "./legacy",
-          "vi.fn"
-        ]
-      },
-      "id": "fnd_728588",
-      "kind": "test.mock-heavy",
-      "location": {
-        "col": 30,
-        "end_col": 4,
-        "end_line": 48,
-        "file": "src/math.test.ts",
-        "line": 44
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_81f0fe0e957b356b",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_728588 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "math.range.is consumed by a spy",
-        "hash": "sh_81f0fe0e957b356b",
-        "lang": "typescript"
-      },
-      "tier": 2,
-      "title": "`math.range.is consumed by a spy` is mock-heavy: 2 doubles and 1 assertion(s), 66% doubles (max 50%)"
     },
     {
       "action": {
@@ -535,22 +490,6 @@
           "lang": "typescript",
           "rank": 1,
           "target": {
-            "display": "math.add.can be called without checking",
-            "location": {
-              "col": 40,
-              "end_col": 4,
-              "end_line": 35,
-              "file": "src/math.test.ts",
-              "line": 33
-            },
-            "symbol": "sh_94c27b48bcd0a5a6"
-          },
-          "value": 100.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 2,
-          "target": {
             "display": "math.quality.logs and mails every sum",
             "location": {
               "col": 34,
@@ -565,7 +504,7 @@
         },
         {
           "lang": "typescript",
-          "rank": 3,
+          "rank": 2,
           "target": {
             "display": "math.range.is consumed by a spy",
             "location": {
@@ -577,107 +516,11 @@
             },
             "symbol": "sh_81f0fe0e957b356b"
           },
-          "value": 66.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 4,
-          "target": {
-            "display": "math.add.adds two numbers",
-            "location": {
-              "col": 26,
-              "end_col": 4,
-              "end_line": 9,
-              "file": "src/math.test.ts",
-              "line": 7
-            },
-            "symbol": "sh_ff3f2895b2f0d75a"
-          },
           "value": 50.0
         },
         {
           "lang": "typescript",
-          "rank": 5,
-          "target": {
-            "display": "math.add.does not return zero",
-            "location": {
-              "col": 30,
-              "end_col": 4,
-              "end_line": 27,
-              "file": "src/math.test.ts",
-              "line": 25
-            },
-            "symbol": "sh_529308faeb202e08"
-          },
-          "value": 50.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 6,
-          "target": {
-            "display": "math.add.handles huge numbers",
-            "location": {
-              "col": 35,
-              "end_col": 4,
-              "end_line": 31,
-              "file": "src/math.test.ts",
-              "line": 29
-            },
-            "symbol": "sh_e61abd1221fe123f"
-          },
-          "value": 50.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 7,
-          "target": {
-            "display": "math.add.is truthy for non-zero sums",
-            "location": {
-              "col": 37,
-              "end_col": 4,
-              "end_line": 19,
-              "file": "src/math.test.ts",
-              "line": 17
-            },
-            "symbol": "sh_41715ce8ae58f7e5"
-          },
-          "value": 50.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 8,
-          "target": {
-            "display": "math.add.returns a defined value",
-            "location": {
-              "col": 33,
-              "end_col": 4,
-              "end_line": 23,
-              "file": "src/math.test.ts",
-              "line": 21
-            },
-            "symbol": "sh_998f329df407a76d"
-          },
-          "value": 50.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 9,
-          "target": {
-            "display": "math.range.matches its snapshot",
-            "location": {
-              "col": 30,
-              "end_col": 4,
-              "end_line": 41,
-              "file": "src/math.test.ts",
-              "line": 39
-            },
-            "symbol": "sh_33f6bf2ba3c8f78e"
-          },
-          "value": 50.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 10,
+          "rank": 3,
           "target": {
             "display": "__tests__.pricing.discounted.tallies stay within bounds",
             "location": {
@@ -690,6 +533,118 @@
             "symbol": "sh_1e13c9f06bb1fb2d"
           },
           "value": 33.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 4,
+          "target": {
+            "display": "__tests__.pricing.discounted.members pay less",
+            "location": {
+              "col": 28,
+              "end_col": 4,
+              "end_line": 7,
+              "file": "src/__tests__/pricing.test.ts",
+              "line": 5
+            },
+            "symbol": "sh_850882ccd49f9150"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 5,
+          "target": {
+            "display": "inline.doubles",
+            "location": {
+              "col": 17,
+              "end_col": 4,
+              "end_line": 10,
+              "file": "src/inline.ts",
+              "line": 8
+            },
+            "symbol": "sh_a32594eacece7365"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 6,
+          "target": {
+            "display": "math.add.adds two numbers",
+            "location": {
+              "col": 26,
+              "end_col": 4,
+              "end_line": 9,
+              "file": "src/math.test.ts",
+              "line": 7
+            },
+            "symbol": "sh_ff3f2895b2f0d75a"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 7,
+          "target": {
+            "display": "math.add.can be called without checking",
+            "location": {
+              "col": 40,
+              "end_col": 4,
+              "end_line": 35,
+              "file": "src/math.test.ts",
+              "line": 33
+            },
+            "symbol": "sh_94c27b48bcd0a5a6"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 8,
+          "target": {
+            "display": "math.add.does not return zero",
+            "location": {
+              "col": 30,
+              "end_col": 4,
+              "end_line": 27,
+              "file": "src/math.test.ts",
+              "line": 25
+            },
+            "symbol": "sh_529308faeb202e08"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 9,
+          "target": {
+            "display": "math.add.handles huge numbers",
+            "location": {
+              "col": 35,
+              "end_col": 4,
+              "end_line": 31,
+              "file": "src/math.test.ts",
+              "line": 29
+            },
+            "symbol": "sh_e61abd1221fe123f"
+          },
+          "value": 0.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 10,
+          "target": {
+            "display": "math.add.is truthy for non-zero sums",
+            "location": {
+              "col": 37,
+              "end_col": 4,
+              "end_line": 19,
+              "file": "src/math.test.ts",
+              "line": 17
+            },
+            "symbol": "sh_41715ce8ae58f7e5"
+          },
+          "value": 0.0
         }
       ],
       "measured": 25,

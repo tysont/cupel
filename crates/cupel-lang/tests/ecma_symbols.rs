@@ -268,3 +268,14 @@ fn names_exported_apart_from_their_definition_are_public_at_the_top_level_only()
         &[("legacy.round", Function, Public, (1, 1))],
     );
 }
+
+#[test]
+fn a_playwright_suite_namespaces_its_cases_and_its_steps_are_not_symbols() {
+    let dir = support::tree(&[(
+        "e2e/settings.spec.ts",
+        "import { expect, test } from \"@playwright/test\";\n\ntest.describe(\"settings page\", () => {\n  test(\"loads its form\", async ({ page }) => {\n    await test.step(\"opens\", async () => {\n      await expect(page).toHaveTitle(\"Settings\");\n    });\n  });\n});\n",
+    )]);
+    let symbols: Symbols = produce("typescript", dir.path());
+    let displays: Vec<&str> = symbols.symbols.iter().map(|s| s.display.as_str()).collect();
+    assert_eq!(displays, ["e2e.settings.settings page.loads its form"]);
+}

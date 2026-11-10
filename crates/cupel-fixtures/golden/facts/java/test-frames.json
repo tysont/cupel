@@ -30,6 +30,7 @@
       ],
       "file": "src/test/java/ledger/LedgerHelperTest.java",
       "framework": "junit5",
+      "mocks": [],
       "setup": []
     },
     {
@@ -62,6 +63,7 @@
       ],
       "file": "src/test/java/ledger/LedgerPropertyTest.java",
       "framework": "jqwik",
+      "mocks": [],
       "setup": []
     },
     {
@@ -311,6 +313,7 @@
       ],
       "file": "src/test/java/ledger/LedgerQualityTest.java",
       "framework": "junit5",
+      "mocks": [],
       "setup": []
     },
     {
@@ -540,6 +543,7 @@
       ],
       "file": "src/test/java/ledger/LedgerTest.java",
       "framework": "junit5",
+      "mocks": [],
       "setup": [
         {
           "col": 5,
@@ -715,6 +719,7 @@
       ],
       "file": "src/test/java/ledger/PricingTest.java",
       "framework": "junit5",
+      "mocks": [],
       "setup": []
     }
   ]

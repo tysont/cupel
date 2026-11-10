@@ -4,7 +4,7 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 12,
+      "findings": 11,
       "id": "tests.quality",
       "metrics": {
         "assertion_density": 1.0,
@@ -421,7 +421,7 @@
       "detail": null,
       "evidence": {
         "actionability": "guided",
-        "mocks": 1,
+        "mocks": 0,
         "remediation_mode": "add-assertion",
         "skipped": false
       },
@@ -446,51 +446,6 @@
       },
       "tier": 2,
       "title": "`math.add.can be called without checking` asserts nothing"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Use real collaborators or simple fakes for some of the doubles in `is consumed by a spy`, or split it, so it checks behavior rather than wiring."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "judgment",
-        "assertions": 1,
-        "density": 66,
-        "mock_density_max": 50,
-        "mocks": 2,
-        "mocks_min": 2,
-        "remediation_mode": "decouple",
-        "targets": [
-          "./legacy",
-          "vi.fn"
-        ]
-      },
-      "id": "fnd_728588",
-      "kind": "test.mock-heavy",
-      "location": {
-        "col": 30,
-        "end_col": 4,
-        "end_line": 48,
-        "file": "src/math.test.ts",
-        "line": 44
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_81f0fe0e957b356b",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_728588 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "math.range.is consumed by a spy",
-        "hash": "sh_81f0fe0e957b356b",
-        "lang": "typescript"
-      },
-      "tier": 2,
-      "title": "`math.range.is consumed by a spy` is mock-heavy: 2 doubles and 1 assertion(s), 66% doubles (max 50%)"
     },
     {
       "action": {
@@ -674,7 +629,7 @@
     "findings": {
       "fail": 0,
       "info": 0,
-      "warn": 12
+      "warn": 11
     },
     "gate": null,
     "new": 0,
@@ -682,6 +637,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 12,
+  "total_findings": 11,
   "truncated": false
 }

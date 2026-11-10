@@ -4,7 +4,7 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 14,
+      "findings": 13,
       "id": "tests.quality",
       "metrics": {
         "assertion_density": 0.9655172413793104,
@@ -502,7 +502,7 @@
       "detail": null,
       "evidence": {
         "actionability": "guided",
-        "mocks": 1,
+        "mocks": 0,
         "remediation_mode": "add-assertion",
         "skipped": false
       },
@@ -568,51 +568,6 @@
       },
       "tier": 2,
       "title": "`test.math.parseCents.throws on nothing` asserts only weakly: 1 weak assertion(s), none pinning a value"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Use real collaborators or simple fakes for some of the doubles in `reports what it parsed`, or split it, so it checks behavior rather than wiring."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "judgment",
-        "assertions": 1,
-        "density": 66,
-        "mock_density_max": 50,
-        "mocks": 2,
-        "mocks_min": 2,
-        "remediation_mode": "decouple",
-        "targets": [
-          "../src/report.cjs",
-          "vi.fn"
-        ]
-      },
-      "id": "fnd_dacf0c",
-      "kind": "test.mock-heavy",
-      "location": {
-        "col": 32,
-        "end_col": 4,
-        "end_line": 57,
-        "file": "test/math.test.js",
-        "line": 53
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_153cb3730cef98a6",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_dacf0c --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "test.math.parseCents.reports what it parsed",
-        "hash": "sh_153cb3730cef98a6",
-        "lang": "javascript"
-      },
-      "tier": 2,
-      "title": "`test.math.parseCents.reports what it parsed` is mock-heavy: 2 doubles and 1 assertion(s), 66% doubles (max 50%)"
     }
   ],
   "next_actions": [
@@ -755,7 +710,7 @@
     "findings": {
       "fail": 0,
       "info": 0,
-      "warn": 14
+      "warn": 13
     },
     "gate": null,
     "new": 0,
@@ -763,6 +718,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 14,
+  "total_findings": 13,
   "truncated": false
 }

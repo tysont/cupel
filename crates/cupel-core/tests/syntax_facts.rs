@@ -226,6 +226,7 @@ fn test_frames_payload_shape() {
                 property: Some("proptest".into()),
                 doc: Some("/// Sorting pushes through. REQ-4".into()),
             }],
+            mocks: Vec::new(),
         }],
     });
     let case = &json["files"][0]["cases"][0];

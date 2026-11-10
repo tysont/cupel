@@ -46,6 +46,7 @@ fn documented(file: &str, cases: &[(&str, Option<&str>)]) -> TestFrames {
                 .enumerate()
                 .map(|(index, (name, doc))| case(name, *doc, 1 + 4 * u32::try_from(index).unwrap()))
                 .collect(),
+            mocks: Vec::new(),
         }],
     }
 }

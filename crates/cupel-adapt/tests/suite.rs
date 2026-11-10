@@ -631,6 +631,7 @@ fn structure(hashes: [&str; 2]) -> [Produced; 2] {
                     doc: None,
                 })
                 .collect(),
+            mocks: Vec::new(),
         }],
     };
     let norm = NormTree {

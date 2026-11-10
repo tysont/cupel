@@ -2,11 +2,11 @@
 // ABOUTME: chai, and node:test cases, assertion kinds and strengths, skips, mocks, setup, and test pairing.
 mod support;
 
-use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
+use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFile, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
 use support::{
-    Expected, assert_framework, assert_test_file, case, expected, fixture, produce, properties,
-    property, rows, tree,
+    Expected, assert_framework, assert_source_file, assert_test_file, case, expected, fixture,
+    produce, properties, property, rows, tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -16,74 +16,56 @@ fn frames(lang: &str) -> TestFrames {
     produce(lang, &fixture(lang))
 }
 
-/// The module `math.test.js` mocks.
+/// The module `math.test.js` mocks, at module level: the file's mock, not any one case's (ADR-164).
 const MODULE: &str = "../src/report.cjs";
 
 const MATH_CASES: &[Expected] = &[
-    (
-        "adds two numbers",
-        &[(Equality, Strong)],
-        None,
-        &[MODULE],
-        14,
-    ),
+    ("adds two numbers", &[(Equality, Strong)], None, &[], 14),
     (
         "is truthy for non-zero sums",
         &[(Truthiness, Weak)],
         None,
-        &[MODULE],
+        &[],
         18,
     ),
-    (
-        "returns a defined value",
-        &[(NotNull, Weak)],
-        None,
-        &[MODULE],
-        22,
-    ),
-    (
-        "does not return zero",
-        &[(Equality, Weak)],
-        None,
-        &[MODULE],
-        26,
-    ),
+    ("returns a defined value", &[(NotNull, Weak)], None, &[], 22),
+    ("does not return zero", &[(Equality, Weak)], None, &[], 26),
     (
         "handles huge numbers",
         &[(Equality, Strong)],
         Some(None),
-        &[MODULE],
+        &[],
         30,
     ),
-    ("can be called without checking", &[], None, &[MODULE], 34),
-    (
-        "rejects empty amounts",
-        &[(Throws, Strong)],
-        None,
-        &[MODULE],
-        40,
-    ),
-    ("throws on nothing", &[(Throws, Weak)], None, &[MODULE], 44),
+    ("can be called without checking", &[], None, &[], 34),
+    ("rejects empty amounts", &[(Throws, Strong)], None, &[], 40),
+    ("throws on nothing", &[(Throws, Weak)], None, &[], 44),
     (
         "matches the range snapshot",
         &[(Snapshot, Strong)],
         None,
-        &[MODULE],
+        &[],
         48,
     ),
     (
         "reports what it parsed",
         &[(Equality, Strong)],
         None,
-        &[MODULE, "vi.fn"],
+        &["vi.fn"],
         53,
     ),
 ];
 
+/// What the mocks outside every case of `file` replace, as written.
+fn file_mocks(file: &TestFile) -> Vec<&str> {
+    file.mocks.iter().map(|mock| mock.target.as_str()).collect()
+}
+
 #[test]
-fn vitest_cases_classify_expect_matchers_and_share_module_mocks() {
+fn vitest_cases_classify_expect_matchers_and_a_module_mock_is_the_files() {
     let math = &assert_test_file("javascript", "test/math.test.js", "vitest", &[10]);
     assert_eq!(rows(math), expected(MATH_CASES));
+    assert_eq!(file_mocks(math), [MODULE]);
 }
 
 #[test]
@@ -136,18 +118,19 @@ fn jest_globals_mocha_with_chai_and_in_source_tests_are_recognized() {
                 "joins one line per entry",
                 &[(Equality, Strong)],
                 Runs,
-                &[module],
+                &[],
                 5
             ),
             case(
                 "formats currency symbols",
                 &[(Snapshot, Strong)],
                 Skipped,
-                &[module],
+                &[],
                 9
             ),
         ]
     );
+    assert_eq!(file_mocks(report), [module]);
     let format = &assert_framework(&frames, "test/format.spec.js", "mocha");
     assert_eq!(
         rows(format),
@@ -176,58 +159,35 @@ fn typescript_vitest_cases_match_their_javascript_twins() {
     assert_eq!(
         rows(math),
         [
-            case(
-                "adds two numbers",
-                &[(Equality, Strong)],
-                Runs,
-                &[module],
-                7
-            ),
+            case("adds two numbers", &[(Equality, Strong)], Runs, &[], 7),
             case(
                 "is truthy for non-zero sums",
                 &[(Truthiness, Weak)],
                 Runs,
-                &[module],
+                &[],
                 17
             ),
-            case(
-                "returns a defined value",
-                &[(NotNull, Weak)],
-                Runs,
-                &[module],
-                21
-            ),
-            case(
-                "does not return zero",
-                &[(Equality, Weak)],
-                Runs,
-                &[module],
-                25
-            ),
+            case("returns a defined value", &[(NotNull, Weak)], Runs, &[], 21),
+            case("does not return zero", &[(Equality, Weak)], Runs, &[], 25),
             case(
                 "handles huge numbers",
                 &[(Equality, Strong)],
                 Skipped,
-                &[module],
+                &[],
                 29
             ),
-            case("can be called without checking", &[], Runs, &[module], 33),
-            case(
-                "matches its snapshot",
-                &[(Snapshot, Strong)],
-                Runs,
-                &[module],
-                39
-            ),
+            case("can be called without checking", &[], Runs, &[], 33),
+            case("matches its snapshot", &[(Snapshot, Strong)], Runs, &[], 39),
             case(
                 "is consumed by a spy",
                 &[(Equality, Strong)],
                 Runs,
-                &[module, "vi.fn"],
+                &["vi.fn"],
                 44
             ),
         ]
     );
+    assert_eq!(file_mocks(math), [module]);
 }
 
 #[test]
@@ -475,4 +435,62 @@ fn type_level_assertions_assert_in_typescript_tests() {
             case("runs exhaustively", &[], Runs, &[], 22),
         ]
     );
+}
+
+#[test]
+fn a_case_that_calls_an_asserting_helper_of_its_file_asserts_through_it() {
+    let source = r#"import { expect, it } from "vitest";
+
+const before = (text, first, second) => {
+  expect(text.indexOf(first)).toBeLessThan(text.indexOf(second));
+};
+
+function same(actual, expected) {
+  expect(actual).toEqual(expected);
+}
+
+it("checks before encrypting", () => {
+  before("check then encrypt", "check", "encrypt");
+});
+
+it("round-trips", () => {
+  same(1, 1);
+});
+
+it("asserts nothing", () => {
+  const x = 1;
+});
+"#;
+    let file = assert_source_file("javascript", "a.test.js", source, "vitest");
+    assert_eq!(
+        rows(&file),
+        [
+            case("checks before encrypting", &[(Custom, Weak)], Runs, &[], 11),
+            case("round-trips", &[(Equality, Strong)], Runs, &[], 15),
+            case("asserts nothing", &[], Runs, &[], 19),
+        ]
+    );
+}
+
+#[test]
+fn a_playwright_suite_step_and_hook_are_not_cases() {
+    let source = r#"import { expect, test } from "@playwright/test";
+
+test.beforeEach(async ({ page }) => {
+  await page.goto("/");
+});
+
+test.describe("settings page", () => {
+  test("loads its form", async ({ page }) => {
+    await test.step("opens", async () => {
+      await expect(page).toHaveTitle("Settings");
+    });
+    await expect(page.locator("form")).toBeVisible();
+  });
+});
+"#;
+    let file = assert_source_file("typescript", "e2e/settings.spec.ts", source, "jest");
+    let names: Vec<&str> = file.cases.iter().map(|case| case.name.as_str()).collect();
+    assert_eq!(names, ["loads its form"]);
+    assert_eq!(file.cases[0].assertions.len(), 2);
 }

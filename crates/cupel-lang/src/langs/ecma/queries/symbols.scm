@@ -97,12 +97,7 @@
 ; Test callbacks are closures named by the test's title (`it("adds", () => …)`, `test.skip`,
 ; `xit`); suites (`describe`) namespace them. See ADR-030.
 (call_expression
-  function: [
-    (identifier) @_test
-    (member_expression
-      object: (identifier) @_test
-      property: (property_identifier))
-  ]
+  function: (identifier) @_test
   arguments: (arguments
     .
     (string (string_fragment) @symbol.name)
@@ -112,6 +107,24 @@
       (function_expression body: (statement_block) @symbol.body)
     ] @symbol.closure)
   (#any-of? @_test "it" "test" "specify" "xit" "xtest" "fit"))
+
+; Through a modifier (`test.skip`, `it.only`), as tests.scm reads cases: Playwright's
+; `test.describe` is a suite (below), and `test.step` and the hooks are parts of a case.
+(call_expression
+  function: (member_expression
+    object: (identifier) @_test
+    property: (property_identifier) @_modifier)
+  arguments: (arguments
+    .
+    (string (string_fragment) @symbol.name)
+    .
+    [
+      (arrow_function body: (_) @symbol.body)
+      (function_expression body: (statement_block) @symbol.body)
+    ] @symbol.closure)
+  (#any-of? @_test "it" "test" "specify" "xit" "xtest" "fit")
+  (#not-any-of? @_modifier "describe" "step" "beforeEach" "afterEach" "beforeAll" "afterAll"
+    "use" "extend" "fixme"))
 
 (call_expression
   function: [
@@ -124,6 +137,23 @@
     .
     (string (string_fragment) @scope.name))
   (#any-of? @_suite "describe" "suite" "context" "xdescribe" "fdescribe")) @scope
+
+; Playwright's suites: `test.describe(…)`, `test.describe.serial(…)`.
+(call_expression
+  function: [
+    (member_expression
+      object: (identifier) @_test
+      property: (property_identifier) @_describe)
+    (member_expression
+      object: (member_expression
+        object: (identifier) @_test
+        property: (property_identifier) @_describe))
+  ]
+  arguments: (arguments
+    .
+    (string (string_fragment) @scope.name))
+  (#eq? @_test "test")
+  (#eq? @_describe "describe")) @scope
 
 ; Everything else is private to its module.
 [

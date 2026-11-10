@@ -80,6 +80,7 @@
       ],
       "file": "ledger_helpers_test.go",
       "framework": "go-test",
+      "mocks": [],
       "setup": []
     },
     {
@@ -122,6 +123,7 @@
       ],
       "file": "ledger_property_test.go",
       "framework": "go-test",
+      "mocks": [],
       "setup": []
     },
     {
@@ -371,6 +373,7 @@
       ],
       "file": "ledger_quality_test.go",
       "framework": "testify",
+      "mocks": [],
       "setup": []
     },
     {
@@ -610,6 +613,7 @@
       ],
       "file": "ledger_test.go",
       "framework": "go-test",
+      "mocks": [],
       "setup": [
         {
           "col": 1,
@@ -795,6 +799,7 @@
       ],
       "file": "pricing_test.go",
       "framework": "testify",
+      "mocks": [],
       "setup": []
     }
   ]

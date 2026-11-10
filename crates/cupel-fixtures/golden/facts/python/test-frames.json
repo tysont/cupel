@@ -297,6 +297,7 @@
       ],
       "file": "tests/test_ledger.py",
       "framework": "pytest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -489,6 +490,7 @@
       ],
       "file": "tests/test_ledger_case.py",
       "framework": "unittest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -599,6 +601,7 @@
       ],
       "file": "tests/test_pricing.py",
       "framework": "unittest",
+      "mocks": [],
       "setup": [
         {
           "col": 5,
@@ -638,6 +641,7 @@
       ],
       "file": "tests/test_properties.py",
       "framework": "pytest",
+      "mocks": [],
       "setup": []
     },
     {
@@ -887,6 +891,7 @@
       ],
       "file": "tests/test_quality_signals.py",
       "framework": "pytest",
+      "mocks": [],
       "setup": []
     }
   ]

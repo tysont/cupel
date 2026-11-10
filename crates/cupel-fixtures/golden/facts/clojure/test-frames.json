@@ -194,6 +194,7 @@
       ],
       "file": "test/ledger/core_test.clj",
       "framework": "clojure-test",
+      "mocks": [],
       "setup": [
         {
           "col": 1,
@@ -328,6 +329,7 @@
       ],
       "file": "test/ledger/pricing_test.clj",
       "framework": "clojure-test",
+      "mocks": [],
       "setup": []
     },
     {
@@ -360,6 +362,7 @@
       ],
       "file": "test/ledger/property_test.clj",
       "framework": "clojure-test",
+      "mocks": [],
       "setup": []
     },
     {
@@ -609,6 +612,7 @@
       ],
       "file": "test/ledger/quality_test.clj",
       "framework": "clojure-test",
+      "mocks": [],
       "setup": []
     }
   ]

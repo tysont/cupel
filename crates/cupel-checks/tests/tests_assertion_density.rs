@@ -48,6 +48,7 @@ fn file(path: &str, lines: u32, assertions: &[usize]) -> TestFile {
             .zip(1u32..)
             .map(|(made, n)| case(&format!("case_{n}"), n * 40, lines, *made))
             .collect(),
+        mocks: Vec::new(),
     }
 }
 
@@ -199,6 +200,7 @@ fn long_tests() -> World {
             // A test that asserts nothing is tests.quality's `test.no-assertion`.
             case("none_in_thirty", 120, 30, 0),
         ],
+        mocks: Vec::new(),
     }])
 }
 
