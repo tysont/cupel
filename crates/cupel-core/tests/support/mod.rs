@@ -14,9 +14,9 @@ use std::process::Command;
 use cupel_core::config::{Config, ConfigRequest};
 use cupel_core::syntax::{Span, SymbolDef, SymbolKind, Symbols, Visibility};
 use cupel_core::{
-    Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CostClass, EventSink,
-    FactKind, Facts, Job, Lang, LangFamily, LangId, Manifest, Plan, Result, RunId, Scope,
-    Stability, Tier, Writer,
+    Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult, CheckStatus, CostClass,
+    EventSink, FactKind, Facts, Job, Lang, LangFamily, LangId, Manifest, Plan, Result, RunId,
+    Scope, Stability, Tier, Writer,
 };
 
 /// What the catalog says about the fact `kind`: its name, whether it is syntactic, its
@@ -122,6 +122,40 @@ pub fn symbols_of(scope: &Scope) -> Symbols {
 pub fn symbol_plan(cost: CostClass, scope: &Scope) -> Plan {
     let targets = scope.symbols.as_ref().map_or(0, BTreeSet::len);
     Plan::estimate(cost, targets as u64)
+}
+
+/// A check that plans one target per file in scope and passes with no findings, whatever facts it
+/// is handed.
+pub struct Passing(pub Manifest);
+
+impl Check for Passing {
+    fn manifest(&self) -> &Manifest {
+        &self.0
+    }
+
+    fn plan(&self, _: &CheckCtx, scope: &Scope) -> Result<Plan> {
+        Ok(Plan {
+            targets: scope.files.len() as u64,
+            est_ms: 0,
+        })
+    }
+
+    fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
+        Ok(CheckResult {
+            id: self.0.id.clone(),
+            status: CheckStatus::Pass,
+            tier: self.0.tier,
+            cost: self.0.cost,
+            score: None,
+            metrics: std::collections::BTreeMap::new(),
+            delta: None,
+            findings: 0,
+            duration_ms: 0,
+            skipped: None,
+            oracle: None,
+            notes: Vec::new(),
+        })
+    }
 }
 
 /// A registered check that plans nothing and is never run; only its manifest matters.

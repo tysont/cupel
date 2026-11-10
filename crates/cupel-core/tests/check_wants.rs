@@ -7,9 +7,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use cupel_core::syntax::Roots;
 use cupel_core::{
-    Availability, Check, CheckCtx, CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx,
-    EventSink, FactKind, Facts, Langs, Plan, ProduceCtx, Producer, ProducerId, ProducerRegistry,
-    Result, Scheduler, Scope, Writer,
+    Availability, CheckRegistry, CostClass, Ctx, EventSink, FactKind, Langs, ProduceCtx, Producer,
+    ProducerId, ProducerRegistry, Result, Scheduler, Scope, Writer,
 };
 
 /// Entry points at `standard` cost, standing in for a fact made by running the project (a coverage
@@ -43,39 +42,6 @@ impl Producer<Roots> for Executing {
     }
 }
 
-/// A `quick` check that wants the entry points and passes with or without them.
-struct Wanting(cupel_core::Manifest);
-
-impl Check for Wanting {
-    fn manifest(&self) -> &cupel_core::Manifest {
-        &self.0
-    }
-
-    fn plan(&self, _: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        Ok(Plan {
-            targets: scope.files.len() as u64,
-            est_ms: 0,
-        })
-    }
-
-    fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
-        Ok(CheckResult {
-            id: self.0.id.clone(),
-            status: CheckStatus::Pass,
-            tier: self.0.tier,
-            cost: self.0.cost,
-            score: None,
-            metrics: std::collections::BTreeMap::new(),
-            delta: None,
-            findings: 0,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-            notes: Vec::new(),
-        })
-    }
-}
-
 /// Whether the `standard` producer ran in a run at `depth` of a `quick` check that wants its fact.
 fn executed_at(depth: CostClass) -> bool {
     let dir = tempfile::tempdir().unwrap();
@@ -86,7 +52,9 @@ fn executed_at(depth: CostClass) -> bool {
     producers.register::<Roots, _>(Executing(Arc::clone(&ran)));
     let mut checks = CheckRegistry::default();
     let manifest = support::manifest("wants.roots", &[], &[FactKind::Roots]);
-    checks.register(Box::new(Wanting(manifest))).unwrap();
+    checks
+        .register(Box::new(support::Passing(manifest)))
+        .unwrap();
     let mut job = support::job(&writer, &config, &checks, &["rust"]);
     job.depth = depth;
     Scheduler {
@@ -99,13 +67,14 @@ fn executed_at(depth: CostClass) -> bool {
 }
 
 #[test]
-fn a_quick_run_does_not_make_a_checks_want_that_only_a_costlier_producer_makes() {
-    assert!(!executed_at(CostClass::Quick));
-}
-
-#[test]
-fn a_run_deep_enough_for_the_producer_makes_the_checks_want() {
-    assert!(executed_at(CostClass::Standard));
+fn a_checks_want_is_made_only_by_a_run_deep_enough_for_its_producer() {
+    assert_eq!(
+        [
+            executed_at(CostClass::Quick),
+            executed_at(CostClass::Standard)
+        ],
+        [false, true]
+    );
 }
 
 /// The facts a dry run at `depth` plans for the `quick` check that wants the entry points.
@@ -117,7 +86,9 @@ fn planned_at(depth: CostClass) -> Vec<String> {
     producers.register::<Roots, _>(Executing(Arc::new(AtomicBool::new(false))));
     let mut checks = CheckRegistry::default();
     let manifest = support::manifest("wants.roots", &[], &[FactKind::Roots]);
-    checks.register(Box::new(Wanting(manifest))).unwrap();
+    checks
+        .register(Box::new(support::Passing(manifest)))
+        .unwrap();
     let mut job = support::job(&writer, &config, &checks, &["rust"]);
     job.depth = depth;
     let scheduler = Scheduler {

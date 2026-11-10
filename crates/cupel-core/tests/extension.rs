@@ -7,11 +7,10 @@ use std::path::PathBuf;
 
 use cupel_core::syntax::{Decisions, MutationSites, Symbols};
 use cupel_core::{
-    ActionKind, Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CheckResult,
-    CheckStatus, CostClass, Ctx, Error, Event, EventSink, Fact, FactKind, Facts, FindingKindSpec,
-    Lang, LangFamily, LangId, Langs, Manifest, MetricPer, MetricSpec, Plan, ProduceCtx, Producer,
-    ProducerId, ProducerRegistry, Result, RunId, Scope, Support, SupportMatrix, ToolId, WriteError,
-    Writer,
+    ActionKind, Availability, Cancellation, Check, CheckCtx, CheckId, CheckRegistry, CostClass,
+    Ctx, Error, Event, EventSink, Fact, FactKind, Facts, FindingKindSpec, Lang, LangFamily, LangId,
+    Langs, Manifest, MetricPer, MetricSpec, ProduceCtx, Producer, ProducerId, ProducerRegistry,
+    Result, RunId, Scope, Support, SupportMatrix, ToolId, WriteError, Writer,
 };
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -37,41 +36,10 @@ fn typescript() -> Lang {
 fn ctx() -> Ctx {
     Ctx::new(PathBuf::from("."))
 }
+
 /// A check that reports one result and never reads facts.
-struct ReportingCheck(Manifest);
-
-impl Check for ReportingCheck {
-    fn manifest(&self) -> &Manifest {
-        &self.0
-    }
-
-    fn plan(&self, _: &CheckCtx, scope: &Scope) -> Result<Plan> {
-        Ok(Plan {
-            targets: scope.files.len() as u64,
-            est_ms: 0,
-        })
-    }
-
-    fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
-        Ok(CheckResult {
-            id: self.0.id.clone(),
-            status: CheckStatus::Pass,
-            tier: self.0.tier,
-            cost: self.0.cost,
-            score: None,
-            metrics: std::collections::BTreeMap::new(),
-            delta: None,
-            findings: 0,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-            notes: Vec::new(),
-        })
-    }
-}
-
 fn check(id: &str, needs: &[FactKind], wants: &[FactKind]) -> Box<dyn Check> {
-    Box::new(ReportingCheck(support::manifest(id, needs, wants)))
+    Box::new(support::Passing(support::manifest(id, needs, wants)))
 }
 
 /// An execution fact standing in for `MutationOutcomes`, whose payload lands in P3.
