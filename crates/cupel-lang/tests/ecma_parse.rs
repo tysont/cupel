@@ -15,10 +15,21 @@ fn parse_errors(lang: &str, files: &[(&str, &str)]) -> Vec<String> {
     let registry = LanguageRegistry::builtin();
     let language = registry.get(&lang.into()).unwrap();
     let writer = Writer::new(dir.path(), false).unwrap().confined();
-    let ctx = ProduceCtx::new(Ctx::new(writer.root().to_path_buf()), writer, Cancellation::new());
+    let ctx = ProduceCtx::new(
+        Ctx::new(writer.root().to_path_buf()),
+        writer,
+        Cancellation::new(),
+    );
     let scope = Scope::of_files(files.iter().map(|(name, _)| (*name).to_owned()).collect());
     let mut events = Vec::new();
-    parse_scope(registry.cache(), &ctx, &scope, language.as_ref(), &mut events).unwrap();
+    parse_scope(
+        registry.cache(),
+        &ctx,
+        &scope,
+        language.as_ref(),
+        &mut events,
+    )
+    .unwrap();
     events
         .iter()
         .filter_map(|event| match event {
@@ -39,29 +50,42 @@ const JSX: [(&str, &str); 5] = [
         "export const c = <link href=\"https://x/css?a=1&family=Inter&display=swap\" />;\n",
     ),
     ("single", "export const d = <a title='x&y'>z</a>;\n"),
-    ("references", "export const e = <p>R&amp;D &#169; &copy;</p>;\n"),
+    (
+        "references",
+        "export const e = <p>R&amp;D &#169; &copy;</p>;\n",
+    ),
 ];
 
-/// `JSX`'s cases as files with `extension`.
-fn jsx(extension: &str) -> Vec<(String, &'static str)> {
-    JSX.iter()
-        .map(|(name, text)| (format!("{name}.{extension}"), *text))
-        .collect()
+/// The files of `JSX`'s cases, each with `extension`, that `lang` reports as `lang.parse-error`.
+fn jsx_parse_errors(lang: &str, extension: &str) -> Vec<String> {
+    let names: Vec<String> = JSX
+        .iter()
+        .map(|(name, _)| format!("{name}.{extension}"))
+        .collect();
+    let files: Vec<(&str, &str)> = names
+        .iter()
+        .zip(JSX)
+        .map(|(name, (_, text))| (name.as_str(), text))
+        .collect();
+    parse_errors(lang, &files)
+}
+
+#[test]
+fn a_bare_ampersand_in_tsx_is_not_a_parse_error() {
+    assert_eq!(jsx_parse_errors("typescript", "tsx"), Vec::<String>::new());
 }
 
 #[test]
 fn a_bare_ampersand_in_jsx_is_not_a_parse_error() {
-    for (lang, extension) in [("typescript", "tsx"), ("javascript", "jsx")] {
-        let files = jsx(extension);
-        let files: Vec<(&str, &str)> = files.iter().map(|(name, text)| (name.as_str(), *text)).collect();
-        assert_eq!(parse_errors(lang, &files), Vec::<String>::new(), "{lang}");
-    }
+    assert_eq!(jsx_parse_errors("javascript", "jsx"), Vec::<String>::new());
 }
 
 #[test]
 fn unique_is_an_identifier_unless_it_types_a_unique_symbol() {
-    let source = "export function f(unique: number[]) {\n  for (let i = 0; i < unique.length; i++) {}\n}\n";
-    let symbol = "declare const s: unique symbol;\nexport type T = { readonly k: unique symbol };\n";
+    let source =
+        "export function f(unique: number[]) {\n  for (let i = 0; i < unique.length; i++) {}\n}\n";
+    let symbol =
+        "declare const s: unique symbol;\nexport type T = { readonly k: unique symbol };\n";
     let files = [
         ("identifier.ts", source),
         ("identifier.tsx", source),
