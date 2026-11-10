@@ -298,3 +298,33 @@ fn init_writes_no_test_command_a_roots_own_test_script_contradicts_and_says_why(
         ]
     );
 }
+
+/// A Vitest that records that it ran, installed where the runner finds it.
+#[cfg(unix)]
+fn install_recording_vitest(repo: &Repo) {
+    use std::os::unix::fs::PermissionsExt;
+    repo.write(
+        "node_modules/.bin/vitest",
+        "#!/bin/sh\ntouch \"$(dirname \"$0\")/../../vitest-ran\"\nexit 1\n",
+    );
+    let bin = repo.path("node_modules/.bin/vitest");
+    std::fs::set_permissions(&bin, std::fs::Permissions::from_mode(0o755)).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn a_standard_run_never_runs_a_runner_the_roots_own_test_script_defers() {
+    let repo = recursive_workspace();
+    repo.write(
+        "apps/web/src/a.test.ts",
+        "import { it, expect } from \"vitest\";\nit(\"a\", () => expect(1).toBe(1));\n",
+    );
+    install_recording_vitest(&repo);
+    let written = repo.run(&["init", "--write"]);
+    assert_eq!(written.code, 0, "{}", written.stdout);
+    repo.run(&["check", "--depth", "standard", "--no-gate"]);
+    assert!(
+        !repo.path("vitest-ran").exists(),
+        "a run executed the root's Vitest, which the root's own `pnpm -r test` defers"
+    );
+}

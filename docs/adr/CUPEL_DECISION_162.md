@@ -1,6 +1,6 @@
 # CUPEL_DECISION_162: A run makes a check's wants only within its depth, and a root's own test script can defer a runner
 
-**Date:** 2026-11-09 · **Status:** accepted · **Phase:** v0.2.6, Molten field trial Area 1b · Extends [080](CUPEL_DECISION_080.md) §2 and [154](CUPEL_DECISION_154.md) to a check's wants; amends [021](CUPEL_DECISION_021.md) §4 (the commands `init` writes) and [036](CUPEL_DECISION_036.md) (detection)
+**Date:** 2026-11-09 · **Status:** accepted; §2 completed by [166](CUPEL_DECISION_166.md) (a deferred producer is no candidate) · **Phase:** v0.2.6, Molten field trial Area 1b · Extends [080](CUPEL_DECISION_080.md) §2 and [154](CUPEL_DECISION_154.md) to a check's wants; amends [021](CUPEL_DECISION_021.md) §4 (the commands `init` writes) and [036](CUPEL_DECISION_036.md) (detection)
 
 ## Context
 

@@ -2311,6 +2311,13 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - Clones outside tests: 87 pairs and 16 clusters. A sample checked by hand is real (M4-2).
     - Molten's layering is clean today (M4-3 proposes the rule).
   - Calibration question for the owner: whether clones inside test files (about 540 of 655) are reported, reported apart, or left out.
+- **B8, found at the start of Area 5** (2026-11-10, [ADR-166](adr/CUPEL_DECISION_166.md)).
+  - The gap: `doctor` on the Molten clone said `gen.property` and `tests.flaky` needed Vitest. ADR-162 made a deferred runner *undetected*, and `candidates` keeps undetected producers as fallbacks, so with Vitest installed a `standard` run would still have run it at the root.
+  - The fix: `Producer::deferred` keeps a deferred producer out of `candidates` (a pin still chooses it). Runners and per-test map producers defer.
+  - Tests:
+    - `cupel-core/tests/deferred.rs`.
+    - `cupel-cli/tests/init.rs`: Molten's shape, with a recording `node_modules/.bin/vitest` that a `standard` check must not run. It runs when the filter is removed.
+  - This was done before anything in Areas 5 to 10 executes Molten's tests.
 
 ## 4. Cross-phase checklist
 

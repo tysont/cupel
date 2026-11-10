@@ -78,6 +78,11 @@ impl RegisteredProducer for PluginProducer {
         true
     }
 
+    /// A plugin producer has no toolchain-table rules, so nothing defers it.
+    fn deferred(&self, _: &Ctx) -> bool {
+        false
+    }
+
     fn tool(&self, _ctx: &Ctx) -> Option<ToolProbe> {
         None
     }

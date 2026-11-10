@@ -258,8 +258,10 @@ fn a_runner_its_roots_test_script_defers_is_not_detected_at_run_time() {
         [
             toolchain::detects(&vitest, deferred.path()),
             toolchain::detects(&vitest, named.path()),
+            toolchain::defers(&vitest, deferred.path()),
+            toolchain::defers(&vitest, named.path()),
         ],
-        [false, true]
+        [false, true, true, false]
     );
 }
 

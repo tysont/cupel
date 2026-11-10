@@ -280,6 +280,12 @@ pub trait Producer<F: Fact>: Send + Sync {
     fn detected(&self, _ctx: &Ctx) -> bool {
         true
     }
+    /// Whether the repository's own entry point runs something else where this producer would
+    /// run (a root whose `test` script names another command, ADR-162). A deferred producer is
+    /// no candidate, not even a fallback; a `[lang.<id>]` pin that names it still chooses it.
+    fn deferred(&self, _ctx: &Ctx) -> bool {
+        false
+    }
     /// The program this producer runs, for producers that run one.
     fn tool(&self, _ctx: &Ctx) -> Option<ToolProbe> {
         None
@@ -444,6 +450,7 @@ pub trait RegisteredProducer: Send + Sync {
     fn estimate(&self, ctx: &Ctx, upstream: &Upstream) -> Estimate;
     fn availability(&self, ctx: &Ctx) -> Availability;
     fn detected(&self, ctx: &Ctx) -> bool;
+    fn deferred(&self, ctx: &Ctx) -> bool;
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe>;
     /// Runs the producer and returns its fact with the type erased.
     fn produce(
@@ -495,6 +502,10 @@ impl<F: Fact, P: Producer<F>> RegisteredProducer for Registration<F, P> {
 
     fn detected(&self, ctx: &Ctx) -> bool {
         self.producer.detected(ctx)
+    }
+
+    fn deferred(&self, ctx: &Ctx) -> bool {
+        self.producer.deferred(ctx)
     }
 
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
@@ -652,7 +663,9 @@ impl ProducerRegistry {
                 Ok(pinned)
             };
         }
-        let (detected, rest): (Vec<_>, Vec<_>) = all.partition(|producer| producer.detected(ctx));
+        let (detected, rest): (Vec<_>, Vec<_>) = all
+            .filter(|producer| !producer.deferred(ctx))
+            .partition(|producer| producer.detected(ctx));
         Ok(detected.into_iter().chain(rest).collect())
     }
 }

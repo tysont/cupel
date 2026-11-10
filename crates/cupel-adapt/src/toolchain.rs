@@ -154,6 +154,16 @@ pub fn detects(id: &ProducerId, root: &Path) -> bool {
         .is_some_and(|tool| tool.eligible(&dirs))
 }
 
+/// Whether a `defer` rule of the tool `id` holds at `root` (ADR-162).
+pub fn defers(id: &ProducerId, root: &Path) -> bool {
+    let dirs = Dirs { root, members: &[] };
+    rows()
+        .iter()
+        .flat_map(Row::tools)
+        .find(|tool| tool.id == *id)
+        .is_some_and(|tool| tool.defer.iter().any(|rule| rule.holds(&dirs)))
+}
+
 /// The table's command for the runner `id` in `root`, with the launcher detected there and the
 /// root's packages filled in; `None` when the table lists no command for it.
 pub fn runner_command(id: &ProducerId, root: &Root) -> Option<String> {

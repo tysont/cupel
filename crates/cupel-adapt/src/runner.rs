@@ -253,6 +253,10 @@ impl Producer<TestResults> for Runner {
         toolchain::detects(&self.id(), &ctx.root)
     }
 
+    fn deferred(&self, ctx: &Ctx) -> bool {
+        toolchain::defers(&self.id(), &ctx.root)
+    }
+
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
         Some(probe(
             self.0.tool,

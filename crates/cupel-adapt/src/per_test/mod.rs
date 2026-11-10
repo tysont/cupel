@@ -32,6 +32,7 @@ use crate::fresh::{
     Changes, Sources, Tree, cache_dir, entries, entry_name, hash, skip_dirs, store,
 };
 use crate::runner::{ID_SEPARATOR, roots, under};
+use crate::toolchain;
 
 /// The kind of cache the producers keep under `.cupel/cache/`.
 const CACHE: &str = "per-test";
@@ -183,6 +184,11 @@ impl Producer<PerTestMap> for PerTest {
             },
             None => Availability::Ready,
         }
+    }
+
+    /// Its runner's deferral: it runs the runner's tests one by one under coverage (ADR-162).
+    fn deferred(&self, ctx: &Ctx) -> bool {
+        toolchain::defers(&ProducerId::from(self.0.runner), &ctx.root)
     }
 
     fn tool(&self, _: &Ctx) -> Option<ToolProbe> {
