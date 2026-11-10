@@ -2354,6 +2354,13 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - Open: coverage producers of other tools as fallbacks, and coverage detection at the repository root rather than the run's roots (ADR-170 Consequences).
 - **Fact cache, found in Area 5's daemon measurement.** `Store::put_fact` has no caller, so command-line runs re-parse everything (about 31 s of static checks on Molten, against 10 s through a warm daemon). This is waiting on the owner's decision.
 
+- **B12, a near miss in Area 6** (2026-11-10, [ADR-171](adr/CUPEL_DECISION_171.md)).
+  - The gap: with `[roots]` narrowed to `packages/shared`, the JavaScript coverage producer, which had no roots, fell back to the repository root and ran `npx vitest run --coverage` there.
+  - Vitest stopped before collecting tests (no coverage provider at the root).
+  - Now a language `[roots]` names no root of runs nowhere (`runner::roots`, `runner::run_dirs`).
+  - Test: `cupel-cli/tests/init.rs`, a marker-leaving coverage command that must not run at the root.
+  - Molten test execution paused until this was merged.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

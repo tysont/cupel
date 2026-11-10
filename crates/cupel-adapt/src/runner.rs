@@ -218,22 +218,20 @@ pub struct Ran<'a> {
 }
 
 /// The directories a producer of `langs` would run in, where its detection and deferral are
-/// judged: each configured root of those languages (ADR-167), else the repository root.
+/// judged: each configured root of those languages (ADR-167), none when `[roots]` names roots
+/// but none of them (ADR-171), and the repository root when it names none at all.
 pub(crate) fn run_dirs(ctx: &Ctx, langs: &Langs) -> Vec<PathBuf> {
-    let configured: Vec<PathBuf> = ctx
-        .roots
+    if ctx.roots.is_empty() {
+        return vec![ctx.root.clone()];
+    }
+    ctx.roots
         .iter()
         .filter(|root| match langs {
             Langs::Any | Langs::Family(_) => true,
             Langs::Only(ids) => ids.contains(&root.lang),
         })
         .map(|root| ctx.root.join(&root.path))
-        .collect();
-    if configured.is_empty() {
-        vec![ctx.root.clone()]
-    } else {
-        configured
-    }
+        .collect()
 }
 
 /// A runner producer: `spec` run once per project root of its language.
@@ -755,7 +753,8 @@ pub(crate) fn suite_roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
 }
 
 /// The project roots of the language being produced, each with its packages; the repository
-/// root alone when `ProjectInfo` names none.
+/// root alone when `ProjectInfo` names none and `[roots]` is not configured. With configured
+/// roots, a language they do not name has none and runs nowhere (ADR-171).
 pub(crate) fn roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
     let roots: Vec<(String, Vec<String>)> = ctx
         .upstream
@@ -767,7 +766,7 @@ pub(crate) fn roots(ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
                 .collect()
         })
         .unwrap_or_default();
-    if roots.is_empty() {
+    if roots.is_empty() && ctx.ctx.roots.is_empty() {
         vec![(".".to_owned(), Vec::new())]
     } else {
         roots

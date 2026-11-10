@@ -373,6 +373,28 @@ fn install_recording_vitest_in(repo: &Repo, package: &str) {
     std::fs::set_permissions(repo.path(&bin), std::fs::Permissions::from_mode(0o755)).unwrap();
 }
 
+/// A language `[roots]` names no root of has none, so nothing of it runs anywhere: not at the
+/// repository root, where a workspace's every package and tier would run.
+#[test]
+fn a_language_the_roots_do_not_name_runs_nothing_at_the_repository_root() {
+    // TypeScript's one root, whose coverage command leaves a marker where it runs; the
+    // workspace's JavaScript, at its root, is in no root.
+    let config = "depth = \"standard\"\n\n[roots]\nweb = { path = \"apps/web\", lang = \"typescript\" }\n\n[lang.typescript]\ncoverage = \"touch coverage-ran\"\n";
+    let repo = recursive_workspace();
+    repo.write("cupel.toml", config);
+    repo.write("scripts/seed.js", "export const seed = 1;\n");
+    let run = repo.run(&["check", "--only", "tests.coverage", "--no-gate"]);
+    assert_eq!(
+        [
+            repo.path("apps/web/coverage-ran").exists(),
+            repo.path("coverage-ran").exists()
+        ],
+        [true, false],
+        "{}",
+        run.stdout
+    );
+}
+
 #[cfg(unix)]
 #[test]
 fn a_run_runs_tests_only_in_the_roots_cupel_toml_names() {
