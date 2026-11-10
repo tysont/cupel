@@ -2371,6 +2371,18 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - `cupel-core/tests/budget_runs.rs`: a cut production that returns its fact is not timed.
   - Open: a mutant whose run the cut reaches is lost even if it was about to finish (at most one per slot).
 
+- **Open, from Areas 6 and 7** (2026-11-10).
+  - **Cross-root test reach.** With per-package roots, a root's coverage and mutation run only that root's tests. So code another root's tests exercise looks uncovered: shared's `shellQuote` is tested from `apps/agent`, and shared's coverage counts only shared's own files. Two options: let a root's coverage and mutation use the tests of the roots that import it (through the module graph), or report such code as covered elsewhere.
+  - **String and regex code.** Neither operator set mutates string or regex literals, so escaping and quoting helpers get no default mutants. This is by design, to keep equivalent mutants down. Calibration question for the owner: an opt-in `strings` operator (a literal to `""`, edits to regex quantifiers and classes).
+  - **Equivalent mutants seen on real code** that `equivalent.rs` does not flag: 5 of 8 survivors in Molten's `signing.ts`.
+    - a sort comparator's `<`/`<=` and `>`/`>=` over keys that cannot be equal;
+    - a typed-array write past its end, which is ignored;
+    - a variable always reassigned before it is read;
+    - WebCrypto `importKey`'s `extractable` flag.
+
+    The last two are detectable by pattern.
+  - **Progress during mutation.** The event stream says nothing between `check.start` and `check.end`, so a long run cannot be watched. Per-file progress events would fix it.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
