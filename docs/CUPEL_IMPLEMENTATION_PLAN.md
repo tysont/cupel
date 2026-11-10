@@ -2105,7 +2105,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 **Goal:** The owner's request (2026-11-09): test Cupel against the surface area of a real repository, the owner's `../molten`, one area at a time. In each area, find Cupel's bugs and fix them, and write every true issue in Molten to one file, `../molten/cupel.md`, for Molten's own agent to pick up.
 
-**Status:** in progress. Areas 0, 1, 1b, and 2 complete (2026-11-09); Area 3's fixes are done and its calibration questions are with the owner; Area 4 next.
+**Status:** in progress. Areas 0 to 4 have their fixes in (2026-11-10). Areas 3 and 4 have calibration questions with the owner. Area 5 next.
 
 **Molten.** A pnpm TypeScript monorepo on Cloudflare Workers, at `fbafa8f5`:
 - `apps/agent`: 461 source files, 230 test files. `agent-do.ts` alone is 34,551 lines.
@@ -2301,6 +2301,16 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - whether `toContain`/`toMatch` with a literal, and `toMatchObject`, are weak;
     - whether a loop over cases with an assertion in it is test logic at `logic_max = 0`;
     - whether three shared leading statements is duplicate setup.
+- **Area 4** (2026-11-10, [ADR-165](adr/CUPEL_DECISION_165.md)).
+  - `EdgeKind::Type` covers `import type`, `export type … from`, and imports whose every name is marked `type`. `static.deps` finds cycles over run-time edges only, and coupling still counts type edges.
+  - Tests in `cupel-lang/tests/ecma_modules.rs` and `cupel-checks/tests/static_deps.rs` failed first and pass now.
+  - Molten `dep.cycle` went from 7 to 2, both value-import cycles (M4-1).
+  - Molten's other structure questions:
+    - Workspace (`@molten/shared/…`) and `.js` → `.ts` imports resolve: no `packages/shared` module reads as unimported.
+    - Complexity counts JSX `&&`, `||`, and ternaries as decisions, as ESLint does. The worst TSX component (`Threads`, 1,133 lines) has about 108 of them, and the top eight are plain TypeScript routers and loops.
+    - Clones outside tests: 87 pairs and 16 clusters. A sample checked by hand is real (M4-2).
+    - Molten's layering is clean today (M4-3 proposes the rule).
+  - Calibration question for the owner: whether clones inside test files (about 540 of 655) are reported, reported apart, or left out.
 
 ## 4. Cross-phase checklist
 

@@ -432,6 +432,9 @@ pub enum EdgeKind {
     /// Imports names in order to export them again (Rust `pub use`, `export … from`, a Python
     /// import of names listed in `__all__`).
     ReExport,
+    /// Imports only types (`import type`, `export type … from`, or a named import whose every
+    /// name is marked `type`), which the compiler erases: no dependency at run time (ADR-165).
+    Type,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

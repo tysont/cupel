@@ -307,7 +307,7 @@
       }
     },
     {
-      "edge_kind": "import",
+      "edge_kind": "type",
       "from": "src/ledger.ts",
       "line": 7,
       "names": [

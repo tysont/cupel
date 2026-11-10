@@ -74,6 +74,8 @@ pub mod capture {
     pub const IMPORT_NAMES: &str = "import.names";
     pub const IMPORT_MODULE: &str = "import.module";
     pub const IMPORT_REEXPORT: &str = "import.reexport";
+    pub const IMPORT_TYPE: &str = "import.type";
+    pub const IMPORT_TYPED: &str = "import.typed";
     pub const REEXPORT_NAME: &str = "reexport.name";
     // api.scm: `api.<kind>`, kinds spelled as `ApiItemKind` serializes.
     pub const API_FUNCTION: &str = "api.function";
@@ -242,6 +244,8 @@ const IMPORTS: Contract = Contract {
         c::IMPORT_NAMES,
         c::IMPORT_MODULE,
         c::IMPORT_REEXPORT,
+        c::IMPORT_TYPE,
+        c::IMPORT_TYPED,
         c::REEXPORT_NAME,
         c::SCOPE,
         c::SCOPE_NAME,

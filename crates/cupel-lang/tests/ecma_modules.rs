@@ -489,3 +489,30 @@ fn export_from_statements_are_re_exports_and_imports_are_imports() {
         ]
     );
 }
+
+#[test]
+fn an_import_of_types_alone_is_a_type_edge_and_a_mixed_one_an_import() {
+    let dir = tree(&[
+        ("package.json", "{ \"name\": \"app\" }"),
+        ("tsconfig.json", "{}"),
+        (
+            "src/index.ts",
+            "import type { A } from \"./a.js\";\nimport { type B, type C } from \"./b.js\";\nimport { type D, e } from \"./d.js\";\nexport type { F } from \"./f.js\";\nimport g, { type G } from \"./g.js\";\n",
+        ),
+        ("src/a.ts", "export type A = 1;\n"),
+        ("src/b.ts", "export type B = 1;\nexport type C = 2;\n"),
+        ("src/d.ts", "export type D = 1;\nexport const e = 1;\n"),
+        ("src/f.ts", "export type F = 1;\n"),
+        ("src/g.ts", "export type G = 1;\nexport default 1;\n"),
+    ]);
+    assert_eq!(
+        kinds(&produce::<ModuleGraph>("typescript", dir.path())),
+        [
+            kind("src/index.ts", "./a.js", EdgeKind::Type),
+            kind("src/index.ts", "./b.js", EdgeKind::Type),
+            kind("src/index.ts", "./d.js", EdgeKind::Import),
+            kind("src/index.ts", "./f.js", EdgeKind::Type),
+            kind("src/index.ts", "./g.js", EdgeKind::Import),
+        ]
+    );
+}

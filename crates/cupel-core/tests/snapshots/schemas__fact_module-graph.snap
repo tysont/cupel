@@ -38,6 +38,11 @@ expression: pretty(&schema)
           "description": "Imports names in order to export them again (Rust `pub use`, `export … from`, a Python\nimport of names listed in `__all__`).",
           "type": "string",
           "const": "re-export"
+        },
+        {
+          "description": "Imports only types (`import type`, `export type … from`, or a named import whose every\nname is marked `type`), which the compiler erases: no dependency at run time (ADR-165).",
+          "type": "string",
+          "const": "type"
         }
       ]
     },

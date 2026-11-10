@@ -489,6 +489,8 @@ struct Import {
     specifier: String,
     /// Some edge between the two uses the module rather than only declaring it (ADR-068).
     uses: bool,
+    /// Some edge between the two uses it at run time, not only for its types (ADR-165).
+    runtime: bool,
     /// The line of the first edge that uses the module.
     first_use: u32,
     /// The specifiers of the edges that use the module, in line order, without repeats.
@@ -505,6 +507,7 @@ impl Import {
             line: edge.line,
             specifier: edge.specifier.clone(),
             uses: false,
+            runtime: false,
             first_use: edge.line,
             specifiers: Vec::new(),
             names: BTreeSet::new(),
@@ -517,6 +520,7 @@ impl Import {
         if edge.edge_kind == EdgeKind::Declaration {
             return;
         }
+        self.runtime |= edge.edge_kind != EdgeKind::Type;
         if !self.uses {
             self.uses = true;
             self.first_use = edge.line;
@@ -617,19 +621,20 @@ impl Graph {
         }
     }
 
-    /// The modules `module` uses: a cycle follows uses, never a module declaration alone,
-    /// which is structure (a Rust parent declaring the child that imports it, ADR-068).
-    fn used<'a>(&'a self, module: &str) -> impl Iterator<Item = &'a String> {
+    /// The modules `module` uses at run time: a cycle follows these, never a module declaration
+    /// alone, which is structure (a Rust parent declaring the child that imports it, ADR-068),
+    /// and never an import of types alone, which the compiler erases (ADR-165).
+    fn run<'a>(&'a self, module: &str) -> impl Iterator<Item = &'a String> {
         self.imports
             .get(module)
             .into_iter()
             .flat_map(|targets| targets.iter())
-            .filter(|(_, import)| import.uses)
+            .filter(|(_, import)| import.runtime)
             .map(|(target, _)| target)
     }
 
     /// Every strongly connected component of more than one module, members sorted, in order
-    /// of their smallest member.
+    /// of their smallest member, over the edges used at run time.
     fn cycles(&self) -> Vec<Vec<String>> {
         let modules: Vec<&String> = self.modules.iter().collect();
         let index: BTreeMap<&String, usize> = modules
@@ -639,7 +644,7 @@ impl Graph {
             .collect();
         let successors: Vec<Vec<usize>> = modules
             .iter()
-            .map(|module| self.used(module).map(|target| index[target]).collect())
+            .map(|module| self.run(module).map(|target| index[target]).collect())
             .collect();
         let mut cycles: Vec<Vec<String>> = strongly_connected(&successors)
             .into_iter()
@@ -689,7 +694,7 @@ impl Graph {
         let successors: Vec<Vec<usize>> = members
             .iter()
             .map(|module| {
-                self.used(module)
+                self.run(module)
                     .filter(|target| !(module == from && *target == to))
                     .filter_map(|target| index.get(target).copied())
                     .collect()
@@ -708,7 +713,7 @@ impl Graph {
         let mut parent: BTreeMap<&String, &String> = BTreeMap::new();
         let mut queue = VecDeque::from([start]);
         while let Some(module) = queue.pop_front() {
-            for next in self.used(module) {
+            for next in self.run(module) {
                 if next == start {
                     let mut cycle = vec![module.clone()];
                     let mut at = module;

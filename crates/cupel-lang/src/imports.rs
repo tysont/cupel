@@ -22,6 +22,10 @@
 //!   the declaring file (Rust `mod a;`): an edge of kind `declaration`.
 //! - `@import.reexport` (optional) marks a statement that exports what it imports (Rust
 //!   `pub use`, `export … from`): an edge of kind `re-export`.
+//! - `@import.type` (any pattern, no `@import` needed) on a statement that imports only types
+//!   (`import type …`, `export type … from`), and `@import.typed` on each named import marked
+//!   `type` (`{ type A }`): a statement so marked, or one whose every named import is typed and
+//!   that imports no default, is an edge of kind `type` (ADR-165).
 //! - `@reexport.name` (any pattern, no `@import` needed) on a name the file exports (an entry of
 //!   Python's `__all__`): an import whose `@import.name` is such a name is a `re-export`.
 //!   Every other import is an `import` edge (ADR-068).
@@ -95,15 +99,21 @@ pub fn file_imports(parsed: &Parsed, language: &dyn Language) -> FileImports {
         .flat_map(|m| m.nodes(capture::REEXPORT_NAME))
         .map(|node| unquote(parsed.text(node)))
         .collect();
+    let types = TypeOnly::of(&found);
     let mut imports: Vec<RawImport> = found
         .iter()
         .filter_map(|m| {
             let statement = m.node(capture::IMPORT)?;
             let specifier = m.node(capture::IMPORT_SPECIFIER)?;
             let names = imported(parsed, m);
+            let kind = if types.holds(m, statement) {
+                EdgeKind::Type
+            } else {
+                edge_kind(m, &names, &reexported)
+            };
             Some(RawImport {
                 specifier: unquote(parsed.text(specifier)).to_owned(),
-                kind: edge_kind(m, &names, &reexported),
+                kind,
                 aliases: aliases(parsed, m),
                 names,
                 scope: path_of(statement),
@@ -217,6 +227,44 @@ fn aliases(parsed: &Parsed, m: &Match<'_, '_>) -> Vec<ImportAlias> {
                 .collect::<Vec<_>>()
         });
     default.into_iter().chain(named).chain(listed).collect()
+}
+
+/// The statements the query marks as importing only types, and the named imports it marks typed.
+struct TypeOnly {
+    statements: BTreeSet<usize>,
+    typed: BTreeSet<usize>,
+}
+
+impl TypeOnly {
+    fn of(found: &[Match<'_, '_>]) -> Self {
+        let ids = |name| -> BTreeSet<usize> {
+            found
+                .iter()
+                .flat_map(|m| m.nodes(name))
+                .map(|node| node.id())
+                .collect()
+        };
+        Self {
+            statements: ids(capture::IMPORT_TYPE),
+            typed: ids(capture::IMPORT_TYPED),
+        }
+    }
+
+    /// Whether the import `m` matched at `statement` imports only types: the statement is
+    /// marked, or it imports no default and names one or more imports, every one typed.
+    fn holds(&self, m: &Match<'_, '_>, statement: tree_sitter::Node<'_>) -> bool {
+        if self.statements.contains(&statement.id()) {
+            return true;
+        }
+        let Some(list) = m.node(capture::IMPORT_NAMES) else {
+            return false;
+        };
+        let mut cursor = list.walk();
+        let named: Vec<usize> = list.named_children(&mut cursor).map(|n| n.id()).collect();
+        !m.has(capture::IMPORT_DEFAULT)
+            && !named.is_empty()
+            && named.iter().all(|id| self.typed.contains(id))
+    }
 }
 
 /// What the import `m` matched does with its module: declares it, re-exports it (by its

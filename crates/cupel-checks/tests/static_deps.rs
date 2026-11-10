@@ -269,6 +269,41 @@ fn a_child_importing_its_parent_is_no_cycle_because_declarations_are_structure()
 }
 
 #[test]
+fn a_cycle_only_a_type_import_closes_is_no_cycle_and_still_couples() {
+    // TypeScript: `flush.ts` imports `ledger.ts` at run time; `ledger.ts` imports only a type
+    // back (`import type { Kind } from "./flush.js"`), which the compiler erases.
+    let typed = World::default().edge("flush", "ledger", 1).link(
+        "ledger",
+        imported_file("flush"),
+        2,
+        EdgeKind::Type,
+    );
+    let (_, findings) = run(&typed, json!({}));
+    let runtime = World::default()
+        .edge("flush", "ledger", 1)
+        .edge("ledger", "flush", 2);
+    let (_, runtime_findings) = run(&runtime, json!({}));
+    assert_eq!(
+        [
+            of_kind(&findings, "dep.cycle").len(),
+            of_kind(&runtime_findings, "dep.cycle").len()
+        ],
+        [0, 1]
+    );
+    let (_, measured) = recorded(&typed, json!({}));
+    let coupling: Vec<(String, f64)> = measured
+        .measurements
+        .iter()
+        .filter(|m| m.metric == "coupling")
+        .map(|m| (m.target.display.clone(), m.value))
+        .collect();
+    assert_eq!(
+        coupling,
+        [("flush".to_owned(), 2.0), ("ledger".to_owned(), 2.0)]
+    );
+}
+
+#[test]
 fn nested_cycles_form_one_component_and_separate_cycles_stay_separate() {
     // a → b → c → a and c → d → c share c: one component of four. e ↔ f is another.
     let world = World::default()
