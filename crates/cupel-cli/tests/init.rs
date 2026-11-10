@@ -258,3 +258,43 @@ fn init_writes_java_and_clojure_roots_with_their_runners_and_reports_no_unsuppor
         doctor.stdout
     );
 }
+
+/// A pnpm TypeScript workspace whose root runs its tests package by package (`pnpm -r test`)
+/// and whose package uses vitest, as Molten does.
+fn recursive_workspace() -> Repo {
+    let repo = Repo::new();
+    repo.write(
+        "package.json",
+        "{\"scripts\": {\"test\": \"pnpm -r test\"}, \"devDependencies\": {\"vitest\": \"1\", \"typescript\": \"5\"}}\n",
+    );
+    repo.write("pnpm-workspace.yaml", "packages:\n  - apps/*\n");
+    repo.write("tsconfig.json", "{}\n");
+    repo.write(
+        "apps/web/package.json",
+        "{\"scripts\": {\"test\": \"vitest run\"}, \"devDependencies\": {\"vitest\": \"1\"}}\n",
+    );
+    repo.write("apps/web/src/a.ts", "export const a = 1;\n");
+    repo
+}
+
+#[test]
+fn init_writes_no_test_command_a_roots_own_test_script_contradicts_and_says_why() {
+    let repo = recursive_workspace();
+    let preview = repo.run(&["init"]);
+    assert_eq!(preview.code, 0, "{}", preview.stdout);
+    let text = added(&would_write(&preview)[0].1);
+    assert!(!text.contains("vitest"), "no vitest command in {text}");
+    let deferred: Vec<Value> = preview.envelope()["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|finding| finding["kind"] == json!("init.runner-deferred"))
+        .map(|finding| finding["evidence"].clone())
+        .collect();
+    assert_eq!(
+        deferred,
+        [
+            json!({"lang": "typescript", "path": ".", "runner": "tool.vitest", "deferred_by": ["`package.json` has `scripts.test` that does not name `vitest`"]})
+        ]
+    );
+}

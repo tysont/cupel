@@ -26,13 +26,16 @@ pub enum Rule {
         #[serde(rename = "in")]
         files: Vec<String>,
     },
-    /// The JSON file has a value at `path` (a string starting with `prefix`, when given), in
-    /// the root directory or, with `members`, in a member directory too.
+    /// The JSON file has a value at `path` (a string starting with `prefix`, or a string that
+    /// does not name the package `lacks`, when given), in the root directory or, with `members`,
+    /// in a member directory too.
     Json {
         json: String,
         path: Vec<String>,
         #[serde(default)]
         prefix: Option<String>,
+        #[serde(default)]
+        lacks: Option<String>,
         #[serde(default)]
         members: bool,
     },
@@ -82,6 +85,7 @@ impl Rule {
                 json,
                 path,
                 prefix,
+                lacks,
                 members,
             } => {
                 let found = |dir: &Path| {
@@ -92,13 +96,16 @@ impl Rule {
                         return false;
                     };
                     let at = path.iter().try_fold(&value, |value, key| value.get(key));
-                    match (at, prefix) {
-                        (None, _) => false,
-                        (Some(_), None) => true,
-                        (Some(value), Some(prefix)) => {
-                            value.as_str().is_some_and(|text| text.starts_with(prefix))
-                        }
-                    }
+                    let Some(value) = at else {
+                        return false;
+                    };
+                    let text = value.as_str();
+                    prefix
+                        .as_ref()
+                        .is_none_or(|prefix| text.is_some_and(|text| text.starts_with(prefix)))
+                        && lacks
+                            .as_ref()
+                            .is_none_or(|name| text.is_some_and(|text| !names(text, name)))
                 };
                 if *members {
                     dirs.all().any(found)
@@ -127,6 +134,7 @@ impl Rule {
                 json,
                 path,
                 prefix,
+                lacks,
                 members,
             } => {
                 let place = if *members {
@@ -136,7 +144,14 @@ impl Rule {
                 };
                 let value = prefix
                     .as_ref()
-                    .map_or_else(String::new, |prefix| format!(" starting `{prefix}`"));
+                    .map(|prefix| format!(" starting `{prefix}`"))
+                    .into_iter()
+                    .chain(
+                        lacks
+                            .as_ref()
+                            .map(|name| format!(" that does not name `{name}`")),
+                    )
+                    .collect::<String>();
                 format!("`{json}`{place} has `{}`{value}", path.join("."))
             }
             Self::All { all } => all
@@ -213,6 +228,7 @@ mod tests {
             json: "p.json".to_owned(),
             path: path.iter().map(|key| (*key).to_owned()).collect(),
             prefix: prefix.map(str::to_owned),
+            lacks: None,
             members,
         };
         let all = Rule::All {
@@ -227,5 +243,34 @@ mod tests {
         ];
         let held = rules.map(|rule| rule.holds(&dirs));
         assert_eq!(held, [true, false, false, true, false]);
+    }
+
+    #[test]
+    fn a_json_rule_with_lacks_holds_for_a_string_that_does_not_name_the_package() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(
+            dir.path().join("package.json"),
+            r#"{"scripts": {"test": "pnpm -r test", "bench": 1}}"#,
+        )
+        .unwrap();
+        let dirs = Dirs {
+            root: dir.path(),
+            members: &[],
+        };
+        let lacking = |key: &str, name: &str| Rule::Json {
+            json: "package.json".to_owned(),
+            path: vec!["scripts".to_owned(), key.to_owned()],
+            prefix: None,
+            lacks: Some(name.to_owned()),
+            members: false,
+        };
+        let rules = [
+            lacking("test", "vitest"),
+            lacking("test", "pnpm"),
+            lacking("lint", "vitest"),
+            lacking("bench", "vitest"),
+        ];
+        let held = rules.map(|rule| rule.holds(&dirs));
+        assert_eq!(held, [true, false, false, false]);
     }
 }

@@ -33,12 +33,59 @@ pub fn write(writer: &Writer, force: bool) -> Result<Vec<Problem>, CupelError> {
         .write(Path::new(FILE_NAME), text.as_bytes())
         .map_err(|error| unwritable(&error))?;
     writer.gitignore().map_err(|error| unwritable(&error))?;
-    Ok(
+    let mut problems: Vec<Problem> =
         cupel_lang::unregistered_roots(writer.root(), &Exclude::default())
             .iter()
             .map(unsupported_root)
-            .collect(),
-    )
+            .collect();
+    problems.extend(first_roots(&info).into_values().filter_map(|root| {
+        let (runner, rules) = project::deferred(writer.root(), root)?;
+        Some(runner_deferred(root, &runner, &rules))
+    }));
+    Ok(problems)
+}
+
+/// Each language's first root, whose commands the language's table takes (ADR-021 §4).
+fn first_roots(info: &ProjectInfo) -> BTreeMap<&str, &ProjectRoot> {
+    let mut languages: BTreeMap<&str, &ProjectRoot> = BTreeMap::new();
+    for root in &info.roots {
+        languages.entry(root.lang.as_str()).or_insert(root);
+    }
+    languages
+}
+
+/// The `info` finding for a root whose own test entry point runs something other than the runner
+/// the table would choose, so `cupel.toml` has no test or coverage command for its language
+/// (ADR-162).
+fn runner_deferred(root: &ProjectRoot, runner: &str, rules: &[String]) -> Problem {
+    Problem {
+        check: "init",
+        kind: "init.runner-deferred",
+        subject: format!("{}:{}", root.lang, root.path),
+        severity: Severity::Info,
+        title: format!(
+            "no {} test command: the root's own test entry point runs something other than {runner}",
+            root.lang
+        ),
+        detail: Some(
+            "A root-level runner command would not run the project's tests as the project runs them, \
+             and could reach test tiers the project runs apart (such as tests against a deployed \
+             environment), so cupel.toml leaves the language's test and coverage commands out."
+                .to_owned(),
+        ),
+        evidence: json!({
+            "lang": root.lang,
+            "path": root.path,
+            "runner": runner,
+            "deferred_by": rules,
+        }),
+        action: ActionKind::Configure,
+        fix: format!(
+            "Add `test` and `coverage` under `[lang.{}]` in cupel.toml for the packages whose tests \
+             Cupel should run; `cupel describe language {}` lists the runners.",
+            root.lang, root.lang
+        ),
+    }
 }
 
 /// The `info` finding for a root of a language Cupel recognizes but has not registered, which
@@ -115,11 +162,7 @@ pub fn config_text(repo: &Path, info: &ProjectInfo, default_branch: Option<&str>
             );
         }
     }
-    let mut languages: BTreeMap<&str, &ProjectRoot> = BTreeMap::new();
-    for root in &info.roots {
-        languages.entry(root.lang.as_str()).or_insert(root);
-    }
-    for (lang, root) in languages {
+    for (lang, root) in first_roots(info) {
         let commands = project::commands(repo, root);
         let commands = [
             ("test", &commands.test),

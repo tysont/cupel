@@ -51,6 +51,16 @@ pub fn selection(repo: &Path, root: &ProjectRoot) -> Option<Selection<'static>> 
     Some(row.select(&Root::new(dir, members, root.packages.clone())))
 }
 
+/// The runner the table would choose at `root` but sets aside because the root's own entry point
+/// runs something else, with the rules that set it aside (ADR-162).
+pub fn deferred(repo: &Path, root: &ProjectRoot) -> Option<(String, Vec<String>)> {
+    let row = toolchain::for_lang(&root.lang)?;
+    let dir = repo.join(&root.path);
+    let members = root.members.iter().map(|member| dir.join(member)).collect();
+    let (runner, rules) = row.deferred(&Root::new(dir, members, root.packages.clone()))?;
+    Some((runner.to_string(), rules))
+}
+
 /// The default commands for `root`; none when the table has no row for its language.
 pub fn commands(repo: &Path, root: &ProjectRoot) -> Commands {
     selection(repo, root).map_or_else(Commands::default, |selection| selection.commands())

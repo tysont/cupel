@@ -2105,7 +2105,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 **Goal:** The owner's request (2026-11-09): test Cupel against the surface area of a real repository, the owner's `../molten`, one area at a time. In each area, find Cupel's bugs and fix them, and write every true issue in Molten to one file, `../molten/cupel.md`, for Molten's own agent to pick up.
 
-**Status:** in progress. Areas 0 and 1 complete (2026-11-09); Area 1b next.
+**Status:** in progress. Areas 0, 1, and 1b complete (2026-11-09); Area 2 next.
 
 **Molten.** A pnpm TypeScript monorepo on Cloudflare Workers, at `fbafa8f5`:
 - `apps/agent`: 461 source files, 230 test files. `agent-do.ts` alone is 34,551 lines.
@@ -2271,6 +2271,12 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - The owner was told at once. The clone's `cupel.toml` now has no test or coverage command.
   - From then on, every trial run uses `env -i` with a scratch `HOME` and no dev environment, and checks afterwards that nothing in the clone changed.
   - B7 is Area 1b.
+- **Area 1b** (2026-11-09, [ADR-162](adr/CUPEL_DECISION_162.md)).
+  - A check's wants are made only within the run's depth, as a producer's are (ADR-080) and its needs (ADR-154): `FactStore::affordable_wants` feeds `serve`, the plan's and budget's reach, and the dry run, which names a left-out want with its cost.
+  - The toolchain table's tools gain `defer` rules, and the JSON rule gains `lacks`. Each JavaScript and TypeScript runner defers where the root's `scripts.test` does not name it. Selection and run-time detection agree.
+  - `init` reports `init.runner-deferred` for a language left without commands.
+  - Tests: `cupel-core/tests/check_wants.rs` (3), `cupel-adapt/tests/toolchain.rs` (3), and `cupel-cli/tests/init.rs` (1) failed first and pass now. The `lacks` unit test was written with its implementation.
+  - CI on Area 1's push failed on every Ubuntu job before any build: `ubuntu-latest` became 26.04, which has no `setup-python` 3.12.10. All workflows now pin `ubuntu-24.04` (756ebf8).
 
 ## 4. Cross-phase checklist
 

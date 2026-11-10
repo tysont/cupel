@@ -213,6 +213,56 @@ fn yarn_and_node_test_are_chosen_without_other_signals() {
     );
 }
 
+/// A pnpm root with vitest whose own `test` script is `script` (none when `None`).
+fn vitest_root(script: Option<&str>) -> tempfile::TempDir {
+    let scripts = script.map_or_else(String::new, |script| {
+        format!("\"scripts\": {{\"test\": \"{script}\"}}, ")
+    });
+    let package = format!("{{{scripts}\"devDependencies\": {{\"vitest\": \"1\"}}}}");
+    tree(&[("package.json", package.as_str()), ("pnpm-lock.yaml", "")])
+}
+
+#[test]
+fn a_root_test_script_that_runs_something_else_leaves_no_runner_to_choose() {
+    let dir = vitest_root(Some("pnpm -r test"));
+    assert_eq!(
+        commands("typescript", dir.path(), &[], &[]),
+        expected(None, None, None)
+    );
+}
+
+#[test]
+fn a_root_test_script_that_runs_the_runner_or_no_script_keeps_it() {
+    let named = vitest_root(Some("vitest run"));
+    let unscripted = vitest_root(None);
+    let vitest = expected(
+        Some("pnpm vitest run"),
+        Some("pnpm vitest run --coverage --coverage.reporter=lcov"),
+        None,
+    );
+    assert_eq!(
+        [
+            commands("typescript", named.path(), &[], &[]),
+            commands("typescript", unscripted.path(), &[], &[]),
+        ],
+        [vitest.clone(), vitest]
+    );
+}
+
+#[test]
+fn a_runner_its_roots_test_script_defers_is_not_detected_at_run_time() {
+    let deferred = vitest_root(Some("pnpm -r test"));
+    let named = vitest_root(Some("vitest run"));
+    let vitest = ProducerId::from("tool.vitest");
+    assert_eq!(
+        [
+            toolchain::detects(&vitest, deferred.path()),
+            toolchain::detects(&vitest, named.path()),
+        ],
+        [false, true]
+    );
+}
+
 #[test]
 fn a_member_dependency_selects_the_runner_and_package_manager_fields_select_the_launcher() {
     let dir = tree(&[

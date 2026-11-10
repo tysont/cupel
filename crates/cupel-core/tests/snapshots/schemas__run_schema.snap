@@ -3800,6 +3800,14 @@ expression: pretty(&schema)
             "$ref": "#/$defs/CommandTemplate"
           }
         },
+        "defer": {
+          "description": "Rules any one of which sets it aside where it was selected, because the project's own\nentry point runs something else (ADR-162); absent when it has none.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-cupel-optional": true
+        },
         "detect": {
           "description": "Detection rules, any one of which selects it; empty for the fallback.",
           "type": "array",

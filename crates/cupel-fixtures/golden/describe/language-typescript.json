@@ -284,6 +284,9 @@
               "runner": null
             }
           ],
+          "defer": [
+            "`package.json` has `scripts.test` that does not name `vitest`"
+          ],
           "detect": [
             "`package.json` in the root or a member has `dependencies.vitest`",
             "`package.json` in the root or a member has `devDependencies.vitest`"
@@ -298,6 +301,9 @@
               "command": "<x> jest",
               "runner": null
             }
+          ],
+          "defer": [
+            "`package.json` has `scripts.test` that does not name `jest`"
           ],
           "detect": [
             "`package.json` in the root or a member has `dependencies.jest`",
@@ -314,6 +320,9 @@
               "runner": null
             }
           ],
+          "defer": [
+            "`package.json` has `scripts.test` that does not name `mocha`"
+          ],
           "detect": [
             "`package.json` in the root or a member has `dependencies.mocha`",
             "`package.json` in the root or a member has `devDependencies.mocha`"
@@ -328,6 +337,9 @@
               "command": "node --test",
               "runner": null
             }
+          ],
+          "defer": [
+            "`package.json` has `scripts.test` that does not name `node`"
           ],
           "detect": [],
           "format": null,

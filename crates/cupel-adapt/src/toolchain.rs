@@ -78,6 +78,10 @@ pub struct Tool {
     /// Any one selects it; none makes it always eligible.
     #[serde(default)]
     pub detect: Vec<Rule>,
+    /// Any one that holds sets it aside where it was selected: the project's own entry point
+    /// runs something else there, so this tool's command would not be the project's (ADR-162).
+    #[serde(default)]
+    pub defer: Vec<Rule>,
     /// The command for every runner.
     #[serde(default)]
     pub command: Option<String>,
@@ -147,7 +151,7 @@ pub fn detects(id: &ProducerId, root: &Path) -> bool {
         .iter()
         .flat_map(Row::tools)
         .find(|tool| tool.id == *id)
-        .is_some_and(|tool| detected(&tool.detect, &dirs))
+        .is_some_and(|tool| tool.eligible(&dirs))
 }
 
 /// The table's command for the runner `id` in `root`, with the launcher detected there and the
@@ -242,15 +246,12 @@ impl Row {
     pub fn select<'a>(&'a self, root: &Root) -> Selection<'a> {
         let dirs = root.dirs();
         let launcher = self.launcher(&dirs);
-        let runner = self
-            .runners
-            .iter()
-            .find(|tool| detected(&tool.detect, &dirs));
+        let runner = self.runners.iter().find(|tool| tool.eligible(&dirs));
         let companion = |tools: &'a [Tool]| -> Option<&'a Tool> {
             let runner = runner?;
-            tools.iter().find(|tool| {
-                tool.command_for(&runner.id).is_some() && detected(&tool.detect, &dirs)
-            })
+            tools
+                .iter()
+                .find(|tool| tool.command_for(&runner.id).is_some() && tool.eligible(&dirs))
         };
         Selection {
             launcher,
@@ -259,6 +260,28 @@ impl Row {
             bench: companion(&self.bench),
             packages: root.packages.join(" "),
         }
+    }
+
+    /// The first runner the rules select at `root` that a `defer` rule sets aside, with those
+    /// rules in words, when no runner is chosen there (ADR-162); `None` when one is chosen or
+    /// none is selected.
+    pub fn deferred(&self, root: &Root) -> Option<(&ProducerId, Vec<String>)> {
+        let dirs = root.dirs();
+        if self.runners.iter().any(|tool| tool.eligible(&dirs)) {
+            return None;
+        }
+        self.runners
+            .iter()
+            .filter(|tool| detected(&tool.detect, &dirs))
+            .find_map(|tool| {
+                let rules: Vec<String> = tool
+                    .defer
+                    .iter()
+                    .filter(|rule| rule.holds(&dirs))
+                    .map(Rule::describe)
+                    .collect();
+                (!rules.is_empty()).then_some((&tool.id, rules))
+            })
     }
 
     /// The row as `describe language` shows it.
@@ -285,6 +308,11 @@ impl Row {
 }
 
 impl Tool {
+    /// Whether its rules select it in `dirs` and none of its `defer` rules sets it aside.
+    fn eligible(&self, dirs: &Dirs<'_>) -> bool {
+        detected(&self.detect, dirs) && !self.defer.iter().any(|rule| rule.holds(dirs))
+    }
+
     /// The command this tool uses alongside `runner`, if it works with it.
     pub fn command_for(&self, runner: &ProducerId) -> Option<&str> {
         self.commands
@@ -298,6 +326,7 @@ impl Tool {
             producer: self.id.clone(),
             format: self.format.clone(),
             detect: self.detect.iter().map(Rule::describe).collect(),
+            defer: self.defer.iter().map(Rule::describe).collect(),
             commands: self
                 .command
                 .iter()

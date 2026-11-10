@@ -269,16 +269,17 @@ impl Scheduler<'_> {
         langs: &[&Lang],
         store: &FactStore<'_>,
     ) -> Vec<String> {
-        let mut needs: Vec<String> = manifest
-            .needs
-            .iter()
-            .chain(&manifest.wants)
-            .map(ToString::to_string)
-            .collect();
+        let mut needs: Vec<String> = manifest.needs.iter().map(ToString::to_string).collect();
+        needs.extend(
+            manifest
+                .wants
+                .iter()
+                .map(|want| planned_want(manifest, *want, langs, store)),
+        );
         let mut covered = BTreeSet::new();
         for lang in langs {
             let deciding = store.deciding(lang);
-            let reached = deciding.reached(&manifest_kinds(manifest));
+            let reached = deciding.reached(&manifest_kinds(manifest, store, lang));
             let (entries, joint) = deciding.planned(&reached);
             covered.extend(joint);
             for entry in entries {
@@ -685,13 +686,37 @@ fn reaches(
     })
 }
 
-/// A check's needs, then its wants, which a run makes whatever they cost.
-fn manifest_kinds(manifest: &Manifest) -> Vec<FactKind> {
+/// A check's `want` as a dry run names it: by name when the run makes it for some language in
+/// `langs`, otherwise with the cost of the producer that would make it, such as `coverage-map(standard)`,
+/// so the plan shows what the run's depth left out (ADR-162).
+fn planned_want(
+    manifest: &Manifest,
+    want: FactKind,
+    langs: &[&Lang],
+    store: &FactStore<'_>,
+) -> String {
+    if langs
+        .iter()
+        .any(|lang| store.affordable_wants(manifest, lang).contains(&want))
+    {
+        return want.to_string();
+    }
+    let cost = langs.iter().find_map(|lang| {
+        let deciding = store.deciding(lang);
+        deciding
+            .chosen(want)
+            .map(|producer| producer.estimate(&store.root, &deciding.upstream).cost)
+    });
+    cost.map_or_else(|| want.to_string(), |cost| format!("{want}({cost})"))
+}
+
+/// A check's needs for `lang`, then the wants the run makes for it (ADR-162).
+fn manifest_kinds(manifest: &Manifest, store: &FactStore<'_>, lang: &Lang) -> Vec<FactKind> {
     manifest
         .needs
         .iter()
-        .chain(&manifest.wants)
         .copied()
+        .chain(store.affordable_wants(manifest, lang))
         .collect()
 }
 
@@ -707,8 +732,8 @@ fn serve(
     for kind in &manifest.needs {
         insert(&store.ensure(*kind, lang, forward)?)?;
     }
-    for kind in &manifest.wants {
-        if let Ok(fact) = store.ensure(*kind, lang, forward) {
+    for kind in store.affordable_wants(manifest, lang) {
+        if let Ok(fact) = store.ensure(kind, lang, forward) {
             let _ = insert(&fact);
         }
     }
@@ -1099,13 +1124,34 @@ impl<'a> FactStore<'a> {
     fn reached_by(&self, tasks: &[Task<'_>]) -> HashMap<LangId, BTreeSet<FactKind>> {
         let mut reached: HashMap<LangId, BTreeSet<FactKind>> = HashMap::new();
         for task in tasks {
-            let kinds = manifest_kinds(task.check.manifest());
             for lang in std::iter::once(&task.lang).chain(&task.siblings) {
+                let kinds = manifest_kinds(task.check.manifest(), self, lang);
                 let found = self.deciding(lang).reached(&kinds);
                 reached.entry(lang.id.clone()).or_default().extend(found);
             }
         }
         reached
+    }
+
+    /// The wants of `manifest` the run makes for `lang`: each made already, or whose producer
+    /// estimates making it within the run's depth, or within the check's own cost when `--only`
+    /// selected a costlier check, the bound ADR-154 sets on needs (ADR-162). A want beyond it is
+    /// left out, so a `quick` run never runs a producer that executes the project for a check
+    /// that can do without its fact.
+    fn affordable_wants(&self, manifest: &Manifest, lang: &Lang) -> Vec<FactKind> {
+        let bound = self.depth.max(manifest.cost);
+        let deciding = self.deciding(lang);
+        manifest
+            .wants
+            .iter()
+            .copied()
+            .filter(|want| {
+                self.made.contains_key(&(*want, lang.id.clone()))
+                    || deciding.chosen(*want).is_some_and(|producer| {
+                        producer.estimate(&self.root, &deciding.upstream).cost <= bound
+                    })
+            })
+            .collect()
     }
 
     /// What deciding how to make a fact for `lang` sees: the facts made so far among them.

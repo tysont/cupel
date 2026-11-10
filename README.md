@@ -127,6 +127,8 @@ Every verb takes the same global flags (below) and writes the same envelope. Run
 
 `init` detects project roots and languages and chooses test, coverage, and bench commands for each. It understands Cargo crates and workspaces, Go modules and workspaces, npm, pnpm, and yarn packages and workspaces (TypeScript when `tsconfig.json` is present), and Python projects (`pyproject.toml`, `setup.cfg`, `requirements.txt`).
 
+A root whose own `package.json` `test` script runs something other than the runner Cupel would choose (`pnpm -r test`, a wrapper script) gets no test or coverage command from `init`, and the run falls back to none: a runner's command at that root would not be the project's tests and could reach tiers the project runs apart, such as tests against a deployed environment. `init` reports it as `init.runner-deferred` (a note naming the runner and the rule), and `cupel describe language <id>` lists each runner's `defer` rules ([ADR-162](docs/adr/CUPEL_DECISION_162.md)). Add `test` and `coverage` under `[lang.<id>]` for the packages Cupel should run.
+
 ```sh
 cupel init                   # preview: the envelope carries unified diffs of what would be written
 cupel init --write           # write cupel.toml and .cupel/.gitignore
@@ -700,7 +702,7 @@ cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock run
 | Wall time, no coverage tool installed | 0.97–1.06 s | 0.28–0.31 s |
 | Wall time, `cargo llvm-cov` installed and its cached report fresh | 1.07–1.20 s | 0.42–0.47 s |
 
-What a warm run still does: walk the tree and hash every file, run the checks over the facts, ask git for the commit, and record the run. When `cargo llvm-cov` (or another coverage tool) is installed and configured, `static.crap` wants a coverage report even at `quick`: a fresh cached report is reused, but after any change to the tree the next run measures coverage again with the whole test suite, cold or warm alike.
+What a warm run still does: walk the tree and hash every file, run the checks over the facts, ask git for the commit, and record the run. A run makes a check's optional facts only within its depth ([ADR-162](docs/adr/CUPEL_DECISION_162.md)), so `static.crap` at `quick` reads a coverage report only while a fresh cached one exists; after a change to the tree it scores no CRAP until a `standard` run measures coverage again. A `quick` run never runs the test suite.
 
 ### MCP
 

@@ -249,6 +249,11 @@ pub struct ToolDescription {
     pub format: Option<String>,
     /// Detection rules, any one of which selects it; empty for the fallback.
     pub detect: Vec<String>,
+    /// Rules any one of which sets it aside where it was selected, because the project's own
+    /// entry point runs something else (ADR-162); absent when it has none.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub defer: Vec<String>,
     /// Default command templates.
     pub commands: Vec<CommandTemplate>,
     /// The command template that installs it, with the launcher's values as placeholders;

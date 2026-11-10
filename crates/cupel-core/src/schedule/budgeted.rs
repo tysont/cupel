@@ -136,9 +136,9 @@ impl<'s, 'a> Costing<'s, 'a> {
     /// The producer tasks of `task`'s closure: a run for every fact its check reaches, in its
     /// language and its family siblings', that is not made yet.
     fn closure(&mut self, task: &Task<'_>) -> Vec<usize> {
-        let kinds = manifest_kinds(task.check.manifest());
         let mut closure = BTreeSet::new();
         for lang in std::iter::once(&task.lang).chain(&task.siblings) {
+            let kinds = manifest_kinds(task.check.manifest(), self.store, lang);
             let reached = self.store.deciding(lang).reached(&kinds);
             for kind in reached {
                 if self.store.made.contains_key(&(kind, lang.id.clone())) {

@@ -45,6 +45,9 @@ values = { x = "yarn", run = "yarn run", add = "yarn add --dev" }
 tool = "npm"
 values = { x = "npx", run = "npm run", add = "npm install --save-dev" }
 
+# A root whose own `test` script runs something other than a runner (`pnpm -r test`, a script per
+# package) defers that runner: its command at the root would not be the project's tests, and it can
+# reach tiers the project runs apart, such as tests against a deployed environment (ADR-162).
 [[rows.runners]]
 id = "tool.vitest"
 detect = [
@@ -52,6 +55,7 @@ detect = [
   { json = "package.json", path = ["devDependencies", "vitest"], members = true },
 ]
 command = "<x> vitest run"
+defer = [{ json = "package.json", path = ["scripts", "test"], lacks = "vitest" }]
 install = "<add> vitest"
 
 [[rows.runners]]
@@ -61,6 +65,7 @@ detect = [
   { json = "package.json", path = ["devDependencies", "jest"], members = true },
 ]
 command = "<x> jest"
+defer = [{ json = "package.json", path = ["scripts", "test"], lacks = "jest" }]
 install = "<add> jest"
 
 [[rows.runners]]
@@ -70,10 +75,12 @@ detect = [
   { json = "package.json", path = ["devDependencies", "mocha"], members = true },
 ]
 command = "<x> mocha"
+defer = [{ json = "package.json", path = ["scripts", "test"], lacks = "mocha" }]
 
 [[rows.runners]]
 id = "tool.node-test"
 command = "node --test"
+defer = [{ json = "package.json", path = ["scripts", "test"], lacks = "node" }]
 
 [[rows.coverage]]
 id = "tool.vitest-coverage"
