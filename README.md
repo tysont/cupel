@@ -1182,11 +1182,11 @@ The minimized input `[0, 1, 1]` sorts to `[0, 1, 1]`, its reverse `[1, 1, 0]` to
 |---|---|---|
 | Rust | clippy | `cargo clippy --all-targets --message-format=json`, with the project's `[lints]` |
 | Python | mypy, ruff | `mypy --strict --output json` and `ruff check --output-format json` on the files in scope |
-| JavaScript | ESLint | `eslint --format json`, only where the root has a flat config (`eslint.config.js` and its siblings) |
+| JavaScript | ESLint | `eslint --format json --no-warn-ignored` (files the config ignores are skipped), only where the root or a directory above it has a flat config (`eslint.config.js` and its siblings), as ESLint finds it |
 | TypeScript | tsc, ESLint | `tsc --noEmit --strict` over the root's `tsconfig.json`, else over the files in scope; ESLint as for JavaScript |
 | Go | go vet, staticcheck | `go vet -json` and `staticcheck -f json` over the module's packages |
 
-The check runs when at least one of a language's analyzers is installed; each one that is missing, unconfigured (ESLint without a config), or failed (its output could not be read) is a note in the result saying what to install or fix, and the others still run. The finding's evidence holds the `tool`, its `rule`, the `level`, and the `message`; its ID does not change when the line moves. The gate keys are `static.analyze.errors` and `diagnostics`. Results depend on each tool's version, so pin them where a gate reads them.
+The check runs when at least one of a language's analyzers is installed; each one that is missing, unconfigured (ESLint without a config), or failed (its output could not be read) is a note in the result saying what to install or fix, and the others still run. A failure names the project root it happened in, and the roots where the analyzer did run keep their findings ([ADR-169](docs/adr/CUPEL_DECISION_169.md)). The finding's evidence holds the `tool`, its `rule`, the `level`, and the `message`; its ID does not change when the line moves. The gate keys are `static.analyze.errors` and `diagnostics`. Results depend on each tool's version, so pin them where a gate reads them.
 
 ## Dependencies and footprint
 

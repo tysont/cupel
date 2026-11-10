@@ -35,8 +35,8 @@
 //! commands = { "tool.pytest" = "<m> pytest --cov=<packages> --cov-report=lcov:{out}" }
 //! ```
 //!
-//! Detection rules (any one in a list selects the tool): `{ file }` exists in the root
-//! directory; `{ contains, in }` a root file contains the text; `{ mentions, in }` a file in the
+//! Detection rules (any one in a list selects the tool): `{ file, above? }` exists in the root
+//! directory (or, with `above = true`, in it or a directory above it); `{ contains, in }` a root file contains the text; `{ mentions, in }` a file in the
 //! root or a member, matched by glob, names the package (not as part of a longer name);
 //! `{ json, path, prefix?, members? }` a JSON file has a value at `path` (a string starting
 //! with `prefix`, when given), in the root or also in members; `{ all = [...] }` every rule.

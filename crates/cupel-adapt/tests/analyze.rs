@@ -55,6 +55,44 @@ fn analyze(root: &Path, lang: &str, files: &[&str]) -> AnalyzerReport {
         .unwrap()
 }
 
+/// The analyzers' report on `files` (relative to the repository at `root`) for `lang`, with
+/// `dirs` as its project roots.
+fn analyze_roots(root: &Path, lang: &str, dirs: &[&str], files: &[&str]) -> AnalyzerReport {
+    let producer = support::producer(
+        support::shared_registry(),
+        FactKind::AnalyzerReport,
+        ID,
+        lang,
+    );
+    let mut ctx = support::produce_ctx(root, lang, Cancellation::new());
+    ctx.upstream
+        .insert(cupel_core::Produced::new(support::project_info(lang, dirs)).share());
+    let scope = Scope::of_files(files.iter().map(|file| (*file).to_owned()).collect());
+    producer
+        .produce(&ctx, &scope, &mut Vec::new())
+        .unwrap()
+        .downcast::<AnalyzerReport>()
+        .unwrap()
+}
+
+/// The fixture for `lang` for the test `test`, which runs in a temporary directory of its own:
+/// the analyzers node runs keep node's compile cache there. `None` in the parent run, which
+/// leaves the test to that run, or when an analyzer is not installed.
+fn isolated_fixture(test: &str, lang: &str) -> Option<tempfile::TempDir> {
+    if ran_in_own_tmpdir(test) {
+        return None;
+    }
+    fixture(lang)
+}
+
+/// [`isolated_fixture`] moved into the directory `dir` of a new repository.
+fn isolated_fixture_in(test: &str, lang: &str, dir: &str) -> Option<tempfile::TempDir> {
+    let fixture = isolated_fixture(test, lang)?;
+    let repository = tempfile::tempdir().unwrap();
+    fs::rename(fixture.path(), repository.path().join(dir)).unwrap();
+    Some(repository)
+}
+
 /// A copy of the static.analyze fixture for `lang`; `None` (reported as skipped) when an
 /// analyzer the fixtures run is not installed.
 fn fixture(lang: &str) -> Option<tempfile::TempDir> {
@@ -284,4 +322,112 @@ fn listing(root: &Path) -> Vec<String> {
         .collect();
     paths.sort();
     paths
+}
+
+/// It runs in a temporary directory of its own ([`isolated_fixture`]).
+#[test]
+fn eslint_runs_in_a_root_whose_flat_config_is_in_a_directory_above_it() {
+    let Some(dir) = isolated_fixture_in(
+        "eslint_runs_in_a_root_whose_flat_config_is_in_a_directory_above_it",
+        "javascript",
+        "pkg",
+    ) else {
+        return;
+    };
+    fs::rename(
+        dir.path().join("pkg/eslint.config.mjs"),
+        dir.path().join("eslint.config.mjs"),
+    )
+    .unwrap();
+    let report = analyze_roots(dir.path(), "javascript", &["pkg"], &["pkg/ledger.js"]);
+    assert_eq!(
+        summary(&report),
+        [ran(
+            "eslint",
+            &[
+                ("eqeqeq", AnalyzerLevel::Error, "pkg/ledger.js", 2),
+                ("no-unused-vars", AnalyzerLevel::Error, "pkg/ledger.js", 5),
+            ],
+        )]
+    );
+}
+
+/// It runs in a temporary directory of its own ([`isolated_fixture`]).
+#[test]
+fn an_analyzer_failing_in_one_root_names_it_and_keeps_the_other_roots_results() {
+    let Some(dir) = isolated_fixture_in(
+        "an_analyzer_failing_in_one_root_names_it_and_keeps_the_other_roots_results",
+        "typescript",
+        "good",
+    ) else {
+        return;
+    };
+    fs::create_dir_all(dir.path().join("bad")).unwrap();
+    fs::write(dir.path().join("bad/package.json"), "{}\n").unwrap();
+    fs::write(dir.path().join("bad/main.ts"), "export const x = 1;\n").unwrap();
+    fs::write(
+        dir.path().join("bad/tsconfig.json"),
+        "{\"compilerOptions\": {\"types\": [\"absent\"]}}\n",
+    )
+    .unwrap();
+    let report = analyze_roots(
+        dir.path(),
+        "typescript",
+        &["good", "bad"],
+        &["good/ledger.ts", "bad/main.ts"],
+    );
+    let tsc = &report.analyzers[0];
+    assert_eq!(
+        (
+            tsc.status,
+            tsc.results
+                .iter()
+                .map(|result| (result.rule.as_str(), result.location.file.as_str()))
+                .collect::<Vec<_>>(),
+            tsc.detail
+                .as_deref()
+                .and_then(|detail| detail.split_once(": tsc could not check the project"))
+                .map(|(root, _)| root),
+        ),
+        (
+            AnalyzerStatus::Failed,
+            vec![("TS2345", "good/ledger.ts")],
+            Some("bad")
+        ),
+        "{tsc:?}"
+    );
+}
+
+/// It runs in a temporary directory of its own ([`isolated_fixture`]).
+#[test]
+fn a_file_the_eslint_config_ignores_is_not_reported() {
+    let Some(dir) = isolated_fixture(
+        "a_file_the_eslint_config_ignores_is_not_reported",
+        "javascript",
+    ) else {
+        return;
+    };
+    let config = dir.path().join("eslint.config.mjs");
+    let rules = fs::read_to_string(&config).unwrap();
+    fs::write(
+        &config,
+        rules.replacen(
+            "export default [",
+            "export default [\n  { ignores: [\"generated.js\"] },",
+            1,
+        ),
+    )
+    .unwrap();
+    fs::write(dir.path().join("generated.js"), "var x = 1;\n").unwrap();
+    let report = analyze(dir.path(), "javascript", &["ledger.js", "generated.js"]);
+    assert_eq!(
+        summary(&report),
+        [ran(
+            "eslint",
+            &[
+                ("eqeqeq", AnalyzerLevel::Error, "ledger.js", 2),
+                ("no-unused-vars", AnalyzerLevel::Error, "ledger.js", 5),
+            ],
+        )]
+    );
 }

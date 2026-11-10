@@ -149,12 +149,12 @@
             }
           ],
           "detect": [
-            "file `eslint.config.js` exists",
-            "file `eslint.config.mjs` exists",
-            "file `eslint.config.cjs` exists",
-            "file `eslint.config.ts` exists",
-            "file `eslint.config.mts` exists",
-            "file `eslint.config.cts` exists"
+            "file `eslint.config.js` exists in the root or a directory above it",
+            "file `eslint.config.mjs` exists in the root or a directory above it",
+            "file `eslint.config.cjs` exists in the root or a directory above it",
+            "file `eslint.config.ts` exists in the root or a directory above it",
+            "file `eslint.config.mts` exists in the root or a directory above it",
+            "file `eslint.config.cts` exists in the root or a directory above it"
           ],
           "format": null,
           "install": "<add> eslint",

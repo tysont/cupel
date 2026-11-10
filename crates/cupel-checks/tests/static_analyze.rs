@@ -218,6 +218,32 @@ fn a_failed_analyzer_is_a_note_beside_the_results_of_the_others() {
 }
 
 #[test]
+fn an_analyzer_that_failed_in_one_root_reports_the_results_of_the_others() {
+    let mut tsc = not_run(
+        "tsc",
+        AnalyzerStatus::Failed,
+        "tools: tsc could not check the project",
+    );
+    tsc.results = vec![result("TS2345", AnalyzerLevel::Error, "Bad", 5)];
+    let (result, findings) = run(vec![tsc]);
+    assert_eq!(
+        (
+            findings
+                .iter()
+                .map(|finding| finding.kind.as_str())
+                .collect::<Vec<_>>(),
+            result.notes,
+            result.score,
+        ),
+        (
+            vec!["analyze.tsc.TS2345"],
+            vec!["tsc failed: tools: tsc could not check the project".to_owned()],
+            Some(score(1.0, "diagnostics", 1)),
+        )
+    );
+}
+
+#[test]
 fn settings_are_refused() {
     support::assert_refuses_settings(ID);
 }

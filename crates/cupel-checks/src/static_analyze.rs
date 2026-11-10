@@ -94,14 +94,16 @@ impl Check for StaticAnalyze {
         let mut tally = Tally::default();
         for analyzer in &report.analyzers {
             ctx.cancel.checkpoint()?;
-            if analyzer.status == AnalyzerStatus::Ran {
+            // An analyzer that failed in one project root keeps the results of the others.
+            if analyzer.status == AnalyzerStatus::Ran || !analyzer.results.is_empty() {
                 tally.ran += 1;
-                for found in &analyzer.results {
-                    sink.emit(Event::Finding(Box::new(
-                        tally.finding(self, analyzer, found),
-                    )));
-                }
-            } else {
+            }
+            for found in &analyzer.results {
+                sink.emit(Event::Finding(Box::new(
+                    tally.finding(self, analyzer, found),
+                )));
+            }
+            if analyzer.status != AnalyzerStatus::Ran {
                 tally.notes.push(format!(
                     "{} {}: {}",
                     analyzer.tool,

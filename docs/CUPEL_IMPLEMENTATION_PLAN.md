@@ -2333,6 +2333,17 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - Now a root reads the `pnpm-lock.yaml` pnpm installs it from: its workspace's, and only when the root has an importer there. It lists what the importer locks, transitively, with licenses from `node_modules/.pnpm`. Roots sharing a lockfile list each package once.
   - Tests: `cupel-adapt/tests/footprint.rs`, covering two members sharing a lockfile, a stale member lockfile, and a directory that is not a member.
   - Molten now counts 487, matching a separate computation with a real YAML parser.
+- **B10, Area 5** (2026-11-10, [ADR-169](adr/CUPEL_DECISION_169.md)).
+  - The gap: `static.analyze` passed on Molten with nothing analyzed.
+    - ESLint was unconfigured in every member root, because its flat config is at the repository root.
+    - tsc failed in `tools/discovery`, whose dependencies are not installed, and the note named no root.
+    - A failure in one root would also have hidden the others' results.
+  - Now a `file` rule can take `above = true`, which ESLint's rules use. A failure names its root and keeps the other roots' results, and the check reports every result.
+  - ESLint runs with `--no-warn-ignored`, because named files the config ignores had come back as 23 `parse-error`s. An unused `eslint-disable` is `unused-disable-directive`.
+  - Tests:
+    - `cupel-adapt` `rules.rs` (`above`);
+    - `tests/analyze.rs`: ESLint in a root below its config; tsc failing in one of two roots;
+    - `cupel-checks/tests/static_analyze.rs`: a failed analyzer's results.
 
 ## 4. Cross-phase checklist
 

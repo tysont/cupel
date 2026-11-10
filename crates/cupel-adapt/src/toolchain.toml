@@ -122,13 +122,14 @@ install = "<add> typescript"
 
 [[rows.analyzers]]
 id = "tool.eslint"
+# ESLint finds its flat config in the directory it runs in or the nearest one above it.
 detect = [
-  { file = "eslint.config.js" },
-  { file = "eslint.config.mjs" },
-  { file = "eslint.config.cjs" },
-  { file = "eslint.config.ts" },
-  { file = "eslint.config.mts" },
-  { file = "eslint.config.cts" },
+  { file = "eslint.config.js", above = true },
+  { file = "eslint.config.mjs", above = true },
+  { file = "eslint.config.cjs", above = true },
+  { file = "eslint.config.ts", above = true },
+  { file = "eslint.config.mts", above = true },
+  { file = "eslint.config.cts", above = true },
 ]
 command = "<x> eslint --format json"
 install = "<add> eslint"

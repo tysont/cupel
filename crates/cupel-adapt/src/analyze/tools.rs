@@ -248,10 +248,17 @@ fn tsc_command(target: &Target<'_>) -> Option<Vec<String>> {
     }
 }
 
+/// The files in scope are named, so a file the project's config ignores is skipped silently
+/// rather than warned about.
 fn eslint_command(target: &Target<'_>) -> Option<Vec<String>> {
     on_files(
         target,
-        &["--format", "json", "--no-error-on-unmatched-pattern"],
+        &[
+            "--format",
+            "json",
+            "--no-error-on-unmatched-pattern",
+            "--no-warn-ignored",
+        ],
     )
 }
 
@@ -451,6 +458,8 @@ struct EslintFile {
 #[serde(rename_all = "camelCase")]
 struct EslintMessage {
     rule_id: Option<String>,
+    #[serde(default)]
+    fatal: bool,
     severity: u8,
     message: String,
     line: Option<u32>,
@@ -460,7 +469,8 @@ struct EslintMessage {
 }
 
 /// `eslint --format json`: one array of files with their messages; severity 2 is an error, 1 a
-/// warning; a message without a rule (a parse error) is rule `parse-error`.
+/// warning. A message without a rule is `parse-error` when fatal, and otherwise a report on the
+/// file's `eslint-disable` comments: `unused-disable-directive`.
 fn eslint(captured: &Captured) -> Result<Vec<Raw>, String> {
     let text = captured.stdout.trim();
     if text.is_empty() {
@@ -473,7 +483,14 @@ fn eslint(captured: &Captured) -> Result<Vec<Raw>, String> {
         .flat_map(|file| {
             let path = file.file_path;
             file.messages.into_iter().map(move |message| Raw {
-                rule: message.rule_id.unwrap_or_else(|| "parse-error".to_owned()),
+                rule: message.rule_id.unwrap_or_else(|| {
+                    if message.fatal {
+                        "parse-error"
+                    } else {
+                        "unused-disable-directive"
+                    }
+                    .to_owned()
+                }),
                 level: if message.severity >= 2 {
                     AnalyzerLevel::Error
                 } else {
@@ -714,8 +731,8 @@ mod tests {
     }
 
     #[test]
-    fn eslint_maps_severities_and_parse_errors() {
-        let stdout = r#"[{"filePath":"/r/app.js","messages":[{"ruleId":"eqeqeq","severity":2,"message":"Expected '==='.","line":1,"column":23,"endLine":1,"endColumn":25},{"ruleId":null,"fatal":true,"severity":2,"message":"Parsing error","line":3,"column":1},{"ruleId":"no-console","severity":1,"message":"Unexpected console.","line":4,"column":1,"endLine":4,"endColumn":12}]}]"#;
+    fn eslint_maps_severities_parse_errors_and_unused_directives() {
+        let stdout = r#"[{"filePath":"/r/app.js","messages":[{"ruleId":"eqeqeq","severity":2,"message":"Expected '==='.","line":1,"column":23,"endLine":1,"endColumn":25},{"ruleId":null,"fatal":true,"severity":2,"message":"Parsing error","line":3,"column":1},{"ruleId":"no-console","severity":1,"message":"Unexpected console.","line":4,"column":1,"endLine":4,"endColumn":12},{"ruleId":null,"severity":1,"message":"Unused eslint-disable directive (no problems were reported from 'no-console').","line":5,"column":1}]}]"#;
         let found = eslint(&captured(stdout, "")).unwrap();
         assert_eq!(
             found
@@ -725,7 +742,8 @@ mod tests {
             [
                 ("eqeqeq", AnalyzerLevel::Error, 1),
                 ("parse-error", AnalyzerLevel::Error, 3),
-                ("no-console", AnalyzerLevel::Warning, 4)
+                ("no-console", AnalyzerLevel::Warning, 4),
+                ("unused-disable-directive", AnalyzerLevel::Warning, 5)
             ]
         );
     }

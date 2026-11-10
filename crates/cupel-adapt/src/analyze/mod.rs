@@ -8,7 +8,8 @@
 //! names none), reads what the tool reported, and keeps the results in files of its scope,
 //! relative to the repository root, without exact duplicates. An analyzer that is not
 //! installed, whose detection rules do not hold in a root, or whose output cannot be read is
-//! recorded with that status; the others still run.
+//! recorded with that status; the others still run. A failure names the root it happened in,
+//! and the roots that succeeded keep their results.
 
 mod tools;
 
@@ -176,6 +177,7 @@ impl Run<'_> {
             return Ok(run);
         };
         let mut configured = false;
+        let mut problems = Vec::new();
         for (dir, packages) in roots(self.ctx) {
             let absolute = canonical(&self.root.join(&dir));
             if !toolchain::detects(&ProducerId::from(self.spec.id), &absolute) {
@@ -199,11 +201,12 @@ impl Run<'_> {
             };
             match self.run_root(&target, &command)? {
                 Ok(raws) => self.keep(&mut run.results, &absolute, raws),
-                Err(problem) => {
-                    run.status = AnalyzerStatus::Failed;
-                    run.detail = Some(problem);
-                }
+                Err(problem) => problems.push(format!("{dir}: {problem}")),
             }
+        }
+        if !problems.is_empty() {
+            run.status = AnalyzerStatus::Failed;
+            run.detail = Some(problems.join("\n"));
         }
         if !configured {
             run.status = AnalyzerStatus::Unconfigured;

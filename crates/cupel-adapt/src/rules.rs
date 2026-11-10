@@ -1,5 +1,5 @@
 // ABOUTME: Detection rules of the toolchain table: what must be true of a project root on disk for a
-// ABOUTME: launcher or tool to be chosen (a file, its text, a package mention, or a JSON value).
+// ABOUTME: launcher or tool to be chosen (a file, here or above, its text, a package mention, or a JSON value).
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -11,8 +11,13 @@ use serde_json::Value;
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub enum Rule {
-    /// The file exists in the root directory.
-    File { file: String },
+    /// The file exists in the root directory or, with `above`, in it or any directory above it
+    /// (as `ESLint` finds its flat config from where it runs).
+    File {
+        file: String,
+        #[serde(default)]
+        above: bool,
+    },
     /// The root directory's file `in` contains the text.
     Contains {
         contains: String,
@@ -58,29 +63,14 @@ impl Dirs<'_> {
 impl Rule {
     pub(crate) fn holds(&self, dirs: &Dirs<'_>) -> bool {
         match self {
-            Self::File { file } => dirs.root.join(file).exists(),
+            Self::File { file, above: false } => dirs.root.join(file).exists(),
+            Self::File { file, above: true } => {
+                dirs.root.ancestors().any(|dir| dir.join(file).exists())
+            }
             Self::Contains { contains, file } => {
                 fs::read_to_string(dirs.root.join(file)).is_ok_and(|text| text.contains(contains))
             }
-            Self::Mentions { mentions, files } => {
-                let globs: Vec<_> = files
-                    .iter()
-                    .filter_map(|glob| Glob::new(glob).ok())
-                    .map(|glob| glob.compile_matcher())
-                    .collect();
-                dirs.all().any(|dir| {
-                    fs::read_dir(dir)
-                        .into_iter()
-                        .flatten()
-                        .flatten()
-                        .filter(|entry| {
-                            let name = entry.file_name();
-                            globs.iter().any(|glob| glob.is_match(&name))
-                        })
-                        .filter_map(|entry| fs::read_to_string(entry.path()).ok())
-                        .any(|text| names(&text, mentions))
-                })
-            }
+            Self::Mentions { mentions, files } => mentioned(dirs, mentions, files),
             Self::Json {
                 json,
                 path,
@@ -120,7 +110,10 @@ impl Rule {
     /// The rule in words, for `describe language`.
     pub fn describe(&self) -> String {
         match self {
-            Self::File { file } => format!("file `{file}` exists"),
+            Self::File { file, above: false } => format!("file `{file}` exists"),
+            Self::File { file, above: true } => {
+                format!("file `{file}` exists in the root or a directory above it")
+            }
             Self::Contains { contains, file } => format!("`{file}` contains `{contains}`"),
             Self::Mentions { mentions, files } => format!(
                 "{} in the root or a member mentions `{mentions}`",
@@ -161,6 +154,28 @@ impl Rule {
                 .join(", and "),
         }
     }
+}
+
+/// Whether a file of the root or a member whose name matches one of `files` (globs) names the
+/// package `mentions`.
+fn mentioned(dirs: &Dirs<'_>, mentions: &str, files: &[String]) -> bool {
+    let globs: Vec<_> = files
+        .iter()
+        .filter_map(|glob| Glob::new(glob).ok())
+        .map(|glob| glob.compile_matcher())
+        .collect();
+    dirs.all().any(|dir| {
+        fs::read_dir(dir)
+            .into_iter()
+            .flatten()
+            .flatten()
+            .filter(|entry| {
+                let name = entry.file_name();
+                globs.iter().any(|glob| glob.is_match(&name))
+            })
+            .filter_map(|entry| fs::read_to_string(entry.path()).ok())
+            .any(|text| names(&text, mentions))
+    })
 }
 
 /// Whether `text` contains `name` as a whole package name: not preceded or followed by a
@@ -212,12 +227,44 @@ mod tests {
         assert!(toml::from_str::<Rules>("detect = [{ file = \"a\", typo = 1 }]").is_err());
     }
 
+    /// A root directory with `file` holding `text`, and an empty directory `member` under it.
+    fn root_with(member: &str, file: &str, text: &str) -> (tempfile::TempDir, PathBuf) {
+        let dir = tempfile::tempdir().unwrap();
+        let member = dir.path().join(member);
+        fs::create_dir_all(&member).unwrap();
+        fs::write(dir.path().join(file), text).unwrap();
+        (dir, member)
+    }
+
+    #[test]
+    fn a_file_rule_with_above_holds_for_the_file_in_a_directory_above_the_root() {
+        let (dir, member) = root_with("apps/web", "eslint.config.js", "export default [];\n");
+        let rules: Vec<Rule> = toml::from_str::<std::collections::BTreeMap<String, Vec<Rule>>>(
+            r#"detect = [
+                { file = "eslint.config.js" },
+                { file = "eslint.config.js", above = true },
+                { file = "eslint.config.mjs", above = true },
+            ]"#,
+        )
+        .unwrap()
+        .remove("detect")
+        .unwrap();
+        let at = |root: &Path| {
+            let dirs = Dirs { root, members: &[] };
+            rules
+                .iter()
+                .map(|rule| rule.holds(&dirs))
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            (at(&member), at(dir.path())),
+            (vec![false, true, false], vec![true, true, false])
+        );
+    }
+
     #[test]
     fn json_rules_read_paths_prefixes_and_optionally_members() {
-        let dir = tempfile::tempdir().unwrap();
-        let member = dir.path().join("m");
-        fs::create_dir_all(&member).unwrap();
-        fs::write(dir.path().join("p.json"), r#"{"pm": "pnpm@9"}"#).unwrap();
+        let (dir, member) = root_with("m", "p.json", r#"{"pm": "pnpm@9"}"#);
         fs::write(member.join("p.json"), r#"{"deps": {"x": "1"}}"#).unwrap();
         let members = [member];
         let dirs = Dirs {
