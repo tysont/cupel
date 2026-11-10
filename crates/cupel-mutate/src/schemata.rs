@@ -54,12 +54,13 @@ pub fn rewriter(lang: &str) -> Option<&'static dyn Rewriter> {
 }
 
 /// Runs the mutants of `run`: behind one validated schemata build where `rewriter` places them,
-/// as file copies otherwise, each with why it fell back (ADR-082 §5–6).
+/// as file copies otherwise, each with why it fell back (ADR-082 §5–6); `None` for each mutant
+/// the run's cancellation left without an outcome (ADR-172).
 pub fn run_file(
     execution: &Execution<'_>,
     rewriter: Option<&dyn Rewriter>,
     run: &FileRun<'_>,
-) -> Result<Vec<Ran>> {
+) -> Result<Vec<Option<Ran>>> {
     let Some(rewriter) = rewriter else {
         return execution.run_file(run, &Build::Copies);
     };
@@ -105,7 +106,7 @@ struct Attempt<'a> {
 impl Attempt<'_> {
     /// The mutants' runs behind a validated schemata build; else why the whole file falls back
     /// (`None` when every gate has its own reason).
-    fn schemata(&mut self) -> Result<std::result::Result<Vec<Ran>, Option<String>>> {
+    fn schemata(&mut self) -> Result<std::result::Result<Vec<Option<Ran>>, Option<String>>> {
         let (run, file) = (self.run, self.run.file);
         let text = String::from_utf8_lossy(run.original);
         let mut failed = None;
@@ -165,7 +166,7 @@ impl Attempt<'_> {
         source: &str,
         limits: &[std::time::Duration],
         prebuilt: Option<&cupel_core::Prebuilt>,
-    ) -> Result<Vec<Ran>> {
+    ) -> Result<Vec<Option<Ran>>> {
         let ids: Vec<Option<u32>> = self
             .gates
             .iter()
@@ -195,7 +196,7 @@ impl Attempt<'_> {
         limits: &[std::time::Duration],
         prebuilt: Option<&cupel_core::Prebuilt>,
         ids: &[Option<u32>],
-    ) -> Result<Vec<Ran>> {
+    ) -> Result<Vec<Option<Ran>>> {
         let (gated, copies): (Vec<usize>, Vec<usize>) =
             (0..ids.len()).partition(|index| ids[*index].is_some());
         let part = |indexes: &[usize]| FileRun {
@@ -217,25 +218,27 @@ impl Attempt<'_> {
         let mut found: Vec<Option<Ran>> = vec![None; ids.len()];
         let ran = self.execution.run_file(&part(&gated), &build)?;
         for (index, ran) in gated.iter().zip(ran) {
-            found[*index] = Some(ran);
+            found[*index] = ran;
         }
         let ran = self.execution.run_file(&part(&copies), &Build::Copies)?;
         for (index, ran) in copies.iter().zip(ran) {
-            found[*index] = Some(ran);
+            found[*index] = ran;
         }
-        let ran = found.into_iter().flatten().collect();
-        Ok(with_fallback(ran, self.gates, &self.fallback, None))
+        Ok(with_fallback(found, self.gates, &self.fallback, None))
     }
 }
 
 /// `ran` with each file copy's reason: its own, else the whole file's `failed`.
 fn with_fallback(
-    mut ran: Vec<Ran>,
+    mut ran: Vec<Option<Ran>>,
     gates: &[Gate<'_>],
     fallback: &BTreeMap<u32, String>,
     failed: Option<&str>,
-) -> Vec<Ran> {
+) -> Vec<Option<Ran>> {
     for (ran, gate) in ran.iter_mut().zip(gates) {
+        let Some(ran) = ran else {
+            continue;
+        };
         if ran.strategy == cupel_core::MutationStrategy::FileCopy {
             ran.fallback = fallback
                 .get(&gate.id)

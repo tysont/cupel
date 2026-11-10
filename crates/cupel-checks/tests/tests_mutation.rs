@@ -125,6 +125,7 @@ fn metrics() -> Vec<(&'static str, MetricPer)> {
         ("out_of_memory", MetricPer::Scope),
         ("uncovered", MetricPer::Scope),
         ("unviable", MetricPer::Scope),
+        ("not_run", MetricPer::Scope),
         ("equivalent", MetricPer::Scope),
         ("executed", MetricPer::Scope),
         ("reused", MetricPer::Scope),
@@ -438,6 +439,55 @@ fn a_mutant_killed_over_its_memory_budget_is_a_note_left_out_of_the_score() {
     assert_eq!((score.value, score.n), (1.0, 1));
     assert_eq!(result.metrics.get("out_of_memory"), Some(&1.0));
     assert_eq!(result.status, CheckStatus::Pass);
+}
+
+/// A production the run's cancellation cut short is scored over the mutants that ran, reports
+/// their survivors, and is `partial`, with a note saying how many mutants were not run; a mutant
+/// not run is no finding of its own (ADR-172).
+#[test]
+fn a_cut_production_is_scored_over_the_mutants_that_ran_and_is_partial() {
+    let not_run = |line, col, from, to| {
+        let mut mutant = mutant(line, col, from, to, MutantOutcome::NotRun);
+        (mutant.tests, mutant.duration_ms) = (Vec::new(), None);
+        mutant
+    };
+    let (result, recorded) = run(vec![
+        mutant(6, 8, ">=", ">", MutantOutcome::Survived),
+        mutant(7, 24, "10", "11", MutantOutcome::Killed),
+        not_run(8, 12, "*", "/"),
+        not_run(8, 14, "1", "0"),
+    ]);
+    assert_eq!(
+        kinds(&recorded.findings),
+        [("mutant.survived", Severity::Fail, 0.95)]
+    );
+    assert_eq!(result.status, CheckStatus::Partial);
+    let score = result.score.unwrap();
+    assert_eq!((score.value, score.n), (0.5, 2));
+    assert_eq!(
+        (
+            result.metrics.get("not_run"),
+            result.metrics.get("executed")
+        ),
+        (Some(&2.0), Some(&2.0))
+    );
+    assert_eq!(
+        result.notes,
+        [
+            "2 of 4 mutants were not run: the run was cut short by --budget or --timeout. The \
+          score and findings are over the mutants that ran; the next run reuses their outcomes \
+          and runs the rest."
+        ]
+    );
+    let (one, _) = run(vec![
+        mutant(7, 24, "10", "11", MutantOutcome::Killed),
+        not_run(8, 14, "1", "0"),
+    ]);
+    assert!(
+        one.notes[0].starts_with("1 of 2 mutants was not run:"),
+        "{:?}",
+        one.notes
+    );
 }
 
 /// Timeouts and unviable mutants are left out of the score, so a scope of only those has

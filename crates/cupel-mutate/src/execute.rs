@@ -202,11 +202,12 @@ impl Execution<'_> {
     }
 
     /// Runs every mutant of `run` across the slots, each slot taking the next mutant when it is
-    /// free, gated mutants first; the outcomes in the order of `run.mutants`.
+    /// free, gated mutants first; the outcomes in the order of `run.mutants`, `None` for each
+    /// mutant the run's cancellation left without one (ADR-172).
     ///
     /// File copies under a runner that builds once run in the first slot alone, where the build
     /// is: any other slot would build everything to run one (ADR-150 §8).
-    pub fn run_file(&self, run: &FileRun<'_>, build: &Build<'_>) -> Result<Vec<Ran>> {
+    pub fn run_file(&self, run: &FileRun<'_>, build: &Build<'_>) -> Result<Vec<Option<Ran>>> {
         let mut order: Vec<usize> = (0..run.mutants.len()).collect();
         order.sort_by_key(|index| id(build, *index).is_none());
         let next = AtomicUsize::new(0);
@@ -236,11 +237,13 @@ impl Execution<'_> {
                 .filter_map(|handle| handle.join().unwrap_or_else(|_| Err(panicked())).err())
                 .collect()
         });
-        if let Some(failure) = failures.into_iter().next() {
+        if let Some(failure) = failures
+            .into_iter()
+            .find(|failure| *failure != Error::Cancelled)
+        {
             return Err(failure);
         }
-        let found = found.into_inner().unwrap_or_default();
-        Ok(found.into_iter().flatten().collect())
+        Ok(found.into_inner().unwrap_or_default())
     }
 
     /// Writes `run`'s original file back into every slot it uses, after its mutants ended in an
@@ -539,6 +542,8 @@ impl Execution<'_> {
             tests: selected(&selection),
         };
         self.phases.took(MutationPhase::Run, served, elapsed);
+        // A run the cancellation reached has no outcome, whatever it reported (ADR-172).
+        self.ctx.cancel.checkpoint()?;
         match ran {
             Err(Error::OutOfMemory { .. }) => Ok(out_of_memory(elapsed, strategy)),
             Err(error) => Err(error),
@@ -630,10 +635,12 @@ impl Execution<'_> {
         let selection = TestSelection::Tests(vec![test.id.clone()]);
         let started = Instant::now();
         let tmp = scratch()?;
-        match self
+        let ran = self
             .runner
-            .run(&worker.ctx, &selection, &within(&options, &tmp))
-        {
+            .run(&worker.ctx, &selection, &within(&options, &tmp));
+        // A run the cancellation reached has no outcome, whatever it reported (ADR-172).
+        self.ctx.cancel.checkpoint()?;
+        match ran {
             Err(Error::OutOfMemory { .. }) => Ok(None),
             Err(error) => Err(error),
             Ok(ran) => Ok(Some((ran, started.elapsed() >= timeout))),

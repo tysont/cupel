@@ -36,6 +36,7 @@
         "executed": 0.0,
         "fallback": 0.0,
         "killed": 1.0,
+        "not_run": 0.0,
         "out_of_memory": 0.0,
         "plan_ms": "<duration-ms>",
         "reused": 1.0,

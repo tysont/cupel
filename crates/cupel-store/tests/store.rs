@@ -910,6 +910,50 @@ fn mutants_are_indexed_and_found_again_by_their_cache_key() {
     );
 }
 
+/// A mutant a cut run left `not-run` has no outcome to reuse or to order the next run by: it is
+/// not stored, so the next run runs it, and an earlier outcome of its site stays the last
+/// (ADR-172).
+#[test]
+fn a_mutant_not_run_is_not_stored() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let survived = mutant(
+        "00000000000000b1",
+        "<=",
+        MutantOutcome::Survived,
+        Some("k1"),
+    );
+    store
+        .record_mutants(&run_id(1), &python(), &outcomes(vec![survived]))
+        .unwrap();
+    let mut not_run = mutant("00000000000000b1", "<=", MutantOutcome::NotRun, Some("k2"));
+    (not_run.tests, not_run.duration_ms) = (Vec::new(), None);
+    let killed = mutant("00000000000000b2", ">", MutantOutcome::Killed, Some("k3"));
+    store
+        .record_mutants(
+            &run_id(2),
+            &python(),
+            &outcomes(vec![not_run, killed.clone()]),
+        )
+        .unwrap();
+    let keys = ["k1", "k2", "k3"].map(str::to_owned);
+    let found: Vec<String> = store.mutants_by_key(&keys).unwrap().into_keys().collect();
+    assert_eq!(found, ["k1", "k3"]);
+    let last: Vec<(String, MutantOutcome)> = store
+        .last_mutant_outcomes()
+        .unwrap()
+        .into_iter()
+        .map(|(site, outcome)| (site.site_hash, outcome))
+        .collect();
+    assert_eq!(
+        last,
+        [
+            ("00000000000000b1".to_owned(), MutantOutcome::Survived),
+            ("00000000000000b2".to_owned(), MutantOutcome::Killed),
+        ]
+    );
+}
+
 #[test]
 fn the_last_outcome_of_each_site_and_replacement_is_kept() {
     let repo = Repo::new();

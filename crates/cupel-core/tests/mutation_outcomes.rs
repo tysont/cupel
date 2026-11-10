@@ -42,7 +42,7 @@ fn mutant(file: &str, line: u32, to: &str, outcome: MutantOutcome) -> Mutant {
 fn mutation_outcomes_is_a_fact_kind_with_a_versioned_schema() {
     assert_eq!(FactKind::MutationOutcomes.as_str(), "mutation-outcomes");
     assert!(!FactKind::syntactic().contains(&FactKind::MutationOutcomes));
-    assert_eq!(schema::fact_version(FactKind::MutationOutcomes), Some(2));
+    assert_eq!(schema::fact_version(FactKind::MutationOutcomes), Some(3));
 }
 
 #[test]
@@ -84,6 +84,7 @@ fn only_killed_and_survived_mutants_are_scored() {
         MutantOutcome::OutOfMemory,
         MutantOutcome::Uncovered,
         MutantOutcome::Unviable,
+        MutantOutcome::NotRun,
     ]
     .into_iter()
     .map(|outcome| (outcome, outcome.killed()))
@@ -97,10 +98,16 @@ fn only_killed_and_survived_mutants_are_scored() {
             (MutantOutcome::OutOfMemory, None),
             (MutantOutcome::Uncovered, None),
             (MutantOutcome::Unviable, None),
+            (MutantOutcome::NotRun, None),
         ]
     );
     assert_eq!(MutantOutcome::Timeout.as_str(), "timeout");
     assert_eq!(MutantOutcome::OutOfMemory.as_str(), "out-of-memory");
+    assert_eq!(MutantOutcome::NotRun.as_str(), "not-run");
+    assert_eq!(
+        serde_json::to_value(MutantOutcome::NotRun).unwrap(),
+        serde_json::json!("not-run")
+    );
 }
 
 #[test]

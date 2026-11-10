@@ -1,6 +1,6 @@
 # CUPEL_DECISION_086: The budget scheduler: task cost from the store's history, task value, the knapsack with dependency closure, and `--jobs`
 
-**Date:** 2026-10-16 · **Status:** accepted · **Phase:** P4.3
+**Date:** 2026-10-16 · **Status:** accepted; §9's last sentence superseded by [172](CUPEL_DECISION_172.md): a mutation run cut by the budget reports a score over the mutants it finished · **Phase:** P4.3
 
 ## Context
 
@@ -46,5 +46,5 @@ None of them says what a task and its shape are, which durations are recorded an
 - `--budget 1s` on a fixture with a test suite skips every check that reaches `TestResults` and runs the static checks; the plan says so with each skipped check's `est_ms`, and the agent can rerun with more time.
 - The store grows one row per production and check per run; nothing prunes it, as nothing prunes `runs`.
 - Every envelope's skipped objects gain `"est_ms": null`; goldens changed by that key only. Dry runs' `est_ms` and `est_total_ms` now include producer runs.
-- A mutation run cut by the budget loses its completed mutants for that run (they are not stored); making the engine return a partial fact needs an outcome for "not run" and a payload version, left as an open item.
+- A mutation run cut by the budget loses its completed mutants for that run (they are not stored); making the engine return a partial fact needs an outcome for "not run" and a payload version, left as an open item. Closed by [172](CUPEL_DECISION_172.md): the engine returns the mutants it finished, the rest `not-run`, the check scores what ran, and the store keeps it for the next run.
 - A process sizes rayon's global pool once, so an invocation with `--jobs` runs in its own process rather than through the daemon (ADR-085 §4); a pool per request would let the daemon serve it. Runners' own parallelism is not capped by `--jobs`.

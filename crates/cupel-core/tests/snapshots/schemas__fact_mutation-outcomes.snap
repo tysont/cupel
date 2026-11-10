@@ -6,7 +6,7 @@ expression: pretty(&schema)
   "$id": "https://tysont.github.io/cupel/schema/v1/fact/mutation-outcomes.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "MutationOutcomes",
-  "description": "What mutation testing found in scope (ADR-080; version 2 adds how each mutant was built,\nADR-082).",
+  "description": "What mutation testing found in scope (ADR-080; version 2 adds how each mutant was built,\nADR-082; version 3 the `not-run` outcome of a production cut short, ADR-172).",
   "type": "object",
   "properties": {
     "depth": {
@@ -63,7 +63,7 @@ expression: pretty(&schema)
     "per_test",
     "runner"
   ],
-  "x-cupel-fact-version": 2,
+  "x-cupel-fact-version": 3,
   "$defs": {
     "CostClass": {
       "description": "How expensive a check or producer is to run. The same names select a run's depth (design §5.8).",
@@ -272,6 +272,11 @@ expression: pretty(&schema)
           "description": "Its run did not complete and no test failed: it did not build or load.",
           "type": "string",
           "const": "unviable"
+        },
+        {
+          "description": "The run was cut short (by `--budget` or `--timeout`) before it ran, or while it ran, so\nit has no outcome (ADR-172).",
+          "type": "string",
+          "const": "not-run"
         }
       ]
     },

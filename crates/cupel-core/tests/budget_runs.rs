@@ -19,11 +19,13 @@ use cupel_core::{
 };
 
 /// Makes a default `F` for rust after waiting `wait` on the run's cancellation, counting its
-/// productions and remembering the concurrency cap it was handed.
+/// productions and remembering the concurrency cap it was handed; cut short, it fails, or makes
+/// its fact anyway when it `keeps` what it made (as the mutation engine does, ADR-172).
 struct Slow<F> {
     id: &'static str,
     cost: CostClass,
     wait: Duration,
+    keeps: bool,
     made: Arc<AtomicUsize>,
     jobs: Arc<Mutex<Vec<Option<NonZeroUsize>>>>,
     make: fn(&Scope) -> F,
@@ -53,7 +55,7 @@ impl<F: Fact> Producer<F> for Slow<F> {
     fn produce(&self, ctx: &ProduceCtx, scope: &Scope, _: &mut dyn EventSink) -> Result<F> {
         self.made.fetch_add(1, Ordering::SeqCst);
         self.jobs.lock().unwrap().push(ctx.focus.jobs);
-        if !ctx.cancel.wait(self.wait) {
+        if !ctx.cancel.wait(self.wait) && !self.keeps {
             return Err(Error::Cancelled);
         }
         Ok((self.make)(scope))
@@ -65,6 +67,7 @@ struct Shape {
     id: &'static str,
     cost: CostClass,
     wait: Duration,
+    keeps: bool,
     made: Arc<AtomicUsize>,
     jobs: Arc<Mutex<Vec<Option<NonZeroUsize>>>>,
 }
@@ -76,6 +79,7 @@ impl Shape {
             id: self.id,
             cost: self.cost,
             wait: self.wait,
+            keeps: self.keeps,
             made: self.made,
             jobs: self.jobs,
             make: |_| F::default(),
@@ -129,7 +133,8 @@ fn graded(id: &str, tier: u8, cost: CostClass, needs: &[FactKind]) -> Box<dyn Ch
 }
 
 /// Registries with `Symbols` (quick, instant), `Decisions` (quick, instant), `ModuleGraph`
-/// (standard, instant), and `TestFrames` (standard, waiting `slow`), all for rust.
+/// (standard, instant), and `TestFrames` (standard, waiting `slow`, and keeping what it made
+/// when cut short if `keeps`), all for rust.
 struct World {
     dir: tempfile::TempDir,
     checks: CheckRegistry,
@@ -141,6 +146,10 @@ struct World {
 
 impl World {
     fn new(checks: Vec<Box<dyn Check>>, slow: Duration) -> Self {
+        Self::keeping(checks, slow, false)
+    }
+
+    fn keeping(checks: Vec<Box<dyn Check>>, slow: Duration, keeps: bool) -> Self {
         let dir = tempfile::tempdir().unwrap();
         let graphs_made = Arc::new(AtomicUsize::new(0));
         let jobs_seen = Arc::new(Mutex::new(Vec::new()));
@@ -149,6 +158,7 @@ impl World {
             id,
             cost,
             wait,
+            keeps: false,
             made: Arc::clone(made),
             jobs: Arc::clone(&jobs_seen),
         };
@@ -166,7 +176,10 @@ impl World {
             &graphs_made,
         );
         producers.register::<ModuleGraph, _>(graph.defaulted());
-        let frames = producer("tool.frames", CostClass::Standard, slow, &none);
+        let frames = Shape {
+            keeps,
+            ..producer("tool.frames", CostClass::Standard, slow, &none)
+        };
         producers.register::<TestFrames, _>(frames.defaulted());
         let mut registry = CheckRegistry::default();
         for check in checks {
@@ -389,6 +402,39 @@ fn a_task_running_at_the_deadline_is_cut_and_the_run_ends_near_the_budget() {
     assert!(elapsed >= Duration::from_millis(300), "took {elapsed:?}");
     assert_eq!(result(&outcome, "tests.slow").status, CheckStatus::Partial);
     assert!(outcome.interrupted);
+}
+
+/// A production the deadline cut short that returns what it made (the mutation engine,
+/// ADR-172) is not timed: its time says nothing of what the whole production costs. The check
+/// is still cut, and the run partial.
+#[test]
+fn a_production_cut_short_that_keeps_what_it_made_is_not_timed() {
+    let checks = vec![graded(
+        "tests.slow",
+        2,
+        CostClass::Standard,
+        &[FactKind::TestFrames],
+    )];
+    let world = World::keeping(checks, HANG, true);
+    let mut history = History::default();
+    recorded(&mut history, "tool.frames", 10);
+    let (outcome, _) = world.run(Resources {
+        budget: Some(budget(300)),
+        history,
+        ..Resources::default()
+    });
+    assert_eq!(result(&outcome, "tests.slow").status, CheckStatus::Partial);
+    assert!(outcome.interrupted);
+    let frames = TaskShape::producer(
+        &ProducerId::from("tool.frames"),
+        &LangId::from("rust"),
+        false,
+    );
+    assert!(
+        outcome.durations.iter().all(|timed| timed.shape != frames),
+        "{:?}",
+        outcome.durations
+    );
 }
 
 #[test]

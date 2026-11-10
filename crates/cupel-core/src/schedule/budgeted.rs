@@ -206,7 +206,8 @@ fn production(
 impl FactStore<'_> {
     /// Runs `produce`, `producer`'s production for `lang`, forwarding the events it emitted and
     /// recording how long it took when it succeeded, under its shape (ADR-086 §2): `estimate`
-    /// says whether it would read its cache.
+    /// says whether it would read its cache. A production the run's cancellation cut short is
+    /// not timed, even when it returns what it finished (ADR-172).
     pub(super) fn timed<T>(
         &mut self,
         producer: &ProducerId,
@@ -218,7 +219,7 @@ impl FactStore<'_> {
         let mut events = Vec::new();
         let started = Instant::now();
         let result = produce(&mut events);
-        if result.is_ok() {
+        if result.is_ok() && !self.cancel.is_cancelled() {
             self.durations.push(TaskDuration {
                 shape: TaskShape::producer(producer, &lang.id, is_cached(estimate)),
                 duration_ms: elapsed_ms(started),

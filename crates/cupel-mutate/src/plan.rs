@@ -37,7 +37,7 @@ pub struct Inputs<'a> {
 /// One mutant to account for.
 #[derive(Debug, Clone)]
 pub struct Planned {
-    /// Its outcome is `uncovered` until it is run or reused.
+    /// Its outcome is `uncovered` until it is reused, or `not-run` until it is run (ADR-172).
     pub mutant: Mutant,
     /// The mutated source of its file.
     pub source: String,

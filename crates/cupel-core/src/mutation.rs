@@ -12,7 +12,7 @@ use crate::id::ProducerId;
 use crate::syntax::{MutationOperator, Span, SymbolKey};
 
 /// What mutation testing found in scope (ADR-080; version 2 adds how each mutant was built,
-/// ADR-082).
+/// ADR-082; version 3 the `not-run` outcome of a production cut short, ADR-172).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct MutationOutcomes {
     /// The producer, such as `engine.mutation`.
@@ -118,7 +118,7 @@ pub struct ExcludedTest {
 
 impl Fact for MutationOutcomes {
     const KIND: FactKind = FactKind::MutationOutcomes;
-    const VERSION: u32 = 2;
+    const VERSION: u32 = 3;
 }
 
 inventory::submit!(
@@ -247,6 +247,9 @@ pub enum MutantOutcome {
     Uncovered,
     /// Its run did not complete and no test failed: it did not build or load.
     Unviable,
+    /// The run was cut short (by `--budget` or `--timeout`) before it ran, or while it ran, so
+    /// it has no outcome (ADR-172).
+    NotRun,
 }
 
 impl MutantOutcome {
@@ -261,19 +264,22 @@ impl MutantOutcome {
         match self {
             Self::Killed => Some(true),
             Self::Survived => Some(false),
-            Self::Timeout | Self::OutOfMemory | Self::Uncovered | Self::Unviable => None,
+            Self::Timeout | Self::OutOfMemory | Self::Uncovered | Self::Unviable | Self::NotRun => {
+                None
+            }
         }
     }
 }
 
 /// Each outcome's name, in declaration order (so `OUTCOMES[outcome as usize]` names it).
-const OUTCOMES: [&str; 6] = [
+const OUTCOMES: [&str; 7] = [
     "killed",
     "survived",
     "timeout",
     "out-of-memory",
     "uncovered",
     "unviable",
+    "not-run",
 ];
 
 impl fmt::Display for MutantOutcome {

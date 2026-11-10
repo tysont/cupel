@@ -335,6 +335,11 @@
           "summary": "Mutants that did not build or load."
         },
         {
+          "name": "not_run",
+          "per": "scope",
+          "summary": "Mutants not run because the run was cut short by --budget or --timeout (ADR-172)."
+        },
+        {
           "name": "equivalent",
           "per": "scope",
           "summary": "Survivors that may behave exactly as the original (ADR-004)."

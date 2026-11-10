@@ -9,7 +9,7 @@ use cupel_core::syntax::{
     ImportTarget, ModuleGraph, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
 };
 use cupel_core::{
-    Availability, CostClass, Ctx, Error, EventSink, ExcludedTest, FactKind, Langs,
+    Availability, CostClass, Ctx, Error, EventSink, ExcludedTest, FactKind, Langs, MutantOutcome,
     MutationOutcomes, MutationPhase, PerTestMap, Process, ProduceCtx, Producer, ProducerId,
     ProducerRegistry, Result, Runner, SLOW_TEST_MS, Scope, TestResults, TestSelection, WriteError,
 };
@@ -258,12 +258,14 @@ impl<'a> Running<'a> {
 
     /// Reuses what the store holds and runs the other covered mutants, file by file. The plan
     /// phase started at `planning` and ends with the history read; a production with nothing
-    /// to run records no phase.
+    /// to run records no phase. A mutant the run's cancellation leaves without an outcome is
+    /// `not-run`, and the production returns what it finished (ADR-172).
     fn run(&self, planned: &mut [Planned], planning: Instant) -> Result<()> {
         let history = History::load(&self.ctx.writer, planned);
         let mut to_run = Vec::new();
         for (index, mutant) in planned.iter_mut().enumerate() {
             if mutant.covered && !history.reuse(mutant) {
+                mutant.mutant.outcome = MutantOutcome::NotRun;
                 to_run.push(index);
             }
         }
@@ -286,7 +288,9 @@ impl<'a> Running<'a> {
         };
         let root = &self.ctx.ctx.root;
         for (file, indexes) in order {
-            self.ctx.cancel.checkpoint()?;
+            if self.ctx.cancel.is_cancelled() {
+                break;
+            }
             let original =
                 std::fs::read(root.join(&file)).map_err(|error| io(root, &file, &error))?;
             let importers = self.importers(&file);
@@ -298,12 +302,19 @@ impl<'a> Running<'a> {
             };
             let found = match schemata::run_file(&execution, self.rewriter, &run) {
                 Ok(found) => found,
+                Err(Error::Cancelled) => Vec::new(),
                 Err(error) => {
                     execution.restore(&run);
                     return Err(error);
                 }
             };
+            if found.len() < indexes.len() || found.iter().any(Option::is_none) {
+                execution.restore(&run);
+            }
             for (index, ran) in indexes.iter().zip(found) {
+                let Some(ran) = ran else {
+                    continue;
+                };
                 let mutant = &mut planned[*index].mutant;
                 mutant.outcome = ran.outcome;
                 mutant.tests = ran.tests;

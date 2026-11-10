@@ -11,7 +11,7 @@ use cupel_core::config::{Config, ConfigRequest};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     Cancellation, ChangedLines, CostClass, Error, FactKind, Job, Lang, MutantOutcome,
-    MutationOutcomes, RunId, Scheduler, Writer,
+    MutationOutcomes, Production, RunId, Scheduler, Writer,
 };
 use cupel_fixtures::matrix::Registries;
 
@@ -56,6 +56,20 @@ pub struct Run {
 
 /// `MutationOutcomes` for `lang` in the repository at `root`, produced as a `check` run would.
 pub fn produce(root: &Path, lang: &str, run: &Run) -> Result<MutationOutcomes, Error> {
+    with_production(root, lang, run, |production, lang| {
+        let fact = production.ensure(FactKind::MutationOutcomes, lang, &mut Vec::new())?;
+        Ok(fact.downcast_ref::<MutationOutcomes>().unwrap().clone())
+    })
+}
+
+/// What `make` makes with the fact store of a `check` run like `run` in the repository at
+/// `root`, for `lang`.
+pub fn with_production<T>(
+    root: &Path,
+    lang: &str,
+    run: &Run,
+    make: impl FnOnce(&mut Production<'_>, &Lang) -> T,
+) -> T {
     let config = Config::load(&ConfigRequest {
         root: root.to_path_buf(),
         config_path: run.config.clone(),
@@ -88,12 +102,7 @@ pub fn produce(root: &Path, lang: &str, run: &Run) -> Result<MutationOutcomes, E
         producers: &registries.producers,
     };
     let mut production = scheduler.production(&job);
-    let fact = production.ensure(
-        FactKind::MutationOutcomes,
-        &self::lang(lang),
-        &mut Vec::new(),
-    )?;
-    Ok(fact.downcast_ref::<MutationOutcomes>().unwrap().clone())
+    make(&mut production, &self::lang(lang))
 }
 
 /// Each mutant as `line from→to outcome`, with ` (equivalent?)` when it is marked.

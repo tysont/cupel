@@ -2361,6 +2361,16 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - Test: `cupel-cli/tests/init.rs`, a marker-leaving coverage command that must not run at the root.
   - Molten test execution paused until this was merged.
 
+- **B13, Area 7** (2026-11-10, [ADR-172](adr/CUPEL_DECISION_172.md)).
+  - The gap: `tests.mutation --budget 30m` on a 10 726-mutant Molten package ran hundreds of mutants, then the budget's cancellation made the engine return `Cancelled`. Nothing was stored, and the check was `partial` with no score and no findings (ADR-086's open item).
+  - Now the engine returns the mutants it finished. Those the cut left, in the file being run or after it, are `not-run` (`MutationOutcomes` version 3). The store keeps only real outcomes, so the next run reuses them and runs the rest. `tests.mutation` scores what ran, reports its survivors, counts `not_run`, and is `partial` with a note saying how many were not run. A cut production is not timed.
+  - Tests:
+    - `cupel-mutate/tests/cut.rs`: the Python fixture's runner cancelling the run before its fourth and its first test run;
+    - `cupel-store/tests/store.rs`: a `not-run` mutant is not stored;
+    - `cupel-checks/tests/tests_mutation.rs`: a cut production's score, finding, status, and note;
+    - `cupel-core/tests/budget_runs.rs`: a cut production that returns its fact is not timed.
+  - Open: a mutant whose run the cut reaches is lost even if it was about to finish (at most one per slot).
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

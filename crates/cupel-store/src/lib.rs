@@ -821,7 +821,8 @@ pub struct MutantSite {
 }
 
 impl Store {
-    /// Indexes every mutant of `outcomes`, which `run` produced for `lang`, in `mutants`.
+    /// Indexes every mutant of `outcomes`, which `run` produced for `lang`, in `mutants`; but a
+    /// mutant `not-run`, which has no outcome to reuse (ADR-172).
     pub fn record_mutants(
         &self,
         run: &RunId,
@@ -838,17 +839,21 @@ impl Store {
                 replacement, outcome, duration_ms, mutant)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
             &fixed,
-            outcomes.mutants.iter().map(|mutant| {
-                Ok(vec![
-                    Value::from(mutant.cache_key.clone()),
-                    Value::from(mutant.symbol_hash.as_ref().map(ToString::to_string)),
-                    Value::from(mutant.site_hash.to_string()),
-                    Value::from(mutant.to.clone()),
-                    Value::from(mutant.outcome.as_str().to_owned()),
-                    Value::from(millis(mutant.duration_ms)),
-                    Value::from(serde_json::to_string(mutant)?),
-                ])
-            }),
+            outcomes
+                .mutants
+                .iter()
+                .filter(|mutant| mutant.outcome != MutantOutcome::NotRun)
+                .map(|mutant| {
+                    Ok(vec![
+                        Value::from(mutant.cache_key.clone()),
+                        Value::from(mutant.symbol_hash.as_ref().map(ToString::to_string)),
+                        Value::from(mutant.site_hash.to_string()),
+                        Value::from(mutant.to.clone()),
+                        Value::from(mutant.outcome.as_str().to_owned()),
+                        Value::from(millis(mutant.duration_ms)),
+                        Value::from(serde_json::to_string(mutant)?),
+                    ])
+                }),
         )
     }
 

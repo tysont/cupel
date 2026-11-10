@@ -88,7 +88,7 @@ def manifest() -> dict[str, Json]:
         "kind": "producer",
         "id": PRODUCER,
         "version": 1,
-        "provides": {"kind": "mutation-outcomes", "version": 2},
+        "provides": {"kind": "mutation-outcomes", "version": 3},
         "languages": ["java"],
         "needs": NEEDS,
         "wants": [],
@@ -392,7 +392,7 @@ def run(request: Json) -> None:
 
 
 def emit_outcomes(payload: dict[str, Json]) -> None:
-    emit({"ev": "fact", "kind": "mutation-outcomes", "version": 2, "payload": payload})
+    emit({"ev": "fact", "kind": "mutation-outcomes", "version": 3, "payload": payload})
 
 
 def fail(message: str) -> NoReturn:

@@ -5,10 +5,11 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 use cupel_core::config::{ConfigError, MemoryLimit, Table, TimeLimit};
 use cupel_core::syntax::{SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
-    ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, ExcludedTest,
-    FactKind, Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant, MutantOutcome,
-    MutationOutcomes, MutationPhase, MutationStrategy, Plan, ProtectionMetric, Result, Scope,
-    Score, SettingSpec, Severity, SiteHash, Stability, SymbolHash, Tier, UnfinishedTest,
+    ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
+    ExcludedTest, FactKind, Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant,
+    MutantOutcome, MutationOutcomes, MutationPhase, MutationStrategy, Plan, ProtectionMetric,
+    Result, Scope, Score, SettingSpec, Severity, SiteHash, Stability, SymbolHash, Tier,
+    UnfinishedTest,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -212,6 +213,10 @@ fn metrics() -> Vec<MetricSpec> {
         ),
         ("uncovered", "Mutants no test runs, which were not run."),
         ("unviable", "Mutants that did not build or load."),
+        (
+            "not_run",
+            "Mutants not run because the run was cut short by --budget or --timeout (ADR-172).",
+        ),
         (
             "equivalent",
             "Survivors that may behave exactly as the original (ADR-004).",
@@ -443,7 +448,10 @@ impl Tally {
         }
         if mutant.reused {
             self.reused += 1;
-        } else if mutant.outcome != MutantOutcome::Uncovered {
+        } else if !matches!(
+            mutant.outcome,
+            MutantOutcome::Uncovered | MutantOutcome::NotRun
+        ) {
             self.executed += 1;
             self.schemata += u64::from(mutant.strategy == Some(MutationStrategy::Schemata));
             if let Some(reason) = &mutant.fallback {
@@ -452,14 +460,24 @@ impl Tally {
         }
     }
 
-    /// One note per reason mutants ran as file copies instead of schemata.
+    /// How many mutants were not run because the run was cut short, when any was, then one
+    /// note per reason mutants ran as file copies instead of schemata.
     fn notes(&self) -> Vec<String> {
-        self.fallbacks
-            .iter()
-            .map(|(reason, n)| match n {
+        let not_run = self.of(MutantOutcome::NotRun);
+        let cut = (not_run > 0).then(|| {
+            let all = self.by_outcome.values().sum::<u64>() + self.equivalent;
+            let were = if not_run == 1 { "was" } else { "were" };
+            format!(
+                "{not_run} of {all} mutants {were} not run: the run was cut short by --budget or \
+                 --timeout. The score and findings are over the mutants that ran; the next run \
+                 reuses their outcomes and runs the rest."
+            )
+        });
+        cut.into_iter()
+            .chain(self.fallbacks.iter().map(|(reason, n)| match n {
                 1 => format!("1 mutant ran as a file copy: {reason}"),
                 n => format!("{n} mutants ran as file copies: {reason}"),
-            })
+            }))
             .collect()
     }
 
@@ -468,7 +486,8 @@ impl Tally {
     }
 
     /// The language's result: `fail` with a survivor, scored by the killed ratio over the
-    /// killed, surviving, and uncovered mutants (ADR-141).
+    /// killed, surviving, and uncovered mutants (ADR-141); `partial` when the run was cut short
+    /// before some mutant ran, scored over those that did (ADR-172).
     fn result(&self, manifest: &Manifest) -> CheckResult {
         let (killed, survived) = (
             self.of(MutantOutcome::Killed),
@@ -487,6 +506,7 @@ impl Tally {
             MutantOutcome::OutOfMemory,
             MutantOutcome::Uncovered,
             MutantOutcome::Unviable,
+            MutantOutcome::NotRun,
         ]
         .into_iter()
         .map(|outcome| (metric_name(outcome), count(self.of(outcome))))
@@ -501,9 +521,14 @@ impl Tally {
             let spent = self.phases.get(&phase).copied().unwrap_or(0);
             metrics.insert(phase_metric(phase), count(spent));
         }
+        let status = if self.of(MutantOutcome::NotRun) > 0 {
+            CheckStatus::Partial
+        } else {
+            outcome::status(survived > 0)
+        };
         let mut result = outcome::result(
             manifest,
-            outcome::status(survived > 0),
+            status,
             Some(Score {
                 value: score,
                 unit: "killed_ratio".to_owned(),
