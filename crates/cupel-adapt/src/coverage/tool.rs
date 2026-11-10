@@ -48,6 +48,9 @@ pub struct CoverageSpec {
     /// Which files the report of the configured command lists (ADR-152): every file with
     /// executable code, or, as coverage.py's without a source, only the files the suite loaded.
     pub listing: fn(&str) -> Listing,
+    /// Node packages of which the tool needs one to measure coverage (Vitest's providers),
+    /// resolved as Node resolves them; empty when it needs none.
+    pub providers: &'static [&'static str],
 }
 
 /// A coverage producer: `spec` run, or its report ingested, once per project root.
@@ -97,13 +100,17 @@ impl Producer<CoverageMap> for CoverageTool {
                 key: format!("lang.{}.{KEY}", self.0.langs[0]),
             };
         }
-        if installed(self.0.tool, self.0.node_bin, &ctx.root).is_some() {
-            Availability::Ready
-        } else {
-            Availability::MissingTool {
+        let install = toolchain::install(&self.id(), self.0.tool, &ctx.root);
+        match installed(self.0.tool, self.0.node_bin, &ctx.root) {
+            None => Availability::MissingTool {
                 name: ToolId::from(self.0.tool),
-                install: toolchain::install(&self.id(), self.0.tool, &ctx.root),
-            }
+                install,
+            },
+            Some(program) if !self.provided(ctx, &program) => Availability::MissingTool {
+                name: ToolId::from(self.0.providers[0]),
+                install,
+            },
+            Some(_) => Availability::Ready,
         }
     }
 
@@ -160,6 +167,34 @@ impl Producer<CoverageMap> for CoverageTool {
 }
 
 impl CoverageTool {
+    /// Whether one of the spec's providers resolves from where `program` (the tool that would
+    /// run) is installed, or from every directory coverage runs in; always without providers.
+    fn provided(&self, ctx: &Ctx, program: &str) -> bool {
+        let providers = self.0.providers;
+        let resolves = |dir: &Path| {
+            dir.ancestors().any(|dir| {
+                providers.iter().any(|provider| {
+                    dir.join("node_modules")
+                        .join(provider)
+                        .join("package.json")
+                        .is_file()
+                })
+            })
+        };
+        let tool = if program.contains('/') {
+            Some(std::path::PathBuf::from(program))
+        } else {
+            cupel_core::find_program(program)
+        };
+        providers.is_empty()
+            || tool
+                .and_then(|tool| fs::canonicalize(tool).ok())
+                .is_some_and(|tool| resolves(&tool))
+            || crate::runner::run_dirs(ctx, &self.languages())
+                .iter()
+                .all(|dir| resolves(dir))
+    }
+
     /// The coverage of one project root: its fresh cached report, else the fresh report the
     /// tool left at its default location, else a new run of the configured command.
     fn root(

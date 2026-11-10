@@ -202,6 +202,53 @@ fn with_a_coverage_command_a_producer_needs_its_tool() {
     }
 }
 
+/// Vitest measures coverage through a provider package it resolves as Node does: from the
+/// project's directory up, or from where the `vitest` that runs is installed.
+#[cfg(unix)]
+#[test]
+fn vitest_coverage_needs_a_coverage_provider_vitest_can_resolve() {
+    use std::os::unix::fs::PermissionsExt;
+    let registry = registry();
+    let dir = fixture("typescript");
+    // A Vitest installed in the project, without a provider beside it or above the project.
+    let vitest = dir.path().join("node_modules/vitest/vitest.mjs");
+    cupel_fixtures::write_file(dir.path(), "node_modules/vitest/vitest.mjs", "");
+    fs::set_permissions(&vitest, fs::Permissions::from_mode(0o755)).unwrap();
+    fs::create_dir_all(dir.path().join("node_modules/.bin")).unwrap();
+    std::os::unix::fs::symlink(
+        "../vitest/vitest.mjs",
+        dir.path().join("node_modules/.bin/vitest"),
+    )
+    .unwrap();
+    let availability = || {
+        producer(&registry, "tool.vitest-coverage", "typescript").availability(&ctx(
+            dir.path(),
+            "typescript",
+            true,
+        ))
+    };
+    let without = availability();
+    cupel_fixtures::write_file(
+        dir.path(),
+        "node_modules/@vitest/coverage-v8/package.json",
+        "{\"name\": \"@vitest/coverage-v8\"}\n",
+    );
+    assert_eq!(
+        (without, availability()),
+        (
+            Availability::MissingTool {
+                name: ToolId::from("@vitest/coverage-v8"),
+                install: cupel_adapt::toolchain::install(
+                    &cupel_core::ProducerId::from("tool.vitest-coverage"),
+                    "vitest",
+                    dir.path(),
+                ),
+            },
+            Availability::Ready,
+        )
+    );
+}
+
 #[test]
 fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
     let registry = registry();

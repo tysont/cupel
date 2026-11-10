@@ -2345,6 +2345,15 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - `tests/analyze.rs`: ESLint in a root below its config; tsc failing in one of two roots;
     - `cupel-checks/tests/static_analyze.rs`: a failed analyzer's results.
 
+- **B11, Area 6** (2026-11-10, [ADR-170](adr/CUPEL_DECISION_170.md)).
+  - The gap: Molten has Vitest but no coverage provider. `init` wrote a coverage command that cannot run, and `doctor` said nothing.
+  - Now `tool.vitest-coverage` needs a provider resolvable as Node would resolve it. `doctor` names a missing package its producer reports, and resolves again after `--fix`.
+  - Tests:
+    - `cupel-adapt/tests/coverage_producers.rs` (provider resolution);
+    - `cupel-cli/tests/doctor.rs` (the finding and its install).
+  - Open: coverage producers of other tools as fallbacks, and coverage detection at the repository root rather than the run's roots (ADR-170 Consequences).
+- **Fact cache, found in Area 5's daemon measurement.** `Store::put_fact` has no caller, so command-line runs re-parse everything (about 31 s of static checks on Molten, against 10 s through a warm daemon). This is waiting on the owner's decision.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

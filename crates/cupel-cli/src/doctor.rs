@@ -58,13 +58,15 @@ pub fn run(invocation: &Invocation<'_>, fix: bool) -> Envelope {
     problems.extend(cupel_dir(writer));
     problems.extend(daemon(writer.root()));
     problems.extend(mutation_slots(&cupel_mutate::slots::root(writer.root())));
-    let (requirements, unresolved) = needed(config, writer);
+    let (mut requirements, unresolved) = needed(config, writer);
     problems.extend(unresolved);
     let mut probed = probe_all(&requirements);
     if fix {
         let planned = installable(&requirements, &probed);
         problems.extend(install::problems(&install::attempt(invocation, &planned)));
         if !planned.is_empty() {
+            // Resolved again, so a producer the installs made ready needs nothing more.
+            requirements = needed(config, writer).0;
             probed = probe_all(&requirements);
         }
     }
@@ -333,16 +335,29 @@ impl Resolution {
         let Some(producer) = chosen else {
             return;
         };
-        let install = match producer.availability(walk.ctx) {
-            Availability::Ready => None,
-            Availability::MissingTool { install, .. } => install,
+        let (missing, install) = match producer.availability(walk.ctx) {
+            Availability::Ready => (None, None),
+            Availability::MissingTool { name, install } => (Some(name), install),
             // A producer waiting for configuration (a coverage producer without a
             // `[lang.<id>] coverage` command, ADR-079) runs nothing, so it needs no tool yet.
             Availability::Unconfigured { .. } => return,
         };
         if let Some(tool) = producer.tool(walk.ctx) {
             let purpose = format!("{purpose} via {}", producer.id());
-            self.require(tool, purpose, (required, install));
+            match missing {
+                // What is missing is not the program the producer probes (Vitest's coverage
+                // provider): it has no probe of its own, so it is missing until a fresh
+                // resolution finds the producer ready.
+                Some(name) if name != tool.name => {
+                    self.require(tool, purpose.clone(), (required, None));
+                    let package = ToolProbe {
+                        name,
+                        version: Vec::new(),
+                    };
+                    self.require(package, purpose, (required, install));
+                }
+                _ => self.require(tool, purpose, (required, install)),
+            }
         }
         visiting.push(kind);
         for upstream in producer.needs() {

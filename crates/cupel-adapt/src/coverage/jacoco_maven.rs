@@ -16,6 +16,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     default_report: Some("target/site/jacoco/jacoco.xml"),
     resolve: source_paths,
     listing: every_file,
+    providers: &[],
 };
 
 inventory::submit!(crate::ToolProducer {

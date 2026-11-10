@@ -15,6 +15,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     default_report: None,
     resolve: as_written,
     listing,
+    providers: &[],
 };
 
 /// coverage.py lists every file under a source (`--source=<dir>` or `--source <dir>`) and,

@@ -285,6 +285,63 @@ fn a_configured_runner_that_is_not_installed_warns_without_failing() {
     );
 }
 
+/// Vitest measures coverage only through a provider package; with Vitest installed and no
+/// provider, the coverage command cannot run, so doctor names the provider and how to add it.
+#[cfg(unix)]
+#[test]
+fn a_vitest_without_a_coverage_provider_is_a_missing_tool_naming_the_provider() {
+    use std::os::unix::fs::PermissionsExt;
+    let repo = Repo::new();
+    repo.write(
+        "package.json",
+        "{\"devDependencies\": {\"vitest\": \"4\"}}\n",
+    );
+    repo.write("tsconfig.json", "{}\n");
+    repo.write("src/a.ts", "export const a = 1;\n");
+    repo.write("node_modules/.bin/vitest", "#!/bin/sh\necho vitest/4.0.0\n");
+    std::fs::set_permissions(
+        repo.path("node_modules/.bin/vitest"),
+        std::fs::Permissions::from_mode(0o755),
+    )
+    .unwrap();
+    repo.write(
+        "cupel.toml",
+        "depth = \"standard\"\n\n[lang.typescript]\ntest = \"npx vitest run\"\ncoverage = \"npx vitest run --coverage --coverage.reporter=lcov\"\n",
+    );
+    // Only the system's programs, as on a machine without other JavaScript tools: an
+    // installed Jest or c8 would otherwise stand in for Vitest's coverage producer.
+    let outcome = repo.run_with(cupel().env("PATH", "/usr/bin:/bin"), &["doctor"]);
+    let envelope = outcome.envelope();
+    let missing: Vec<(Value, Value, Value)> = envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|finding| finding["kind"] == json!("doctor.tool-missing"))
+        // Without npx on this PATH, the configured commands' launcher is missing too.
+        .filter(|finding| finding["evidence"]["tool"] != json!("npx"))
+        .map(|finding| {
+            (
+                finding["evidence"]["tool"].clone(),
+                finding["severity"].clone(),
+                finding["evidence"]["install"].clone(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        (outcome.code, missing),
+        (
+            3,
+            vec![(
+                json!("@vitest/coverage-v8"),
+                json!("fail"),
+                json!("npm install --save-dev vitest @vitest/coverage-v8"),
+            )]
+        ),
+        "{}",
+        outcome.stdout
+    );
+}
+
 /// Writes `bytes` into slot 0 of `lang` in the repository's `.cupel/work/slots/` (ADR-159).
 fn slots(repo: &Repo, lang: &str, bytes: usize) {
     let slot = repo.root().join(".cupel/work/slots").join(lang).join("0");

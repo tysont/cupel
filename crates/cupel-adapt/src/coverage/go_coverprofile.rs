@@ -15,6 +15,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     default_report: None,
     resolve: module_paths,
     listing: every_file,
+    providers: &[],
 };
 
 inventory::submit!(crate::ToolProducer {

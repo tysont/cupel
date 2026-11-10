@@ -15,6 +15,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     default_report: Some("coverage/lcov.info"),
     resolve: as_written,
     listing: every_file,
+    providers: &[],
 };
 
 inventory::submit!(crate::ToolProducer {
