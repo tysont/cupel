@@ -14,7 +14,7 @@ use cupel_core::{
     ProducerRegistry, Result, Runner, SLOW_TEST_MS, Scope, TestResults, TestSelection, WriteError,
 };
 
-use crate::execute::{Execution, FileRun};
+use crate::execute::{Execution, FileRun, Ran};
 use crate::history::History;
 use crate::overlay::Slot;
 use crate::phases::{Phases, Served};
@@ -286,47 +286,50 @@ impl<'a> Running<'a> {
             phases: &self.phases,
             baseline: &self.baseline,
         };
-        let root = &self.ctx.ctx.root;
         for (file, indexes) in order {
             if self.ctx.cancel.is_cancelled() {
                 break;
             }
-            let original =
-                std::fs::read(root.join(&file)).map_err(|error| io(root, &file, &error))?;
-            let importers = self.importers(&file);
-            let run = FileRun {
-                file: &file,
-                original: &original,
-                importers: &importers,
-                mutants: indexes.iter().map(|index| &planned[*index]).collect(),
-            };
-            let found = match schemata::run_file(&execution, self.rewriter, &run) {
-                Ok(found) => found,
-                Err(Error::Cancelled) => Vec::new(),
-                Err(error) => {
-                    execution.restore(&run);
-                    return Err(error);
-                }
-            };
-            if found.len() < indexes.len() || found.iter().any(Option::is_none) {
-                execution.restore(&run);
-            }
+            let found = self.run_file(&execution, &file, planned, &indexes)?;
             for (index, ran) in indexes.iter().zip(found) {
-                let Some(ran) = ran else {
-                    continue;
-                };
-                let mutant = &mut planned[*index].mutant;
-                mutant.outcome = ran.outcome;
-                mutant.tests = ran.tests;
-                mutant.killing_tests = ran.killing_tests;
-                mutant.duration_ms = Some(ran.duration_ms);
-                mutant.strategy = Some(ran.strategy);
-                mutant.fallback = ran.fallback;
-                mutant.hung = ran.hung;
-                mutant.slowest = ran.slowest;
+                if let Some(ran) = ran {
+                    record(&mut planned[*index].mutant, ran);
+                }
             }
         }
         Ok(())
+    }
+
+    /// The outcomes of `file`'s mutants at `indexes`, `None` for each the run's cancellation
+    /// left unrun. The file's copies in the slots are restored unless every mutant finished.
+    fn run_file(
+        &self,
+        execution: &Execution<'_>,
+        file: &str,
+        planned: &[Planned],
+        indexes: &[usize],
+    ) -> Result<Vec<Option<Ran>>> {
+        let root = &self.ctx.ctx.root;
+        let original = std::fs::read(root.join(file)).map_err(|error| io(root, file, &error))?;
+        let importers = self.importers(file);
+        let run = FileRun {
+            file,
+            original: &original,
+            importers: &importers,
+            mutants: indexes.iter().map(|index| &planned[*index]).collect(),
+        };
+        let found = match schemata::run_file(execution, self.rewriter, &run) {
+            Ok(found) => found,
+            Err(Error::Cancelled) => Vec::new(),
+            Err(error) => {
+                execution.restore(&run);
+                return Err(error);
+            }
+        };
+        if found.len() < indexes.len() || found.iter().any(Option::is_none) {
+            execution.restore(&run);
+        }
+        Ok(found)
     }
 
     /// The slots for files of at most `widest` mutants, each synced with the tree: as many as
@@ -407,4 +410,16 @@ fn io(root: &Path, file: &str, error: &std::io::Error) -> Error {
         path: root.join(file),
         message: error.to_string(),
     })
+}
+
+/// Records on `mutant` what running it found.
+fn record(mutant: &mut cupel_core::Mutant, ran: Ran) {
+    mutant.outcome = ran.outcome;
+    mutant.tests = ran.tests;
+    mutant.killing_tests = ran.killing_tests;
+    mutant.duration_ms = Some(ran.duration_ms);
+    mutant.strategy = Some(ran.strategy);
+    mutant.fallback = ran.fallback;
+    mutant.hung = ran.hung;
+    mutant.slowest = ran.slowest;
 }

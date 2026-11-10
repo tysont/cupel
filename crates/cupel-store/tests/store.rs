@@ -884,19 +884,26 @@ fn outcomes(mutants: Vec<Mutant>) -> MutationOutcomes {
     )
 }
 
-#[test]
-fn mutants_are_indexed_and_found_again_by_their_cache_key() {
+/// A store whose first run recorded a survivor of site `b1` under cache key `k1`, with the
+/// repository it is in.
+fn store_with_a_survivor() -> (Repo, Store) {
     let repo = Repo::new();
     let store = repo.store();
-    let first = mutant(
+    let survived = mutant(
         "00000000000000b1",
         "<=",
         MutantOutcome::Survived,
         Some("k1"),
     );
     store
-        .record_mutants(&run_id(1), &python(), &outcomes(vec![first]))
+        .record_mutants(&run_id(1), &python(), &outcomes(vec![survived]))
         .unwrap();
+    (repo, store)
+}
+
+#[test]
+fn mutants_are_indexed_and_found_again_by_their_cache_key() {
+    let (_repo, store) = store_with_a_survivor();
     let killed = mutant("00000000000000b1", "<=", MutantOutcome::Killed, Some("k1"));
     store
         .record_mutants(&run_id(2), &python(), &outcomes(vec![killed.clone()]))
@@ -915,17 +922,7 @@ fn mutants_are_indexed_and_found_again_by_their_cache_key() {
 /// (ADR-172).
 #[test]
 fn a_mutant_not_run_is_not_stored() {
-    let repo = Repo::new();
-    let store = repo.store();
-    let survived = mutant(
-        "00000000000000b1",
-        "<=",
-        MutantOutcome::Survived,
-        Some("k1"),
-    );
-    store
-        .record_mutants(&run_id(1), &python(), &outcomes(vec![survived]))
-        .unwrap();
+    let (_repo, store) = store_with_a_survivor();
     let mut not_run = mutant("00000000000000b1", "<=", MutantOutcome::NotRun, Some("k2"));
     (not_run.tests, not_run.duration_ms) = (Vec::new(), None);
     let killed = mutant("00000000000000b2", ">", MutantOutcome::Killed, Some("k3"));
