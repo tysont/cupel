@@ -550,6 +550,11 @@ pub struct ProjectRoot {
     pub packages: Vec<String>,
     /// Directory names the ecosystem generates, skipped below the root.
     pub skip_dirs: Vec<String>,
+    /// Files the root's own manifests say the project runs or ships, relative to the root: a
+    /// Worker's `main`, a package's `main` or `bin`, a script's `node <file>`, a file a Dockerfile
+    /// copies into its image. Each roots its module as an entry point (ADR-163).
+    #[serde(default)]
+    pub entries: Vec<String>,
 }
 
 /// Where each symbol is named, in every file of the language in the repository (not only the

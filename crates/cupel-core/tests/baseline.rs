@@ -124,6 +124,7 @@ impl Producer<ProjectInfo> for Roots {
                 members: Vec::new(),
                 packages: Vec::new(),
                 skip_dirs: Vec::new(),
+                entries: Vec::new(),
             }],
         })
     }

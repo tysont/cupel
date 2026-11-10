@@ -36,6 +36,14 @@ expression: pretty(&schema)
             "type": "string"
           }
         },
+        "entries": {
+          "description": "Files the root's own manifests say the project runs or ships, relative to the root: a\nWorker's `main`, a package's `main` or `bin`, a script's `node <file>`, a file a Dockerfile\ncopies into its image. Each roots its module as an entry point (ADR-163).",
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
         "lang": {
           "$ref": "#/$defs/LangId"
         },
@@ -67,6 +75,7 @@ expression: pretty(&schema)
       },
       "required": [
         "build_files",
+        "entries",
         "lang",
         "members",
         "packages",

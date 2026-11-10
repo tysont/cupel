@@ -391,6 +391,7 @@ pub(crate) mod tests {
                 members: vec!["crates/books".to_owned()],
                 packages: vec![],
                 skip_dirs: vec![],
+                entries: Vec::new(),
             }],
         };
         ctx.upstream.insert(cupel_core::Produced::new(info).share());

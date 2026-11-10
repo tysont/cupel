@@ -391,6 +391,7 @@ coverage = \"npx vitest run --coverage --coverage.reporter=lcov\"
             members: Vec::new(),
             packages: packages.iter().map(|p| (*p).to_owned()).collect(),
             skip_dirs: Vec::new(),
+            entries: Vec::new(),
         }
     }
 

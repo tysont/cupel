@@ -2105,7 +2105,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 **Goal:** The owner's request (2026-11-09): test Cupel against the surface area of a real repository, the owner's `../molten`, one area at a time. In each area, find Cupel's bugs and fix them, and write every true issue in Molten to one file, `../molten/cupel.md`, for Molten's own agent to pick up.
 
-**Status:** in progress. Areas 0, 1, and 1b complete (2026-11-09); Area 2 next.
+**Status:** in progress. Areas 0, 1, 1b, and 2 complete (2026-11-09); Area 3 next.
 
 **Molten.** A pnpm TypeScript monorepo on Cloudflare Workers, at `fbafa8f5`:
 - `apps/agent`: 461 source files, 230 test files. `agent-do.ts` alone is 34,551 lines.
@@ -2277,6 +2277,16 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - `init` reports `init.runner-deferred` for a language left without commands.
   - Tests: `cupel-core/tests/check_wants.rs` (3), `cupel-adapt/tests/toolchain.rs` (3), and `cupel-cli/tests/init.rs` (1) failed first and pass now. The `lacks` unit test was written with its implementation.
   - CI on Area 1's push failed on every Ubuntu job before any build: `ubuntu-latest` became 26.04, which has no `setup-python` 3.12.10. All workflows now pin `ubuntu-24.04` (756ebf8).
+- **Area 2** (2026-11-09, [ADR-163](adr/CUPEL_DECISION_163.md)).
+  - `ProjectRoot.entries`: an ECMA root's manifests' run files, from `package.json` `main`, `bin`, and launcher scripts, `wrangler*.toml` `main`, and Dockerfile `COPY` sources. An entry roots its module in `static.dead-code`.
+  - `static.dead-code` spans the ECMA family: Molten's sandbox JavaScript sat under a TypeScript root and was invisible to the JavaScript task.
+  - Tests: two in `cupel-checks/tests/static_dead_code.rs` and one in `cupel-lang/tests/project.rs` failed first and pass now.
+  - Molten `dead.symbol` went from 91 to 15: 8 real (M0-3), 6 in three scripts nothing names (M2-3), 1 run only from a shell script (a limitation).
+  - `dead.export` (26, info) triage:
+    - True: 11 functions in two e2e helper files nothing imports (M2-1), plus two unused modules (M2-2).
+    - False: a Vitest `globalSetup` file and a Python keyring module loaded by configuration (limitations in ADR-163).
+    - Two unproven, left out.
+  - Precision of `dead.symbol` on Molten: before, about 9 of 91; now 14 of 15.
 
 ## 4. Cross-phase checklist
 

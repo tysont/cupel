@@ -236,6 +236,7 @@ fn a_selection_reaches_only_the_roots_that_hold_it_relative_to_each() {
         members: Vec::new(),
         packages: Vec::new(),
         skip_dirs: Vec::new(),
+        entries: Vec::new(),
     };
     ctx.upstream.insert(
         Produced::new(ProjectInfo {

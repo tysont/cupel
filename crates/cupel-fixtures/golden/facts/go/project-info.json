@@ -6,6 +6,7 @@
         "go.mod",
         "shapes/go.mod"
       ],
+      "entries": [],
       "lang": "go",
       "members": [
         "shapes"

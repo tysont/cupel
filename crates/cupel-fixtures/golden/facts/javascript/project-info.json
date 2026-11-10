@@ -5,6 +5,7 @@
         "package.json",
         "packages/shapes/package.json"
       ],
+      "entries": [],
       "lang": "javascript",
       "members": [
         "packages/shapes"

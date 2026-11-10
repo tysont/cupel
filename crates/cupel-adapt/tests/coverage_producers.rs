@@ -83,6 +83,7 @@ fn produce_ctx(root: &Path, lang: &str, configured: bool) -> ProduceCtx {
                 members: Vec::new(),
                 packages: Vec::new(),
                 skip_dirs: skip_dirs.into_iter().map(str::to_owned).collect(),
+                entries: Vec::new(),
             }],
         })
         .share(),

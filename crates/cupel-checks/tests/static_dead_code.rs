@@ -7,9 +7,9 @@ use std::collections::BTreeSet;
 use cupel_core::config::ConfigError;
 use cupel_core::syntax::{
     DynamicAccess, DynamicReach, EdgeKind, ImportEdge, ImportTarget, LiveRoot, ModuleGraph,
-    NormNode, NormTree, NormalizedSymbol, Reference, ReferenceKind, ReferenceTarget, References,
-    RootImports, RootReason, Roots, Span, SymbolDef, SymbolKind, Symbols, TestConventions,
-    Visibility,
+    NormNode, NormTree, NormalizedSymbol, ProjectInfo, ProjectRoot, Reference, ReferenceKind,
+    ReferenceTarget, References, RootImports, RootReason, Roots, Span, SymbolDef, SymbolKind,
+    Symbols, TestConventions, Visibility,
 };
 use cupel_core::{
     ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts,
@@ -149,6 +149,9 @@ struct World {
     references: References,
     /// The globs of test files; no `TestConventions` fact when empty.
     test_globs: Vec<String>,
+    /// Files the project's manifests say it runs, relative to the root `.`; no `ProjectInfo`
+    /// fact when empty.
+    entries: Vec<String>,
 }
 
 impl World {
@@ -165,7 +168,13 @@ impl World {
             edges: Vec::new(),
             references: References::default(),
             test_globs: Vec::new(),
+            entries: Vec::new(),
         }
+    }
+
+    fn entry(mut self, file: &str) -> Self {
+        self.entries.push(file.to_owned());
+        self
     }
 
     fn tests(mut self, globs: &[&str]) -> Self {
@@ -188,52 +197,80 @@ impl World {
         self
     }
 
+    fn symbols(&self) -> Symbols {
+        Symbols {
+            symbols: self.symbols.clone(),
+        }
+    }
+
+    fn norm_tree(&self) -> NormTree {
+        NormTree {
+            symbols: self
+                .symbols
+                .iter()
+                .map(|def| NormalizedSymbol {
+                    symbol: def.key(),
+                    hash: hash_of(def),
+                    root: NormNode {
+                        span: None,
+                        text: None,
+                        label: "fn".to_owned(),
+                        children: Vec::new(),
+                    },
+                })
+                .collect(),
+        }
+    }
+
+    fn graph(&self) -> ModuleGraph {
+        ModuleGraph {
+            roots: vec![RootImports {
+                root: ".".to_owned(),
+                edges: self.edges.clone(),
+            }],
+        }
+    }
+
+    fn live_roots(&self) -> Roots {
+        Roots {
+            roots: self
+                .roots
+                .iter()
+                .map(|(index, reason)| LiveRoot {
+                    symbol: self.symbols[*index].key(),
+                    reason: *reason,
+                })
+                .collect(),
+        }
+    }
+
+    /// The project's roots of `lang`, as its producer makes them: one root `.` with this world's
+    /// entries, or none when it has none.
+    fn project(&self, lang: &str) -> ProjectInfo {
+        if self.entries.is_empty() {
+            return ProjectInfo::default();
+        }
+        ProjectInfo {
+            roots: vec![ProjectRoot {
+                path: ".".to_owned(),
+                lang: LangId::from(lang),
+                build_files: vec!["package.json".to_owned()],
+                members: Vec::new(),
+                packages: Vec::new(),
+                skip_dirs: Vec::new(),
+                entries: self.entries.clone(),
+            }],
+        }
+    }
+
     fn facts(&self, check: &dyn Check) -> Facts {
         let mut facts = Facts::for_manifest(check.manifest());
-        facts
-            .insert(Symbols {
-                symbols: self.symbols.clone(),
-            })
-            .unwrap();
-        facts
-            .insert(NormTree {
-                symbols: self
-                    .symbols
-                    .iter()
-                    .map(|def| NormalizedSymbol {
-                        symbol: def.key(),
-                        hash: hash_of(def),
-                        root: NormNode {
-                            span: None,
-                            text: None,
-                            label: "fn".to_owned(),
-                            children: Vec::new(),
-                        },
-                    })
-                    .collect(),
-            })
-            .unwrap();
-        facts
-            .insert(ModuleGraph {
-                roots: vec![RootImports {
-                    root: ".".to_owned(),
-                    edges: self.edges.clone(),
-                }],
-            })
-            .unwrap();
-        facts
-            .insert(Roots {
-                roots: self
-                    .roots
-                    .iter()
-                    .map(|(index, reason)| LiveRoot {
-                        symbol: self.symbols[*index].key(),
-                        reason: *reason,
-                    })
-                    .collect(),
-            })
-            .unwrap();
+        facts.insert(self.symbols()).unwrap();
+        facts.insert(self.norm_tree()).unwrap();
+        facts.insert(self.graph()).unwrap();
+        facts.insert(self.live_roots()).unwrap();
         facts.insert(self.references.clone()).unwrap();
+        facts.insert(self.project("javascript")).unwrap();
         if !self.test_globs.is_empty() {
             facts
                 .insert(TestConventions {
@@ -242,6 +279,18 @@ impl World {
                 })
                 .unwrap();
         }
+        facts
+    }
+
+    /// This world's facts with `sibling`'s as another language of its family (ADR-051).
+    fn with_sibling(&self, check: &dyn Check, sibling: &World) -> Facts {
+        let mut facts = self.facts(check);
+        facts.insert_sibling(sibling.symbols()).unwrap();
+        facts.insert_sibling(sibling.norm_tree()).unwrap();
+        facts.insert_sibling(sibling.graph()).unwrap();
+        facts.insert_sibling(sibling.live_roots()).unwrap();
+        facts.insert_sibling(sibling.references.clone()).unwrap();
+        facts.insert_sibling(sibling.project("typescript")).unwrap();
         facts
     }
 
@@ -297,7 +346,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
                 FactKind::Roots,
                 FactKind::References
             ],
-            wants: vec![FactKind::TestConventions],
+            wants: vec![FactKind::TestConventions, FactKind::ProjectInfo],
             tier: 0,
             cost: CostClass::Quick,
             kinds: vec![
@@ -310,6 +359,106 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ],
             evidence: vec!["object"; 2],
         }
+    );
+}
+
+/// An unimported `svc/server.js` whose top level calls `start` and that never calls `unused`.
+fn server() -> World {
+    World::with(vec![
+        private("svc/server.js", "svc.server", "start", 1),
+        private("svc/server.js", "svc.server", "unused", 5),
+    ])
+    .refer(named("svc/server.js", 9, "start"))
+}
+
+/// Each finding's symbol, kind, and how it was found unreachable.
+fn reach_of(findings: &[Finding]) -> Vec<(String, String, Value)> {
+    findings
+        .iter()
+        .map(|finding| {
+            let symbol = finding
+                .symbol
+                .as_ref()
+                .map_or(String::new(), |s| s.display.clone());
+            (
+                symbol,
+                finding.kind.clone(),
+                finding.evidence.0["reach"].clone(),
+            )
+        })
+        .collect()
+}
+
+#[test]
+fn a_file_the_project_runs_roots_its_module_so_only_what_nothing_names_is_dead() {
+    let (_, entered) = run(&server().entry("svc/server.js"));
+    let (_, unentered) = run(&server());
+    assert_eq!(
+        [reach_of(&entered), reach_of(&unentered)],
+        [
+            vec![(
+                "svc.server::unused".to_owned(),
+                "dead.symbol".to_owned(),
+                json!("references")
+            )],
+            vec![
+                (
+                    "svc.server::start".to_owned(),
+                    "dead.symbol".to_owned(),
+                    json!("module")
+                ),
+                (
+                    "svc.server::unused".to_owned(),
+                    "dead.symbol".to_owned(),
+                    json!("module")
+                ),
+            ],
+        ]
+    );
+}
+
+/// The JavaScript half of a family: `lib/util.js`, whose `helper` its own `run` calls, and
+/// `svc/boot.js`, whose top level calls `start`; neither is imported by a JavaScript file.
+fn javascript_half() -> World {
+    World::with(vec![
+        private("lib/util.js", "lib.util", "run", 1),
+        private("lib/util.js", "lib.util", "helper", 5),
+        private("svc/boot.js", "svc.boot", "start", 1),
+    ])
+    .refer(named("lib/util.js", 2, "helper"))
+    .refer(named("svc/boot.js", 9, "start"))
+}
+
+#[test]
+fn a_family_member_s_imports_and_entries_reach_a_module_of_another() {
+    let typescript = World::with(vec![public("app/main.ts", "app.main", "main", 1)])
+        .import(edge(
+            "app/main.ts",
+            "../lib/util.js",
+            support::imported_file("lib/util.js"),
+        ))
+        .refer(named("app/main.ts", 2, "run"))
+        .entry("svc/boot.js");
+    let check = support::check(ID);
+    let javascript = javascript_half();
+    let scope = Scope {
+        files: vec!["lib/util.js".to_owned(), "svc/boot.js".to_owned()],
+        symbols: Some(javascript.symbols.iter().map(SymbolDef::key).collect()),
+    };
+    let (_, alone) =
+        support::recorded(check, &javascript.facts(check), scope.clone(), json!({})).unwrap();
+    let (_, family) = support::recorded(
+        check,
+        &javascript.with_sibling(check, &typescript),
+        scope,
+        json!({}),
+    )
+    .unwrap();
+    assert_eq!(
+        [alone.findings.len(), family.findings.len()],
+        [3, 0],
+        "{:?}",
+        reach_of(&family.findings)
     );
 }
 

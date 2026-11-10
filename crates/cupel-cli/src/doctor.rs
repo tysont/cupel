@@ -855,6 +855,7 @@ mod tests {
                 members: vec!["crates/engine".to_owned()],
                 packages: Vec::new(),
                 skip_dirs: Vec::new(),
+                entries: Vec::new(),
             }],
         };
         let config = config(
@@ -900,6 +901,7 @@ mod tests {
                 members: Vec::new(),
                 packages: Vec::new(),
                 skip_dirs: Vec::new(),
+                entries: Vec::new(),
             }],
         };
         let config = config("[lang.rust]\ntest = \"just test\"\n");

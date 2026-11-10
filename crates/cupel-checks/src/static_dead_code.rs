@@ -3,8 +3,9 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::syntax::{
-    DynamicAccess, DynamicReach, ImportEdge, ImportTarget, ModuleGraph, NormTree, Reference,
-    References, RootReason, Roots, SymbolDef, SymbolKey, SymbolKind, Symbols, TestConventions,
+    DynamicAccess, DynamicReach, ImportEdge, ImportTarget, ModuleGraph, NormTree, ProjectInfo,
+    Reference, References, RootReason, Roots, SymbolDef, SymbolKey, SymbolKind, Symbols,
+    TestConventions,
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
@@ -87,8 +88,9 @@ const NEEDS: [FactKind; 5] = [
     FactKind::References,
 ];
 
-/// The test conventions, by which a test file roots its module.
-const WANTS: [FactKind; 1] = [FactKind::TestConventions];
+/// The test conventions, by which a test file roots its module, and the project roots, whose entry
+/// files root theirs (ADR-163).
+const WANTS: [FactKind; 2] = [FactKind::TestConventions, FactKind::ProjectInfo];
 
 impl StaticDeadCode {
     pub fn new() -> Self {
@@ -169,15 +171,17 @@ impl Check for StaticDeadCode {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        let symbols = facts.get::<Symbols>()?;
-        let hashes = hashes_by_symbol(facts.get::<NormTree>()?);
-        let roots = facts.get::<Roots>()?;
-        let references = facts.get::<References>()?;
+        let family = Family::of(facts)?;
+        let symbols = &family.symbols;
+        let hashes = hashes_by_symbol(&family.trees);
+        let roots = &family.roots;
+        let references = &family.references;
         let reachability = Reachability::of(
             &symbols.symbols,
             roots,
-            imports(facts.get::<ModuleGraph>()?, references),
-            facts.get::<TestConventions>().ok(),
+            imports(&family.graph, references),
+            family.conventions.as_ref(),
+            &entry_files(family.projects.as_ref()),
         );
         let usage = Usage::of(references, roots);
         let mut tally = Tally::default();
@@ -215,6 +219,12 @@ impl Check for StaticDeadCode {
             ]),
             tally.findings(),
         ))
+    }
+
+    /// JavaScript and TypeScript import, call, and run each other's files, so one language's
+    /// facts cannot say what reaches another's (ADR-163, as ADR-051 for clones).
+    fn spans_family(&self) -> bool {
+        true
     }
 
     /// Dead symbols add up across languages (ADR-059).
@@ -413,16 +423,88 @@ struct Module<'a> {
 fn modules_of<'a>(
     module_of: &HashMap<&'a str, &'a str>,
     conventions: Option<&TestConventions>,
+    entries: &BTreeSet<String>,
 ) -> BTreeMap<&'a str, Module<'a>> {
     let mut modules: BTreeMap<&str, Module<'_>> = BTreeMap::new();
     for (file, namespace) in module_of {
         let module = modules.entry(namespace).or_default();
         module.files.insert(file);
-        if conventions.is_some_and(|conventions| conventions.is_test(file)) {
+        if conventions.is_some_and(|conventions| conventions.is_test(file))
+            || entries.contains(*file)
+        {
             module.rooted = true;
         }
     }
     modules
+}
+
+/// The facts of every language of the check's family, each kind as one (ADR-163): a module of one
+/// language may be imported, called, or run only from another's.
+struct Family {
+    symbols: Symbols,
+    trees: NormTree,
+    graph: ModuleGraph,
+    roots: Roots,
+    references: References,
+    conventions: Option<TestConventions>,
+    projects: Option<ProjectInfo>,
+}
+
+impl Family {
+    fn of(facts: &Facts) -> Result<Self> {
+        let references = facts.family::<References>()?;
+        let conventions = facts.family::<TestConventions>().ok();
+        Ok(Self {
+            symbols: Symbols {
+                symbols: joined(facts.family::<Symbols>()?, |fact| &fact.symbols),
+            },
+            trees: NormTree {
+                symbols: joined(facts.family::<NormTree>()?, |fact| &fact.symbols),
+            },
+            graph: ModuleGraph {
+                roots: joined(facts.family::<ModuleGraph>()?, |fact| &fact.roots),
+            },
+            roots: Roots {
+                roots: joined(facts.family::<Roots>()?, |fact| &fact.roots),
+            },
+            references: References {
+                references: joined(references.clone(), |fact| &fact.references),
+                dynamic: joined(references.clone(), |fact| &fact.dynamic),
+                imports: joined(references, |fact| &fact.imports),
+            },
+            conventions: conventions.map(|own| TestConventions {
+                test_globs: joined(own.clone(), |fact| &fact.test_globs),
+                pairs: joined(own, |fact| &fact.pairs),
+            }),
+            projects: facts.family::<ProjectInfo>().ok().map(|own| ProjectInfo {
+                roots: joined(own, |fact| &fact.roots),
+            }),
+        })
+    }
+}
+
+/// The items `field` holds in each of `facts`, in order.
+fn joined<F, T: Clone>(facts: Vec<&F>, field: impl Fn(&F) -> &Vec<T>) -> Vec<T> {
+    facts
+        .into_iter()
+        .flat_map(|fact| field(fact).iter().cloned())
+        .collect()
+}
+
+/// The files the project's manifests say it runs, relative to the repository (ADR-163): a file the
+/// project runs directly roots its module, as a test file does.
+fn entry_files(info: Option<&ProjectInfo>) -> BTreeSet<String> {
+    info.iter()
+        .flat_map(|info| &info.roots)
+        .flat_map(|root| {
+            root.entries
+                .iter()
+                .map(move |entry| match root.path.as_str() {
+                    "." => entry.clone(),
+                    path => format!("{path}/{entry}"),
+                })
+        })
+        .collect()
 }
 
 /// Marks the module of each root as exporting (an export root) or rooted (any other); the
@@ -512,9 +594,10 @@ impl<'a> Reachability<'a> {
         roots: &Roots,
         edges: Vec<&'a ImportEdge>,
         conventions: Option<&TestConventions>,
+        entries: &BTreeSet<String>,
     ) -> Self {
         let module_of = module_namespaces(symbols);
-        let mut modules = modules_of(&module_of, conventions);
+        let mut modules = modules_of(&module_of, conventions, entries);
         let exported = root_modules(&mut modules, &module_of, symbols, roots);
         let unfollowed = enter_modules(&mut modules, &module_of, edges);
         Self {

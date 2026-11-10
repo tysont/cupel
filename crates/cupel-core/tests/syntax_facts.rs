@@ -357,6 +357,7 @@ fn project_info_payload_shape() {
             members: vec!["api".into()],
             packages: vec!["./api/...".into()],
             skip_dirs: vec!["vendor".into()],
+            entries: Vec::new(),
         }],
     });
     assert_eq!(json["roots"][0]["members"], json!(["api"]));

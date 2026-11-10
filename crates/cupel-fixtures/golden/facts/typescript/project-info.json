@@ -5,6 +5,9 @@
         "package.json",
         "packages/shapes/package.json"
       ],
+      "entries": [
+        "packages/shapes/src/index.ts"
+      ],
       "lang": "typescript",
       "members": [
         "packages/shapes"

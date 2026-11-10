@@ -89,6 +89,7 @@ pub fn produce_ctx(root: &Path, lang: &str, cancel: Cancellation) -> ProduceCtx 
                     Vec::new()
                 },
                 skip_dirs: Vec::new(),
+                entries: Vec::new(),
             }],
         })
         .share(),

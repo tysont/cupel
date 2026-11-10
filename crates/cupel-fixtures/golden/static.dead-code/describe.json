@@ -152,7 +152,8 @@
       "tier": 0,
       "version": 2,
       "wants": [
-        "test-conventions"
+        "test-conventions",
+        "project-info"
       ]
     },
     "subject": "check"

@@ -45,6 +45,7 @@ fn plain(path: &str, lang: &str, build_files: &[&str], skip: &[&str]) -> Project
         members: Vec::new(),
         packages: Vec::new(),
         skip_dirs: strings(skip),
+        entries: Vec::new(),
     }
 }
 
@@ -338,5 +339,46 @@ fn root_detection_does_not_descend_into_excluded_paths() {
                 CARGO_SKIP
             )
         }]
+    );
+}
+
+#[test]
+fn a_node_root_lists_the_files_its_manifests_say_it_runs_and_only_files_that_exist() {
+    let dir = tree(&[
+        (
+            "package.json",
+            r#"{"workspaces": ["apps/*"], "main": "lib/index.js", "bin": {"tool": "./bin/tool.js", "built": "./dist/built.js"}, "scripts": {"start": "node server.js --port 1", "dev": "tsx scripts/dev.ts", "test": "vitest run"}}"#,
+        ),
+        ("lib/index.js", ""),
+        ("bin/tool.js", ""),
+        ("server.js", ""),
+        ("scripts/dev.ts", ""),
+        ("apps/web/package.json", "{}"),
+        (
+            "apps/web/wrangler.toml",
+            "name = \"web\"\nmain = \"src/index.tsx\"\n[[durable_objects.bindings]]\nname = \"X\"\n",
+        ),
+        ("apps/web/src/index.tsx", ""),
+        ("apps/box/package.json", "{}"),
+        (
+            "apps/box/Dockerfile",
+            "FROM node:22\nCOPY package.json /app/package.json\nCOPY server.js /app/server.js\nCOPY lib/jobs.js missing.js /app/\nCMD [\"node\", \"/app/server.js\"]\n",
+        ),
+        ("apps/box/server.js", ""),
+        ("apps/box/lib/jobs.js", ""),
+    ]);
+    let roots = all_roots(dir.path());
+    let node: Vec<&ProjectRoot> = roots.iter().filter(|root| root.path == ".").collect();
+    assert_eq!(
+        node[0].entries,
+        [
+            "apps/box/lib/jobs.js",
+            "apps/box/server.js",
+            "apps/web/src/index.tsx",
+            "bin/tool.js",
+            "lib/index.js",
+            "scripts/dev.ts",
+            "server.js",
+        ]
     );
 }

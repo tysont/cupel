@@ -36,6 +36,7 @@ fn project(lang: &str) -> Produced {
             members: Vec::new(),
             packages: Vec::new(),
             skip_dirs: Vec::new(),
+            entries: Vec::new(),
         }],
     })
 }

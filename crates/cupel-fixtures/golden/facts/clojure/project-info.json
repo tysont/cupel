@@ -5,6 +5,7 @@
         "deps.edn",
         "shapes/deps.edn"
       ],
+      "entries": [],
       "lang": "clojure",
       "members": [
         "shapes"

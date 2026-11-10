@@ -5,6 +5,7 @@
         "Cargo.toml",
         "shapes/Cargo.toml"
       ],
+      "entries": [],
       "lang": "rust",
       "members": [
         "shapes"

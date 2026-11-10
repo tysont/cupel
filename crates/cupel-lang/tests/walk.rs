@@ -76,6 +76,7 @@ fn project_root(path: &str, skip_dirs: &[&str]) -> ProjectRoot {
         members: Vec::new(),
         packages: Vec::new(),
         skip_dirs: skip_dirs.iter().map(|dir| (*dir).to_owned()).collect(),
+        entries: Vec::new(),
     }
 }
 

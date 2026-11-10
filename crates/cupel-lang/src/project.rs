@@ -76,6 +76,7 @@ impl Candidate {
                 .iter()
                 .map(|dir| (*dir).to_owned())
                 .collect(),
+            entries: Vec::new(),
         }
     }
 }

@@ -6,6 +6,7 @@
         "settings.gradle",
         "shapes/build.gradle"
       ],
+      "entries": [],
       "lang": "java",
       "members": [
         "shapes"

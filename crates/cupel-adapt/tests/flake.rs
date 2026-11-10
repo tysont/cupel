@@ -79,6 +79,7 @@ fn project(lang: &str) -> Produced {
                 Vec::new()
             },
             skip_dirs: Vec::new(),
+            entries: Vec::new(),
         }],
     })
 }
