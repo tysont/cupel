@@ -1,17 +1,10 @@
 // ABOUTME: Tests for the file walk: source files of registered languages only, gitignore-aware even
 // ABOUTME: outside a git repository, hidden and project-generated directories skipped, paths sorted.
-use std::fs;
-use std::path::Path;
 
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{Exclude, LangId};
+use cupel_fixtures::write_file;
 use cupel_lang::{LanguageRegistry, walk, walk_excluding};
-
-fn write(root: &Path, path: &str, contents: &str) {
-    let path = root.join(path);
-    fs::create_dir_all(path.parent().unwrap()).unwrap();
-    fs::write(path, contents).unwrap();
-}
 
 #[test]
 fn the_walk_returns_exactly_the_source_files_that_are_not_ignored() {
@@ -33,11 +26,11 @@ fn the_walk_returns_exactly_the_source_files_that_are_not_ignored() {
         ".hidden/secret.py",
         "py/pkg/generated_pb2.py",
     ] {
-        write(root, path, "");
+        write_file(root, path, "");
     }
-    write(root, ".gitignore", "target/\nnode_modules/\n");
-    write(root, "web/.gitignore", "dist/\n");
-    write(root, "py/.gitignore", "*_pb2.py\n");
+    write_file(root, ".gitignore", "target/\nnode_modules/\n");
+    write_file(root, "web/.gitignore", "dist/\n");
+    write_file(root, "py/.gitignore", "*_pb2.py\n");
 
     let files = walk(root, &LanguageRegistry::builtin(), &ProjectInfo::default());
 
@@ -92,7 +85,7 @@ fn the_walk_skips_each_project_roots_generated_directories_below_that_root_only(
         "svc/vendor/dep/dep.go",
         "svc/main.go",
     ] {
-        write(root, path, "");
+        write_file(root, path, "");
     }
     let project = ProjectInfo {
         roots: vec![
@@ -112,8 +105,8 @@ fn the_walk_skips_each_project_roots_generated_directories_below_that_root_only(
 #[test]
 fn a_project_root_at_the_top_skips_its_generated_directories_everywhere() {
     let dir = tempfile::tempdir().unwrap();
-    write(dir.path(), "src/lib.rs", "");
-    write(dir.path(), "crates/a/target/gen.rs", "");
+    write_file(dir.path(), "src/lib.rs", "");
+    write_file(dir.path(), "crates/a/target/gen.rs", "");
     let project = ProjectInfo {
         roots: vec![project_root(".", &["target"])],
     };
@@ -134,7 +127,7 @@ fn excluded_paths_and_always_excluded_directories_are_never_walked() {
         "web/node_modules/dep/index.js",
         "src/generated/types.ts",
     ] {
-        write(dir.path(), path, "");
+        write_file(dir.path(), path, "");
     }
     let exclude = Exclude::new(vec![
         "crates/fixtures/**".to_owned(),

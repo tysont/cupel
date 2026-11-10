@@ -76,10 +76,18 @@ pub fn produce_ctx(root: &Path, lang: &str, cancel: Cancellation) -> ProduceCtx 
         Writer::new(root, false).unwrap().confined(),
         cancel,
     );
-    ctx.upstream.insert(
-        Produced::new(ProjectInfo {
-            roots: vec![ProjectRoot {
-                path: ".".to_owned(),
+    ctx.upstream
+        .insert(Produced::new(project_info(lang, &["."])).share());
+    ctx
+}
+
+/// `ProjectInfo` naming each of `dirs` (relative to the repository root) a root of `lang`.
+pub fn project_info(lang: &str, dirs: &[&str]) -> ProjectInfo {
+    ProjectInfo {
+        roots: dirs
+            .iter()
+            .map(|dir| ProjectRoot {
+                path: (*dir).to_owned(),
                 lang: LangId::from(lang),
                 build_files: Vec::new(),
                 members: Vec::new(),
@@ -90,11 +98,9 @@ pub fn produce_ctx(root: &Path, lang: &str, cancel: Cancellation) -> ProduceCtx 
                 },
                 skip_dirs: Vec::new(),
                 entries: Vec::new(),
-            }],
-        })
-        .share(),
-    );
-    ctx
+            })
+            .collect(),
+    }
 }
 
 /// Every file under `root` outside `.cupel/` (where producers keep their caches), relative to it

@@ -11,6 +11,19 @@ pub fn repo_path(name: &str) -> PathBuf {
         .join(name)
 }
 
+/// Writes `contents` to `path` under `root`, creating the directories it needs.
+///
+/// # Panics
+///
+/// When the file cannot be written.
+pub fn write_file(root: &Path, path: &str, contents: &str) {
+    let path = root.join(path);
+    fs::create_dir_all(path.parent().expect("a file under the root"))
+        .unwrap_or_else(|error| panic!("cannot create {}: {error}", path.display()));
+    fs::write(&path, contents)
+        .unwrap_or_else(|error| panic!("cannot write {}: {error}", path.display()));
+}
+
 /// Copies the fixture repository `name` into the existing directory `into`.
 ///
 /// # Panics

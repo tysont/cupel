@@ -16,6 +16,7 @@ mod cargo;
 mod gomod;
 mod npm;
 mod osv;
+mod pnpm;
 mod python;
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -87,6 +88,8 @@ pub struct Context {
     pub licenses: Option<BTreeMap<String, String>>,
     /// Whether the lockfile itself records licenses.
     pub licensed_lockfile: bool,
+    /// The project's entry in a lockfile that several projects share (a pnpm importer).
+    pub importer: Option<String>,
 }
 
 impl Context {
@@ -155,22 +158,27 @@ impl Producer<Footprint> for FootprintReader {
             };
             let project = (ecosystem.discover)(&root);
             ctx.cancel.checkpoint()?;
-            for file in &project.manifests {
-                if let Ok(text) = std::fs::read_to_string(ctx.ctx.root.join(file)) {
-                    let listed = (ecosystem.parse)(file, &text, &project.context);
-                    footprint.licenses |= project.context.licensed() && !listed.is_empty();
-                    footprint.dependencies.extend(listed);
-                }
-            }
-            footprint
-                .manifests
-                .extend(project.manifests.iter().cloned());
+            read(&ctx.ctx.root, ecosystem, &project, &mut footprint);
             projects.push(project);
         }
         footprint.vulnerabilities = osv::configured(ctx, ecosystem, &footprint.dependencies)?;
         footprint.artifacts = artifacts::configured(ctx)?;
         footprint.base = base(ctx, ecosystem, &projects);
         Ok(footprint)
+    }
+}
+
+/// Adds what `project`'s files list to `footprint`, at head under the repository `root`.
+fn read(root: &Path, ecosystem: &Ecosystem, project: &Project, footprint: &mut Footprint) {
+    for file in &project.manifests {
+        if let Ok(text) = std::fs::read_to_string(root.join(file)) {
+            let listed = (ecosystem.parse)(file, &text, &project.context);
+            footprint.licenses |= project.context.licensed() && !listed.is_empty();
+            merge(&mut footprint.dependencies, listed);
+        }
+        if !footprint.manifests.contains(file) {
+            footprint.manifests.push(file.clone());
+        }
     }
 }
 
@@ -194,13 +202,30 @@ fn base(ctx: &ProduceCtx, ecosystem: &Ecosystem, projects: &[Project]) -> Option
                 continue;
             };
             let text = String::from_utf8_lossy(&bytes);
-            dependencies.extend((ecosystem.parse)(file, &text, &project.context));
+            merge(
+                &mut dependencies,
+                (ecosystem.parse)(file, &text, &project.context),
+            );
         }
     }
     Some(FootprintBase {
         commit: commit.clone(),
         dependencies,
     })
+}
+
+/// Adds `listed` to `dependencies`, each package of a file once: projects sharing a lockfile list
+/// the same package, which is direct when any of them declares it.
+fn merge(dependencies: &mut Vec<Dependency>, listed: Vec<Dependency>) {
+    for dependency in listed {
+        match dependencies.iter_mut().find(|known| {
+            (&known.file, &known.name, &known.version)
+                == (&dependency.file, &dependency.name, &dependency.version)
+        }) {
+            Some(known) => known.direct |= dependency.direct,
+            None => dependencies.push(dependency),
+        }
+    }
 }
 
 /// The line (1-based) of the first line of `text` at or after `from` (0-based) that `matches`;

@@ -2328,6 +2328,11 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - The latter first failed because deferral was judged at the repository root; it is now judged at the run's roots.
   - Molten's `init` now writes eight per-package roots. `tests/api` and `tests/e2e` are in none.
   - Open: one runner command per language runs in every root of it, including `tools/discovery`, which has no tests.
+- **B6, Area 5** (2026-11-10, [ADR-168](adr/CUPEL_DECISION_168.md)).
+  - The gap: `perf.footprint` counted 93 dependencies on Molten. The pnpm members gave only their declared names, without versions or licenses, while the npm roots gave their full lockfiles.
+  - Now a root reads the `pnpm-lock.yaml` pnpm installs it from: its workspace's, and only when the root has an importer there. It lists what the importer locks, transitively, with licenses from `node_modules/.pnpm`. Roots sharing a lockfile list each package once.
+  - Tests: `cupel-adapt/tests/footprint.rs`, covering two members sharing a lockfile, a stale member lockfile, and a directory that is not a member.
+  - Molten now counts 487, matching a separate computation with a real YAML parser.
 
 ## 4. Cross-phase checklist
 

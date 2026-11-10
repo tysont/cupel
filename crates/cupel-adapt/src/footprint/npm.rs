@@ -1,11 +1,11 @@
 // ABOUTME: The JavaScript and TypeScript ecosystem of `tool.footprint` (ADR-103): `package-lock.json`'s packages with their
-// ABOUTME: licenses, else `package.json`'s declared dependencies without versions; direct when `package.json` declares them.
+// ABOUTME: licenses, else what the enclosing `pnpm-lock.yaml` locks for the root, else `package.json`'s declared names.
 use std::collections::BTreeSet;
 
 use cupel_core::Dependency;
 use serde_json::Value;
 
-use super::{Context, Ecosystem, Project, Root, line_after};
+use super::{Context, Ecosystem, Project, Root, line_after, pnpm};
 
 pub static NPM: Ecosystem = Ecosystem {
     langs: &["javascript", "typescript"],
@@ -26,19 +26,39 @@ const DECLARING: [&str; 4] = [
     "peerDependencies",
 ];
 
-/// `package-lock.json` when the root has one, else `package.json`; the names `package.json`
-/// declares are direct.
+/// `package-lock.json` when the root has one, else the `pnpm-lock.yaml` pnpm installs it from
+/// (its workspace's, for a member), else `package.json`; the names `package.json` declares are
+/// direct.
 fn discover(root: &Root<'_>) -> Project {
     let Ok(text) = std::fs::read_to_string(root.path.join(MANIFEST)) else {
         return Project::default();
     };
     let direct = declared(&text).into_iter().map(|(name, _)| name).collect();
-    let locked = root.path.join(LOCKFILE).is_file();
+    if root.path.join(LOCKFILE).is_file() {
+        return Project {
+            manifests: vec![root.file(LOCKFILE)],
+            context: Context {
+                direct,
+                licensed_lockfile: true,
+                ..Context::default()
+            },
+        };
+    }
+    if let Some(locking) = pnpm::locking(root) {
+        return Project {
+            manifests: vec![locking.file],
+            context: Context {
+                direct,
+                importer: Some(locking.importer),
+                licenses: pnpm::installed_licenses(&locking.dir),
+                ..Context::default()
+            },
+        };
+    }
     Project {
-        manifests: vec![root.file(if locked { LOCKFILE } else { MANIFEST })],
+        manifests: vec![root.file(MANIFEST)],
         context: Context {
             direct,
-            licensed_lockfile: locked,
             ..Context::default()
         },
     }
@@ -60,6 +80,8 @@ fn declared(text: &str) -> Vec<(String, String)> {
 fn parse(file: &str, text: &str, context: &Context) -> Vec<Dependency> {
     if file.ends_with(LOCKFILE) {
         locked(file, text, context)
+    } else if file.ends_with(pnpm::LOCKFILE) {
+        pnpm::parse(file, text, context)
     } else {
         unlocked(file, text)
     }

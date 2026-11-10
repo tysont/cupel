@@ -1,5 +1,5 @@
 // ABOUTME: `tool.footprint` (ADR-103) on each language's perf.footprint fixture: dependencies with lines, direct marks,
-// ABOUTME: and licenses, OSV advisories, artifact sizes, unconfigured measurements, a root without manifests, and the base.
+// ABOUTME: and licenses, OSV advisories, artifact sizes, unconfigured measurements, a root without manifests, the base, and pnpm workspaces.
 mod support;
 
 use std::fs;
@@ -9,6 +9,7 @@ use cupel_core::{
     Availability, Cancellation, Dependency, FactKind, Footprint, ProduceCtx, Scope, Vulnerability,
     find_program,
 };
+use cupel_fixtures::write_file;
 use serde_json::{Value, json};
 
 const ID: &str = "tool.footprint";
@@ -234,4 +235,171 @@ fn under_a_range_the_same_manifests_are_read_at_the_base_commit() {
         ["example.com/gplthing@v1.0.0"]
     );
     assert_eq!(footprint.dependencies.len(), 2);
+}
+
+/// A pnpm workspace's lockfile: the root's own tooling, member `apps/a` needing `left-pad`, and
+/// member `apps/b` needing a scoped package (resolved with a peer) and linking `apps/a`; the
+/// two packages need each other.
+const PNPM_LOCK: &str = "lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+
+importers:
+
+  .:
+    devDependencies:
+      prettier:
+        specifier: ^3.0.0
+        version: 3.0.0
+
+  apps/a:
+    dependencies:
+      left-pad:
+        specifier: ^1.3.0
+        version: 1.3.0
+
+  apps/b:
+    dependencies:
+      '@scope/tiny':
+        specifier: ^0.1.0
+        version: 0.1.0(left-pad@1.3.0)
+      a:
+        specifier: workspace:*
+        version: link:../a
+
+packages:
+
+  '@scope/tiny@0.1.0':
+    resolution: {integrity: sha512-x}
+    peerDependencies:
+      left-pad: '*'
+
+  left-pad@1.3.0:
+    resolution: {integrity: sha512-y}
+
+  prettier@3.0.0:
+    resolution: {integrity: sha512-z}
+
+snapshots:
+
+  '@scope/tiny@0.1.0(left-pad@1.3.0)':
+    dependencies:
+      left-pad: 1.3.0
+
+  left-pad@1.3.0:
+    dependencies:
+      '@scope/tiny': 0.1.0(left-pad@1.3.0)
+
+  prettier@3.0.0: {}
+";
+
+/// A pnpm workspace with `PNPM_LOCK` at its root.
+fn pnpm_workspace() -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    write_file(dir.path(), "pnpm-workspace.yaml", "packages:\n  - apps/*\n");
+    write_file(dir.path(), "pnpm-lock.yaml", PNPM_LOCK);
+    dir
+}
+
+/// What `tool.footprint` lists for the TypeScript roots `dirs` of the repository at `root`.
+fn produce_roots(root: &Path, dirs: &[&str]) -> Footprint {
+    let mut ctx = ctx(root, "typescript", json!({}));
+    ctx.upstream
+        .insert(cupel_core::Produced::new(support::project_info("typescript", dirs)).share());
+    produce(&ctx, "typescript")
+}
+
+#[test]
+fn a_pnpm_member_lists_what_its_importer_locks_once_across_members_with_installed_licenses() {
+    let dir = pnpm_workspace();
+    let write = |path: &str, text: &str| write_file(dir.path(), path, text);
+    write(
+        "package.json",
+        "{\"devDependencies\": {\"prettier\": \"^3.0.0\"}}\n",
+    );
+    write(
+        "apps/a/package.json",
+        "{\"dependencies\": {\"left-pad\": \"^1.3.0\"}}\n",
+    );
+    write(
+        "apps/b/package.json",
+        "{\"dependencies\": {\"@scope/tiny\": \"^0.1.0\", \"a\": \"workspace:*\"}}\n",
+    );
+    write(
+        "node_modules/.pnpm/left-pad@1.3.0/node_modules/left-pad/package.json",
+        "{\"name\": \"left-pad\", \"version\": \"1.3.0\", \"license\": \"WTFPL\"}\n",
+    );
+    let footprint = produce_roots(dir.path(), &["apps/a", "apps/b"]);
+    let listed: Vec<_> = footprint
+        .dependencies
+        .iter()
+        .map(|d| {
+            (
+                d.spelled(),
+                d.direct,
+                d.license.clone(),
+                d.file.as_str(),
+                d.line,
+            )
+        })
+        .collect();
+    assert_eq!(
+        (footprint.manifests, listed, footprint.licenses),
+        (
+            vec!["pnpm-lock.yaml".to_owned()],
+            vec![
+                (
+                    "left-pad@1.3.0".to_owned(),
+                    true,
+                    Some("WTFPL".to_owned()),
+                    "pnpm-lock.yaml",
+                    36
+                ),
+                (
+                    "@scope/tiny@0.1.0".to_owned(),
+                    true,
+                    None,
+                    "pnpm-lock.yaml",
+                    31
+                ),
+            ],
+            true,
+        )
+    );
+}
+
+#[test]
+fn a_workspace_member_reads_the_workspace_lockfile_and_a_directory_it_does_not_lock_its_manifest() {
+    let dir = pnpm_workspace();
+    write_file(
+        dir.path(),
+        "apps/a/package.json",
+        "{\"dependencies\": {\"left-pad\": \"^1.3.0\"}}\n",
+    );
+    // pnpm installs a member from the workspace's lockfile; one left in the member is stale.
+    write_file(
+        dir.path(),
+        "apps/a/pnpm-lock.yaml",
+        PNPM_LOCK.replace("1.3.0", "1.0.0").as_str(),
+    );
+    write_file(
+        dir.path(),
+        "apps/a/echo/package.json",
+        "{\"dependencies\": {\"express\": \"^4\"}}\n",
+    );
+    let footprint = produce_roots(dir.path(), &["apps/a", "apps/a/echo"]);
+    let listed: Vec<_> = footprint
+        .dependencies
+        .iter()
+        .map(|d| (d.spelled(), d.file.as_str()))
+        .collect();
+    assert_eq!(
+        listed,
+        [
+            ("left-pad@1.3.0".to_owned(), "pnpm-lock.yaml"),
+            ("@scope/tiny@0.1.0".to_owned(), "pnpm-lock.yaml"),
+            ("express".to_owned(), "apps/a/echo/package.json"),
+        ]
+    );
 }

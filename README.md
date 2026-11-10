@@ -1196,10 +1196,10 @@ The check runs when at least one of a language's analyzers is installed; each on
 |---|---|---|
 | Rust | `Cargo.lock`, except the workspace's own packages | `cargo metadata --offline --locked`, from the local registry cache |
 | Python | `uv.lock`, else `poetry.lock`, else `requirements*.txt` | the package metadata in `.venv/` or `venv/` |
-| JavaScript, TypeScript | `package-lock.json`, else `package.json` (without versions) | the lockfile |
+| JavaScript, TypeScript | `package-lock.json`, else the `pnpm-lock.yaml` pnpm installs the root from (its workspace's, for a member: what its importer locks, transitively), else `package.json` (without versions) | the lockfile; for pnpm, the packages installed in `node_modules/.pnpm` |
 | Go | `go.mod`'s `require` lines | not read |
 
-A dependency is direct when the project declares it itself. Two measurements are opt-in, per language:
+A dependency is direct when the project declares it itself. Roots that share a lockfile list each of its packages once ([ADR-168](docs/adr/CUPEL_DECISION_168.md)). Two measurements are opt-in, per language:
 
 ```toml
 [lang.rust]

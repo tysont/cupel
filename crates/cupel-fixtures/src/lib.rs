@@ -60,7 +60,7 @@ pub use captures::Capture;
 pub use cupel_plugin::evidence;
 pub use golden::{GoldenError, GoldenMode, Goldens, assert_golden, canonical_json};
 pub use redact::{redact, redact_sarif};
-pub use repos::{copy_repo, repo_path};
+pub use repos::{copy_repo, repo_path, write_file};
 pub use run::{Outcome, run_cupel, run_cupel_measuring};
 pub use sarif::sarif_problems;
 pub use sockets::{SOCKET_PATH_MAX, assert_socket_fits};
