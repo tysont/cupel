@@ -182,10 +182,11 @@ fn warm(root: &Path, changed: &[PathBuf], cancel: &Cancellation) {
     let ctx = Ctx {
         exclude: config.file.scope.exclude.clone(),
         lang: config.file.lang.clone(),
+        roots: config.file.roots.values().cloned().collect(),
         ..Ctx::new(root.to_path_buf())
     };
     let catalog = Catalog::builtin();
-    let info = project::detect(&writer, &ctx.exclude);
+    let info = project::detect(&writer, &ctx.exclude, &ctx.roots);
     for lang in catalog.language_registry().langs() {
         for joint in catalog.producers().joints_for(&lang) {
             if cancel.is_cancelled() || !matches!(joint.availability(&ctx), Availability::Ready) {

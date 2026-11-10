@@ -2318,6 +2318,16 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - `cupel-core/tests/deferred.rs`.
     - `cupel-cli/tests/init.rs`: Molten's shape, with a recording `node_modules/.bin/vitest` that a `standard` check must not run. It runs when the filter is removed.
   - This was done before anything in Areas 5 to 10 executes Molten's tests.
+- **B9, Area 5's core** (2026-11-10, [ADR-167](adr/CUPEL_DECISION_167.md)).
+  - The gap: `[roots]` was validated and echoed but read by nothing.
+  - Now configured roots are each language's `ProjectInfo` (`Ctx.roots`), and runner detection and deferral are judged at them.
+  - `init` replaces a root whose runner is deferred and that has members with those members.
+  - Tests:
+    - `cupel-lang/tests/project.rs`;
+    - `cupel-cli/tests/init.rs`: the split, plus a run that, with recording Vitests in two packages, runs only the configured one's.
+    - The latter first failed because deferral was judged at the repository root; it is now judged at the run's roots.
+  - Molten's `init` now writes eight per-package roots. `tests/api` and `tests/e2e` are in none.
+  - Open: one runner command per language runs in every root of it, including `tools/discovery`, which has no tests.
 
 ## 4. Cross-phase checklist
 

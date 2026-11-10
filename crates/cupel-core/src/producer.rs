@@ -11,7 +11,7 @@ use std::time::Duration;
 use serde_json::{Map, Value};
 
 use crate::cancel::Cancellation;
-use crate::config::Table;
+use crate::config::{RootConfig, Table};
 use crate::error::Result;
 use crate::event::EventSink;
 use crate::exclude::Exclude;
@@ -36,6 +36,9 @@ pub struct Ctx {
     pub exclude: Exclude,
     /// The `[lang.<id>]` tables, which pin producers (ADR-076); empty when nothing is configured.
     pub lang: BTreeMap<LangId, Table>,
+    /// The `[roots]` configured. When any is, a language's project roots are exactly those
+    /// configured for it, and none is detected (ADR-167).
+    pub roots: Vec<RootConfig>,
 }
 
 impl Ctx {
@@ -45,6 +48,7 @@ impl Ctx {
             root,
             exclude: Exclude::default(),
             lang: BTreeMap::new(),
+            roots: Vec::new(),
         }
     }
 

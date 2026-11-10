@@ -51,12 +51,38 @@ fn produce_in<F: Fact>(lang: &str, root: &Path, exclude: &Exclude) -> (F, Vec<Ev
     produce_over::<F>(lang, root, exclude, None)
 }
 
+/// Produces `F` for `lang` over `root` with `roots` as the configured `[roots]`, panicking on any
+/// event.
+pub fn produce_rooted<F: Fact>(lang: &str, root: &Path, roots: &[(&str, &str)]) -> F {
+    let roots = roots
+        .iter()
+        .map(|(path, lang)| cupel_core::config::RootConfig {
+            path: (*path).to_owned(),
+            lang: (*lang).into(),
+        })
+        .collect();
+    let (fact, events) = produce_with::<F>(lang, root, &Exclude::default(), None, roots);
+    assert!(events.is_empty(), "{events:?}");
+    fact
+}
+
 /// Produces `F` for `lang` over `root` with `scope`, or every file the walk finds.
 fn produce_over<F: Fact>(
     lang: &str,
     root: &Path,
     exclude: &Exclude,
     scope: Option<Scope>,
+) -> (F, Vec<Event>) {
+    produce_with::<F>(lang, root, exclude, scope, Vec::new())
+}
+
+/// Produces `F` for `lang` over `root` with `scope` and `roots` as the configured `[roots]`.
+fn produce_with<F: Fact>(
+    lang: &str,
+    root: &Path,
+    exclude: &Exclude,
+    scope: Option<Scope>,
+    roots: Vec<cupel_core::config::RootConfig>,
 ) -> (F, Vec<Event>) {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
@@ -70,6 +96,7 @@ fn produce_over<F: Fact>(
     let ctx = ProduceCtx::new(
         Ctx {
             exclude: exclude.clone(),
+            roots,
             ..Ctx::new(writer.root().to_path_buf())
         },
         writer,

@@ -273,13 +273,26 @@ fn recursive_workspace() -> Repo {
         "apps/web/package.json",
         "{\"scripts\": {\"test\": \"vitest run\"}, \"devDependencies\": {\"vitest\": \"1\"}}\n",
     );
+    repo.write("apps/web/tsconfig.json", "{}\n");
     repo.write("apps/web/src/a.ts", "export const a = 1;\n");
+    repo
+}
+
+/// A single TypeScript package whose `test` script runs a wrapper Cupel cannot see into.
+fn wrapped_package() -> Repo {
+    let repo = Repo::new();
+    repo.write(
+        "package.json",
+        "{\"scripts\": {\"test\": \"pnpm run test:unit\"}, \"devDependencies\": {\"vitest\": \"1\"}}\n",
+    );
+    repo.write("tsconfig.json", "{}\n");
+    repo.write("src/a.ts", "export const a = 1;\n");
     repo
 }
 
 #[test]
 fn init_writes_no_test_command_a_roots_own_test_script_contradicts_and_says_why() {
-    let repo = recursive_workspace();
+    let repo = wrapped_package();
     let preview = repo.run(&["init"]);
     assert_eq!(preview.code, 0, "{}", preview.stdout);
     let text = added(&would_write(&preview)[0].1);
@@ -297,6 +310,26 @@ fn init_writes_no_test_command_a_roots_own_test_script_contradicts_and_says_why(
             json!({"lang": "typescript", "path": ".", "runner": "tool.vitest", "deferred_by": ["`package.json` has `scripts.test` that does not name `vitest`"]})
         ]
     );
+}
+
+#[test]
+fn init_makes_each_member_of_a_workspace_that_delegates_its_tests_a_root() {
+    let repo = recursive_workspace();
+    let preview = repo.run(&["init"]);
+    assert_eq!(preview.code, 0, "{}", preview.stdout);
+    let text = added(&would_write(&preview)[0].1);
+    assert!(
+        text.contains("[roots]\nweb = { path = \"apps/web\", lang = \"typescript\" }\n"),
+        "{text}"
+    );
+    assert!(text.contains("test = \"npx vitest run\""), "{text}");
+    let kinds: Vec<Value> = preview.envelope()["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|finding| finding["kind"].clone())
+        .collect();
+    assert_eq!(kinds, Vec::<Value>::new());
 }
 
 /// A Vitest that records that it ran, installed where the runner finds it.
@@ -320,11 +353,48 @@ fn a_standard_run_never_runs_a_runner_the_roots_own_test_script_defers() {
         "import { it, expect } from \"vitest\";\nit(\"a\", () => expect(1).toBe(1));\n",
     );
     install_recording_vitest(&repo);
-    let written = repo.run(&["init", "--write"]);
-    assert_eq!(written.code, 0, "{}", written.stdout);
+    // Detection, not `init`: `init` would make each member a root (ADR-167).
+    repo.write("cupel.toml", "depth = \"standard\"\n");
+    let run = repo.run(&["check", "--depth", "standard", "--no-gate"]);
+    assert_eq!(
+        (run.code, repo.path("vitest-ran").exists()),
+        (0, false),
+        "a run executed the root's Vitest, which the root's own `pnpm -r test` defers: {}",
+        run.stdout
+    );
+}
+
+/// A Vitest in `package` that records each run there and fails, so no run of it goes unnoticed.
+#[cfg(unix)]
+fn install_recording_vitest_in(repo: &Repo, package: &str) {
+    use std::os::unix::fs::PermissionsExt;
+    let bin = format!("{package}/node_modules/.bin/vitest");
+    repo.write(&bin, "#!/bin/sh\ntouch \"$PWD/vitest-ran\"\nexit 1\n");
+    std::fs::set_permissions(repo.path(&bin), std::fs::Permissions::from_mode(0o755)).unwrap();
+}
+
+#[cfg(unix)]
+#[test]
+fn a_run_runs_tests_only_in_the_roots_cupel_toml_names() {
+    let repo = recursive_workspace();
+    repo.write(
+        "packages/shared/package.json",
+        "{\"scripts\": {\"test\": \"vitest run\"}, \"devDependencies\": {\"vitest\": \"1\"}}\n",
+    );
+    repo.write("packages/shared/tsconfig.json", "{}\n");
+    repo.write("packages/shared/src/b.ts", "export const b = 1;\n");
+    install_recording_vitest_in(&repo, "apps/web");
+    install_recording_vitest_in(&repo, "packages/shared");
+    repo.write(
+        "cupel.toml",
+        "depth = \"standard\"\n\n[roots]\nshared = { path = \"packages/shared\", lang = \"typescript\" }\n",
+    );
     repo.run(&["check", "--depth", "standard", "--no-gate"]);
-    assert!(
-        !repo.path("vitest-ran").exists(),
-        "a run executed the root's Vitest, which the root's own `pnpm -r test` defers"
+    assert_eq!(
+        [
+            repo.path("packages/shared/vitest-ran").exists(),
+            repo.path("apps/web/vitest-ran").exists()
+        ],
+        [true, false]
     );
 }

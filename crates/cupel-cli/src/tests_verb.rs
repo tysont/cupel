@@ -69,6 +69,7 @@ pub fn verb(
             ctx: Ctx {
                 exclude: config.file.scope.exclude.clone(),
                 lang: config.file.lang.clone(),
+                roots: config.file.roots.values().cloned().collect(),
                 ..Ctx::new(invocation.writer.root().to_path_buf())
             },
             config,

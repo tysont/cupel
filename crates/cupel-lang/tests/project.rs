@@ -382,3 +382,56 @@ fn a_node_root_lists_the_files_its_manifests_say_it_runs_and_only_files_that_exi
         ]
     );
 }
+
+/// A pnpm workspace whose root runs its packages' tests (`pnpm -r test`), with a web app and a
+/// shared library, each with its own `tsconfig.json`.
+fn delegating_workspace() -> tempfile::TempDir {
+    tree(&[
+        (
+            "package.json",
+            r#"{"scripts": {"test": "pnpm -r test"}, "devDependencies": {"vitest": "1"}}"#,
+        ),
+        (
+            "pnpm-workspace.yaml",
+            "packages:\n  - apps/*\n  - packages/*\n",
+        ),
+        ("tsconfig.json", "{}"),
+        (
+            "apps/web/package.json",
+            r#"{"scripts": {"test": "vitest run"}}"#,
+        ),
+        ("apps/web/tsconfig.json", "{}"),
+        (
+            "packages/shared/package.json",
+            r#"{"scripts": {"test": "vitest run"}}"#,
+        ),
+        ("packages/shared/tsconfig.json", "{}"),
+    ])
+}
+
+#[test]
+fn configured_roots_are_the_project_roots_and_none_is_detected() {
+    let dir = delegating_workspace();
+    let detected: Vec<String> = produce::<ProjectInfo>("typescript", dir.path())
+        .roots
+        .into_iter()
+        .map(|root| root.path)
+        .collect();
+    let configured = support::produce_rooted::<ProjectInfo>(
+        "typescript",
+        dir.path(),
+        &[("packages/shared", "typescript"), ("tools", "python")],
+    );
+    let paths: Vec<(&str, &[String])> = configured
+        .roots
+        .iter()
+        .map(|root| (root.path.as_str(), root.build_files.as_slice()))
+        .collect();
+    assert_eq!(
+        (detected, paths),
+        (
+            vec![".".to_owned()],
+            vec![("packages/shared", &["package.json".to_owned()][..])]
+        )
+    );
+}

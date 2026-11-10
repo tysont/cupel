@@ -367,6 +367,7 @@ impl Scheduler<'_> {
                 root: job.writer.root().to_path_buf(),
                 exclude: job.config.file.scope.exclude.clone(),
                 lang: job.config.file.lang.clone(),
+                roots: job.config.file.roots.values().cloned().collect(),
             },
         );
         let mut prepared = Prepared {
@@ -1093,6 +1094,7 @@ impl<'a> FactStore<'a> {
                 root,
                 exclude: job.config.file.scope.exclude.clone(),
                 lang: job.config.file.lang.clone(),
+                roots: job.config.file.roots.values().cloned().collect(),
             },
             writer: job.writer.confined(),
             cancel: job.cancel.clone(),

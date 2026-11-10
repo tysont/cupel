@@ -188,7 +188,9 @@ impl Producer<PerTestMap> for PerTest {
 
     /// Its runner's deferral: it runs the runner's tests one by one under coverage (ADR-162).
     fn deferred(&self, ctx: &Ctx) -> bool {
-        toolchain::defers(&ProducerId::from(self.0.runner), &ctx.root)
+        crate::runner::run_dirs(ctx, &self.languages())
+            .iter()
+            .all(|dir| toolchain::defers(&ProducerId::from(self.0.runner), dir))
     }
 
     fn tool(&self, _: &Ctx) -> Option<ToolProbe> {

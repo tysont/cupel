@@ -281,7 +281,8 @@ pub(crate) fn resolve(
 ) -> Result<Scoped, CupelError> {
     let root = writer.root();
     let exclude = &config.file.scope.exclude;
-    let info = project::detect(writer, exclude);
+    let roots: Vec<_> = config.file.roots.values().cloned().collect();
+    let info = project::detect(writer, exclude, &roots);
     let tree = cupel_lang::walk_excluding(root, languages, &info, exclude);
     let mut files = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
     files

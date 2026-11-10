@@ -3,6 +3,7 @@
 use std::path::Path;
 
 use cupel_adapt::toolchain::{self, Commands, Root, Selection};
+use cupel_core::config::RootConfig;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
     Cancellation, Ctx, Event, Exclude, FactKind, ProduceCtx, Produced, ProducerRegistry, Scope,
@@ -11,15 +12,17 @@ use cupel_core::{
 use cupel_lang::LanguageRegistry;
 
 /// Every registered language's project roots in the repository at `writer`'s root outside
-/// `exclude`, ordered by path, then language. Producers get `writer` confined to `.cupel/`. A
-/// producer that fails contributes nothing: detection is best effort.
-pub fn detect(writer: &Writer, exclude: &Exclude) -> ProjectInfo {
+/// `exclude`, ordered by path, then language: the configured `roots` when there are any, else
+/// the detected ones (ADR-167). Producers get `writer` confined to `.cupel/`. A producer that
+/// fails contributes nothing: detection is best effort.
+pub fn detect(writer: &Writer, exclude: &Exclude, roots: &[RootConfig]) -> ProjectInfo {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
     let ctx = ProduceCtx::new(
         Ctx {
             exclude: exclude.clone(),
+            roots: roots.to_vec(),
             ..Ctx::new(writer.root().to_path_buf())
         },
         writer.confined(),

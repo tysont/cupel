@@ -127,7 +127,7 @@ Every verb takes the same global flags (below) and writes the same envelope. Run
 
 `init` detects project roots and languages and chooses test, coverage, and bench commands for each. It understands Cargo crates and workspaces, Go modules and workspaces, npm, pnpm, and yarn packages and workspaces (TypeScript when `tsconfig.json` is present), and Python projects (`pyproject.toml`, `setup.cfg`, `requirements.txt`).
 
-A root whose own `package.json` `test` script runs something other than the runner Cupel would choose (`pnpm -r test`, a wrapper script) gets no test or coverage command from `init`, and a run uses no runner there unless `[lang.<id>] runner` pins one ([ADR-166](docs/adr/CUPEL_DECISION_166.md)): a runner's command at that root would not be the project's tests and could reach tiers the project runs apart, such as tests against a deployed environment. `init` reports it as `init.runner-deferred` (a note naming the runner and the rule), and `cupel describe language <id>` lists each runner's `defer` rules ([ADR-162](docs/adr/CUPEL_DECISION_162.md)). Add `test` and `coverage` under `[lang.<id>]` for the packages Cupel should run.
+A workspace whose root `package.json` `test` script delegates to its packages (`pnpm -r test`) gets one root per package under `[roots]`, each tested by its own runner and configuration; configured `[roots]` are the project's roots, so editing them narrows what Cupel tests ([ADR-167](docs/adr/CUPEL_DECISION_167.md)). A root whose own `test` script runs something other than the runner Cupel would choose and has no packages to split into (a wrapper script) gets no test or coverage command from `init`, and a run uses no runner there unless `[lang.<id>] runner` pins one ([ADR-166](docs/adr/CUPEL_DECISION_166.md)): a runner's command at that root would not be the project's tests and could reach tiers the project runs apart, such as tests against a deployed environment. `init` reports it as `init.runner-deferred` (a note naming the runner and the rule), and `cupel describe language <id>` lists each runner's `defer` rules ([ADR-162](docs/adr/CUPEL_DECISION_162.md)). Add `test` and `coverage` under `[lang.<id>]` for the packages Cupel should run.
 
 ```sh
 cupel init                   # preview: the envelope carries unified diffs of what would be written
@@ -1523,7 +1523,7 @@ required_version = ">=0.1"         # a Cargo version requirement this binary mus
 default_branch = "main"            # what --changed diffs against
 depth = "standard"
 
-[roots]                            # monorepos; omit for a single root
+[roots]                            # monorepos; when set, exactly these are the project's roots (ADR-167)
 engine = { path = "engine", lang = "rust" }
 web = { path = "web", lang = "typescript" }
 

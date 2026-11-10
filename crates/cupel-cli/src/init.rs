@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::Path;
 
-use cupel_core::config::FILE_NAME;
+use cupel_core::config::{FILE_NAME, RootConfig};
 use cupel_core::git::Git;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{ActionKind, Exclude, NextAction, Severity, Writer};
@@ -21,7 +21,8 @@ pub fn write(writer: &Writer, force: bool) -> Result<Vec<Problem>, CupelError> {
     if writer.root().join(FILE_NAME).exists() && !force {
         return Err(exists());
     }
-    let info = project::detect(writer, &Exclude::default());
+    // `init` writes the configuration, so it detects: any `[roots]` there is about to be replaced.
+    let info = members_as_roots(writer, project::detect(writer, &Exclude::default(), &[]));
     let text = config_text(
         writer.root(),
         &info,
@@ -43,6 +44,53 @@ pub fn write(writer: &Writer, force: bool) -> Result<Vec<Problem>, CupelError> {
         Some(runner_deferred(root, &runner, &rules))
     }));
     Ok(problems)
+}
+
+/// `info` with each root whose own test entry point delegates to its members (its runner is
+/// deferred, ADR-162) replaced by those members, each a root in the language its manifests give
+/// (ADR-167): the root's runner command would not be the project's tests, and each member's is.
+fn members_as_roots(writer: &Writer, info: ProjectInfo) -> ProjectInfo {
+    let registry = cupel_lang::LanguageRegistry::builtin();
+    let langs = registry.langs();
+    let mut roots = Vec::new();
+    for root in info.roots {
+        if root.members.is_empty() || project::deferred(writer.root(), &root).is_none() {
+            roots.push(root);
+            continue;
+        }
+        let family = langs
+            .iter()
+            .find(|lang| lang.id == root.lang)
+            .map(|lang| &lang.family);
+        let paths: Vec<String> = root
+            .members
+            .iter()
+            .map(|member| match root.path.as_str() {
+                "." => member.clone(),
+                path => format!("{path}/{member}"),
+            })
+            .collect();
+        let configured: Vec<RootConfig> = paths
+            .iter()
+            .flat_map(|path| {
+                langs
+                    .iter()
+                    .filter(|lang| Some(&lang.family) == family)
+                    .map(|lang| RootConfig {
+                        path: path.clone(),
+                        lang: lang.id.clone(),
+                    })
+            })
+            .collect();
+        roots.extend(
+            project::detect(writer, &Exclude::default(), &configured)
+                .roots
+                .into_iter()
+                .filter(|member| paths.contains(&member.path)),
+        );
+    }
+    roots.sort_by(|a, b| (&a.path, &a.lang).cmp(&(&b.path, &b.lang)));
+    ProjectInfo { roots }
 }
 
 /// Each language's first root, whose commands the language's table takes (ADR-021 §4).
@@ -282,6 +330,7 @@ mod tests {
         project::detect(
             &Writer::new(&fixture(case), false).unwrap(),
             &Exclude::default(),
+            &[],
         )
     }
 

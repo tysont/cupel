@@ -135,7 +135,11 @@ fn needed(
         .ok()
         .map(|config| config.file.scope.exclude.clone())
         .unwrap_or_default();
-    let info = project::detect(writer, &exclude);
+    let roots: Vec<_> = config
+        .ok()
+        .map(|config| config.file.roots.values().cloned().collect())
+        .unwrap_or_default();
+    let info = project::detect(writer, &exclude, &roots);
     let mut requirements = requirements(config.ok(), writer.root(), &info);
     let mut problems = Vec::new();
     if let Ok(config) = config {
@@ -198,6 +202,7 @@ fn resolution_ctx(config: &Config, repo: &Path) -> Ctx {
     Ctx {
         exclude: config.file.scope.exclude.clone(),
         lang: config.file.lang.clone(),
+        roots: config.file.roots.values().cloned().collect(),
         ..Ctx::new(repo.to_path_buf())
     }
 }

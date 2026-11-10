@@ -12,6 +12,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 
+use cupel_core::config::RootConfig;
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
     Availability, CostClass, Ctx, EventSink, Exclude, FactKind, LangId, Langs, ProduceCtx,
@@ -95,6 +96,41 @@ pub fn roots(
     let mut roots: Vec<ProjectRoot> = candidates
         .iter()
         .map(|candidate| (ecosystem.describe)(candidate))
+        .collect();
+    roots.sort_by(|a, b| (&a.path, &a.lang).cmp(&(&b.path, &b.lang)));
+    roots
+}
+
+/// The roots of `ecosystem` that `[roots]` configures for `lang` (ADR-167): each a directory
+/// holding one of its manifests, described as a detected root there would be (its members are the
+/// manifests below it). A configured path without such a manifest, or one the ecosystem describes
+/// in another language (a `tsconfig.json` makes it TypeScript), is no root of `lang`.
+pub fn configured_roots(
+    root: &Path,
+    ecosystem: &'static Ecosystem,
+    known: &[&Ecosystem],
+    exclude: &Exclude,
+    (configured, lang): (&[RootConfig], &LangId),
+) -> Vec<ProjectRoot> {
+    let skip = Skip { known, exclude };
+    let mut roots: Vec<ProjectRoot> = configured
+        .iter()
+        .filter(|configured| configured.lang == *lang)
+        .filter_map(|configured| {
+            let mut candidates = Vec::new();
+            walk(
+                root,
+                &root.join(&configured.path),
+                ecosystem,
+                &skip,
+                &mut candidates,
+            );
+            let path = relative(&root.join(&configured.path), root);
+            let candidate = candidates
+                .into_iter()
+                .find(|candidate| candidate.path == path)?;
+            Some((ecosystem.describe)(&candidate)).filter(|described| described.lang == *lang)
+        })
         .collect();
     roots.sort_by(|a, b| (&a.path, &a.lang).cmp(&(&b.path, &b.lang)));
     roots
@@ -230,6 +266,16 @@ impl Producer<ProjectInfo> for ProjectRoots {
 
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<ProjectInfo> {
         ctx.cancel.checkpoint()?;
+        if !ctx.ctx.roots.is_empty() {
+            let roots = configured_roots(
+                &ctx.ctx.root,
+                self.ecosystem,
+                &self.known,
+                &ctx.ctx.exclude,
+                (&ctx.ctx.roots, &self.lang),
+            );
+            return Ok(ProjectInfo { roots });
+        }
         let roots = roots(&ctx.ctx.root, self.ecosystem, &self.known, &ctx.ctx.exclude)
             .into_iter()
             .filter(|root| root.lang == self.lang)

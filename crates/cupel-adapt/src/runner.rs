@@ -217,6 +217,25 @@ pub struct Ran<'a> {
     pub report: Option<String>,
 }
 
+/// The directories a producer of `langs` would run in, where its detection and deferral are
+/// judged: each configured root of those languages (ADR-167), else the repository root.
+pub(crate) fn run_dirs(ctx: &Ctx, langs: &Langs) -> Vec<PathBuf> {
+    let configured: Vec<PathBuf> = ctx
+        .roots
+        .iter()
+        .filter(|root| match langs {
+            Langs::Any | Langs::Family(_) => true,
+            Langs::Only(ids) => ids.contains(&root.lang),
+        })
+        .map(|root| ctx.root.join(&root.path))
+        .collect();
+    if configured.is_empty() {
+        vec![ctx.root.clone()]
+    } else {
+        configured
+    }
+}
+
 /// A runner producer: `spec` run once per project root of its language.
 #[derive(Clone)]
 pub struct Runner(pub &'static RunnerSpec);
@@ -250,11 +269,15 @@ impl Producer<TestResults> for Runner {
     }
 
     fn detected(&self, ctx: &Ctx) -> bool {
-        toolchain::detects(&self.id(), &ctx.root)
+        run_dirs(ctx, &(self.0.languages)())
+            .iter()
+            .any(|dir| toolchain::detects(&self.id(), dir))
     }
 
     fn deferred(&self, ctx: &Ctx) -> bool {
-        toolchain::defers(&self.id(), &ctx.root)
+        run_dirs(ctx, &(self.0.languages)())
+            .iter()
+            .all(|dir| toolchain::defers(&self.id(), dir))
     }
 
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {
