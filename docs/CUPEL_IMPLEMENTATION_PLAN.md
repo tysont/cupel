@@ -2396,6 +2396,38 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - Test: `cupel-adapt/tests/coverage_producers.rs`.
   - Still open: `tool.bench-script` detects `scripts.bench` at the repository root the same way (`bench/mod.rs`).
 
+- **B18, Area 11: an agent with the gate as its stopping rule** (2026-11-11).
+  - The run: an agent in the clone, on a branch, took three `cupel.md` items, each gated by `cupel check --changed --depth standard --gate` under the strict `[gate.changed]` of Area 8:
+    - four dead functions in `apps/agent`;
+    - the `extension-authoring` ↔ `extension-drafting` cycle;
+    - splitting `validateManifestForTier`, which took its cyclomatic complexity from 219 to 18.
+
+    All three went green in 5 gate runs (1, 2, and 1 to green; about 15 minutes per item). Each gate run took 6 to 12 minutes, dominated by `tests.flaky` (about 300 s) on `apps/agent` and `tests.mutation` (about 640 s) on `packages/shared`.
+  - The gaps: two things in the report misled the agent.
+    - A gate rule whose check was not selected (a repro's `--only`) said "did not run to completion", which reads like a crash.
+    - The summary said `new 0 · resolved 0` on runs that compared with nothing, including a run where the agent had added a warning.
+
+    Now:
+    - an unevaluated rule says whether its check was not selected, skipped (with the skip reasons), or cut short;
+    - a check or survey without a reference run says new and resolved need a baseline, and other verbs leave them out.
+  - Tests: `cupel-core/tests/gate.rs`, `cupel-cli/src/render.rs`.
+
+- **Open, from Area 11** (2026-11-11). Questions for the owner:
+  - **What a TypeScript package's API is.**
+    - The one blocking false finding was `api.breaking`. Moving `validateCustomManifest` out of `apps/agent/src/tools/extension-authoring.ts` and updating every importer counted as removing a public item.
+    - `apps/agent` is `"private": true`, and its `package.json` `exports` map names five entry files, none under `tools/`. Node and TypeScript refuse a deep import past an `exports` map, so nothing outside the package can reach that file.
+    - Option: in a package with an `exports` map, only items its entry files define or re-export (ADR-174's edges) are public. This needs a per-language notion of a package's entries that `ApiSurface` does not carry, so it is a design decision, not a fix.
+  - **Roots and the static scope.**
+    - `[roots]` narrows what is tested and mutated (ADR-167), but not the files the static checks read. So `gate.sh shared` with only `packages/shared` configured gated `cyclomatic_max` on an `apps/agent` file (30) under a header saying `roots packages/shared`.
+    - Either the static scope follows the configured roots, or the header should not imply it does. Either way, each `actual`/`bound` pair should name the symbol behind it: the agent found item 3's own number (18) only in per-function warnings.
+  - **Abstractness counts only declared types.**
+    - `dep.unstable-abstract` called `packages/shared/extensions/validate.ts` (42 functions, 1 exported interface) fully abstract (A = 1.0). Martin's A over types alone misreads a module of functions.
+    - Calibration question: should exported functions count as concrete members?
+  - **Moved code is new code.** After the move, `validateCustomManifest` drew six findings at its new place (complexity, length, nesting, CRAP, uncovered branches, a missing property) that the gate does not see at the old place. ADR-131's matching pairs moved functions for deltas against a baseline. Without one, nothing says the findings were carried. This is the same need as the summary's: an agent wants "what did I add".
+  - **Gate cost on deletions.** A pure deletion ran `tests.flaky` over the whole `apps/agent` suite (about 300 s). `--changed` could rerun only the tests that import the changed files (`tests --impacted`).
+  - **`covering_tests` without a per-test map** lists every test in the package (1,007 for shared). That is accurate (Vitest has no per-test map producer here) but buries the finding. It could say "all tests (no per-test map)" instead.
+  - **`explain` on a removed symbol** shows the head file's lines at the old location, which is unrelated code, rather than the base source.
+
 - **Open, from Areas 6 and 7** (2026-11-10).
   - **Cross-root test reach.** With per-package roots, a root's coverage and mutation run only that root's tests. So code another root's tests exercise looks uncovered: shared's `shellQuote` is tested from `apps/agent`, and shared's coverage counts only shared's own files. It is also the largest source of false survivors: 15 of shared's 47 survivors, all in `cron.ts`, are killed by `apps/agent/src/scheduling-types.test.ts`. Two options: let a root's coverage and mutation use the tests of the roots that import it (through the module graph), or report such code as covered elsewhere.
   - **String and regex code.** Neither operator set mutates string or regex literals, so escaping and quoting helpers get no default mutants. This is by design, to keep equivalent mutants down. Calibration question for the owner: an opt-in `strings` operator (a literal to `""`, edits to regex quantifiers and classes).
