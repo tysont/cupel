@@ -291,25 +291,21 @@ impl<'a> Running<'a> {
             if self.ctx.cancel.is_cancelled() {
                 break;
             }
-            let found = self.run_file(&execution, &file, planned, &indexes)?;
-            for (index, ran) in indexes.iter().zip(found) {
-                if let Some(ran) = ran {
-                    record(&mut planned[*index].mutant, ran);
-                }
-            }
+            self.run_file(&execution, &file, planned, &indexes)?;
         }
         Ok(())
     }
 
-    /// The outcomes of `file`'s mutants at `indexes`, `None` for each the run's cancellation
-    /// left unrun. The file's copies in the slots are restored unless every mutant finished.
+    /// Runs `file`'s mutants at `indexes` and records what each found; one the run's
+    /// cancellation left unrun keeps its outcome. The file's copies in the slots are restored
+    /// unless every mutant finished.
     fn run_file(
         &self,
         execution: &Execution<'_>,
         file: &str,
-        planned: &[Planned],
+        planned: &mut [Planned],
         indexes: &[usize],
-    ) -> Result<Vec<Option<Ran>>> {
+    ) -> Result<()> {
         let root = &self.ctx.ctx.root;
         let original = std::fs::read(root.join(file)).map_err(|error| io(root, file, &error))?;
         let importers = self.importers(file);
@@ -330,7 +326,12 @@ impl<'a> Running<'a> {
         if found.len() < indexes.len() || found.iter().any(Option::is_none) {
             execution.restore(&run);
         }
-        Ok(found)
+        for (index, ran) in indexes.iter().zip(found) {
+            if let Some(ran) = ran {
+                record(&mut planned[*index].mutant, ran);
+            }
+        }
+        Ok(())
     }
 
     /// The slots for files of at most `widest` mutants, each synced with the tree: as many as
