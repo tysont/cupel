@@ -160,25 +160,17 @@ impl Git {
     }
 
     /// The lines of each file that differ between `base` and `head` (the working tree when
-    /// `head` is `None`), as inclusive ranges of the new side; a pure deletion is the lines
-    /// around where it was. Files are relative to the root, `/`-separated (ADR-077 §5).
+    /// `head` is `None`), as inclusive ranges of `side`. On the new side, a pure deletion is the
+    /// lines around where it was (ADR-077 §5); on the old side, the lines of `base` the change
+    /// replaced or removed, a pure insertion is the lines around where it went, and a file the
+    /// change added has none (ADR-175). Files are relative to the root, `/`-separated.
     pub fn changed_lines(
         &self,
         base: &str,
         head: Option<&str>,
+        side: Side,
     ) -> Result<BTreeMap<String, Vec<(u32, u32)>>, GitError> {
-        Ok(hunks(&self.diff_lines(base, head)?, Side::New))
-    }
-
-    /// The same differences as [`Git::changed_lines`], as inclusive ranges of the old side: the
-    /// lines of `base` the change replaced or removed, and the lines around a pure insertion. A
-    /// file the change added has none (ADR-175).
-    pub fn base_lines(
-        &self,
-        base: &str,
-        head: Option<&str>,
-    ) -> Result<BTreeMap<String, Vec<(u32, u32)>>, GitError> {
-        Ok(hunks(&self.diff_lines(base, head)?, Side::Old))
+        Ok(hunks(&self.diff_lines(base, head)?, side))
     }
 
     /// `git diff -U0` from `base` to `head`, or to the working tree.
@@ -313,9 +305,9 @@ fn hunks(diff: &str, side: Side) -> BTreeMap<String, Vec<(u32, u32)>> {
     files
 }
 
-/// Which side of a diff a hunk's lines are read from.
-#[derive(Clone, Copy)]
-enum Side {
+/// Which side of a diff a hunk's lines are read from: `base`'s (old) or `head`'s (new).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Side {
     Old,
     New,
 }

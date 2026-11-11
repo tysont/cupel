@@ -2,7 +2,7 @@
 // ABOUTME: merge bases, and changed files between revisions and the working tree (ADR-002).
 mod support;
 
-use cupel_core::git::{Change, ChangeKind, Git};
+use cupel_core::git::{Change, ChangeKind, Git, Side};
 use support::GitRepo;
 
 #[test]
@@ -239,7 +239,7 @@ fn changed_lines_are_the_new_side_of_each_hunk_and_a_deletion_is_where_it_was() 
     let git = Git::open(&repo.root()).unwrap();
     repo.write("src/a.rs", "1\nTWO\n3\n4\n5\nsix\nseven\n");
     repo.write("b.rs", "x\nz\n");
-    let lines = git.changed_lines(&base, None).unwrap();
+    let lines = git.changed_lines(&base, None, Side::New).unwrap();
     let as_vec: Vec<(&str, &[(u32, u32)])> = lines
         .iter()
         .map(|(file, ranges)| (file.as_str(), ranges.as_slice()))
@@ -249,11 +249,14 @@ fn changed_lines_are_the_new_side_of_each_hunk_and_a_deletion_is_where_it_was() 
         [("b.rs", &[(1, 2)][..]), ("src/a.rs", &[(2, 2), (6, 7)][..])]
     );
     let head = repo.commit("change");
-    assert_eq!(git.changed_lines(&base, Some(&head)).unwrap(), lines);
+    assert_eq!(
+        git.changed_lines(&base, Some(&head), Side::New).unwrap(),
+        lines
+    );
 }
 
 #[test]
-fn base_lines_are_the_old_side_of_each_hunk_and_an_insertion_is_where_it_went() {
+fn the_old_side_of_changed_lines_is_the_base_of_each_hunk_and_an_insertion_is_where_it_went() {
     let Some((repo, base)) = GitRepo::committed(&[
         ("src/a.rs", "1\n2\n3\n4\n5\n"),
         ("b.sql", "-- one\nselect 1;\n-- two\n"),
@@ -266,7 +269,7 @@ fn base_lines_are_the_old_side_of_each_hunk_and_an_insertion_is_where_it_went() 
     repo.write("b.sql", "select 1;\n");
     std::fs::remove_file(repo.root().join("gone.rs")).unwrap();
     repo.write("new.rs", "n\n");
-    let lines = git.base_lines(&base, None).unwrap();
+    let lines = git.changed_lines(&base, None, Side::Old).unwrap();
     let as_vec: Vec<(&str, &[(u32, u32)])> = lines
         .iter()
         .map(|(file, ranges)| (file.as_str(), ranges.as_slice()))

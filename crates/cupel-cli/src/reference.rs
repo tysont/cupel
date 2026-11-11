@@ -4,7 +4,7 @@ use std::path::Path;
 
 use cupel_core::config::Config;
 use cupel_core::config::GateRuleSpec;
-use cupel_core::git::Git;
+use cupel_core::git::{Git, Side};
 use cupel_core::{ChangedLines, Envelope, Event, GateReference, Status, Writer, needs_reference};
 
 use crate::check::{self, gate_rules};
@@ -106,7 +106,11 @@ fn recompute(
         .map_err(|error| format!("the base could not be written: {error}"))?;
     let short = &commit[..commit.len().min(12)];
     let touched = git
-        .base_lines(&commit, check::scope_request(args).head.as_deref())
+        .changed_lines(
+            &commit,
+            check::scope_request(args).head.as_deref(),
+            Side::Old,
+        )
         .map_err(|error| format!("the base's changed lines could not be read: {error}"))?;
     run_at(
         invocation,

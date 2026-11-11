@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 use cupel_core::config::{Config, GateRuleSpec};
-use cupel_core::git::{ChangeKind, Git};
+use cupel_core::git::{ChangeKind, Git, Side};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GateReference, GitInfo,
@@ -239,7 +239,7 @@ pub(crate) fn changed_lines(
         return Ok(None);
     };
     let hunks = git
-        .changed_lines(base, request.head.as_deref())
+        .changed_lines(base, request.head.as_deref(), Side::New)
         .map_err(|error| {
             CupelError::bad_argument(
                 if request.changed {

@@ -24,7 +24,7 @@ For a max or count metric the ratchet admitted almost anything. For a ratio it w
 
 ## Decision
 
-1. **The old side of a hunk.** `Git::base_lines(base, head)` reads the same `git diff -U0` as `Git::changed_lines`, and returns each file's old-side ranges. The hunk reader reads a file's `---`/`+++` names only in that file's header, before its first `@@`. A removed line beginning `-- ` or an added line beginning `++ ` is not taken for a file name.
+1. **The old side of a hunk.** `Git::changed_lines(base, head, side)` reads one `git diff -U0` and returns each file's ranges of the side asked for: `Side::New` for the current side, as before, and `Side::Old` for the base. The hunk reader reads a file's `---`/`+++` names only in that file's header, before its first `@@`. A removed line beginning `-- ` or an added line beginning `++ ` is not taken for a file name.
 2. **The base run's changed lines.** `reference::recompute` passes the range's base lines to the base run (`check::run_touching`). That run's `Job.changed` is those lines in place of its own scope's, which is `--paths` and has none. Every check that narrows by changed lines then narrows the base the way it narrows the head: the symbols in scope (ADR-142) and the mutants planned (ADR-141).
 3. **Unchanged.** `--against` still names a stored run as it is. A range whose changed files are all new still has no reference. The base copy, `--only`, and `--jobs` are as ADR-130 §3 has them.
 

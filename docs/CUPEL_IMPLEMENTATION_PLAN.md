@@ -2387,7 +2387,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 - **B16, Area 8's gated replay** (2026-11-10, [ADR-175](adr/CUPEL_DECISION_175.md)).
   - The replay ran again with a candidate `[gate.changed]`: `static.api-surface` `no-breaking`; `cyclomatic_max`, `deps.cycles`, and `clones.pairs` `<= base`; and `tests.weakening` `none`. Eight PRs passed. The two that failed were the deliberate test changes `tests.weakening` should flag.
   - The gap: each `<= base` bound was the worst value in any touched file (complexity 296 to 447 against changed code of 3 to 41), because the recomputed base scored the base files whole (ADR-130's documented asymmetry, P9.1 open item 2).
-  - Now the base run is narrowed by the old side of the same diff (`Git::base_lines`, `check::run_touching`), and the hunk reader reads file names only in a file's header.
+  - Now the base run is narrowed by the old side of the same diff (`Git::changed_lines` with `Side::Old`, `check::run_touching`), and the hunk reader reads file names only in a file's header.
   - Tests: `cupel-core/tests/git.rs` (the old side); `cupel-cli/tests/gate.rs` (a touched function compared with itself at the base; the mutation ratchet passes an untested change to untested code, and fails one that deletes the touched code's test).
 
 - **Open, from Areas 6 and 7** (2026-11-10).
