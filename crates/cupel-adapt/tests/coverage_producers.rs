@@ -290,6 +290,37 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
 }
 
 #[test]
+fn a_configured_root_detects_its_coverage_producer_from_its_own_runner() {
+    let registry = registry();
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(
+        dir.path().join("package.json"),
+        r#"{"devDependencies": {"vitest": "^2.1.0"}}"#,
+    )
+    .unwrap();
+    fs::create_dir(dir.path().join("sandbox")).unwrap();
+    fs::write(
+        dir.path().join("sandbox/package.json"),
+        r#"{"scripts": {"test": "node --test"}}"#,
+    )
+    .unwrap();
+    let mut ctx = Ctx::new(dir.path().to_path_buf());
+    ctx.roots.push(cupel_core::config::RootConfig {
+        path: "sandbox".to_owned(),
+        lang: LangId::from("javascript"),
+    });
+    let preferred = registry
+        .candidates(FactKind::CoverageMap, &support::lang("javascript"), &ctx)
+        .unwrap()[0]
+        .id()
+        .to_string();
+    assert_eq!(
+        preferred, "tool.c8",
+        "the root runs `node --test`; the repository root's Vitest is not its runner"
+    );
+}
+
+#[test]
 fn a_report_the_tool_left_newer_than_every_source_is_ingested_without_running() {
     let registry = registry();
     let dir = fixture("javascript");
