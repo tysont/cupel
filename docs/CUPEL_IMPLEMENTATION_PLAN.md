@@ -2403,6 +2403,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
     The `extractable` flag and the reassigned variables are detectable by pattern.
   - **Reference runs per file.** With file-copy mutation (TypeScript has no schemata), each file's mutants start with a reference run of its selected tests unmutated (ADR-080 §9). On shared that was 872 s of a 25-minute budget, about 20 s per file. Two options: share one reference run across files whose selected tests are the same, or skip it when the baseline run of those tests is recent.
+  - **A pinned property and `--cases`** (Area 9). All six of Molten's fast-check properties pass `{ numRuns }` to `fc.assert`. That wins over Cupel's `fc.configureGlobal`, as ADR-095 §4 decided ("the framework's precedence, not Cupel's"). Two gaps follow. `--cases 1000` ran them at their own 120 to 300 cases and said nothing. And a falsified finding's `evidence.cases` would report the budget, not the count that ran. Hypothesis's `@settings(max_examples=…)` and proptest's `with_cases` behave the same way. Open: note, per property, that its settings fix the count (the framework reports it: fast-check's failure message gives the run count, Hypothesis's statistics give examples), and report the count that ran.
   - **Progress during mutation.** The event stream says nothing between `check.start` and `check.end`, so a long run cannot be watched. Per-file progress events would fix it.
 
 ## 4. Cross-phase checklist
