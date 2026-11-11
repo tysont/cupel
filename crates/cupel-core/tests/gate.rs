@@ -409,7 +409,7 @@ fn a_skipped_rule_says_why_and_an_evaluated_one_carries_its_bound() {
                 None,
                 None,
                 RuleOutcome::Skipped,
-                Some("`static.crap` did not run to completion"),
+                Some("`static.crap` was skipped (unsupported)"),
             ),
             gate_rule(
                 "tests.mutation.max < 30",
@@ -432,6 +432,34 @@ fn a_skipped_rule_says_why_and_an_evaluated_one_carries_its_bound() {
                 RuleOutcome::Pass,
                 None,
             ),
+        ]
+    );
+}
+
+#[test]
+fn a_rule_whose_check_did_not_complete_says_whether_it_was_unselected_skipped_or_cut_short() {
+    let envelope = envelope(
+        "pass",
+        &[
+            check("static.crap", "skipped", &json!({})),
+            check("static.deps", "error", &json!({})),
+        ],
+        &[],
+    );
+    let reasons: Vec<Option<String>> = [
+        "static.complexity.cyclomatic_max",
+        "static.crap.max",
+        "static.deps.cycles",
+    ]
+    .iter()
+    .map(|key| against(key, "< 30", &envelope, &unset()).reason)
+    .collect();
+    assert_eq!(
+        reasons,
+        [
+            Some("`static.complexity` was not selected for this run".to_owned()),
+            Some("`static.crap` was skipped (unsupported)".to_owned()),
+            Some("`static.deps` did not run to completion".to_owned()),
         ]
     );
 }

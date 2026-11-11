@@ -140,10 +140,7 @@ fn evaluate_rule(
         };
     }
     let Some(entry) = completed(envelope, rule) else {
-        return Evaluation::skipped(
-            None,
-            format!("`{}` did not run to completion", rule.key.check),
-        );
+        return Evaluation::skipped(None, incomplete(envelope, rule));
     };
     match rule.condition {
         GateCondition::Compare { op, threshold } => {
@@ -233,6 +230,34 @@ pub fn is_breaking(kind: &str) -> bool {
 
 /// The rule's check entry when the check ran to completion for some language: not skipped
 /// everywhere, not failed, not cut short.
+/// Why a rule's check has no completed result: the run did not select it, every result of it
+/// was skipped (with the skips' reasons), or it errored or was cut short.
+fn incomplete(envelope: &Envelope, rule: &GateRuleSpec) -> String {
+    let check = &rule.key.check;
+    let entries: Vec<&CheckResult> = envelope
+        .checks
+        .iter()
+        .filter(|entry| entry.id == *check)
+        .collect();
+    if entries.is_empty() {
+        return format!("`{check}` was not selected for this run");
+    }
+    let mut reasons: Vec<String> = Vec::new();
+    for entry in &entries {
+        let Some(skipped) = entry.skipped.as_ref() else {
+            return format!("`{check}` did not run to completion");
+        };
+        let reason = serde_json::to_value(skipped.reason)
+            .ok()
+            .and_then(|value| value.as_str().map(str::to_owned))
+            .unwrap_or_default();
+        if !reasons.contains(&reason) {
+            reasons.push(reason);
+        }
+    }
+    format!("`{check}` was skipped ({})", reasons.join(", "))
+}
+
 fn completed<'a>(envelope: &'a Envelope, rule: &GateRuleSpec) -> Option<&'a CheckResult> {
     envelope.checks.iter().find(|entry| {
         entry.id == rule.key.check && matches!(entry.status, CheckStatus::Pass | CheckStatus::Fail)

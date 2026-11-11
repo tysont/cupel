@@ -99,7 +99,7 @@ fn an_unselected_check_fails_the_gate_with_a_rerun_action() {
     assert_eq!(
         gate(&envelope)["rules"][0],
         json!({"rule": "static.complexity.cyclomatic_max < 30", "actual": null, "bound": null,
-               "result": "skipped", "reason": "`static.complexity` did not run to completion"})
+               "result": "skipped", "reason": "`static.complexity` was not selected for this run"})
     );
     assert_eq!(
         envelope["next_actions"][0],
