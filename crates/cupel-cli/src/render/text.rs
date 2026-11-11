@@ -234,6 +234,7 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
 
 /// Whether a run's new and resolved findings were counted against a reference run (a baseline,
 /// a ref, or a run ID), and if not, whether the verb is one a reference would have served.
+#[derive(Clone, Copy)]
 enum Compared {
     Yes,
     Unset,
