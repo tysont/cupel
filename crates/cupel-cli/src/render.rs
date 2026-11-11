@@ -104,6 +104,33 @@ mod tests {
     }
 
     #[test]
+    fn text_counts_new_and_resolved_findings_only_against_a_baseline() {
+        let summary = |envelope: &Envelope| {
+            text::render(envelope, false)
+                .lines()
+                .find(|line| line.starts_with("summary"))
+                .map(str::to_owned)
+        };
+        let mut unbased = fixture::envelope();
+        unbased.run.baseline = None;
+        assert_eq!(
+            [summary(&fixture::envelope()), summary(&unbased)],
+            [
+                Some(
+                    "summary   3 findings · fail 6 · warn 9 · info 22 · new 4 · resolved 2 · \
+                     suppressed 1"
+                        .to_owned()
+                ),
+                Some(
+                    "summary   3 findings · fail 6 · warn 9 · info 22 · suppressed 1 · new and \
+                     resolved need a baseline (`cupel baseline set`)"
+                        .to_owned()
+                ),
+            ]
+        );
+    }
+
+    #[test]
     fn text_lists_each_oracle_with_its_definition_state_and_verification() {
         assert_eq!(
             text_block("oracles", 3),

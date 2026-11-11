@@ -10,7 +10,7 @@ use cupel_core::{
     CheckResult, Description, Envelope, Excerpt, Explanation, Finding, FindingId, GateOutcome,
     GateResult, GitInfo, ImpactBasis, LangId, Location, Metric, NextAction, OracleReport,
     PlannedCheck, Rankings, RecommendedTarget, RuleOutcome, RunInfo, RunPlan, ScopeInfo, SetDelta,
-    Severity, Skipped, Status, Summary, Symbol, Target, TestsReport,
+    Severity, Skipped, Status, Summary, Symbol, Target, TestsReport, Verb,
 };
 use serde::Serialize;
 use serde_json::{Map, Value};
@@ -52,7 +52,12 @@ pub fn render(envelope: &Envelope, color: bool) -> String {
             .as_ref()
             .map(|gate| gate_block(gate, &paint))
             .unwrap_or_default(),
-        summary_line(&envelope.summary, envelope.total_findings, &paint),
+        summary_line(
+            &envelope.summary,
+            envelope.total_findings,
+            Compared::of(envelope),
+            &paint,
+        ),
         checks_block(&envelope.checks, &paint),
         envelope
             .rankings
@@ -227,21 +232,51 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
     out
 }
 
-fn summary_line(summary: &Summary, total: u64, paint: &Paint) -> String {
+/// Whether a run's new and resolved findings were counted against a reference run (a baseline,
+/// a ref, or a run ID), and if not, whether the verb is one a reference would have served.
+enum Compared {
+    Yes,
+    Unset,
+    Inapplicable,
+}
+
+impl Compared {
+    fn of(envelope: &Envelope) -> Self {
+        if envelope.run.baseline.is_some() {
+            Self::Yes
+        } else if matches!(envelope.run.verb, Some(Verb::Check | Verb::Survey)) {
+            Self::Unset
+        } else {
+            Self::Inapplicable
+        }
+    }
+}
+
+/// The run's finding counts. New and resolved are counted only against a reference run; a
+/// check or survey without one says so instead of counting zero.
+fn summary_line(summary: &Summary, total: u64, compared: Compared, paint: &Paint) -> String {
     let counts = &summary.findings;
+    let tail = match compared {
+        Compared::Yes => format!(
+            " · new {} · resolved {} · suppressed {}",
+            summary.new, summary.resolved, summary.suppressed
+        ),
+        Compared::Unset => format!(
+            " · suppressed {} · new and resolved need a baseline (`cupel baseline set`)",
+            summary.suppressed
+        ),
+        Compared::Inapplicable => format!(" · suppressed {}", summary.suppressed),
+    };
     let mut out = String::new();
     labeled(
         &mut out,
         "summary",
         &format!(
-            "{total} {} · fail {} · warn {} · info {} · new {} · resolved {} · suppressed {}",
+            "{total} {} · fail {} · warn {} · info {}{tail}",
             plural(total, "finding", "findings"),
             counts.fail,
             counts.warn,
             counts.info,
-            summary.new,
-            summary.resolved,
-            summary.suppressed
         ),
         paint,
     );

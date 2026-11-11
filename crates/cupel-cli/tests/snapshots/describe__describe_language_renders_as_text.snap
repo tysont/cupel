@@ -61,7 +61,7 @@ toolchain
   fuzz      jazzer.js
   race      none
 
-summary   0 findings · fail 0 · warn 0 · info 0 · new 0 · resolved 0 · suppressed 0
+summary   0 findings · fail 0 · warn 0 · info 0 · suppressed 0
 
 run       [run id, start, duration, seed]
 depth     standard

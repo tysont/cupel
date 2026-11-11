@@ -271,7 +271,7 @@ gate      fail (gate.changed)
   fail  static.complexity none  actual 1
   pass  static.clones none  actual 0
 
-summary   39 findings · fail 7 · warn 4 · info 28 · new 0 · resolved 0 · suppressed 0
+summary   39 findings · fail 7 · warn 4 · info 28 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
 
 checks
   conc.race                 skipped  tier 4 · standard · 0 findings · 0 ms · skipped: unsupported (fact race-reports, lang python, see `cupel describe matrix`)
@@ -452,7 +452,7 @@ Every object has a fixed key set; an absent value is `null`, never a missing key
 $ cupel survey --depth quick --format text
 cupel survey: pass (exit 0)
 
-summary   5 findings · fail 0 · warn 3 · info 2 · new 0 · resolved 0 · suppressed 0
+summary   5 findings · fail 0 · warn 3 · info 2 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
 
 checks
   …
@@ -568,7 +568,7 @@ cupel oracle remove sum --write       # drop the table and the verification
 $ cupel oracle verify --all --format text
 cupel oracle: fail (exit 1)
 
-summary   1 finding · fail 1 · warn 0 · info 0 · new 0 · resolved 0 · suppressed 0
+summary   1 finding · fail 1 · warn 0 · info 0 · suppressed 0
 
 oracles  3
   clock    command `python3 -c 'import time; print(time.time())'` · unverified
@@ -601,7 +601,7 @@ A check that compares against an oracle names it in its result's `oracle` member
 $ cupel suppress fnd_af9323 --reason "public API; the checkout service imports it" --until 2027-01-31 --format text
 cupel suppress: pass (exit 0)
 
-summary   1 finding · fail 0 · warn 0 · info 1 · new 0 · resolved 0 · suppressed 1
+summary   1 finding · fail 0 · warn 0 · info 1 · suppressed 1
 
 info (1)
   static.dead-code
@@ -663,7 +663,7 @@ In another terminal, `doctor` reports the daemon, and `serve --stop` stops it:
 $ cupel doctor --format text
 cupel doctor: pass (exit 0)
 
-summary   1 finding · fail 0 · warn 0 · info 1 · new 0 · resolved 0 · suppressed 0
+summary   1 finding · fail 0 · warn 0 · info 1 · suppressed 0
 
 info (1)
   doctor
@@ -675,7 +675,7 @@ info (1)
 $ cupel serve --stop --format text
 cupel serve: pass (exit 0)
 
-summary   1 finding · fail 0 · warn 0 · info 1 · new 0 · resolved 0 · suppressed 0
+summary   1 finding · fail 0 · warn 0 · info 1 · suppressed 0
 
 info (1)
   serve
@@ -1110,7 +1110,7 @@ $ cupel oracle verify release
 $ cupel check --only gen.differential --seed 7 --format text
 cupel check: pass (exit 0)
 
-summary   1 finding · fail 1 · warn 0 · info 0 · new 0 · resolved 0 · suppressed 0
+summary   1 finding · fail 1 · warn 0 · info 0 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
 
 checks
   gen.differential  fail     tier 4 · deep · score 1 divergent (n 1) · metrics cases 100, divergences 1 · 1 finding · 5993 ms · oracle release
@@ -1500,7 +1500,7 @@ Reference plugins in Rust, Python, and TypeScript live in [`crates/cupel-fixture
 $ cupel check --only ref.untested-python --format text
 cupel check: pass (exit 0)
 
-summary   1 finding · fail 0 · warn 1 · info 0 · new 0 · resolved 0 · suppressed 0
+summary   1 finding · fail 0 · warn 1 · info 0 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
 
 checks
   ref.untested-python  fail     tier 2 · quick · score 0.6666666666666666 tested_files (n 3) · metrics untested 1 · 1 finding · 100 ms
