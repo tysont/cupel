@@ -297,11 +297,12 @@ fn hunks(diff: &str, side: Side) -> BTreeMap<String, Vec<(u32, u32)>> {
     // A file's `---`/`+++` names come before its first hunk; inside the hunks, a removed or added
     // line can start with the same characters.
     let mut in_header = false;
+    let (file_marker, prefix, _) = side.markers();
     for line in diff.lines() {
         if line.starts_with("diff ") {
             in_header = true;
-        } else if let Some(path) = line.strip_prefix(side.file_marker()).filter(|_| in_header) {
-            current = path.strip_prefix(side.prefix()).map(str::to_owned);
+        } else if let Some(path) = line.strip_prefix(file_marker).filter(|_| in_header) {
+            current = path.strip_prefix(prefix).map(str::to_owned);
         } else if let Some(header) = line.strip_prefix("@@ ") {
             in_header = false;
             if let (Some(file), Some(range)) = (&current, side.range(header)) {
@@ -320,18 +321,13 @@ enum Side {
 }
 
 impl Side {
-    /// The line naming a file's version on this side: `--- a/…` or `+++ b/…`.
-    fn file_marker(self) -> &'static str {
+    /// The start of the line naming a file's version on this side, the prefix of its path
+    /// there, and the sign of this side's range in a hunk header: `--- a/…` and `-`, or
+    /// `+++ b/…` and `+`.
+    fn markers(self) -> (&'static str, &'static str, char) {
         match self {
-            Self::Old => "--- ",
-            Self::New => "+++ ",
-        }
-    }
-
-    fn prefix(self) -> &'static str {
-        match self {
-            Self::Old => "a/",
-            Self::New => "b/",
+            Self::Old => ("--- ", "a/", '-'),
+            Self::New => ("+++ ", "b/", '+'),
         }
     }
 
@@ -339,10 +335,7 @@ impl Side {
     /// `c + d - 1`, or the lines `c` and `c + 1` around a deletion (`d` is 0); for the old side,
     /// the same of `a` and `b`.
     fn range(self, header: &str) -> Option<(u32, u32)> {
-        let sign = match self {
-            Self::Old => '-',
-            Self::New => '+',
-        };
+        let (_, _, sign) = self.markers();
         let lines = header
             .split_whitespace()
             .find_map(|part| part.strip_prefix(sign))?;

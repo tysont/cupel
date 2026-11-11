@@ -156,10 +156,7 @@ pub(crate) fn run_touching(
         selectors_must_match: !request.has_range(),
         seed: run.seed,
         depth: config.effective.depth,
-        changed: match touched {
-            Some(lines) => Some(lines),
-            None => changed_lines(writer.root(), &request, &resolved)?,
-        },
+        changed: touched_or_changed(touched, writer.root(), &request, &resolved)?,
         resources: resources::of(invocation, config, args, git.as_ref())?,
         oracle: oracle.run_oracle(config),
         cases: args.cases.map(u64::from),
@@ -217,6 +214,19 @@ fn install_tools(
         .map(|problem| problem.finding(&run.repro()))
         .collect();
     (Vec::new(), findings)
+}
+
+/// `touched` when given, else the lines the range scope changed.
+fn touched_or_changed(
+    touched: Option<ChangedLines>,
+    root: &Path,
+    request: &ScopeRequest,
+    resolved: &ResolvedFiles,
+) -> Result<Option<ChangedLines>, CupelError> {
+    match touched {
+        Some(lines) => Ok(Some(lines)),
+        None => changed_lines(root, request, resolved),
+    }
 }
 
 /// The lines a range scope changed per file; `None` without a range.
