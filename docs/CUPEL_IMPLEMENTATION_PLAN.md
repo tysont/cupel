@@ -2379,15 +2379,18 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - Also seen: building the mutation slots took 872 s of the 25 minutes, for a package of a 487-dependency workspace.
 
 - **Open, from Areas 6 and 7** (2026-11-10).
-  - **Cross-root test reach.** With per-package roots, a root's coverage and mutation run only that root's tests. So code another root's tests exercise looks uncovered: shared's `shellQuote` is tested from `apps/agent`, and shared's coverage counts only shared's own files. Two options: let a root's coverage and mutation use the tests of the roots that import it (through the module graph), or report such code as covered elsewhere.
+  - **Cross-root test reach.** With per-package roots, a root's coverage and mutation run only that root's tests. So code another root's tests exercise looks uncovered: shared's `shellQuote` is tested from `apps/agent`, and shared's coverage counts only shared's own files. It is also the largest source of false survivors: 15 of shared's 47 survivors, all in `cron.ts`, are killed by `apps/agent/src/scheduling-types.test.ts`. Two options: let a root's coverage and mutation use the tests of the roots that import it (through the module graph), or report such code as covered elsewhere.
   - **String and regex code.** Neither operator set mutates string or regex literals, so escaping and quoting helpers get no default mutants. This is by design, to keep equivalent mutants down. Calibration question for the owner: an opt-in `strings` operator (a literal to `""`, edits to regex quantifiers and classes).
   - **Equivalent mutants seen on real code** that `equivalent.rs` does not flag: 5 of 8 survivors in Molten's `signing.ts`.
     - a sort comparator's `<`/`<=` and `>`/`>=` over keys that cannot be equal;
     - a typed-array write past its end, which is ignored;
     - a variable always reassigned before it is read;
-    - WebCrypto `importKey`'s `extractable` flag.
+    - WebCrypto `importKey`'s `extractable` flag;
+    - `a <= b ? x : y` choosing between values that are equal when `a == b` (`minCapability` and `maxCapability` over a rank map);
+    - an initial value whose only read before reassignment is on a path that returns (`signing.ts:165`, where the `catch` returns).
 
-    The last two are detectable by pattern.
+    The `extractable` flag and the reassigned variables are detectable by pattern.
+  - **Reference runs per file.** With file-copy mutation (TypeScript has no schemata), each file's mutants start with a reference run of its selected tests unmutated (ADR-080 §9). On shared that was 872 s of a 25-minute budget, about 20 s per file. Two options: share one reference run across files whose selected tests are the same, or skip it when the baseline run of those tests is recent.
   - **Progress during mutation.** The event stream says nothing between `check.start` and `check.end`, so a long run cannot be watched. Per-file progress events would fix it.
 
 ## 4. Cross-phase checklist
