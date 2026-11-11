@@ -2105,7 +2105,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 **Goal:** The owner's request (2026-11-09): test Cupel against the surface area of a real repository, the owner's `../molten`, one area at a time. In each area, find Cupel's bugs and fix them, and write every true issue in Molten to one file, `../molten/cupel.md`, for Molten's own agent to pick up.
 
-**Status:** in progress. Areas 0 to 4 have their fixes in (2026-11-10). Areas 3 and 4 have calibration questions with the owner. Area 5 next.
+**Status:** complete (2026-11-11). Every area ran and `v0.2.6` is tagged. The calibration and design questions in the Notes are with the owner.
 
 **Molten.** A pnpm TypeScript monorepo on Cloudflare Workers, at `fbafa8f5`:
 - `apps/agent`: 461 source files, 230 test files. `agent-do.ts` alone is 34,551 lines.
@@ -2411,6 +2411,21 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - an unevaluated rule says whether its check was not selected, skipped (with the skip reasons), or cut short;
     - a check or survey without a reference run says new and resolved need a baseline, and other verbs leave them out.
   - Tests: `cupel-core/tests/gate.rs`, `cupel-cli/src/render.rs`.
+
+- **Area 12: the rerun and `v0.2.6`** (2026-11-11, Molten `fbafa8f5`, Cupel `259c99df`). Every area ran again in the clones under the same containment. The before-and-after table is at the top of `cupel.md`.
+  - Survey: 3,693 findings, against 5,198 at 0.2.5. `lang.parse-error` 12 to 0, `dead.symbol` 91 to 15, `test.mock-heavy` 1,404 to 35, `test.no-assertion` 33 to 2, `dep.cycle` 7 to 2.
+  - `init` proposes eight roots, and JavaScript coverage uses `npx c8`. `perf.footprint` counts 503 dependencies, 2 copyleft.
+  - Coverage, line and branch: `packages/shared` 88.95% and 83.6%, `apps/cli` 75.08% and 53.75%, `apps/agent` 72.08% and 63.27%. `containers/sandbox` is skipped as unavailable, since nothing reads `node --test` results.
+  - Mutation on `packages/shared`: partial at the budget, score 0.7092 (634 killed, 159 survived, 101 uncovered, 112 not run, 373 reused).
+  - `tests.flaky` found nothing flaky in `packages/shared` or `apps/agent`. The 6 property tests ran, none falsified.
+  - The ten Area 8 replays gave the same verdicts, and no test or coverage command ran. Nothing changed outside `.cupel` in either clone.
+  - `apps/web` still waits on Molten's `remoteBindings: false` (M10-1).
+  - `v0.2.6` tagged at 64c2a13e after gate b23 and CI green on it. Verified as for 0.2.5:
+    - Every archive matches `SHA256SUMS` and passes `release.sh verify`.
+    - Both macOS binaries report `cupel 0.2.6`, the x86_64 one under Rosetta.
+    - `install.sh` installs `cupel 0.2.6` on the Mac, and in `ubuntu:24.04` x86_64 and `alpine:3.20` arm64, where `init --dry-run` runs.
+    - `cargo binstall --git` in `rust:1.92-bookworm` downloads the release binary (installed in 4 s, no build).
+    - The registry publishes stay skipped (ADR-146).
 
 - **Open, from Area 11** (2026-11-11). Questions for the owner:
   - **What a TypeScript package's API is.**
