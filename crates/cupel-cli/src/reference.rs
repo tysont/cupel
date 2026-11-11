@@ -1,11 +1,11 @@
 // ABOUTME: The reference run a gate rule against `base` compares with (ADR-130): `--against`, the base of a
-// ABOUTME: range recomputed over the base versions of its changed files, or the default baseline.
+// ABOUTME: range recomputed over the base versions of the symbols it changed, or the default baseline.
 use std::path::Path;
 
 use cupel_core::config::Config;
 use cupel_core::config::GateRuleSpec;
 use cupel_core::git::Git;
-use cupel_core::{Envelope, Event, GateReference, Status, Writer, needs_reference};
+use cupel_core::{ChangedLines, Envelope, Event, GateReference, Status, Writer, needs_reference};
 
 use crate::check::{self, gate_rules};
 use crate::cli::ScopeArgs;
@@ -60,7 +60,8 @@ pub fn resolve(
 }
 
 /// The base side of a range, recomputed: the checks the rules against `base` name, run over
-/// the base versions of the range's changed files in a copy of the base commit (ADR-130).
+/// the base versions of the range's changed files in a copy of the base commit (ADR-130),
+/// narrowed to the symbols the range's lines touched there (ADR-175).
 fn base_run(
     invocation: &Invocation<'_>,
     config: &Config,
@@ -104,8 +105,17 @@ fn recompute(
         .export(&commit, &copy.path().join("tree"))
         .map_err(|error| format!("the base could not be written: {error}"))?;
     let short = &commit[..commit.len().min(12)];
-    run_at(invocation, config, &base_scope(args, rules, files), &root)
-        .map_err(|error| format!("the run at the base {short} failed: {error}"))
+    let touched = git
+        .base_lines(&commit, check::scope_request(args).head.as_deref())
+        .map_err(|error| format!("the base's changed lines could not be read: {error}"))?;
+    run_at(
+        invocation,
+        config,
+        &base_scope(args, rules, files),
+        touched,
+        &root,
+    )
+    .map_err(|error| format!("the run at the base {short} failed: {error}"))
 }
 
 /// The base run's flags: `files` as its paths, the checks of the rules against `base` as its
@@ -127,11 +137,13 @@ fn base_scope(args: &ScopeArgs, rules: &[GateRuleSpec], files: Vec<String>) -> S
     }
 }
 
-/// The run `base_args` describes, in the tree at `root`.
+/// The run `base_args` describes, in the tree at `root`, over the symbols the range's `touched`
+/// lines of the base fall in (ADR-175).
 fn run_at(
     invocation: &Invocation<'_>,
     config: &Config,
     base_args: &ScopeArgs,
+    touched: ChangedLines,
     root: &Path,
 ) -> Result<Envelope, String> {
     let writer = Writer::new(root, false).map_err(|error| error.to_string())?;
@@ -145,7 +157,7 @@ fn run_at(
         installs: Permission::Never("a reference run installs nothing"),
     };
     let mut events: Vec<Event> = Vec::new();
-    let checked =
-        check::run(&base, config, base_args, &mut events).map_err(|error| error.to_string())?;
+    let checked = check::run_touching(&base, config, base_args, Some(touched), &mut events)
+        .map_err(|error| error.to_string())?;
     Ok(checked.into_envelope(invocation.run, &writer, &mut events))
 }

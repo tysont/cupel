@@ -167,6 +167,22 @@ impl Git {
         base: &str,
         head: Option<&str>,
     ) -> Result<BTreeMap<String, Vec<(u32, u32)>>, GitError> {
+        Ok(hunks(&self.diff_lines(base, head)?, Side::New))
+    }
+
+    /// The same differences as [`Git::changed_lines`], as inclusive ranges of the old side: the
+    /// lines of `base` the change replaced or removed, and the lines around a pure insertion. A
+    /// file the change added has none (ADR-175).
+    pub fn base_lines(
+        &self,
+        base: &str,
+        head: Option<&str>,
+    ) -> Result<BTreeMap<String, Vec<(u32, u32)>>, GitError> {
+        Ok(hunks(&self.diff_lines(base, head)?, Side::Old))
+    }
+
+    /// `git diff -U0` from `base` to `head`, or to the working tree.
+    fn diff_lines(&self, base: &str, head: Option<&str>) -> Result<String, GitError> {
         let mut args = vec![
             "diff",
             "-U0",
@@ -178,7 +194,7 @@ impl Git {
         ];
         args.extend(head);
         args.push("--");
-        Ok(hunks(&self.output(&args)?))
+        self.output(&args)
     }
 
     /// The contents of `path` (relative to the root) at the commit `rev`.
@@ -274,36 +290,71 @@ impl Git {
     }
 }
 
-/// The new-side line ranges of each file in a `git diff -U0` (ADR-077 §5).
-fn hunks(diff: &str) -> BTreeMap<String, Vec<(u32, u32)>> {
+/// The line ranges of `side` of each file in a `git diff -U0` (ADR-077 §5).
+fn hunks(diff: &str, side: Side) -> BTreeMap<String, Vec<(u32, u32)>> {
     let mut files: BTreeMap<String, Vec<(u32, u32)>> = BTreeMap::new();
     let mut current: Option<String> = None;
+    // A file's `---`/`+++` names come before its first hunk; inside the hunks, a removed or added
+    // line can start with the same characters.
+    let mut in_header = false;
     for line in diff.lines() {
-        if let Some(path) = line.strip_prefix("+++ ") {
-            current = path.strip_prefix("b/").map(str::to_owned);
-        } else if let (Some(file), Some(header)) = (&current, line.strip_prefix("@@ "))
-            && let Some(range) = new_side(header)
-        {
-            files.entry(file.clone()).or_default().push(range);
+        if line.starts_with("diff ") {
+            in_header = true;
+        } else if let Some(path) = line.strip_prefix(side.file_marker()).filter(|_| in_header) {
+            current = path.strip_prefix(side.prefix()).map(str::to_owned);
+        } else if let Some(header) = line.strip_prefix("@@ ") {
+            in_header = false;
+            if let (Some(file), Some(range)) = (&current, side.range(header)) {
+                files.entry(file.clone()).or_default().push(range);
+            }
         }
     }
     files
 }
 
-/// The new-side range of a hunk header `-a,b +c,d @@`: lines `c` to `c + d - 1`, or the lines
-/// `c` and `c + 1` around a deletion (`d` is 0).
-fn new_side(header: &str) -> Option<(u32, u32)> {
-    let added = header
-        .split_whitespace()
-        .find_map(|part| part.strip_prefix('+'))?;
-    let (start, count) = added.split_once(',').unwrap_or((added, "1"));
-    let start: u32 = start.parse().ok()?;
-    let count: u32 = count.parse().ok()?;
-    Some(if count == 0 {
-        (start.max(1), start + 1)
-    } else {
-        (start, start + count - 1)
-    })
+/// Which side of a diff a hunk's lines are read from.
+#[derive(Clone, Copy)]
+enum Side {
+    Old,
+    New,
+}
+
+impl Side {
+    /// The line naming a file's version on this side: `--- a/…` or `+++ b/…`.
+    fn file_marker(self) -> &'static str {
+        match self {
+            Self::Old => "--- ",
+            Self::New => "+++ ",
+        }
+    }
+
+    fn prefix(self) -> &'static str {
+        match self {
+            Self::Old => "a/",
+            Self::New => "b/",
+        }
+    }
+
+    /// This side's range of a hunk header `-a,b +c,d @@`: for the new side, lines `c` to
+    /// `c + d - 1`, or the lines `c` and `c + 1` around a deletion (`d` is 0); for the old side,
+    /// the same of `a` and `b`.
+    fn range(self, header: &str) -> Option<(u32, u32)> {
+        let sign = match self {
+            Self::Old => '-',
+            Self::New => '+',
+        };
+        let lines = header
+            .split_whitespace()
+            .find_map(|part| part.strip_prefix(sign))?;
+        let (start, count) = lines.split_once(',').unwrap_or((lines, "1"));
+        let start: u32 = start.parse().ok()?;
+        let count: u32 = count.parse().ok()?;
+        Some(if count == 0 {
+            (start.max(1), start + 1)
+        } else {
+            (start, start + count - 1)
+        })
+    }
 }
 
 fn failure(args: &[&str], message: String) -> GitError {

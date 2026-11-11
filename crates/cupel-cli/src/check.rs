@@ -117,6 +117,18 @@ pub fn run(
     args: &ScopeArgs,
     events: &mut dyn EventSink,
 ) -> Result<CheckRun, CupelError> {
+    run_touching(invocation, config, args, None, events)
+}
+
+/// [`run`], with `touched` as the changed lines that narrow its symbols when given: a recomputed
+/// base's old side of the range (ADR-175), in place of the lines its own scope changed.
+pub(crate) fn run_touching(
+    invocation: &Invocation<'_>,
+    config: &Config,
+    args: &ScopeArgs,
+    touched: Option<ChangedLines>,
+    events: &mut dyn EventSink,
+) -> Result<CheckRun, CupelError> {
     let (run, writer) = (invocation.run, invocation.writer);
     resources::limit_threads(args.jobs);
     let catalog = invocation.catalog();
@@ -144,7 +156,10 @@ pub fn run(
         selectors_must_match: !request.has_range(),
         seed: run.seed,
         depth: config.effective.depth,
-        changed: changed_lines(writer.root(), &request, &resolved)?,
+        changed: match touched {
+            Some(lines) => Some(lines),
+            None => changed_lines(writer.root(), &request, &resolved)?,
+        },
         resources: resources::of(invocation, config, args, git.as_ref())?,
         oracle: oracle.run_oracle(config),
         cases: args.cases.map(u64::from),

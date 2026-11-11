@@ -419,6 +419,40 @@ fn a_changed_rule_against_base_recomputes_the_value_at_the_base_commit() {
     );
 }
 
+/// `wide` with seven parameters, then `step`, whose cyclomatic complexity is 1, or 2 with a branch.
+fn beside_wide(branched: bool) -> String {
+    let body = if branched {
+        "if n > 0 { n } else { 0 }"
+    } else {
+        "n"
+    };
+    format!(
+        "{}\npub fn step(n: i32) -> i32 {{\n    {body}\n}}\n",
+        with_params(7)
+    )
+}
+
+#[test]
+fn a_changed_rule_against_base_compares_the_symbols_the_change_touched_at_the_base() {
+    let Some(repo) =
+        committed("[gate.changed]\n\"static.complexity.cyclomatic_max\" = \"<= base\"\n")
+    else {
+        return;
+    };
+    repo.write("src/wide.rs", &beside_wide(false));
+    assert!(repo.git(&["commit", "--quiet", "--all", "-m", "step"]));
+
+    repo.write("src/wide.rs", &beside_wide(true));
+    let outcome = repo.run(&["check", "--changed", "--only", "static.complexity"]);
+    assert_eq!(outcome.code, 1, "{}", outcome.stdout);
+    assert_eq!(
+        gate(&outcome.envelope())["rules"][0],
+        json!({"rule": "static.complexity.cyclomatic_max <= base", "actual": 2.0, "bound": 1.0,
+               "result": "fail", "reason": null}),
+        "the base is `step` as it was, not the untouched `wide` beside it"
+    );
+}
+
 #[test]
 fn a_changed_rule_against_base_has_no_reference_when_every_changed_file_is_new() {
     let Some(repo) = committed("[gate.changed]\n\"static.complexity.params_max\" = \"<= base\"\n")
@@ -456,15 +490,15 @@ fn a_changed_mutation_rule_against_base_reruns_the_suite_at_the_base_commit() {
     let source = std::fs::read_to_string(repo.path("discount.py")).unwrap();
     let check = ["check", "--changed", "--only", "tests.mutation"];
 
-    // The base's discount.py scores 0.6: 3 killed, 1 survived, and `refund`'s mutant uncovered
-    // (ADR-141 §1). The changed lines of `refund` have no covering test, so the change scores 0.
+    // The base is scored over what the range touched there (ADR-175): `refund` was untested
+    // before the change as well, so an untested change to it is no worse than its base.
     repo.write("discount.py", &source.replace("total - 5", "total - 6"));
     let untested = repo.run(&check);
-    assert_eq!(untested.code, 1, "{}", untested.stdout);
+    assert_eq!(untested.code, 0, "{}", untested.stdout);
     assert_eq!(
         gate(&untested.envelope())["rules"][0],
-        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 0.0, "bound": 0.58,
-               "result": "fail", "reason": null})
+        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 0.0, "bound": -0.02,
+               "result": "pass", "reason": null})
     );
 
     repo.write(
@@ -475,7 +509,20 @@ fn a_changed_mutation_rule_against_base_reruns_the_suite_at_the_base_commit() {
     assert_eq!(tested.code, 0, "{}", tested.stdout);
     assert_eq!(
         gate(&tested.envelope())["rules"][0],
-        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 1.0, "bound": 0.58,
+        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 1.0, "bound": -0.02,
                "result": "pass", "reason": null})
+    );
+
+    // `discount` scored 0.75 at the base (3 of its 4 mutants killed); changed with the test of
+    // its discounted branch deleted, it scores 0.5, below its base.
+    repo.write("discount.py", &source.replace("total - 10", "total - 9"));
+    std::fs::remove_file(repo.path("tests/test_large.py")).unwrap();
+    std::fs::remove_file(repo.path("tests/test_refund.py")).unwrap();
+    let unprotected = repo.run(&check);
+    assert_eq!(unprotected.code, 1, "{}", unprotected.stdout);
+    assert_eq!(
+        gate(&unprotected.envelope())["rules"][0],
+        json!({"rule": "tests.mutation.score >= base - 0.02", "actual": 0.5, "bound": 0.73,
+               "result": "fail", "reason": null})
     );
 }

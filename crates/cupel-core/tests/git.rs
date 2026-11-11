@@ -251,3 +251,33 @@ fn changed_lines_are_the_new_side_of_each_hunk_and_a_deletion_is_where_it_was() 
     let head = repo.commit("change");
     assert_eq!(git.changed_lines(&base, Some(&head)).unwrap(), lines);
 }
+
+#[test]
+fn base_lines_are_the_old_side_of_each_hunk_and_an_insertion_is_where_it_went() {
+    let Some((repo, base)) = GitRepo::committed(&[
+        ("src/a.rs", "1\n2\n3\n4\n5\n"),
+        ("b.sql", "-- one\nselect 1;\n-- two\n"),
+        ("gone.rs", "a\nb\n"),
+    ]) else {
+        return;
+    };
+    let git = Git::open(&repo.root()).unwrap();
+    repo.write("src/a.rs", "1\nTWO\n3\n4\n5\nsix\nseven\n");
+    repo.write("b.sql", "select 1;\n");
+    std::fs::remove_file(repo.root().join("gone.rs")).unwrap();
+    repo.write("new.rs", "n\n");
+    let lines = git.base_lines(&base, None).unwrap();
+    let as_vec: Vec<(&str, &[(u32, u32)])> = lines
+        .iter()
+        .map(|(file, ranges)| (file.as_str(), ranges.as_slice()))
+        .collect();
+    assert_eq!(
+        as_vec,
+        [
+            ("b.sql", &[(1, 1), (3, 3)][..]),
+            ("gone.rs", &[(1, 2)][..]),
+            ("src/a.rs", &[(2, 2), (5, 6)][..])
+        ],
+        "a removed `-- ` line is not a file header, and an added file has no base side"
+    );
+}
