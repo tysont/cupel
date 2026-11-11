@@ -154,7 +154,7 @@
             "type": "object"
           },
           "kind": "api.widened",
-          "summary": "The public API gained an item (added, renamed into, or made public) or a signature beside the ones it had."
+          "summary": "The public API gained an item (added, renamed into, or made public), a signature beside the ones it had, or trailing parameters a caller may leave out."
         }
       ],
       "id": "static.api-surface",
@@ -177,7 +177,9 @@
       "summary": "Diff of the public API against the range's base: removed and changed items are breaking, added ones widen it. Runs only with --changed or --base.",
       "tier": 0,
       "version": 1,
-      "wants": []
+      "wants": [
+        "module-graph"
+      ]
     },
     "subject": "check"
   },

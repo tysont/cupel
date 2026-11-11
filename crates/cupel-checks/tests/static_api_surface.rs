@@ -2,7 +2,10 @@
 // ABOUTME: signatures, additions, matching by path, identity, location, settings, the score, and the manifest (ADR-101).
 mod support;
 
-use cupel_core::syntax::{ApiItem, ApiItemKind, ApiSurface, Span};
+use cupel_core::syntax::{
+    ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportAlias, ImportEdge, ImportTarget, ModuleGraph,
+    RootImports, Span,
+};
 use cupel_core::{
     ActionKind, CheckId, CheckResult, CheckStatus, CostClass, FactKind, Facts, Finding, FindingId,
     MetricPer, Produced, Range, Scope, Severity,
@@ -37,9 +40,26 @@ fn surface(items: Vec<ApiItem>) -> ApiSurface {
 
 /// Runs the check comparing `base` with `head` over a range starting at `c0ffee`.
 fn run(base: Vec<ApiItem>, head: Vec<ApiItem>) -> (CheckResult, Vec<Finding>) {
+    run_with(base, head, Vec::new())
+}
+
+/// [`run`] with a head module graph of `edges`.
+fn run_with(
+    base: Vec<ApiItem>,
+    head: Vec<ApiItem>,
+    edges: Vec<ImportEdge>,
+) -> (CheckResult, Vec<Finding>) {
     let check = support::check(ID);
     let mut facts = Facts::for_manifest(check.manifest());
     facts.insert(surface(head)).unwrap();
+    facts
+        .insert(ModuleGraph {
+            roots: vec![RootImports {
+                root: ".".to_owned(),
+                edges,
+            }],
+        })
+        .unwrap();
     facts
         .insert_base_shared(&Produced::new(surface(base)).share())
         .unwrap();
@@ -173,6 +193,116 @@ fn an_item_moved_to_another_file_under_its_path_is_unchanged() {
     assert_eq!(findings, []);
 }
 
+/// `export { names } from "./models"` in `constants.x` at head, `names` each `(name, local)`;
+/// none is `export * from`.
+fn reexport(names: &[(&str, &str)]) -> ImportEdge {
+    ImportEdge {
+        from: "constants.x".to_owned(),
+        specifier: "./models".to_owned(),
+        target: ImportTarget::File {
+            path: "models.x".to_owned(),
+        },
+        relative: true,
+        line: 1,
+        edge_kind: EdgeKind::ReExport,
+        names: names.iter().map(|(name, _)| (*name).to_owned()).collect(),
+        aliases: names
+            .iter()
+            .filter(|(name, local)| name != local)
+            .map(|(name, local)| ImportAlias {
+                name: (*name).to_owned(),
+                local: (*local).to_owned(),
+            })
+            .collect(),
+    }
+}
+
+fn constant(path: &str, signature: &str, file: &str) -> ApiItem {
+    item(path, ApiItemKind::Constant, signature, file, 1)
+}
+
+/// An item moved to another module that its old module re-exports, by name, under an alias,
+/// or with `export *`, is still public at its old path: only its new path is added (ADR-174).
+#[test]
+fn an_item_its_module_re_exports_from_another_is_not_removed() {
+    let base = || vec![constant("m.constants.C", "Record", "constants.x")];
+    let moved = |name: &str| vec![constant(&format!("m.models.{name}"), "Record", "models.x")];
+    for (head, edge) in [
+        (moved("C"), reexport(&[("C", "C")])),
+        (moved("D"), reexport(&[("D", "C")])),
+        (moved("C"), reexport(&[])),
+    ] {
+        let path = head[0].path.clone();
+        let (_, findings) = run_with(base(), head, vec![edge]);
+        assert_eq!(
+            reported(&findings),
+            [("api.widened", path.as_str(), "added")]
+        );
+    }
+}
+
+/// A re-exported item is compared with what it re-exports: another signature is breaking, and
+/// a target the range did not change, so not in the head surface, is taken as unchanged.
+#[test]
+fn a_re_exported_item_is_compared_with_its_target() {
+    let base = vec![constant("m.constants.C", "Record", "constants.x")];
+    let head = vec![constant("m.models.C", "Map", "models.x")];
+    let (_, findings) = run_with(base.clone(), head, vec![reexport(&[("C", "C")])]);
+    assert_eq!(
+        reported(&findings),
+        [
+            ("api.breaking", "m.constants.C", "changed"),
+            ("api.widened", "m.models.C", "added")
+        ]
+    );
+    let (_, findings) = run_with(base.clone(), Vec::new(), vec![reexport(&[("C", "C")])]);
+    assert_eq!(reported(&findings), []);
+    let (_, findings) = run_with(base, Vec::new(), vec![reexport(&[("X", "X")])]);
+    assert_eq!(
+        reported(&findings),
+        [("api.breaking", "m.constants.C", "removed")]
+    );
+}
+
+/// Trailing parameters a caller may leave out (optional, defaulted, or variadic) widen a
+/// signature; a required one, a changed one, or another return type is breaking (ADR-174).
+#[test]
+fn trailing_parameters_a_caller_may_leave_out_widen_a_signature() {
+    let changes = |base: &str, head: &str| {
+        let (_, findings) = run(
+            vec![function("m.f", base, 1)],
+            vec![function("m.f", head, 1)],
+        );
+        reported(&findings)
+            .into_iter()
+            .map(|(_, _, change)| change.to_owned())
+            .collect::<Vec<_>>()
+    };
+    let base = "(_: string[], _: (x) => void): string | null";
+    for head in [
+        "(_: string[], _: (x) => void, _: Record<string, [number, number]> = []): string | null",
+        "(_: string[], _: (x) => void, _?: \"5m\" | \"1h\", _: Billing = { a: 1, b: 2 }): string | null",
+        "(_: string[], _: (x) => void, ..._: number[]): string | null",
+    ] {
+        assert_eq!(changes(base, head), ["extended"], "{head}");
+    }
+    assert_eq!(changes("()", "(_=None, *_, **_)"), ["extended"]);
+    for head in [
+        "(_: string[], _: (x) => void, _: number): string | null",
+        "(_: string[], _?: (x) => void): string | null",
+        "(_: string[], _: (x) => void, _?: number): string",
+    ] {
+        assert_eq!(changes(base, head), ["changed"], "{head}");
+    }
+    assert_eq!(
+        changes(
+            "(_ *Account) Deposit(_ int64)",
+            "(_ *Account) Deposit(_ int64, _ bool)"
+        ),
+        ["changed"]
+    );
+}
+
 #[test]
 fn a_lost_overload_is_breaking_even_when_another_is_added() {
     let base = vec![function("m.f", "(_: string)", 1)];
@@ -215,7 +345,7 @@ fn the_manifest_needs_api_surface_on_both_sides() {
         Shape::of(check.manifest()),
         Shape {
             needs: vec![FactKind::ApiSurface],
-            wants: vec![],
+            wants: vec![FactKind::ModuleGraph],
             tier: 0,
             cost: CostClass::Quick,
             kinds: vec![

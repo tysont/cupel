@@ -2378,6 +2378,12 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - Test: `cupel-core/tests/scope.rs`.
   - Also seen: building the mutation slots took 872 s of the 25 minutes, for a package of a 487-dependency workspace.
 
+- **B15, Area 8** (2026-11-10, [ADR-174](adr/CUPEL_DECISION_174.md)).
+  - The replay: ten Molten PRs that changed `packages/shared`, each in a detached worktree without `node_modules`, as `cupel check --depth quick --base <c>^ --head <c>`, with test and coverage commands that leave a marker and fail. None ran. Each took 9 to 19 s.
+  - The gap: all seven `api.breaking` findings were false. Two were items moved behind an `export … from`, and five were trailing parameters with a default or `?`.
+  - Now `static.api-surface` follows a head re-export of a missing path, and trailing parameters a caller may leave out are `extended`.
+  - Tests: `cupel-checks/tests/static_api_surface.rs`, three tests.
+
 - **Open, from Areas 6 and 7** (2026-11-10).
   - **Cross-root test reach.** With per-package roots, a root's coverage and mutation run only that root's tests. So code another root's tests exercise looks uncovered: shared's `shellQuote` is tested from `apps/agent`, and shared's coverage counts only shared's own files. It is also the largest source of false survivors: 15 of shared's 47 survivors, all in `cron.ts`, are killed by `apps/agent/src/scheduling-types.test.ts`. Two options: let a root's coverage and mutation use the tests of the roots that import it (through the module graph), or report such code as covered elsewhere.
   - **String and regex code.** Neither operator set mutates string or regex literals, so escaping and quoting helpers get no default mutants. This is by design, to keep equivalent mutants down. Calibration question for the owner: an opt-in `strings` operator (a literal to `""`, edits to regex quantifiers and classes).

@@ -1,8 +1,8 @@
 // ABOUTME: `static.api-surface`: diffs ApiSurface between a range's base and head by path and reports removed or
-// ABOUTME: changed public items as `api.breaking` and added ones as `api.widened` (ADR-101).
+// ABOUTME: changed public items as `api.breaking` and added ones as `api.widened` (ADR-101, ADR-174).
 use std::collections::BTreeMap;
 
-use cupel_core::syntax::{ApiItem, ApiSurface};
+use cupel_core::syntax::{ApiItem, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result, Scope, Score,
@@ -63,7 +63,7 @@ impl StaticApiSurface {
             tier: Tier::try_from(0).expect("tier 0 exists"),
             cost: CostClass::Quick,
             needs: vec![FactKind::ApiSurface],
-            wants: vec![],
+            wants: vec![FactKind::ModuleGraph],
             findings: Vec::new(),
             metrics: Vec::new(),
             settings: SETTINGS.specs(),
@@ -93,8 +93,8 @@ const KINDS: [(&str, &str); 2] = [
     ),
     (
         "api.widened",
-        "The public API gained an item (added, renamed into, or made public) or a signature beside \
-         the ones it had.",
+        "The public API gained an item (added, renamed into, or made public), a signature beside \
+         the ones it had, or trailing parameters a caller may leave out.",
     ),
 ];
 
@@ -132,12 +132,15 @@ impl Check for StaticApiSurface {
         let head = Side::of(facts.get::<ApiSurface>()?);
         let base = Side::of(facts.base::<ApiSurface>()?);
         let commit = facts.range().map_or("", |range| range.commit.as_str());
+        let reexports = Reexports::of(facts.get::<ModuleGraph>().ok());
         let mut findings = Vec::new();
         for path in &base.order {
             ctx.cancel.checkpoint()?;
-            let (before, after) = (base.items(path), head.items(path));
-            if let Some(change) = compared(before, after) {
-                findings.push(self.finding(path, change, before, after, commit));
+            let Some(after) = reexports.at_head(path, base.items(path), &head) else {
+                continue;
+            };
+            if let Some(change) = compared(base.items(path), &after) {
+                findings.push(self.finding(path, change, base.items(path), &after, commit));
             }
         }
         let added: Vec<&str> = head
@@ -214,6 +217,104 @@ impl<'a> Side<'a> {
     fn items(&self, path: &str) -> &[&'a ApiItem] {
         self.paths.get(path).map_or(&[], Vec::as_slice)
     }
+
+    /// The items defined in `file`.
+    fn in_file(&self, file: &str) -> Vec<&'a ApiItem> {
+        self.paths
+            .values()
+            .flatten()
+            .copied()
+            .filter(|item| item.file == file)
+            .collect()
+    }
+}
+
+/// The head's re-exports (`export … from`, `pub use`) by the file that makes them, so a path
+/// whose item moved behind one is compared with what it re-exports (ADR-174).
+struct Reexports<'a> {
+    by_file: BTreeMap<&'a str, Vec<&'a ImportEdge>>,
+}
+
+impl<'a> Reexports<'a> {
+    fn of(graph: Option<&'a ModuleGraph>) -> Self {
+        let mut by_file: BTreeMap<&str, Vec<&ImportEdge>> = BTreeMap::new();
+        let edges = graph.into_iter().flat_map(|graph| &graph.roots);
+        for edge in edges.flat_map(|root| &root.edges) {
+            if edge.edge_kind == EdgeKind::ReExport {
+                by_file.entry(edge.from.as_str()).or_default().push(edge);
+            }
+        }
+        Self { by_file }
+    }
+
+    /// The head items at `path`, whose base items are `before`: its own, else those a
+    /// re-export of its file names (none when nothing re-exports it); `None` when a re-export
+    /// names it from a file the head surface does not hold, which the range left unchanged.
+    fn at_head(
+        &self,
+        path: &str,
+        before: &[&ApiItem],
+        head: &Side<'a>,
+    ) -> Option<Vec<&'a ApiItem>> {
+        let own = head.items(path);
+        if !own.is_empty() {
+            return Some(own.to_vec());
+        }
+        let edges = before
+            .first()
+            .and_then(|item| self.by_file.get(item.file.as_str()));
+        let segments: Vec<&str> = path.split('.').collect();
+        edges
+            .into_iter()
+            .flatten()
+            .find_map(|edge| through(edge, &segments, head))
+            .map_or(Some(Vec::new()), |found| match found {
+                Reexported::Items(items) => Some(items),
+                Reexported::Unread => None,
+            })
+    }
+}
+
+/// What a re-export gives a path: the head items it names, or a name from a file the head
+/// surface does not hold.
+enum Reexported<'a> {
+    Items(Vec<&'a ApiItem>),
+    Unread,
+}
+
+/// What `edge` re-exports at the path of `segments`, for the first segment it exports: the head
+/// items of its file at the same path from the name it re-exports; `None` when it gives none.
+fn through<'a>(edge: &ImportEdge, segments: &[&str], head: &Side<'a>) -> Option<Reexported<'a>> {
+    let ImportTarget::File { path: file } = &edge.target else {
+        return None;
+    };
+    let in_file = head.in_file(file);
+    segments.iter().enumerate().find_map(|(at, segment)| {
+        let name = exported(edge, segment)?;
+        if in_file.is_empty() && !edge.names.is_empty() {
+            return Some(Reexported::Unread);
+        }
+        let suffix = [&[name][..], &segments[at + 1..]].concat().join(".");
+        let items: Vec<&ApiItem> = in_file
+            .iter()
+            .copied()
+            .filter(|item| item.path == suffix || item.path.ends_with(&format!(".{suffix}")))
+            .collect();
+        (!items.is_empty()).then_some(Reexported::Items(items))
+    })
+}
+
+/// The name `edge` re-exports as `local`: itself, the name an alias gives it, or any name for
+/// `export *`; `None` when the edge does not export it.
+fn exported<'e>(edge: &'e ImportEdge, local: &'e str) -> Option<&'e str> {
+    if edge.names.is_empty() {
+        return Some(local);
+    }
+    if let Some(alias) = edge.aliases.iter().find(|alias| alias.local == local) {
+        return Some(&alias.name);
+    }
+    let aliased = edge.aliases.iter().any(|alias| alias.name == local);
+    (edge.names.iter().any(|name| name == local) && !aliased).then_some(local)
 }
 
 /// How a path's items changed across the range.
@@ -236,21 +337,113 @@ impl Change {
 }
 
 /// How a path present at the base changed at head: removed when it is gone, changed when an
-/// item of the base is missing, extended when head only adds items; `None` when unchanged.
+/// item of the base is missing, extended when head only adds items or parameters a caller may
+/// leave out (ADR-174); `None` when unchanged.
 fn compared(before: &[&ApiItem], after: &[&ApiItem]) -> Option<Change> {
     if after.is_empty() {
         return Some(Change::Removed);
     }
     let mut remaining = shown(after);
+    let mut extended = false;
     for item in shown(before) {
-        match remaining.iter().position(|candidate| *candidate == item) {
+        let same = remaining.iter().position(|candidate| *candidate == item);
+        let index = same.or_else(|| {
+            extended = true;
+            remaining.iter().position(|candidate| {
+                candidate.kind == item.kind && extends(&item.signature, &candidate.signature)
+            })
+        });
+        match index {
             Some(index) => {
                 remaining.remove(index);
             }
             None => return Some(Change::Changed),
         }
     }
-    (!remaining.is_empty()).then_some(Change::Extended)
+    (extended || !remaining.is_empty()).then_some(Change::Extended)
+}
+
+/// Whether `after` is `before` with trailing parameters a caller may leave out: each optional
+/// (`_?`), defaulted (`= …`), or variadic (`...`, `*`), and the rest of the signature the same.
+fn extends(before: &str, after: &str) -> bool {
+    let (Some((had, rest)), Some((has, now))) = (parameters(before), parameters(after)) else {
+        return false;
+    };
+    rest == now
+        && has.len() > had.len()
+        && has.starts_with(&had)
+        && has[had.len()..]
+            .iter()
+            .all(|parameter| omittable(parameter))
+}
+
+/// The parameters of a signature's first parenthesized list, split at its top-level commas,
+/// and what follows the list; `None` without one.
+fn parameters(signature: &str) -> Option<(Vec<&str>, &str)> {
+    let mut found = Vec::new();
+    let mut start = None;
+    for (at, c, depth) in nesting(signature) {
+        match (c, depth, start) {
+            ('(', 0, None) => start = Some(at + 1),
+            (',', 1, Some(from)) => {
+                found.push(signature[from..at].trim());
+                start = Some(at + 1);
+            }
+            (')', 0, Some(from)) => {
+                found.push(signature[from..at].trim());
+                found.retain(|parameter| !parameter.is_empty());
+                return Some((found, &signature[at + 1..]));
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+/// Whether a caller may leave `parameter` out: optional, variadic, or defaulted, with a `=` at
+/// its top level that is not part of `=>`, `==`, `!=`, `<=`, or `>=`.
+fn omittable(parameter: &str) -> bool {
+    parameter.starts_with("_?")
+        || parameter.starts_with("...")
+        || parameter.starts_with('*')
+        || nesting(parameter).any(|(at, c, depth)| {
+            c == '='
+                && depth == 0
+                && !parameter[at + 1..].starts_with(['>', '='])
+                && !parameter[..at].ends_with(['=', '!', '<', '>'])
+        })
+}
+
+/// Each character of `text` outside quotes, with its byte offset and its bracket depth: an
+/// opening bracket at the depth it opens from, a closing one at the depth it returns to. The
+/// `>` of `=>` and `->` is no bracket.
+fn nesting(text: &str) -> impl Iterator<Item = (usize, char, usize)> + '_ {
+    let (mut depth, mut quote, mut previous) = (0_usize, None, ' ');
+    text.char_indices().filter_map(move |(at, c)| {
+        let escaped = previous == '\\';
+        previous = c;
+        match (quote, c) {
+            (Some(q), _) if c == q && !escaped => {
+                quote = None;
+                None
+            }
+            (Some(_), _) => None,
+            (None, '"' | '\'' | '`') => {
+                quote = Some(c);
+                None
+            }
+            (None, '(' | '[' | '{' | '<') => {
+                depth += 1;
+                Some((at, c, depth - 1))
+            }
+            (None, '>') if text[..at].ends_with(['=', '-']) => Some((at, c, depth)),
+            (None, ')' | ']' | '}' | '>') => {
+                depth = depth.saturating_sub(1);
+                Some((at, c, depth))
+            }
+            _ => Some((at, c, depth)),
+        }
+    })
 }
 
 fn shown(items: &[&ApiItem]) -> Vec<Shown> {
