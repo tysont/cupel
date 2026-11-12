@@ -1,5 +1,5 @@
 // ABOUTME: `gen.property` through the binary on the Python gen.property fixture (ADR-095, ADR-096): the falsified and
-// ABOUTME: missing properties, `--cases`, and `--scaffold` previewed without `--write` and written with it.
+// ABOUTME: missing properties, `--cases` and a pinned count, and `--scaffold` previewed and written.
 mod support;
 
 use serde_json::{Value, json};
@@ -165,4 +165,37 @@ fn scaffold_with_write_appends_stubs_the_next_run_counts_as_properties() {
         after.envelope()["checks"][0]["metrics"]["properties"],
         json!(2.0)
     );
+}
+
+/// A property that sets its own count runs at it whatever `--cases` says, and the run says so.
+#[test]
+fn a_property_that_pins_its_cases_runs_at_them_and_is_noted() {
+    let Some(repo) = fixture() else { return };
+    repo.write(
+        "tests/test_digits.py",
+        "from hypothesis import given, settings, strategies as st\n\nfrom units.digits import \
+         digits\n\n\n@settings(max_examples=5)\n@given(st.integers(min_value=0, \
+         max_value=109_999))\ndef test_digits_counts_decimal_places(n):\n    assert digits(n) \
+         == len(str(n))\n",
+    );
+    let outcome = repo.run(&["check", "--only", "gen.property", "--seed", "3"]);
+    assert_eq!(outcome.code, 0, "no gate: {}", outcome.stdout);
+    let envelope = outcome.envelope();
+    assert_eq!(
+        found(&envelope),
+        [
+            pair("property.cases-pinned", FALSIFIED),
+            pair("property.missing", "units.percent.clamp_percent"),
+        ]
+    );
+    let pinned = &envelope["findings"][0];
+    assert_eq!(
+        (
+            &pinned["severity"],
+            &pinned["evidence"]["cases"],
+            &pinned["evidence"]["budget"]
+        ),
+        (&json!("info"), &json!(5), &json!(1000))
+    );
+    assert_eq!(envelope["checks"][0]["metrics"]["falsified"], json!(0.0));
 }

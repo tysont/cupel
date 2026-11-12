@@ -2571,6 +2571,18 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-adapt/tests/runners.rs`: `tool.node-test` runs the `test-results/node-test` fixture green and red, and is detected first in it and after a detected Vitest or Jest (failed first: not registered);
     - `cupel-fixtures/tests/node_test.rs`: the `node-test` repository, `[roots]` naming `containers/sandbox` beside a root that depends on Vitest, gets `tests.coverage` from c8's committed report and a passing `tests.flaky` over its two tests (golden `node-test.json`; with the runner unregistered, `tests.flaky` was skipped).
 
+- **Item 10, `property.cases-pinned`** (2026-11-12, [ADR-183](adr/CUPEL_DECISION_183.md)).
+  - The gap: a property that sets its own count (Molten's six `fc.assert(…, { numRuns: 120 })`) ran at it under any `--cases`, silently, and a falsified one's `evidence.cases` said the budget.
+  - Running was already right: each framework's own count wins over Cupel's (fast-check's `fc.assert` parameters over `fc.configureGlobal`, Hypothesis's `@settings` over the loaded profile, proptest's `with_cases` over `PROPTEST_CASES`, quickcheck's `tests` over `QUICKCHECK_TESTS`), so `--cases` reaches only the unpinned tests; nothing about the run changed.
+  - Now the engine reads each property's count from its source (`cupel-adapt` `property/pin.rs`, a `pinned` reader per framework): fast-check `numRuns:` in the case (the shorthand `{ numRuns }` too); Hypothesis `max_examples=` in the case or its decorators; proptest `with_cases(…)`, `cases:`, or `cases =` inside the case's `#[proptest(…)]` or the `#![proptest_config(…)]` of the `proptest!` block still open at the case; quickcheck `.tests(…)` in a case that names `QuickCheck`. The case's text is its span plus the decorator or attribute lines directly above it. A count that is not an integer literal (Rust's integer suffixes and `_` separators allowed) is pinned with the count unknown.
+  - `PropertyResult` gains `pinned: {cases}` (null when unpinned; `PropertyResults` v2) and `cases(budget)`. `gen.property` reports each pinned property as `property.cases-pinned` (`info`, `review`, evidence `{test, framework, cases, budget}`, the title naming the test and the count), and a falsified property's `evidence.cases` is the count it ran (null when unknown).
+  - Open: a count set elsewhere runs as set but is not reported: a `fc.assert` parameters object held in a variable, a shared `ProptestConfig` constant or a `proptest_config(CONFIG)` whose cases are not visible at the call, a Hypothesis profile the project loads itself, and `fc.configureGlobal` in the project's own setup.
+  - Tests:
+    - `cupel-adapt` `pin.rs` unit tests: each framework's literal, separated, suffixed, shorthand, and non-literal counts; a count in another case, a closed `proptest!` block, or a configuration without `cases` pins nothing (failed first: every reader returned none);
+    - `cupel-checks/tests/gen_property.rs`: pinned properties noted with their count or null, and a falsified one's `evidence.cases` the count it ran (failed first: no `pinned`);
+    - `cupel-core/tests/property_results.rs`: `pinned` serialized, schema v2, `cases` by pin or budget;
+    - `cupel-cli/tests/property.rs`: the Python fixture with `@settings(max_examples=5)` under the default 1 000-case budget passes, and the run reports `property.cases-pinned` with `cases` 5 and `budget` 1000.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

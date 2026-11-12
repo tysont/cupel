@@ -138,7 +138,7 @@ pub use producer::{
     Runners, TestRun, TestSelection, ToolProbe, Upstream,
 };
 pub use proof::{Obligation, ObligationStatus, ProofResults, RelatedPlace};
-pub use property::{PropertyOutcome, PropertyResult, PropertyResults};
+pub use property::{Pinned, PropertyOutcome, PropertyResult, PropertyResults};
 pub use race::{RaceFrame, RaceKind, RaceReport, RaceReports, RaceStack};
 pub use rank::{
     Measured, Measurement, MetricPer, Protection, ProtectionMetric, RANKED, RankedTarget,

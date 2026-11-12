@@ -7,7 +7,7 @@ use cupel_core::syntax::{
     TestPairing, Visibility,
 };
 use cupel_core::{
-    ActionKind, CheckStatus, CostClass, FactKind, Facts, Finding, LangId, ProducerId,
+    ActionKind, CheckStatus, CostClass, FactKind, Facts, Finding, LangId, Pinned, ProducerId,
     PropertyOutcome, PropertyResult, PropertyResults, Scope, Severity,
 };
 use serde_json::{Value, json};
@@ -40,6 +40,7 @@ fn property(name: &str, outcome: PropertyOutcome, counterexample: Option<&str>) 
         outcome,
         counterexample: counterexample.map(str::to_owned),
         seeded: true,
+        pinned: None,
     }
 }
 
@@ -183,6 +184,7 @@ fn the_manifest_needs_property_results_symbols_and_conventions_at_tier_four() {
         [
             ("property.falsified", ActionKind::FixBug),
             ("property.missing", ActionKind::AddProperty),
+            ("property.cases-pinned", ActionKind::Review),
         ]
     );
     let metrics: Vec<&str> = manifest.metrics.iter().map(|m| m.name.as_str()).collect();
@@ -381,4 +383,70 @@ fn finding_ids_are_stable_and_distinct() {
     assert_eq!(first, run());
     assert_eq!(first.len(), 2);
     assert_ne!(first[0], first[1]);
+}
+
+#[test]
+fn a_property_that_pins_its_cases_is_noted_and_its_failure_counts_the_cases_it_ran() {
+    let mut counted = property("test_counted", PropertyOutcome::Falsified, Some("n=100000"));
+    counted.pinned = Some(Pinned { cases: Some(120) });
+    let mut uncounted = property("test_uncounted", PropertyOutcome::Failed, None);
+    uncounted.pinned = Some(Pinned { cases: None });
+    let (result, recorded) = run_over(
+        results(vec![
+            counted,
+            uncounted,
+            property("test_budgeted", PropertyOutcome::Passed, None),
+        ]),
+        None,
+        &ALL_FILES,
+    );
+    assert_eq!(
+        kinds(&recorded.findings),
+        [
+            kind("property.falsified", "tests/test_units.py::test_counted"),
+            kind("property.falsified", "tests/test_units.py::test_uncounted"),
+            kind("property.cases-pinned", "tests/test_units.py::test_counted"),
+            kind(
+                "property.cases-pinned",
+                "tests/test_units.py::test_uncounted"
+            ),
+            kind("property.missing", "units.clamp_percent"),
+        ]
+    );
+    let cases: Vec<&Value> = recorded.findings[..4]
+        .iter()
+        .map(|finding| &finding.evidence.0["cases"])
+        .collect();
+    assert_eq!(
+        cases,
+        [&json!(120), &Value::Null, &json!(120), &Value::Null]
+    );
+    let noted = &recorded.findings[2];
+    assert_eq!(
+        (noted.severity, noted.action.kind, noted.title.as_str()),
+        (
+            Severity::Info,
+            ActionKind::Review,
+            "`test_counted` pins its own 120 cases; `--cases` does not apply to it"
+        )
+    );
+    assert_eq!(
+        Value::Object(noted.evidence.0.clone()),
+        json!({
+            "test": "tests/test_units.py::test_counted",
+            "framework": "hypothesis",
+            "cases": 120,
+            "budget": 1000,
+        })
+    );
+    assert_eq!(
+        recorded.findings[3].title,
+        "`test_uncounted` pins its own case count, not as a literal; `--cases` does not apply \
+         to it"
+    );
+    assert_eq!(result.status, CheckStatus::Fail);
+    assert_eq!(
+        format!("{:?}", result.metrics),
+        r#"{"falsified": 2.0, "missing": 1.0, "properties": 3.0}"#
+    );
 }

@@ -11,14 +11,15 @@
 
 mod counterexample;
 mod frameworks;
+mod pin;
 
 use std::collections::BTreeSet;
 
 use cupel_core::syntax::{TestCase, TestFrames};
 use cupel_core::{
-    Availability, CostClass, Ctx, Error, EventSink, FactKind, LangId, Langs, ProduceCtx, Producer,
-    ProducerId, PropertyOutcome, PropertyResult, PropertyResults, Result, RunOptions, Runner,
-    Scope, TestOutcome, TestResult, TestResults, TestSelection, names_case,
+    Availability, CostClass, Ctx, Error, EventSink, FactKind, LangId, Langs, Pinned, ProduceCtx,
+    Producer, ProducerId, PropertyOutcome, PropertyResult, PropertyResults, Result, RunOptions,
+    Runner, Scope, TestOutcome, TestResult, TestResults, TestSelection, names_case,
 };
 
 use crate::toolchain;
@@ -107,7 +108,10 @@ impl Producer<PropertyResults> for PropertyEngine {
         produced.properties = cases
             .iter()
             .zip(ids)
-            .map(|(case, id)| result(case, id, &ran.results.tests))
+            .map(|(case, id)| PropertyResult {
+                pinned: pinned(ctx, case),
+                ..result(case, id, &ran.results.tests)
+            })
             .collect();
         Ok(produced)
     }
@@ -263,5 +267,13 @@ fn result(case: &Case<'_>, id: Option<String>, tests: &[TestResult]) -> Property
         outcome,
         counterexample,
         seeded: case.framework.seeded,
+        pinned: None,
     }
+}
+
+/// The case count `case` sets itself, read from its file; `None` when it sets none or the file
+/// cannot be read.
+fn pinned(ctx: &ProduceCtx, case: &Case<'_>) -> Option<Pinned> {
+    let text = std::fs::read_to_string(ctx.ctx.root.join(case.file)).ok()?;
+    (case.framework.pinned)(&text, &case.test.span)
 }

@@ -16,10 +16,13 @@
             "description": "Evidence of `property.falsified`.",
             "properties": {
               "cases": {
-                "description": "The generated cases it was asked to pass.",
+                "description": "The generated cases it ran: its own pinned count, else the run's budget; null when it\npins a count that is not a literal.",
                 "format": "uint32",
                 "minimum": 0,
-                "type": "integer"
+                "type": [
+                  "integer",
+                  "null"
+                ]
               },
               "counterexample": {
                 "description": "The framework's shrunk failing input, as it printed it; null when it failed without one.",
@@ -55,8 +58,7 @@
             },
             "required": [
               "framework",
-              "runner",
-              "cases"
+              "runner"
             ],
             "title": "Falsified",
             "type": "object"
@@ -113,6 +115,50 @@
           },
           "kind": "property.missing",
           "summary": "A public function that takes arguments, in a file whose tests hold no property test."
+        },
+        {
+          "action": "review",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `property.cases-pinned`.",
+            "properties": {
+              "budget": {
+                "description": "The run's case budget, which applies only to tests that pin no count.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "cases": {
+                "description": "The count the test sets itself; null when a variable or an expression gives it.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "framework": {
+                "description": "The framework that generated its inputs, such as `fast-check`.",
+                "type": "string"
+              },
+              "test": {
+                "description": "The test's ID, as its runner names it; null when no test the runner reported is the case.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "framework",
+              "budget"
+            ],
+            "title": "CasesPinned",
+            "type": "object"
+          },
+          "kind": "property.cases-pinned",
+          "summary": "A property test that sets its own case count, which it runs at: the run's case budget (`--cases`) does not apply to it."
         }
       ],
       "id": "gen.property",

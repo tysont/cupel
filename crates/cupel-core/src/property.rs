@@ -14,7 +14,8 @@ pub struct PropertyResults {
     pub runner: ProducerId,
     /// The run's seed, handed to every framework that takes one.
     pub seed: u64,
-    /// The generated cases each property was asked to pass.
+    /// The generated cases each property was asked to pass; a property that pins its own count
+    /// runs that count instead (`PropertyResult::pinned`, ADR-183).
     pub cases: u32,
     /// The language's property frameworks, in the toolchain table's order.
     pub frameworks: Vec<String>,
@@ -24,7 +25,7 @@ pub struct PropertyResults {
 
 impl Fact for PropertyResults {
     const KIND: FactKind = FactKind::PropertyResults;
-    const VERSION: u32 = 1;
+    const VERSION: u32 = 2;
 }
 
 inventory::submit!(FactEntry::execution::<PropertyResults>("property-results"));
@@ -46,6 +47,25 @@ pub struct PropertyResult {
     pub counterexample: Option<String>,
     /// Whether the framework took the run's seed (quickcheck takes none).
     pub seeded: bool,
+    /// The case count the test sets itself, which wins over the run's budget (ADR-183); `None`
+    /// when it sets none.
+    pub pinned: Option<Pinned>,
+}
+
+impl PropertyResult {
+    /// The cases the property ran at under a run whose budget is `budget`: its own pinned count,
+    /// else the budget; `None` when it pins a count that is not a literal.
+    pub fn cases(&self, budget: u32) -> Option<u32> {
+        self.pinned.map_or(Some(budget), |pinned| pinned.cases)
+    }
+}
+
+/// A case count a property test sets itself, such as fast-check's `{ numRuns: 120 }`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct Pinned {
+    /// The count, when the test writes it as a literal; `None` when a variable or an expression
+    /// gives it.
+    pub cases: Option<u32>,
 }
 
 /// How a property test ended.

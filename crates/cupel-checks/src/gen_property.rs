@@ -38,8 +38,23 @@ struct Falsified {
     counterexample: Option<String>,
     /// The seed the framework was given; null for a framework that takes none.
     seed: Option<u64>,
-    /// The generated cases it was asked to pass.
-    cases: u32,
+    /// The generated cases it ran: its own pinned count, else the run's budget; null when it
+    /// pins a count that is not a literal.
+    cases: Option<u32>,
+}
+
+/// Evidence of `property.cases-pinned`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct CasesPinned {
+    /// The test's ID, as its runner names it; null when no test the runner reported is the case.
+    test: Option<String>,
+    /// The framework that generated its inputs, such as `fast-check`.
+    framework: String,
+    /// The count the test sets itself; null when a variable or an expression gives it.
+    cases: Option<u32>,
+    /// The run's case budget, which applies only to tests that pin no count.
+    budget: u32,
 }
 
 /// Evidence of `property.missing`.
@@ -90,6 +105,12 @@ impl GenProperty {
                         "A public function that takes arguments, in a file whose tests hold no \
                          property test.",
                     ),
+                    kind::<CasesPinned>(
+                        "property.cases-pinned",
+                        ActionKind::Review,
+                        "A property test that sets its own case count, which it runs at: the \
+                         run's case budget (`--cases`) does not apply to it.",
+                    ),
                 ],
                 metrics: ["properties", "falsified", "missing"]
                     .into_iter()
@@ -139,6 +160,11 @@ impl Check for GenProperty {
             .filter(|property| property.outcome.is_failure())
             .map(|property| self.falsified(properties, property))
             .collect();
+        let pinned = properties
+            .properties
+            .iter()
+            .filter(|property| property.pinned.is_some())
+            .map(|property| self.pinned(properties, property));
         let missing: Vec<Finding> = symbols
             .symbols
             .iter()
@@ -156,9 +182,10 @@ impl Check for GenProperty {
             ("falsified", falsified.len()),
             ("missing", missing.len()),
         ];
-        let reported = (falsified.len() + missing.len()) as u64;
         let failed = !falsified.is_empty();
-        for finding in falsified.into_iter().chain(missing) {
+        let findings: Vec<Finding> = falsified.into_iter().chain(pinned).chain(missing).collect();
+        let reported = findings.len() as u64;
+        for finding in findings {
             sink.emit(Event::Finding(Box::new(finding)));
         }
         Ok(outcome::result(
@@ -228,11 +255,42 @@ impl GenProperty {
                 runner: run.runner.to_string(),
                 counterexample: property.counterexample.clone(),
                 seed: property.seeded.then_some(run.seed),
-                cases: run.cases,
+                cases: property.cases(run.cases),
             }),
             repro: format!(
                 "cupel check --only {ID} --paths {} --seed {} --cases {}",
                 property.file, run.seed, run.cases
+            ),
+        };
+        self.finding(said, &property.file, &property.span)
+    }
+
+    fn pinned(&self, run: &PropertyResults, property: &PropertyResult) -> Finding {
+        let name = &property.name;
+        let cases = property.cases(run.cases);
+        let count = cases.map_or_else(
+            || "case count, not as a literal".to_owned(),
+            |cases| format!("{cases} cases"),
+        );
+        let said = Said {
+            kind: "property.cases-pinned",
+            subject: format!("{}::{name}", property.file),
+            severity: Severity::Info,
+            confidence: 1.0,
+            title: format!("`{name}` pins its own {count}; `--cases` does not apply to it"),
+            summary: format!(
+                "Leave the count if `{name}` needs it; remove it for the run's case budget to \
+                 apply."
+            ),
+            evidence: evidence(&CasesPinned {
+                test: property.test.clone(),
+                framework: property.framework.clone(),
+                cases,
+                budget: run.cases,
+            }),
+            repro: format!(
+                "cupel check --only {ID} --paths {} --seed {}",
+                property.file, run.seed
             ),
         };
         self.finding(said, &property.file, &property.span)

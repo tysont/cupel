@@ -1,10 +1,11 @@
 // ABOUTME: The property frameworks the engine budgets (ADR-095 §3): the runners each runs under, whether it takes the
-// ABOUTME: seed, the environment, arguments, and files that hand it the seed and case budget, and its report parser.
+// ABOUTME: seed, what hands it the seed and case budget, its report parser, and how a case pins its own count.
 use std::path::{Path, PathBuf};
 
-use cupel_core::{Error, ProduceCtx, ProducerId, Result, RunOptions};
+use cupel_core::syntax::Span;
+use cupel_core::{Error, Pinned, ProduceCtx, ProducerId, Result, RunOptions};
 
-use super::counterexample;
+use super::{counterexample, pin};
 
 /// What a property run hands every framework: the run's seed and the case budget.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -23,6 +24,9 @@ pub struct Framework {
     pub seeded: bool,
     /// The shrunk counterexample in a failing test's output.
     pub counterexample: fn(&str) -> Option<String>,
+    /// The case count a case (its span in its file's text) sets itself, which wins over the
+    /// budget (ADR-183).
+    pub pinned: fn(&str, &Span) -> Option<Pinned>,
     /// The settings that hand it the budget under `runner`.
     settings: fn(&ProduceCtx, &ProducerId, &Budget) -> Result<RunOptions>,
 }
@@ -41,6 +45,7 @@ pub const FRAMEWORKS: [Framework; 4] = [
         runners: None,
         seeded: true,
         counterexample: counterexample::proptest,
+        pinned: pin::proptest,
         settings: |_, _, budget| {
             Ok(environment(&[
                 ("PROPTEST_CASES", budget.cases.to_string()),
@@ -54,6 +59,7 @@ pub const FRAMEWORKS: [Framework; 4] = [
         runners: None,
         seeded: false,
         counterexample: counterexample::quickcheck,
+        pinned: pin::quickcheck,
         settings: |_, _, budget| {
             Ok(environment(&[
                 ("QUICKCHECK_TESTS", budget.cases.to_string()),
@@ -73,6 +79,7 @@ pub const FRAMEWORKS: [Framework; 4] = [
         }),
         seeded: true,
         counterexample: counterexample::hypothesis,
+        pinned: pin::hypothesis,
         settings: hypothesis,
     },
     Framework {
@@ -84,6 +91,7 @@ pub const FRAMEWORKS: [Framework; 4] = [
         }),
         seeded: true,
         counterexample: counterexample::fast_check,
+        pinned: pin::fast_check,
         settings: fast_check,
     },
 ];

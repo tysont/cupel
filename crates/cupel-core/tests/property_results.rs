@@ -1,9 +1,9 @@
 // ABOUTME: Tests for the `PropertyResults` payload (ADR-095): its fact kind and versioned schema, its shape as
-// ABOUTME: JSON, the outcome spellings, and the case budget a run's depth or `--cases` gives the property engine.
+// ABOUTME: JSON, the outcome spellings, the case budget a run's depth or `--cases` gives, and a pinned count.
 use cupel_core::syntax::Span;
 use cupel_core::{
-    CostClass, FactKind, Focus, ProducerId, PropertyOutcome, PropertyResult, PropertyResults,
-    schema,
+    CostClass, FactKind, Focus, Pinned, ProducerId, PropertyOutcome, PropertyResult,
+    PropertyResults, schema,
 };
 use serde_json::json;
 
@@ -22,6 +22,7 @@ fn falsified() -> PropertyResult {
         outcome: PropertyOutcome::Falsified,
         counterexample: Some("n = 100000".to_owned()),
         seeded: true,
+        pinned: Some(Pinned { cases: Some(120) }),
     }
 }
 
@@ -38,7 +39,7 @@ fn property_results_is_an_execution_fact_with_a_versioned_schema() {
         (
             "property-results",
             false,
-            Some(1),
+            Some(2),
             Some(json!(
                 "https://tysont.github.io/cupel/schema/v1/fact/property-results.json"
             )),
@@ -72,6 +73,7 @@ fn property_results_serialize_every_field() {
                 "outcome": "falsified",
                 "counterexample": "n = 100000",
                 "seeded": true,
+                "pinned": {"cases": 120},
             }],
         })
     );
@@ -128,4 +130,14 @@ fn the_case_budget_is_cases_else_one_per_depth() {
     assert_eq!(budget(CostClass::Exhaustive, None), 100_000);
     assert_eq!(budget(CostClass::Deep, Some(7)), 7);
     assert_eq!(Focus::default().cases, None);
+}
+
+#[test]
+fn a_property_runs_at_its_pinned_count_else_the_budget() {
+    let mut property = falsified();
+    assert_eq!(property.cases(1000), Some(120));
+    property.pinned = Some(Pinned { cases: None });
+    assert_eq!(property.cases(1000), None);
+    property.pinned = None;
+    assert_eq!(property.cases(1000), Some(1000));
 }

@@ -113,7 +113,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 
 | ID | Measures | Finding kinds | Cost | Build/wrap |
 |---|---|---|---|---|
-| `gen.property` | Runs existing property tests (Hypothesis, proptest/quickcheck, fast-check, jqwik) with seed and budget; reports counterexamples minimized; can scaffold property stubs from signatures (`--scaffold`, writes only with `--write`) | `property.falsified`, `property.missing` | standard/deep | wrap |
+| `gen.property` | Runs existing property tests (Hypothesis, proptest/quickcheck, fast-check, jqwik) with seed and budget; reports counterexamples minimized; can scaffold property stubs from signatures (`--scaffold`, writes only with `--write`); a test that sets its own case count runs at it (ADR-183) | `property.falsified`, `property.missing`, `property.cases-pinned` | standard/deep | wrap |
 | `gen.fuzz` | Coverage-guided fuzzing (cargo-fuzz, libFuzzer, AFL++, Go native, Jazzer) with time budget; reproduces crashes | `fuzz.crash`, `fuzz.timeout`, `fuzz.target-missing` | deep/exhaustive | wrap |
 | `gen.differential` | Old vs new (or impl vs registered oracle) on generated inputs; requires a **verified** oracle for tier 4, else tier 3 | `diff.divergence` (with minimized input, both outputs) | deep | build harness + wrap generators |
 | `gen.metamorphic` | User-declared metamorphic relations in config (`sort(x) == sort(shuffle(x))`); runs on generated inputs | `metamorphic.violated` | deep | build |

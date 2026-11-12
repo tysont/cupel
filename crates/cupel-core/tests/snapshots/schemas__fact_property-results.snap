@@ -10,7 +10,7 @@ expression: pretty(&schema)
   "type": "object",
   "properties": {
     "cases": {
-      "description": "The generated cases each property was asked to pass.",
+      "description": "The generated cases each property was asked to pass; a property that pins its own count\nruns that count instead (`PropertyResult::pinned`, ADR-183).",
       "type": "integer",
       "format": "uint32",
       "minimum": 0
@@ -47,8 +47,26 @@ expression: pretty(&schema)
     "runner",
     "seed"
   ],
-  "x-cupel-fact-version": 1,
+  "x-cupel-fact-version": 2,
   "$defs": {
+    "Pinned": {
+      "description": "A case count a property test sets itself, such as fast-check's `{ numRuns: 120 }`.",
+      "type": "object",
+      "properties": {
+        "cases": {
+          "description": "The count, when the test writes it as a literal; `None` when a variable or an expression\ngives it.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "cases"
+      ]
+    },
     "ProducerId": {
       "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
       "type": "string"
@@ -106,6 +124,17 @@ expression: pretty(&schema)
         "outcome": {
           "$ref": "#/$defs/PropertyOutcome"
         },
+        "pinned": {
+          "description": "The case count the test sets itself, which wins over the run's budget (ADR-183); `None`\nwhen it sets none.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Pinned"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "seeded": {
           "description": "Whether the framework took the run's seed (quickcheck takes none).",
           "type": "boolean"
@@ -127,6 +156,7 @@ expression: pretty(&schema)
         "framework",
         "name",
         "outcome",
+        "pinned",
         "seeded",
         "span",
         "test"
