@@ -184,7 +184,7 @@ impl Planner<'_, '_> {
     /// The mutants of `site` in `symbol`, whose file's text is `source`.
     fn mutants(&self, symbol: &Symbol<'_>, site: &Site, source: &str) -> Vec<Planned> {
         let selection = self.selection(&symbol.def.file, site);
-        let equivalent = equivalent::reason(source, site.operator, &site.span);
+        let equivalent = equivalent::reason(source, site, &symbol.def.span);
         replacements(source, site)
             .into_iter()
             .map(|(to, mutated)| {

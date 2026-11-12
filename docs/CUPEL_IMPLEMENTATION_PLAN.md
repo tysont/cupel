@@ -2523,6 +2523,14 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-mutate/tests/phases.rs`: the file-copy breakdown builds once, in the first slot;
     - `cupel-store/tests/store.rs`: baselines stored by suite hash and replaced.
 
+- **Item 3, equivalent mutants by pattern** (2026-11-11, ADR-004).
+  - The gap: `equivalent.rs` marked only an operand that is both operators' identity, so two of the patterns behind 5 of 8 survivors in Molten's `signing.ts` counted against the score.
+  - Now `equivalent::reason` reads the site's enclosing symbol too and marks two more patterns `mutant.equivalent?`, left out of the score as before:
+    - a mutant whose site is the whole fourth argument (`extractable`) of a `subtle.importKey(…)` call, in a function whose text names neither `exportKey` nor `wrapKey`. The key is not tracked: any export or wrap in the function, of any key, keeps the mutant, which is conservative and needs no data flow;
+    - a mutant whose site is the whole initializer of a `let`, `let mut`, or `:=` declaration (block-scoped, so no path outside the block reads it), of a variable named nowhere in the symbol before it, when the next line naming it is a plain assignment `x = …` at the declaration's indentation and bracket depth, whose value (to the statement's end) does not read it. A line at a lower indentation (the block ends) or any other mention first keeps the mutant.
+  - Out of scope (the plan's other patterns): a reassignment on both branches of an `if`, an initial value read only on a path that returns (`signing.ts:165`), comparator and rank-map ties, typed-array writes past the end. Python's keyword-less `x = 0` and JavaScript's `var` are not declarations here (function scope, hoisting).
+  - Tests: `cupel-mutate` `equivalent.rs` unit tests: a multi-line and a one-line `importKey` flag marked; not with `exportKey` or `wrapKey` in the function, another method, or another argument; a TypeScript, typed, Rust, and Go initializer marked; not when read first, assigned on one path, braceless-indented, read by the assignment (one line or several), compound-assigned, out of its block, named before, not declared, never reassigned, or when the site is only part of the initializer.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
