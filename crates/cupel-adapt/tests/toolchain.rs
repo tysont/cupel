@@ -1,7 +1,8 @@
 // ABOUTME: Tests for the toolchain table: every row loads and is consistent, and selection over the
 // ABOUTME: detect fixtures and scratch trees yields ADR-021's default commands for each root.
+mod support;
+
 use std::collections::BTreeSet;
-use std::fs;
 use std::path::{Path, PathBuf};
 
 use cupel_adapt::toolchain::{self, Commands, Root};
@@ -174,20 +175,9 @@ fn each_monorepo_root_gets_its_own_ecosystems_commands() {
     );
 }
 
-/// A temporary directory holding `files`, each a (relative path, text) pair.
-fn tree(files: &[(&str, &str)]) -> tempfile::TempDir {
-    let dir = tempfile::tempdir().unwrap();
-    for (relative, text) in files {
-        let path = dir.path().join(relative);
-        fs::create_dir_all(path.parent().unwrap()).unwrap();
-        fs::write(path, text).unwrap();
-    }
-    dir
-}
-
 #[test]
 fn go_commands_cover_the_packages_project_info_reports() {
-    let dir = tree(&[]);
+    let dir = support::repository(&[]);
     let got = commands("go", dir.path(), &[], &["./api/...", "./worker/..."]);
     assert_eq!(
         got.test.as_deref(),
@@ -201,7 +191,7 @@ fn go_commands_cover_the_packages_project_info_reports() {
 
 #[test]
 fn yarn_and_node_test_are_chosen_without_other_signals() {
-    let dir = tree(&[("package.json", "{\"name\": \"plain\"}"), ("yarn.lock", "")]);
+    let dir = support::repository(&[("package.json", "{\"name\": \"plain\"}"), ("yarn.lock", "")]);
     let got = commands("javascript", dir.path(), &[], &[]);
     assert_eq!(
         got,
@@ -219,7 +209,7 @@ fn vitest_root(script: Option<&str>) -> tempfile::TempDir {
         format!("\"scripts\": {{\"test\": \"{script}\"}}, ")
     });
     let package = format!("{{{scripts}\"devDependencies\": {{\"vitest\": \"1\"}}}}");
-    tree(&[("package.json", package.as_str()), ("pnpm-lock.yaml", "")])
+    support::repository(&[("package.json", package.as_str()), ("pnpm-lock.yaml", "")])
 }
 
 #[test]
@@ -267,7 +257,7 @@ fn a_runner_its_roots_test_script_defers_is_not_detected_at_run_time() {
 
 #[test]
 fn a_member_dependency_selects_the_runner_and_package_manager_fields_select_the_launcher() {
-    let dir = tree(&[
+    let dir = support::repository(&[
         ("package.json", "{\"packageManager\": \"pnpm@9.1.0\"}"),
         (
             "libs/a/package.json",
@@ -287,7 +277,7 @@ fn a_member_dependency_selects_the_runner_and_package_manager_fields_select_the_
 
 #[test]
 fn a_python_bench_needs_pytest_and_pytest_benchmark_alone_does_not_mean_pytest() {
-    let dir = tree(&[("requirements-dev.txt", "pytest-benchmark==4\n")]);
+    let dir = support::repository(&[("requirements-dev.txt", "pytest-benchmark==4\n")]);
     let got = commands("python", dir.path(), &[], &[]);
     assert_eq!(got.test.as_deref(), Some("python -m unittest"));
     assert_eq!(got.bench, None);

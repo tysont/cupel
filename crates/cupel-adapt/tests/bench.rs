@@ -254,16 +254,22 @@ fn detected(id: &str, lang: &str, ctx: &cupel_core::Ctx) -> bool {
 }
 
 #[test]
-fn a_configured_root_detects_its_bench_producer_in_its_own_directory() {
-    let dir = repository(&[
+fn a_root_s_bench_producers_are_detected_in_its_own_directory_and_hyperfine_at_the_repository_s() {
+    let dir = support::repository(&[
         ("Cargo.toml", "[workspace]\n"),
         (
             "crates/app/Cargo.toml",
             "[package]\nname = \"app\"\n\n[dev-dependencies]\ncriterion = \"0.5\"\n",
         ),
+        (
+            "cupel.toml",
+            "[lang.javascript]\nbench_commands = [\"node bench.js\"]\n",
+        ),
+        ("sandbox/bench.js", ""),
     ]);
     let unrooted = cupel_core::Ctx::new(dir.path().to_path_buf());
-    // The root's own Cargo.toml names criterion; without [roots], the repository root's decides.
+    // criterion is named by the root's own Cargo.toml, so only the rooted run sees it; hyperfine's
+    // commands are in the repository root's cupel.toml, which every run reads.
     assert_eq!(
         [
             detected(
@@ -272,23 +278,6 @@ fn a_configured_root_detects_its_bench_producer_in_its_own_directory() {
                 &rooted(dir.path(), "crates/app", "rust")
             ),
             detected("tool.criterion", "rust", &unrooted),
-        ],
-        [true, false]
-    );
-}
-
-#[test]
-fn hyperfine_is_detected_by_the_repository_root_s_cupel_toml_whatever_the_roots() {
-    let dir = repository(&[
-        (
-            "cupel.toml",
-            "[lang.javascript]\nbench_commands = [\"node bench.js\"]\n",
-        ),
-        ("sandbox/bench.js", ""),
-    ]);
-    let unrooted = cupel_core::Ctx::new(dir.path().to_path_buf());
-    assert_eq!(
-        [
             detected(
                 "tool.hyperfine",
                 "javascript",
@@ -296,17 +285,6 @@ fn hyperfine_is_detected_by_the_repository_root_s_cupel_toml_whatever_the_roots(
             ),
             detected("tool.hyperfine", "javascript", &unrooted),
         ],
-        [true, true]
+        [true, false, true, true]
     );
-}
-
-/// A temporary repository holding `files`, each a path and its contents.
-fn repository(files: &[(&str, &str)]) -> tempfile::TempDir {
-    let dir = tempfile::tempdir().unwrap();
-    for (path, contents) in files {
-        let path = dir.path().join(path);
-        fs::create_dir_all(path.parent().unwrap()).unwrap();
-        fs::write(path, contents).unwrap();
-    }
-    dir
 }

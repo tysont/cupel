@@ -135,3 +135,14 @@ pub fn git(dir: &Path, args: &[&str]) -> String {
     assert!(output.status.success(), "git {args:?}");
     String::from_utf8(output.stdout).unwrap().trim().to_owned()
 }
+
+/// A temporary directory holding `files`, each a (relative path, text) pair.
+pub fn repository(files: &[(&str, &str)]) -> tempfile::TempDir {
+    let dir = tempfile::tempdir().unwrap();
+    for (relative, text) in files {
+        let path = dir.path().join(relative);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(path, text).unwrap();
+    }
+    dir
+}
