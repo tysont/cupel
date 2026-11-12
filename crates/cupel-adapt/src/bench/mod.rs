@@ -24,7 +24,7 @@ use cupel_core::{
     Scope, ToolId, ToolProbe, output_tail,
 };
 
-use crate::runner::{installed, probe, suite_roots};
+use crate::runner::{installed, probe, run_dirs, suite_roots};
 use crate::{toolchain, tree};
 
 /// What differs between bench tools.
@@ -225,8 +225,16 @@ impl Producer<BenchSamples> for BenchProducer {
         (self.0.availability)(self.0, ctx, &self.1)
     }
 
+    /// Detected where it measures: in a directory its language's tests run in (the configured
+    /// roots, else the repository root) for a tool that measures each root, else at the
+    /// repository root.
     fn detected(&self, ctx: &Ctx) -> bool {
-        toolchain::detects(&self.id(), &ctx.root)
+        if !self.0.per_root {
+            return toolchain::detects(&self.id(), &ctx.root);
+        }
+        run_dirs(ctx, &self.languages())
+            .iter()
+            .any(|dir| toolchain::detects(&self.id(), dir))
     }
 
     fn tool(&self, ctx: &Ctx) -> Option<ToolProbe> {

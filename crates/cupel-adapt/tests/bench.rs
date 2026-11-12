@@ -238,3 +238,55 @@ fn a_command_hyperfine_cannot_run_is_a_failed_run() {
     let detail = samples.runs[0].detail.as_deref().unwrap();
     assert!(detail.contains("non-zero exit code"), "{detail}");
 }
+
+/// A context at `dir` whose `[roots]` names `path` of `lang`.
+fn rooted(dir: &std::path::Path, path: &str, lang: &str) -> cupel_core::Ctx {
+    let mut ctx = cupel_core::Ctx::new(dir.to_path_buf());
+    ctx.roots.push(cupel_core::config::RootConfig {
+        path: path.to_owned(),
+        lang: LangId::from(lang),
+    });
+    ctx
+}
+
+fn detected(id: &str, lang: &str, ctx: &cupel_core::Ctx) -> bool {
+    support::producer(support::shared_registry(), FactKind::BenchSamples, id, lang).detected(ctx)
+}
+
+#[test]
+fn a_configured_root_detects_its_bench_producer_in_its_own_directory() {
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(dir.path().join("Cargo.toml"), "[workspace]\n").unwrap();
+    fs::create_dir_all(dir.path().join("crates/app")).unwrap();
+    fs::write(
+        dir.path().join("crates/app/Cargo.toml"),
+        "[package]\nname = \"app\"\n\n[dev-dependencies]\ncriterion = \"0.5\"\n",
+    )
+    .unwrap();
+    let ctx = rooted(dir.path(), "crates/app", "rust");
+    assert!(
+        detected("tool.criterion", "rust", &ctx),
+        "the root's own Cargo.toml names criterion"
+    );
+    assert!(
+        !detected(
+            "tool.criterion",
+            "rust",
+            &cupel_core::Ctx::new(dir.path().to_path_buf())
+        ),
+        "without [roots], the repository root's Cargo.toml decides"
+    );
+}
+
+#[test]
+fn hyperfine_is_detected_by_the_repository_root_s_cupel_toml_whatever_the_roots() {
+    let dir = tempfile::tempdir().unwrap();
+    fs::write(
+        dir.path().join("cupel.toml"),
+        "[lang.javascript]\nbench_commands = [\"node bench.js\"]\n",
+    )
+    .unwrap();
+    fs::create_dir_all(dir.path().join("sandbox")).unwrap();
+    let ctx = rooted(dir.path(), "sandbox", "javascript");
+    assert!(detected("tool.hyperfine", "javascript", &ctx));
+}

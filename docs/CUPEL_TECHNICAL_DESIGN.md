@@ -827,6 +827,8 @@ Producers are registered per language in a **toolchain table** in `cupel-adapt`,
 | `java` (ADR-108) | Maven Surefire, Gradle → JUnit XML | JaCoCo through Maven or Gradle → JaCoCo XML | — | none (module-graph fallback) | — |
 | `clojure` (ADR-109) | `clojure.test` through the Clojure CLI → JUnit XML | Cloverage → lcov | — | none (module-graph fallback) | — |
 
+A producer's detection rules are judged where it runs: a runner's, a coverage producer's companion runner's, and a bench producer's that measures each root (criterion, pytest-benchmark) in each configured root of its language, or the repository root without `[roots]`; hyperfine's in the repository root, whose `cupel.toml` lists its commands.
+
 Producers ingest existing reports when fresher than the sources (mtime and content hash), avoiding regeneration.
 
 ### 8.8 Fact store

@@ -2555,6 +2555,12 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-store/tests/store.rs`: parsed facts read by build and file, replaced by name, and dropped by another build's write (failed first: no `parsed_facts`);
     - `cupel-cli` `shelf.rs`: a kept value is stored deflated and loads back as kept (failed first: stored at full size).
 
+- **Item 1, bench detection per configured root** (2026-11-12, as B17).
+  - The gap: a bench producer was detected by its rules at the repository root (`bench/mod.rs` `detected`), so a configured root whose own manifest names its bench tool (a `crates/app/Cargo.toml` with criterion) did not detect it.
+  - Now a bench producer that measures each root (criterion, pytest-benchmark, go bench) is detected in the directories its language's tests run in (`runner::run_dirs`): each configured root of its language, or the repository root without `[roots]`. hyperfine, which measures from the repository root, is still detected there, by the `cupel.toml` that lists its commands.
+  - `tool.bench-script` (`scripts.bench`) is a toolchain row with no producer: `init` and `doctor` choose it per root already (`Row::select`), so nothing else read it at the repository root.
+  - Tests: `cupel-adapt/tests/bench.rs`: a configured root detects criterion from its own `Cargo.toml` and the repository root alone does not (failed first: not detected); hyperfine is detected by the repository root's `cupel.toml` with `[roots]` naming another directory.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
