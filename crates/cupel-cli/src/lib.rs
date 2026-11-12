@@ -36,6 +36,7 @@ mod resources;
 mod routes;
 mod run;
 mod scaffold;
+mod scope;
 mod serve;
 mod session;
 mod shelf;

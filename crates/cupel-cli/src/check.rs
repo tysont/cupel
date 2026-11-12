@@ -1,10 +1,10 @@
 // ABOUTME: The `check` verb and the pipeline `survey` shares: walk the tree once, resolve the scope, select
 // ABOUTME: checks, run the scheduler (or plan it), assemble the envelope, and grade it with the gate.
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use cupel_core::config::{Config, GateRuleSpec};
-use cupel_core::git::{ChangeKind, Git, Side};
+use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
     BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, FactKind, Finding, GateReference,
@@ -18,9 +18,9 @@ use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::install::{self, Permission};
 use crate::oracle::select::Selected;
-use crate::project;
 use crate::resources;
 use crate::run::{Executions, Invocation, Run, shell_quote};
+use crate::scope;
 use crate::tests_verb;
 
 /// `cupel check`: the envelope of running the selected checks, or of planning them.
@@ -30,7 +30,7 @@ pub fn verb(
     events: &mut dyn EventSink,
 ) -> Result<Envelope, CupelError> {
     let config = invocation.config()?;
-    let (table, rules) = gate_for(&config.file.gate, scope_request(args).mode());
+    let (table, rules) = gate_for(&config.file.gate, scope::scope_request(args).mode());
     if args.gate && rules.is_none() {
         return Err(CupelError::bad_argument(
             "--gate",
@@ -101,16 +101,6 @@ fn rerun(verb: Verb, args: &ScopeArgs) -> String {
     words.join(" ")
 }
 
-pub(crate) fn scope_request(args: &ScopeArgs) -> ScopeRequest {
-    ScopeRequest {
-        changed: args.changed,
-        base: args.base.clone(),
-        head: args.head.clone(),
-        paths: args.paths.clone(),
-        symbols: args.symbols.clone(),
-    }
-}
-
 /// Runs (or, with `dry_run`, plans) the checks `args` select over the scope it names.
 pub fn run(
     invocation: &Invocation<'_>,
@@ -133,17 +123,17 @@ pub(crate) fn run_touching(
     let (run, writer) = (invocation.run, invocation.writer);
     resources::limit_threads(args.jobs);
     let catalog = invocation.catalog();
-    let request = scope_request(args);
-    let scoped = resolve(writer, config, &request, catalog.language_registry())?;
+    let request = scope::scope_request(args);
+    let scoped = scope::resolve(writer, config, &request, catalog.language_registry())?;
     let (info, resolved) = (scoped.info, scoped.files);
     let mut selected = selection(config, args).select(catalog.checks())?;
     let oracle = Selected::choose(writer, config, args.oracle.as_deref(), &mut selected)?;
     let base_files = base_files(catalog.language_registry(), &resolved);
-    let langs = languages_of(
+    let langs = scope::languages_of(
         catalog.language_registry(),
         resolved.files.iter().chain(&base_files),
     );
-    let git = git_info(writer.root(), &resolved);
+    let git = scope::git_info(writer.root(), &resolved);
     let tree = touched.is_none().then_some(scoped.tree);
     let mut job = Job {
         run: run.id(),
@@ -191,7 +181,7 @@ fn scope_info(
         mode: request.mode(),
         files: resolved.files.len() as u64,
         symbols: outcome.symbols,
-        roots: roots(info, &langs),
+        roots: scope::roots(info, &langs),
         languages: langs.into_iter().map(|lang| lang.id).collect(),
     }
 }
@@ -270,35 +260,8 @@ fn touched_or_changed(
 ) -> Result<Option<ChangedLines>, CupelError> {
     match touched {
         Some(lines) => Ok(Some(lines)),
-        None => changed_lines(root, request, resolved),
+        None => scope::changed_lines(root, request, resolved),
     }
-}
-
-/// The lines a range scope changed per file; `None` without a range.
-pub(crate) fn changed_lines(
-    root: &Path,
-    request: &ScopeRequest,
-    resolved: &ResolvedFiles,
-) -> Result<Option<ChangedLines>, CupelError> {
-    let (Some(base), Some(git)) = (&resolved.base, Git::open(root)) else {
-        return Ok(None);
-    };
-    let hunks = git
-        .changed_lines(base, request.head.as_deref(), Side::New)
-        .map_err(|error| {
-            CupelError::bad_argument(
-                if request.changed {
-                    "--changed"
-                } else {
-                    "--base"
-                },
-                None,
-                format!("cannot read the changed lines: {error}"),
-                "Run in a git work tree with git installed, or scope with --paths instead."
-                    .to_owned(),
-            )
-        })?;
-    Ok(Some(hunks))
 }
 
 /// Runs (or, for a dry run, plans) `job`, keeping the test runs it made for the store, and
@@ -334,31 +297,14 @@ fn schedule(
     }
 }
 
-/// A resolved scope: the project roots outside `[scope] exclude`, every file of the walk, and
-/// the files and range changes the request selects from it (ADR-065).
-pub(crate) struct Scoped {
-    pub info: ProjectInfo,
-    pub tree: Vec<String>,
-    pub files: ResolvedFiles,
-}
-
-/// Walks the repository and resolves `request` against the walk.
-pub(crate) fn resolve(
-    writer: &Writer,
-    config: &Config,
-    request: &ScopeRequest,
-    languages: &LanguageRegistry,
-) -> Result<Scoped, CupelError> {
-    let root = writer.root();
-    let exclude = &config.file.scope.exclude;
-    let roots: Vec<_> = config.file.roots.values().cloned().collect();
-    let info = project::detect(writer, exclude, &roots);
-    let tree = cupel_lang::walk_excluding(root, languages, &info, exclude);
-    let mut files = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
-    files
-        .changes
-        .retain(|change| !exclude.excludes(&change.path));
-    Ok(Scoped { info, tree, files })
+/// Per language, how the joint suite run that made its baseline reused its cache (ADR-149 §5),
+/// from the test runs `outcome` kept.
+fn suites_of(outcome: &Outcome) -> BTreeMap<LangId, SuiteReuse> {
+    outcome
+        .test_results
+        .iter()
+        .filter_map(|(lang, results)| Some((lang.clone(), results.reuse.clone()?)))
+        .collect()
 }
 
 /// What `check` (or `survey`) found, before it becomes an envelope.
@@ -368,16 +314,6 @@ pub struct CheckRun {
     /// Per language, what the joint suite run that made its baseline reran and reused.
     suite: BTreeMap<LangId, SuiteReuse>,
     outcome: Outcome,
-}
-
-/// Per language, how the joint suite run that made its baseline reused its cache (ADR-149 §5),
-/// from the test runs `outcome` kept.
-fn suites_of(outcome: &Outcome) -> BTreeMap<LangId, SuiteReuse> {
-    outcome
-        .test_results
-        .iter()
-        .filter_map(|(lang, results)| Some((lang.clone(), results.reuse.clone()?)))
-        .collect()
 }
 
 impl CheckRun {
@@ -477,46 +413,4 @@ fn base_tree(
         })?,
         None => BaseTree::planned(range, &scratch),
     }))
-}
-
-/// The languages that own at least one of `files`, in ID order.
-pub(crate) fn languages_of<'a>(
-    languages: &LanguageRegistry,
-    files: impl Iterator<Item = &'a String>,
-) -> Vec<Lang> {
-    let owning: BTreeSet<_> = files
-        .filter_map(|file| languages.for_path(file))
-        .map(|language| language.id())
-        .collect();
-    languages
-        .langs()
-        .into_iter()
-        .filter(|lang| owning.contains(&lang.id))
-        .collect()
-}
-
-/// The detected project roots of the languages in scope; `.` when none is detected.
-pub(crate) fn roots(info: &ProjectInfo, langs: &[Lang]) -> Vec<String> {
-    let roots: BTreeSet<String> = info
-        .roots
-        .iter()
-        .filter(|root| langs.iter().any(|lang| lang.id == root.lang))
-        .map(|root| root.path.clone())
-        .collect();
-    if roots.is_empty() {
-        vec![".".to_owned()]
-    } else {
-        roots.into_iter().collect()
-    }
-}
-
-/// `run.git`: null outside a work tree or before the first commit.
-pub(crate) fn git_info(root: &Path, resolved: &ResolvedFiles) -> Option<GitInfo> {
-    let head = Git::open(root)?.head();
-    Some(GitInfo {
-        sha: head.sha?,
-        dirty: head.dirty,
-        base: resolved.base.clone(),
-        branch: head.branch,
-    })
 }

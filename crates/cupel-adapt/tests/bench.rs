@@ -255,38 +255,58 @@ fn detected(id: &str, lang: &str, ctx: &cupel_core::Ctx) -> bool {
 
 #[test]
 fn a_configured_root_detects_its_bench_producer_in_its_own_directory() {
-    let dir = tempfile::tempdir().unwrap();
-    fs::write(dir.path().join("Cargo.toml"), "[workspace]\n").unwrap();
-    fs::create_dir_all(dir.path().join("crates/app")).unwrap();
-    fs::write(
-        dir.path().join("crates/app/Cargo.toml"),
-        "[package]\nname = \"app\"\n\n[dev-dependencies]\ncriterion = \"0.5\"\n",
-    )
-    .unwrap();
-    let ctx = rooted(dir.path(), "crates/app", "rust");
-    assert!(
-        detected("tool.criterion", "rust", &ctx),
-        "the root's own Cargo.toml names criterion"
-    );
-    assert!(
-        !detected(
-            "tool.criterion",
-            "rust",
-            &cupel_core::Ctx::new(dir.path().to_path_buf())
+    let dir = repository(&[
+        ("Cargo.toml", "[workspace]\n"),
+        (
+            "crates/app/Cargo.toml",
+            "[package]\nname = \"app\"\n\n[dev-dependencies]\ncriterion = \"0.5\"\n",
         ),
-        "without [roots], the repository root's Cargo.toml decides"
+    ]);
+    let unrooted = cupel_core::Ctx::new(dir.path().to_path_buf());
+    // The root's own Cargo.toml names criterion; without [roots], the repository root's decides.
+    assert_eq!(
+        [
+            detected(
+                "tool.criterion",
+                "rust",
+                &rooted(dir.path(), "crates/app", "rust")
+            ),
+            detected("tool.criterion", "rust", &unrooted),
+        ],
+        [true, false]
     );
 }
 
 #[test]
 fn hyperfine_is_detected_by_the_repository_root_s_cupel_toml_whatever_the_roots() {
+    let dir = repository(&[
+        (
+            "cupel.toml",
+            "[lang.javascript]\nbench_commands = [\"node bench.js\"]\n",
+        ),
+        ("sandbox/bench.js", ""),
+    ]);
+    let unrooted = cupel_core::Ctx::new(dir.path().to_path_buf());
+    assert_eq!(
+        [
+            detected(
+                "tool.hyperfine",
+                "javascript",
+                &rooted(dir.path(), "sandbox", "javascript")
+            ),
+            detected("tool.hyperfine", "javascript", &unrooted),
+        ],
+        [true, true]
+    );
+}
+
+/// A temporary repository holding `files`, each a path and its contents.
+fn repository(files: &[(&str, &str)]) -> tempfile::TempDir {
     let dir = tempfile::tempdir().unwrap();
-    fs::write(
-        dir.path().join("cupel.toml"),
-        "[lang.javascript]\nbench_commands = [\"node bench.js\"]\n",
-    )
-    .unwrap();
-    fs::create_dir_all(dir.path().join("sandbox")).unwrap();
-    let ctx = rooted(dir.path(), "sandbox", "javascript");
-    assert!(detected("tool.hyperfine", "javascript", &ctx));
+    for (path, contents) in files {
+        let path = dir.path().join(path);
+        fs::create_dir_all(path.parent().unwrap()).unwrap();
+        fs::write(path, contents).unwrap();
+    }
+    dir
 }

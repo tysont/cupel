@@ -142,20 +142,25 @@ impl Check for Passing {
     }
 
     fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
-        Ok(CheckResult {
-            id: self.0.id.clone(),
-            status: CheckStatus::Pass,
-            tier: self.0.tier,
-            cost: self.0.cost,
-            score: None,
-            metrics: std::collections::BTreeMap::new(),
-            delta: None,
-            findings: 0,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-            notes: Vec::new(),
-        })
+        Ok(passed(&self.0))
+    }
+}
+
+/// A `pass` of the check `manifest` describes, with nothing measured.
+pub fn passed(manifest: &Manifest) -> CheckResult {
+    CheckResult {
+        id: manifest.id.clone(),
+        status: CheckStatus::Pass,
+        tier: manifest.tier,
+        cost: manifest.cost,
+        score: None,
+        metrics: std::collections::BTreeMap::new(),
+        delta: None,
+        findings: 0,
+        duration_ms: 0,
+        skipped: None,
+        oracle: None,
+        notes: Vec::new(),
     }
 }
 

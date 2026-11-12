@@ -7,7 +7,7 @@ use cupel_core::syntax::{NormTree, SymbolDef, SymbolKey, Symbols};
 use cupel_core::{
     ActionKind, Answer, Check, CheckCtx, CheckId, CheckResult, CheckStatus, ComparedOracle,
     CostClass, Divergence, DivergenceResults, EntryComparison, Event, EventSink, FactKind, Facts,
-    Finding, Manifest, Plan, Result, Scope, Score, Severity, SkipReason, Skipped, Stability, Tier,
+    Finding, Manifest, Plan, Result, Scope, Score, Severity, SkipReason, Stability, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -300,22 +300,7 @@ impl GenDifferential {
 
     /// The check's own skip when the run's oracle is a specification (ADR-094 §3).
     fn skipped(&self) -> CheckResult {
-        let mut result = outcome::result(
-            &self.manifest,
-            CheckStatus::Skipped,
-            None,
-            BTreeMap::new(),
-            0,
-        );
-        result.skipped = Some(Skipped {
-            reason: SkipReason::Unconfigured,
-            fact: None,
-            lang: None,
-            tool: None,
-            see: Some(SEE.to_owned()),
-            est_ms: None,
-        });
-        result
+        outcome::skipped(&self.manifest, SkipReason::Unconfigured, SEE)
     }
 }
 

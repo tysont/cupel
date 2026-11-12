@@ -11,6 +11,7 @@ use crate::check::{self, gate_rules};
 use crate::cli::ScopeArgs;
 use crate::install::Permission;
 use crate::run::Invocation;
+use crate::scope;
 
 /// What `base` stands for in this run's gate, owned.
 pub enum Reference {
@@ -47,7 +48,7 @@ pub fn resolve(
     if !rules.is_some_and(needs_reference) {
         return Reference::Missing(String::new());
     }
-    if args.against.is_none() && check::scope_request(args).has_range() {
+    if args.against.is_none() && scope::scope_request(args).has_range() {
         return base_run(invocation, config, args, rules.unwrap_or_default());
     }
     match compared {
@@ -83,7 +84,7 @@ fn recompute(
     let writer = invocation.writer;
     let languages = invocation.catalog();
     let languages = languages.language_registry();
-    let scoped = check::resolve(writer, config, &check::scope_request(args), languages)
+    let scoped = scope::resolve(writer, config, &scope::scope_request(args), languages)
         .map_err(|error| format!("the range did not resolve: {error}"))?;
     let commit = scoped
         .files
@@ -108,7 +109,7 @@ fn recompute(
     let touched = git
         .changed_lines(
             &commit,
-            check::scope_request(args).head.as_deref(),
+            scope::scope_request(args).head.as_deref(),
             Side::Old,
         )
         .map_err(|error| format!("the base's changed lines could not be read: {error}"))?;

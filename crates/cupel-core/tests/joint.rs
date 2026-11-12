@@ -9,10 +9,10 @@ use std::sync::{Arc, Mutex};
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::Symbols;
 use cupel_core::{
-    Availability, Check, CheckCtx, CheckRegistry, CheckResult, CheckStatus, CostClass, Ctx,
-    Estimate, EventSink, FactKind, Facts, Focus, JointProducer, LangId, Langs, Manifest,
-    PerTestMap, Plan, ProduceCtx, Produced, Producer, ProducerId, ProducerRegistry, Result,
-    RunnerInvocation, Scheduler, Scope, TestOutcome, TestResult, TestResults, Upstream, Writer,
+    Availability, Check, CheckCtx, CheckRegistry, CheckResult, CostClass, Ctx, Estimate, EventSink,
+    FactKind, Facts, Focus, JointProducer, LangId, Langs, Manifest, PerTestMap, Plan, ProduceCtx,
+    Produced, Producer, ProducerId, ProducerRegistry, Result, RunnerInvocation, Scheduler, Scope,
+    TestOutcome, TestResult, TestResults, Upstream, Writer,
 };
 
 /// How many times each producer ran.
@@ -233,20 +233,7 @@ impl Check for Passes {
     }
 
     fn run(&self, _: &CheckCtx, _: &Facts, _: &Plan, _: &mut dyn EventSink) -> Result<CheckResult> {
-        Ok(CheckResult {
-            id: self.0.id.clone(),
-            status: CheckStatus::Pass,
-            tier: self.0.tier,
-            cost: self.0.cost,
-            score: None,
-            metrics: BTreeMap::new(),
-            delta: None,
-            findings: 0,
-            duration_ms: 0,
-            skipped: None,
-            oracle: None,
-            notes: Vec::new(),
-        })
+        Ok(support::passed(&self.0))
     }
 }
 

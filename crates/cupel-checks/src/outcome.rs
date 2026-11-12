@@ -2,7 +2,7 @@
 // ABOUTME: or files in scope, and scores combined across languages by sum or by maximum (ADR-041).
 use std::collections::BTreeMap;
 
-use cupel_core::{CheckResult, CheckStatus, Manifest, Plan, Scope, Score};
+use cupel_core::{CheckResult, CheckStatus, Manifest, Plan, Scope, Score, SkipReason, Skipped};
 
 /// One language's result of the check `manifest` describes.
 pub fn result(
@@ -32,6 +32,21 @@ pub fn result(
 pub fn unmeasured(manifest: &Manifest, note: String) -> CheckResult {
     let mut result = result(manifest, CheckStatus::Pass, None, BTreeMap::new(), 0);
     result.notes = vec![note];
+    result
+}
+
+/// The check `manifest` describes, skipped by the check itself for `reason`, with `see` naming
+/// what to read or run instead.
+pub fn skipped(manifest: &Manifest, reason: SkipReason, see: &str) -> CheckResult {
+    let mut result = result(manifest, CheckStatus::Skipped, None, BTreeMap::new(), 0);
+    result.skipped = Some(Skipped {
+        reason,
+        fact: None,
+        lang: None,
+        tool: None,
+        see: Some(see.to_owned()),
+        est_ms: None,
+    });
     result
 }
 

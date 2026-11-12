@@ -15,10 +15,10 @@ use cupel_core::{
 
 use self::impact::Regions;
 use crate::catalog::Catalog;
-use crate::check;
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::run::{Invocation, Run};
+use crate::scope;
 
 /// What `tests --impacted` reads to choose tests per test, where a language can produce it.
 pub const IMPACT_FACT: FactKind = FactKind::PerTestMap;
@@ -38,16 +38,16 @@ pub fn verb(
     }
     let config = invocation.config()?;
     let catalog = invocation.catalog();
-    let request = check::scope_request(args);
-    let scoped = check::resolve(
+    let request = scope::scope_request(args);
+    let scoped = scope::resolve(
         invocation.writer,
         config,
         &request,
         catalog.language_registry(),
     )?;
-    let langs = check::languages_of(catalog.language_registry(), scoped.files.files.iter());
+    let langs = scope::languages_of(catalog.language_registry(), scoped.files.files.iter());
     let mut scope = scope_info(&request, &scoped, &langs);
-    let git = check::git_info(invocation.writer.root(), &scoped.files);
+    let git = scope::git_info(invocation.writer.root(), &scoped.files);
     let mut envelope = if invocation.dry_run {
         invocation.nothing_planned(events)
     } else {
@@ -68,7 +68,7 @@ pub fn verb(
             job: &job,
             ctx: ctx(invocation, config),
             config,
-            hunks: check::changed_lines(invocation.writer.root(), &request, &scoped.files)?,
+            hunks: scope::changed_lines(invocation.writer.root(), &request, &scoped.files)?,
             events,
             within_depth: false,
         };
@@ -146,12 +146,12 @@ fn ctx(invocation: &Invocation<'_>, config: &Config) -> Ctx {
 }
 
 /// The scope as the envelope reports it, before its symbols are counted.
-fn scope_info(request: &ScopeRequest, scoped: &check::Scoped, langs: &[Lang]) -> ScopeInfo {
+fn scope_info(request: &ScopeRequest, scoped: &scope::Scoped, langs: &[Lang]) -> ScopeInfo {
     ScopeInfo {
         mode: request.mode(),
         files: scoped.files.files.len() as u64,
         symbols: 0,
-        roots: check::roots(&scoped.info, langs),
+        roots: scope::roots(&scoped.info, langs),
         languages: langs.iter().map(|lang| lang.id.clone()).collect(),
     }
 }
