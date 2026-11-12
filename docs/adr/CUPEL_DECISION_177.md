@@ -12,4 +12,4 @@ ADR-167 made configured `[roots]` decide which tests run and what is mutated, wh
 When `[roots]` is configured, every check, static checks included, reads only files under some root. A file outside all roots is out of scope entirely: not parsed for findings, not counted in any metric or bound, and not offered by `--changed`. Without `[roots]`, the scope is the whole repository, as before.
 
 ## Consequences
-Module resolution may still read a file outside the roots to resolve an import's target, without reporting on it. `init`'s proposed roots now decide what a first run sees, so its proposals matter more. Not implemented in v0.2.7, whose scope the owner set; it is the next batch's work. Until then Cupel behaves as the amended ADRs say.
+Module resolution may still read a file outside the roots to resolve an import's target, without reporting on it. `init`'s proposed roots now decide what a first run sees, so its proposals matter more. v0.2.7 implements it; the plan's batch v0.2.7 Notes record the implementation and its tests.

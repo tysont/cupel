@@ -12,4 +12,4 @@ ADR-175 made a range's base the touched symbols at the base, and left open how m
 Each ratcheted metric has a tolerance δ. Counts are exact, δ = 0: `tests.weakening`, `static.api-surface`, and dependency cycles. Sampled ratios have δ = 0.02: `tests.mutation.score`. The reference baseline advances only on a passing run on the default branch; a failing run, or any run on another branch, never moves it. Molten's proposed `[gate.changed]` (M8-3 in its `cupel.md`) uses these values.
 
 ## Consequences
-Rules already accept an offset against `base`; the tolerance makes it the default per metric. Not implemented in v0.2.7, whose scope the owner set; it is the next batch's work. Until then Cupel behaves as the amended ADRs say.
+Rules already accept an offset against `base`; the tolerance makes it the default per metric. v0.2.7 implements it; the plan's batch v0.2.7 Notes record the implementation and its tests.

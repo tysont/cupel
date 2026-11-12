@@ -2427,18 +2427,18 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - `cargo binstall --git` in `rust:1.92-bookworm` downloads the release binary (installed in 4 s, no build).
     - The registry publishes stay skipped (ADR-146).
 
-- **Owner rulings** (2026-11-11), answering the questions of Areas 3 to 11. Each is an ADR; v0.2.7 implements those marked so, and the rest are the next batch's work.
+- **Owner rulings** (2026-11-11), answering the questions of Areas 3 to 11. Each is an ADR, and v0.2.7 implements all of them (the owner, 2026-11-11: "Complete all fixes").
   1. A TypeScript package's API is what its `exports` map exposes; with no `exports` map, the `main`/`types` entry and its re-exports. Nothing else is API surface ([ADR-176](adr/CUPEL_DECISION_176.md)).
   2. `[roots]` scope every check, static ones included; files outside all roots are out of scope entirely ([ADR-177](adr/CUPEL_DECISION_177.md)).
   3. Abstractness: exported functions are concrete; interfaces, abstract classes, and type-only exports are abstract ([ADR-178](adr/CUPEL_DECISION_178.md), which records the adaptation from Martin's class-based metric).
   4. A package's coverage and mutation include tests from dependent packages when a per-test map names them; without one, own tests only, and the finding says so ([ADR-179](adr/CUPEL_DECISION_179.md)).
-  5. String and regex mutation operators join the extended set, opt-in, off by default ([ADR-180](adr/CUPEL_DECISION_180.md)). v0.2.7.
-  6. Parsed facts persist in the store keyed by content hash and are read on the no-daemon CLI path; target: Molten's cold-CLI parse within 1.5× the warm daemon's ([ADR-181](adr/CUPEL_DECISION_181.md)). v0.2.7.
-  7. Ratchet tolerance per metric: counts δ = 0, `tests.mutation.score` δ = 0.02; the baseline advances only on a passing default-branch run; M8-3 uses these values ([ADR-182](adr/CUPEL_DECISION_182.md)). M8-3 in `cupel.md` is updated.
-  8. A test that pins its own `numRuns` is respected; `property.cases-pinned` at info names the test and count; `--cases` applies only to unpinned tests ([ADR-183](adr/CUPEL_DECISION_183.md)). v0.2.7.
+  5. String and regex mutation operators join the extended set, opt-in, off by default ([ADR-180](adr/CUPEL_DECISION_180.md)).
+  6. Parsed facts persist in the store keyed by content hash and are read on the no-daemon CLI path; target: Molten's cold-CLI parse within 1.5× the warm daemon's ([ADR-181](adr/CUPEL_DECISION_181.md)).
+  7. Ratchet tolerance per metric: counts δ = 0, `tests.mutation.score` δ = 0.02; the baseline advances only on a passing default-branch run; M8-3 uses these values ([ADR-182](adr/CUPEL_DECISION_182.md)); M8-3 in `cupel.md` is updated.
+  8. A test that pins its own `numRuns` is respected; `property.cases-pinned` at info names the test and count; `--cases` applies only to unpinned tests ([ADR-183](adr/CUPEL_DECISION_183.md)).
   9. Calibration: `toContain`, `toMatch`, and `toMatchObject` are not weak; a loop containing an assertion is table-driven, branching is logic; duplicate setup at ≥ 3 tests sharing ≥ 5 identical normalized setup statements; clones within test files report at info and leave the clone gate ([ADR-184](adr/CUPEL_DECISION_184.md)).
-  10. Mutation's unmutated baseline runs once per package per run, stored by suite hash, reused while the hash is unchanged ([ADR-185](adr/CUPEL_DECISION_185.md)). v0.2.7.
-  11. `tests.flaky` reruns impacted tests only; none impacted, skipped with the reason ([ADR-186](adr/CUPEL_DECISION_186.md)). v0.2.7.
+  10. Mutation's unmutated baseline runs once per package per run, stored by suite hash, reused while the hash is unchanged ([ADR-185](adr/CUPEL_DECISION_185.md)).
+  11. `tests.flaky` reruns impacted tests only; none impacted, skipped with the reason ([ADR-186](adr/CUPEL_DECISION_186.md)).
 
 - **Open, from Area 11** (2026-11-11). Questions for the owner:
   - **What a TypeScript package's API is.**
@@ -2475,7 +2475,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 ### Batch v0.2.7
 
-**Goal:** The owner's v0.2.7 batch (2026-11-11): the fixes v0.2.6 recorded and five of the owner's rulings, then a Molten rerun and `v0.2.7`.
+**Goal:** The owner's v0.2.7 batch (2026-11-11): the fixes v0.2.6 recorded and all eleven of the owner's rulings, then a Molten rerun and `v0.2.7`.
 
 **Status:** in progress.
 
@@ -2493,8 +2493,14 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
 10. **`property.cases-pinned`** ([ADR-183](adr/CUPEL_DECISION_183.md)).
 11. **The mutation baseline once per package, by suite hash** ([ADR-185](adr/CUPEL_DECISION_185.md)).
 12. **`tests.flaky` on impacted tests** ([ADR-186](adr/CUPEL_DECISION_186.md)).
-13. **The Molten rerun:** findings by check, mutation wall time on `packages/shared`, and CLI parse time, before and after, under the v0.2.6 containment rules.
-14. **`v0.2.7`:** tag, verify the release as for 0.2.6, confirm CI green, and report in the agreed format.
+13. **A TypeScript package's API is its entries** ([ADR-176](adr/CUPEL_DECISION_176.md)).
+14. **`[roots]` scope every check** ([ADR-177](adr/CUPEL_DECISION_177.md)).
+15. **Abstractness counts exported functions as concrete** ([ADR-178](adr/CUPEL_DECISION_178.md)).
+16. **Dependent packages' tests through a per-test map** ([ADR-179](adr/CUPEL_DECISION_179.md)).
+17. **Per-metric ratchet tolerance; the baseline advances only on a passing default-branch run** ([ADR-182](adr/CUPEL_DECISION_182.md)).
+18. **Test-quality calibration** ([ADR-184](adr/CUPEL_DECISION_184.md)).
+19. **The Molten rerun:** findings by check, mutation wall time on `packages/shared`, and CLI parse time, before and after, under the v0.2.6 containment rules.
+20. **`v0.2.7`:** tag, verify the release as for 0.2.6, confirm CI green, and report in the agreed format.
 
 #### Notes
 

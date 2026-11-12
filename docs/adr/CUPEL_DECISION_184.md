@@ -15,4 +15,4 @@ Each question had the options its Area recorded; the owner ruled on each.
 4. Clones whose members all lie in test files are reported at info and are excluded from the clone gate (`static.clones.pairs`).
 
 ## Consequences
-Molten's `test.weak-assertion`, `test.logic`, `test.duplicate-setup`, and clone counts drop. Not implemented in v0.2.7, whose scope the owner set; it is the next batch's work. Until then Cupel behaves as the amended ADRs say.
+Molten's `test.weak-assertion`, `test.logic`, `test.duplicate-setup`, and clone counts drop. v0.2.7 implements it; the plan's batch v0.2.7 Notes record the implementation and its tests.

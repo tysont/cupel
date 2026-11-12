@@ -14,4 +14,4 @@ A module's abstractness A is abstract exported members over all exported members
 **Adaptation from Martin's metric.** Martin defined A over the classes of a package (abstract classes and interfaces over all classes), for languages where all behavior lives in classes. In module-based languages most behavior is free functions, so leaving them out reads a module of functions as fully abstract. Counting exported functions as concrete keeps the metric's intent: how much of what a module offers is contract rather than implementation.
 
 ## Consequences
-A, and with it distance and `dep.unstable-abstract`, changes for every module that exports functions. Languages whose exports are all classes are unaffected. Not implemented in v0.2.7, whose scope the owner set; it is the next batch's work. Until then Cupel behaves as the amended ADRs say.
+A, and with it distance and `dep.unstable-abstract`, changes for every module that exports functions. Languages whose exports are all classes are unaffected. v0.2.7 implements it; the plan's batch v0.2.7 Notes record the implementation and its tests.

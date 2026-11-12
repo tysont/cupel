@@ -12,4 +12,4 @@ With per-package roots, a root's coverage and mutation ran only that root's test
 A root's coverage and mutation include tests from roots that depend on it when a per-test map names those tests as covering the code. Without a per-test map, they run the root's own tests only, and each affected finding says so ("own tests only; no per-test map").
 
 ## Consequences
-Producers of per-test maps become worth more on monorepos. Not implemented in v0.2.7, whose scope the owner set; it is the next batch's work. Until then Cupel behaves as the amended ADRs say. v0.2.7's `covering_tests` wording ("all tests (no per-test map)") is the first half of saying so.
+Producers of per-test maps become worth more on monorepos. v0.2.7 implements it; the plan's batch v0.2.7 Notes record the implementation and its tests. v0.2.7's `covering_tests` wording ("all tests (no per-test map)") is the first half of saying so.
