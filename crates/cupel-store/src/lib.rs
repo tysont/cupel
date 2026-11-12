@@ -19,6 +19,8 @@
 //!   per-symbol measurements, and [`Store::symbol_metrics`], which a comparison across symbol
 //!   matches reads back (ADR-131).
 //! - **Facts.** [`Store::put_fact`] and [`Store::fact`] by [`CacheKey::digest`] (design §8.3.6).
+//! - **Parsed facts.** [`Store::record_parsed_facts`] keeps what the parse cache derived from
+//!   each file, by build and file key; [`Store::parsed_facts`] reads a file's back (ADR-188).
 //! - **Symbols.** [`Store::record_symbols`] and [`Store::symbols_new_since`], which answers
 //!   `--since-baseline`.
 //! - **Test results.** [`Store::record_test_results`] indexes a run's `TestResults` per test;
@@ -134,6 +136,16 @@ pub struct StoredFact {
     pub lang: Option<LangId>,
     /// The run that produced it.
     pub run: Option<RunId>,
+    pub payload: Vec<u8>,
+}
+
+/// A value the parse cache derived from one file (ADR-188).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParsedFact {
+    /// The file's key: its path, content hash, language, and grammar.
+    pub key: String,
+    /// The extractor's name.
+    pub name: String,
     pub payload: Vec<u8>,
 }
 
@@ -898,6 +910,37 @@ impl Store {
                 "INSERT OR REPLACE INTO mutation_baselines (suite_hash, elapsed_ms) VALUES (?1, ?2)",
                 params![suite_hash, i64::try_from(elapsed_ms).unwrap_or(i64::MAX)],
             )?;
+            Ok(())
+        })
+    }
+
+    /// The values `build` derived from the file under `key`, by name (ADR-188).
+    pub fn parsed_facts(&self, build: &str, key: &str) -> Result<Vec<(String, Vec<u8>)>> {
+        let mut statement = self.connection.prepare_cached(
+            "SELECT name, payload FROM parsed_facts WHERE build = ?1 AND file_key = ?2 ORDER BY name",
+        )?;
+        let rows = statement.query_map([build, key], |row| Ok((row.get(0)?, row.get(1)?)))?;
+        Ok(rows.collect::<rusqlite::Result<_>>()?)
+    }
+
+    /// Keeps `facts`, derived by `build` in `run`, replacing a value kept under the same file
+    /// and name, and drops every value another build derived: a new build misses every key.
+    pub fn record_parsed_facts(
+        &self,
+        build: &str,
+        run: &RunId,
+        facts: &[ParsedFact],
+    ) -> Result<()> {
+        let run = run.to_string();
+        self.write(|tx| {
+            tx.execute("DELETE FROM parsed_facts WHERE build != ?1", [build])?;
+            let mut insert = tx.prepare_cached(
+                "INSERT OR REPLACE INTO parsed_facts (build, file_key, name, run_id, payload)
+                 VALUES (?1, ?2, ?3, ?4, ?5)",
+            )?;
+            for fact in facts {
+                insert.execute(params![build, fact.key, fact.name, run, fact.payload])?;
+            }
             Ok(())
         })
     }

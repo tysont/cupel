@@ -845,12 +845,15 @@ findings     (id, run_id, check, kind, symbol_hash, severity, json)
 baselines    (name PK, run_id)
 oracles      (name PK, kind, spec JSON, verified_at, verified_hash)
 mutation_baselines (suite_hash PK, elapsed_ms)                                     -- the mutation engine's unmutated baseline (ADR-185)
+parsed_facts (build, file_key, name, run_id, payload)  PK (build, file_key, name)  -- each file's derived values (ADR-181, ADR-188)
 suppressions mirrored from .cupel/suppressions.toml
 ```
 
 `facts` is the generic cache for every fact kind, so a new fact kind needs no migration. The typed tables (`symbols`, `coverage`, `mutants`, `test_results`) are query indexes over the facts that `explain`, `survey`, and the differential mutation path read at fine grain; they are populated from the corresponding facts, never written independently.
 
 Cache validity for a mutant outcome: `(symbol_hash, site_hash, suite_hash, toolchain_hash)` unchanged ⇒ reuse. `suite_hash` = hash of the structural hashes of all test symbols that cover the site (or of the test files when no per-test map). Scores are recomputed from the store on every run, so a cached kill contributes without re-execution.
+
+`parsed_facts` is the parse cache's shelf (ADR-188): every value a syntactic producer derives from one file (its share of a fact, its imports and references before resolution, its asserting test helpers, its first syntax error), deflated JSON, keyed by the file's path, content hash, language, and grammar, under the build that derived it (version and executable, as the daemon compares builds). A process reads a file's values in one query and parses the file only for a value the store lacks; a run's new values are written in one transaction after its run record, which also drops every other build's rows.
 
 `.cupel/` is gitignored except `suppressions.toml` and any `baseline export` outputs the user commits.
 
@@ -884,7 +887,7 @@ Holds parsed trees (content-hash keyed), store connection, coverage map, and the
 
 ### 9.2 Static path
 
-- Parallel walk via the `ignore` crate; parse with rayon; parse cache keyed by file content hash (unchanged file = one stat + hash).
+- Parallel walk via the `ignore` crate; parse with rayon; parse cache keyed by file content hash (unchanged file = one stat + hash). Each file's derived values persist in the fact store (§8.8, ADR-188), so a cold process reads an unchanged file's facts instead of parsing it.
 - Clone detection: per-symbol fingerprint sets → MinHash signatures → LSH bands → pairwise Jaccard only within buckets. Approximately linear.
 - Dependency graph built from import/use statements via tree-sitter queries; cycle detection via Tarjan SCC.
 

@@ -36,6 +36,7 @@ cupel-plugin.workspace = true
 cupel-serve.workspace = true
 cupel-store.workspace = true
 clap.workspace = true
+miniz_oxide.workspace = true
 rayon.workspace = true
 serde.workspace = true
 serde_json.workspace = true

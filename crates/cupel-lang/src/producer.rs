@@ -104,11 +104,12 @@ impl<F: Fact + Merge + Clone> Producer<F> for QueryProducer<F> {
     fn produce(&self, ctx: &ProduceCtx, scope: &Scope, sink: &mut dyn EventSink) -> Result<F> {
         let parsed = parse_scope(&self.cache, ctx, scope, self.language.as_ref(), sink)?;
         let language = self.language.as_ref();
-        let extractor = self.extract as usize;
         let parts: Vec<F> = parsed
             .par_iter()
             .map(|parsed| {
-                parsed.derived(extractor, || (self.extract)(&Source { parsed, language }))
+                parsed.derived(F::KIND.as_str(), || {
+                    (self.extract)(&Source { parsed, language })
+                })
             })
             .collect();
         let mut fact = F::default();
@@ -145,16 +146,21 @@ pub fn parse_scope(
         match outcome {
             Ok(file) => {
                 let token_trees = &language.spec().tables().syntax.token_trees;
-                if let Some(error) = file.first_error(token_trees) {
-                    let start = error.start_position();
+                let first_error = file.derived("first-error", || {
+                    file.first_error(token_trees).map(|error| {
+                        let start = error.start_position();
+                        (start.row, start.column)
+                    })
+                });
+                if let Some((row, column)) = first_error {
                     sink.emit(Event::Finding(Box::new(parse_error(
                         &file.file,
                         &file.lang.to_string(),
-                        line_col(start.row, start.column),
+                        line_col(row, column),
                         &format!(
                             "unexpected syntax at line {}, column {}",
-                            start.row + 1,
-                            start.column + 1
+                            row + 1,
+                            column + 1
                         ),
                     ))));
                 }

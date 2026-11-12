@@ -42,6 +42,7 @@ use cupel_core::{
     ProducerId, Result, Scope,
 };
 use globset::Glob;
+use serde::{Deserialize, Serialize};
 
 use crate::contract::capture;
 use crate::language::{Language, owns, parse_one, producer_id};
@@ -51,7 +52,7 @@ use crate::query::{Match, encloses, matches};
 use crate::spec::QueryFile;
 
 /// One import as written.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RawImport {
     pub specifier: String,
     pub names: Vec<String>,
@@ -69,7 +70,7 @@ pub struct RawImport {
 }
 
 /// A file's imports and the inline modules it declares (each as its path within the file).
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct FileImports {
     pub imports: Vec<RawImport>,
     pub modules: Vec<Vec<String>>,
@@ -473,10 +474,7 @@ impl Imports<'_> {
             self.language,
             &Cancellation::new(),
         )
-        .map(|parsed| {
-            let extractor = file_imports as fn(&Parsed, &dyn Language) -> FileImports as usize;
-            parsed.derived(extractor, || file_imports(&parsed, self.language))
-        })
+        .map(|parsed| parsed.derived("imports", || file_imports(&parsed, self.language)))
         .unwrap_or_default()
     }
 }

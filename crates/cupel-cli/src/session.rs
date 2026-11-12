@@ -2,19 +2,42 @@
 // ABOUTME: every request it serves; `Stream`, where an invocation writes as it goes; and `Input`, what it reads.
 use std::io::{self, Read, Write};
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex, PoisonError};
+use std::sync::{Arc, Mutex, OnceLock, PoisonError};
 
-use cupel_lang::{ParseCache, Reparse};
+use cupel_core::{RunId, Writer};
+use cupel_lang::{FactShelf, ParseCache, Reparse};
 
-/// The caches an invocation may find warm: the parse cache, trees by content hash and grammar.
+use crate::shelf::StoreShelf;
+
+/// The caches an invocation may find warm: the parse cache, trees by content hash and grammar,
+/// and the fact store it keeps derived values in (ADR-188).
 #[derive(Default)]
 pub struct Session {
     cache: Arc<ParseCache>,
+    shelf: OnceLock<Option<Arc<StoreShelf>>>,
 }
 
 impl Session {
     pub fn cache(&self) -> &Arc<ParseCache> {
         &self.cache
+    }
+
+    /// Gives the parse cache the fact store of `writer`'s repository as its shelf, once per
+    /// session: a process serves one repository.
+    pub fn shelve(&self, writer: &Writer) {
+        self.shelf.get_or_init(|| {
+            let store = Arc::new(StoreShelf::new(writer)?);
+            self.cache.shelve(Arc::clone(&store) as Arc<dyn FactShelf>);
+            Some(store)
+        });
+    }
+
+    /// Records in the fact store the values derived since the last record, in `run`.
+    pub fn record_parsed(&self, run: &RunId) -> Result<(), String> {
+        match self.shelf.get() {
+            Some(Some(store)) => store.record(run),
+            _ => Ok(()),
+        }
     }
 
     /// Reparses each of `paths` the cache parsed before from its previous tree; how many changed.

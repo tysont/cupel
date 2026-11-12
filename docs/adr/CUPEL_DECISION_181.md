@@ -1,6 +1,6 @@
 # CUPEL_DECISION_181: Parsed facts persist in the store, keyed by content hash, and the CLI reads them
 
-**Date:** 2026-11-11 · **Status:** accepted · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [045](CUPEL_DECISION_045.md)
+**Date:** 2026-11-11 · **Status:** accepted; detailed by [188](CUPEL_DECISION_188.md) · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [045](CUPEL_DECISION_045.md)
 
 ## Context
 `Store::put_fact` had no caller, so every command-line run re-parsed every file: about 31 s of static checks on Molten against 10 s through a warm daemon.

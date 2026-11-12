@@ -8,28 +8,100 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock, PoisonError};
 
 use cupel_core::LangId;
+use serde::Serialize;
+use serde::de::DeserializeOwned;
 use tree_sitter::{InputEdit, Node, Parser, Point, Tree};
 
-/// A parsed source text. Identical texts share one, whatever their paths.
-#[derive(Debug)]
+/// Where a parse cache keeps the values it derives beyond its process, and finds them again
+/// (ADR-181, ADR-188): each file's values by the file's key ([`ParseCache::shelve`]) and the
+/// value's name. A file whose values are all found is never parsed.
+pub trait FactShelf: Send + Sync {
+    /// The values kept for the file under `key`, by name; empty when none are.
+    fn load(&self, key: &str) -> Vec<(String, Vec<u8>)>;
+    /// Keeps `payload`, the value `name` derived from the file under `key`.
+    fn keep(&self, key: &str, name: &str, payload: Vec<u8>);
+}
+
+impl std::fmt::Debug for dyn FactShelf {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("FactShelf")
+    }
+}
+
+/// A source text, parsed when first asked. Identical texts share one, whatever their paths.
 pub struct Syntax {
     pub source: String,
-    pub tree: Tree,
+    grammar: tree_sitter::Language,
+    /// The tree, parsed on first use; `None` when the parser could not run.
+    tree: OnceLock<Option<Tree>>,
+    /// The parse cache's count of trees parsed.
+    parses: Arc<AtomicU64>,
     /// What extractors derived from this tree, by file, result type, and extractor: kept with
     /// the tree, so a warm daemon derives nothing again for an unchanged file (ADR-085 §3).
     derived: Mutex<HashMap<DerivedKey, Arc<dyn Any + Send + Sync>>>,
+    /// What the cache's shelf held for each file of this text, by file, once loaded.
+    shelved: Mutex<HashMap<String, Shelved>>,
 }
 
-/// A derived value's file, result type, and extractor.
-type DerivedKey = (String, TypeId, usize);
+impl std::fmt::Debug for Syntax {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Syntax")
+            .field("source", &self.source)
+            .field("tree", &self.tree.get())
+            .finish_non_exhaustive()
+    }
+}
+
+/// What a shelf held for one file: whether it held anything, and the values not read yet, by name.
+#[derive(Default)]
+struct Shelved {
+    found: bool,
+    unread: HashMap<String, Vec<u8>>,
+}
+
+/// A derived value's file, result type, and extractor name.
+type DerivedKey = (String, TypeId, &'static str);
 
 impl Syntax {
-    fn new(source: String, tree: Tree) -> Self {
+    fn new(source: String, grammar: tree_sitter::Language, parses: Arc<AtomicU64>) -> Self {
         Self {
             source,
-            tree,
+            grammar,
+            tree: OnceLock::new(),
+            parses,
             derived: Mutex::default(),
+            shelved: Mutex::default(),
         }
+    }
+
+    /// The tree, parsing the source on first use; `None` when the parser could not run.
+    fn tree(&self) -> Option<&Tree> {
+        self.tree
+            .get_or_init(|| {
+                self.parses.fetch_add(1, Ordering::Relaxed);
+                let mut parser = Parser::new();
+                parser.set_language(&self.grammar).ok()?;
+                parser.parse(&self.source, None)
+            })
+            .as_ref()
+    }
+
+    /// Loads, once per file, what `load` finds on the shelf for `file`: whether it found any,
+    /// and whether it loaded now.
+    fn shelve(&self, file: &str, load: impl FnOnce() -> Vec<(String, Vec<u8>)>) -> (bool, bool) {
+        let mut loaded = false;
+        let found = lock(&self.shelved)
+            .entry(file.to_owned())
+            .or_insert_with(|| {
+                loaded = true;
+                let unread: HashMap<String, Vec<u8>> = load().into_iter().collect();
+                Shelved {
+                    found: !unread.is_empty(),
+                    unread,
+                }
+            })
+            .found;
+        (found, loaded)
     }
 }
 
@@ -42,35 +114,74 @@ pub struct Parsed {
     /// The grammar the file was parsed with; queries are compiled against it.
     pub grammar: tree_sitter::Language,
     pub syntax: Arc<Syntax>,
+    /// The cache's shelf and this file's key on it, when the cache has one.
+    shelf: Option<(Arc<dyn FactShelf>, Arc<str>)>,
 }
 
 impl Parsed {
     /// What `derive` makes of this file, made once per file, content, result type, and
-    /// `extractor` (an identity for `derive`, such as its function's address) and kept with the
-    /// tree. `derive` must read nothing but this file's path, language, and tree.
-    pub fn derived<T: Clone + Send + Sync + 'static>(
-        &self,
-        extractor: usize,
-        derive: impl FnOnce() -> T,
-    ) -> T {
-        let key = (self.file.clone(), TypeId::of::<T>(), extractor);
-        let found = lock(&self.syntax.derived)
-            .get(&key)
-            .and_then(|value| value.downcast_ref::<T>().cloned());
-        if let Some(found) = found {
+    /// extractor `name` and kept with the tree. With a shelf, a value the shelf holds for this
+    /// file is read from it instead, and one derived here is kept on it. `derive` must read
+    /// nothing but this file's path, language, and tree; `name` names one extractor, the same
+    /// in every build.
+    pub fn derived<T>(&self, name: &'static str, derive: impl FnOnce() -> T) -> T
+    where
+        T: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
+    {
+        let key = (self.file.clone(), TypeId::of::<T>(), name);
+        let remembered = || {
+            lock(&self.syntax.derived)
+                .get(&key)
+                .and_then(|value| value.downcast_ref::<T>().cloned())
+        };
+        if let Some(found) = remembered() {
+            return found;
+        }
+        if let Some(found) = self.unshelved::<T>(name) {
+            lock(&self.syntax.derived).insert(key.clone(), Arc::new(found.clone()));
+            // Removed only once remembered, so a caller that finds it gone finds it remembered.
+            if let Some(shelved) = lock(&self.syntax.shelved).get_mut(&self.file) {
+                shelved.unread.remove(name);
+            }
+            return found;
+        }
+        if let Some(found) = remembered() {
             return found;
         }
         let value = derive();
+        if let Some((shelf, file_key)) = &self.shelf
+            && let Ok(payload) = serde_json::to_vec(&value)
+        {
+            shelf.keep(file_key, name, payload);
+        }
         lock(&self.syntax.derived).insert(key, Arc::new(value.clone()));
         value
+    }
+
+    /// The value `name` the shelf holds for this file, when it holds one that reads back.
+    fn unshelved<T: DeserializeOwned>(&self, name: &str) -> Option<T> {
+        let payload = lock(&self.syntax.shelved)
+            .get(&self.file)?
+            .unread
+            .get(name)?
+            .clone();
+        serde_json::from_slice(&payload).ok()
     }
 
     pub fn source(&self) -> &str {
         &self.syntax.source
     }
 
+    /// The root of the file's tree, which is parsed now if it was not yet.
+    ///
+    /// # Panics
+    ///
+    /// When the parser cannot run on a text whose values the shelf held, which it parsed before.
     pub fn root(&self) -> Node<'_> {
-        self.syntax.tree.root_node()
+        self.syntax
+            .tree()
+            .expect("a text the cache accepted parses")
+            .root_node()
     }
 
     /// The source text a node spans.
@@ -131,8 +242,8 @@ pub struct CacheStats {
 
 type Key = (blake3::Hash, tree_sitter::Language);
 
-/// One cache slot: filled once by whichever caller parses first; `None` when the parser failed.
-type Slot = Arc<OnceLock<Option<Arc<Syntax>>>>;
+/// One cache slot: filled once by whichever caller reads the content first.
+type Slot = Arc<OnceLock<Arc<Syntax>>>;
 
 /// What [`ParseCache::reparse`] did with a file.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -155,8 +266,12 @@ pub struct ParseCache {
     /// The key each file, by its path under its root, last parsed to: where a reparse starts and
     /// which trees a sweep keeps.
     files: Mutex<HashMap<PathBuf, Key>>,
+    /// Where derived values are kept beyond the process, once a run gives the cache one.
+    shelf: OnceLock<Arc<dyn FactShelf>>,
     hits: AtomicU64,
     misses: AtomicU64,
+    parses: Arc<AtomicU64>,
+    shelved: AtomicU64,
 }
 
 impl ParseCache {
@@ -167,8 +282,26 @@ impl ParseCache {
         }
     }
 
+    /// How many trees the cache has parsed: a file whose derived values all came from the shelf
+    /// needs none.
+    pub fn trees_parsed(&self) -> u64 {
+        self.parses.load(Ordering::Relaxed)
+    }
+
+    /// How many files the cache found values for on the shelf.
+    pub fn files_shelved(&self) -> u64 {
+        self.shelved.load(Ordering::Relaxed)
+    }
+
+    /// Gives the cache `given`, the shelf where every value a [`Parsed::derived`] makes is kept
+    /// and found again; the first shelf given stays. Whether this one was taken.
+    pub fn shelve(&self, given: Arc<dyn FactShelf>) -> bool {
+        self.shelf.set(given).is_ok()
+    }
+
     /// Reads and parses `file` (relative to `root`) of language `lang` with `grammar`.
-    /// Concurrent requests for the same content wait for one parse.
+    /// Concurrent requests for the same content wait for one parse. With a shelf that holds
+    /// values for the file, the tree is parsed only when something asks for it.
     pub fn parse(
         &self,
         root: &Path,
@@ -184,34 +317,79 @@ impl ParseCache {
         let bytes = fs::read(root.join(file)).map_err(|error| problem(error.to_string()))?;
         let source =
             String::from_utf8(bytes).map_err(|_| problem("the file is not UTF-8".to_owned()))?;
-        let key = (blake3::hash(source.as_bytes()), grammar.clone());
-        let parse_grammar = grammar.clone();
+        let hash = blake3::hash(source.as_bytes());
+        let key = (hash, grammar.clone());
         let cell = Arc::clone(lock(&self.trees).entry(key.clone()).or_default());
-        let mut parsed_here = false;
-        let syntax = cell.get_or_init(|| {
-            parsed_here = true;
-            let mut parser = Parser::new();
-            parser.set_language(&parse_grammar).ok()?;
-            let tree = parser.parse(&source, None)?;
-            Some(Arc::new(Syntax::new(source, tree)))
-        });
-        let counter = if parsed_here {
-            &self.misses
-        } else {
-            &self.hits
-        };
+        let mut read_here = false;
+        let syntax = Arc::clone(cell.get_or_init(|| {
+            read_here = true;
+            Arc::new(Syntax::new(
+                source,
+                grammar.clone(),
+                Arc::clone(&self.parses),
+            ))
+        }));
+        let counter = if read_here { &self.misses } else { &self.hits };
         counter.fetch_add(1, Ordering::Relaxed);
-        let syntax = syntax
-            .clone()
-            .ok_or_else(|| problem("the parser could not run".to_owned()))?;
+        let kept_on = self.shelf.get().map(|given| {
+            let file_key: Arc<str> = shelf_key(file, &hash, lang, &grammar).into();
+            (Arc::clone(given), file_key)
+        });
+        let (on_shelf, loaded) = kept_on
+            .as_ref()
+            .map_or((false, false), |(given, file_key)| {
+                syntax.shelve(file, || given.load(file_key))
+            });
+        if on_shelf && loaded {
+            self.shelved.fetch_add(1, Ordering::Relaxed);
+        }
+        if !on_shelf && syntax.tree().is_none() {
+            return Err(problem("the parser could not run".to_owned()));
+        }
         lock(&self.files).insert(root.join(file), key);
         Ok(Parsed {
             file: file.to_owned(),
             lang: lang.clone(),
             grammar,
             syntax,
+            shelf: kept_on,
         })
     }
+}
+
+/// The key of `file`'s values on a shelf: BLAKE3 of the NUL-separated path, content hash,
+/// language, and grammar (its name, version, and ABI). The shelf adds the build (ADR-188).
+fn shelf_key(
+    file: &str,
+    hash: &blake3::Hash,
+    lang: &LangId,
+    grammar: &tree_sitter::Language,
+) -> String {
+    let version = grammar
+        .metadata()
+        .map(|version| {
+            format!(
+                "{}.{}.{}",
+                version.major_version, version.minor_version, version.patch_version
+            )
+        })
+        .unwrap_or_default();
+    let abi = grammar.abi_version().to_string();
+    let hash = hash.to_hex();
+    let parts = [
+        file,
+        hash.as_str(),
+        lang.as_str(),
+        grammar.name().unwrap_or_default(),
+        version.as_str(),
+        abi.as_str(),
+    ];
+    let mut hasher = blake3::Hasher::new();
+    for part in parts {
+        hasher.update(part.as_bytes());
+        hasher.update(&[0]);
+    }
+    hasher.finalize().to_hex().to_string()
 }
 
 impl ParseCache {
@@ -238,24 +416,31 @@ impl ParseCache {
         let key = (blake3::hash(source.as_bytes()), grammar.clone());
         let (cell, old) = {
             let mut trees = lock(&self.trees);
-            let old = trees
-                .get(&old_key)
-                .and_then(|slot| slot.get().cloned().flatten());
+            let old = trees.get(&old_key).and_then(|slot| slot.get().cloned());
             (Arc::clone(trees.entry(key.clone()).or_default()), old)
         };
         let mut parsed_here = false;
-        cell.get_or_init(|| {
+        let syntax = cell.get_or_init(|| {
             parsed_here = true;
-            let mut parser = Parser::new();
-            parser.set_language(&grammar).ok()?;
-            let old_tree = old.map(|old| {
-                let mut tree = old.tree.clone();
-                tree.edit(&edit_between(&old.source, &source));
-                tree
-            });
-            let tree = parser.parse(&source, old_tree.as_ref())?;
-            Some(Arc::new(Syntax::new(source, tree)))
+            Arc::new(Syntax::new(
+                source,
+                grammar.clone(),
+                Arc::clone(&self.parses),
+            ))
         });
+        if parsed_here {
+            let old_tree = old.as_ref().and_then(|old| {
+                let mut tree = old.tree.get()?.as_ref()?.clone();
+                tree.edit(&edit_between(&old.source, &syntax.source));
+                Some(tree)
+            });
+            syntax.tree.get_or_init(|| {
+                self.parses.fetch_add(1, Ordering::Relaxed);
+                let mut parser = Parser::new();
+                parser.set_language(&grammar).ok()?;
+                parser.parse(&syntax.source, old_tree.as_ref())
+            });
+        }
         lock(&self.files).insert(path.to_path_buf(), key);
         if parsed_here {
             Reparse::Reparsed

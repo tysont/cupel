@@ -7,7 +7,7 @@ use std::sync::Arc;
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{Cancellation, FactKind, ProducerRegistry};
 use cupel_fixtures::conformance::{produce_fact_at, produce_fixture_fact};
-use cupel_fixtures::{Goldens, copy_repo};
+use cupel_fixtures::{Goldens, MemoryShelf, copy_repo};
 use cupel_lang::{LanguageRegistry, ParseCache, Reparse, walk};
 
 /// Every (language, fact) pair that has a producer, as golden names.
@@ -122,6 +122,47 @@ fn every_fact_golden_holds_for_trees_reparsed_from_edited_ones() {
             "{}: the facts were read from the reparsed trees",
             lang.id
         );
+    }
+    assert!(failures.is_empty(), "\n{}", failures.join("\n"));
+}
+
+/// Facts read from the fact store's shelf (ADR-181, ADR-188) are the facts cold trees give: each
+/// fixture's facts are produced once through a cache that keeps its values on a shelf, then
+/// through a fresh cache on the same shelf, as a later process would; every fact golden must hold,
+/// read from the shelf alone, with no tree parsed.
+#[test]
+fn every_fact_golden_holds_for_facts_read_from_a_shelf() {
+    let goldens = Goldens::from_env();
+    let mut failures = Vec::new();
+    for lang in LanguageRegistry::builtin().langs() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().canonicalize().unwrap();
+        copy_repo(lang.id.as_str(), &root);
+        let shelf = Arc::new(MemoryShelf::default());
+        let mut parsed = Vec::new();
+        for process in 0..2 {
+            let languages = LanguageRegistry::with_cache(MemoryShelf::cache(&shelf));
+            let mut producers = ProducerRegistry::default();
+            languages.register_producers(&mut producers);
+            for &kind in FactKind::syntactic() {
+                if producers.producers_for(kind, &lang).next().is_none() {
+                    continue;
+                }
+                let name = format!("facts/{}/{kind}", lang.id);
+                match produce_fact_at(&producers, &languages, &lang, kind, &root) {
+                    Ok(value) if process == 1 => {
+                        if let Err(error) = goldens.check(&name, &value) {
+                            failures.push(error.to_string());
+                        }
+                    }
+                    Ok(_) => {}
+                    Err(message) => failures.push(format!("{name}: {message}")),
+                }
+            }
+            parsed.push(languages.cache().trees_parsed());
+        }
+        assert!(parsed[0] > 0, "{}: the first process parses", lang.id);
+        assert_eq!(parsed[1], 0, "{}: the second parses nothing", lang.id);
     }
     assert!(failures.is_empty(), "\n{}", failures.join("\n"));
 }

@@ -67,6 +67,9 @@ tree-sitter-java = "0.23.5"
 tree-sitter-clojure-orchard = "0.2.8"
 ignore = "0.4.33"
 globset = "0.4.20"
+# Deflate for the parsed facts the store keeps (ADR-188): pure Rust, with only `adler2` beneath it; their JSON
+# compresses about ninefold.
+miniz_oxide = "0.9.1"
 rayon = "1.12.0"
 # Checks and producers register themselves from their own modules (ADR-074).
 inventory = "0.3.25"

@@ -50,6 +50,7 @@ use cupel_core::syntax::{
     Assertion, AssertionKind, AssertionStrength, Mock, SkipMarker, Span, TestCase, TestFile,
     TestFrames,
 };
+use serde::{Deserialize, Serialize};
 use tree_sitter::Node;
 
 use crate::contract::capture;
@@ -239,7 +240,7 @@ fn attach_assertions(
 }
 
 /// How an assertion is classified, as a helper passes it on.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 struct Class {
     kind: AssertionKind,
     strength: AssertionStrength,
@@ -374,7 +375,7 @@ fn assert_through(assertions: &mut Vec<Assertion>, class: Class, call: Called) {
 /// when it starts at the name and is one of them: one that only starts there
 /// (`cupel().arg("x").assert().success()`, `assert_cmd`'s chain on a command a helper made) is a
 /// longer expression, and one the name is an argument of starts elsewhere.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 struct Called {
     at: Span,
     call: [Option<Span>; 2],
@@ -412,7 +413,7 @@ fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn La
     let mut shared: BTreeMap<(String, String), Class> = BTreeMap::new();
     let mut unresolved: Vec<Unresolved> = Vec::new();
     for parsed in parsed {
-        let (helpers, calls) = helpers_of(parsed, language);
+        let (helpers, calls) = parsed.derived("test-helpers", || helpers_of(parsed, language));
         let dir = directory(&parsed.file);
         unresolved.extend(calls);
         for (name, class) in helpers {
@@ -428,6 +429,7 @@ fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn La
 }
 
 /// A helper call already read as an assertion that names no asserting helper of its own file.
+#[derive(Clone, Serialize, Deserialize)]
 struct Unresolved {
     file: String,
     call: Called,

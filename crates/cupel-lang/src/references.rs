@@ -38,6 +38,7 @@ use cupel_core::{
     ProducerRegistry, Result, Scope,
 };
 use rayon::prelude::*;
+use serde::{Deserialize, Serialize};
 use tree_sitter::Node;
 
 use crate::contract::capture;
@@ -124,11 +125,10 @@ impl Producer<References> for ReferenceGraph {
         files.sort();
         files.dedup();
         ctx.cancel.checkpoint()?;
-        let extractor = extract as fn(&Parsed, &dyn Language) -> FileReferences as usize;
         let parts: Vec<FileReferences> = files
             .par_iter()
             .filter_map(|file| parse_one(&self.cache, root, file, language, &ctx.cancel).ok())
-            .map(|parsed| parsed.derived(extractor, || extract(&parsed, language)))
+            .map(|parsed| parsed.derived("references", || extract(&parsed, language)))
             .collect();
         ctx.cancel.checkpoint()?;
         let graph = (self.resolve)(&Imports::new(root, language, &self.cache, files));
@@ -138,7 +138,7 @@ impl Producer<References> for ReferenceGraph {
 }
 
 /// One file's references before imports are resolved.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct FileReferences {
     file: String,
     /// The file's functions and closures, which a plain name may call, by name.

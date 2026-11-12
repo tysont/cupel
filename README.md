@@ -702,6 +702,8 @@ cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock run
 | Wall time, no coverage tool installed | 0.97–1.06 s | 0.28–0.31 s |
 | Wall time, `cargo llvm-cov` installed and its cached report fresh | 1.07–1.20 s | 0.42–0.47 s |
 
+**Without the daemon.** A run also keeps what it extracted from each file in `.cupel/cupel.db`, by the file's path and content and this build of `cupel`, deflated ([ADR-188](docs/adr/CUPEL_DECISION_188.md)). A later process of the same build reads an unchanged file's facts from there instead of parsing it, and prints exactly what it would have printed parsing every file. On the Cupel repository (666 files parsed; release build, load average 20–45), a cold `check --depth quick` spent a median 725 ms in its static checks once the facts were kept, against 2.7 s parsing every file and 0.6 s through a warm daemon; the first run of a build, which writes them (18 MB), took about as long as one that keeps nothing. A rebuilt `cupel` reads none of an older build's facts, and its first write drops them. `--verbose` prints how many files were read from the store and how many trees were parsed.
+
 What a warm run still does: walk the tree and hash every file, run the checks over the facts, ask git for the commit, and record the run. A run makes a check's optional facts only within its depth ([ADR-162](docs/adr/CUPEL_DECISION_162.md)), so `static.crap` at `quick` reads a coverage report only while a fresh cached one exists; after a change to the tree it scores no CRAP until a `standard` run measures coverage again. A `quick` run never runs the test suite.
 
 ### MCP

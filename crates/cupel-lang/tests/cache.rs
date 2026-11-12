@@ -4,6 +4,7 @@ use std::fs;
 
 use cupel_core::Cancellation;
 use cupel_core::syntax::ProjectInfo;
+use cupel_fixtures::MemoryShelf;
 use cupel_lang::{CacheStats, LanguageRegistry, Reparse, walk};
 
 #[test]
@@ -204,7 +205,7 @@ fn sweep_keeps_the_trees_of_files_that_still_hold_them_and_drops_the_rest() {
 fn a_derivation_runs_once_per_file_and_content_and_again_after_a_change() {
     let (dir, registry, files, cancel) = identical_pair();
     let runs = std::cell::Cell::new(0);
-    let derive = |parsed: &cupel_lang::Parsed, extractor: usize| {
+    let derive = |parsed: &cupel_lang::Parsed, extractor: &'static str| {
         parsed.derived(extractor, || {
             runs.set(runs.get() + 1);
             format!("{} {}", parsed.file, parsed.root().child_count())
@@ -212,7 +213,12 @@ fn a_derivation_runs_once_per_file_and_content_and_again_after_a_change() {
     };
     let parsed = registry.parse_all(dir.path(), &files, &cancel);
     let (a, b) = (parsed[0].as_ref().unwrap(), parsed[1].as_ref().unwrap());
-    let first = [derive(a, 1), derive(a, 1), derive(b, 1), derive(a, 2)];
+    let first = [
+        derive(a, "one"),
+        derive(a, "one"),
+        derive(b, "one"),
+        derive(a, "two"),
+    ];
     assert_eq!(first, ["a.rs 1", "a.rs 1", "b.rs 1", "a.rs 1"]);
     assert_eq!(
         runs.get(),
@@ -223,9 +229,61 @@ fn a_derivation_runs_once_per_file_and_content_and_again_after_a_change() {
     fs::write(dir.path().join("a.rs"), "fn a() {}\nfn b() {}\n").unwrap();
     let parsed = registry.parse_all(dir.path(), &files, &cancel);
     let again = [
-        derive(parsed[0].as_ref().unwrap(), 1),
-        derive(parsed[1].as_ref().unwrap(), 1),
+        derive(parsed[0].as_ref().unwrap(), "one"),
+        derive(parsed[1].as_ref().unwrap(), "one"),
     ];
     assert_eq!(again, ["a.rs 2", "b.rs 1"]);
     assert_eq!(runs.get(), 4, "only the changed file derives again");
+}
+
+/// A registry whose cache keeps what it derives on `shelf`, as a fresh process would open it.
+fn shelved(shelf: &std::sync::Arc<MemoryShelf>) -> LanguageRegistry {
+    LanguageRegistry::with_cache(MemoryShelf::cache(shelf))
+}
+
+#[test]
+fn values_kept_on_a_shelf_are_read_by_a_later_cache_without_parsing() {
+    let (_dir, root) = repo(&[
+        ("a.rs", "fn a() {}\nfn b() {}\n"),
+        ("c.py", "def c():\n    pass\n"),
+    ]);
+    let files = vec!["a.rs".to_owned(), "c.py".to_owned()];
+    let shelf = std::sync::Arc::new(MemoryShelf::default());
+    let runs = std::cell::Cell::new(0);
+    let derive_all = |registry: &LanguageRegistry| -> Vec<String> {
+        registry
+            .parse_all(&root, &files, &Cancellation::new())
+            .iter()
+            .map(|parsed| {
+                let parsed = parsed.as_ref().unwrap();
+                parsed.derived("shape", || {
+                    runs.set(runs.get() + 1);
+                    format!("{} {}", parsed.file, parsed.root().child_count())
+                })
+            })
+            .collect()
+    };
+
+    let first = shelved(&shelf);
+    let cold = derive_all(&first);
+    assert_eq!(cold, ["a.rs 2", "c.py 1"]);
+    assert_eq!((runs.get(), first.cache().trees_parsed()), (2, 2));
+    assert_eq!(shelf.kept(), 2, "each file's value is kept");
+
+    let second = shelved(&shelf);
+    assert_eq!(derive_all(&second), cold, "read back as derived");
+    assert_eq!(
+        (runs.get(), second.cache().trees_parsed()),
+        (2, 0),
+        "nothing derived again and no tree parsed"
+    );
+
+    fs::write(root.join("a.rs"), "fn a() {}\n").unwrap();
+    let third = shelved(&shelf);
+    assert_eq!(derive_all(&third), ["a.rs 1", "c.py 1"]);
+    assert_eq!(
+        (runs.get(), third.cache().trees_parsed()),
+        (3, 1),
+        "only the changed file is parsed and derived again"
+    );
 }

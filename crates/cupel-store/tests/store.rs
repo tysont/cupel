@@ -12,7 +12,8 @@ use cupel_core::{
     TestResults, Writer,
 };
 use cupel_store::{
-    CacheKey, ScoredAt, Store, StoreError, StoredFact, StoredTestResult, oracles::VerifiedOracle,
+    CacheKey, ParsedFact, ScoredAt, Store, StoreError, StoredFact, StoredTestResult,
+    oracles::VerifiedOracle,
 };
 use serde_json::{Value, json};
 use tempfile::TempDir;
@@ -221,6 +222,7 @@ fn migrations_run_from_empty_and_reopening_changes_nothing() {
             "mutants",
             "mutation_baselines",
             "oracles",
+            "parsed_facts",
             "runs",
             "schema_version",
             "suppressions",
@@ -754,7 +756,7 @@ fn the_oracles_table_holds_only_verifications_so_every_column_is_required() {
             required("run_id"),
         ]
     );
-    assert_eq!(Store::SCHEMA_VERSION, 6);
+    assert_eq!(Store::SCHEMA_VERSION, 7);
 }
 
 #[test]
@@ -767,6 +769,54 @@ fn a_mutation_baseline_is_stored_by_suite_hash_and_replaced() {
     store.put_mutation_baseline("suite-a", 900).unwrap();
     assert_eq!(store.mutation_baseline("suite-a").unwrap(), Some(900));
     assert_eq!(store.mutation_baseline("suite-b").unwrap(), Some(300));
+}
+
+#[test]
+fn parsed_facts_are_read_by_build_and_file_and_a_build_keeps_only_its_own() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let fact = |key: &str, name: &str, payload: &[u8]| ParsedFact {
+        key: key.to_owned(),
+        name: name.to_owned(),
+        payload: payload.to_vec(),
+    };
+    assert_eq!(store.parsed_facts("build-1", "file-a").unwrap(), []);
+    store
+        .record_parsed_facts(
+            "build-1",
+            &run_id(1),
+            &[
+                fact("file-a", "symbols", b"[1]"),
+                fact("file-a", "norm-tree", b"[2]"),
+                fact("file-b", "symbols", b"[3]"),
+            ],
+        )
+        .unwrap();
+    store
+        .record_parsed_facts("build-1", &run_id(2), &[fact("file-a", "symbols", b"[4]")])
+        .unwrap();
+    assert_eq!(
+        store.parsed_facts("build-1", "file-a").unwrap(),
+        [
+            ("norm-tree".to_owned(), b"[2]".to_vec()),
+            ("symbols".to_owned(), b"[4]".to_vec()),
+        ],
+        "by name, the latest kept"
+    );
+    assert_eq!(store.parsed_facts("build-2", "file-a").unwrap(), []);
+
+    store
+        .record_parsed_facts("build-2", &run_id(3), &[fact("file-b", "symbols", b"[5]")])
+        .unwrap();
+    assert_eq!(
+        store.parsed_facts("build-1", "file-b").unwrap(),
+        [],
+        "another build's facts are dropped"
+    );
+    assert_eq!(
+        store.parsed_facts("build-2", "file-b").unwrap(),
+        [("symbols".to_owned(), b"[5]".to_vec())]
+    );
 }
 
 /// Records runs 1 to `runs`, each from a thread of its own with a store of its own.

@@ -42,6 +42,7 @@ name = "matrix"
 harness = false
 
 [dev-dependencies]
+cupel-store.workspace = true
 libtest-mimic.workspace = true
 
 [lints]

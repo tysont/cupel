@@ -89,8 +89,9 @@ pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
 
 /// Runs `cupel <args>` in `cwd` as [`run_cupel`] does, but never through the parity daemon: for
 /// an invocation whose output holds wall-time measurements (`perf.bench` comparing benchmark
-/// samples, ADR-106), which a second run measures again and cannot print the same. Every other
-/// invocation goes through [`run_cupel`].
+/// samples, ADR-106), which a second run measures again and cannot print the same, or counts of
+/// the work its own process did (`--verbose`'s parsed facts, ADR-188), which a warm daemon does
+/// not do. Every other invocation goes through [`run_cupel`].
 ///
 /// # Panics
 ///

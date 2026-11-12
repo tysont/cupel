@@ -38,6 +38,7 @@ mod run;
 mod scaffold;
 mod serve;
 mod session;
+mod shelf;
 mod suppress;
 mod survey;
 mod tests_verb;

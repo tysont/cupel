@@ -23,6 +23,7 @@ use crate::install::Permission;
 use crate::page::Page;
 use crate::problem::Problem;
 use crate::run::{Invocation, Run};
+use crate::session::Session;
 use crate::{
     against, baseline, catalog, check, describe, doctor, explain, init, oracle, persist, reference,
     registry, render, scaffold, serve, suppress, survey, tests_verb,
@@ -101,6 +102,8 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
             );
         }
     };
+    environment.session.shelve(&writer);
+    let parsed_before = parsed_counts(&environment.session);
     let mut stderr = String::new();
     let destination = cli.global.events.as_deref();
     let (envelope, rendering, events) = match Events::open(
@@ -125,8 +128,18 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
             let _ = writeln!(stderr, "cupel: could not write events: {problem}");
         }
     }
+    if cli.global.verbose {
+        say_parsed(&environment.session, parsed_before, &mut stderr);
+    }
     if keeps_run_record(run, cli) {
-        record(&writer, &envelope, &run.take_executions(), &mut stderr);
+        let executed = run.take_executions();
+        record(
+            &writer,
+            &envelope,
+            &executed,
+            &environment.session,
+            &mut stderr,
+        );
     }
     routed(
         cli,
@@ -163,19 +176,42 @@ fn writer_for(environment: &Environment, cli: &Cli) -> Result<Writer, CupelError
     })
 }
 
-/// Keeps `envelope` as the run record and in the fact store; a failure is a line on `stderr`
-/// and changes nothing else (ADR-045 §8).
+/// How many files the session's parse cache has read from the fact store and how many trees it
+/// has parsed.
+fn parsed_counts(session: &Session) -> (u64, u64) {
+    let cache = session.cache();
+    (cache.files_shelved(), cache.trees_parsed())
+}
+
+/// Says on `stderr` how many files this invocation read from the fact store and how many trees it
+/// parsed since `before` (ADR-188), when it did either.
+fn say_parsed(session: &Session, before: (u64, u64), stderr: &mut String) {
+    let now = parsed_counts(session);
+    let (read, parsed) = (now.0 - before.0, now.1 - before.1);
+    if read + parsed > 0 {
+        let _ = writeln!(
+            stderr,
+            "cupel: parsed facts: {read} files read from the fact store, {parsed} trees parsed"
+        );
+    }
+}
+
+/// Keeps `envelope` as the run record and in the fact store, with the values the session's parse
+/// cache derived (ADR-188); a failure is a line on `stderr` and changes nothing else (ADR-045 §8).
 fn record(
     writer: &Writer,
     envelope: &Envelope,
     executed: &crate::run::Executions,
+    session: &Session,
     stderr: &mut String,
 ) {
     if let Err(error) = writer.run_record(&envelope.run.id, envelope) {
         let _ = writeln!(stderr, "cupel: could not write the run record: {error}");
     }
     let suppressions = suppress::load(writer).ok();
-    if let Err(error) = persist::record(writer, envelope, executed, suppressions.as_ref()) {
+    let recorded = persist::record(writer, envelope, executed, suppressions.as_ref())
+        .and_then(|()| session.record_parsed(&envelope.run.id));
+    if let Err(error) = recorded {
         let _ = writeln!(
             stderr,
             "cupel: could not record the run in the fact store: {error}"
