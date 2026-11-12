@@ -181,14 +181,20 @@ fn a_property_that_pins_its_cases_runs_at_them_and_is_noted() {
     let outcome = repo.run(&["check", "--only", "gen.property", "--seed", "3"]);
     assert_eq!(outcome.code, 0, "no gate: {}", outcome.stdout);
     let envelope = outcome.envelope();
+    let mut kinds = found(&envelope);
+    kinds.sort();
     assert_eq!(
-        found(&envelope),
+        kinds,
         [
             pair("property.cases-pinned", FALSIFIED),
             pair("property.missing", "units.percent.clamp_percent"),
         ]
     );
-    let pinned = &envelope["findings"][0];
+    let pinned = support::finding_fields(&envelope, "kind")
+        .iter()
+        .position(|kind| kind == "property.cases-pinned")
+        .map(|at| &envelope["findings"][at])
+        .unwrap();
     assert_eq!(
         (
             &pinned["severity"],
