@@ -133,15 +133,15 @@ fn reassigned_before_read(body: &Body<'_>, name: &str, indent: usize, from: usiz
     let mut depth = 0i64;
     let mut at = from;
     for line in text[from..].split_inclusive('\n') {
-        if depth == 0 && !line.trim().is_empty() && leading_space(line) < indent {
-            return false;
-        }
-        if depth == 0
-            && leading_space(line) == indent
-            && let Some(value) = assigned(line, name)
-        {
-            let value = at + value;
-            return !mentions(&text[value..statement_end(body, value)], name);
+        if depth == 0 {
+            match level(line, name, indent) {
+                Level::Outside => return false,
+                Level::Assigns(value) => {
+                    let value = at + value;
+                    return !mentions(&text[value..statement_end(body, value)], name);
+                }
+                Level::Other => {}
+            }
         }
         if mentions(line, name) {
             return false;
@@ -153,6 +153,28 @@ fn reassigned_before_read(body: &Body<'_>, name: &str, indent: usize, from: usiz
         at += line.len();
     }
     false
+}
+
+/// What a line at the declaration's nesting is to the rule.
+enum Level {
+    /// It is indented less than the declaration: the declaration's block has ended.
+    Outside,
+    /// It assigns the variable at the declaration's indentation; the value starts at this byte.
+    Assigns(usize),
+    /// Anything else.
+    Other,
+}
+
+/// What `line`, at the declaration's nesting, is for the variable `name` declared at `indent`.
+fn level(line: &str, name: &str, indent: usize) -> Level {
+    let leading = leading_space(line);
+    if !line.trim().is_empty() && leading < indent {
+        return Level::Outside;
+    }
+    match assigned(line, name) {
+        Some(value) if leading == indent => Level::Assigns(value),
+        _ => Level::Other,
+    }
 }
 
 /// How much `line` opens or closes brackets, counting only bytes `code` marks as code.
