@@ -106,47 +106,65 @@ fn trimmed(text: &str, start: usize, end: usize) -> (usize, usize) {
 /// itself, a variable named nowhere before it, and an assignment at the declaration's own
 /// indentation and nesting, not reading the variable, before anything else names it.
 fn dead_initializer(body: &Body<'_>, start: usize, end: usize) -> Option<String> {
-    let text = body.text;
+    let (name, line_start, line_end) = declaration(body.text, start, end)?;
+    let indent = leading_space(&body.text[line_start..]);
+    reassigned_before_read(body, name, indent, line_end + 1)
+        .then(|| format!("`{name}` is assigned again before it is read"))
+}
+
+/// The variable declared on the line holding `start..end`, with that line's bounds, when the
+/// site is the line's whole initializer, the variable is named nowhere before the line, and a
+/// line follows it.
+fn declaration(text: &str, start: usize, end: usize) -> Option<(&str, usize, usize)> {
     let line_start = text[..start].rfind('\n').map_or(0, |at| at + 1);
     let line_end = text[end..].find('\n').map_or(text.len(), |at| end + at);
     if !matches!(text[end..line_end].trim(), "" | ";") {
         return None;
     }
     let name = declared(&text[line_start..start])?;
-    if mentions(&text[..line_start], name) || line_end == text.len() {
-        return None;
-    }
-    let indent = leading_space(&text[line_start..]);
+    (!mentions(&text[..line_start], name) && line_end != text.len())
+        .then_some((name, line_start, line_end))
+}
+
+/// Whether the lines from byte `from` assign `name` at `indent` and the declaration's nesting,
+/// without reading it, before any line names it or the block ends.
+fn reassigned_before_read(body: &Body<'_>, name: &str, indent: usize, from: usize) -> bool {
+    let text = body.text;
     let mut depth = 0i64;
-    let mut at = line_end + 1;
-    for line in text[at..].split_inclusive('\n') {
+    let mut at = from;
+    for line in text[from..].split_inclusive('\n') {
         if depth == 0 && !line.trim().is_empty() && leading_space(line) < indent {
-            return None;
+            return false;
         }
         if depth == 0
             && leading_space(line) == indent
             && let Some(value) = assigned(line, name)
         {
             let value = at + value;
-            return (!mentions(&text[value..statement_end(body, value)], name))
-                .then(|| format!("`{name}` is assigned again before it is read"));
+            return !mentions(&text[value..statement_end(body, value)], name);
         }
         if mentions(line, name) {
-            return None;
+            return false;
         }
-        for (byte, is_code) in line.bytes().zip(&body.code[at..]) {
-            match byte {
-                b'{' | b'(' | b'[' if *is_code => depth += 1,
-                b'}' | b')' | b']' if *is_code => depth -= 1,
-                _ => {}
-            }
-        }
+        depth += nesting_change(line, &body.code[at..]);
         if depth < 0 {
-            return None;
+            return false;
         }
         at += line.len();
     }
-    None
+    false
+}
+
+/// How much `line` opens or closes brackets, counting only bytes `code` marks as code.
+fn nesting_change(line: &str, code: &[bool]) -> i64 {
+    line.bytes()
+        .zip(code)
+        .map(|(byte, is_code)| match byte {
+            b'{' | b'(' | b'[' if *is_code => 1,
+            b'}' | b')' | b']' if *is_code => -1,
+            _ => 0,
+        })
+        .sum()
 }
 
 /// The variable a declaration ending in `=` declares: `let x =`, `let mut x =`, `let x: T =`,
@@ -431,7 +449,7 @@ mod tests {
     }
 
     #[test]
-    fn an_initializer_read_or_kept_on_some_path_is_not() {
+    fn an_initializer_read_on_some_path_is_not() {
         let cases = [
             // Read before it is assigned again.
             (
@@ -463,6 +481,16 @@ mod tests {
                 "function f(a) {\n  let x = 0;\n  x += a;\n  return x;\n}",
                 2,
             ),
+        ];
+        assert_eq!(
+            cases.map(|(source, line)| marked(source, MutationOperator::ZeroOne, line, "0")),
+            [const { None }; 6]
+        );
+    }
+
+    #[test]
+    fn an_initializer_outside_the_rule_s_shape_is_not() {
+        let cases = [
             // Its block ends before it is assigned again.
             (
                 "function f(a) {\n  {\n    let x = 0;\n  }\n  x = a;\n  return x;\n}",
@@ -480,7 +508,7 @@ mod tests {
         ];
         assert_eq!(
             cases.map(|(source, line)| marked(source, MutationOperator::ZeroOne, line, "0")),
-            [const { None }; 10]
+            [const { None }; 4]
         );
         // The site is only part of the initializer.
         assert_eq!(

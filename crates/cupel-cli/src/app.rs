@@ -105,29 +105,7 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
     environment.session.shelve(&writer);
     let parsed_before = parsed_counts(&environment.session);
     let mut stderr = String::new();
-    let destination = cli.global.events.as_deref();
-    let (envelope, rendering, events) = match Events::open(
-        destination,
-        &writer,
-        (&environment.stderr, environment.events.as_ref()),
-    ) {
-        Ok(mut events) => {
-            let (envelope, rendering, said) =
-                configured(environment, run, cli, &writer, &mut events);
-            stderr.push_str(&said);
-            (envelope, rendering, Some(events))
-        }
-        Err(error) => (run.failed(&error), recovered_rendering(environment), None),
-    };
-    if let Some(mut events) = events {
-        events.emit(Event::RunEnd {
-            status: envelope.status,
-            exit_code: envelope.exit_code,
-        });
-        if let Some(problem) = events.error() {
-            let _ = writeln!(stderr, "cupel: could not write events: {problem}");
-        }
-    }
+    let (envelope, rendering) = evented(environment, run, cli, &writer, &mut stderr);
     if cli.global.verbose {
         say_parsed(&environment.session, parsed_before, &mut stderr);
     }
@@ -149,6 +127,41 @@ fn accepted(environment: &Environment, run: &mut Run, cli: &Cli) -> Output {
             stderr,
         ),
     )
+}
+
+/// Runs the configured invocation with its `--events` stream open, ending the stream with
+/// `run.end`; what it says on stderr goes to `stderr`.
+fn evented(
+    environment: &Environment,
+    run: &mut Run,
+    cli: &Cli,
+    writer: &Writer,
+    stderr: &mut String,
+) -> (Envelope, Rendering) {
+    let destination = cli.global.events.as_deref();
+    let (envelope, rendering, events) = match Events::open(
+        destination,
+        writer,
+        (&environment.stderr, environment.events.as_ref()),
+    ) {
+        Ok(mut events) => {
+            let (envelope, rendering, said) =
+                configured(environment, run, cli, writer, &mut events);
+            stderr.push_str(&said);
+            (envelope, rendering, Some(events))
+        }
+        Err(error) => (run.failed(&error), recovered_rendering(environment), None),
+    };
+    if let Some(mut events) = events {
+        events.emit(Event::RunEnd {
+            status: envelope.status,
+            exit_code: envelope.exit_code,
+        });
+        if let Some(problem) = events.error() {
+            let _ = writeln!(stderr, "cupel: could not write events: {problem}");
+        }
+    }
+    (envelope, rendering)
 }
 
 /// `output` as the process writes it: under `serve --mcp` stdout carries the protocol, so the

@@ -76,22 +76,31 @@ impl Settings {
         };
         let table = table.as_object().ok_or_else(|| invalid(KEY, table))?;
         for (key, value) in table {
-            match key.as_str() {
-                "operators" => settings.operators = choice("mutation.operators", value, OPERATORS)?,
-                "strategy" => settings.strategy = choice("mutation.strategy", value, STRATEGIES)?,
-                "strings" => {
-                    settings.strings = value.as_bool().ok_or_else(|| invalid(STRINGS, value))?;
-                }
-                "jobs" => settings.jobs = count("mutation.jobs", value)?,
-                "timeout_factor" => {
-                    let what = "mutation.timeout_factor";
-                    settings.timeout_factor =
-                        u32::try_from(count(what, value)?).map_err(|_| invalid(what, value))?;
-                }
-                _ => return Err(invalid("mutation", &Value::String(key.clone()))),
-            }
+            settings.set(key, value)?;
         }
-        if settings.strings && settings.operators != OperatorSet::Extended {
+        settings.strings_need_extended()
+    }
+
+    /// These settings with the `[lang.<id>] mutation` entry `key` set to `value`.
+    fn set(&mut self, key: &str, value: &Value) -> Result<()> {
+        match key {
+            "operators" => self.operators = choice("mutation.operators", value, OPERATORS)?,
+            "strategy" => self.strategy = choice("mutation.strategy", value, STRATEGIES)?,
+            "strings" => self.strings = value.as_bool().ok_or_else(|| invalid(STRINGS, value))?,
+            "jobs" => self.jobs = count("mutation.jobs", value)?,
+            "timeout_factor" => {
+                let what = "mutation.timeout_factor";
+                self.timeout_factor =
+                    u32::try_from(count(what, value)?).map_err(|_| invalid(what, value))?;
+            }
+            _ => return Err(invalid("mutation", &Value::String(key.to_owned()))),
+        }
+        Ok(())
+    }
+
+    /// These settings, unless they enable the `strings` group outside the extended set.
+    fn strings_need_extended(self) -> Result<Self> {
+        if self.strings && self.operators != OperatorSet::Extended {
             return Err(Error::InvalidValue {
                 what: STRINGS,
                 value: "true".to_owned(),
@@ -99,7 +108,7 @@ impl Settings {
                            group is part of the extended set",
             });
         }
-        Ok(settings)
+        Ok(self)
     }
 
     /// These settings with the cap and the budget `declared` names (ADR-147, ADR-148).

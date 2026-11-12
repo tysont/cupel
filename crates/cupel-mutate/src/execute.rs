@@ -146,11 +146,13 @@ impl Execution<'_> {
             }
         };
         let (ran, elapsed) = self.unmutated(
-            0,
+            Unmutated {
+                slot: 0,
+                file: Some(run.file),
+                phase: MutationPhase::Validate,
+            },
             &ctx,
             &self.union(&run.mutants),
-            Some(run.file),
-            MutationPhase::Validate,
             &RunOptions {
                 prebuilt: Some(prebuilt.clone()),
                 ..self.options_for(None, 0, Share::Slot)
@@ -392,11 +394,13 @@ impl Execution<'_> {
         renewed.push(b'\n');
         write(slot, run.file, &renewed)?;
         let measured = self.unmutated(
-            0,
+            Unmutated {
+                slot: 0,
+                file: None,
+                phase: MutationPhase::Build,
+            },
             &ctx,
             self.whole,
-            None,
-            MutationPhase::Build,
             &self.options(None, 0),
         );
         write(slot, run.file, run.original)?;
@@ -477,27 +481,32 @@ impl Execution<'_> {
         let options = self.options(None, 0);
         let selection = self.union(&run.mutants);
         self.unmutated(
-            index,
+            Unmutated {
+                slot: index,
+                file: Some(run.file),
+                phase: MutationPhase::Build,
+            },
             ctx,
             &selection,
-            Some(run.file),
-            MutationPhase::Build,
             &options,
         )
     }
 
-    /// Runs `selection` with no mutant in slot `index` with `options`, for the mutants of `file`
-    /// (`None`: the production's), timed and recorded as `phase`. A run over the slot's memory
-    /// budget is an error naming the setting: every mutant would be.
+    /// Runs `selection` with no mutant, in the slot and for the file `run` names, with
+    /// `options`, timed and recorded as `run`'s phase. A run over the slot's memory budget is an
+    /// error naming the setting: every mutant would be.
     fn unmutated(
         &self,
-        index: usize,
+        run: Unmutated<'_>,
         ctx: &ProduceCtx,
         selection: &TestSelection,
-        file: Option<&str>,
-        phase: MutationPhase,
         options: &RunOptions,
     ) -> Result<(TestRun, Duration)> {
+        let Unmutated {
+            slot: index,
+            file,
+            phase,
+        } = run;
         let started = Instant::now();
         let tmp = scratch()?;
         let ran = match self.runner.run(ctx, selection, &within(options, &tmp)) {
@@ -961,6 +970,15 @@ fn write(slot: &Slot, path: &str, bytes: &[u8]) -> Result<()> {
             message: error.to_string(),
         })
     })
+}
+
+/// What an unmutated run serves: the slot it runs in, the file whose mutants it times or
+/// validates (`None`: the production's), and the phase it is recorded as.
+#[derive(Clone, Copy)]
+struct Unmutated<'a> {
+    slot: usize,
+    file: Option<&'a str>,
+    phase: MutationPhase,
 }
 
 #[cfg(test)]
