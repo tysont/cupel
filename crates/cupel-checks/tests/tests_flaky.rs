@@ -5,7 +5,7 @@ mod support;
 use cupel_core::syntax::{Span, TestCase, TestFile, TestFrames};
 use cupel_core::{
     ActionKind, CheckStatus, CostClass, FactKind, Facts, Finding, FindingId, ProducerId, RunOrder,
-    Scope, Severity, TestOutcome, TestRerun, TestReruns, TestResult,
+    Scope, Severity, SkipReason, TestOutcome, TestRerun, TestReruns, TestResult,
 };
 use serde_json::{Value, json};
 use support::{Recorded, check, recorded, setting_error};
@@ -48,6 +48,7 @@ fn reruns(runs: Vec<TestRerun>) -> TestReruns {
         runner: ProducerId::from("tool.pytest"),
         seed: 7,
         runs,
+        impacted: None,
     }
 }
 
@@ -298,4 +299,31 @@ fn no_reruns_is_a_pass_over_no_tests() {
 fn the_check_takes_no_settings() {
     let (key, valid) = setting_error(check(ID), json!({"runs": 5}));
     assert_eq!((key.as_str(), valid), ("runs", Vec::<String>::new()));
+}
+
+#[test]
+fn a_range_that_impacts_no_test_skips_the_check_saying_so() {
+    let nothing = TestReruns {
+        impacted: Some(Vec::new()),
+        ..reruns(Vec::new())
+    };
+    let (result, recorded) = run_over(nothing, frames(&[]));
+    assert_eq!(result.status, CheckStatus::Skipped);
+    let skipped = result.skipped.unwrap();
+    assert_eq!(
+        (skipped.reason, skipped.see.as_deref()),
+        (
+            SkipReason::NoImpactedTests,
+            Some("cupel tests --impacted --changed")
+        )
+    );
+    assert!(recorded.findings.is_empty());
+    let some = TestReruns {
+        impacted: Some(vec!["t.py".to_owned()]),
+        ..order_dependent()
+    };
+    assert_eq!(
+        run_over(some, frames(&["test_victim"])).0.status,
+        CheckStatus::Fail
+    );
 }

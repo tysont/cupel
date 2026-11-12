@@ -16,11 +16,15 @@ pub struct TestReruns {
     pub seed: u64,
     /// Every rerun, in the order they ran.
     pub runs: Vec<TestRerun>,
+    /// The tests a range scope impacts, which are all the reruns ran (ADR-186): test IDs, or test
+    /// files where the language chose them by imports; empty when the range impacts no test, and
+    /// `None` when the reruns ran every test.
+    pub impacted: Option<Vec<String>>,
 }
 
 impl Fact for TestReruns {
     const KIND: FactKind = FactKind::TestReruns;
-    const VERSION: u32 = 1;
+    const VERSION: u32 = 2;
 }
 
 inventory::submit!(FactEntry::execution::<TestReruns>("test-reruns"));

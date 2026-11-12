@@ -91,6 +91,7 @@ pub fn job<'a>(
         resources: cupel_core::budget::Resources::default(),
         oracle: None,
         cases: None,
+        impacted: std::collections::BTreeMap::new(),
     }
 }
 

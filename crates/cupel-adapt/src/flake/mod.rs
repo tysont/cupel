@@ -7,7 +7,9 @@
 //! order, seed, and parallelism come from [`options::schedule`]; the engine hands them to the
 //! baseline's runner, which it finds among the registered runners (`ProduceCtx::runners`), as
 //! [`RunOptions`](cupel_core::RunOptions). The runner runs every process against the run's cancellation, so
-//! `--timeout` stops a rerun (exit 5).
+//! `--timeout` stops a rerun (exit 5). A run over a range reruns only the tests the range
+//! impacts, which the run chose before it started as `tests --impacted` chooses them
+//! ([`Focus::impacted`](cupel_core::Focus), ADR-186, ADR-190).
 
 mod options;
 
@@ -71,6 +73,7 @@ impl Producer<TestReruns> for FlakeEngine {
                 runner: self.id(),
                 seed: ctx.seed,
                 runs: Vec::new(),
+                impacted: None,
             });
         };
         let runner = ctx
@@ -94,19 +97,84 @@ impl Producer<TestReruns> for FlakeEngine {
                 ),
             });
         }
+        let impacted = impacted(ctx, &baseline.runner);
         let explicit = runner.ordering() == RunOrdering::Explicit;
         let mut runs: Vec<TestRerun> = Vec::new();
-        for planned in schedule(ctx.seed, rerun_count(&ctx.config)?) {
-            let first = runs.first().and_then(|run| run.executed.as_deref());
-            let planned = planned.resolved(explicit, first);
-            runs.push(rerun(ctx, runner, &planned, scope)?);
+        if impacted
+            .as_ref()
+            .is_none_or(|impacted| !impacted.is_empty())
+        {
+            for planned in schedule(ctx.seed, rerun_count(&ctx.config)?) {
+                let first = runs.first().and_then(|run| run.executed.as_deref());
+                let planned = planned.resolved(explicit, first);
+                runs.push(rerun(ctx, runner, &planned, scope, impacted.as_ref())?);
+            }
         }
         Ok(TestReruns {
             runner: baseline.runner.clone(),
             seed: ctx.seed,
             runs,
+            impacted: impacted.map(Impacted::names),
         })
     }
+}
+
+/// The tests a range impacts: by the runner's test IDs, or by test file.
+enum Impacted {
+    Tests(Vec<String>),
+    Files(Vec<String>),
+}
+
+impl Impacted {
+    fn is_empty(&self) -> bool {
+        match self {
+            Self::Tests(names) | Self::Files(names) => names.is_empty(),
+        }
+    }
+
+    fn names(self) -> Vec<String> {
+        match self {
+            Self::Tests(names) | Self::Files(names) => names,
+        }
+    }
+
+    fn selection(&self) -> TestSelection {
+        match self {
+            Self::Tests(ids) => TestSelection::Tests(ids.clone()),
+            Self::Files(files) => TestSelection::Files(files.clone()),
+        }
+    }
+
+    /// Whether `test` is one of them.
+    fn holds(&self, test: &TestResult) -> bool {
+        match self {
+            Self::Tests(ids) => ids.contains(&test.id),
+            Self::Files(files) => test.file.as_ref().is_some_and(|file| files.contains(file)),
+        }
+    }
+}
+
+/// The tests the run's range impacts, as the run chose them (ADR-190): by test ID when they are
+/// `runner`'s IDs, or by test file; `None` without a range, or when the run could not choose
+/// them in a way `runner` can rerun, when every test reruns.
+fn impacted(ctx: &ProduceCtx, runner: &ProducerId) -> Option<Impacted> {
+    let impacted = ctx.focus.impacted.as_ref()?;
+    match &impacted.selection {
+        TestSelection::Tests(ids) if impacted.runner.as_ref() == Some(runner) => {
+            Some(Impacted::Tests(ids.clone()))
+        }
+        TestSelection::Files(files) => Some(Impacted::Files(files.clone())),
+        _ => None,
+    }
+}
+
+/// The `impacted` tests as a selection, when there are some and the runner can narrow its suite
+/// to them; else the whole suite.
+fn narrowest(ctx: &ProduceCtx, runner: &dyn Runner, impacted: Option<&Impacted>) -> TestSelection {
+    impacted
+        .map(Impacted::selection)
+        .filter(|selection| runner.commands(ctx, selection).is_some())
+        .unwrap_or(TestSelection::All)
 }
 
 /// `[lang.<id>] flake_runs`, else [`DEFAULT_RUNS`].
@@ -124,16 +192,18 @@ fn rerun_count(config: &serde_json::Map<String, Value>) -> Result<u32> {
     }
 }
 
-/// One rerun as `planned`, its tests narrowed to those in scope (or with no file). Its order is
-/// kept when the runner reports one and ran one test at a time or in the order given.
+/// One rerun as `planned`, its tests narrowed to the `impacted` ones, else to those in scope (or
+/// with no file). Its order is kept when the runner reports one and ran one test at a time or
+/// in the order given.
 fn rerun(
     ctx: &ProduceCtx,
     runner: &dyn Runner,
     planned: &Planned,
     scope: &Scope,
+    impacted: Option<&Impacted>,
 ) -> Result<TestRerun> {
     let selection = if planned.explicit.is_empty() {
-        TestSelection::All
+        narrowest(ctx, runner, impacted)
     } else {
         TestSelection::Tests(planned.explicit.clone())
     };
@@ -141,8 +211,9 @@ fn rerun(
     let ran = runner.run(ctx, &selection, &planned.options())?;
     let files = &scope.files;
     let mut tests = ran.results.tests;
-    tests.retain(|test: &TestResult| {
-        files.is_empty() || test.file.as_ref().is_none_or(|file| files.contains(file))
+    tests.retain(|test: &TestResult| match impacted {
+        Some(impacted) => impacted.holds(test),
+        None => files.is_empty() || test.file.as_ref().is_none_or(|file| files.contains(file)),
     });
     Ok(TestRerun {
         order: planned.order,

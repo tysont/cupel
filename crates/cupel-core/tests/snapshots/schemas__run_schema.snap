@@ -3298,7 +3298,8 @@ expression: pretty(&schema)
         "budget",
         "timeout",
         "needs-range",
-        "depth"
+        "depth",
+        "no-impacted-tests"
       ]
     },
     "Skipped": {

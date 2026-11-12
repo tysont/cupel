@@ -23,7 +23,9 @@ use crate::matching::{self, SymbolMatch};
 use crate::matrix::{Support, SupportMatrix};
 use crate::mutation::MutationOutcomes;
 use crate::oracle::RunOracle;
-use crate::producer::{Availability, Ctx, Focus, ProduceCtx, ProducerRegistry, Upstream};
+use crate::producer::{
+    Availability, Ctx, Focus, ImpactedTests, ProduceCtx, ProducerRegistry, Upstream,
+};
 use crate::rank::{Measured, Measurement};
 use crate::result::{CheckResult, CheckStatus, SkipReason, Skipped};
 use crate::scope::{ChangedLines, Scope, SymbolSelector, select_symbols, touched};
@@ -69,6 +71,9 @@ pub struct Job<'a> {
     pub oracle: Option<RunOracle>,
     /// `--cases`, handed to every producer (ADR-094 §5, ADR-098).
     pub cases: Option<u64>,
+    /// Per language, the tests a range impacts, chosen before the run (ADR-190); empty without
+    /// a range or when no selected check reruns tests.
+    pub impacted: BTreeMap<LangId, ImpactedTests>,
 }
 
 /// What a run (or a dry run's planning) produced.
@@ -119,6 +124,12 @@ impl Production<'_> {
         sink: &mut dyn EventSink,
     ) -> Result<SharedFact> {
         self.0.ensure(kind, lang, sink)
+    }
+
+    /// Whether `kind` for `lang` is made already, or its producer estimates making it within the
+    /// run's depth (ADR-080), as a producer's want is made (ADR-190).
+    pub fn within_depth(&self, kind: FactKind, lang: &Lang) -> bool {
+        self.0.within_depth(kind, lang)
     }
 
     /// Whether the run's cancellation cut production short.
@@ -1064,6 +1075,7 @@ struct FactStore<'a> {
     durations: Vec<TaskDuration>,
     oracle: Option<RunOracle>,
     cases: Option<u64>,
+    impacted: BTreeMap<LangId, ImpactedTests>,
     /// Each setting a registered check declares for a fact (`SettingSpec::configures`), as
     /// (fact, setting, check), the first check by ID for each fact and setting (ADR-147).
     declared: Vec<(FactKind, String, CheckId)>,
@@ -1122,6 +1134,7 @@ impl<'a> FactStore<'a> {
             durations: Vec::new(),
             oracle: job.oracle.clone(),
             cases: job.cases,
+            impacted: job.impacted.clone(),
         }
     }
 
@@ -1158,6 +1171,16 @@ impl<'a> FactStore<'a> {
                     })
             })
             .collect()
+    }
+
+    /// Whether `kind` for `lang` is made already, or the producer the store would choose
+    /// estimates making it within the run's depth.
+    fn within_depth(&self, kind: FactKind, lang: &Lang) -> bool {
+        let deciding = self.deciding(lang);
+        self.made.contains_key(&(kind, lang.id.clone()))
+            || deciding.chosen(kind).is_some_and(|producer| {
+                producer.estimate(&self.root, &deciding.upstream).cost <= self.depth
+            })
     }
 
     /// What deciding how to make a fact for `lang` sees: the facts made so far among them.
@@ -1349,6 +1372,7 @@ impl<'a> FactStore<'a> {
             base: self.base_commit.clone(),
             jobs: self.jobs,
             cases: self.cases,
+            impacted: self.impacted.get(&lang.id).cloned(),
         }
     }
 

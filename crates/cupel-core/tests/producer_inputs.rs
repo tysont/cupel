@@ -1,5 +1,5 @@
 // ABOUTME: What the scheduler hands a producer beside its needs (ADR-080): the facts it wants when they can be
-// ABOUTME: made, the registered runners, the run's depth, the lines a range changed, its oracle, and `--cases`.
+// ABOUTME: made, the runners, the run's depth, the lines a range changed and the tests it impacts, oracle, `--cases`.
 mod support;
 
 use std::collections::BTreeMap;
@@ -10,8 +10,8 @@ use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{ProjectInfo, Roots as EntryPoints, Symbols};
 use cupel_core::{
     Availability, BaseTree, CheckRegistry, CostClass, Ctx, Error, Estimate, EventSink, FactKind,
-    Focus, Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result, RunId,
-    RunOracle, Scheduler, Scope, Upstream, Writer,
+    Focus, ImpactedTests, Langs, ProduceCtx, Producer, ProducerId, ProducerRegistry, Range, Result,
+    RunId, RunOracle, Scheduler, Scope, TestSelection, Upstream, Writer,
 };
 
 /// What the recording producer saw: the kinds upstream held and the runners it was handed.
@@ -173,6 +173,14 @@ impl Producer<CoverageMap> for Broken {
     }
 }
 
+/// The tests a range impacts: the test file `file`.
+fn impacted(file: &str) -> ImpactedTests {
+    ImpactedTests {
+        runner: None,
+        selection: TestSelection::Files(vec![file.to_owned()]),
+    }
+}
+
 /// The lines the range of [`seen`]'s job changed.
 fn changed() -> BTreeMap<String, Vec<(u32, u32)>> {
     BTreeMap::from([("a.x".to_owned(), vec![(3, 4)])])
@@ -217,6 +225,10 @@ fn seen_in(depth: CostClass, cached: bool) -> Seen {
         &writer.scratch(&RunId::generate()),
     ));
     job.cases = Some(7);
+    job.impacted = BTreeMap::from([
+        ("go".into(), impacted("a_test.go")),
+        ("rust".into(), impacted("tests/a.rs")),
+    ]);
     job.oracle = Some(RunOracle {
         name: "release".to_owned(),
         definition: OracleConfig {
@@ -253,8 +265,9 @@ fn a_producer_gets_the_registered_runners() {
     assert_eq!(seen().runners, "[]");
 }
 
+/// The tests the run chose per language reach a producer of that language (ADR-190).
 #[test]
-fn a_producer_gets_the_runs_depth_and_changed_lines() {
+fn a_producer_gets_the_runs_depth_changed_lines_and_its_languages_impacted_tests() {
     assert_eq!(
         seen().focus,
         Some(Focus {
@@ -264,6 +277,7 @@ fn a_producer_gets_the_runs_depth_and_changed_lines() {
             base: Some("c0ffee".to_owned()),
             jobs: None,
             cases: Some(7),
+            impacted: Some(impacted("tests/a.rs")),
         })
     );
 }

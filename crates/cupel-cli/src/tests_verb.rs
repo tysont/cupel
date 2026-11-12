@@ -8,8 +8,8 @@ use cupel_core::config::Config;
 use cupel_core::syntax::{ModuleGraph, NormTree, Symbols, TestConventions, TestFrames};
 use cupel_core::{
     Attribution, Availability, CostClass, Ctx, Envelope, EventSink, ExitCode, FactKind,
-    ImpactBasis, ImpactedTest, Job, Lang, LangId, PerTestMap, ProduceCtx, ProducerId,
-    ProducerRegistry, Production, Scheduler, ScopeInfo, ScopeRequest, Status, Support,
+    ImpactBasis, ImpactedTest, ImpactedTests, Job, Lang, LangId, PerTestMap, ProduceCtx,
+    ProducerId, ProducerRegistry, Production, Scheduler, ScopeInfo, ScopeRequest, Status, Support,
     SupportMatrix, TestCommand, TestSelection, TestsReport, attributions, select_symbols,
 };
 
@@ -66,15 +66,11 @@ pub fn verb(
             production: scheduler.production(&job),
             producers: catalog.producers(),
             job: &job,
-            ctx: Ctx {
-                exclude: config.file.scope.exclude.clone(),
-                lang: config.file.lang.clone(),
-                roots: config.file.roots.values().cloned().collect(),
-                ..Ctx::new(invocation.writer.root().to_path_buf())
-            },
+            ctx: ctx(invocation, config),
             config,
             hunks: check::changed_lines(invocation.writer.root(), &request, &scoped.files)?,
             events,
+            within_depth: false,
         };
         let by_language = files_by_language(&catalog, &scoped.files.files);
         let (report, symbols) = impact.report(&langs, &by_language);
@@ -84,6 +80,69 @@ pub fn verb(
     envelope.run.scope = Some(scope);
     envelope.run.git = git;
     Ok(envelope)
+}
+
+/// The tests a range impacts, per language, for a check run whose checks rerun them: the
+/// range's changed lines (`hunks`) in its `files`, the whole walk (`tree`) the import graph
+/// reads, and the `--symbols` selectors.
+pub(crate) struct RangeScope<'r> {
+    pub tree: Vec<String>,
+    pub files: &'r [String],
+    pub hunks: Regions,
+    pub selectors: Vec<cupel_core::SymbolSelector>,
+}
+
+/// Per language of `langs`, the tests `range` impacts, chosen as `tests --impacted` chooses them
+/// over the whole walk, except that a per-test map is made only within the run's depth (ADR-186,
+/// ADR-190).
+pub(crate) fn impacted_tests(
+    invocation: &Invocation<'_>,
+    config: &Config,
+    langs: &[Lang],
+    range: RangeScope<'_>,
+    events: &mut dyn EventSink,
+) -> BTreeMap<LangId, ImpactedTests> {
+    let catalog = invocation.catalog();
+    let job = job(invocation, config, langs, range.tree, range.selectors);
+    let scheduler = Scheduler {
+        checks: catalog.checks(),
+        producers: catalog.producers(),
+    };
+    let mut impact = Impact {
+        production: scheduler.production(&job),
+        producers: catalog.producers(),
+        job: &job,
+        ctx: ctx(invocation, config),
+        config,
+        hunks: Some(range.hunks),
+        events,
+        within_depth: true,
+    };
+    let by_language = files_by_language(&catalog, range.files);
+    langs
+        .iter()
+        .map(|lang| {
+            let files = by_language.get(&lang.id).map_or(&[][..], Vec::as_slice);
+            let symbols = impact.fact::<Symbols>(FactKind::Symbols, lang);
+            let regions = impact.regions(lang, files, symbols.as_ref());
+            let chosen = impact.choose(lang, &regions, symbols.as_ref());
+            let tests = ImpactedTests {
+                runner: chosen.runner,
+                selection: chosen.selection,
+            };
+            (lang.id.clone(), tests)
+        })
+        .collect()
+}
+
+/// What producers see in `tests --impacted`'s production, as in a check run.
+fn ctx(invocation: &Invocation<'_>, config: &Config) -> Ctx {
+    Ctx {
+        exclude: config.file.scope.exclude.clone(),
+        lang: config.file.lang.clone(),
+        roots: config.file.roots.values().cloned().collect(),
+        ..Ctx::new(invocation.writer.root().to_path_buf())
+    }
 }
 
 /// The scope as the envelope reports it, before its symbols are counted.
@@ -133,6 +192,7 @@ fn job<'a>(
         resources: cupel_core::budget::Resources::default(),
         oracle: None,
         cases: None,
+        impacted: BTreeMap::new(),
     }
 }
 
@@ -156,6 +216,9 @@ struct Impact<'a, 'e> {
     config: &'a Config,
     hunks: Option<Regions>,
     events: &'e mut dyn EventSink,
+    /// Whether a per-test map is made only within the run's depth, as a check run's wants are,
+    /// rather than whatever it costs (ADR-190).
+    within_depth: bool,
 }
 
 impl Impact<'_, '_> {
@@ -203,10 +266,7 @@ impl Impact<'_, '_> {
     fn language(&mut self, lang: &Lang, files: &[String], report: &mut TestsReport) -> u64 {
         let symbols = self.fact::<Symbols>(FactKind::Symbols, lang);
         let regions = self.regions(lang, files, symbols.as_ref());
-        let chosen = match self.map(lang) {
-            Ok(map) => self.by_coverage(lang, &map, &regions, symbols.as_ref()),
-            Err(reason) => self.by_imports(lang, &regions, reason),
-        };
+        let chosen = self.choose(lang, &regions, symbols.as_ref());
         if !chosen.impacted.is_empty()
             && let Some(runner) = &chosen.runner
         {
@@ -219,9 +279,25 @@ impl Impact<'_, '_> {
         impact::touched(&regions, symbols.as_ref())
     }
 
+    /// The tests of `lang` the regions impact: by its per-test map, else by its import graph.
+    fn choose(&mut self, lang: &Lang, regions: &Regions, symbols: Option<&Symbols>) -> Chosen {
+        match self.map(lang) {
+            Ok(map) => self.by_coverage(lang, &map, regions, symbols),
+            Err(reason) => self.by_imports(lang, regions, reason),
+        }
+    }
+
     /// `lang`'s per-test map, or why there is none.
     fn map(&mut self, lang: &Lang) -> Result<PerTestMap, String> {
         match SupportMatrix::fact(self.producers, IMPACT_FACT, lang, &self.ctx) {
+            Support::Supported
+                if self.within_depth && !self.production.within_depth(IMPACT_FACT, lang) =>
+            {
+                Err(format!(
+                    "the {IMPACT_FACT} costs more than the run's depth, {}",
+                    self.job.depth
+                ))
+            }
             Support::Supported => self
                 .production
                 .ensure(IMPACT_FACT, lang, self.events)
@@ -270,13 +346,15 @@ impl Impact<'_, '_> {
     fn by_imports(&mut self, lang: &Lang, regions: &Regions, reason: String) -> Chosen {
         let graph = self.fact::<ModuleGraph>(FactKind::ModuleGraph, lang);
         let conventions = self.fact::<TestConventions>(FactKind::TestConventions, lang);
-        let impacted = match (graph, conventions) {
+        let (impacted, selection) = match (graph, conventions) {
             (Some(graph), Some(conventions)) => {
-                impact::by_imports(&graph, &conventions, regions, &lang.id)
+                let impacted = impact::by_imports(&graph, &conventions, regions, &lang.id);
+                let files = impacted.iter().map(|test| test.id.clone()).collect();
+                (impacted, TestSelection::Files(files))
             }
-            _ => Vec::new(),
+            // Nothing chose the tests, so a run reruns them all.
+            _ => (Vec::new(), TestSelection::All),
         };
-        let files = impacted.iter().map(|test| test.id.clone()).collect();
         Chosen {
             basis: ImpactBasis {
                 lang: lang.id.clone(),
@@ -288,7 +366,7 @@ impl Impact<'_, '_> {
             },
             impacted,
             runner: self.ready(FactKind::TestResults, lang),
-            selection: TestSelection::Files(files),
+            selection,
         }
     }
 

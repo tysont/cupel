@@ -96,6 +96,7 @@ pub fn with_production<T>(
         resources: cupel_core::budget::Resources::default(),
         oracle: None,
         cases: None,
+        impacted: std::collections::BTreeMap::new(),
     };
     let scheduler = Scheduler {
         checks: &registries.checks,

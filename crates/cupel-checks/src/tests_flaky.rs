@@ -4,9 +4,10 @@ use std::collections::BTreeMap;
 
 use cupel_core::syntax::{Span, TestFrames};
 use cupel_core::{
-    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
-    Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result, RunOrder,
-    Scope, Score, Severity, Stability, TestOutcome, TestRerun, TestReruns, Tier, names_case,
+    Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event,
+    EventSink, Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result,
+    RunOrder, Scope, Score, Severity, SkipReason, Skipped, Stability, TestOutcome, TestRerun,
+    TestReruns, Tier, names_case,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -130,6 +131,9 @@ impl Check for TestsFlaky {
     ) -> Result<CheckResult> {
         LIMITS.read(&self.manifest.id, &ctx.config)?;
         let reruns = facts.get::<TestReruns>()?;
+        if reruns.impacted.as_ref().is_some_and(Vec::is_empty) {
+            return Ok(self.nothing_impacted());
+        }
         let frames = facts.get::<TestFrames>()?;
         let histories = histories(reruns);
         let mut findings = Vec::new();
@@ -177,6 +181,28 @@ impl Check for TestsFlaky {
 
     fn combine_metric(&self, name: &str, results: &[&CheckResult]) -> Option<f64> {
         sum(name, results)
+    }
+}
+
+impl TestsFlaky {
+    /// The check's own skip when the run's range impacts no test, so nothing reran (ADR-186).
+    fn nothing_impacted(&self) -> CheckResult {
+        let mut result = outcome::result(
+            &self.manifest,
+            CheckStatus::Skipped,
+            None,
+            BTreeMap::new(),
+            0,
+        );
+        result.skipped = Some(Skipped {
+            reason: SkipReason::NoImpactedTests,
+            fact: None,
+            lang: None,
+            tool: None,
+            see: Some("cupel tests --impacted --changed".to_owned()),
+            est_ms: None,
+        });
+        result
     }
 }
 

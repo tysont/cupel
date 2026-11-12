@@ -139,4 +139,6 @@ pub enum SkipReason {
     // The producer the store would choose for one of the check's needs costs more than the run's
     // depth, or the check's own cost when that is greater (ADR-154).
     Depth,
+    // The check reruns the tests a range impacts, and the range impacts none (ADR-186).
+    NoImpactedTests,
 }

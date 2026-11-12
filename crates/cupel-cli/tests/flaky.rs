@@ -1,5 +1,5 @@
-// ABOUTME: `tests.flaky` through the binary on the Python tests.flaky fixture (ADR-078): flaky versus
-// ABOUTME: order-dependent findings, the text line, `explain`, the reproducing seed, and exit 4 on a red baseline.
+// ABOUTME: `tests.flaky` through the binary on the Python tests.flaky fixture (ADR-078, ADR-186): flaky versus
+// ABOUTME: order-dependent findings, `explain`, the seed, exit 4 on a red baseline, and reruns of impacted tests.
 mod support;
 
 use serde_json::{Value, json};
@@ -151,4 +151,90 @@ fn a_repository_without_a_test_suite_skips_tests_flaky_as_unavailable() {
             "see": "cupel describe matrix"
         })
     );
+}
+
+/// The fixture in a git repository on `main`, its ledger tests calling `rules.py` and an
+/// untested `notes.py` beside them, with `file` then rewritten to `text`; `None` without pytest
+/// or git.
+fn changed(file: &str, text: &str) -> Option<Repo> {
+    let repo = fixture()?;
+    repo.write("rules.py", "def opening():\n    return 0\n");
+    repo.write("notes.py", "TITLE = \"ledger\"\n");
+    let ledger = std::fs::read_to_string(repo.path("tests/test_ledger.py")).unwrap();
+    repo.write(
+        "tests/test_ledger.py",
+        &ledger
+            .replace("import unittest\n", "import unittest\n\nimport rules\n")
+            .replace("sum(BALANCE)", "sum(BALANCE) + rules.opening()"),
+    );
+    if !(repo.git(&["init", "--quiet", "--initial-branch", "main"])
+        && repo.git(&["add", "."])
+        && repo.git(&["commit", "--quiet", "-m", "fixture"]))
+    {
+        eprintln!("SKIPPED: git not installed");
+        return None;
+    }
+    repo.write(file, text);
+    Some(repo)
+}
+
+/// A change no test reaches reruns nothing: `tests.flaky` is skipped, saying why (ADR-186).
+#[test]
+fn a_change_that_impacts_no_test_skips_the_reruns() {
+    let Some(repo) = changed("notes.py", "TITLE = \"notes\"\n") else {
+        return;
+    };
+    let outcome = repo.run(&[
+        "check",
+        "--changed",
+        "--only",
+        "tests.flaky",
+        "--seed",
+        SEED,
+    ]);
+    let envelope = outcome.envelope();
+    assert_eq!(outcome.code, 0, "{envelope}");
+    assert_eq!(
+        envelope["checks"][0]["status"],
+        json!("skipped"),
+        "{envelope}"
+    );
+    assert_eq!(
+        envelope["checks"][0]["skipped"],
+        json!({
+            "est_ms": null,
+            "reason": "no-impacted-tests",
+            "fact": null,
+            "lang": null,
+            "tool": null,
+            "see": "cupel tests --impacted --changed"
+        })
+    );
+}
+
+/// A change the ledger tests call reruns those tests alone: the order-dependent test is found,
+/// and the flaky one in the other file is not rerun (ADR-186).
+#[test]
+fn a_change_reruns_only_the_tests_it_impacts() {
+    let Some(repo) = changed("rules.py", "def opening():\n    return 0 * 1\n") else {
+        return;
+    };
+    let outcome = repo.run(&[
+        "check",
+        "--changed",
+        "--only",
+        "tests.flaky",
+        "--seed",
+        SEED,
+    ]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
+    assert_eq!(
+        found(&envelope),
+        [pair(
+            "test.order-dependent",
+            "tests/test_ledger.py::LedgerTest::test_balance_starts_at_zero"
+        )]
+    );
+    assert_eq!(envelope["checks"][0]["score"]["n"], json!(2), "{envelope}");
 }

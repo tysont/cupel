@@ -2583,6 +2583,17 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-core/tests/property_results.rs`: `pinned` serialized, schema v2, `cases` by pin or budget;
     - `cupel-cli/tests/property.rs`: the Python fixture with `@settings(max_examples=5)` under the default 1 000-case budget passes, and the run reports `property.cases-pinned` with `cases` 5 and `budget` 1000.
 
+- **Item 12, `tests.flaky` on impacted tests** (2026-11-12, [ADR-186](adr/CUPEL_DECISION_186.md), [ADR-190](adr/CUPEL_DECISION_190.md)).
+  - The gap: the flake engine reran the whole suite three times on any scope and kept the results of the tests in scope, so Area 11's pure deletion in `apps/agent` reran every test (about 300 s) and a change to a source file kept none of the tests it reached.
+  - The obstacle: `tests --impacted` (`cupel-cli` `tests_verb.rs`, `impact.rs`) chooses by imports over the whole walk, but a check run's producers see only the files in scope, so the run's own import graph has no importers of a changed file (ADR-190).
+  - Now a check run with a range and a selected check that needs `TestReruns` (not a dry run or a recomputed base's run) runs `tests --impacted`'s choice per language in scope over the whole walk before the run (`check.rs` `impacted_tests`, `tests_verb::impacted_tests`), the per-test map made only where the run's depth affords it (`Production::within_depth`), and hands each language's choice to its producers as `Focus::impacted` (`ImpactedTests { runner, selection }`, from `Job::impacted`). The import-graph choice is `All` where the graph or the conventions could not be made (`tests --impacted`'s report is unchanged: it lists nothing then).
+  - The flake engine (`flake/mod.rs`) reruns only those tests (narrowed where the runner can, and only their results kept); test IDs chosen with another runner than the baseline's, or `All`, rerun every test. With none it reruns nothing, and `TestReruns` (v2) records `impacted`: the IDs or files, empty for none, null for every test. `tests.flaky` then skips itself with the new reason `no-impacted-tests` (`SkipReason::NoImpactedTests`, in the run and events schemas; `see: cupel tests --impacted --changed`; no next action). A whole-tree or `--paths` run is unchanged.
+  - Tests:
+    - `cupel-cli/tests/flaky.rs`: on the Python fixture in git, with its ledger tests calling `rules.py`, changing an untested `notes.py` skips `tests.flaky` as `no-impacted-tests`, and changing `rules.py` reruns the ledger tests alone (the order-dependent test found, the flaky settle test not rerun, `n` 2) (both failed first: the first passed with no findings, the second found nothing, since the reruns kept only tests in the changed files);
+    - `cupel-adapt/tests/flake.rs`: pytest reruns narrowed to an impacted file or test IDs, none rerun for an empty choice, every test for IDs of another runner;
+    - `cupel-checks/tests/tests_flaky.rs`: an empty `impacted` skips the check with the reason, a non-empty one is judged as before;
+    - `cupel-core/tests/producer_inputs.rs`: a producer sees its own language's `impacted` in its focus; `test_reruns.rs`: `TestReruns` v2.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

@@ -7,10 +7,10 @@ use cupel_core::config::{Config, GateRuleSpec};
 use cupel_core::git::{ChangeKind, Git, Side};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, Finding, GateReference, GitInfo,
-    Job, Lang, LangId, Manifest, Measured, Outcome, PlannedInstall, PlannedWrite, ProducerRegistry,
-    Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest, Selection, Status, SuiteReuse, Verb,
-    Writer, apply_gate, evaluate_gate, gate_for, next_actions,
+    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, FactKind, Finding, GateReference,
+    GitInfo, ImpactedTests, Job, Lang, LangId, Manifest, Measured, Outcome, PlannedInstall,
+    PlannedWrite, ProducerRegistry, Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest,
+    Selection, Status, SuiteReuse, Verb, Writer, apply_gate, evaluate_gate, gate_for, next_actions,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -21,6 +21,7 @@ use crate::oracle::select::Selected;
 use crate::project;
 use crate::resources;
 use crate::run::{Executions, Invocation, Run, shell_quote};
+use crate::tests_verb;
 
 /// `cupel check`: the envelope of running the selected checks, or of planning them.
 pub fn verb(
@@ -143,7 +144,8 @@ pub(crate) fn run_touching(
         resolved.files.iter().chain(&base_files),
     );
     let git = git_info(writer.root(), &resolved);
-    let job = Job {
+    let tree = touched.is_none().then_some(scoped.tree);
+    let mut job = Job {
         run: run.id(),
         writer,
         cancel: run.cancellation().clone(),
@@ -160,26 +162,38 @@ pub(crate) fn run_touching(
         resources: resources::of(invocation, config, args, git.as_ref())?,
         oracle: oracle.run_oracle(config),
         cases: args.cases.map(u64::from),
+        impacted: BTreeMap::new(),
     };
+    job.impacted = impacted_tests(invocation, &job, tree, &request, events)?;
     let scheduler = Scheduler {
         checks: catalog.checks(),
         producers: catalog.producers(),
     };
     let (mut outcome, suite) = schedule(&scheduler, &job, invocation, events)?;
     oracle.apply(&mut outcome, catalog.checks());
-    let scope = ScopeInfo {
-        mode: request.mode(),
-        files: resolved.files.len() as u64,
-        symbols: outcome.symbols,
-        roots: roots(&info, &langs),
-        languages: langs.into_iter().map(|lang| lang.id).collect(),
-    };
     Ok(CheckRun {
-        scope,
+        scope: scope_info(&request, &resolved, &outcome, &info, langs),
         git,
         suite,
         outcome,
     })
+}
+
+/// The scope a run of `langs` over `resolved` reports, with the symbols `outcome` counted.
+fn scope_info(
+    request: &ScopeRequest,
+    resolved: &ResolvedFiles,
+    outcome: &Outcome,
+    info: &ProjectInfo,
+    langs: Vec<Lang>,
+) -> ScopeInfo {
+    ScopeInfo {
+        mode: request.mode(),
+        files: resolved.files.len() as u64,
+        symbols: outcome.symbols,
+        roots: roots(info, &langs),
+        languages: langs.into_iter().map(|lang| lang.id).collect(),
+    }
 }
 
 /// The checks `args` select at the configuration's depth.
@@ -214,6 +228,37 @@ fn install_tools(
         .map(|problem| problem.finding(&run.repro()))
         .collect();
     (Vec::new(), findings)
+}
+
+/// Per language, the tests `job`'s range impacts in the walk `tree`, when a selected check
+/// reruns tests (ADR-186, ADR-190); none without a range, in a dry run, or without a walk (a
+/// recomputed base's run).
+fn impacted_tests(
+    invocation: &Invocation<'_>,
+    job: &Job<'_>,
+    tree: Option<Vec<String>>,
+    request: &ScopeRequest,
+    events: &mut dyn EventSink,
+) -> Result<BTreeMap<LangId, ImpactedTests>, CupelError> {
+    let reruns = job
+        .selected
+        .iter()
+        .any(|check| check.manifest().needs.contains(&FactKind::TestReruns));
+    let (Some(hunks), Some(tree)) = (job.changed.clone(), tree) else {
+        return Ok(BTreeMap::new());
+    };
+    if !reruns || invocation.dry_run {
+        return Ok(BTreeMap::new());
+    }
+    let range = tests_verb::RangeScope {
+        tree,
+        files: &job.files,
+        hunks,
+        selectors: request.selectors()?,
+    };
+    Ok(tests_verb::impacted_tests(
+        invocation, job.config, &job.langs, range, events,
+    ))
 }
 
 /// `touched` when given, else the lines the range scope changed.

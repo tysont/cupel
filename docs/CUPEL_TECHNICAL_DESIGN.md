@@ -612,7 +612,7 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `TestConventions` | test files for a source file; is-test predicate | language | `write_test` hints, scope |
 | `ProjectInfo` | detected roots: path, language, build files, workspace members, dirs to skip — no commands; the CLI joins it with the toolchain table (§8.7, ADR-037) | language | `init`, `doctor`, toolchain selection |
 | `TestResults` | per test: outcome, duration | runner tool | baseline/exit 4, flake engine, mutation engine |
-| `TestReruns` | per rerun: order, seed, parallelism, executed order; per test per rerun: outcome (ADR-078) | flake engine | `tests.flaky` |
+| `TestReruns` | per rerun: order, seed, parallelism, executed order; per test per rerun: outcome (ADR-078); under a range, the impacted tests the reruns were narrowed to (ADR-186, ADR-190) | flake engine | `tests.flaky` |
 | `CoverageMap` | line + optional branch hits; `branches: Option<_>` says whether the producer measures branches | coverage tool | `tests.coverage`, `static.crap`, mutation engine |
 | `PerTestMap` | `test_id → lines` | coverage tool | `tests --impacted`, mutation engine |
 | `MutationOutcomes` | per site: killed/survived/timeout/uncovered, killing tests, duration | mutation engine · PIT/Stryker tool | `tests.mutation` |
@@ -667,7 +667,7 @@ For every `(check, lang)`:
 - `unsupported(fact)` — some needed fact has no producer for `lang`. Permanent until someone writes one.
 - `unavailable(tool)` — supported, but the selected producer's tool is missing here. `doctor` fixes this.
 
-`cupel describe matrix` renders the table with reasons; the README's support matrix is generated from it. In an envelope, a check that did not run for a language records `skipped: { reason: "unsupported" | "unavailable" | "budget" | …, fact, lang, see: "cupel describe matrix" }`. Multi-language scopes run each check once per language present, except where the fact is cross-language by nature (`NormTree` comparisons within a family; `ModuleGraph` per root).
+`cupel describe matrix` renders the table with reasons; the README's support matrix is generated from it. In an envelope, a check that did not run for a language records `skipped: { reason: "unsupported" | "unavailable" | "budget" | …, fact, lang, see: "cupel describe matrix" }`; a check may skip itself for its own reason, such as `tests.flaky`'s `no-impacted-tests` when a range impacts no test (ADR-186). Multi-language scopes run each check once per language present, except where the fact is cross-language by nature (`NormTree` comparisons within a family; `ModuleGraph` per root).
 
 #### 8.3.6 Versioning and caching
 

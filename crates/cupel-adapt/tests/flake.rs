@@ -1,13 +1,13 @@
 // ABOUTME: The flake engine (ADR-078): its schedule from the seed, what it does with no baseline or a runner it
-// ABOUTME: cannot rerun, cancellation, and real reruns of each runner on the tests.flaky fixtures (skipped when absent).
+// ABOUTME: cannot rerun, cancellation, and real reruns of each runner, or of a range's impacted tests, on the fixtures.
 use std::path::Path;
 
 use cupel_adapt::flake::{DEFAULT_RUNS, rerun_seed, schedule};
 use cupel_core::syntax::{ProjectInfo, ProjectRoot};
 use cupel_core::{
-    Availability, Cancellation, Ctx, Error, FactKind, Lang, LangId, ProduceCtx, Produced,
-    ProducerId, ProducerRegistry, RegisteredProducer, RunOrder, RunOrdering, Scope, TestOutcome,
-    TestReruns, TestResults, Writer,
+    Availability, Cancellation, Ctx, Error, FactKind, ImpactedTests, Lang, LangId, ProduceCtx,
+    Produced, ProducerId, ProducerRegistry, RegisteredProducer, RunOrder, RunOrdering, Scope,
+    TestOutcome, TestReruns, TestResults, TestSelection, Writer,
 };
 use cupel_fixtures::copy_repo;
 use cupel_fixtures::matrix::Registries;
@@ -274,6 +274,16 @@ fn a_cancelled_run_stops_the_reruns() {
 /// The baseline of `runner` and then the engine's reruns on a copy of `tests.flaky/<lang>` with
 /// `seed`; `None` (reported as skipped) when the runner's tool is not installed.
 fn reruns(runner: &str, lang: &str, seed: u64) -> Option<TestReruns> {
+    reruns_of(runner, lang, seed, None)
+}
+
+/// [`reruns`] in a run that chose the `impacted` tests of a range (ADR-190).
+fn reruns_of(
+    runner: &str,
+    lang: &str,
+    seed: u64,
+    impacted: Option<ImpactedTests>,
+) -> Option<TestReruns> {
     let dir = tempfile::tempdir().unwrap();
     copy_repo(&format!("tests.flaky/{lang}"), dir.path());
     let registry = registry();
@@ -296,7 +306,8 @@ fn reruns(runner: &str, lang: &str, seed: u64) -> Option<TestReruns> {
         "{runner}: {:?}",
         baseline.to_json()
     );
-    let ctx = produce_ctx(dir.path(), seed, json!({}), vec![baseline]);
+    let mut ctx = produce_ctx(dir.path(), seed, json!({}), vec![baseline]);
+    ctx.focus.impacted = impacted;
     Some(engine_produce(&ctx, lang).unwrap())
 }
 
@@ -422,4 +433,54 @@ fn the_same_seed_repeats_the_reruns_orders() {
         reruns.runs.iter().map(|run| run.executed.clone()).collect()
     };
     assert_eq!(orders(&first), orders(&second));
+}
+
+/// Each rerun's test IDs, and the tests the reruns say were impacted.
+type Impacted = (Vec<Vec<String>>, Option<Vec<String>>);
+
+/// The pytest reruns of a range that impacts `selection`, chosen with `runner`'s IDs.
+fn impacted_reruns(runner: &str, selection: TestSelection) -> Option<Impacted> {
+    let impacted = ImpactedTests {
+        runner: Some(ProducerId::from(runner)),
+        selection,
+    };
+    let reruns = reruns_of("tool.pytest", "python", SEED, Some(impacted))?;
+    let ran = reruns
+        .runs
+        .iter()
+        .map(|run| run.tests.iter().map(|test| test.id.clone()).collect())
+        .collect();
+    Some((ran, reruns.impacted))
+}
+
+const SETTLE: &str = "tests/test_settle.py::SettleTest::test_settles_on_every_other_run";
+
+/// A range's impacted tests are all the reruns run, by file or by test ID (ADR-186).
+#[test]
+fn a_range_reruns_only_its_impacted_tests() {
+    let settle = vec![SETTLE.to_owned()];
+    let files = TestSelection::Files(vec!["tests/test_settle.py".to_owned()]);
+    let Some((ran, impacted)) = impacted_reruns("tool.pytest", files) else {
+        return;
+    };
+    assert_eq!(ran, [settle.clone(), settle.clone(), settle.clone()]);
+    assert_eq!(impacted, Some(vec!["tests/test_settle.py".to_owned()]));
+    let tests = TestSelection::Tests(settle.clone());
+    let (ran, impacted) = impacted_reruns("tool.pytest", tests).unwrap();
+    assert_eq!(ran, [settle.clone(), settle.clone(), settle.clone()]);
+    assert_eq!(impacted, Some(settle));
+}
+
+/// A range that impacts no test reruns nothing and says so; IDs of another runner choose
+/// nothing it can rerun, so it reruns every test (ADR-190).
+#[test]
+fn a_range_with_no_impacted_test_reruns_nothing() {
+    let Some((ran, impacted)) = impacted_reruns("tool.pytest", TestSelection::Files(Vec::new()))
+    else {
+        return;
+    };
+    assert_eq!((ran.len(), impacted), (0, Some(Vec::new())));
+    let other = TestSelection::Tests(vec![SETTLE.to_owned()]);
+    let (ran, impacted) = impacted_reruns("tool.unittest", other).unwrap();
+    assert_eq!((ran[0].len(), impacted), (3, None));
 }

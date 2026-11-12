@@ -111,6 +111,21 @@ pub struct Focus {
     /// cases a property runs (ADR-094 §5, ADR-095 §3, ADR-098); `None` for the producer's own
     /// default, or [`case_budget`](Self::case_budget)'s for the depth.
     pub cases: Option<u64>,
+    /// The tests a range impacts in the language, chosen before the run as `tests --impacted`
+    /// chooses them, for producers that rerun only those (ADR-186, ADR-190); `None` without a
+    /// range or when the run chose none for the language.
+    pub impacted: Option<ImpactedTests>,
+}
+
+/// The tests a range impacts in one language (ADR-190): by the runner's test IDs where a
+/// per-test map chose them, else by test file.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ImpactedTests {
+    /// The runner whose test IDs a selection of tests uses; `None` when none can run them.
+    pub runner: Option<ProducerId>,
+    /// The impacted tests (`Tests`) or test files (`Files`), empty when the range impacts none;
+    /// `All` when neither a per-test map nor the import graph could choose them.
+    pub selection: TestSelection,
 }
 
 impl Default for Focus {
@@ -123,6 +138,7 @@ impl Default for Focus {
             base: None,
             jobs: None,
             cases: None,
+            impacted: None,
         }
     }
 }

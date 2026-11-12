@@ -9,6 +9,16 @@ expression: pretty(&schema)
   "description": "The baseline's tests, rerun (ADR-078).",
   "type": "object",
   "properties": {
+    "impacted": {
+      "description": "The tests a range scope impacts, which are all the reruns ran (ADR-186): test IDs, or test\nfiles where the language chose them by imports; empty when the range impacts no test, and\n`None` when the reruns ran every test.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
     "runner": {
       "description": "The runner whose baseline was rerun, such as `tool.pytest`.",
       "$ref": "#/$defs/ProducerId"
@@ -28,11 +38,12 @@ expression: pretty(&schema)
     }
   },
   "required": [
+    "impacted",
     "runner",
     "runs",
     "seed"
   ],
-  "x-cupel-fact-version": 1,
+  "x-cupel-fact-version": 2,
   "$defs": {
     "ProducerId": {
       "description": "A producer's ID, such as `lang.go`, `tool.pytest-cov`, or `engine.mutation`.",
