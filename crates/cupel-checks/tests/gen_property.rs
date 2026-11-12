@@ -385,21 +385,24 @@ fn finding_ids_are_stable_and_distinct() {
     assert_ne!(first[0], first[1]);
 }
 
-#[test]
-fn a_property_that_pins_its_cases_is_noted_and_its_failure_counts_the_cases_it_ran() {
+/// A run over a falsified property pinned at 120 cases, a failed one pinned at a count that is not
+/// a literal, and a passing one that pins none.
+fn pinned_run() -> (cupel_core::CheckResult, Recorded) {
     let mut counted = property("test_counted", PropertyOutcome::Falsified, Some("n=100000"));
     counted.pinned = Some(Pinned { cases: Some(120) });
     let mut uncounted = property("test_uncounted", PropertyOutcome::Failed, None);
     uncounted.pinned = Some(Pinned { cases: None });
-    let (result, recorded) = run_over(
-        results(vec![
-            counted,
-            uncounted,
-            property("test_budgeted", PropertyOutcome::Passed, None),
-        ]),
+    let budgeted = property("test_budgeted", PropertyOutcome::Passed, None);
+    run_over(
+        results(vec![counted, uncounted, budgeted]),
         None,
         &ALL_FILES,
-    );
+    )
+}
+
+#[test]
+fn a_property_that_pins_its_cases_is_noted_and_its_failure_counts_the_cases_it_ran() {
+    let (result, recorded) = pinned_run();
     assert_eq!(
         kinds(&recorded.findings),
         [
