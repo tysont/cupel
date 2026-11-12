@@ -2,7 +2,7 @@
 // ABOUTME: how many have been applied (ADR-045 §4). Append new scripts; never edit an applied one.
 
 /// Every migration, in order. Migration `n` (1-based) moves the store from version `n - 1` to `n`.
-pub const MIGRATIONS: &[&str] = &[V1, V2, V3, V4, V5];
+pub const MIGRATIONS: &[&str] = &[V1, V2, V3, V4, V5, V6];
 
 /// Every table of design §8.8, with the ADR-045 §5 additions.
 const V1: &str = "
@@ -174,5 +174,14 @@ CREATE TABLE oracles (
     verified_at TEXT NOT NULL,
     verified_hash TEXT NOT NULL,
     run_id TEXT NOT NULL
+);
+";
+
+/// The `mutation_baselines` table (ADR-185): how long the mutation engine's unmutated baseline took, by the suite hash it
+/// ran under, so a later production with the same suite times its file copies without running it again.
+const V6: &str = "
+CREATE TABLE mutation_baselines (
+    suite_hash TEXT PRIMARY KEY,
+    elapsed_ms INTEGER NOT NULL
 );
 ";

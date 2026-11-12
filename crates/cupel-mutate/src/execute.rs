@@ -13,6 +13,7 @@ use cupel_core::{
 
 use tempfile::TempDir;
 
+use crate::baseline::{self, Baseline};
 use crate::overlay::Slot;
 use crate::phases::{Phases, Served};
 use crate::plan::Planned;
@@ -38,6 +39,8 @@ pub struct Execution<'a> {
     pub phases: &'a Phases,
     /// Each test's duration in the baseline, which orders a narrowed mutant's tests (ADR-160).
     pub baseline: &'a BTreeMap<String, Duration>,
+    /// The unmutated baseline that times every file copy (ADR-185).
+    pub reference: &'a Baseline<'a>,
 }
 
 /// What a mutant's run found.
@@ -98,8 +101,6 @@ pub enum Validation {
 #[derive(PartialEq, Eq)]
 enum Holds {
     Original,
-    /// The original with one more trailing newline, as a reference run leaves it.
-    Renewed,
     Schemata,
 }
 
@@ -146,7 +147,8 @@ impl Execution<'_> {
         let (ran, elapsed) = self.unmutated(
             0,
             &ctx,
-            run,
+            &self.union(&run.mutants),
+            Some(run.file),
             MutationPhase::Validate,
             &RunOptions {
                 prebuilt: Some(prebuilt.clone()),
@@ -212,9 +214,14 @@ impl Execution<'_> {
         order.sort_by_key(|index| id(build, *index).is_none());
         let next = AtomicUsize::new(0);
         let found: Mutex<Vec<Option<Ran>>> = Mutex::new(vec![None; run.mutants.len()]);
+        let reference = match build {
+            Build::Copies => self.reference(run)?,
+            Build::Schemata { .. } => Duration::ZERO,
+        };
         let work = Work {
             run,
             build,
+            reference,
             order: &order,
             next: &next,
             found: &found,
@@ -247,7 +254,7 @@ impl Execution<'_> {
     }
 
     /// Writes `run`'s original file back into every slot it uses, after its mutants ended in an
-    /// error (the budget, a cancellation, a reference that is not green), so no slot keeps a
+    /// error (the budget, a cancellation, a baseline that is not green), so no slot keeps a
     /// mutant or a schemata build of it (ADR-141 §3). A slot that cannot be written is made
     /// whole by its next sync.
     pub fn restore(&self, run: &FileRun<'_>) {
@@ -261,23 +268,22 @@ impl Execution<'_> {
         self.slots.len().min(run.mutants.len())
     }
 
-    /// One slot's work on a file: the reference (unless the schemata build was validated), the
-    /// runner's start-up for one test, then mutants until none is left, then the original file
-    /// back.
+    /// One slot's work on a file: the runner's start-up for one test, then mutants until none is
+    /// left, then the original file back. File copies are timed by the production's baseline,
+    /// schemata by the validated build's.
     fn work(&self, index: usize, slot: &Slot, work: &Work<'_>) -> Result<()> {
-        let (run, build) = (work.run, work.build);
+        let (run, build, reference) = (work.run, work.build, work.reference);
         let ctx = self.slot_ctx(slot)?;
-        let (reference, limit, holds, prebuilt) = match build {
+        let (limit, holds, prebuilt) = match build {
             Build::Copies => {
                 for (importer, text) in run.importers {
                     write(slot, importer, text)?;
                 }
-                let reference = self.reference(index, slot, &ctx, run)?;
-                (reference, self.limit(reference), Holds::Renewed, None)
+                (self.limit(reference), Holds::Original, None)
             }
             Build::Schemata {
                 limits, prebuilt, ..
-            } => (Duration::ZERO, limits[index], Holds::Schemata, *prebuilt),
+            } => (limits[index], Holds::Schemata, *prebuilt),
         };
         let startup = self.startup(slot, &ctx, run, prebuilt)?;
         let mut worker = Worker {
@@ -336,33 +342,67 @@ impl Execution<'_> {
         Ok(ctx)
     }
 
-    /// Runs the tests of `run`'s mutants against the unmutated file with one more trailing
-    /// newline, which builds and loads like the original but is new to every build cache (by
-    /// content or by time), so the run rebuilds what a mutant would; how long it took. A
-    /// reference that is not green means the slot does not reproduce the baseline.
-    fn reference(
-        &self,
-        index: usize,
-        slot: &Slot,
-        ctx: &ProduceCtx,
-        run: &FileRun<'_>,
-    ) -> Result<Duration> {
+    /// How long the production's unmutated baseline took, which times every file copy (ADR-185):
+    /// this production's, else the store's under its suite hash, else measured now in the first
+    /// slot and stored. The measurement runs the whole suite with `run`'s file holding one more
+    /// trailing newline, which builds and loads like the original but is new to every build
+    /// cache (by content or by time), so the run rebuilds what a mutant would. A baseline that is
+    /// not green means the slot does not reproduce the tree's.
+    fn reference(&self, run: &FileRun<'_>) -> Result<Duration> {
+        if let Some(elapsed) = self.reference.elapsed() {
+            return Ok(elapsed);
+        }
+        let cores = std::thread::available_parallelism().map_or(1, std::num::NonZero::get);
+        let commands = self
+            .runner
+            .commands(self.ctx, self.whole)
+            .unwrap_or_default();
+        let key = self.reference.key(
+            &self.ctx.ctx.root,
+            &commands,
+            self.runner.outputs(),
+            threads(cores, self.slots.len()),
+        );
+        if let Some(elapsed) = key
+            .as_deref()
+            .and_then(|key| baseline::stored(&self.ctx.writer, key))
+        {
+            return Ok(self.reference.keep(elapsed));
+        }
+        let slot = &self.slots[0];
+        let ctx = self.slot_ctx(slot)?;
+        for (importer, text) in run.importers {
+            write(slot, importer, text)?;
+        }
         let mut renewed = run.original.to_vec();
         renewed.push(b'\n');
         write(slot, run.file, &renewed)?;
-        let (ran, elapsed) = self.build(index, ctx, run)?;
+        let measured = self.unmutated(
+            0,
+            &ctx,
+            self.whole,
+            None,
+            MutationPhase::Build,
+            &self.options(None, 0),
+        );
+        write(slot, run.file, run.original)?;
+        let (ran, elapsed) = measured?;
+        // A run the cancellation reached measured nothing to keep.
+        self.ctx.cancel.checkpoint()?;
         if !ran.results.is_green() {
             return Err(Error::Process {
                 program: self.runner.id().to_string(),
                 message: format!(
-                    "the unmutated `{}` does not pass its tests in the mutation overlay at {}: {}",
-                    run.file,
+                    "the unmutated tree does not pass its tests in the mutation overlay at {}: {}",
                     slot.root().display(),
                     why_red(&ran)
                 ),
             });
         }
-        Ok(elapsed)
+        if let Some(key) = &key {
+            baseline::store(&self.ctx.writer, key, elapsed);
+        }
+        Ok(self.reference.keep(elapsed))
     }
 
     /// The runner's start-up for a run of one test in `slot` (ADR-160 §3): the wall time of the
@@ -411,8 +451,9 @@ impl Execution<'_> {
         Ok(Some(elapsed))
     }
 
-    /// The build every mutant of `run`'s file shares, in slot `index` (`ctx` is the slot's): the
-    /// file's selected tests with no mutant, built where they run, recorded as the `build` phase.
+    /// The schemata build every mutant of `run`'s file shares, in slot `index` (`ctx` is the
+    /// slot's): the file's selected tests with no mutant, built where they run, recorded as the
+    /// `build` phase.
     fn build(
         &self,
         index: usize,
@@ -420,37 +461,45 @@ impl Execution<'_> {
         run: &FileRun<'_>,
     ) -> Result<(TestRun, Duration)> {
         let options = self.options(None, 0);
-        self.unmutated(index, ctx, run, MutationPhase::Build, &options)
+        let selection = self.union(&run.mutants);
+        self.unmutated(
+            index,
+            ctx,
+            &selection,
+            Some(run.file),
+            MutationPhase::Build,
+            &options,
+        )
     }
 
-    /// Runs `run`'s file's selected tests with no mutant in slot `index` with `options`, timed
-    /// and recorded as `phase`. A run over the slot's memory budget is an error naming the
-    /// setting: every mutant of the file would be.
+    /// Runs `selection` with no mutant in slot `index` with `options`, for the mutants of `file`
+    /// (`None`: the production's), timed and recorded as `phase`. A run over the slot's memory
+    /// budget is an error naming the setting: every mutant would be.
     fn unmutated(
         &self,
         index: usize,
         ctx: &ProduceCtx,
-        run: &FileRun<'_>,
+        selection: &TestSelection,
+        file: Option<&str>,
         phase: MutationPhase,
         options: &RunOptions,
     ) -> Result<(TestRun, Duration)> {
-        let selection = self.union(&run.mutants);
         let started = Instant::now();
         let tmp = scratch()?;
-        let ran = match self.runner.run(ctx, &selection, &within(options, &tmp)) {
+        let ran = match self.runner.run(ctx, selection, &within(options, &tmp)) {
             Err(Error::OutOfMemory { limit, .. }) => return Err(over_budget(self.runner, limit)),
             ran => ran?,
         };
         let served = Served {
-            file: Some(run.file),
+            file,
             slot: Some(index),
-            tests: selected(&selection),
+            tests: selected(selection),
         };
         self.phases.record(phase, served, started);
         Ok((ran, started.elapsed()))
     }
 
-    /// A mutant's timeout after a reference run of `elapsed`.
+    /// A mutant's timeout after a baseline or validation run of `elapsed`.
     fn limit(&self, elapsed: Duration) -> Duration {
         self.settings.timeout(elapsed)
     }
@@ -590,7 +639,7 @@ impl Execution<'_> {
         started: Instant,
     ) -> Result<()> {
         for (position, test) in sequence.tests.iter().enumerate() {
-            // A file copy's first run rebuilds the mutant, which the reference run also did.
+            // A file copy's first run rebuilds the mutant, which the baseline run also did.
             let build = if position == 0 && found.strategy == MutationStrategy::FileCopy {
                 worker.reference
             } else {
@@ -730,7 +779,7 @@ struct Worker<'a> {
     ctx: ProduceCtx,
     /// The timeout of a mutant that runs its selection as one run.
     limit: Duration,
-    /// How long the file's reference run took, its build included; zero for a validated
+    /// How long the production's baseline took, its build included; zero for a validated
     /// schemata build.
     reference: Duration,
     /// The runner's start-up for a run of one test; `None` when no mutant of the file is
@@ -743,6 +792,8 @@ struct Worker<'a> {
 struct Work<'a> {
     run: &'a FileRun<'a>,
     build: &'a Build<'a>,
+    /// The production's baseline time for file copies; zero for schemata.
+    reference: Duration,
     /// Indexes of `run.mutants` in the order they are taken.
     order: &'a [usize],
     next: &'a AtomicUsize,

@@ -2504,6 +2504,19 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
 
 #### Notes
 
+- **Item 11, the mutation baseline once per package** (2026-11-11, [ADR-185](adr/CUPEL_DECISION_185.md)).
+  - The gap: each file copy's mutants began with a reference run of the file's selected tests in every slot the file used: 3,801 s of `build_ms` in a 6,595 s run on Molten.
+  - Now file copies are timed by one unmutated baseline per production (`cupel-mutate` `baseline.rs`): the whole suite (less ADR-147's slow tests) once in the first slot, with the first file copy's file renewed so the run includes the rebuild a mutant pays. Its time is stored in the store's `mutation_baselines` (migration 6) by a suite hash, and a later production reuses it while the hash holds.
+  - The suite hash: the whole suite's hash (test IDs and test files), the toolchain hash (engine, runner, tool version), Cupel's version, the runner's commands for the whole suite, the test threads per slot (the timing depends on them), and the content of every file a slot mirrors (what `.gitignore` does not ignore) under the directories those commands run in, the whole tree when the runner names none. Which sources a test loads is not knowable without running it, so the package roots' files stand for them: any change in the package reruns the baseline, a change outside it does not.
+  - Timeouts still derive from measured timings: a whole-suite mutant gets `timeout_factor` times the baseline, and a narrowed file copy's first test gets the baseline as its rebuild allowance, as it got the file's reference run before (more generous now, since the baseline runs the whole suite; ADR-160's per-test caps are unchanged).
+  - Engine paths: file copies (every language but Rust, and Rust under `strategy = "file-copy"`) run one baseline per production, or none when stored. Rust schemata keep their per-file validated build (ADR-082 §5, ADR-141, ADR-150 §8), which times their gated mutants, so a Rust production whose files all build as schemata runs no baseline; a Rust file that falls back to file copies, wholly or under a runner that builds once, uses the production's baseline in the first slot.
+  - The baseline is a `build` phase row naming no file. A red baseline is still an error (the slot does not reproduce the tree); a cancelled one is not stored.
+  - Tests:
+    - `cupel-mutate/tests/baseline.rs`: once in the first slot over the whole suite; reused by a later production; rerun after a source or a test changes;
+    - `cupel-mutate/tests/overlay.rs`: the content hash follows only the mirrored files under its directories;
+    - `cupel-mutate/tests/phases.rs`: the file-copy breakdown builds once, in the first slot;
+    - `cupel-store/tests/store.rs`: baselines stored by suite hash and replaced.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

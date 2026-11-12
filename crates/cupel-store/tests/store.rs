@@ -1,5 +1,5 @@
 // ABOUTME: Tests for the fact store: opening through a `Writer`, migrations, recording and reading
-// ABOUTME: runs, findings, checks, metrics, baselines, facts, symbols, suppressions, and oracles (ADR-045).
+// ABOUTME: runs, findings, checks, metrics, baselines, facts, symbols, suppressions, oracles (ADR-045), and mutation baselines.
 use std::fs;
 use std::path::PathBuf;
 
@@ -219,6 +219,7 @@ fn migrations_run_from_empty_and_reopening_changes_nothing() {
             "findings",
             "metrics",
             "mutants",
+            "mutation_baselines",
             "oracles",
             "runs",
             "schema_version",
@@ -753,7 +754,19 @@ fn the_oracles_table_holds_only_verifications_so_every_column_is_required() {
             required("run_id"),
         ]
     );
-    assert_eq!(Store::SCHEMA_VERSION, 5);
+    assert_eq!(Store::SCHEMA_VERSION, 6);
+}
+
+#[test]
+fn a_mutation_baseline_is_stored_by_suite_hash_and_replaced() {
+    let repo = Repo::new();
+    let store = repo.store();
+    assert_eq!(store.mutation_baseline("suite-a").unwrap(), None);
+    store.put_mutation_baseline("suite-a", 1_200).unwrap();
+    store.put_mutation_baseline("suite-b", 300).unwrap();
+    store.put_mutation_baseline("suite-a", 900).unwrap();
+    assert_eq!(store.mutation_baseline("suite-a").unwrap(), Some(900));
+    assert_eq!(store.mutation_baseline("suite-b").unwrap(), Some(300));
 }
 
 /// Records runs 1 to `runs`, each from a thread of its own with a store of its own.

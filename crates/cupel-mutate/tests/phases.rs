@@ -1,5 +1,5 @@
 // ABOUTME: The engine's phase breakdown (ADR-150): a production's `phases` are its timeline, one plan, a sync per slot,
-// ABOUTME: a build per slot per file (with the tests it selected), a rewrite per schemata file, and a run per mutant.
+// ABOUTME: one file-copy baseline per production (ADR-185), a rewrite and a build per schemata file, a run per mutant.
 mod support;
 
 use std::collections::BTreeSet;
@@ -32,7 +32,8 @@ fn ran(outcomes: &MutationOutcomes) -> Vec<(String, u64)> {
 }
 
 #[test]
-fn a_file_copy_production_plans_once_syncs_each_slot_builds_in_each_and_runs_each_mutant() {
+fn a_file_copy_production_plans_once_syncs_each_slot_builds_once_in_the_first_and_runs_each_mutant()
+{
     let Some((_dir, outcomes)) = support::python() else {
         return;
     };
@@ -40,9 +41,10 @@ fn a_file_copy_production_plans_once_syncs_each_slot_builds_in_each_and_runs_eac
     assert_eq!(plan.len(), 1, "{:?}", outcomes.phases);
     assert_eq!((plan[0].file.as_deref(), plan[0].slot), (None, None));
     assert_eq!(
-        slots(&outcomes, MutationPhase::Sync),
         slots(&outcomes, MutationPhase::Build),
-        "every slot the file's build used was synced first"
+        BTreeSet::from([Some(0)]),
+        "the production's baseline ran once, in the first slot: {:?}",
+        outcomes.phases
     );
     assert!(
         of(&outcomes, MutationPhase::Sync)
@@ -51,11 +53,11 @@ fn a_file_copy_production_plans_once_syncs_each_slot_builds_in_each_and_runs_eac
         "{:?}",
         outcomes.phases
     );
-    // Without a per-test map every mutant runs the whole suite: no test count on the builds.
+    // The baseline is the production's, not a file's, and runs the whole suite: no test count.
     assert!(
         of(&outcomes, MutationPhase::Build)
             .iter()
-            .all(|row| row.file.as_deref() == Some("discount.py") && row.tests.is_none()),
+            .all(|row| row.file.is_none() && row.tests.is_none()),
         "{:?}",
         outcomes.phases
     );
@@ -71,16 +73,16 @@ fn a_file_copy_production_plans_once_syncs_each_slot_builds_in_each_and_runs_eac
 }
 
 #[test]
-fn with_a_per_test_map_the_build_counts_the_tests_the_files_mutants_selected_together() {
+fn with_a_per_test_map_the_baseline_runs_the_whole_suite_and_each_run_counts_its_tests() {
     let Some((_dir, outcomes)) = support::python_per_test() else {
         return;
     };
-    // The covered mutants of `discount.py` select the large and the small test between them.
-    let tests: BTreeSet<Option<u32>> = of(&outcomes, MutationPhase::Build)
+    // The baseline is the package's whole suite, whatever the mutants select (ADR-185).
+    let tests: Vec<Option<u32>> = of(&outcomes, MutationPhase::Build)
         .iter()
         .map(|row| row.tests)
         .collect();
-    assert_eq!(tests, BTreeSet::from([Some(2)]), "{:?}", outcomes.phases);
+    assert_eq!(tests, [None], "{:?}", outcomes.phases);
     let runs: BTreeSet<Option<u32>> = of(&outcomes, MutationPhase::Run)
         .iter()
         .map(|row| row.tests)

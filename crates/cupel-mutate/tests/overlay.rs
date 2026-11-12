@@ -1,5 +1,5 @@
 // ABOUTME: Worker overlays (ADR-080 §8): a slot mirrors the tree, links ignored directories, writes mutants as private
-// ABOUTME: copies that never reach the original, restores them newer than the mutant, and follows the tree's changes.
+// ABOUTME: copies that never reach the original, restores them newer than the mutant, follows the tree's changes, and hashes it.
 use std::fs;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
@@ -183,5 +183,27 @@ fn a_symlink_in_the_tree_is_the_same_symlink_in_the_slot() {
             read(slot.root(), "alias/other.py")
         ),
         (Path::new("src").to_path_buf(), "X = 1\n".to_owned())
+    );
+}
+
+/// The content hash a production's baseline is stored by (ADR-185) covers the mirrored files under its directories:
+/// a change to one of them changes it; an ignored file, Cupel's own, or a file outside the directories does not.
+#[test]
+fn the_content_hash_follows_the_mirrored_files_under_its_directories_only() {
+    let repo = repository();
+    let root = repo.path();
+    let hash = || cupel_mutate::overlay::content_hash(root, &["src"], &[]).unwrap();
+    let before = hash();
+    fs::write(root.join("target/build.out"), "rebuilt\n").unwrap();
+    fs::write(root.join(".cupel/cupel.db"), "another store\n").unwrap();
+    fs::write(root.join("fixtures/.cupel/cache/report"), "outside src\n").unwrap();
+    assert_eq!(hash(), before);
+    fs::write(root.join("src/other.py"), "X = 2\n").unwrap();
+    assert_ne!(hash(), before);
+    let whole = cupel_mutate::overlay::content_hash(root, &["."], &[]).unwrap();
+    fs::write(root.join("fixtures/.cupel/cache/report"), "changed again\n").unwrap();
+    assert_ne!(
+        cupel_mutate::overlay::content_hash(root, &["."], &[]).unwrap(),
+        whole
     );
 }

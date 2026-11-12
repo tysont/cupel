@@ -6,6 +6,7 @@
 //! of earlier runs) and nothing else from Cupel; it names no language, tool, or check. Only
 //! `cupel-cli` and `cupel-fixtures` call [`register`].
 
+mod baseline;
 mod engine;
 mod equivalent;
 mod execute;

@@ -98,6 +98,33 @@ impl Own {
     }
 }
 
+/// BLAKE3 of the path and content of every file a slot of `tree` mirrors under one of `dirs`
+/// (relative to `tree`, `.` for all of it), in path order: every file its `.gitignore`s do not
+/// ignore, but `.git`, `.cupel`, and the directories named in `outputs` (ADR-185).
+pub fn content_hash(tree: &Path, dirs: &[&str], outputs: &[&str]) -> io::Result<String> {
+    let own = Own(outputs.iter().map(|name| (*name).to_owned()).collect());
+    let under = |path: &Path| {
+        dirs.iter()
+            .any(|dir| matches!(*dir, "." | "") || path.starts_with(dir))
+    };
+    let mut hasher = blake3::Hasher::new();
+    for (path, entry) in mirrored(tree, &own)? {
+        if !under(&path) {
+            continue;
+        }
+        let content = match entry {
+            Entry::Dir => continue,
+            Entry::File(source) => fs::read(source)?,
+            Entry::Link(target) => target.to_string_lossy().into_owned().into_bytes(),
+        };
+        hasher.update(path.to_string_lossy().as_bytes());
+        hasher.update(&[0]);
+        hasher.update(&content);
+        hasher.update(&[0]);
+    }
+    Ok(hasher.finalize().to_hex().to_string())
+}
+
 /// Every path a slot of `tree` should hold, relative to it.
 fn wanted(tree: &Path, own: &Own) -> io::Result<BTreeMap<PathBuf, Entry>> {
     let mut kept = mirrored(tree, own)?;

@@ -14,6 +14,7 @@ use cupel_core::{
     ProducerRegistry, Result, Runner, SLOW_TEST_MS, Scope, TestResults, TestSelection, WriteError,
 };
 
+use crate::baseline::Baseline;
 use crate::execute::{Execution, FileRun, Ran};
 use crate::history::History;
 use crate::overlay::Slot;
@@ -117,7 +118,8 @@ impl Producer<MutationOutcomes> for MutationEngine {
         let planning = Instant::now();
         let mut planned = plan(&inputs, &|file| read(root, file));
         let running = Running::new(ctx, runner, settings, symbols, &whole);
-        running.run(&mut planned, planning)?;
+        let reference = Baseline::new(&suite_hash, &toolchain);
+        running.run(&mut planned, planning, &reference)?;
         let runs_whole = planned
             .iter()
             .any(|planned| planned.covered && planned.tests.is_none());
@@ -257,11 +259,16 @@ impl<'a> Running<'a> {
         }
     }
 
-    /// Reuses what the store holds and runs the other covered mutants, file by file. The plan
-    /// phase started at `planning` and ends with the history read; a production with nothing
-    /// to run records no phase. A mutant the run's cancellation leaves without an outcome is
+    /// Reuses what the store holds and runs the other covered mutants, file by file, the file
+    /// copies timed by `reference` (ADR-185). The plan phase started at `planning` and ends with
+    /// the history read; a production with nothing to run records no phase. A mutant the run's cancellation leaves without an outcome is
     /// `not-run`, and the production returns what it finished (ADR-172).
-    fn run(&self, planned: &mut [Planned], planning: Instant) -> Result<()> {
+    fn run(
+        &self,
+        planned: &mut [Planned],
+        planning: Instant,
+        reference: &Baseline<'_>,
+    ) -> Result<()> {
         let history = History::load(&self.ctx.writer, planned);
         let mut to_run = Vec::new();
         for (index, mutant) in planned.iter_mut().enumerate() {
@@ -286,6 +293,7 @@ impl<'a> Running<'a> {
             whole: self.whole,
             phases: &self.phases,
             baseline: &self.baseline,
+            reference,
         };
         for (file, indexes) in order {
             if self.ctx.cancel.is_cancelled() {

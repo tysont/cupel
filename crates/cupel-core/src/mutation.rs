@@ -67,8 +67,9 @@ pub enum MutationPhase {
     Rewrite,
     /// The build every mutant of a file shares. With a runner that builds once (ADR-150 §8),
     /// the compile alone, once per file in the first slot; otherwise the schemata validation
-    /// (ADR-082 §5) or a file copy's reference run (ADR-080 §9), the build and the file's
-    /// selected tests with no mutant, once per slot the file used.
+    /// (ADR-082 §5), the build and the file's selected tests with no mutant, once per slot the
+    /// file used. For file copies, the production's unmutated baseline (ADR-185): the whole
+    /// suite with no mutant, once in the first slot and naming no file, unless the store held it.
     Build,
     /// One mutant's test run, as long as the mutant's `duration_ms`.
     Run,

@@ -876,6 +876,32 @@ impl Store {
         })
     }
 
+    /// How long the mutation engine's unmutated baseline took under `suite_hash`, in
+    /// milliseconds, when one is stored (ADR-185).
+    pub fn mutation_baseline(&self, suite_hash: &str) -> Result<Option<u64>> {
+        let elapsed: Option<i64> = self
+            .connection
+            .query_row(
+                "SELECT elapsed_ms FROM mutation_baselines WHERE suite_hash = ?1",
+                [suite_hash],
+                |row| row.get(0),
+            )
+            .optional()?;
+        Ok(elapsed.map(|ms| u64::try_from(ms).unwrap_or_default()))
+    }
+
+    /// Stores that the unmutated baseline took `elapsed_ms` under `suite_hash`, replacing what
+    /// was stored there.
+    pub fn put_mutation_baseline(&self, suite_hash: &str, elapsed_ms: u64) -> Result<()> {
+        self.write(|tx| {
+            tx.execute(
+                "INSERT OR REPLACE INTO mutation_baselines (suite_hash, elapsed_ms) VALUES (?1, ?2)",
+                params![suite_hash, i64::try_from(elapsed_ms).unwrap_or(i64::MAX)],
+            )?;
+            Ok(())
+        })
+    }
+
     /// The last mutant stored under each of `keys` that has one.
     pub fn mutants_by_key(&self, keys: &[String]) -> Result<BTreeMap<String, Mutant>> {
         let mut statement = self.connection.prepare(
