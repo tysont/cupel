@@ -2504,6 +2504,12 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
 
 #### Notes
 
+- **Item 7, mutation progress on `--events`** (2026-11-11, design §7.4).
+  - The gap: the engine emitted no event, so the only `progress` of `tests.mutation` was the scheduler's when the check's language finished: one line in Molten's 6,595 s run.
+  - Now the engine reports `progress` as each mutant finishes (`engine.rs` `Progress`): `done` of `total` planned mutants, the reused and uncovered ones done at the start, `eta_ms` the time left at the mean wall time per mutant run so far (none before the first). Workers signal each finished mutant over a channel and the producing thread emits it, so the sink stays on one thread.
+  - A producer reports progress under its own ID; the scheduler forwards the progress of the producers making a check's facts as that check's (`schedule.rs` `Serving`), so the events read `"id":"tests.mutation"`. The check's own event at the end still counts its targets.
+  - Tests: `cupel-cli/tests/mutation.rs`: a run on the Python fixture streams `(1,6)` to `(6,6)` with an estimate after the first, and a rerun's reused outcomes are all done in its first event.
+
 - **Item 11, the mutation baseline once per package** (2026-11-11, [ADR-185](adr/CUPEL_DECISION_185.md)).
   - The gap: each file copy's mutants began with a reference run of the file's selected tests in every slot the file used: 3,801 s of `build_ms` in a 6,595 s run on Molten.
   - Now file copies are timed by one unmutated baseline per production (`cupel-mutate` `baseline.rs`): the whole suite (less ADR-147's slow tests) once in the first slot, with the first file copy's file renewed so the run includes the rebuild a mutant pays. Its time is stored in the store's `mutation_baselines` (migration 6) by a suite hash, and a later production reuses it while the hash holds.

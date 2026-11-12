@@ -536,7 +536,7 @@ JSONL to stderr or a file; stdout stays reserved for the final envelope.
 {"ev":"run.end","status":"fail","exit_code":1}
 ```
 
-Findings stream as discovered so an agent can act before the run completes. `serve` exposes the same stream over the socket/MCP.
+Findings stream as discovered so an agent can act before the run completes. A check's `progress` counts its targets as each of its languages finishes. While a producer makes a fact a check needs, the producer's progress is reported as that check's, in the producer's units: the mutation engine reports `done` of `total` mutants as each finishes (those reused from the store or uncovered are done from the start), with `eta_ms` the time left at the mean wall time of the mutants run so far. `serve` exposes the same stream over the socket/MCP.
 
 ## 8. Architecture
 

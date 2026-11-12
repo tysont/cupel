@@ -1,5 +1,5 @@
 // ABOUTME: `tests.mutation` through the binary on the Python tests.mutation fixture (ADR-080): a second run reuses
-// ABOUTME: every outcome from the store, a red baseline refuses the run with exit 4, and the survivor's text line.
+// ABOUTME: every outcome, a red baseline refuses the run with exit 4, the survivor's text line, and progress events.
 mod support;
 
 use serde_json::{Value, json};
@@ -127,4 +127,60 @@ fn a_mutation_run_keeps_its_slots_in_the_repository_and_none_in_the_temporary_di
         outcome.stdout
     );
     assert!(!tmp.path().join("cupel-mutate").exists());
+}
+
+/// The `progress` events of `tests.mutation` that a `check --events` run of `repo` streamed before the check ended,
+/// each as `(done, total, eta_ms)`.
+fn progress(repo: &Repo) -> Vec<(u64, u64, Option<u64>)> {
+    let outcome = repo.run(&[
+        "check",
+        "--only",
+        "tests.mutation",
+        "--events",
+        ".cupel/events.jsonl",
+    ]);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
+    let text = std::fs::read_to_string(repo.path(".cupel/events.jsonl")).unwrap();
+    let events: Vec<Value> = text
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .take_while(|event: &Value| event["ev"] != json!("check.end"))
+        .filter(|event| event["ev"] == json!("progress") && event["id"] == json!("tests.mutation"))
+        .collect();
+    events
+        .iter()
+        .map(|event| {
+            (
+                event["done"].as_u64().unwrap(),
+                event["total"].as_u64().unwrap(),
+                event["eta_ms"].as_u64(),
+            )
+        })
+        .collect()
+}
+
+/// The engine reports its mutants as they finish (design §7.4): the uncovered one is done from the start, each run
+/// mutant adds one with an estimate of the time left, and a rerun's reused outcomes are all done at the start.
+#[test]
+fn a_mutation_run_streams_progress_as_each_mutant_finishes() {
+    let Some(repo) = fixture() else { return };
+    let first = progress(&repo);
+    let mutants: Vec<(u64, u64)> = first
+        .iter()
+        .take(6)
+        .map(|(done, total, _)| (*done, *total))
+        .collect();
+    assert_eq!(
+        mutants,
+        [(1, 6), (2, 6), (3, 6), (4, 6), (5, 6), (6, 6)],
+        "{first:?}"
+    );
+    assert_eq!(first[0].2, None, "nothing has run to estimate from");
+    assert!(
+        first[1..6].iter().all(|(_, _, eta)| eta.is_some()),
+        "{first:?}"
+    );
+    assert_eq!(first[5].2, Some(0), "{first:?}");
+    let second = progress(&repo);
+    assert_eq!(second.first(), Some(&(6, 6, None)), "{second:?}");
 }

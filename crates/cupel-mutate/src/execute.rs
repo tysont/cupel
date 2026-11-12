@@ -3,6 +3,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::mpsc::{Sender, channel};
 use std::time::{Duration, Instant};
 
 use cupel_core::{
@@ -208,8 +209,14 @@ impl Execution<'_> {
     /// mutant the run's cancellation left without one (ADR-172).
     ///
     /// File copies under a runner that builds once run in the first slot alone, where the build
-    /// is: any other slot would build everything to run one (ADR-150 §8).
-    pub fn run_file(&self, run: &FileRun<'_>, build: &Build<'_>) -> Result<Vec<Option<Ran>>> {
+    /// is: any other slot would build everything to run one (ADR-150 §8). `finished` is called on
+    /// this thread as each mutant finishes.
+    pub fn run_file(
+        &self,
+        run: &FileRun<'_>,
+        build: &Build<'_>,
+        finished: &mut dyn FnMut(),
+    ) -> Result<Vec<Option<Ran>>> {
         let mut order: Vec<usize> = (0..run.mutants.len()).collect();
         order.sort_by_key(|index| id(build, *index).is_none());
         let next = AtomicUsize::new(0);
@@ -231,14 +238,20 @@ impl Execution<'_> {
                 Build::Copies if self.runner.builds_once() => 1,
                 _ => self.workers(run),
             };
+            let (done, signals) = channel();
             let handles: Vec<_> = self.slots[..workers]
                 .iter()
                 .enumerate()
                 .map(|(index, slot)| {
-                    let work = &work;
-                    scope.spawn(move || self.work(index, slot, work))
+                    let (work, done) = (&work, done.clone());
+                    scope.spawn(move || self.work(index, slot, work, &done))
                 })
                 .collect();
+            drop(done);
+            // Ends when every worker has ended and dropped its sender.
+            for () in signals {
+                finished();
+            }
             handles
                 .into_iter()
                 .filter_map(|handle| handle.join().unwrap_or_else(|_| Err(panicked())).err())
@@ -270,8 +283,8 @@ impl Execution<'_> {
 
     /// One slot's work on a file: the runner's start-up for one test, then mutants until none is
     /// left, then the original file back. File copies are timed by the production's baseline,
-    /// schemata by the validated build's.
-    fn work(&self, index: usize, slot: &Slot, work: &Work<'_>) -> Result<()> {
+    /// schemata by the validated build's. Each mutant it finishes is sent on `done`.
+    fn work(&self, index: usize, slot: &Slot, work: &Work<'_>, done: &Sender<()>) -> Result<()> {
         let (run, build, reference) = (work.run, work.build, work.reference);
         let ctx = self.slot_ctx(slot)?;
         let (limit, holds, prebuilt) = match build {
@@ -300,6 +313,7 @@ impl Execution<'_> {
             if let Ok(mut found) = work.found.lock() {
                 found[mutant] = Some(ran);
             }
+            let _ = done.send(());
         }
         if worker.holds != Holds::Original {
             write(slot, run.file, run.original)?;

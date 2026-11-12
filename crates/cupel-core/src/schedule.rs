@@ -614,9 +614,13 @@ impl<'a, 'j> Execution<'a, 'j> {
     }
 
     /// The facts `task`'s check reads: its language's, its family siblings', the range, and the
-    /// base side's.
+    /// base side's. A producer's progress while making them is the check's (design §7.4).
     fn facts_for(&mut self, task: &Task<'_>, forward: &mut dyn EventSink) -> Result<Facts> {
         let manifest = task.check.manifest();
+        let forward = &mut Serving {
+            forward,
+            check: &manifest.id,
+        };
         let mut facts = Facts::for_manifest(manifest);
         serve(
             &mut self.store,
@@ -1640,6 +1644,36 @@ impl EventSink for CheckSink<'_> {
             lang: self.lang.id.clone(),
             measurement,
         });
+    }
+}
+
+/// Forwards the events of the producers making a check's facts, their progress as the check's.
+struct Serving<'a> {
+    forward: &'a mut dyn EventSink,
+    check: &'a CheckId,
+}
+
+impl EventSink for Serving<'_> {
+    fn emit(&mut self, event: Event) {
+        let event = match event {
+            Event::Progress {
+                done,
+                total,
+                eta_ms,
+                ..
+            } => Event::Progress {
+                id: self.check.clone(),
+                done,
+                total,
+                eta_ms,
+            },
+            event => event,
+        };
+        self.forward.emit(event);
+    }
+
+    fn measure(&mut self, measurement: Measurement) {
+        self.forward.measure(measurement);
     }
 }
 

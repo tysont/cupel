@@ -9,9 +9,10 @@ use cupel_core::syntax::{
     ImportTarget, ModuleGraph, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
 };
 use cupel_core::{
-    Availability, CostClass, Ctx, Error, EventSink, ExcludedTest, FactKind, Langs, MutantOutcome,
-    MutationOutcomes, MutationPhase, PerTestMap, Process, ProduceCtx, Producer, ProducerId,
-    ProducerRegistry, Result, Runner, SLOW_TEST_MS, Scope, TestResults, TestSelection, WriteError,
+    Availability, CheckId, CostClass, Ctx, Error, Event, EventSink, ExcludedTest, FactKind, Langs,
+    MutantOutcome, MutationOutcomes, MutationPhase, PerTestMap, Process, ProduceCtx, Producer,
+    ProducerId, ProducerRegistry, Result, Runner, SLOW_TEST_MS, Scope, TestResults, TestSelection,
+    WriteError,
 };
 
 use crate::baseline::Baseline;
@@ -79,7 +80,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         &self,
         ctx: &ProduceCtx,
         scope: &Scope,
-        _: &mut dyn EventSink,
+        sink: &mut dyn EventSink,
     ) -> Result<MutationOutcomes> {
         let upstream = &ctx.upstream;
         let (Some(baseline), Some(sites), Some(symbols), Some(coverage)) = (
@@ -119,7 +120,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         let mut planned = plan(&inputs, &|file| read(root, file));
         let running = Running::new(ctx, runner, settings, symbols, &whole);
         let reference = Baseline::new(&suite_hash, &toolchain);
-        running.run(&mut planned, planning, &reference)?;
+        running.run(&mut planned, planning, &reference, sink)?;
         let runs_whole = planned
             .iter()
             .any(|planned| planned.covered && planned.tests.is_none());
@@ -268,6 +269,7 @@ impl<'a> Running<'a> {
         planned: &mut [Planned],
         planning: Instant,
         reference: &Baseline<'_>,
+        sink: &mut dyn EventSink,
     ) -> Result<()> {
         let history = History::load(&self.ctx.writer, planned);
         let mut to_run = Vec::new();
@@ -277,6 +279,7 @@ impl<'a> Running<'a> {
                 to_run.push(index);
             }
         }
+        let mut progress = Progress::new(sink, planned.len(), to_run.len());
         if to_run.is_empty() {
             return Ok(());
         }
@@ -299,7 +302,7 @@ impl<'a> Running<'a> {
             if self.ctx.cancel.is_cancelled() {
                 break;
             }
-            self.run_file(&execution, &file, planned, &indexes)?;
+            self.run_file(&execution, &file, planned, &indexes, &mut progress)?;
         }
         Ok(())
     }
@@ -313,6 +316,7 @@ impl<'a> Running<'a> {
         file: &str,
         planned: &mut [Planned],
         indexes: &[usize],
+        progress: &mut Progress<'_>,
     ) -> Result<()> {
         let root = &self.ctx.ctx.root;
         let original = std::fs::read(root.join(file)).map_err(|error| io(root, file, &error))?;
@@ -323,7 +327,9 @@ impl<'a> Running<'a> {
             importers: &importers,
             mutants: indexes.iter().map(|index| &planned[*index]).collect(),
         };
-        let found = match schemata::run_file(execution, self.rewriter, &run) {
+        let found = match schemata::run_file(execution, self.rewriter, &run, &mut || {
+            progress.finished();
+        }) {
             Ok(found) => found,
             Err(Error::Cancelled) => Vec::new(),
             Err(error) => {
@@ -390,6 +396,55 @@ impl<'a> Running<'a> {
                 Some((importer.clone(), std::fs::read(root.join(&importer)).ok()?))
             })
             .collect()
+    }
+}
+
+/// A production's progress on `--events` (design §7.4): its mutants done of all it planned, those
+/// reused or never run (uncovered) done from the start, with the time left estimated from the
+/// mean time of the mutants run so far. The scheduler reports it as the check's it serves.
+struct Progress<'s> {
+    sink: &'s mut dyn EventSink,
+    done: u64,
+    total: u64,
+    /// The mutants run so far, since `started`.
+    ran: u64,
+    started: Instant,
+}
+
+impl<'s> Progress<'s> {
+    /// The progress of `total` mutants, `to_run` of them still to run, reported at once.
+    fn new(sink: &'s mut dyn EventSink, total: usize, to_run: usize) -> Self {
+        let total = u64::try_from(total).unwrap_or(u64::MAX);
+        let mut progress = Self {
+            sink,
+            done: total.saturating_sub(u64::try_from(to_run).unwrap_or(u64::MAX)),
+            total,
+            ran: 0,
+            started: Instant::now(),
+        };
+        if total > 0 {
+            progress.emit();
+        }
+        progress
+    }
+
+    /// One more mutant finished.
+    fn finished(&mut self) {
+        self.done += 1;
+        self.ran += 1;
+        self.emit();
+    }
+
+    fn emit(&mut self) {
+        let left = self.total.saturating_sub(self.done);
+        let spent = u64::try_from(self.started.elapsed().as_millis()).unwrap_or(u64::MAX);
+        let eta_ms = (self.ran > 0).then(|| spent.saturating_mul(left) / self.ran);
+        self.sink.emit(Event::Progress {
+            id: CheckId::from(ID),
+            done: self.done,
+            total: self.total,
+            eta_ms,
+        });
     }
 }
 

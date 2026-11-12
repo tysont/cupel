@@ -55,14 +55,16 @@ pub fn rewriter(lang: &str) -> Option<&'static dyn Rewriter> {
 
 /// Runs the mutants of `run`: behind one validated schemata build where `rewriter` places them,
 /// as file copies otherwise, each with why it fell back (ADR-082 §5–6); `None` for each mutant
-/// the run's cancellation left without an outcome (ADR-172).
+/// the run's cancellation left without an outcome (ADR-172). `finished` is called as each
+/// mutant finishes.
 pub fn run_file(
     execution: &Execution<'_>,
     rewriter: Option<&dyn Rewriter>,
     run: &FileRun<'_>,
+    finished: &mut dyn FnMut(),
 ) -> Result<Vec<Option<Ran>>> {
     let Some(rewriter) = rewriter else {
-        return execution.run_file(run, &Build::Copies);
+        return execution.run_file(run, &Build::Copies, finished);
     };
     let gates: Vec<Gate<'_>> = (1..)
         .zip(&run.mutants)
@@ -79,12 +81,13 @@ pub fn run_file(
         run,
         gates: &gates,
         fallback: BTreeMap::new(),
+        finished,
     };
     let failed = match attempt.schemata()? {
         Ok(ran) => return Ok(ran),
         Err(failed) => failed,
     };
-    let ran = execution.run_file(run, &Build::Copies)?;
+    let ran = execution.run_file(run, &Build::Copies, attempt.finished)?;
     Ok(with_fallback(
         ran,
         &gates,
@@ -101,6 +104,8 @@ struct Attempt<'a> {
     gates: &'a [Gate<'a>],
     /// The gates left to file copies so far, with why.
     fallback: BTreeMap<u32, String>,
+    /// Called as each mutant finishes.
+    finished: &'a mut dyn FnMut(),
 }
 
 impl Attempt<'_> {
@@ -162,7 +167,7 @@ impl Attempt<'_> {
     /// Runs the mutants with `source`, validated with these `limits`, from `prebuilt` when the
     /// runner built once.
     fn gated(
-        &self,
+        &mut self,
         source: &str,
         limits: &[std::time::Duration],
         prebuilt: Option<&cupel_core::Prebuilt>,
@@ -181,7 +186,7 @@ impl Attempt<'_> {
             limits,
             prebuilt,
         };
-        let ran = self.execution.run_file(self.run, &build)?;
+        let ran = self.execution.run_file(self.run, &build, self.finished)?;
         Ok(with_fallback(ran, self.gates, &self.fallback, None))
     }
 }
@@ -191,7 +196,7 @@ impl Attempt<'_> {
     /// every slot, then the others as file copies, each timed by its own reference, where the
     /// build is (ADR-150 §8); the outcomes in the order of the file's mutants.
     fn shared(
-        &self,
+        &mut self,
         source: &str,
         limits: &[std::time::Duration],
         prebuilt: Option<&cupel_core::Prebuilt>,
@@ -208,6 +213,7 @@ impl Attempt<'_> {
                 .map(|index| self.run.mutants[*index])
                 .collect(),
         };
+        let (gated_run, copies_run) = (part(&gated), part(&copies));
         let gated_ids: Vec<Option<u32>> = gated.iter().map(|index| ids[*index]).collect();
         let build = Build::Schemata {
             source,
@@ -216,11 +222,15 @@ impl Attempt<'_> {
             prebuilt,
         };
         let mut found: Vec<Option<Ran>> = vec![None; ids.len()];
-        let ran = self.execution.run_file(&part(&gated), &build)?;
+        let ran = self
+            .execution
+            .run_file(&gated_run, &build, &mut *self.finished)?;
         for (index, ran) in gated.iter().zip(ran) {
             found[*index] = ran;
         }
-        let ran = self.execution.run_file(&part(&copies), &Build::Copies)?;
+        let ran = self
+            .execution
+            .run_file(&copies_run, &Build::Copies, &mut *self.finished)?;
         for (index, ran) in copies.iter().zip(ran) {
             found[*index] = ran;
         }
