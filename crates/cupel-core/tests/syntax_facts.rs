@@ -193,6 +193,9 @@ fn mutation_operators_use_conformance_names() {
         (MutationOperator::Constant, "constant"),
         (MutationOperator::Boundary, "boundary"),
         (MutationOperator::Negation, "negation"),
+        (MutationOperator::StringEmpty, "string-empty"),
+        (MutationOperator::RegexQuantifier, "regex-quantifier"),
+        (MutationOperator::RegexClass, "regex-class"),
     ]);
     assert_spellings(&[
         (OperatorSet::Default, "default"),

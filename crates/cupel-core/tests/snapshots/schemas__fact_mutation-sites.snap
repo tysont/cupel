@@ -35,7 +35,10 @@ expression: pretty(&schema)
         "return-value",
         "constant",
         "boundary",
-        "negation"
+        "negation",
+        "string-empty",
+        "regex-quantifier",
+        "regex-class"
       ]
     },
     "OperatorSet": {

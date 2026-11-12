@@ -103,6 +103,10 @@ templates = ["{} + 1", "{} - 1"]
 [mutations.negation]
 templates = ["!({})"]
 
+# The `strings` group (ADR-180); regex patterns' edits need no table.
+[mutations.string-empty]
+templates = ["\"\""]
+
 # Jest's globals need no import, so a file whose framework nothing names is a jest file.
 [tests]
 framework = "jest"

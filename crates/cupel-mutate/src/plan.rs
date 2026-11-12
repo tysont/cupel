@@ -28,6 +28,8 @@ pub struct Inputs<'a> {
     pub focus: &'a Focus,
     pub scope: &'a Scope,
     pub operators: OperatorSet,
+    /// Whether the `strings` group runs (ADR-180): only beside the extended set.
+    pub strings: bool,
     /// The baseline's suite hash: the suite hash of a mutant that runs the whole suite.
     pub suite_hash: &'a str,
     /// Identifies the engine, the runner, and its version.
@@ -160,8 +162,12 @@ fn executable(coverage: &CoverageMap, symbol: &SymbolDef, site: &Site) -> bool {
             .is_empty()
 }
 
-/// Whether the configured operator set mutates `site`.
+/// Whether the configured operators mutate `site`: the `strings` group only when it is
+/// enabled, whatever the set and the depth (ADR-180).
 fn wanted(inputs: &Inputs<'_>, site: &Site) -> bool {
+    if site.operator.is_strings() {
+        return inputs.strings && inputs.operators == OperatorSet::Extended;
+    }
     inputs.operators == OperatorSet::Extended || site.set == OperatorSet::Default
 }
 
@@ -306,7 +312,7 @@ pub fn digest(parts: &[&str]) -> String {
 mod tests {
     use cupel_core::coverage::{FileCoverage, LineHits};
     use cupel_core::syntax::{MutationOperator, Site, Span, SymbolKind, SymbolSites, Visibility};
-    use cupel_core::{Focus, LangId};
+    use cupel_core::{CostClass, Focus, LangId};
 
     use super::*;
 
@@ -349,6 +355,102 @@ mod tests {
         }
     }
 
+    /// The operators of the mutants planned over `sites` of `src/lib.rs` with `operators`, the
+    /// `strings` group when `strings`, at `depth`.
+    fn planned_operators(
+        sites: Vec<Site>,
+        operators: OperatorSet,
+        strings: bool,
+        depth: CostClass,
+    ) -> Vec<MutationOperator> {
+        let file = "src/lib.rs";
+        let symbols = Symbols {
+            symbols: vec![symbol(file)],
+        };
+        let sites = MutationSites {
+            symbols: vec![SymbolSites {
+                symbol: symbol(file).key(),
+                sites,
+            }],
+        };
+        let inputs = Inputs {
+            sites: &sites,
+            symbols: &symbols,
+            coverage: &CoverageMap::new(Vec::new()),
+            norm: None,
+            conventions: None,
+            frames: None,
+            per_test: None,
+            focus: &Focus {
+                depth,
+                ..Focus::default()
+            },
+            scope: &Scope::of_files(vec![file.to_owned()]),
+            operators,
+            strings,
+            suite_hash: "suite",
+            toolchain_hash: "toolchain",
+        };
+        plan(&inputs, &|_| Some(SOURCE.to_owned()))
+            .iter()
+            .map(|planned| planned.mutant.operator)
+            .collect()
+    }
+
+    #[test]
+    fn the_strings_group_is_planned_only_when_enabled_whatever_the_depth() {
+        use MutationOperator::{Constant, Relational, StringEmpty};
+        // `"off"` on line 3: a string the strings group empties; the `>` of line 2 a default
+        // site; the `1` of line 2 an extended constant.
+        let string = Site {
+            operator: MutationOperator::StringEmpty,
+            set: OperatorSet::Extended,
+            from: "\"off\"".to_owned(),
+            to: vec!["\"\"".to_owned()],
+            site_hash: "00000000000000aa".parse().unwrap(),
+            span: Span {
+                line: 3,
+                col: 21,
+                end_line: 3,
+                end_col: 26,
+            },
+        };
+        let constant = Site {
+            operator: MutationOperator::Constant,
+            set: OperatorSet::Extended,
+            from: "1".to_owned(),
+            to: vec!["0".to_owned()],
+            site_hash: "00000000000000bb".parse().unwrap(),
+            span: Span {
+                line: 2,
+                col: 19,
+                end_line: 2,
+                end_col: 20,
+            },
+        };
+        let sites = vec![site(2), constant, string];
+        let run =
+            |operators, strings, depth| planned_operators(sites.clone(), operators, strings, depth);
+        assert_eq!(
+            [
+                run(OperatorSet::Default, false, CostClass::Standard),
+                run(OperatorSet::Default, false, CostClass::Deep),
+                run(OperatorSet::Extended, false, CostClass::Standard),
+                run(OperatorSet::Extended, false, CostClass::Deep),
+                run(OperatorSet::Extended, true, CostClass::Standard),
+                run(OperatorSet::Extended, true, CostClass::Deep),
+            ],
+            [
+                vec![Relational],
+                vec![Relational],
+                vec![Relational, Constant],
+                vec![Relational, Constant],
+                vec![Relational, Constant, StringEmpty],
+                vec![Relational, Constant, StringEmpty],
+            ]
+        );
+    }
+
     /// The lines of `file`'s mutants with `coverage`: line 2 instrumented and never run.
     fn planned_lines(file: &str, coverage: &CoverageMap) -> Vec<(u32, bool)> {
         let symbols = Symbols {
@@ -371,6 +473,7 @@ mod tests {
             focus: &Focus::default(),
             scope: &Scope::of_files(vec![file.to_owned()]),
             operators: OperatorSet::Default,
+            strings: false,
             suite_hash: "suite",
             toolchain_hash: "toolchain",
         };

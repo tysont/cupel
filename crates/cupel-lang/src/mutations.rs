@@ -7,8 +7,10 @@
 //! token, a literal, a statement, a returned value, a condition). `<operator>` is one of
 //! `relational`, `equality`, `arith-add-sub`, `arith-mul-div`, `boolean-op`,
 //! `boolean-literal`, `zero-one` (the `default` set) or `statement-deletion`, `return-value`,
-//! `constant`, `boundary`, `negation` (the `extended` set); the set follows from the operator.
-//! `[mutations.<operator>]` gives the replacements. A site belongs to the innermost symbol
+//! `constant`, `boundary`, `negation`, and the `strings` group's `string-empty`,
+//! `regex-quantifier`, `regex-class` (the `extended` set); the set follows from the operator.
+//! `[mutations.<operator>]` gives the replacements, except a regex pattern's, whose edits
+//! [`crate::regex`] computes (ADR-180). A site belongs to the innermost symbol
 //! that contains it; every symbol gets an entry. Sites are ordered by position, outer before
 //! inner, then by operator.
 //!
@@ -28,6 +30,7 @@ use crate::normalize::hex16;
 use crate::parse::Parsed;
 use crate::producer::{QueryProducer, Source};
 use crate::query::{matches, span};
+use crate::regex;
 use crate::spec::QueryFile;
 use crate::symbols::{Definition, definitions};
 
@@ -106,7 +109,11 @@ fn site(
     tables: &crate::tables::Tables,
 ) -> Option<Site> {
     let from = parsed.text(node);
-    let to = tables.mutations.get(&operator)?.of(from);
+    let to = match operator {
+        MutationOperator::RegexQuantifier => regex::quantifier_edits(from),
+        MutationOperator::RegexClass => regex::class_edits(from),
+        _ => tables.mutations.get(&operator)?.of(from),
+    };
     if to.is_empty() {
         return None;
     }
@@ -134,7 +141,10 @@ pub fn set_of(operator: MutationOperator) -> OperatorSet {
         | MutationOperator::ReturnValue
         | MutationOperator::Constant
         | MutationOperator::Boundary
-        | MutationOperator::Negation => OperatorSet::Extended,
+        | MutationOperator::Negation
+        | MutationOperator::StringEmpty
+        | MutationOperator::RegexQuantifier
+        | MutationOperator::RegexClass => OperatorSet::Extended,
     }
 }
 

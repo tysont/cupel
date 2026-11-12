@@ -1,5 +1,5 @@
-// ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, jobs, timeout_factor, strategy }` (ADR-080,
-// ABOUTME: ADR-082) and the cap and budget a check declares for its fact (ADR-147, ADR-148): slots, timeouts, memory, builds.
+// ABOUTME: The engine's settings, from `[lang.<id>] mutation = { operators, strings, jobs, timeout_factor, strategy }`
+// ABOUTME: (ADR-080, ADR-082, ADR-187) and the cap and budget a check declares for its fact (ADR-147, ADR-148): slots, timeouts, memory, builds.
 use std::time::Duration;
 
 use cupel_core::config::{MemoryLimit, TimeLimit};
@@ -44,6 +44,8 @@ pub struct Settings {
     pub max_mutant_timeout: Duration,
     /// The resident memory the slots' runs may hold together (ADR-148).
     pub max_mutant_memory: MemoryLimit,
+    /// Whether the `strings` group of the extended set runs too (ADR-180, ADR-187).
+    pub strings: bool,
 }
 
 /// How the engine builds mutants (ADR-082).
@@ -66,6 +68,7 @@ impl Settings {
             strategy: Strategy::Schemata,
             max_mutant_timeout: DEFAULT_MAX_MUTANT_TIMEOUT,
             max_mutant_memory: default_memory(),
+            strings: false,
         }
         .declared(declared)?;
         let Some(table) = config.get(KEY) else {
@@ -76,6 +79,9 @@ impl Settings {
             match key.as_str() {
                 "operators" => settings.operators = choice("mutation.operators", value, OPERATORS)?,
                 "strategy" => settings.strategy = choice("mutation.strategy", value, STRATEGIES)?,
+                "strings" => {
+                    settings.strings = value.as_bool().ok_or_else(|| invalid(STRINGS, value))?;
+                }
                 "jobs" => settings.jobs = count("mutation.jobs", value)?,
                 "timeout_factor" => {
                     let what = "mutation.timeout_factor";
@@ -84,6 +90,14 @@ impl Settings {
                 }
                 _ => return Err(invalid("mutation", &Value::String(key.clone()))),
             }
+        }
+        if settings.strings && settings.operators != OperatorSet::Extended {
+            return Err(Error::InvalidValue {
+                what: STRINGS,
+                value: "true".to_owned(),
+                expected: "`strings = true` beside `operators = \"extended\"`: the `strings` \
+                           group is part of the extended set",
+            });
         }
         Ok(settings)
     }
@@ -158,6 +172,9 @@ fn cap(value: &Value) -> Result<Duration> {
         })
 }
 
+/// The setting enabling the `strings` group.
+const STRINGS: &str = "mutation.strings";
+
 /// The operator sets, by name.
 const OPERATORS: &[(&str, OperatorSet)] = &[
     ("default", OperatorSet::Default),
@@ -199,8 +216,8 @@ fn invalid(what: &'static str, value: &Value) -> Error {
     Error::InvalidValue {
         what,
         value: value.to_string(),
-        expected: "`mutation = { operators = \"default\" | \"extended\", jobs = <positive \
-                   integer>, timeout_factor = <positive integer>, strategy = \"schemata\" | \
-                   \"file-copy\" }`",
+        expected: "`mutation = { operators = \"default\" | \"extended\", strings = <boolean>, \
+                   jobs = <positive integer>, timeout_factor = <positive integer>, strategy = \
+                   \"schemata\" | \"file-copy\" }`",
     }
 }

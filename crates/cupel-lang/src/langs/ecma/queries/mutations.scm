@@ -46,3 +46,26 @@
 
 (while_statement
   condition: (parenthesized_expression (_) @mut.negation))
+
+; The `strings` group (extended, and off unless enabled; ADR-180). A non-empty string is a site
+; where it is a value, never as a type, a key, an import, or a directive. A regex's pattern is a
+; site of both regex operators, whose edits the producer computes.
+((variable_declarator value: (string) @mut.string-empty)
+  (#not-any-of? @mut.string-empty "\"\"" "''"))
+((assignment_expression right: (string) @mut.string-empty)
+  (#not-any-of? @mut.string-empty "\"\"" "''"))
+((pair value: (string) @mut.string-empty)
+  (#not-any-of? @mut.string-empty "\"\"" "''"))
+((arguments (string) @mut.string-empty)
+  (#not-any-of? @mut.string-empty "\"\"" "''"))
+((array (string) @mut.string-empty)
+  (#not-any-of? @mut.string-empty "\"\"" "''"))
+((ternary_expression [consequence: (string) alternative: (string)] @mut.string-empty)
+  (#not-any-of? @mut.string-empty "\"\"" "''"))
+((binary_expression [left: (string) right: (string)] @mut.string-empty)
+  (#not-any-of? @mut.string-empty "\"\"" "''"))
+((return_statement (string) @mut.string-empty)
+  (#not-any-of? @mut.string-empty "\"\"" "''"))
+
+(regex pattern: (regex_pattern) @mut.regex-quantifier)
+(regex pattern: (regex_pattern) @mut.regex-class)

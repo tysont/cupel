@@ -39,3 +39,25 @@
 (if_statement condition: (_) @mut.negation)
 (elif_clause condition: (_) @mut.negation)
 (while_statement condition: (_) @mut.negation)
+
+; The `strings` group (extended, and off unless enabled; ADR-180). A non-empty string is a site
+; where it is a value, never a docstring or a dictionary key. Prefixed empty strings (`b''`,
+; `f""`) are empty too.
+((assignment right: (string) @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))
+((pair value: (string) @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))
+((argument_list (string) @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))
+((keyword_argument value: (string) @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))
+((list (string) @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))
+((conditional_expression (string) @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))
+((binary_operator [left: (string) right: (string)] @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))
+((comparison_operator (string) @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))
+((return_statement (string) @mut.string-empty)
+  (#not-match? @mut.string-empty "^[A-Za-z]*(\"\"|'')$"))

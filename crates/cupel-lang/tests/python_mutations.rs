@@ -11,7 +11,7 @@ use support::{
 
 use MutationOperator::{
     ArithAddSub, ArithMulDiv, BooleanLiteral, BooleanOp, Boundary, Constant, Equality, Negation,
-    Relational, ReturnValue, StatementDeletion, ZeroOne,
+    Relational, ReturnValue, StatementDeletion, StringEmpty, ZeroOne,
 };
 
 #[test]
@@ -66,6 +66,28 @@ fn tally_has_literal_augmented_assignment_and_statement_deletion_sites() {
             row(BooleanLiteral, "True", &["False"], 14),
             row(StatementDeletion, "log_total(total)", &["pass"], 15),
             row(ReturnValue, "total, overdrawn", &["None"], 16),
+        ]
+    );
+}
+
+#[test]
+fn value_strings_are_strings_group_sites() {
+    // A docstring, an empty string, and a dictionary key are not sites.
+    let dir = tree(&[(
+        "a.py",
+        "def label(n):\n    \"\"\"Name n items.\"\"\"\n    if n == \"one\":\n        return 'single'\n    word = f\"{n} items\" + \"\" + b''\n    return show({\"key\": word}, sep=\";\")\n",
+    )]);
+    let strings: Vec<_> = summary(&sites_of("python", dir.path(), "a.label"))
+        .into_iter()
+        .filter(|(operator, ..)| operator.is_strings())
+        .collect();
+    assert_eq!(
+        strings,
+        [
+            row(StringEmpty, "\"one\"", &["\"\""], 3),
+            row(StringEmpty, "'single'", &["\"\""], 4),
+            row(StringEmpty, "f\"{n} items\"", &["\"\""], 5),
+            row(StringEmpty, "\";\"", &["\"\""], 6),
         ]
     );
 }

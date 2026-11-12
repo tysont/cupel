@@ -1054,6 +1054,13 @@ max_mutant_timeout = "5m"               # the longest any mutant's run may take;
 max_mutant_memory = "6g"                # what the workers' runs may hold together; default 50% of physical memory
 ```
 
+String and regex literals have their own operators, the `strings` group: a non-empty string used as a value becomes `""` (JavaScript, TypeScript, Python), and in a JavaScript or TypeScript regex literal each quantifier is edited (`*`↔`+`, a `?` removed, `{n,m}` to `{n}`) and each class too (a negated class un-negated, a range narrowed to its first member). They make many equivalent mutants (log messages, labels), so the group is off unless a language enables it, beside the extended set; neither `operators = "extended"` nor `--depth deep` turns it on ([ADR-180](docs/adr/CUPEL_DECISION_180.md), [ADR-187](docs/adr/CUPEL_DECISION_187.md)):
+
+```toml
+[lang.typescript]
+mutation = { operators = "extended", strings = true }   # `strings = true` needs `operators = "extended"`
+```
+
 Mutation testing is expensive, so the engine stacks every saving it can. Before the first mutant, the baseline, the coverage report, and the per-test map come from [one run of the suite](#one-suite-run) where the toolchain allows, or from its cache when nothing changed. Then:
 
 1. **Coverage gating.** A site no test runs, by the coverage report, is reported `uncovered` and never run. A site on a line the report does not instrument, in a file it does (code a `cfg` or build tag leaves out of the build, a constant the compiler evaluates), is not a mutant: no test can reach it.

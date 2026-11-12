@@ -748,7 +748,7 @@ A JavaScript project is a root with `package.json` and no `tsconfig.json`; a Typ
 
 Java and Clojure followed launch (§12, P6.4: ADR-108, ADR-109) using the same contract; Java mutation can delegate to PIT through a producer plugin for `MutationOutcomes`, pinned with `[lang.java] mutator = "plugin.pit"`, which `tests.mutation` consumes without knowing the difference (ADR-110).
 
-Per-language decision-point and mutation-operator tables follow crapper/mutator's definitions (§3) as the default operator set `default`; an `extended` set adds statement deletion, return-value replacement, constant replacement, boundary (`+1/-1`), and negation. `extended` is opt-in because it increases equivalent-mutant rate.
+Per-language decision-point and mutation-operator tables follow crapper/mutator's definitions (§3) as the default operator set `default`; an `extended` set adds statement deletion, return-value replacement, constant replacement, boundary (`+1/-1`), and negation. `extended` is opt-in because it increases equivalent-mutant rate. Within `extended`, the `strings` group (a non-empty value string to `""`; regex quantifier and class edits) runs only when a language also sets `mutation = { operators = "extended", strings = true }`; `extended` alone and `--depth deep` leave it off ([ADR-180](adr/CUPEL_DECISION_180.md), [ADR-187](adr/CUPEL_DECISION_187.md)).
 
 #### 8.4.4 Adding a language
 

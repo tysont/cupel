@@ -13,7 +13,7 @@ use support::{
 
 use MutationOperator::{
     ArithAddSub, ArithMulDiv, BooleanLiteral, BooleanOp, Boundary, Constant, Equality, Negation,
-    Relational, ReturnValue, StatementDeletion, ZeroOne,
+    RegexClass, RegexQuantifier, Relational, ReturnValue, StatementDeletion, StringEmpty, ZeroOne,
 };
 
 /// Asserts that `display` has `expected` sites in both fixture repositories: the TypeScript
@@ -81,6 +81,7 @@ fn loose_equality_is_negated_loosely() {
                 23,
             ),
             row(Equality, "==", &["!="], 23),
+            row(StringEmpty, "\"none\"", &["\"\""], 23),
         ],
     );
 }
@@ -117,6 +118,44 @@ fn statements_outside_blocks_and_fractional_literals_are_not_sites() {
             row(Negation, "a", &["!(a)"], 2),
             row(ReturnValue, "a < 0.5", &["undefined"], 3),
             row(Relational, "<", &["<="], 3),
+        ]
+    );
+}
+
+#[test]
+fn value_strings_and_regex_patterns_are_strings_group_sites() {
+    // A string in a type, an empty string, a template, and an object key are not sites.
+    let dir = tree(&[(
+        "src/a.ts",
+        "function quote(s: string): string {\n  const safe: \"yes\" | \"no\" = \"yes\";\n  if (/^[a-z]+\\d*$/.test(s)) return `${s}`;\n  log({ \"key\": [\"v\"] }, safe ? \"a\" : 'b');\n  return \"'\" + s.replace(/[^\\w-]{1,3}?/g, \"\") + \"'\";\n}\n",
+    )]);
+    let strings: Vec<Row> = summary(&sites_of("typescript", dir.path(), "a.quote"))
+        .into_iter()
+        .filter(|(operator, ..)| operator.is_strings())
+        .collect();
+    assert_eq!(
+        strings,
+        [
+            row(StringEmpty, "\"yes\"", &["\"\""], 2),
+            row(
+                RegexQuantifier,
+                "^[a-z]+\\d*$",
+                &["^[a-z]*\\d*$", "^[a-z]+\\d+$"],
+                3
+            ),
+            row(RegexClass, "^[a-z]+\\d*$", &["^[a]+\\d*$"], 3),
+            row(StringEmpty, "\"v\"", &["\"\""], 4),
+            row(StringEmpty, "\"a\"", &["\"\""], 4),
+            row(StringEmpty, "'b'", &["\"\""], 4),
+            row(StringEmpty, "\"'\"", &["\"\""], 5),
+            row(
+                RegexQuantifier,
+                "[^\\w-]{1,3}?",
+                &["[^\\w-]{1}?", "[^\\w-]{1,3}"],
+                5
+            ),
+            row(RegexClass, "[^\\w-]{1,3}?", &["[\\w-]{1,3}?"], 5),
+            row(StringEmpty, "\"'\"", &["\"\""], 5),
         ]
     );
 }

@@ -1003,6 +1003,21 @@
           ]
         },
         {
+          "from": "\"refund\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "b9ca3c16d09251eb",
+          "span": {
+            "col": 12,
+            "end_col": 20,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "amount === 0",
           "operator": "negation",
           "set": "extended",
@@ -1060,6 +1075,21 @@
           },
           "to": [
             ""
+          ]
+        },
+        {
+          "from": "\"empty\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "09a3a09d5ca1f1a6",
+          "span": {
+            "col": 12,
+            "end_col": 19,
+            "end_line": 8,
+            "line": 8
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -1138,6 +1168,21 @@
           ]
         },
         {
+          "from": "\"huge\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "cc77d34d2a147e26",
+          "span": {
+            "col": 12,
+            "end_col": 18,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "amount > limit * 10",
           "operator": "negation",
           "set": "extended",
@@ -1213,6 +1258,21 @@
           ]
         },
         {
+          "from": "\"large\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "18464e545d56d2d5",
+          "span": {
+            "col": 12,
+            "end_col": 19,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "amount > limit",
           "operator": "negation",
           "set": "extended",
@@ -1258,6 +1318,21 @@
           ]
         },
         {
+          "from": "\"over\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "8713864ea40a8e21",
+          "span": {
+            "col": 12,
+            "end_col": 18,
+            "end_line": 14,
+            "line": 14
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "amount === limit",
           "operator": "negation",
           "set": "extended",
@@ -1300,6 +1375,21 @@
           },
           "to": [
             ""
+          ]
+        },
+        {
+          "from": "\"at-limit\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "e4d0480adaf6f534",
+          "span": {
+            "col": 12,
+            "end_col": 22,
+            "end_line": 16,
+            "line": 16
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -1378,6 +1468,21 @@
           ]
         },
         {
+          "from": "\"high\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "89021eea26c56de2",
+          "span": {
+            "col": 12,
+            "end_col": 18,
+            "end_line": 18,
+            "line": 18
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "amount > limit / 4",
           "operator": "negation",
           "set": "extended",
@@ -1453,6 +1558,21 @@
           ]
         },
         {
+          "from": "\"medium\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "aac3b5f4212632c0",
+          "span": {
+            "col": 12,
+            "end_col": 20,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "amount > limit / 10",
           "operator": "negation",
           "set": "extended",
@@ -1525,6 +1645,21 @@
           },
           "to": [
             ""
+          ]
+        },
+        {
+          "from": "\"low\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "d1204fbbd5512f77",
+          "span": {
+            "col": 12,
+            "end_col": 17,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -1604,6 +1739,21 @@
           ]
         },
         {
+          "from": "\"tiny\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a38f85bf5d7dd55f",
+          "span": {
+            "col": 12,
+            "end_col": 18,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "name = \"unit\";",
           "operator": "statement-deletion",
           "set": "extended",
@@ -1616,6 +1766,21 @@
           },
           "to": [
             ""
+          ]
+        },
+        {
+          "from": "\"unit\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "e6fd635bb9c4979c",
+          "span": {
+            "col": 12,
+            "end_col": 18,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -1901,6 +2066,786 @@
           "to": [
             "undefined"
           ]
+        },
+        {
+          "from": "\"ACME LEDGER\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "b82a21953127c037",
+          "span": {
+            "col": 5,
+            "end_col": 18,
+            "end_line": 60,
+            "line": 60
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"===========\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "2eea371a568449de",
+          "span": {
+            "col": 5,
+            "end_col": 18,
+            "end_line": 61,
+            "line": 61
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Account holder:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "b9219ed1009c3d9d",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 63,
+            "line": 63
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Account number:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "f547c41c04e452be",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 64,
+            "line": 64
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Branch:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "3481a131f4c898a5",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 65,
+            "line": 65
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Currency:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "d2476fd0d13a9d9d",
+          "span": {
+            "col": 5,
+            "end_col": 16,
+            "end_line": 66,
+            "line": 66
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Statement period:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "09a8f604e1ef1050",
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 67,
+            "line": 67
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Opening balance\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "1e90277a9ff2499d",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 69,
+            "line": 69
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"---------------\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "4b3c3b2fc27e0844",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 70,
+            "line": 70
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Balance brought forward:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "0056790cdcfe9e4a",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 71,
+            "line": 71
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Pending credits:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "46836b27e965a92c",
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 72,
+            "line": 72
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Pending debits:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "435beb3b3b85a09a",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 73,
+            "line": 73
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Credits\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "810f6e0387983312",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 75,
+            "line": 75
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"-------\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "35a254de0d9f4e6c",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 76,
+            "line": 76
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Deposits:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "aedccf4667d4594e",
+          "span": {
+            "col": 5,
+            "end_col": 16,
+            "end_line": 77,
+            "line": 77
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Transfers in:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "d964116c1fe793b0",
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 78,
+            "line": 78
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Interest:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "4c7fbf9d8b0594fe",
+          "span": {
+            "col": 5,
+            "end_col": 16,
+            "end_line": 79,
+            "line": 79
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Refunds:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "4dcf64bd581b6a9c",
+          "span": {
+            "col": 5,
+            "end_col": 15,
+            "end_line": 80,
+            "line": 80
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Adjustments:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "6f9f128d3799e981",
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 81,
+            "line": 81
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Debits\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "1d841bf256ae4027",
+          "span": {
+            "col": 5,
+            "end_col": 13,
+            "end_line": 83,
+            "line": 83
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"------\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "d77e4a0db547b7f2",
+          "span": {
+            "col": 5,
+            "end_col": 13,
+            "end_line": 84,
+            "line": 84
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Withdrawals:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "addac104e105a0a2",
+          "span": {
+            "col": 5,
+            "end_col": 19,
+            "end_line": 85,
+            "line": 85
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Transfers out:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "b2cc2e1113f8f1ba",
+          "span": {
+            "col": 5,
+            "end_col": 21,
+            "end_line": 86,
+            "line": 86
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Card payments:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "3a4f349cc222d3d5",
+          "span": {
+            "col": 5,
+            "end_col": 21,
+            "end_line": 87,
+            "line": 87
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Direct debits:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "f3ce411d0997a400",
+          "span": {
+            "col": 5,
+            "end_col": 21,
+            "end_line": 88,
+            "line": 88
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Standing orders:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "f02722f509690ed6",
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 89,
+            "line": 89
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Fees:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "dbcd6e5e272db2d5",
+          "span": {
+            "col": 5,
+            "end_col": 12,
+            "end_line": 90,
+            "line": 90
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Charges:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "7188f05039c4fe78",
+          "span": {
+            "col": 5,
+            "end_col": 15,
+            "end_line": 91,
+            "line": 91
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Closing balance\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "6b107be54b67388e",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 93,
+            "line": 93
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"---------------\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "673c6a727971b269",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 94,
+            "line": 94
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Balance carried forward:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "6bdcf402776d1036",
+          "span": {
+            "col": 5,
+            "end_col": 31,
+            "end_line": 95,
+            "line": 95
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Available balance:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "716586285fcfbb98",
+          "span": {
+            "col": 5,
+            "end_col": 25,
+            "end_line": 96,
+            "line": 96
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Overdraft limit:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "4d5aaae0b5abd8c6",
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 97,
+            "line": 97
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Overdraft used:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "63fbd3f46809d485",
+          "span": {
+            "col": 5,
+            "end_col": 22,
+            "end_line": 98,
+            "line": 98
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Notices\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "cb2297fcc63892ba",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 100,
+            "line": 100
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"-------\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "caea68690732e384",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 101,
+            "line": 101
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Rates changed this period.\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "d36751ff792ade8f",
+          "span": {
+            "col": 5,
+            "end_col": 33,
+            "end_line": 102,
+            "line": 102
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Fees are listed above.\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "5a6b2c63a25f0b64",
+          "span": {
+            "col": 5,
+            "end_col": 29,
+            "end_line": 103,
+            "line": 103
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Keep this statement for your records.\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "4412adf164a3b4a2",
+          "span": {
+            "col": 5,
+            "end_col": 44,
+            "end_line": 104,
+            "line": 104
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Report errors within thirty days.\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a6ddf74291142c01",
+          "span": {
+            "col": 5,
+            "end_col": 40,
+            "end_line": 105,
+            "line": 105
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Contact\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "d01e60e6738f46a6",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 107,
+            "line": 107
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"-------\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "708e7e1fc739cbac",
+          "span": {
+            "col": 5,
+            "end_col": 14,
+            "end_line": 108,
+            "line": 108
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Telephone:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "de7cf7553956134a",
+          "span": {
+            "col": 5,
+            "end_col": 17,
+            "end_line": 109,
+            "line": 109
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Email:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "f336f6c0f55fcfc3",
+          "span": {
+            "col": 5,
+            "end_col": 13,
+            "end_line": 110,
+            "line": 110
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Post:\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "ba47648252dafc3c",
+          "span": {
+            "col": 5,
+            "end_col": 12,
+            "end_line": 111,
+            "line": 111
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Opening hours\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a973285c6c20dd92",
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 113,
+            "line": 113
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"-------------\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "8bc2bca47e390e80",
+          "span": {
+            "col": 5,
+            "end_col": 20,
+            "end_line": 114,
+            "line": 114
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Weekdays: 9 to 5\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "96a29e46e9104131",
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 115,
+            "line": 115
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Saturday: 9 to 12\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "79b4d314a5351896",
+          "span": {
+            "col": 5,
+            "end_col": 24,
+            "end_line": 116,
+            "line": 116
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Sunday: closed\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "dd06c36619ebf9e1",
+          "span": {
+            "col": 5,
+            "end_col": 21,
+            "end_line": 117,
+            "line": 117
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"Page 1 of 1\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a3b8d89d38949efe",
+          "span": {
+            "col": 5,
+            "end_col": 18,
+            "end_line": 119,
+            "line": 119
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"End of statement\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "9a87e07322633755",
+          "span": {
+            "col": 5,
+            "end_col": 23,
+            "end_line": 120,
+            "line": 120
+          },
+          "to": [
+            "\"\""
+          ]
         }
       ],
       "symbol": {
@@ -2029,6 +2974,21 @@
           ]
         },
         {
+          "from": "\"jan\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "d5c99ebfd1cdc760",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 142,
+            "line": 142
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "2",
           "operator": "constant",
           "set": "extended",
@@ -2056,6 +3016,21 @@
           },
           "to": [
             "undefined"
+          ]
+        },
+        {
+          "from": "\"feb\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "18bc04351c3885f8",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 144,
+            "line": 144
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -2089,6 +3064,21 @@
           ]
         },
         {
+          "from": "\"mar\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "12999ed4932b01df",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 146,
+            "line": 146
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "4",
           "operator": "constant",
           "set": "extended",
@@ -2116,6 +3106,21 @@
           },
           "to": [
             "undefined"
+          ]
+        },
+        {
+          "from": "\"apr\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "67a98b120ff477eb",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 148,
+            "line": 148
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -2149,6 +3154,21 @@
           ]
         },
         {
+          "from": "\"may\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "f09697279856f36c",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 150,
+            "line": 150
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "6",
           "operator": "constant",
           "set": "extended",
@@ -2176,6 +3196,21 @@
           },
           "to": [
             "undefined"
+          ]
+        },
+        {
+          "from": "\"jun\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "27cdb98a30960823",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 152,
+            "line": 152
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -2209,6 +3244,21 @@
           ]
         },
         {
+          "from": "\"jul\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "5c87561acff2b390",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 154,
+            "line": 154
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "8",
           "operator": "constant",
           "set": "extended",
@@ -2236,6 +3286,21 @@
           },
           "to": [
             "undefined"
+          ]
+        },
+        {
+          "from": "\"aug\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "44bad73a6a064fbc",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 156,
+            "line": 156
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -2269,6 +3334,21 @@
           ]
         },
         {
+          "from": "\"sep\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "1eb23561f671c729",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 158,
+            "line": 158
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "10",
           "operator": "constant",
           "set": "extended",
@@ -2296,6 +3376,21 @@
           },
           "to": [
             "undefined"
+          ]
+        },
+        {
+          "from": "\"oct\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "8de1c0b0babbe464",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 160,
+            "line": 160
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -2329,6 +3424,21 @@
           ]
         },
         {
+          "from": "\"nov\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "ff67eab8e7d9c74a",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 162,
+            "line": 162
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "12",
           "operator": "constant",
           "set": "extended",
@@ -2359,6 +3469,21 @@
           ]
         },
         {
+          "from": "\"dec\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "8cdb7e6e2f23e55b",
+          "span": {
+            "col": 14,
+            "end_col": 19,
+            "end_line": 164,
+            "line": 164
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "\"none\"",
           "operator": "return-value",
           "set": "extended",
@@ -2371,6 +3496,21 @@
           },
           "to": [
             "undefined"
+          ]
+        },
+        {
+          "from": "\"none\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "bd51597202ed3391",
+          "span": {
+            "col": 14,
+            "end_col": 20,
+            "end_line": 166,
+            "line": 166
+          },
+          "to": [
+            "\"\""
           ]
         }
       ],
@@ -3137,6 +4277,21 @@
           ]
         },
         {
+          "from": "\"overdrawn\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "34a7e32b112886a4",
+          "span": {
+            "col": 12,
+            "end_col": 23,
+            "end_line": 3,
+            "line": 3
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "balance === 0",
           "operator": "negation",
           "set": "extended",
@@ -3197,6 +4352,21 @@
           ]
         },
         {
+          "from": "\"empty\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "802588d1c6dda60f",
+          "span": {
+            "col": 12,
+            "end_col": 19,
+            "end_line": 5,
+            "line": 5
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "balance > limit ? \"rich\" : \"ok\"",
           "operator": "return-value",
           "set": "extended",
@@ -3224,6 +4394,36 @@
           },
           "to": [
             ">="
+          ]
+        },
+        {
+          "from": "\"rich\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "458b460415f44851",
+          "span": {
+            "col": 28,
+            "end_col": 34,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"ok\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "33b87a76e4f6a8d2",
+          "span": {
+            "col": 37,
+            "end_col": 41,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "\"\""
           ]
         }
       ],
@@ -3351,6 +4551,21 @@
           ]
         },
         {
+          "from": "\"money in\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "d5c99ebfd1cdc760",
+          "span": {
+            "col": 14,
+            "end_col": 24,
+            "end_line": 22,
+            "line": 22
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "\"money out\"",
           "operator": "return-value",
           "set": "extended",
@@ -3366,6 +4581,21 @@
           ]
         },
         {
+          "from": "\"money out\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "18bc04351c3885f8",
+          "span": {
+            "col": 14,
+            "end_col": 25,
+            "end_line": 24,
+            "line": 24
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "\"unknown\"",
           "operator": "return-value",
           "set": "extended",
@@ -3378,6 +4608,21 @@
           },
           "to": [
             "undefined"
+          ]
+        },
+        {
+          "from": "\"unknown\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "c931fc12c9fe451e",
+          "span": {
+            "col": 14,
+            "end_col": 23,
+            "end_line": 26,
+            "line": 26
+          },
+          "to": [
+            "\"\""
           ]
         }
       ],
@@ -3402,6 +4647,21 @@
           },
           "to": [
             "!(!text)"
+          ]
+        },
+        {
+          "from": "\"empty amount\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "cb4227c0a61d40e5",
+          "span": {
+            "col": 21,
+            "end_col": 35,
+            "end_line": 32,
+            "line": 32
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -3666,6 +4926,51 @@
     {
       "sites": [
         {
+          "from": "\"utf8\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "7f59ac3294d4d640",
+          "span": {
+            "col": 51,
+            "end_col": 57,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"./report.cjs\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "8f74f9924ace8836",
+          "span": {
+            "col": 36,
+            "end_col": 50,
+            "end_line": 12,
+            "line": 12
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
+          "from": "\"\\n\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "13b3eda8867fca9e",
+          "span": {
+            "col": 45,
+            "end_col": 49,
+            "end_line": 13,
+            "line": 13
+          },
+          "to": [
+            "\"\""
+          ]
+        },
+        {
           "from": "summary(amounts.map((amount) => toCents(add(amount, square(side(generated))))))",
           "operator": "return-value",
           "set": "extended",
@@ -3849,6 +5154,21 @@
           },
           "to": [
             ""
+          ]
+        },
+        {
+          "from": "\"ledger\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a85df26ec977d68f",
+          "span": {
+            "col": 21,
+            "end_col": 29,
+            "end_line": 2,
+            "line": 2
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -4251,6 +5571,21 @@
           },
           "to": [
             "!="
+          ]
+        },
+        {
+          "from": "\"none\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "462ed8c1b3b1ad9d",
+          "span": {
+            "col": 31,
+            "end_col": 37,
+            "end_line": 23,
+            "line": 23
+          },
+          "to": [
+            "\"\""
           ]
         }
       ],
@@ -4717,6 +6052,21 @@
           },
           "to": [
             "undefined"
+          ]
+        },
+        {
+          "from": "\"\\n\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "17f799635c7f6d3c",
+          "span": {
+            "col": 52,
+            "end_col": 56,
+            "end_line": 4,
+            "line": 4
+          },
+          "to": [
+            "\"\""
           ]
         }
       ],
@@ -5860,6 +7210,21 @@
           "to": [
             "0"
           ]
+        },
+        {
+          "from": "\"overdrawn\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "4af4a1a3214c3721",
+          "span": {
+            "col": 34,
+            "end_col": 45,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "\"\""
+          ]
         }
       ],
       "symbol": {
@@ -5914,6 +7279,21 @@
           "to": [
             "0"
           ]
+        },
+        {
+          "from": "\"rich\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "4af4a1a3214c3721",
+          "span": {
+            "col": 36,
+            "end_col": 42,
+            "end_line": 10,
+            "line": 10
+          },
+          "to": [
+            "\"\""
+          ]
         }
       ],
       "symbol": {
@@ -5938,6 +7318,21 @@
           "to": [
             ""
           ]
+        },
+        {
+          "from": "\"deposit\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "5172a757c3015217",
+          "span": {
+            "col": 26,
+            "end_col": 35,
+            "end_line": 15,
+            "line": 15
+          },
+          "to": [
+            "\"\""
+          ]
         }
       ],
       "symbol": {
@@ -5961,6 +7356,21 @@
           },
           "to": [
             ""
+          ]
+        },
+        {
+          "from": "\"needs a ledger server\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a85df26ec977d68f",
+          "span": {
+            "col": 10,
+            "end_col": 33,
+            "end_line": 19,
+            "line": 19
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -6007,6 +7417,21 @@
           "to": [
             "1"
           ]
+        },
+        {
+          "from": "\"rich\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "9b40f967426cae4a",
+          "span": {
+            "col": 36,
+            "end_col": 42,
+            "end_line": 20,
+            "line": 20
+          },
+          "to": [
+            "\"\""
+          ]
         }
       ],
       "symbol": {
@@ -6045,6 +7470,21 @@
           },
           "to": [
             "0"
+          ]
+        },
+        {
+          "from": "\"1.50\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a85df26ec977d68f",
+          "span": {
+            "col": 33,
+            "end_col": 39,
+            "end_line": 7,
+            "line": 7
+          },
+          "to": [
+            "\"\""
           ]
         }
       ],
@@ -6146,6 +7586,21 @@
           },
           "to": [
             ""
+          ]
+        },
+        {
+          "from": "\"empty amount\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a85df26ec977d68f",
+          "span": {
+            "col": 42,
+            "end_col": 56,
+            "end_line": 11,
+            "line": 11
+          },
+          "to": [
+            "\"\""
           ]
         }
       ],
@@ -7188,6 +8643,21 @@
           "to": [
             ""
           ]
+        },
+        {
+          "from": "\"empty amount\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a85df26ec977d68f",
+          "span": {
+            "col": 42,
+            "end_col": 56,
+            "end_line": 41,
+            "line": 41
+          },
+          "to": [
+            "\"\""
+          ]
         }
       ],
       "symbol": {
@@ -7289,6 +8759,21 @@
           },
           "to": [
             ""
+          ]
+        },
+        {
+          "from": "\"1.00\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "5172a757c3015217",
+          "span": {
+            "col": 20,
+            "end_col": 26,
+            "end_line": 55,
+            "line": 55
+          },
+          "to": [
+            "\"\""
           ]
         },
         {
@@ -7412,6 +8897,21 @@
           },
           "to": [
             "0"
+          ]
+        },
+        {
+          "from": "\"1\\n2\"",
+          "operator": "string-empty",
+          "set": "extended",
+          "site_hash": "a85df26ec977d68f",
+          "span": {
+            "col": 35,
+            "end_col": 41,
+            "end_line": 6,
+            "line": 6
+          },
+          "to": [
+            "\"\""
           ]
         }
       ],

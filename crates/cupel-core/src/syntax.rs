@@ -290,6 +290,23 @@ pub enum MutationOperator {
     Constant,
     Boundary,
     Negation,
+    // The `strings` group (ADR-180): a non-empty string literal to `""`; a regex quantifier
+    // edited (`*`↔`+`, a `?` removed, `{n,m}` to `{n}`); a regex class edited (a negated class
+    // un-negated, a range narrowed to its first member).
+    StringEmpty,
+    RegexQuantifier,
+    RegexClass,
+}
+
+impl MutationOperator {
+    /// Whether the operator is in the `strings` group: extended operators that run only when
+    /// the group is enabled, not with the extended set alone (ADR-180).
+    pub fn is_strings(self) -> bool {
+        matches!(
+            self,
+            Self::StringEmpty | Self::RegexQuantifier | Self::RegexClass
+        )
+    }
 }
 
 /// Operator sets: `default` keeps the equivalent-mutant rate low; `extended` is opt-in.

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_180: String and regex mutation operators, in the extended set, off by default
 
-**Date:** 2026-11-11 · **Status:** accepted · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [026](CUPEL_DECISION_026.md)
+**Date:** 2026-11-11 · **Status:** accepted; detailed by [187](CUPEL_DECISION_187.md) · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [026](CUPEL_DECISION_026.md)
 
 ## Context
 Neither operator set mutated string or regex literals, so escaping and quoting helpers (Molten's `shellQuote`) got no default mutants. ADR-026 left them out to keep equivalent mutants down.

@@ -112,6 +112,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
             focus: &ctx.focus,
             scope: &reachable,
             operators: settings.operators,
+            strings: settings.strings,
             suite_hash: &suite_hash,
             toolchain_hash: &toolchain,
         };

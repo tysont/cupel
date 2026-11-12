@@ -2531,6 +2531,16 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
   - Out of scope (the plan's other patterns): a reassignment on both branches of an `if`, an initial value read only on a path that returns (`signing.ts:165`), comparator and rank-map ties, typed-array writes past the end. Python's keyword-less `x = 0` and JavaScript's `var` are not declarations here (function scope, hoisting).
   - Tests: `cupel-mutate` `equivalent.rs` unit tests: a multi-line and a one-line `importKey` flag marked; not with `exportKey` or `wrapKey` in the function, another method, or another argument; a TypeScript, typed, Rust, and Go initializer marked; not when read first, assigned on one path, braceless-indented, read by the assignment (one line or several), compound-assigned, out of its block, named before, not declared, never reassigned, or when the site is only part of the initializer.
 
+- **Item 8, the `strings` operator group** (2026-11-11, [ADR-180](adr/CUPEL_DECISION_180.md), [ADR-187](adr/CUPEL_DECISION_187.md)).
+  - The gap: neither operator set mutated string or regex literals, so escaping and quoting helpers (Molten's `shellQuote`) got no mutants.
+  - Now three operators make the `strings` group of the extended set: `string-empty` (a non-empty value string to `""`), `regex-quantifier`, `regex-class` (`MutationOperator::is_strings`). JavaScript and TypeScript capture value strings and regex patterns, Python value strings (`mutations.scm`, `[mutations.string-empty]`); the regex edits are computed from the pattern (`cupel-lang` `regex.rs`), one mutant per edit. A string is a site only as a value (a variable's or assignment's value, an argument, an element, an object or dictionary value, a conditional's branch, a binary operand, a returned value): not a type, a key, an import, or a docstring; empty strings are not sites.
+  - How a user enables it: `[lang.<id>] mutation = { operators = "extended", strings = true }` (ADR-187). `strings = true` with the default set is a configuration error naming `mutation.strings`. The sites are always in `mutation-sites` (`set: "extended"`); the planner (`plan.rs` `wanted`) runs them only when the group is enabled, so the default and `extended` sets, at every depth including `--depth deep`, plan the same mutants as before.
+  - Tests:
+    - `cupel-mutate` `plan.rs`: `the_strings_group_is_planned_only_when_enabled_whatever_the_depth` (default and extended at `standard` and `deep` plan no string mutant; enabled, they do);
+    - `cupel-mutate/tests/settings.rs`: the group off by default and with `extended` alone, on with `strings = true`; a non-boolean, or `strings = true` without `extended`, refused;
+    - `cupel-lang/tests/ecma_mutations.rs`, `python_mutations.rs`: value strings and regex patterns are sites, types, keys, templates, docstrings, and empty strings are not; `cupel-lang` `regex.rs` unit tests for each edit;
+    - `cupel-core/tests/syntax_facts.rs`: the operators' spellings; the fact schemas and the JavaScript, TypeScript, and Python `mutation-sites` goldens regenerated (string sites added, no other site changed).
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

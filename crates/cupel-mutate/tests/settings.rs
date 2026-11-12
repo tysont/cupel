@@ -72,7 +72,23 @@ fn each_key_is_read() {
             strategy: Strategy::FileCopy,
             max_mutant_timeout: Duration::from_secs(90),
             max_mutant_memory: memory("3g"),
+            strings: false,
         }
+    );
+}
+
+#[test]
+fn the_strings_group_is_off_unless_enabled_with_the_extended_set() {
+    let read = |value: Value| Settings::read(&table(&value), &Map::new()).unwrap().strings;
+    assert_eq!(
+        [
+            Settings::read(&Map::new(), &Map::new()).unwrap().strings,
+            read(json!({"operators": "extended"})),
+            read(json!({"operators": "extended", "strings": false})),
+            read(json!({"operators": "extended", "strings": true})),
+            read(json!({"strings": true, "operators": "extended"})),
+        ],
+        [false, false, false, true, true]
     );
 }
 
@@ -92,6 +108,9 @@ fn an_unknown_key_or_a_bad_value_is_refused() {
         json!({"operators": "all"}),
         json!({"jobs": 0}),
         json!({"timeout_factor": "ten"}),
+        json!({"operators": "extended", "strings": "yes"}),
+        json!({"strings": true}),
+        json!({"operators": "default", "strings": true}),
         json!("fast"),
     ]
     .iter()
@@ -105,6 +124,9 @@ fn an_unknown_key_or_a_bad_value_is_refused() {
             "mutation.operators",
             "mutation.jobs",
             "mutation.timeout_factor",
+            "mutation.strings",
+            "mutation.strings",
+            "mutation.strings",
             "mutation"
         ]
     );

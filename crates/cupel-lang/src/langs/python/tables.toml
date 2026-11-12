@@ -95,6 +95,10 @@ templates = ["{} + 1", "{} - 1"]
 [mutations.negation]
 templates = ["not ({})"]
 
+# The `strings` group (ADR-180).
+[mutations.string-empty]
+templates = ["\"\""]
+
 [tests]
 framework = "pytest"
 # A test package's harness (a `TestCase` base class, shared functions) sits beside its tests.

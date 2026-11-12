@@ -45,6 +45,9 @@ pub mod capture {
     pub const MUT_CONSTANT: &str = "mut.constant";
     pub const MUT_BOUNDARY: &str = "mut.boundary";
     pub const MUT_NEGATION: &str = "mut.negation";
+    pub const MUT_STRING_EMPTY: &str = "mut.string-empty";
+    pub const MUT_REGEX_QUANTIFIER: &str = "mut.regex-quantifier";
+    pub const MUT_REGEX_CLASS: &str = "mut.regex-class";
     pub const MUT_PREFIX: &str = "mut.";
     // tests.scm
     pub const TEST_CASE: &str = "test.case";
@@ -205,7 +208,11 @@ const MUTATIONS: Contract = Contract {
         c::MUT_BOUNDARY,
         c::MUT_NEGATION,
     ]],
-    optional: &[],
+    optional: &[
+        c::MUT_STRING_EMPTY,
+        c::MUT_REGEX_QUANTIFIER,
+        c::MUT_REGEX_CLASS,
+    ],
     open: &[],
 };
 
