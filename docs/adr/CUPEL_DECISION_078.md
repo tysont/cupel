@@ -1,6 +1,6 @@
 # CUPEL_DECISION_078: Repeated test runs are their own fact, `TestReruns`
 
-**Date:** 2026-10-14 · **Status:** accepted; amended by [158](CUPEL_DECISION_158.md) (a runner whose order cannot matter makes `tests.flaky` skipped `unsupported`, not an error) · **Phase:** P3.5
+**Date:** 2026-10-14 · **Status:** accepted; amended by [158](CUPEL_DECISION_158.md) (a runner whose order cannot matter makes `tests.flaky` skipped `unsupported`, not an error); amended by [186](CUPEL_DECISION_186.md) (owner rulings, 2026-11-11) · **Phase:** P3.5
 
 ## Context
 

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_045: The fact store: file, locking, migrations, and what it indexes
 
-**Date:** 2026-10-13 · **Status:** accepted · **Phase:** P2.2
+**Date:** 2026-10-13 · **Status:** accepted; amended by [181](CUPEL_DECISION_181.md) (owner rulings, 2026-11-11) · **Phase:** P2.2
 
 ## Context
 

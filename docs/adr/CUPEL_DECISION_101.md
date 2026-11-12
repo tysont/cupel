@@ -1,6 +1,6 @@
 # CUPEL_DECISION_101: `static.api-surface`: the public API diffed across a range, `api.breaking` and `api.widened`
 
-**Date:** 2026-10-16 · **Status:** accepted; supersedes the `no-breaking` clause of [060](CUPEL_DECISION_060.md) §6 · **Phase:** P6.2
+**Date:** 2026-10-16 · **Status:** accepted; supersedes the `no-breaking` clause of [060](CUPEL_DECISION_060.md) §6; amended by [176](CUPEL_DECISION_176.md) (owner rulings, 2026-11-11) · **Phase:** P6.2
 
 ## Context
 

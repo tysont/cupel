@@ -1,6 +1,6 @@
 # CUPEL_DECISION_167: Configured `[roots]` are the project's roots, and `init` makes each member of a workspace that delegates its tests a root
 
-**Date:** 2026-11-10 · **Status:** accepted · **Phase:** v0.2.6, Molten field trial Area 5 · Amends [021](CUPEL_DECISION_021.md) §3–4 (nesting decides members; commands from a language's first root) and [037](CUPEL_DECISION_037.md) (`ProjectInfo` reports detected facts only)
+**Date:** 2026-11-10 · **Status:** accepted; amended by [177](CUPEL_DECISION_177.md) and [179](CUPEL_DECISION_179.md) (owner rulings, 2026-11-11) · **Phase:** v0.2.6, Molten field trial Area 5 · Amends [021](CUPEL_DECISION_021.md) §3–4 (nesting decides members; commands from a language's first root) and [037](CUPEL_DECISION_037.md) (`ProjectInfo` reports detected facts only)
 
 ## Context
 

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_052: `static.deps`: modules, coupling, abstractness, distance, cycles, and findings
 
-**Date:** 2026-10-13 · **Status:** accepted; the narrowed-scope consequence amended on 2026-10-25 (P9.9 group 1): afferent coupling counts importers outside the scope · **Phase:** P2.5
+**Date:** 2026-10-13 · **Status:** accepted; the narrowed-scope consequence amended on 2026-10-25 (P9.9 group 1): afferent coupling counts importers outside the scope; amended by [178](CUPEL_DECISION_178.md) (owner rulings, 2026-11-11) · **Phase:** P2.5
 
 ## Context
 

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_175: A range's recomputed base scores the symbols the range touched at the base
 
-**Date:** 2026-11-10 · **Status:** accepted · **Phase:** v0.2.6, Molten field trial Area 8 · Amends [130](CUPEL_DECISION_130.md)
+**Date:** 2026-11-10 · **Status:** accepted; amended by [182](CUPEL_DECISION_182.md) (owner rulings, 2026-11-11) · **Phase:** v0.2.6, Molten field trial Area 8 · Amends [130](CUPEL_DECISION_130.md)
 
 ## Context
 

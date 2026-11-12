@@ -2105,7 +2105,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 **Goal:** The owner's request (2026-11-09): test Cupel against the surface area of a real repository, the owner's `../molten`, one area at a time. In each area, find Cupel's bugs and fix them, and write every true issue in Molten to one file, `../molten/cupel.md`, for Molten's own agent to pick up.
 
-**Status:** complete (2026-11-11). Every area ran and `v0.2.6` is tagged. The calibration and design questions in the Notes are with the owner.
+**Status:** tagged, waiting on owner answers (2026-11-11). Every area ran and `v0.2.6` is tagged at 64c2a13e. Rule 5 makes an area done only when the owner has answered its calibration questions; the owner answered them on 2026-11-11 (the Owner rulings note below).
 
 **Molten.** A pnpm TypeScript monorepo on Cloudflare Workers, at `fbafa8f5`:
 - `apps/agent`: 461 source files, 230 test files. `agent-do.ts` alone is 34,551 lines.
@@ -2352,7 +2352,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - `cupel-adapt/tests/coverage_producers.rs` (provider resolution);
     - `cupel-cli/tests/doctor.rs` (the finding and its install).
   - Open: coverage producers of other tools as fallbacks, and coverage detection at the repository root rather than the run's roots (ADR-170 Consequences).
-- **Fact cache, found in Area 5's daemon measurement.** `Store::put_fact` has no caller, so command-line runs re-parse everything (about 31 s of static checks on Molten, against 10 s through a warm daemon). This is waiting on the owner's decision.
+- **Fact cache, found in Area 5's daemon measurement.** `Store::put_fact` has no caller, so command-line runs re-parse everything (about 31 s of static checks on Molten, against 10 s through a warm daemon). The owner ruled on 2026-11-11 ([ADR-181](adr/CUPEL_DECISION_181.md)).
 
 - **B12, a near miss in Area 6** (2026-11-10, [ADR-171](adr/CUPEL_DECISION_171.md)).
   - The gap: with `[roots]` narrowed to `packages/shared`, the JavaScript coverage producer, which had no roots, fell back to the repository root and ran `npx vitest run --coverage` there.
@@ -2427,6 +2427,19 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
     - `cargo binstall --git` in `rust:1.92-bookworm` downloads the release binary (installed in 4 s, no build).
     - The registry publishes stay skipped (ADR-146).
 
+- **Owner rulings** (2026-11-11), answering the questions of Areas 3 to 11. Each is an ADR; v0.2.7 implements those marked so, and the rest are the next batch's work.
+  1. A TypeScript package's API is what its `exports` map exposes; with no `exports` map, the `main`/`types` entry and its re-exports. Nothing else is API surface ([ADR-176](adr/CUPEL_DECISION_176.md)).
+  2. `[roots]` scope every check, static ones included; files outside all roots are out of scope entirely ([ADR-177](adr/CUPEL_DECISION_177.md)).
+  3. Abstractness: exported functions are concrete; interfaces, abstract classes, and type-only exports are abstract ([ADR-178](adr/CUPEL_DECISION_178.md), which records the adaptation from Martin's class-based metric).
+  4. A package's coverage and mutation include tests from dependent packages when a per-test map names them; without one, own tests only, and the finding says so ([ADR-179](adr/CUPEL_DECISION_179.md)).
+  5. String and regex mutation operators join the extended set, opt-in, off by default ([ADR-180](adr/CUPEL_DECISION_180.md)). v0.2.7.
+  6. Parsed facts persist in the store keyed by content hash and are read on the no-daemon CLI path; target: Molten's cold-CLI parse within 1.5× the warm daemon's ([ADR-181](adr/CUPEL_DECISION_181.md)). v0.2.7.
+  7. Ratchet tolerance per metric: counts δ = 0, `tests.mutation.score` δ = 0.02; the baseline advances only on a passing default-branch run; M8-3 uses these values ([ADR-182](adr/CUPEL_DECISION_182.md)). M8-3 in `cupel.md` is updated.
+  8. A test that pins its own `numRuns` is respected; `property.cases-pinned` at info names the test and count; `--cases` applies only to unpinned tests ([ADR-183](adr/CUPEL_DECISION_183.md)). v0.2.7.
+  9. Calibration: `toContain`, `toMatch`, and `toMatchObject` are not weak; a loop containing an assertion is table-driven, branching is logic; duplicate setup at ≥ 3 tests sharing ≥ 5 identical normalized setup statements; clones within test files report at info and leave the clone gate ([ADR-184](adr/CUPEL_DECISION_184.md)).
+  10. Mutation's unmutated baseline runs once per package per run, stored by suite hash, reused while the hash is unchanged ([ADR-185](adr/CUPEL_DECISION_185.md)). v0.2.7.
+  11. `tests.flaky` reruns impacted tests only; none impacted, skipped with the reason ([ADR-186](adr/CUPEL_DECISION_186.md)). v0.2.7.
+
 - **Open, from Area 11** (2026-11-11). Questions for the owner:
   - **What a TypeScript package's API is.**
     - The one blocking false finding was `api.breaking`. Moving `validateCustomManifest` out of `apps/agent/src/tools/extension-authoring.ts` and updating every importer counted as removing a public item.
@@ -2459,6 +2472,31 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
   - **A pinned property and `--cases`** (Area 9). All six of Molten's fast-check properties pass `{ numRuns }` to `fc.assert`. That wins over Cupel's `fc.configureGlobal`, as ADR-095 §4 decided ("the framework's precedence, not Cupel's"). Two gaps follow. `--cases 1000` ran them at their own 120 to 300 cases and said nothing. And a falsified finding's `evidence.cases` would report the budget, not the count that ran. Hypothesis's `@settings(max_examples=…)` and proptest's `with_cases` behave the same way. Open: note, per property, that its settings fix the count (the framework reports it: fast-check's failure message gives the run count, Hypothesis's statistics give examples), and report the count that ran.
   - **No runner reads `node --test`** (Area 10). The toolchain table has `tool.node-test` as a default command, but no producer reads its results. So a `node:test` root, such as Molten's `containers/sandbox` (four files, Node built-ins only), gets no `test-results`, and every check that needs them skips. Node writes JUnit XML (`--test-reporter=junit --test-reporter-destination=<file>`, Node 21 and later), which the JUnit parser already reads. Coverage of such a root needs c8, or Node's own `--experimental-test-coverage --test-reporter=lcov`, which no producer runs.
   - **Progress during mutation.** The event stream says nothing between `check.start` and `check.end`, so a long run cannot be watched. Per-file progress events would fix it.
+
+### Batch v0.2.7
+
+**Goal:** The owner's v0.2.7 batch (2026-11-11): the fixes v0.2.6 recorded and five of the owner's rulings, then a Molten rerun and `v0.2.7`.
+
+**Status:** in progress.
+
+The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gated by `make check` and the tree dogfood before each push to main.
+
+1. **`tool.bench-script` per configured root.** Detect `scripts.bench` in each configured root, not only at the repository root (as B17 did for coverage).
+2. **`explain` on a removed symbol** shows the removed code from the base, not the head file's lines at the old location.
+3. **Equivalent mutants:** WebCrypto `importKey`'s `extractable` flag, and a variable always reassigned before it is read.
+4. **`covering_tests` without a per-test map** says "all tests (no per-test map)" instead of listing the package.
+5. **Gate bounds name the symbol** behind each rule's `actual` and `bound`.
+6. **A `node --test` JUnit reader**, so `containers/sandbox` gets test results and coverage.
+7. **Mutation progress events on `--events`** (design §7.4 has them; their absence is a bug).
+8. **String and regex operators** ([ADR-180](adr/CUPEL_DECISION_180.md)).
+9. **The fact cache** ([ADR-181](adr/CUPEL_DECISION_181.md)).
+10. **`property.cases-pinned`** ([ADR-183](adr/CUPEL_DECISION_183.md)).
+11. **The mutation baseline once per package, by suite hash** ([ADR-185](adr/CUPEL_DECISION_185.md)).
+12. **`tests.flaky` on impacted tests** ([ADR-186](adr/CUPEL_DECISION_186.md)).
+13. **The Molten rerun:** findings by check, mutation wall time on `packages/shared`, and CLI parse time, before and after, under the v0.2.6 containment rules.
+14. **`v0.2.7`:** tag, verify the release as for 0.2.6, confirm CI green, and report in the agreed format.
+
+#### Notes
 
 ## 4. Cross-phase checklist
 

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_026: Mutation sites: operator sets, replacement tables, and the `site_hash` path
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P1.5
+**Date:** 2026-10-10 · **Status:** accepted; amended by [180](CUPEL_DECISION_180.md) (owner rulings, 2026-11-11) · **Phase:** P1.5
 
 ## Context
 

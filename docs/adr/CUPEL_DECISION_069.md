@@ -1,6 +1,6 @@
 # CUPEL_DECISION_069: Loops over a table of cases written in place are not logic in tests
 
-**Date:** 2026-10-14 · **Status:** accepted; supersedes the table-driven consequence of [054](CUPEL_DECISION_054.md) · **Phase:** P2.10
+**Date:** 2026-10-14 · **Status:** accepted; supersedes the table-driven consequence of [054](CUPEL_DECISION_054.md); amended by [184](CUPEL_DECISION_184.md) (owner rulings, 2026-11-11) · **Phase:** P2.10
 
 ## Context
 

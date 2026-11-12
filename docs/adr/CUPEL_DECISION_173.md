@@ -1,6 +1,6 @@
 # CUPEL_DECISION_173: With configured `[roots]`, mutation plans only the files under them
 
-**Date:** 2026-11-10 · **Status:** accepted · **Phase:** v0.2.6, Molten field trial Area 7 · Extends [167](CUPEL_DECISION_167.md) §4 and [171](CUPEL_DECISION_171.md)
+**Date:** 2026-11-10 · **Status:** accepted; amended by [179](CUPEL_DECISION_179.md) (owner rulings, 2026-11-11) · **Phase:** v0.2.6, Molten field trial Area 7 · Extends [167](CUPEL_DECISION_167.md) §4 and [171](CUPEL_DECISION_171.md)
 
 ## Context
 

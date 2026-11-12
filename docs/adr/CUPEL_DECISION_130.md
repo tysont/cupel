@@ -1,6 +1,6 @@
 # CUPEL_DECISION_130: Gate rules against `base`, the metric's value in the reference run
 
-**Date:** 2026-10-19 · **Status:** accepted · **Phase:** P9.1
+**Date:** 2026-10-19 · **Status:** accepted; amended by [182](CUPEL_DECISION_182.md) (owner rulings, 2026-11-11) · **Phase:** P9.1
 
 ## Context
 

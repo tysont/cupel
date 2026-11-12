@@ -1,6 +1,6 @@
 # CUPEL_DECISION_174: `static.api-surface` follows re-exports and counts trailing parameters a caller may leave out as widening
 
-**Date:** 2026-11-10 · **Status:** accepted · **Phase:** v0.2.6, Molten field trial Area 8 · Amends [101](CUPEL_DECISION_101.md)
+**Date:** 2026-11-10 · **Status:** accepted; amended by [176](CUPEL_DECISION_176.md) (owner rulings, 2026-11-11) · **Phase:** v0.2.6, Molten field trial Area 8 · Amends [101](CUPEL_DECISION_101.md)
 
 ## Context
 

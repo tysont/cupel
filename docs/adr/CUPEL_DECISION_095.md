@@ -1,6 +1,6 @@
 # CUPEL_DECISION_095: Property tests: found by the language, run by the property engine with the run's seed and a case budget, read back as `PropertyResults`
 
-**Date:** 2026-10-16 · **Status:** accepted; §1's Rust launch patterns amended on 2026-10-25 (P9.9 group 1): `quickcheck! { … }` blocks are recognized · **Phase:** P5.4
+**Date:** 2026-10-16 · **Status:** accepted; §1's Rust launch patterns amended on 2026-10-25 (P9.9 group 1): `quickcheck! { … }` blocks are recognized; amended by [183](CUPEL_DECISION_183.md) (owner rulings, 2026-11-11) · **Phase:** P5.4
 
 ## Context
 

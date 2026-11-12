@@ -1,6 +1,6 @@
 # CUPEL_DECISION_080: `MutationOutcomes` and the file-copy mutation engine
 
-**Date:** 2026-10-14 · **Status:** accepted; the score (now over killed, survived, and uncovered mutants) and §8 (slots are reclaimed) amended by [141](CUPEL_DECISION_141.md) §1 and §3; §9 (timeouts) capped, and slow tests left out of whole-suite runs, by [147](CUPEL_DECISION_147.md); §8 (slots share the cores) and §9 (a run is bounded in memory too) amended by [148](CUPEL_DECISION_148.md); §8 (slots live in the repository's `.cupel/work/slots/`) amended by [159](CUPEL_DECISION_159.md); §9 (a narrowed mutant's tests run one at a time, fastest first) and §10 (a timeout is not reused) amended by [160](CUPEL_DECISION_160.md) · **Phase:** P3.4
+**Date:** 2026-10-14 · **Status:** accepted; the score (now over killed, survived, and uncovered mutants) and §8 (slots are reclaimed) amended by [141](CUPEL_DECISION_141.md) §1 and §3; §9 (timeouts) capped, and slow tests left out of whole-suite runs, by [147](CUPEL_DECISION_147.md); §8 (slots share the cores) and §9 (a run is bounded in memory too) amended by [148](CUPEL_DECISION_148.md); §8 (slots live in the repository's `.cupel/work/slots/`) amended by [159](CUPEL_DECISION_159.md); §9 (a narrowed mutant's tests run one at a time, fastest first) and §10 (a timeout is not reused) amended by [160](CUPEL_DECISION_160.md); amended by [185](CUPEL_DECISION_185.md) (owner rulings, 2026-11-11) · **Phase:** P3.4
 
 ## Context
 
