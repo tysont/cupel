@@ -14,6 +14,7 @@ go = "go is the Go toolchain, which Cupel does not install: install Go from http
 python3 = "python3 is the Python toolchain, which Cupel does not install: install Python 3 from https://www.python.org/downloads/ or a package manager and put python3 on PATH."
 mvn = "mvn is Apache Maven, which Cupel does not install: install a JDK and Maven from https://maven.apache.org/download.cgi or a package manager and put mvn on PATH."
 gradle = "gradle is the Gradle build tool, which Cupel does not install: install a JDK and Gradle from https://gradle.org/install/ or a package manager and put gradle on PATH."
+node = "node is the Node.js runtime, which Cupel does not install: install Node.js 24.11.1 or later from https://nodejs.org/en/download or a package manager and put node on PATH."
 clojure = "clojure is the Clojure CLI, which Cupel does not install: install a JDK and the CLI from https://clojure.org/guides/install_clojure and put clojure on PATH."
 
 # --- JavaScript and TypeScript ------------------------------------------------------------------

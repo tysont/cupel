@@ -1,0 +1,9 @@
+# A repository whose configured root `containers/sandbox` is tested with `node --test` while the
+# repository root depends on Vitest. `.cupel/cache/coverage/` holds the report a real run of the
+# coverage command left (ADR-079); after changing a file here, delete that cache and run
+# `cupel check --only tests.coverage` here with c8 installed, then commit the new cache.
+[roots]
+sandbox = { path = "containers/sandbox", lang = "javascript" }
+
+[lang.javascript]
+coverage = "npx c8 --reporter=lcov node --test"

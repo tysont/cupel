@@ -820,7 +820,7 @@ Producers are registered per language in a **toolchain table** in `cupel-adapt`,
 
 | LangId | Runners | Coverage producer → format | Bench | Per-test map | Analyzers (ADR-102) |
 |---|---|---|---|---|---|
-| `javascript` / `typescript` | vitest, jest, mocha, node:test | vitest/jest → Istanbul JSON, c8 → lcov | hyperfine, tinybench | file-level fallback | tsc `--strict` (TypeScript), ESLint (with a flat config) |
+| `javascript` / `typescript` | vitest, jest → Jest JSON; node:test → JUnit XML (Node 24.11.1 and later name each test's file); mocha (table only) | vitest/jest → Istanbul JSON, c8 → lcov | hyperfine, tinybench | file-level fallback | tsc `--strict` (TypeScript), ESLint (with a flat config) |
 | `rust` | cargo test, cargo nextest | cargo llvm-cov → lcov | criterion | nextest + llvm-cov per test | clippy |
 | `go` | go test -json | go test -coverprofile → coverprofile | go test -bench + benchstat | `-run` narrowing per test | go vet, staticcheck |
 | `python` | pytest, unittest | pytest-cov / coverage.py → lcov, Cobertura XML | pytest-benchmark, hyperfine | `--cov-context=test` | mypy `--strict`, ruff |

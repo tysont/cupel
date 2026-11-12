@@ -158,6 +158,7 @@ fn the_engine_reruns_any_language_and_needs_the_baseline() {
             "tool.cargo-test",
             "tool.go-test",
             "tool.jest",
+            "tool.node-test",
             "tool.pytest",
             "tool.unittest",
             "tool.vitest"

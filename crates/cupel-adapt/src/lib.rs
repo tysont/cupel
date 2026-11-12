@@ -79,6 +79,7 @@ mod madsim;
 mod maven;
 pub mod metamorphic;
 mod model_check;
+mod node_test;
 mod per_test;
 mod proof;
 mod property;

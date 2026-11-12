@@ -894,7 +894,7 @@ Checks that depend on running the test suite read a `test-results` fact, which C
 | Rust | `cargo nextest` (when `.config/nextest.toml` exists), `cargo test` | JUnit through a nextest tool profile; libtest output |
 | Go | `go test -json` | test2json events |
 | Python | `pytest` (when the project mentions it), `unittest` | JUnit XML; `unittest -v` output |
-| JavaScript, TypeScript | `vitest`, `jest` (whichever `package.json` depends on) | the Jest JSON report |
+| JavaScript, TypeScript | `vitest`, `jest` (whichever `package.json` depends on), `node --test` (Node's built-in runner, when neither is the root's runner) | the Jest JSON report; `node --test`'s JUnit XML (Node 24.11.1 or later, which names each test's file) |
 | Java | Maven (`mvn test`, when a `pom.xml` exists), Gradle (`gradle test --rerun`) | Surefire's and Gradle's JUnit XML, one file per test class |
 | Clojure | `clojure.test` through the Clojure CLI (`clojure -M:test` and a runner script Cupel writes under `.cupel/`) | `clojure.test.junit` XML |
 
@@ -943,7 +943,7 @@ Below `--depth deep`, such a test reruns only when one of those files, its own f
 
 ### Flakiness
 
-`tests.flaky` reruns the tests the baseline ran, three times by default, with the same runner, and compares the outcomes. The reruns differ on purpose: the first two run the tests in their declared order one at a time, differing only in seed; the third runs them reversed (pytest and unittest, which take the tests in order) or in the runner's seeded shuffle (`go test -shuffle`, libtest's `--shuffle-seed`, `jest --randomize`, `vitest --sequence.shuffle`, Surefire's random class order, which otherwise runs classes alphabetically; Cupel's Clojure runner takes the reversed order); further reruns shuffle again, alternating between the runner's default parallelism and one test at a time. Every rerun's seed is derived from the run's `--seed`, so `cupel check --only tests.flaky --seed N`, which each finding gives as its `repro`, repeats the same reruns.
+`tests.flaky` reruns the tests the baseline ran, three times by default, with the same runner, and compares the outcomes. The reruns differ on purpose: the first two run the tests in their declared order one at a time, differing only in seed; the third runs them reversed (pytest and unittest, which take the tests in order) or in the runner's seeded shuffle (`go test -shuffle`, libtest's `--shuffle-seed`, `jest --randomize`, `vitest --sequence.shuffle`, Surefire's random class order (`node --test` has no shuffle: its reruns differ only in `--test-concurrency`), which otherwise runs classes alphabetically; Cupel's Clojure runner takes the reversed order); further reruns shuffle again, alternating between the runner's default parallelism and one test at a time. Every rerun's seed is derived from the run's `--seed`, so `cupel check --only tests.flaky --seed N`, which each finding gives as its `repro`, repeats the same reruns.
 
 - `test.flaky`: the test passed and failed in two reruns that ran the tests in the same order. Something besides the code and the order decides it: time, randomness, concurrency, or the environment.
 - `test.order-dependent`: the outcome is the same in every rerun of one order and differs between orders. The evidence lists `preceded_by`, the tests that ran before it in every rerun it failed and after it in some rerun it passed, when the runner reports its order.
@@ -1091,7 +1091,7 @@ Which tests a mutant's run can be narrowed to, or leave out, depends on the runn
 | `go test` | each `Test` function, by name | yes | yes, by name in every package |
 | `pytest` | each node ID and file | yes | yes |
 | `unittest` | each dotted ID | no | no |
-| `jest`, `vitest` | test files | no | no |
+| `jest`, `vitest`, `node --test` | test files | no | no |
 | Maven, Gradle (Surefire) | classes and methods | no | no |
 | `clojure.test` | each var and file | no | no |
 

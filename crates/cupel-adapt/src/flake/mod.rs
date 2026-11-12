@@ -80,7 +80,7 @@ impl Producer<TestReruns> for FlakeEngine {
                 what: "runner for engine.flake",
                 value: baseline.runner.to_string(),
                 expected: "a runner the flake engine reruns: tool.cargo-test, tool.go-test, \
-                           tool.pytest, tool.unittest, tool.vitest, or tool.jest",
+                           tool.pytest, tool.unittest, tool.vitest, tool.jest, or tool.node-test",
             })?;
         // One process per test: no order of the tests can change an outcome (ADR-158).
         if runner.ordering() == RunOrdering::Fixed {

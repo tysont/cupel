@@ -5,7 +5,7 @@ use std::path::Path;
 use cupel_core::{TestOutcome, TestResult, output_tail};
 use serde::Deserialize;
 
-use super::milliseconds;
+use super::{milliseconds, relative, without_frames};
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -81,34 +81,10 @@ pub fn parse(json: &str, dir: &Path) -> Option<Vec<TestResult>> {
     Some(tests)
 }
 
-/// Failure `messages` joined, without their stack frames (`    at f (file:1:2)`): a message's own
-/// lines, such as a property's counterexample, are what its output tail must keep.
-fn without_frames(messages: &[String]) -> String {
-    messages
-        .iter()
-        .flat_map(|message| message.lines())
-        .filter(|line| !line.trim_start().starts_with("at "))
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
 fn outcome(status: &str) -> TestOutcome {
     match status {
         "passed" => TestOutcome::Passed,
         "failed" => TestOutcome::Failed,
         _ => TestOutcome::Skipped,
     }
-}
-
-/// `name` relative to `dir`, `/`-separated; `name` itself when it is not below `dir`.
-fn relative(name: &str, dir: &Path) -> String {
-    Path::new(name).strip_prefix(dir).map_or_else(
-        |_| name.to_owned(),
-        |path| {
-            path.components()
-                .map(|part| part.as_os_str().to_string_lossy())
-                .collect::<Vec<_>>()
-                .join("/")
-        },
-    )
 }

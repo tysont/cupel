@@ -42,8 +42,8 @@ fn runners_register_for_their_languages_in_toolchain_table_order() {
             vec!["tool.cargo-test", "tool.cargo-nextest"],
             vec!["tool.go-test"],
             vec!["tool.unittest", "tool.pytest"],
-            vec!["tool.vitest", "tool.jest"],
-            vec!["tool.vitest", "tool.jest"],
+            vec!["tool.node-test", "tool.vitest", "tool.jest"],
+            vec!["tool.node-test", "tool.vitest", "tool.jest"],
             vec!["tool.gradle", "tool.maven"],
             vec!["tool.clojure-test"],
         ]
@@ -65,18 +65,20 @@ fn detection_puts_the_runner_a_fixture_uses_first() {
         [
             at("python", "python"),
             at("javascript", "javascript"),
+            at("node-test", "javascript"),
             at("typescript", "typescript"),
             at("java", "java"),
             at("gradle", "java"),
         ],
         [
-            ["tool.pytest", "tool.unittest"],
-            ["tool.jest", "tool.vitest"],
-            ["tool.vitest", "tool.jest"],
-            ["tool.maven", "tool.gradle"],
-            ["tool.gradle", "tool.maven"],
+            vec!["tool.pytest", "tool.unittest"],
+            vec!["tool.jest", "tool.node-test", "tool.vitest"],
+            vec!["tool.node-test"],
+            vec!["tool.vitest", "tool.node-test", "tool.jest"],
+            vec!["tool.maven", "tool.gradle"],
+            vec!["tool.gradle", "tool.maven"],
         ]
-        .map(|ids| ids.map(str::to_owned).to_vec())
+        .map(|ids| ids.into_iter().map(str::to_owned).collect::<Vec<_>>())
     );
 }
 
@@ -267,6 +269,18 @@ const VITEST: Expected = Expected {
     line: "AssertionError: expected 4 to be 5 // Object.is equality",
 };
 
+const NODE_TEST: Expected = Expected {
+    runner: "tool.node-test",
+    lang: "javascript",
+    repo: "node-test",
+    tests: &[
+        ("test/tally.test.js > total > totals a huge list", Skipped),
+        ("test/tally.test.js > total > totals a list", Passed),
+    ],
+    red: "test/red.test.js > reports a wrong total",
+    line: "  cause: AssertionError [ERR_ASSERTION]: totalling 2 and 2",
+};
+
 const MAVEN: Expected = Expected {
     runner: "tool.maven",
     lang: "java",
@@ -351,6 +365,11 @@ fn jest_runs_the_javascript_fixture() {
 #[test]
 fn vitest_runs_the_typescript_fixture() {
     assert_runs(&VITEST);
+}
+
+#[test]
+fn node_test_runs_the_node_test_fixture() {
+    assert_runs(&NODE_TEST);
 }
 
 #[test]

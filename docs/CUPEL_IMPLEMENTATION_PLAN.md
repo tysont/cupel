@@ -2561,6 +2561,16 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
   - `tool.bench-script` (`scripts.bench`) is a toolchain row with no producer: `init` and `doctor` choose it per root already (`Row::select`), so nothing else read it at the repository root.
   - Tests: `cupel-adapt/tests/bench.rs`: a configured root detects criterion from its own `Cargo.toml` and the repository root alone does not (failed first: not detected); hyperfine is detected by the repository root's `cupel.toml` with `[roots]` naming another directory.
 
+- **Item 6, a `node --test` runner** (2026-11-12, [ADR-189](adr/CUPEL_DECISION_189.md)).
+  - The gap: the toolchain table listed `tool.node-test`, and `init` chose it, but no producer ran it, so Molten's `containers/sandbox` (`"test": "node --test"`) got no `test-results` and every check needing them skipped.
+  - Now `tool.node-test` (`node_test.rs`) runs `node --test --test-reporter=junit --test-reporter-destination=<report>` in each root, and `junit::node` reads the report: IDs `<file> > <describe…> > <name>` as Jest's (ADR-075), files relative to the root, a failure's output without stack frames, a file that does not load one `errored` test named by the file. Test files narrow a run; parallelism is `--test-concurrency`; Node has no shuffle, so `tests.flaky`'s reruns differ only in concurrency.
+  - Node writes each test's file in its JUnit report from 24.11.1 on; Node 22's report has none. CI's tools action and `ci.yml` (`actions/setup-node`) and `scripts/dev-setup.sh` move Node from 22.23.3 to 24.22.3.
+  - With no detection rule (as the table always had it), `tool.node-test` is detected in every root, so the registry orders it before an undetected Vitest or Jest, as `init` chose it, and after a detected one.
+  - Tests:
+    - `cupel-adapt/tests/reports.rs`: the captured green, red, and unloaded reports (`captures/node-test/`, Node 24.22.3) read with file-and-suite IDs, output without frames, and the unloaded file errored (failed first: no `junit::node`);
+    - `cupel-adapt/tests/runners.rs`: `tool.node-test` runs the `test-results/node-test` fixture green and red, and is detected first in it and after a detected Vitest or Jest (failed first: not registered);
+    - `cupel-fixtures/tests/node_test.rs`: the `node-test` repository, `[roots]` naming `containers/sandbox` beside a root that depends on Vitest, gets `tests.coverage` from c8's committed report and a passing `tests.flaky` over its two tests (golden `node-test.json`; with the runner unregistered, `tests.flaky` was skipped).
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

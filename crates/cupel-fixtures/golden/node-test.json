@@ -1,0 +1,177 @@
+{
+  "checks": [
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 1,
+      "id": "tests.coverage",
+      "metrics": {
+        "branch": 1.0,
+        "branches": 2.0,
+        "line": 0.7142857142857143,
+        "lines": 7.0,
+        "uncovered": 1.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 7,
+        "unit": "line_ratio",
+        "value": 0.7142857142857143
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    },
+    {
+      "cost": "standard",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 0,
+      "id": "tests.flaky",
+      "metrics": {
+        "flaky": 0.0,
+        "order_dependent": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 2,
+        "unit": "unstable",
+        "value": 0.0
+      },
+      "skipped": null,
+      "status": "pass",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {
+          "nearest_test_file": "containers/sandbox/test/quote.test.js"
+        },
+        "kind": "write_test",
+        "priority": 2,
+        "summary": "Write a test that calls `joinCommand`."
+      },
+      "check": "tests.coverage",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "covered": 0,
+        "lines": 2
+      },
+      "id": "fnd_2ca851",
+      "kind": "coverage.uncovered-symbol",
+      "location": {
+        "col": 1,
+        "end_col": 2,
+        "end_line": 12,
+        "file": "containers/sandbox/src/quote.js",
+        "line": 10
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.coverage --symbols sh_58800517e2468414",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_2ca851 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "quote.joinCommand",
+        "hash": "sh_58800517e2468414",
+        "lang": "javascript"
+      },
+      "tier": 2,
+      "title": "`quote.joinCommand` never ran under test: none of its 2 instrumented lines"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_2ca851",
+      "kind": "write_test",
+      "priority": 1,
+      "summary": "Write a test that calls `joinCommand`."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {
+          "javascript": {
+            "coverage": "npx c8 --reporter=lcov node --test"
+          }
+        },
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {
+          "sandbox": {
+            "lang": "javascript",
+            "path": "containers/sandbox"
+          }
+        }
+      },
+      "sources": [
+        "flags",
+        "cupel.toml",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 2,
+      "languages": [
+        "javascript"
+      ],
+      "mode": "tree",
+      "roots": [
+        "containers/sandbox"
+      ],
+      "symbols": 4
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "suite": {},
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 1
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 1,
+  "truncated": false
+}

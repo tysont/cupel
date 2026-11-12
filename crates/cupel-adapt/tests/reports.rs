@@ -414,6 +414,63 @@ fn vitest_json_is_read_like_jest_with_describe_blocks_in_the_id() {
 }
 
 #[test]
+fn node_test_junit_names_each_test_by_file_and_suites_relative_to_the_run() {
+    let capture = Capture::of("node-test", "red");
+    let tests = junit::node(&capture.file("report.xml"), &capture.ran_in).unwrap();
+    assert_eq!(
+        shape(&tests),
+        [
+            row(
+                "test/red.test.js > reports a wrong total",
+                Some("test/red.test.js"),
+                Failed,
+                Some(1)
+            ),
+            row(
+                "test/tally.test.js > total > totals a list",
+                Some("test/tally.test.js"),
+                Passed,
+                Some(0)
+            ),
+            row(
+                "test/tally.test.js > total > totals a huge list",
+                Some("test/tally.test.js"),
+                Skipped,
+                Some(0)
+            ),
+        ]
+    );
+    let output = tests[0].output.as_deref().unwrap();
+    assert!(
+        output
+            .lines()
+            .all(|line| !line.trim_start().starts_with("at ")),
+        "{output}"
+    );
+    assert!(
+        output
+            .lines()
+            .any(|line| line == "  cause: AssertionError [ERR_ASSERTION]: totalling 2 and 2"),
+        "{output}"
+    );
+}
+
+#[test]
+fn a_node_test_file_that_does_not_load_is_one_errored_test_named_after_the_file() {
+    let capture = Capture::of("node-test", "unloaded");
+    let tests = junit::node(&capture.file("report.xml"), &capture.ran_in).unwrap();
+    assert_eq!(
+        shape(&tests)[2],
+        row(
+            "test/unloaded.test.js",
+            Some("test/unloaded.test.js"),
+            Errored,
+            Some(33)
+        )
+    );
+}
+
+#[test]
 fn a_green_run_of_every_runner_has_no_failing_test() {
     let failing = |tests: Vec<TestResult>| {
         tests
@@ -423,6 +480,7 @@ fn a_green_run_of_every_runner_has_no_failing_test() {
     };
     let jest = Capture::of("jest", "green");
     let vitest = Capture::of("vitest", "green");
+    let node = Capture::of("node-test", "green");
     let counts = [
         failing(junit::nextest(&Capture::of("cargo-nextest", "green").file("junit.xml")).unwrap()),
         failing(junit::pytest(&Capture::of("pytest", "green").file("junit.xml")).unwrap()),
@@ -446,6 +504,7 @@ fn a_green_run_of_every_runner_has_no_failing_test() {
             &["TEST-tally.TallyTest.xml"],
         )),
         failing(junit::clojure(&Capture::of("clojure-test", "green").file("report.xml")).unwrap()),
+        failing(junit::node(&node.file("report.xml"), &node.ran_in).unwrap()),
     ];
-    assert_eq!(counts, [0; 9]);
+    assert_eq!(counts, [0; 10]);
 }

@@ -1,0 +1,15 @@
+{
+  "dir": "containers/sandbox",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/work/node-fixture/containers/sandbox",
+  "skip_dirs": [
+    "node_modules",
+    "dist",
+    "coverage"
+  ],
+  "report": "7ece79498d4bdeb4e3cc4b53182796f47b51410c97499bc341a5d24c4d2015d2",
+  "files": {
+    "package.json": "78235d445598fbda924cb804db11ac9629d45e43962f653e2fc2313748027282",
+    "src/quote.js": "c612be642fd0ce73a6f8bed5314b87deef84cf462583ebcc06678f0c5c9485ae",
+    "test/quote.test.js": "ce8eac4a7abc74969e1a810828b21e8bc59294f0ac59af66ab3a9fa89391d20c"
+  }
+}

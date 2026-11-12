@@ -100,9 +100,10 @@ jobs:
       - name: Install pinned toolchain
         run: rustup toolchain install
       - uses: Swatinem/rust-cache@v2
+      # Node 24.11.1 and later name each test's file in `node --test`'s JUnit report, which tool.node-test reads.
       - uses: actions/setup-node@v4
         with:
-          node-version: "22.23.3"
+          node-version: "24.22.3"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12.10"
