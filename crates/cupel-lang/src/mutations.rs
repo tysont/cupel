@@ -10,7 +10,7 @@
 //! `constant`, `boundary`, `negation`, and the `strings` group's `string-empty`,
 //! `regex-quantifier`, `regex-class` (the `extended` set); the set follows from the operator.
 //! `[mutations.<operator>]` gives the replacements, except a regex pattern's, whose edits
-//! [`crate::regex`] computes (ADR-180). A site belongs to the innermost symbol
+//! `regex.rs` computes (ADR-180). A site belongs to the innermost symbol
 //! that contains it; every symbol gets an entry. Sites are ordered by position, outer before
 //! inner, then by operator.
 //!
