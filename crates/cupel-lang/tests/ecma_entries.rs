@@ -124,9 +124,9 @@ fn the_nearest_manifest_is_the_package_and_no_manifest_exposes_nothing() {
 /// Other languages have no notion of entries here: every public item is API, as before.
 #[test]
 fn other_languages_keep_every_public_item() {
-    for lang in ["rust", "go", "python", "java"] {
+    for (lang, count) in [("rust", 69), ("go", 44), ("python", 98), ("java", 55)] {
         let api: ApiSurface = produce(lang, &fixture(lang));
-        assert!(!api.items.is_empty(), "{lang}");
-        assert!(api.items.iter().all(|item| !item.internal), "{lang}");
+        let internal: Vec<bool> = api.items.iter().map(|item| item.internal).collect();
+        assert_eq!(internal, vec![false; count], "{lang}");
     }
 }
