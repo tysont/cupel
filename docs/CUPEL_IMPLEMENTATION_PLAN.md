@@ -2477,7 +2477,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 **Goal:** The owner's v0.2.7 batch (2026-11-11): the fixes v0.2.6 recorded and all eleven of the owner's rulings, then a Molten rerun and `v0.2.7`.
 
-**Status:** in progress.
+**Status:** tagged (2026-11-13). Items 1–19 are done; `v0.2.7` is tagged at 1f737a6e, CI green on every job, the release verified as for 0.2.6 (checksums, `release.sh verify` on all five archives, both macOS binaries, `install.sh` on macOS, Ubuntu 24.04 amd64 and Alpine 3.20 arm64, `cargo binstall` from git; registry publishes skipped, ADR-146). Open for the owner: whether `init` writes Node's own coverage command for a `node --test` root (ADR-196), the first-baseline reading in ADR-195, and Molten #661's `cyclomatic_max <= base` over a small changed scope.
 
 The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gated by `make check` and the tree dogfood before each push to main.
 
