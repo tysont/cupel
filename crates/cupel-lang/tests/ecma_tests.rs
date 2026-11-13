@@ -552,7 +552,13 @@ it("asserts through assert", () => {
             case("lists the entry", &[(Custom, Strong); 4], Runs, &[], 3),
             case("names the version", &[(Custom, Strong)], Runs, &[], 10),
             case("keeps the id", &[(Custom, Strong)], Runs, &[], 14),
-            case("asserts through assert", &[(Custom, Strong); 2], Runs, &[], 18),
+            case(
+                "asserts through assert",
+                &[(Custom, Strong); 2],
+                Runs,
+                &[],
+                18
+            ),
         ]
     );
 }

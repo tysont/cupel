@@ -196,7 +196,10 @@ const NODE_COVERAGE: &str = "node --test --experimental-test-coverage --test-rep
 fn yarn_and_node_test_with_node_coverage_are_chosen_without_other_signals() {
     let dir = support::repository(&[("package.json", "{\"name\": \"plain\"}"), ("yarn.lock", "")]);
     let got = commands("javascript", dir.path(), &[], &[]);
-    assert_eq!(got, expected(Some("node --test"), Some(NODE_COVERAGE), None));
+    assert_eq!(
+        got,
+        expected(Some("node --test"), Some(NODE_COVERAGE), None)
+    );
 }
 
 #[test]
