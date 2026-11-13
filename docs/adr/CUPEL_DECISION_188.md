@@ -1,6 +1,6 @@
 # CUPEL_DECISION_188: The fact cache keeps each file's derived values, by build, in a table of its own
 
-**Date:** 2026-11-12 · **Status:** accepted · **Phase:** v0.2.7, item 9 · Details [181](CUPEL_DECISION_181.md)
+**Date:** 2026-11-12 · **Status:** accepted; amended by [201](CUPEL_DECISION_201.md) (owner rulings, 2026-11-13) · **Phase:** v0.2.7, item 9 · Details [181](CUPEL_DECISION_181.md)
 
 ## Context
 ADR-181 stores "per-file facts the static checks derive from a parse" by content hash, language, grammar version, and Cupel's version, and has the no-daemon CLI read them. It does not say which values those are, what "Cupel's version" is for a build that changes without a version bump, where in the store they go (the `facts` table of ADR-045 §6 is keyed by a §8.3.6 `CacheKey` naming one fact kind), how they are written, or how large the store gets.

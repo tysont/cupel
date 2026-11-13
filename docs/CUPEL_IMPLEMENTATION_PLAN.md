@@ -2477,7 +2477,7 @@ The integrator ran the batch alone on branch `batch-0.2.5`, gated by `make check
 
 **Goal:** The owner's v0.2.7 batch (2026-11-11): the fixes v0.2.6 recorded and all eleven of the owner's rulings, then a Molten rerun and `v0.2.7`.
 
-**Status:** tagged (2026-11-13). Items 1–19 are done; `v0.2.7` is tagged at 1f737a6e, CI green on every job, the release verified as for 0.2.6 (checksums, `release.sh verify` on all five archives, both macOS binaries, `install.sh` on macOS, Ubuntu 24.04 amd64 and Alpine 3.20 arm64, `cargo binstall` from git; registry publishes skipped, ADR-146). Open for the owner: whether `init` writes Node's own coverage command for a `node --test` root (ADR-196), the first-baseline reading in ADR-195, and Molten #661's `cyclomatic_max <= base` over a small changed scope.
+**Status:** complete, accepted by the owner (2026-11-13), whose rulings on its open questions start batch v0.2.8. Items 1–19 are done; `v0.2.7` is tagged at 1f737a6e, CI green on every job, the release verified as for 0.2.6 (checksums, `release.sh verify` on all five archives, both macOS binaries, `install.sh` on macOS, Ubuntu 24.04 amd64 and Alpine 3.20 arm64, `cargo binstall` from git; registry publishes skipped, ADR-146). Open for the owner: whether `init` writes Node's own coverage command for a `node --test` root (ADR-196), the first-baseline reading in ADR-195, and Molten #661's `cyclomatic_max <= base` over a small changed scope.
 
 The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gated by `make check` and the tree dogfood before each push to main.
 
@@ -2704,6 +2704,41 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
   - The gap: `cupel baseline set` named the latest result run (or `--from`'s) and `import` any file's run, whatever its status or branch, and nothing else moves a baseline.
   - Now `set` and `import` (`baseline.rs` `unfit`), preview included, refuse as a usage error a run that did not pass, and a run recorded in a git work tree on a branch other than the default one or on a detached `HEAD`. Passing is status `pass`, or a gate that failed only on rules against `base` skipped for want of a reference, so the run before the first baseline can still become one and the gate's `cupel baseline set --write` next action stays good. The default branch is what `--changed` reads: `default_branch` in `cupel.toml`, else `Git::default_branch` (`origin/HEAD`, else `main` or `master`, else `HEAD`'s branch). A run recorded outside a work tree has no branch and is accepted. `baseline::run` takes the invocation, for the configuration.
   - Tests: `cupel-cli/tests/baseline.rs` `set_and_import_refuse_a_run_that_did_not_pass`, `set_refuses_a_run_on_another_branch_or_a_detached_head` (also `default_branch` over git's), and `a_run_whose_gate_failed_only_for_want_of_a_reference_can_be_the_baseline`. The first two failed first with exit 0 where a refusal was expected; the third, written after `cupel-cli/tests/gate.rs`' stored-baseline test failed on the first refusal, failed first refusing the no-reference run.
+
+### Batch v0.2.8
+
+**Goal:** The owner's rulings on v0.2.7's open questions (2026-11-13), shipped as `v0.2.8` before the validation pass.
+
+**Status:** in progress.
+
+Owner's rulings, verbatim:
+1. "init for node --test packages writes Node's built-in coverage command; c8 only when it is already in devDependencies." ([ADR-197](adr/CUPEL_DECISION_197.md))
+2. "First baseline (ADR-195): a rule with no baseline evaluates as skipped with a baseline.missing info finding, and the run may pass. Record as ruled." ([ADR-198](adr/CUPEL_DECISION_198.md))
+3. "Ratchet on max-type metrics (cyclomatic, cognitive, nesting): `<= base` gets default δ = +2, and never fails while the new value is below the check's watch threshold. Update ADR-175/-194 and the M8-3 gate. Fixture: a one-if addition to a CC-3 function passes; a change pushing a function past watch fails." ([ADR-199](adr/CUPEL_DECISION_199.md); the ratchet tolerance is ADR-195, not ADR-194, so 175, 182 and 195 carry the amendment.)
+4. "Chai, Mocha and Jasmine equivalents of toContain/toMatch/toMatchObject (include, contain, match, deep.include) are not weak." ([ADR-200](adr/CUPEL_DECISION_200.md))
+5. "Prune parsed_facts in the sweep: rows whose file hash is absent from the last 20 runs." ([ADR-201](adr/CUPEL_DECISION_201.md))
+6. "Per-test maps across packages for Rust (nextest + llvm-cov per test, workspace-wide) and Go (-coverpkg). Fixture per language with an integration test in a sibling crate/package." ([ADR-202](adr/CUPEL_DECISION_202.md))
+7. "Fixture repositories for test.logic and test.duplicate-setup at the new thresholds." ([ADR-203](adr/CUPEL_DECISION_203.md))
+
+Items 1–7 are the rulings in order; 8 is `v0.2.8`: tag, verify the release as for 0.2.7, confirm CI green.
+
+#### Notes
+
+### Batch v0.2.9: validation on one repository per language
+
+**Goal:** Validate Cupel on a real repository per language, with PR replay as the method, and ship the fixes as `v0.2.9`.
+
+**Status:** not started; follows v0.2.8.
+
+The owner's method (2026-11-13):
+- Repositories: Rust clap, Python httpx, Go hashicorp/raft, Java jackson-core, Clojure ring.
+- For each: `init --dry-run` then `init`; `doctor`; `survey --depth standard` with a repository-wide budget of 30 m; `baseline set` at the current main. Then replay the last 12 merged PRs: check out each PR's parent, apply its diff, run `check --changed --depth standard --gate` and `baseline diff`. Record per PR the gate result, findings by check, and whether a maintainer-merged PR failed the gate and why.
+- Every false positive is a check bug and ships with a fixture. Calibration questions the data cannot settle are collected for the owner, one list per language, each with a recommended answer and its evidence.
+- One heavy run at a time under the lock. Deep only on `--paths` subsets chosen from survey hot spots.
+- A second repository for a language only if the first produces a class of finding specific to that language.
+- Report per language in the agreed format with the PR-replay table; tag `v0.2.9` with the fixes.
+
+#### Notes
 
 ## 4. Cross-phase checklist
 

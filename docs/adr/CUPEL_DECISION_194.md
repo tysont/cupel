@@ -1,6 +1,6 @@
 # CUPEL_DECISION_194: How a root's coverage and mutation take its dependents' tests from a per-test map, and say when they cannot
 
-**Date:** 2026-11-13 · **Status:** accepted · **Phase:** v0.2.7, item 16 · Details [179](CUPEL_DECISION_179.md), [191](CUPEL_DECISION_191.md)
+**Date:** 2026-11-13 · **Status:** accepted; amended by [202](CUPEL_DECISION_202.md) (owner rulings, 2026-11-13) · **Phase:** v0.2.7, item 16 · Details [179](CUPEL_DECISION_179.md), [191](CUPEL_DECISION_191.md)
 
 ## Context
 ADR-179 rules that a root's coverage and mutation include the tests of roots that depend on it when a per-test map names them, and run the root's own tests only without one, saying so. It leaves open how. Before this, the two halves were the wrong way round:

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_196: A `node:test` root's coverage can come from Node's own LCOV reporter
 
-**Date:** 2026-11-13 · **Status:** accepted · **Phase:** v0.2.7, item 6 · Details [189](CUPEL_DECISION_189.md), [079](CUPEL_DECISION_079.md)
+**Date:** 2026-11-13 · **Status:** accepted; amended by [197](CUPEL_DECISION_197.md) (owner rulings, 2026-11-13) · **Phase:** v0.2.7, item 6 · Details [189](CUPEL_DECISION_189.md), [079](CUPEL_DECISION_079.md)
 
 ## Context
 ADR-189 gave a `node:test` root test results, but its coverage still needed c8, the only coverage producer the toolchain table paired with `tool.node-test`. Molten's `containers/sandbox` has no c8: with `[lang.javascript] coverage` set to Node's own command (`node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}`), `tests.coverage` still skipped with "c8 unavailable", because the configured command is the language's and c8's availability asks only whether c8 is installed. Node writes LCOV itself from 22 on, with no package; its report lists the files the suite loaded and leaves test files out.

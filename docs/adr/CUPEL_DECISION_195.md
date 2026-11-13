@@ -1,6 +1,6 @@
 # CUPEL_DECISION_195: Where a metric's ratchet tolerance is declared and how it applies, and which runs a baseline may name
 
-**Date:** 2026-11-13 · **Status:** accepted · **Phase:** v0.2.7, item 17 · Details [182](CUPEL_DECISION_182.md), [130](CUPEL_DECISION_130.md), [046](CUPEL_DECISION_046.md)
+**Date:** 2026-11-13 · **Status:** accepted; amended by [198](CUPEL_DECISION_198.md), [199](CUPEL_DECISION_199.md) (owner rulings, 2026-11-13) · **Phase:** v0.2.7, item 17 · Details [182](CUPEL_DECISION_182.md), [130](CUPEL_DECISION_130.md), [046](CUPEL_DECISION_046.md)
 
 ## Context
 ADR-182 gives each ratcheted metric a tolerance δ (counts 0, `tests.mutation.score` 0.02) and rules that the reference baseline advances only on a passing run on the default branch. It leaves open where δ is declared, which way it moves a bound, how a rule's written offset relates to it, how a gate result says which δ it used, and what "passing" and "the default branch" mean for `cupel baseline`, the only thing that moves a baseline. Cupel has no metric direction: a rule's operator says which way is better.

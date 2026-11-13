@@ -1,6 +1,6 @@
 # CUPEL_DECISION_184: Test-quality calibration from the Molten trial
 
-**Date:** 2026-11-11 · **Status:** accepted · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [054](CUPEL_DECISION_054.md), [055](CUPEL_DECISION_055.md), [069](CUPEL_DECISION_069.md), and [050](CUPEL_DECISION_050.md)
+**Date:** 2026-11-11 · **Status:** accepted; amended by [200](CUPEL_DECISION_200.md); detailed by [203](CUPEL_DECISION_203.md) (owner rulings, 2026-11-13) · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [054](CUPEL_DECISION_054.md), [055](CUPEL_DECISION_055.md), [069](CUPEL_DECISION_069.md), and [050](CUPEL_DECISION_050.md)
 
 ## Context
 Area 3 and Area 4 left calibration questions: whether `toContain`, `toMatch`, and `toMatchObject` are weak (1,221 findings, 31% of Molten's tests); whether a loop with an assertion is test logic; the duplicate-setup threshold; and whether clones inside test files (about 540 of 655) are reported.
