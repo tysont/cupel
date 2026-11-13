@@ -48,13 +48,16 @@
 
 (source_file
   (type_declaration
-    [
-      (type_spec
-        name: (type_identifier) @api.name
-        type_parameters: (type_parameter_list)? @api.signature)
-      (type_alias
-        name: (type_identifier) @api.name)
-    ] @api.type
+    (type_spec
+      name: (type_identifier) @api.name
+      type_parameters: (type_parameter_list)? @api.signature) @api.type
+    (#match? @api.name "^[A-Z]")))
+
+; Type aliases are abstract (ADR-178).
+(source_file
+  (type_declaration
+    (type_alias
+      name: (type_identifier) @api.name) @api.type @api.abstract
     (#match? @api.name "^[A-Z]")))
 
 (source_file

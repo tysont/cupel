@@ -5,7 +5,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use cupel_core::config::{ConfigError, Table};
 use cupel_core::hint::{self, CheapestCut};
 use cupel_core::syntax::{
-    ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, References,
+    ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, References,
 };
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
@@ -89,7 +89,7 @@ struct UnstableAbstract {
     unresolved: u32,
     /// I = Ce / (Ca + Ce).
     instability: f64,
-    /// A = interfaces / (types + interfaces) among the module's public items.
+    /// A = abstract exported members / exported members (ADR-178).
     abstractness: f64,
     /// D = |A + I − 1|.
     distance: f64,
@@ -197,7 +197,7 @@ impl Check for StaticDeps {
     ) -> Result<CheckResult> {
         let settings = Settings::read(&self.manifest.id, &ctx.config)?;
         let graph = Graph::of(facts.get::<ModuleGraph>()?, facts.get::<References>().ok());
-        let types = TypeCounts::of(facts.get::<ApiSurface>()?);
+        let members = MemberCounts::of(facts.get::<ApiSurface>()?);
         ctx.cancel.checkpoint()?;
         let mut findings = Vec::new();
         let components = graph.cycles();
@@ -213,7 +213,7 @@ impl Check for StaticDeps {
             findings.extend(found);
         }
         ctx.cancel.checkpoint()?;
-        let farthest = self.modules(&graph, &types, &settings, sink, &mut findings);
+        let farthest = self.modules(&graph, &members, &settings, sink, &mut findings);
         let (max_distance, farthest) = farthest.map_or((0.0, None), |(max, on)| (max, Some(on)));
         let count = findings.len() as u64;
         for finding in findings {
@@ -260,19 +260,19 @@ impl StaticDeps {
     fn modules(
         &self,
         graph: &Graph,
-        types: &TypeCounts,
+        members: &MemberCounts,
         settings: &Settings,
         sink: &mut dyn EventSink,
         findings: &mut Vec<Finding>,
     ) -> Option<(f64, Target)> {
         let mut farthest: Option<(f64, Target)> = None;
         for module in &graph.modules {
-            if let Some((distance, target)) = measure_module(graph, types, module, sink)
+            if let Some((distance, target)) = measure_module(graph, members, module, sink)
                 && farthest.as_ref().is_none_or(|(max, _)| distance > *max)
             {
                 farthest = Some((distance, target));
             }
-            if let Some(finding) = self.unstable_abstract(graph, types, module, settings) {
+            if let Some(finding) = self.unstable_abstract(graph, members, module, settings) {
                 findings.push(finding);
             }
         }
@@ -285,7 +285,7 @@ impl StaticDeps {
 /// target.
 fn measure_module(
     graph: &Graph,
-    types: &TypeCounts,
+    members: &MemberCounts,
     module: &str,
     sink: &mut dyn EventSink,
 ) -> Option<(f64, Target)> {
@@ -306,7 +306,7 @@ fn measure_module(
         value: f64::from(coupling.afferent + coupling.efferent),
         target: target.clone(),
     });
-    let distance = rounded(Martin::of(&coupling, types.module(module))?.distance);
+    let distance = rounded(Martin::of(&coupling, members.module(module))?.distance);
     sink.measure(Measurement {
         metric: "distance".to_owned(),
         value: distance,
@@ -409,12 +409,12 @@ impl StaticDeps {
     fn unstable_abstract(
         &self,
         graph: &Graph,
-        types: &TypeCounts,
+        members: &MemberCounts,
         module: &str,
         settings: &Settings,
     ) -> Option<Finding> {
         let coupling = graph.coupling(module);
-        let martin = Martin::of(&coupling, types.module(module))?;
+        let martin = Martin::of(&coupling, members.module(module))?;
         if martin.abstractness + martin.instability - 1.0 <= settings.distance_max {
             return None;
         }
@@ -863,28 +863,38 @@ struct Coupling {
     unresolved: u32,
 }
 
-/// Public types and interfaces per module, from `ApiSurface`.
-struct TypeCounts(BTreeMap<String, (u32, u32)>);
+/// Exported members and the abstract ones among them per module, from `ApiSurface` (ADR-178).
+struct MemberCounts(BTreeMap<String, (u32, u32)>);
 
-impl TypeCounts {
+impl MemberCounts {
     fn of(surface: &ApiSurface) -> Self {
         let mut counts: BTreeMap<String, (u32, u32)> = BTreeMap::new();
         for item in &surface.items {
-            let abstract_item = match item.kind {
-                ApiItemKind::Interface => true,
-                ApiItemKind::Type => false,
-                _ => continue,
+            let Some(abstract_item) = abstractness(item) else {
+                continue;
             };
-            let (types, interfaces) = counts.entry(item.file.clone()).or_default();
-            *types += 1;
-            *interfaces += u32::from(abstract_item);
+            let (members, abstracts) = counts.entry(item.file.clone()).or_default();
+            *members += 1;
+            *abstracts += u32::from(abstract_item);
         }
         Self(counts)
     }
 
-    /// (types including interfaces, interfaces) the module declares.
+    /// (exported members, abstract members) the module declares.
     fn module(&self, module: &str) -> (u32, u32) {
         self.0.get(module).copied().unwrap_or_default()
+    }
+}
+
+/// Whether an exported item is abstract (an interface, an abstract class, a type alias) or
+/// concrete (a function, a concrete type, a value); `None` for methods and namespace re-exports,
+/// members of items counted on their own.
+fn abstractness(item: &ApiItem) -> Option<bool> {
+    match item.kind {
+        ApiItemKind::Interface => Some(true),
+        ApiItemKind::Type => Some(item.is_abstract),
+        ApiItemKind::Function | ApiItemKind::Constant | ApiItemKind::Variable => Some(false),
+        ApiItemKind::Method | ApiItemKind::Module => None,
     }
 }
 
@@ -897,14 +907,14 @@ struct Martin {
 }
 
 impl Martin {
-    /// `None` when the module has no coupling (I undefined) or declares no type (A undefined).
-    fn of(coupling: &Coupling, (types, interfaces): (u32, u32)) -> Option<Self> {
+    /// `None` when the module has no coupling (I undefined) or exports no member (A undefined).
+    fn of(coupling: &Coupling, (members, abstracts): (u32, u32)) -> Option<Self> {
         let couplings = coupling.afferent + coupling.efferent;
-        if couplings == 0 || types == 0 {
+        if couplings == 0 || members == 0 {
             return None;
         }
         let instability = f64::from(coupling.efferent) / f64::from(couplings);
-        let abstractness = f64::from(interfaces) / f64::from(types);
+        let abstractness = f64::from(abstracts) / f64::from(members);
         Some(Self {
             instability,
             abstractness,

@@ -8,12 +8,12 @@
       "id": "static.deps",
       "metric_targets": {
         "max_distance": {
-          "display": "src/deps_layers/infra/store.py",
+          "display": "libs/units/src/units/__init__.py",
           "location": {
             "col": null,
             "end_col": null,
             "end_line": 1,
-            "file": "src/deps_layers/infra/store.py",
+            "file": "libs/units/src/units/__init__.py",
             "line": 1
           },
           "symbol": null
@@ -176,6 +176,22 @@
           "lang": "python",
           "rank": 1,
           "target": {
+            "display": "libs/units/src/units/__init__.py",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "libs/units/src/units/__init__.py",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "python",
+          "rank": 2,
+          "target": {
             "display": "src/deps_layers/infra/store.py",
             "location": {
               "col": null,
@@ -190,7 +206,7 @@
         },
         {
           "lang": "python",
-          "rank": 2,
+          "rank": 3,
           "target": {
             "display": "src/deps_layers/port.py",
             "location": {
@@ -206,86 +222,118 @@
         },
         {
           "lang": "python",
-          "rank": 3,
-          "target": {
-            "display": "src/deps_layers/domain/order.py",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "src/deps_layers/domain/order.py",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 0.5
-        },
-        {
-          "lang": "python",
           "rank": 4,
           "target": {
-            "display": "tests/ledger_case.py",
+            "display": "src/ledger/decide.py",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "tests/ledger_case.py",
+              "file": "src/ledger/decide.py",
               "line": 1
             },
             "symbol": null
           },
-          "value": 0.5
+          "value": 1.0
         },
         {
           "lang": "python",
           "rank": 5,
           "target": {
-            "display": "src/ledger/account.py",
+            "display": "src/ledger/pricing.py",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "src/ledger/account.py",
+              "file": "src/ledger/pricing.py",
               "line": 1
             },
             "symbol": null
           },
-          "value": 0.0
+          "value": 1.0
         },
         {
           "lang": "python",
           "rank": 6,
           "target": {
-            "display": "tests/test_ledger_case.py",
+            "display": "src/ledger/references.py",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "tests/test_ledger_case.py",
+              "file": "src/ledger/references.py",
               "line": 1
             },
             "symbol": null
           },
-          "value": 0.0
+          "value": 1.0
         },
         {
           "lang": "python",
           "rank": 7,
           "target": {
-            "display": "tests/test_pricing.py",
+            "display": "src/ledger/report/format.py",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "tests/test_pricing.py",
+              "file": "src/ledger/report/format.py",
               "line": 1
             },
             "symbol": null
           },
-          "value": 0.0
+          "value": 1.0
+        },
+        {
+          "lang": "python",
+          "rank": 8,
+          "target": {
+            "display": "src/ledger/__init__.py",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/__init__.py",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.75
+        },
+        {
+          "lang": "python",
+          "rank": 9,
+          "target": {
+            "display": "src/deps_cycle/alpha.py",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.py",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "python",
+          "rank": 10,
+          "target": {
+            "display": "src/deps_cycle/beta.py",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/beta.py",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
         }
       ],
-      "measured": 7,
+      "measured": 22,
       "metric": "distance",
       "per": "module",
       "summary": "Distance from the main sequence per module that declares a type and has a coupling.",

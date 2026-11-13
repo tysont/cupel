@@ -8,12 +8,12 @@
       "id": "static.deps",
       "metric_targets": {
         "max_distance": {
-          "display": "src/references.js",
+          "display": "packages/shapes/lib/square.js",
           "location": {
             "col": null,
             "end_col": null,
             "end_line": 1,
-            "file": "src/references.js",
+            "file": "packages/shapes/lib/square.js",
             "line": 1
           },
           "symbol": null

@@ -55,12 +55,15 @@
     (visibility_modifier) @_pub
     name: (type_identifier) @api.name
     type_parameters: (type_parameters)? @api.signature)
-  (type_item
-    (visibility_modifier) @_pub
-    name: (type_identifier) @api.name
-    type_parameters: (type_parameters)? @api.signature)
 ] @api.type
   (#eq? @_pub "pub"))
+
+; Type aliases are abstract (ADR-178).
+(type_item
+  (visibility_modifier) @_pub
+  name: (type_identifier) @api.name
+  type_parameters: (type_parameters)? @api.signature
+  (#eq? @_pub "pub")) @api.type @api.abstract
 
 (trait_item
   (visibility_modifier) @_pub

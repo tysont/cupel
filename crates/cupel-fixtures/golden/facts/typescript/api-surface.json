@@ -351,6 +351,7 @@
       }
     },
     {
+      "abstract": true,
       "file": "src/deps_layers/domain/order.ts",
       "internal": true,
       "kind": "type",
@@ -364,6 +365,7 @@
       }
     },
     {
+      "abstract": true,
       "file": "src/deps_layers/infra/store.ts",
       "internal": true,
       "kind": "type",
@@ -442,6 +444,7 @@
       }
     },
     {
+      "abstract": true,
       "file": "src/index.ts",
       "internal": true,
       "kind": "type",
@@ -702,6 +705,7 @@
       }
     },
     {
+      "abstract": true,
       "file": "src/shapes/geometry.ts",
       "internal": true,
       "kind": "type",

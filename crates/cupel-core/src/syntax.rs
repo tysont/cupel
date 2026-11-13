@@ -484,6 +484,16 @@ pub struct ApiItem {
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub internal: bool,
+    /// Whether the item is abstract though its kind is not `Interface`: an abstract class or a
+    /// type alias, a contract with no implementation of its own (ADR-178). Absent (false) for
+    /// every other item.
+    #[serde(
+        rename = "abstract",
+        default,
+        skip_serializing_if = "std::ops::Not::not"
+    )]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub is_abstract: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]

@@ -8,12 +8,12 @@
       "id": "static.deps",
       "metric_targets": {
         "max_distance": {
-          "display": "src/deps_layers/infra/store.ts",
+          "display": "packages/shapes/src/index.ts",
           "location": {
             "col": null,
             "end_col": null,
             "end_line": 1,
-            "file": "src/deps_layers/infra/store.ts",
+            "file": "packages/shapes/src/index.ts",
             "line": 1
           },
           "symbol": null

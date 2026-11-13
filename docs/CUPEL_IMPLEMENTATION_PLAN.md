@@ -2637,6 +2637,15 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-fixtures/tests/roots_scope.rs` on the `roots-scope` repository (`[roots]` naming `packages/shared` beside an `apps/agent` with a cyclomatic-15 function, a clone pair, and an import cycle): no finding, `scope.files` 1, `cyclomatic_max` 1, `pairs` 0, `cycles` 0 (failed first: three findings, `scope.files` 3); a change in `apps/agent` is not in a `--changed` scope (failed first: `files` 1); `--paths apps/agent` is refused naming the root (failed first: exit 0); without `cupel.toml` the three findings and metrics are back;
     - `cupel-cli` `scope.rs` unit tests: the roots hold the scope, none holds all of it; a path only outside the roots is refused by name, a path matching nothing is left to the usual error.
 
+- **Item 15, abstractness counts exported functions as concrete** (2026-11-12, [ADR-178](adr/CUPEL_DECISION_178.md), ADR-052).
+  - The gap: A was interfaces over public types only, so `validate.ts` (42 functions, 1 exported interface) was fully abstract (A = 1.0) and `dep.unstable-abstract`; abstract classes counted as concrete (ADR-052's open consequence).
+  - Now `static.deps` takes A as abstract exported members over exported members (`MemberCounts`): interfaces, and types marked abstract, are abstract; functions, concrete types, constants, and variables concrete; methods and namespace re-exports are members of other items and not counted. An `ApiItem` carries `abstract` (optional, false absent), which a language's `api.scm` sets with `@api.abstract`: TypeScript abstract classes and type aliases, Java `public abstract` classes, and Python, Rust, and Go type aliases. ADR-178's adaptation from Martin's class-based metric is in the ADR; ADR-052's status line already names the amendment.
+  - Open: `export type { … }` clauses are not items (ADR-031), so a type-only re-export moves nothing.
+  - Tests:
+    - `cupel-checks/tests/static_deps.rs` `exported_functions_and_values_are_concrete_and_abstract_classes_and_type_aliases_abstract` (A 0.375; failed first at 0.25 with functions and values left out) and `a_module_of_functions_and_one_interface_is_mostly_concrete` (A 0.023, no finding at the default; failed first: A 1.0); Martin's own test swaps its function for a method to keep A 0.5;
+    - `cupel-lang/tests/api_abstract.rs`: TypeScript, Java, Python, Rust, and Go mark exactly their abstract classes and type aliases (all three failed first: every item `false`);
+    - the TypeScript `api-surface` fact golden, the fact schema snapshot, and `static.deps`' describe golden regenerated.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

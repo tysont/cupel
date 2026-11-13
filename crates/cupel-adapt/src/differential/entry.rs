@@ -143,6 +143,7 @@ mod tests {
             file: "src/pricing.py".to_owned(),
             span: span(line, line + 2),
             internal: false,
+            is_abstract: false,
         }
     }
 

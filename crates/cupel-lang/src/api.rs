@@ -107,6 +107,7 @@ pub fn extract(source: &Source<'_>) -> ApiSurface {
                     file: parsed.file.clone(),
                     span: span(node),
                     internal: false,
+                    is_abstract: m.node(capture::API_ABSTRACT).is_some(),
                 })
             })
             .collect(),

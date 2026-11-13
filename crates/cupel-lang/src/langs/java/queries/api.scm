@@ -73,6 +73,15 @@
   (modifiers "public")
   name: (identifier) @api.name) @api.interface
 
+; Abstract classes are abstract (ADR-178); the earlier pattern wins for them.
+(class_declaration
+  (modifiers "public") @_modifiers
+  name: (identifier) @api.name
+  type_parameters: (_)? @api.signature
+  superclass: (_)? @api.signature
+  interfaces: (_)? @api.signature
+  (#match? @_modifiers "\\babstract\\b")) @api.type @api.abstract
+
 (class_declaration
   (modifiers "public")
   name: (identifier) @api.name

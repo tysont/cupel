@@ -8,12 +8,12 @@
       "id": "static.deps",
       "metric_targets": {
         "max_distance": {
-          "display": "src/deps_layers/domain/money.rs",
+          "display": "shapes/src/lib.rs",
           "location": {
             "col": null,
             "end_col": null,
             "end_line": 1,
-            "file": "src/deps_layers/domain/money.rs",
+            "file": "shapes/src/lib.rs",
             "line": 1
           },
           "symbol": null

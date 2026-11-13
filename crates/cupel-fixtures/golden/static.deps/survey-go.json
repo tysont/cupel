@@ -206,6 +206,38 @@
           "lang": "go",
           "rank": 3,
           "target": {
+            "display": "crap_scores.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "crap_scores.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 4,
+          "target": {
+            "display": "decide.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "decide.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 5,
+          "target": {
             "display": "deps_layers/infra/store.go",
             "location": {
               "col": null,
@@ -220,7 +252,7 @@
         },
         {
           "lang": "go",
-          "rank": 4,
+          "rank": 6,
           "target": {
             "display": "deps_layers/port/port.go",
             "location": {
@@ -236,7 +268,55 @@
         },
         {
           "lang": "go",
-          "rank": 5,
+          "rank": 7,
+          "target": {
+            "display": "rates.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "rates.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 8,
+          "target": {
+            "display": "references.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "references.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 9,
+          "target": {
+            "display": "report/format.go",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "report/format.go",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "go",
+          "rank": 10,
           "target": {
             "display": "shapes/geometry.go",
             "location": {
@@ -249,57 +329,9 @@
             "symbol": null
           },
           "value": 1.0
-        },
-        {
-          "lang": "go",
-          "rank": 6,
-          "target": {
-            "display": "deps_layers/domain/order.go",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "deps_layers/domain/order.go",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 0.5
-        },
-        {
-          "lang": "go",
-          "rank": 7,
-          "target": {
-            "display": "ledger.go",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "ledger.go",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 0.167
-        },
-        {
-          "lang": "go",
-          "rank": 8,
-          "target": {
-            "display": "pricing.go",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "pricing.go",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 0.0
         }
       ],
-      "measured": 8,
+      "measured": 15,
       "metric": "distance",
       "per": "module",
       "summary": "Distance from the main sequence per module that declares a type and has a coupling.",

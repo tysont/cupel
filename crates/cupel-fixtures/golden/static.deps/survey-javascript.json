@@ -8,12 +8,12 @@
       "id": "static.deps",
       "metric_targets": {
         "max_distance": {
-          "display": "src/references.js",
+          "display": "packages/shapes/lib/square.js",
           "location": {
             "col": null,
             "end_col": null,
             "end_line": 1,
-            "file": "src/references.js",
+            "file": "packages/shapes/lib/square.js",
             "line": 1
           },
           "symbol": null
@@ -137,6 +137,102 @@
           "lang": "javascript",
           "rank": 1,
           "target": {
+            "display": "packages/shapes/lib/square.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "packages/shapes/lib/square.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 2,
+          "target": {
+            "display": "src/decide.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/decide.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 3,
+          "target": {
+            "display": "src/deps_layers/infra/store.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_layers/infra/store.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 4,
+          "target": {
+            "display": "src/format.cjs",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/format.cjs",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 5,
+          "target": {
+            "display": "src/math.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/math.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 6,
+          "target": {
+            "display": "src/money/cents.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/money/cents.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 7,
+          "target": {
             "display": "src/references.js",
             "location": {
               "col": null,
@@ -151,7 +247,7 @@
         },
         {
           "lang": "javascript",
-          "rank": 2,
+          "rank": 8,
           "target": {
             "display": "src/shapes/geometry.js",
             "location": {
@@ -164,9 +260,41 @@
             "symbol": null
           },
           "value": 1.0
+        },
+        {
+          "lang": "javascript",
+          "rank": 9,
+          "target": {
+            "display": "src/deps_cycle/alpha.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "javascript",
+          "rank": 10,
+          "target": {
+            "display": "src/deps_cycle/beta.js",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/beta.js",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
         }
       ],
-      "measured": 2,
+      "measured": 14,
       "metric": "distance",
       "per": "module",
       "summary": "Distance from the main sequence per module that declares a type and has a coupling.",

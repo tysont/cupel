@@ -4,16 +4,16 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 3,
+      "findings": 2,
       "id": "static.deps",
       "metric_targets": {
         "max_distance": {
-          "display": "src/ledger/deps_layers/port/port.clj",
+          "display": "src/ledger/clones_settlement.clj",
           "location": {
             "col": null,
             "end_col": null,
             "end_line": 1,
-            "file": "src/ledger/deps_layers/port/port.clj",
+            "file": "src/ledger/clones_settlement.clj",
             "line": 1
           },
           "symbol": null
@@ -132,45 +132,6 @@
       "symbol": null,
       "tier": 0,
       "title": "`src/ledger/deps_layers/domain/order.clj` (layer domain) imports `src/ledger/deps_layers/infra/store.clj` (layer infra)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `src/ledger/deps_layers/port/port.clj`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
-      },
-      "check": "static.deps",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "abstractness": 1.0,
-        "afferent": 0,
-        "distance": 1.0,
-        "distance_max": 0.7,
-        "efferent": 1,
-        "external": 0,
-        "instability": 1.0,
-        "module": "src/ledger/deps_layers/port/port.clj",
-        "unresolved": 0
-      },
-      "id": "fnd_d1f627",
-      "kind": "dep.unstable-abstract",
-      "location": {
-        "col": null,
-        "end_col": null,
-        "end_line": 1,
-        "file": "src/ledger/deps_layers/port/port.clj",
-        "line": 1
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.deps",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_d1f627 --reason '…'",
-      "suppressed": false,
-      "symbol": null,
-      "tier": 0,
-      "title": "`src/ledger/deps_layers/port/port.clj` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
     }
   ],
   "next_actions": [
@@ -187,13 +148,6 @@
       "kind": "review",
       "priority": 2,
       "summary": "Remove the import of `src/ledger/deps_layers/infra/store.clj` from `src/ledger/deps_layers/domain/order.clj`: layer domain must not depend on layer infra (order: domain, infra). Move the code down to domain, or invert the dependency through an interface declared in domain."
-    },
-    {
-      "command": null,
-      "finding": "fnd_d1f627",
-      "kind": "review",
-      "priority": 3,
-      "summary": "Review `src/ledger/deps_layers/port/port.clj`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
     }
   ],
   "oracles": null,
@@ -264,7 +218,7 @@
     "findings": {
       "fail": 0,
       "info": 0,
-      "warn": 3
+      "warn": 2
     },
     "gate": null,
     "new": 0,
@@ -272,6 +226,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 3,
+  "total_findings": 2,
   "truncated": false
 }

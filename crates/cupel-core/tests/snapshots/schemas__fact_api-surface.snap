@@ -24,6 +24,11 @@ expression: pretty(&schema)
     "ApiItem": {
       "type": "object",
       "properties": {
+        "abstract": {
+          "description": "Whether the item is abstract though its kind is not `Interface`: an abstract class or a\ntype alias, a contract with no implementation of its own (ADR-178). Absent (false) for\nevery other item.",
+          "type": "boolean",
+          "x-cupel-optional": true
+        },
         "file": {
           "type": "string"
         },

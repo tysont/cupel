@@ -1,5 +1,5 @@
 ; Python public API (ADR-034): module-level functions, classes (Protocol and ABC subclasses are
-; interfaces), `type` aliases, upper-case constants, and variables, plus the public methods and
+; interfaces), `type` aliases (abstract, ADR-178), upper-case constants, and variables, plus the public methods and
 ; `__init__` of public classes. The earliest pattern wins for an item node, and an item whose
 ; winning match has no `@api.name` is not reported, so the patterns come in three tiers: names a
 ; module-level `__all__` lists; then, when `__all__` exists, every other definition, unnamed and
@@ -58,7 +58,7 @@
         superclasses: (argument_list)? @api.signature) @api.type)
     (type_alias_statement
       left: (type (identifier) @api.name)
-      right: (type) @api.signature) @api.type
+      right: (type) @api.signature) @api.type @api.abstract
   ]
   (#eq? @_all "__all__")
   (#eq? @_exported @api.name))
@@ -248,7 +248,7 @@
         superclasses: (argument_list)? @api.signature) @api.type)
     (type_alias_statement
       left: (type (identifier) @api.name)
-      right: (type) @api.signature) @api.type
+      right: (type) @api.signature) @api.type @api.abstract
   ]
   (#not-match? @api.name "^_"))
 

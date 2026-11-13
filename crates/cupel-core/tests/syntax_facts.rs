@@ -306,6 +306,7 @@ fn api_surface_payload_shape() {
             file: "src/lib.rs".into(),
             span: span(10),
             internal: false,
+            is_abstract: false,
         }],
     });
     assert_eq!(json["items"][0]["kind"], json!("method"));

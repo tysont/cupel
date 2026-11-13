@@ -79,7 +79,16 @@ impl World {
     }
 
     /// `module` declares a public item of `kind`.
-    fn declares(mut self, module: &str, kind: ApiItemKind) -> Self {
+    fn declares(self, module: &str, kind: ApiItemKind) -> Self {
+        self.item(module, kind, false)
+    }
+
+    /// `module` declares a public abstract item of `kind`: an abstract class or a type alias.
+    fn declares_abstract(self, module: &str, kind: ApiItemKind) -> Self {
+        self.item(module, kind, true)
+    }
+
+    fn item(mut self, module: &str, kind: ApiItemKind, is_abstract: bool) -> Self {
         self.items.push(ApiItem {
             path: format!("{module}::item{}", self.items.len()),
             kind,
@@ -92,6 +101,7 @@ impl World {
                 end_col: 2,
             },
             internal: false,
+            is_abstract,
         });
         self
     }
@@ -419,12 +429,12 @@ fn an_importer_outside_a_narrowed_scope_counts_toward_afferent_coupling() {
 
 #[test]
 fn instability_abstractness_and_distance_follow_martin() {
-    // m: Ca = 1 (u), Ce = 3 (x, y, z), so I = 0.75; one interface of two types, so A = 0.5;
-    // D = |0.5 + 0.75 − 1| = 0.25.
+    // m: Ca = 1 (u), Ce = 3 (x, y, z), so I = 0.75; one interface of two exported members (a
+    // method is a member of its type), so A = 0.5; D = |0.5 + 0.75 − 1| = 0.25.
     let world = World::default()
         .declares("m", ApiItemKind::Interface)
         .declares("m", ApiItemKind::Type)
-        .declares("m", ApiItemKind::Function)
+        .declares("m", ApiItemKind::Method)
         .edge("u", "m", 1)
         .edge("m", "x", 1)
         .edge("m", "y", 2)
@@ -454,9 +464,59 @@ fn instability_abstractness_and_distance_follow_martin() {
 }
 
 #[test]
+fn exported_functions_and_values_are_concrete_and_abstract_classes_and_type_aliases_abstract() {
+    // m: an interface, an abstract class, and a type alias over them and a concrete class, two
+    // functions, a constant, and a variable: A = 3 / 8. Methods and namespace re-exports are
+    // members of other items, not counted. Nothing imports m and it imports x: I = 1,
+    // D = 0.375.
+    let world = World::default()
+        .declares("m", ApiItemKind::Interface)
+        .declares_abstract("m", ApiItemKind::Type)
+        .declares_abstract("m", ApiItemKind::Type)
+        .declares("m", ApiItemKind::Type)
+        .declares("m", ApiItemKind::Function)
+        .declares("m", ApiItemKind::Function)
+        .declares("m", ApiItemKind::Constant)
+        .declares("m", ApiItemKind::Variable)
+        .declares("m", ApiItemKind::Method)
+        .declares("m", ApiItemKind::Module)
+        .edge("m", "x", 1);
+    let (_, findings) = run(&world, json!({"distance_max": 0.0}));
+    let [finding] = findings.as_slice() else {
+        panic!("one finding expected: {findings:?}")
+    };
+    assert_eq!(
+        (
+            &finding.evidence.0["abstractness"],
+            &finding.evidence.0["distance"]
+        ),
+        (&json!(0.375), &json!(0.375))
+    );
+}
+
+#[test]
+fn a_module_of_functions_and_one_interface_is_mostly_concrete() {
+    // validate.ts from the Molten trial: 42 exported functions and one interface, A = 1 / 43,
+    // so nothing imports it and it is still not unstable-abstract at the default distance.
+    let world = (0..42)
+        .fold(World::default(), |world, _| {
+            world.declares("validate", ApiItemKind::Function)
+        })
+        .declares("validate", ApiItemKind::Interface)
+        .edge("validate", "x", 1);
+    let (_, findings) = run(&world, json!({}));
+    assert_eq!(findings.len(), 0, "{findings:?}");
+    let (_, findings) = run(&world, json!({"distance_max": 0.0}));
+    let [finding] = findings.as_slice() else {
+        panic!("one finding expected: {findings:?}")
+    };
+    assert_eq!(finding.evidence.0["abstractness"], json!(0.023));
+}
+
+#[test]
 fn stable_concrete_modules_and_modules_without_types_are_not_unstable_abstract() {
     // c: concrete and depended upon (zone of pain, D = 1, not this kind). f: unstable but
-    // declares no type, so it has no abstractness. lone: an interface with no couplings.
+    // exports nothing, so it has no abstractness. lone: an interface with no couplings.
     let world = World::default()
         .declares("c", ApiItemKind::Type)
         .edge("u", "c", 1)

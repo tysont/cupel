@@ -28,6 +28,7 @@ fn item(path: &str, kind: ApiItemKind, signature: &str, file: &str, line: u32) -
             end_col: 2,
         },
         internal: false,
+        is_abstract: false,
     }
 }
 
@@ -315,6 +316,7 @@ fn trailing_parameters_a_caller_may_leave_out_widen_a_signature() {
 fn internal_items_are_not_api_surface() {
     let internal = |path: &str, file: &str| ApiItem {
         internal: true,
+        is_abstract: false,
         ..item(path, ApiItemKind::Function, "()", file, 1)
     };
     let base = vec![

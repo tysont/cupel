@@ -4,16 +4,16 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 3,
+      "findings": 2,
       "id": "static.deps",
       "metric_targets": {
         "max_distance": {
-          "display": "src/ledger/deps_layers/port/port.clj",
+          "display": "src/ledger/clones_settlement.clj",
           "location": {
             "col": null,
             "end_col": null,
             "end_line": 1,
-            "file": "src/ledger/deps_layers/port/port.clj",
+            "file": "src/ledger/clones_settlement.clj",
             "line": 1
           },
           "symbol": null
@@ -125,45 +125,6 @@
       "symbol": null,
       "tier": 0,
       "title": "`src/ledger/deps_layers/domain/order.clj` (layer domain) imports `src/ledger/deps_layers/infra/store.clj` (layer infra)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "review",
-        "priority": 2,
-        "summary": "Review `src/ledger/deps_layers/port/port.clj`: its abstractions have 0 importers but it imports 1 modules. Move its imports into the implementations, or merge the abstractions into the modules that use them."
-      },
-      "check": "static.deps",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "abstractness": 1.0,
-        "afferent": 0,
-        "distance": 1.0,
-        "distance_max": 0.7,
-        "efferent": 1,
-        "external": 0,
-        "instability": 1.0,
-        "module": "src/ledger/deps_layers/port/port.clj",
-        "unresolved": 0
-      },
-      "id": "fnd_d1f627",
-      "kind": "dep.unstable-abstract",
-      "location": {
-        "col": null,
-        "end_col": null,
-        "end_line": 1,
-        "file": "src/ledger/deps_layers/port/port.clj",
-        "line": 1
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only static.deps",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_d1f627 --reason '…'",
-      "suppressed": false,
-      "symbol": null,
-      "tier": 0,
-      "title": "`src/ledger/deps_layers/port/port.clj` is abstract but unstable: distance 1.00 from the main sequence (max 0.70)"
     }
   ],
   "rankings": [
@@ -174,12 +135,12 @@
           "lang": "clojure",
           "rank": 1,
           "target": {
-            "display": "src/ledger/deps_layers/port/port.clj",
+            "display": "src/ledger/clones_settlement.clj",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "src/ledger/deps_layers/port/port.clj",
+              "file": "src/ledger/clones_settlement.clj",
               "line": 1
             },
             "symbol": null
@@ -190,21 +151,101 @@
           "lang": "clojure",
           "rank": 2,
           "target": {
-            "display": "shapes/src/shapes/geometry.clj",
+            "display": "src/ledger/decide.clj",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "shapes/src/shapes/geometry.clj",
+              "file": "src/ledger/decide.clj",
               "line": 1
             },
             "symbol": null
           },
-          "value": 0.5
+          "value": 1.0
         },
         {
           "lang": "clojure",
           "rank": 3,
+          "target": {
+            "display": "src/ledger/deps_layers/infra/store.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/deps_layers/infra/store.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 4,
+          "target": {
+            "display": "src/ledger/pricing.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/pricing.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 5,
+          "target": {
+            "display": "src/ledger/references.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/references.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 6,
+          "target": {
+            "display": "src/ledger/report.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/report.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 7,
+          "target": {
+            "display": "src/ledger/twins.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/ledger/twins.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "clojure",
+          "rank": 8,
           "target": {
             "display": "src/ledger/complexity.clj",
             "location": {
@@ -216,11 +257,27 @@
             },
             "symbol": null
           },
-          "value": 0.5
+          "value": 0.875
         },
         {
           "lang": "clojure",
-          "rank": 4,
+          "rank": 9,
+          "target": {
+            "display": "shapes/src/shapes/geometry.clj",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "shapes/src/shapes/geometry.clj",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.667
+        },
+        {
+          "lang": "clojure",
+          "rank": 10,
           "target": {
             "display": "src/ledger/core.clj",
             "location": {
@@ -232,10 +289,10 @@
             },
             "symbol": null
           },
-          "value": 0.214
+          "value": 0.623
         }
       ],
-      "measured": 4,
+      "measured": 16,
       "metric": "distance",
       "per": "module",
       "summary": "Distance from the main sequence per module that declares a type and has a coupling.",

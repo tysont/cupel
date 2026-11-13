@@ -159,7 +159,7 @@
             "description": "Evidence of `dep.unstable-abstract`.",
             "properties": {
               "abstractness": {
-                "description": "A = interfaces / (types + interfaces) among the module's public items.",
+                "description": "A = abstract exported members / exported members (ADR-178).",
                 "format": "double",
                 "type": "number"
               },

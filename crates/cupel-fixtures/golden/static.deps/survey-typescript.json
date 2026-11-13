@@ -8,12 +8,12 @@
       "id": "static.deps",
       "metric_targets": {
         "max_distance": {
-          "display": "src/deps_layers/infra/store.ts",
+          "display": "packages/shapes/src/index.ts",
           "location": {
             "col": null,
             "end_col": null,
             "end_line": 1,
-            "file": "src/deps_layers/infra/store.ts",
+            "file": "packages/shapes/src/index.ts",
             "line": 1
           },
           "symbol": null
@@ -176,12 +176,12 @@
           "lang": "typescript",
           "rank": 1,
           "target": {
-            "display": "src/deps_layers/infra/store.ts",
+            "display": "packages/shapes/src/index.ts",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "src/deps_layers/infra/store.ts",
+              "file": "packages/shapes/src/index.ts",
               "line": 1
             },
             "symbol": null
@@ -208,6 +208,38 @@
           "lang": "typescript",
           "rank": 3,
           "target": {
+            "display": "src/math.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/math.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 4,
+          "target": {
+            "display": "src/pricing.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/pricing.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 1.0
+        },
+        {
+          "lang": "typescript",
+          "rank": 5,
+          "target": {
             "display": "src/references.ts",
             "location": {
               "col": null,
@@ -222,14 +254,14 @@
         },
         {
           "lang": "typescript",
-          "rank": 4,
+          "rank": 6,
           "target": {
-            "display": "src/shapes/geometry.ts",
+            "display": "src/widget.tsx",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "src/shapes/geometry.ts",
+              "file": "src/widget.tsx",
               "line": 1
             },
             "symbol": null
@@ -238,23 +270,7 @@
         },
         {
           "lang": "typescript",
-          "rank": 5,
-          "target": {
-            "display": "src/deps_layers/domain/order.ts",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "src/deps_layers/domain/order.ts",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 0.5
-        },
-        {
-          "lang": "typescript",
-          "rank": 6,
+          "rank": 7,
           "target": {
             "display": "src/decide.ts",
             "location": {
@@ -266,42 +282,58 @@
             },
             "symbol": null
           },
-          "value": 0.0
-        },
-        {
-          "lang": "typescript",
-          "rank": 7,
-          "target": {
-            "display": "src/index.ts",
-            "location": {
-              "col": null,
-              "end_col": null,
-              "end_line": 1,
-              "file": "src/index.ts",
-              "line": 1
-            },
-            "symbol": null
-          },
-          "value": 0.0
+          "value": 0.8
         },
         {
           "lang": "typescript",
           "rank": 8,
           "target": {
-            "display": "src/plugin.ts",
+            "display": "src/shapes/geometry.ts",
             "location": {
               "col": null,
               "end_col": null,
               "end_line": 1,
-              "file": "src/plugin.ts",
+              "file": "src/shapes/geometry.ts",
               "line": 1
             },
             "symbol": null
           },
-          "value": 0.0
+          "value": 0.667
+        },
+        {
+          "lang": "typescript",
+          "rank": 9,
+          "target": {
+            "display": "src/deps_cycle/alpha.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/alpha.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
+        },
+        {
+          "lang": "typescript",
+          "rank": 10,
+          "target": {
+            "display": "src/deps_cycle/beta.ts",
+            "location": {
+              "col": null,
+              "end_col": null,
+              "end_line": 1,
+              "file": "src/deps_cycle/beta.ts",
+              "line": 1
+            },
+            "symbol": null
+          },
+          "value": 0.5
         }
       ],
-      "measured": 8,
+      "measured": 16,
       "metric": "distance",
       "per": "module",
       "summary": "Distance from the main sequence per module that declares a type and has a coupling.",

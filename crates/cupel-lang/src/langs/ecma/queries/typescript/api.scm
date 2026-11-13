@@ -57,16 +57,16 @@
   ] @api.function @root.hook)
 
 ; Classes, abstract or not, and their public methods. `private` and `protected` members and
-; `#private` ones are not API.
+; `#private` ones are not API. Abstract classes and type aliases are abstract (ADR-178).
 (export_statement
-  declaration: [
-    (class_declaration
-      name: (_) @api.name
-      type_parameters: (type_parameters)? @api.signature)
-    (abstract_class_declaration
-      name: (_) @api.name
-      type_parameters: (type_parameters)? @api.signature)
-  ] @api.type)
+  declaration: (class_declaration
+    name: (_) @api.name
+    type_parameters: (type_parameters)? @api.signature) @api.type)
+
+(export_statement
+  declaration: (abstract_class_declaration
+    name: (_) @api.name
+    type_parameters: (type_parameters)? @api.signature) @api.type @api.abstract)
 
 (export_statement
   declaration: [
@@ -120,13 +120,13 @@
         return_type: (_)? @api.signature) @api.method)))
 
 (export_statement
-  declaration: [
-    (type_alias_declaration
-      name: (_) @api.name
-      type_parameters: (type_parameters)? @api.signature)
-    (enum_declaration
-      name: (_) @api.name)
-  ] @api.type)
+  declaration: (type_alias_declaration
+    name: (_) @api.name
+    type_parameters: (type_parameters)? @api.signature) @api.type @api.abstract)
+
+(export_statement
+  declaration: (enum_declaration
+    name: (_) @api.name) @api.type)
 
 (export_statement
   declaration: (internal_module

@@ -92,6 +92,7 @@ pub mod capture {
     pub const API_NAME: &str = "api.name";
     pub const API_SIGNATURE: &str = "api.signature";
     pub const API_LOCAL: &str = "api.local";
+    pub const API_ABSTRACT: &str = "api.abstract";
     pub const ROOT_ENTRY_POINT: &str = "root.entry-point";
     pub const ROOT_HOOK: &str = "root.hook";
     // references.scm
@@ -277,6 +278,7 @@ const API: Contract = Contract {
     optional: &[
         c::API_SIGNATURE,
         c::API_LOCAL,
+        c::API_ABSTRACT,
         c::ROOT_ENTRY_POINT,
         c::ROOT_HOOK,
         c::SCOPE,
