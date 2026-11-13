@@ -9,7 +9,7 @@
   "oracles": null,
   "plan": null,
   "rankings": {
-    "recommended": 14,
+    "recommended": 13,
     "targets": [
       {
         "findings": [
@@ -397,7 +397,7 @@
       },
       {
         "findings": [
-          "fnd_bc1c58"
+          "fnd_efc44f"
         ],
         "lang": "clojure",
         "protection": {
@@ -408,34 +408,28 @@
         "rank": 10,
         "recommend": "simplify",
         "target": {
-          "display": "ledger.quality-test/computed-entries-count-toward-the-balance",
+          "display": "ledger.clones-settlement/settle-invoices",
           "location": {
             "col": 1,
-            "end_col": 47,
-            "end_line": 32,
-            "file": "test/ledger/quality_test.clj",
-            "line": 29
+            "end_col": 21,
+            "end_line": 11,
+            "file": "src/ledger/clones_settlement.clj",
+            "line": 4
           },
-          "symbol": "sh_4a961e99e251307b"
+          "symbol": "sh_3cd709fc3e433ea2"
         },
         "values": [
           {
             "check": "static.complexity",
             "metric": "cyclomatic",
-            "rank": 7,
-            "value": 3.0
+            "rank": 10,
+            "value": 2.0
           },
           {
             "check": "static.complexity",
             "metric": "cognitive",
-            "rank": 5,
-            "value": 3.0
-          },
-          {
-            "check": "tests.quality",
-            "metric": "mock_density",
-            "rank": 17,
-            "value": 0.0
+            "rank": 10,
+            "value": 1.0
           }
         ]
       }

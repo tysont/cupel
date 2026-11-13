@@ -125,7 +125,8 @@ struct TestLogic {
     logic_max: u32,
     /// Loops other than tables.
     loops: u32,
-    /// Loops over a table of cases written in place: parametrization, not logic (ADR-069).
+    /// Loops over a table of cases written in place (ADR-069) or holding an assertion
+    /// (ADR-184): parametrization, not logic.
     tables: u32,
     /// `if` and `else if` branches and switch or match arms.
     branches: u32,
@@ -415,12 +416,11 @@ impl LogicCount {
                     .filter(|decision| kinds.contains(&decision.kind)),
             )
         };
-        let loops =
-            |table: bool| {
-                count(decisions.iter().filter(|decision| {
-                    decision.kind == DecisionKind::Loop && decision.table == table
-                }))
-            };
+        let loops = |table: bool| {
+            count(decisions.iter().filter(|decision| {
+                decision.kind == DecisionKind::Loop && table_driven(decision, case) == table
+            }))
+        };
         Self {
             loops: loops(false),
             tables: loops(true),
@@ -437,6 +437,17 @@ impl LogicCount {
     fn logic(&self) -> u32 {
         self.loops + self.alternatives + self.branches.saturating_sub(self.guards)
     }
+}
+
+/// Whether a loop runs a table of cases: it iterates one written in place (ADR-069), or its body
+/// holds one of the case's assertions (ADR-184), so each pass checks one case.
+fn table_driven(decision: &Decision, case: &TestCase) -> bool {
+    decision.table
+        || decision.span.as_ref().is_some_and(|span| {
+            case.assertions
+                .iter()
+                .any(|assertion| span.contains(&assertion.span))
+        })
 }
 
 impl TestsQuality {

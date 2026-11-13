@@ -258,7 +258,7 @@
                 "type": "string"
               },
               "tables": {
-                "description": "Loops over a table of cases written in place: parametrization, not logic (ADR-069).",
+                "description": "Loops over a table of cases written in place (ADR-069) or holding an assertion\n(ADR-184): parametrization, not logic.",
                 "format": "uint32",
                 "minimum": 0,
                 "type": "integer"

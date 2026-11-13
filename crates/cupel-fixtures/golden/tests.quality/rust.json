@@ -4,7 +4,7 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 11,
+      "findings": 10,
       "id": "tests.quality",
       "metrics": {
         "assertion_density": 0.9230769230769232,
@@ -400,49 +400,6 @@
         "hints": {},
         "kind": "refactor_extract",
         "priority": 2,
-        "summary": "Split `computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "guided",
-        "alternatives": 0,
-        "branches": 0,
-        "guards": 1,
-        "logic": 1,
-        "logic_max": 0,
-        "loops": 1,
-        "remediation_mode": "simplify",
-        "tables": 0
-      },
-      "id": "fnd_d5638e",
-      "kind": "test.logic",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 47,
-        "file": "tests/quality_signals.rs",
-        "line": 43
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_94021b48c3f81f84",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_d5638e --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "tests::quality_signals::computed_entries_count_toward_the_balance",
-        "hash": "sh_94021b48c3f81f84",
-        "lang": "rust"
-      },
-      "tier": 2,
-      "title": "`tests::quality_signals::computed_entries_count_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "refactor_extract",
-        "priority": 2,
         "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `display_shows_owner_and_balance`."
       },
       "check": "tests.quality",
@@ -551,10 +508,10 @@
     },
     {
       "command": null,
-      "finding": "fnd_d5638e",
+      "finding": "fnd_deba8c",
       "kind": "refactor_extract",
       "priority": 10,
-      "summary": "Split `computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `display_shows_owner_and_balance`."
     }
   ],
   "oracles": null,
@@ -625,7 +582,7 @@
     "findings": {
       "fail": 0,
       "info": 0,
-      "warn": 11
+      "warn": 10
     },
     "gate": null,
     "new": 0,
@@ -633,6 +590,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 11,
+  "total_findings": 10,
   "truncated": false
 }

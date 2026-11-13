@@ -70,6 +70,8 @@ struct Case {
     /// Clauses of expressions computing a value (a comprehension's `for` and `if`), after
     /// `tables`.
     clauses: Vec<DecisionKind>,
+    /// Loops not over a table written in place, where each is, after `clauses`.
+    loops_at: Vec<Span>,
     body: Vec<NormNode>,
     /// The body's statements sit inside one list node, as Go's do.
     wrapped: bool,
@@ -87,6 +89,7 @@ fn case(name: &'static str, line: u32) -> Case {
         decisions: Vec::new(),
         tables: 0,
         clauses: Vec::new(),
+        loops_at: Vec::new(),
         body: Vec::new(),
         wrapped: false,
     }
@@ -127,6 +130,12 @@ impl Case {
 
     fn computing(mut self, clauses: &[DecisionKind]) -> Self {
         self.clauses = clauses.to_vec();
+        self
+    }
+
+    /// Loops spanning each of `spans`, none over a table written in place.
+    fn looping_at(mut self, spans: &[Span]) -> Self {
+        self.loops_at = spans.to_vec();
         self
     }
 
@@ -267,11 +276,19 @@ impl World {
                             decisions: case
                                 .decisions
                                 .iter()
-                                .map(|kind| (*kind, false, false))
-                                .chain((0..case.tables).map(|_| (DecisionKind::Loop, true, false)))
-                                .chain(case.clauses.iter().map(|kind| (*kind, false, true)))
-                                .map(|(kind, table, expression)| Decision {
-                                    span: None,
+                                .map(|kind| (*kind, false, false, None))
+                                .chain(
+                                    (0..case.tables)
+                                        .map(|_| (DecisionKind::Loop, true, false, None)),
+                                )
+                                .chain(case.clauses.iter().map(|kind| (*kind, false, true, None)))
+                                .chain(
+                                    case.loops_at
+                                        .iter()
+                                        .map(|at| (DecisionKind::Loop, false, false, Some(*at))),
+                                )
+                                .map(|(kind, table, expression, span)| Decision {
+                                    span,
                                     kind,
                                     nesting: 0,
                                     cyclomatic: 1,
@@ -607,6 +624,54 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
         "a table loop is not logic; the other loop is"
     );
     assert_eq!(findings[0].action.kind, ActionKind::RefactorExtract);
+}
+
+#[test]
+fn a_loop_holding_an_assertion_is_table_driven_but_branching_inside_it_is_logic() {
+    use DecisionKind::Branch;
+    let (_, findings) = Run::of(vec![
+        // `for (const [input, want] of cases()) { expect(f(input)).toBe(want) }`
+        case("asserting_loop", 100)
+            .asserting_on(&[102])
+            .looping_at(&[span(101, 3)]),
+        case("loop_before_the_assertion", 110)
+            .asserting_on(&[115])
+            .looping_at(&[span(111, 2)]),
+        // `for (…) { if (a) { … } else if (b) { … } expect(…) }`: one branch beyond the guard.
+        case("branching_in_an_asserting_loop", 120)
+            .asserting_on(&[124])
+            .looping_at(&[span(121, 5)])
+            .deciding(&[Branch, Branch]),
+    ])
+    .go();
+    let logic: Vec<(&str, &Value, &Value, &Value)> = findings
+        .iter()
+        .map(|finding| {
+            (
+                finding.symbol.as_ref().unwrap().display.as_str(),
+                &finding.evidence.0["loops"],
+                &finding.evidence.0["tables"],
+                &finding.evidence.0["branches"],
+            )
+        })
+        .collect();
+    assert_eq!(
+        logic,
+        [
+            (
+                "t::loop_before_the_assertion",
+                &json!(1),
+                &json!(0),
+                &json!(0)
+            ),
+            (
+                "t::branching_in_an_asserting_loop",
+                &json!(0),
+                &json!(1),
+                &json!(2)
+            ),
+        ]
+    );
 }
 
 #[test]

@@ -4,7 +4,7 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 10,
+      "findings": 9,
       "id": "tests.quality",
       "metrics": {
         "assertion_density": 1.1724137931034482,
@@ -362,49 +362,6 @@
         "hints": {},
         "kind": "refactor_extract",
         "priority": 2,
-        "summary": "Split `test_computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "guided",
-        "alternatives": 0,
-        "branches": 0,
-        "guards": 1,
-        "logic": 1,
-        "logic_max": 0,
-        "loops": 1,
-        "remediation_mode": "simplify",
-        "tables": 0
-      },
-      "id": "fnd_30b5d7",
-      "kind": "test.logic",
-      "location": {
-        "col": 1,
-        "end_col": 41,
-        "end_line": 39,
-        "file": "tests/test_quality_signals.py",
-        "line": 37
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_6d78cfccff75262d",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_30b5d7 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "tests.test_quality_signals.test_computed_entries_count_toward_the_balance",
-        "hash": "sh_6d78cfccff75262d",
-        "lang": "python"
-      },
-      "tier": 2,
-      "title": "`tests.test_quality_signals.test_computed_entries_count_toward_the_balance` contains logic: 1 loop(s) or branch(es) (max 0)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "refactor_extract",
-        "priority": 2,
         "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `test_deposits_keep_the_owner`."
       },
       "check": "tests.quality",
@@ -506,16 +463,9 @@
     },
     {
       "command": null,
-      "finding": "fnd_30b5d7",
-      "kind": "refactor_extract",
-      "priority": 9,
-      "summary": "Split `test_computed_entries_count_toward_the_balance` into one test per path, or parametrize it, so the test body neither loops nor branches."
-    },
-    {
-      "command": null,
       "finding": "fnd_cc14c6",
       "kind": "refactor_extract",
-      "priority": 10,
+      "priority": 9,
       "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `test_deposits_keep_the_owner`."
     }
   ],
@@ -587,7 +537,7 @@
     "findings": {
       "fail": 0,
       "info": 0,
-      "warn": 10
+      "warn": 9
     },
     "gate": null,
     "new": 0,
@@ -595,6 +545,6 @@
     "suppressed": 0
   },
   "tests": null,
-  "total_findings": 10,
+  "total_findings": 9,
   "truncated": false
 }
