@@ -1023,7 +1023,7 @@ coverage = "npx vitest run --coverage --coverage.reporter=lcov"   # no {out}: co
 | Rust | `cargo llvm-cov` | no (stable llvm-cov reports none) |
 | Go | `go test -coverprofile` | no (coverprofile has none) |
 | Python | `pytest-cov` (with pytest), `coverage.py` (with unittest) | with `--cov-branch` |
-| JavaScript, TypeScript | `vitest --coverage`, `jest --coverage`, `c8`, `node --test --experimental-test-coverage` | yes |
+| JavaScript, TypeScript | `vitest --coverage`, `jest --coverage`, `node --test --experimental-test-coverage` (for a `node --test` root without `c8` in `devDependencies`), `c8` (with Mocha, or a `node --test` root that lists it) | yes |
 | Java | JaCoCo through Maven (its goals by coordinate around `mvn test`), JaCoCo through Gradle (`gradle test jacocoTestReport`, with the `jacoco` plugin applied and XML reports on) | yes |
 | Clojure | Cloverage (`-Sdeps` adds it for the run, `--lcov`) | no |
 

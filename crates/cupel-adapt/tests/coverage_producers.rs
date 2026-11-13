@@ -138,8 +138,8 @@ fn coverage_producers_register_for_their_languages_in_toolchain_table_order() {
     let ecma = [
         "tool.vitest-coverage",
         "tool.jest-coverage",
-        "tool.c8",
         "tool.node-test-coverage",
+        "tool.c8",
     ];
     assert_eq!(
         ids,
@@ -349,7 +349,7 @@ fn a_configured_root_detects_its_coverage_producer_from_its_own_runner() {
         .id()
         .to_string();
     assert_eq!(
-        preferred, "tool.c8",
+        preferred, "tool.node-test-coverage",
         "the root runs `node --test`; the repository root's Vitest is not its runner"
     );
 }

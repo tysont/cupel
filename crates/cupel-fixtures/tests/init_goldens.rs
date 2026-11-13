@@ -3,11 +3,12 @@
 use cupel_core::Status;
 use cupel_fixtures::{copy_repo, run_cupel};
 
-const CASES: [&str; 10] = [
+const CASES: [&str; 11] = [
     "cargo-single",
     "cargo-workspace",
     "go-module",
     "npm-js",
+    "node-test",
     "pnpm-ts-workspace",
     "python-pyproject",
     "python-requirements",

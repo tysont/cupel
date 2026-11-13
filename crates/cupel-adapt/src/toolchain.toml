@@ -95,18 +95,20 @@ format = "lcov"
 commands = { "tool.jest" = "<x> jest --coverage --coverageReporters=lcov" }
 install = "<add> jest"
 
+# Node's own coverage: `node --test` writes LCOV through its built-in reporter, with no package to
+# install. A root that lists c8 in `devDependencies` sets it aside for c8 (ADR-197); Mocha has
+# no command here, so it always gets c8's.
+[[rows.coverage]]
+id = "tool.node-test-coverage"
+format = "lcov"
+defer = [{ json = "package.json", path = ["devDependencies", "c8"] }]
+commands = { "tool.node-test" = "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}" }
+
 [[rows.coverage]]
 id = "tool.c8"
 format = "lcov"
 commands = { "tool.mocha" = "<x> c8 --reporter=lcov mocha", "tool.node-test" = "<x> c8 --reporter=lcov node --test" }
 install = "<add> c8"
-
-# Node's own coverage: `node --test` writes LCOV through its built-in reporter, with no package to
-# install; `init` writes c8's command, and a root without c8 configures this one.
-[[rows.coverage]]
-id = "tool.node-test-coverage"
-format = "lcov"
-commands = { "tool.node-test" = "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}" }
 
 [[rows.bench]]
 id = "tool.bench-script"

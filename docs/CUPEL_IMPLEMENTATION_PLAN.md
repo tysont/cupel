@@ -2724,6 +2724,8 @@ Items 1–7 are the rulings in order; 8 is `v0.2.8`: tag, verify the release as 
 
 #### Notes
 
+- **1 — `init`'s coverage command for `node --test`.** [ADR-197](adr/CUPEL_DECISION_197.md). The gap: `tool.c8` came before `tool.node-test-coverage` in the toolchain table, so every `node --test` root got `<x> c8 --reporter=lcov node --test`, which cannot run without c8. Now `tool.node-test-coverage` comes first with `defer = [package.json devDependencies.c8]`: a `node --test` root gets `node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}`, and one listing c8 in `devDependencies` (not `dependencies`) defers it to c8. Mocha is unchanged: Node's row has no Mocha command, so Mocha roots still get c8's. The table order is also the registry's, so where no coverage command is configured a `node --test` root's preferred coverage producer is `tool.node-test-coverage`. Tests: `cupel-adapt/tests/toolchain.rs` `yarn_and_node_test_with_node_coverage_are_chosen_without_other_signals` and `a_node_test_root_gets_c8_only_where_c8_is_a_dev_dependency` (observed failing first: both got c8's command); `a_member_dependency_selects_the_runner_...` keeps Mocha's c8; `coverage_producers.rs`'s order and preferred-producer expectations follow the table; a `detect/node-test` fixture and `golden/init/node-test.json` for `init --dry-run`; the describe JSON goldens list Node's row first with its `defer`, the text snapshot lists it first.
+
 ### Batch v0.2.9: validation on one repository per language
 
 **Goal:** Validate Cupel on a real repository per language, with PR replay as the method, and ship the fixes as `v0.2.9`.

@@ -219,6 +219,21 @@
         {
           "commands": [
             {
+              "command": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}",
+              "runner": "tool.node-test"
+            }
+          ],
+          "defer": [
+            "`package.json` has `devDependencies.c8`"
+          ],
+          "detect": [],
+          "format": "lcov",
+          "install": null,
+          "producer": "tool.node-test-coverage"
+        },
+        {
+          "commands": [
+            {
               "command": "<x> c8 --reporter=lcov mocha",
               "runner": "tool.mocha"
             },
@@ -231,18 +246,6 @@
           "format": "lcov",
           "install": "<add> c8",
           "producer": "tool.c8"
-        },
-        {
-          "commands": [
-            {
-              "command": "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}",
-              "runner": "tool.node-test"
-            }
-          ],
-          "detect": [],
-          "format": "lcov",
-          "install": null,
-          "producer": "tool.node-test-coverage"
         }
       ],
       "fuzz": [

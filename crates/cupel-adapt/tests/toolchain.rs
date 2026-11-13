@@ -189,17 +189,29 @@ fn go_commands_cover_the_packages_project_info_reports() {
     );
 }
 
+const NODE_COVERAGE: &str = "node --test --experimental-test-coverage --test-reporter=lcov \
+                             --test-reporter-destination={out}";
+
 #[test]
-fn yarn_and_node_test_are_chosen_without_other_signals() {
+fn yarn_and_node_test_with_node_coverage_are_chosen_without_other_signals() {
     let dir = support::repository(&[("package.json", "{\"name\": \"plain\"}"), ("yarn.lock", "")]);
     let got = commands("javascript", dir.path(), &[], &[]);
+    assert_eq!(got, expected(Some("node --test"), Some(NODE_COVERAGE), None));
+}
+
+#[test]
+fn a_node_test_root_gets_c8_only_where_c8_is_a_dev_dependency() {
+    let dev = support::repository(&[("package.json", "{\"devDependencies\": {\"c8\": \"10\"}}")]);
+    let runtime = support::repository(&[("package.json", "{\"dependencies\": {\"c8\": \"10\"}}")]);
     assert_eq!(
-        got,
-        expected(
-            Some("node --test"),
-            Some("yarn c8 --reporter=lcov node --test"),
-            None
-        )
+        [
+            commands("javascript", dev.path(), &[], &[]).coverage,
+            commands("javascript", runtime.path(), &[], &[]).coverage,
+        ],
+        [
+            Some("npx c8 --reporter=lcov node --test".to_owned()),
+            Some(NODE_COVERAGE.to_owned()),
+        ]
     );
 }
 
