@@ -215,8 +215,18 @@ fn exit_1_when_the_gate_fails() {
     assert_eq!(outcome.code, 1, "{}", outcome.stdout);
     let envelope = outcome.envelope();
     assert_eq!(envelope["status"], json!("fail"));
+    let mut gate = envelope["summary"]["gate"].clone();
+    let target = gate["rules"][0]["actual_target"].take();
     assert_eq!(
-        envelope["summary"]["gate"],
+        (&target["display"], &target["location"]["file"]),
+        (&json!("branchy::branchy"), &json!("src/branchy.rs"))
+    );
+    gate["rules"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("actual_target");
+    assert_eq!(
+        gate,
         json!({
             "result": "fail", "evaluated": "gate.tree",
             "rules": [{"rule": "static.complexity.cyclomatic_max < 3", "actual": 3.0,
