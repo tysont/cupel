@@ -562,3 +562,92 @@ fn a_roots_tests_are_measured_on_the_other_roots_files_they_run_and_rerun_when_t
         "a change in `fees` measures again the tests of both roots that ran it"
     );
 }
+
+/// The map `id` measures for `lang` on a fresh copy of `sibling-tests/<variant>`, where only a
+/// sibling crate's, package's or module's test runs the library's code (ADR-202); `None`
+/// (reported as skipped) without the tool. The root's packages are `packages` when it names any.
+fn sibling_map(
+    (id, lang): (&'static str, &'static str),
+    variant: &str,
+    packages: &[&str],
+) -> Option<PerTestMap> {
+    let registry = registry();
+    let dir = tempfile::tempdir().unwrap();
+    cupel_fixtures::copy_repo(&format!("sibling-tests/{variant}"), dir.path());
+    let producer = producer(&registry, FactKind::PerTestMap, id, lang);
+    let mut ctx = produce_ctx(dir.path(), lang, Cancellation::new());
+    let mut info = support::project_info(lang, &["."]);
+    if !packages.is_empty() {
+        info.roots[0].packages = packages
+            .iter()
+            .map(|package| (*package).to_owned())
+            .collect();
+    }
+    ctx.upstream.insert(Produced::new(info).share());
+    if let Availability::MissingTool { name, .. } = producer.availability(&ctx.ctx) {
+        eprintln!("SKIPPED: {name} not installed; {id} was not run");
+        return None;
+    }
+    let fact = producer
+        .produce(&ctx, &Scope::default(), &mut Vec::new())
+        .unwrap();
+    Some(fact.downcast::<PerTestMap>().unwrap())
+}
+
+#[test]
+fn a_sibling_crates_integration_test_is_measured_on_the_library_crate_it_runs() {
+    let Some(map) = sibling_map(("tool.llvm-cov-per-test", "rust"), "rust", &[]) else {
+        return;
+    };
+    assert_eq!(
+        (
+            covering(&map, "lib-a/src/lib.rs", 6, 6),
+            covering(&map, "lib-a/src/lib.rs", 8, 8)
+        ),
+        (
+            ids(&["shop::fees large_orders_ship_free"]),
+            ids(&[
+                "shop::charged a_small_order_is_charged_its_fee",
+                "shop::fees small_orders_pay_the_fee"
+            ])
+        )
+    );
+}
+
+#[test]
+fn a_sibling_packages_test_is_measured_on_the_package_it_runs() {
+    let Some(map) = sibling_map(("tool.go-cover-per-test", "go"), "go", &[]) else {
+        return;
+    };
+    assert_eq!(
+        (
+            covering(&map, "a/fee.go", 7, 7),
+            covering(&map, "a/fee.go", 9, 9)
+        ),
+        (
+            ids(&["example.com/shop/b/TestLargeOrdersShipFree"]),
+            ids(&["example.com/shop/b/TestSmallOrdersPayTheFee"])
+        )
+    );
+}
+
+#[test]
+fn a_sibling_modules_test_is_measured_on_the_module_its_go_workspace_uses() {
+    let Some(map) = sibling_map(
+        ("tool.go-cover-per-test", "go"),
+        "go-work",
+        &["./a/...", "./b/..."],
+    ) else {
+        return;
+    };
+    assert_eq!(
+        (
+            covering(&map, "a/fee.go", 7, 7),
+            covering(&map, "a/fee.go", 9, 9)
+        ),
+        (
+            ids(&["example.com/b/TestLargeOrdersShipFree"]),
+            ids(&["example.com/b/TestSmallOrdersPayTheFee"])
+        )
+    );
+}

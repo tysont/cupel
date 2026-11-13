@@ -1,0 +1,4 @@
+# The sibling-tests fixture (ADR-202): package `a` has no test; `b`'s tests run it. Run at --depth deep, so the
+# per-test map, measured with -coverpkg over every package of the module, names `b`'s tests for `a`'s lines.
+[lang.go]
+coverage = "go test -coverprofile={out} ./..."

@@ -1,0 +1,5 @@
+# The sibling-tests fixture (ADR-202): `lib-a` has no test of its own; `shop`'s integration test is the only one
+# that runs `lib_a::fee`, so with a per-test map that test covers `lib-a`'s lines and kills its mutants.
+[workspace]
+members = ["lib-a", "shop"]
+resolver = "2"

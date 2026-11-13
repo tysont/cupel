@@ -1,0 +1,4 @@
+# The sibling-tests fixture (ADR-202): run at --depth deep, so the per-test map names `shop`'s tests for `lib-a`'s
+# lines, and its mutants run them.
+[lang.rust]
+coverage = "cargo llvm-cov --workspace --lcov --output-path {out}"

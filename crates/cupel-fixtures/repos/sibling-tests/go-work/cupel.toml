@@ -1,0 +1,5 @@
+# The sibling-tests fixture (ADR-202) as a Go workspace: `go.work` uses modules `a` and `b`, `a` has no test, and
+# `b`'s tests run it. Run at --depth deep, so the per-test map, measured with -coverpkg over every used module's
+# packages, names `b`'s tests for `a`'s lines.
+[lang.go]
+coverage = "go test -coverprofile={out} ./a/... ./b/..."

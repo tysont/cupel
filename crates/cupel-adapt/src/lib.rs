@@ -70,6 +70,7 @@ pub mod flake;
 mod footprint;
 mod fresh;
 mod fuzz;
+mod go_module;
 mod go_test;
 mod gradle;
 mod java_tests;
