@@ -135,6 +135,15 @@ mod tests {
         assert_eq!(later.load("file-b"), []);
     }
 
+    /// Records one run per id, each using only `key` and deriving nothing.
+    fn record_runs_using(writer: &Writer, runs: impl Iterator<Item = RunId>, key: &str) {
+        for run in runs {
+            let shelf = StoreShelf::new(writer).unwrap();
+            shelf.used(key);
+            shelf.record(&run).unwrap();
+        }
+    }
+
     #[test]
     fn a_run_that_derives_nothing_still_records_the_files_it_used_and_sweeps() {
         let dir = tempfile::tempdir().unwrap();
@@ -145,16 +154,12 @@ mod tests {
                 .unwrap()
         };
         let first = StoreShelf::new(&writer).unwrap();
-        for key in ["file-a", "file-b"] {
-            first.used(key);
-            first.keep(key, "symbols", b"[1]".to_vec());
-        }
+        first.used("file-a");
+        first.keep("file-a", "symbols", b"[1]".to_vec());
+        first.used("file-b");
+        first.keep("file-b", "symbols", b"[1]".to_vec());
         first.record(&run(1)).unwrap();
-        for n in 2..=21 {
-            let shelf = StoreShelf::new(&writer).unwrap();
-            shelf.used("file-b");
-            shelf.record(&run(n)).unwrap();
-        }
+        record_runs_using(&writer, (2..=21).map(run), "file-b");
         let later = StoreShelf::new(&writer).unwrap();
         assert_eq!(
             [later.load("file-a"), later.load("file-b")],

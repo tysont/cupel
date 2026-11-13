@@ -831,6 +831,15 @@ fn parsed_facts_are_read_by_build_and_file_and_a_build_keeps_only_its_own() {
     );
 }
 
+/// Records one run per number, each using only `key` and deriving nothing.
+fn record_runs_using(store: &Store, runs: std::ops::RangeInclusive<u8>, key: &str) {
+    for n in runs {
+        store
+            .record_parsed_facts("build-1", &run_id(n), &[], &[key.to_owned()])
+            .unwrap();
+    }
+}
+
 #[test]
 fn the_sweep_drops_parsed_facts_of_files_none_of_the_last_20_runs_used() {
     let repo = Repo::new();
@@ -852,11 +861,7 @@ fn the_sweep_drops_parsed_facts_of_files_none_of_the_last_20_runs_used() {
     let kept = |store: &Store| {
         ["file-a", "file-b"].map(|key| store.parsed_facts("build-1", key).unwrap().len())
     };
-    for n in 2..=20 {
-        store
-            .record_parsed_facts("build-1", &run_id(n), &[], &used(&["file-b"]))
-            .unwrap();
-    }
+    record_runs_using(&store, 2..=20, "file-b");
     assert_eq!(kept(&store), [1, 1], "run 1 is among the last 20");
     store
         .record_parsed_facts("build-1", &run_id(21), &[], &used(&["file-b"]))
