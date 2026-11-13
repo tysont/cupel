@@ -2680,6 +2680,11 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-core/tests/config_gate.rs`: `<= base` parses with no offset and `==base+0` with an offset of 0, and each displays as written;
     - the render snapshots (the fixture's `<= base` rule shows `tolerance 0`), the run and plugin schema snapshots, and `tests.mutation`'s describe golden regenerated.
 
+- **Item 17, the baseline advances only on a passing default-branch run** (2026-11-13, [ADR-182](adr/CUPEL_DECISION_182.md), [ADR-195](adr/CUPEL_DECISION_195.md) §4).
+  - The gap: `cupel baseline set` named the latest result run (or `--from`'s) and `import` any file's run, whatever its status or branch, and nothing else moves a baseline.
+  - Now `set` and `import` (`baseline.rs` `unfit`), preview included, refuse as a usage error a run that did not pass, and a run recorded in a git work tree on a branch other than the default one or on a detached `HEAD`. Passing is status `pass`, or a gate that failed only on rules against `base` skipped for want of a reference, so the run before the first baseline can still become one and the gate's `cupel baseline set --write` next action stays good. The default branch is what `--changed` reads: `default_branch` in `cupel.toml`, else `Git::default_branch` (`origin/HEAD`, else `main` or `master`, else `HEAD`'s branch). A run recorded outside a work tree has no branch and is accepted. `baseline::run` takes the invocation, for the configuration.
+  - Tests: `cupel-cli/tests/baseline.rs` `set_and_import_refuse_a_run_that_did_not_pass`, `set_refuses_a_run_on_another_branch_or_a_detached_head` (also `default_branch` over git's), and `a_run_whose_gate_failed_only_for_want_of_a_reference_can_be_the_baseline`. The first two failed first with exit 0 where a refusal was expected; the third, written after `cupel-cli/tests/gate.rs`' stored-baseline test failed on the first refusal, failed first refusing the no-reference run.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

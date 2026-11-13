@@ -493,7 +493,7 @@ fn run_verb(
         // `explain` only reads the store.
         VerbArgs::Explain { target, .. } => explain::run(run, writer, target),
         VerbArgs::Baseline { name, action } => {
-            baseline::run(run, writer, events, name.as_deref(), action)
+            baseline::run(invocation, events, name.as_deref(), action)
         }
         VerbArgs::Suppress {
             finding,

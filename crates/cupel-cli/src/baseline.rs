@@ -2,9 +2,10 @@
 // ABOUTME: runs as new and resolved findings, and export or import a baseline run as JSON.
 use std::path::Path;
 
+use cupel_core::git::Git;
 use cupel_core::{
-    ActionKind, BaselineRef, Envelope, EventSink, ExitCode, NextAction, PlannedWrite, RunId,
-    RunPlan, Status, WriteError, Writer, deltas,
+    ActionKind, BaselineRef, Envelope, EventSink, ExitCode, GateRule, NO_REFERENCE, NextAction,
+    PlannedWrite, RuleOutcome, RunId, RunPlan, Status, WriteError, Writer, deltas,
 };
 use cupel_store::Store;
 
@@ -12,22 +13,23 @@ use crate::against::{self, DEFAULT_BASELINE};
 use crate::cli::BaselineArgs;
 use crate::error::CupelError;
 use crate::persist;
-use crate::run::Run;
+use crate::run::{Invocation, Run};
 
 /// Runs `action` on the baseline `name` (default `default`). A recording writer (a dry run, or
 /// `set`/`import` without `--write`) plans instead of changing anything, reading the store only
 /// if it already exists.
 pub fn run(
-    run: &Run,
-    writer: &Writer,
+    invocation: &Invocation<'_>,
     events: &mut dyn EventSink,
     name: Option<&str>,
     action: &BaselineArgs,
 ) -> Result<Envelope, CupelError> {
+    let (run, writer) = (invocation.run, invocation.writer);
     let baseline = Baseline {
         run,
         writer,
         name: name.unwrap_or(DEFAULT_BASELINE),
+        default_branch: default_branch(invocation),
     };
     match action {
         BaselineArgs::Set { from } => baseline.set(from.as_deref(), events),
@@ -52,6 +54,77 @@ struct Baseline<'a> {
     run: &'a Run,
     writer: &'a Writer,
     name: &'a str,
+    /// The branch a baseline's run must have been recorded on, when one is known (ADR-195 §4).
+    default_branch: Option<String>,
+}
+
+/// The repository's default branch: `default_branch` in `cupel.toml`, else git's (the branch
+/// `origin/HEAD` names, else `main` or `master`, else `HEAD`'s), as `--changed` reads it.
+fn default_branch(invocation: &Invocation<'_>) -> Option<String> {
+    invocation
+        .config
+        .ok()
+        .and_then(|config| config.file.default_branch.clone())
+        .or_else(|| Git::open(invocation.writer.root())?.default_branch())
+}
+
+/// What every refusal of a run as a baseline ends with (ADR-182).
+const ONLY_PASSING_DEFAULT: &str = "a baseline names only a passing run on the default branch";
+
+/// Whether `envelope`'s run passed, as a baseline's run must: its status is `pass`, or its gate
+/// failed only on rules against `base` that had no reference, as a run before the first
+/// baseline does (ADR-195 §4).
+fn passed(envelope: &Envelope) -> bool {
+    match envelope.status {
+        Status::Pass => true,
+        Status::Fail => envelope
+            .summary
+            .gate
+            .as_ref()
+            .is_some_and(|gate| gate.rules.iter().all(passed_but_for_a_reference)),
+        Status::Partial | Status::Error | Status::Plan => false,
+    }
+}
+
+/// Whether a gate rule passed, or was skipped only because `base` had no reference value.
+fn passed_but_for_a_reference(rule: &GateRule) -> bool {
+    match rule.result {
+        RuleOutcome::Pass => true,
+        RuleOutcome::Skipped => rule
+            .reason
+            .as_deref()
+            .is_some_and(|reason| reason.starts_with(NO_REFERENCE)),
+        RuleOutcome::Fail | RuleOutcome::Unsupported => false,
+    }
+}
+
+/// Why `envelope`'s run cannot be a baseline: it did not pass, or it was recorded in a work tree
+/// on a branch other than `default` (a detached `HEAD` included). `None` when it can.
+fn unfit(envelope: &Envelope, default: Option<&str>) -> Option<String> {
+    let id = envelope.run.id;
+    if !passed(envelope) {
+        let status = serde_json::to_value(envelope.status)
+            .ok()
+            .and_then(|value| value.as_str().map(str::to_owned))
+            .unwrap_or_default();
+        return Some(format!(
+            "The run {id} did not pass (status `{status}`); {ONLY_PASSING_DEFAULT}"
+        ));
+    }
+    let branch = envelope.run.git.as_ref()?.branch.as_deref();
+    let place = branch.map_or_else(
+        || "on a detached HEAD".to_owned(),
+        |branch| format!("on branch `{branch}`"),
+    );
+    match default {
+        Some(default) if branch == Some(default) => None,
+        Some(default) => Some(format!(
+            "The run {id} is {place}, not the default branch `{default}`; {ONLY_PASSING_DEFAULT}"
+        )),
+        None => Some(format!(
+            "The run {id} is {place}, and no default branch is known; {ONLY_PASSING_DEFAULT}"
+        )),
+    }
 }
 
 impl Baseline<'_> {
@@ -65,11 +138,59 @@ impl Baseline<'_> {
         }
     }
 
+    /// Refuses `envelope`'s run as this baseline when it is unfit, as a usage error on
+    /// `argument` with `value`.
+    fn admit(
+        &self,
+        envelope: &Envelope,
+        argument: &str,
+        value: Option<&str>,
+    ) -> Result<(), CupelError> {
+        let Some(title) = unfit(envelope, self.default_branch.as_deref()) else {
+            return Ok(());
+        };
+        let fix = match argument {
+            "--from" => {
+                "Pass --from run:<run ID> naming a passing run on the default branch, \
+                         run `cupel check` there first, or set default_branch in cupel.toml."
+            }
+            _ => {
+                "Import a baseline exported from a passing run on the default branch, or set \
+                  default_branch in cupel.toml."
+            }
+        };
+        Err(CupelError::bad_argument(
+            argument,
+            value,
+            title,
+            fix.to_owned(),
+        ))
+    }
+
+    /// Refuses the stored run `id` as this baseline when it is unfit (`--from`'s argument).
+    fn admit_stored(
+        &self,
+        store: Option<&Store>,
+        id: &RunId,
+        from: Option<&str>,
+    ) -> Result<(), CupelError> {
+        let stored = store
+            .map(|store| store.run(id))
+            .transpose()
+            .map_err(|error| persist::unusable(&error))?
+            .flatten();
+        match stored {
+            Some(envelope) => self.admit(&envelope, "--from", from),
+            None => Ok(()),
+        }
+    }
+
     /// `set`: points the baseline at `--from`'s run or the latest result run, or previews that.
     fn set(&self, from: Option<&str>, events: &mut dyn EventSink) -> Result<Envelope, CupelError> {
         if self.writer.is_recording() {
             let store = persist::open_for_reading(self.writer)?;
             let target = chosen(store.as_ref(), from)?;
+            self.admit_stored(store.as_ref(), &target, from)?;
             let from = from
                 .map(|from| format!(" --from {from}"))
                 .unwrap_or_default();
@@ -79,6 +200,7 @@ impl Baseline<'_> {
         }
         let store = persist::open(self.writer)?;
         let target = chosen(Some(&store), from)?;
+        self.admit_stored(Some(&store), &target, from)?;
         store
             .set_baseline(self.name, &target)
             .map_err(|error| persist::unusable(&error))?;
@@ -114,6 +236,7 @@ impl Baseline<'_> {
             .map_err(|error| bad_file(file, &error.to_string()))?;
         let imported: Envelope =
             serde_json::from_str(&text).map_err(|error| bad_file(file, &error.to_string()))?;
+        self.admit(&imported, "FILE", Some(&file.display().to_string()))?;
         if self.writer.is_recording() {
             let store = persist::open_for_reading(self.writer)?;
             let command = format!("{} import {} --write", self.command(), file.display());

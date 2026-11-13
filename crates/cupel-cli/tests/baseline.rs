@@ -290,3 +290,141 @@ fn baseline_runs_never_become_the_default_baseline() {
     let set = repo.run(&["baseline", "set", "--write"]);
     assert_eq!(set.envelope()["run"]["baseline"]["id"], json!(run_id(2)));
 }
+
+/// `run_id(n)`'s `check` run with status `status` and `git` as its `run.git`.
+fn run_on(n: u8, status: &str, git: Value) -> cupel_core::Envelope {
+    let run = envelope(&run_id(n), "check", &[], &[complexity_check(0.5)]);
+    let mut value = serde_json::to_value(&run).unwrap();
+    value["status"] = json!(status);
+    value["exit_code"] = json!(i32::from(status == "fail"));
+    value["run"]["git"] = git;
+    serde_json::from_value(value).unwrap()
+}
+
+/// A run's `run.git` in a work tree on `branch`, or on a detached `HEAD` when `None`.
+fn on_branch(branch: Option<&str>) -> Value {
+    json!({"sha": "9f1c2d3", "dirty": false, "base": null, "branch": branch})
+}
+
+/// The baseline's run ID, or null when none is set.
+fn baseline_id(repo: &Repo) -> Value {
+    repo.run(&["baseline", "show"]).envelope()["run"]["baseline"]["id"].clone()
+}
+
+#[test]
+fn set_and_import_refuse_a_run_that_did_not_pass() {
+    let repo = Repo::new();
+    repo.seed(&[
+        run_on(1, "pass", Value::Null),
+        run_on(2, "fail", Value::Null),
+    ]);
+    let title = format!(
+        "The run {} did not pass (status `fail`); a baseline names only a passing run on the \
+         default branch",
+        run_id(2)
+    );
+    for args in [&["baseline", "set"][..], &["baseline", "set", "--write"]] {
+        let refused = assert_usage(&repo.run(args));
+        assert_eq!(
+            (&refused["title"], &refused["evidence"]["argument"]),
+            (&json!(title), &json!("--from")),
+            "{args:?}"
+        );
+    }
+    let from = format!("run:{}", run_id(1));
+    let set = repo.run(&["baseline", "set", "--from", &from, "--write"]);
+    assert_eq!(set.code, 0, "{}", set.stdout);
+
+    repo.write(
+        "failed.json",
+        &serde_json::to_string(&run_on(2, "fail", Value::Null)).unwrap(),
+    );
+    let refused = assert_usage(&repo.run(&["baseline", "import", "failed.json", "--write"]));
+    assert_eq!(
+        (&refused["title"], &refused["evidence"]["argument"]),
+        (&json!(title), &json!("FILE"))
+    );
+    assert_eq!(baseline_id(&repo), json!(run_id(1)));
+}
+
+#[test]
+fn set_refuses_a_run_on_another_branch_or_a_detached_head() {
+    let repo = Repo::new();
+    repo.write("README", "a\n");
+    let made = repo.git(&["init", "-q", "-b", "main"])
+        && repo.git(&["add", "README"])
+        && repo.git(&["commit", "-q", "-m", "a"]);
+    assert!(made, "git could not make the repository");
+    repo.seed(&[
+        run_on(1, "pass", on_branch(Some("main"))),
+        run_on(2, "pass", on_branch(Some("feature"))),
+        run_on(3, "pass", on_branch(None)),
+    ]);
+    let refusal = |n: u8| {
+        let from = format!("run:{}", run_id(n));
+        assert_usage(&repo.run(&["baseline", "set", "--from", &from, "--write"]))["title"].clone()
+    };
+    assert_eq!(
+        [refusal(2), refusal(3)],
+        [
+            json!(format!(
+                "The run {} is on branch `feature`, not the default branch `main`; a baseline \
+                 names only a passing run on the default branch",
+                run_id(2)
+            )),
+            json!(format!(
+                "The run {} is on a detached HEAD, not the default branch `main`; a baseline \
+                 names only a passing run on the default branch",
+                run_id(3)
+            )),
+        ]
+    );
+    let from = format!("run:{}", run_id(1));
+    let set = repo.run(&["baseline", "set", "--from", &from, "--write"]);
+    assert_eq!(set.code, 0, "{}", set.stdout);
+    assert_eq!(baseline_id(&repo), json!(run_id(1)));
+
+    // `default_branch` in cupel.toml names the default branch over git's.
+    repo.write("cupel.toml", "default_branch = \"feature\"\n");
+    let from = format!("run:{}", run_id(2));
+    let set = repo.run(&["baseline", "set", "--from", &from, "--write"]);
+    assert_eq!(set.code, 0, "{}", set.stdout);
+    assert_eq!(baseline_id(&repo), json!(run_id(2)));
+}
+
+/// `run_id(n)`'s run whose gate failed on one skipped rule, skipped for `reason`.
+fn gated(n: u8, reason: &str) -> cupel_core::Envelope {
+    let mut value = serde_json::to_value(run_on(n, "fail", Value::Null)).unwrap();
+    value["summary"]["gate"] = json!({
+        "result": "fail", "evaluated": "gate.tree",
+        "rules": [
+            {"rule": "static.complexity.cyclomatic_max <= 10", "actual": 4.0, "bound": 10.0,
+             "result": "pass", "reason": null},
+            {"rule": "static.clones.pairs <= base", "actual": 1.0, "bound": null,
+             "result": "skipped", "reason": reason}
+        ]
+    });
+    serde_json::from_value(value).unwrap()
+}
+
+#[test]
+fn a_run_whose_gate_failed_only_for_want_of_a_reference_can_be_the_baseline() {
+    let repo = Repo::new();
+    repo.seed(&[
+        gated(1, "no reference: no baseline is set"),
+        gated(2, "`static.clones` was skipped (unsupported)"),
+    ]);
+    let refused = assert_usage(&repo.run(&["baseline", "set", "--write"]));
+    assert_eq!(
+        refused["title"],
+        json!(format!(
+            "The run {} did not pass (status `fail`); a baseline names only a passing run on \
+             the default branch",
+            run_id(2)
+        ))
+    );
+    let from = format!("run:{}", run_id(1));
+    let set = repo.run(&["baseline", "set", "--from", &from, "--write"]);
+    assert_eq!(set.code, 0, "{}", set.stdout);
+    assert_eq!(baseline_id(&repo), json!(run_id(1)));
+}

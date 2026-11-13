@@ -517,7 +517,7 @@ explain   finding fnd_c5c4da from run_01M4X8VRAYVSC12KFEYGD2BX8A
 
 ### `cupel baseline`
 
-A baseline is a stored run that later runs are compared with. Findings absent from the baseline are marked `new_since_baseline`, and each check reports a `delta` against it. Writing a baseline changes only `.cupel/`, but `set` and `import` still preview until you pass `--write`.
+A baseline is a stored run that later runs are compared with. Findings absent from the baseline are marked `new_since_baseline`, and each check reports a `delta` against it. Writing a baseline changes only `.cupel/`, but `set` and `import` still preview until you pass `--write`. A baseline advances only on a passing run on the default branch ([ADR-182](docs/adr/CUPEL_DECISION_182.md), [ADR-195](docs/adr/CUPEL_DECISION_195.md)): `set` and `import` refuse a run that failed its gate, was cut short, or errored, and a run recorded on another branch or a detached `HEAD`. The default branch is `default_branch` in `cupel.toml`, else the branch `origin/HEAD` names, else `main` or `master`. A run whose gate failed only because rules against `base` had no reference, as the run before the first baseline does, counts as passing; a run recorded outside a git work tree has no branch and is accepted.
 
 ```sh
 cupel baseline set --write            # the latest check or survey run becomes the baseline
