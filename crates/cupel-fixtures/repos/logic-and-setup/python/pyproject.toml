@@ -1,0 +1,8 @@
+# ABOUTME: A Python project whose tests show test.logic and test.duplicate-setup at the default thresholds
+# ABOUTME: (ADR-184, ADR-203): no cupel.toml, so tests.quality runs with its default settings.
+[project]
+name = "shop"
+version = "0.1.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

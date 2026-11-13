@@ -1,0 +1,206 @@
+{
+  "checks": [
+    {
+      "cost": "quick",
+      "delta": null,
+      "duration_ms": "<duration-ms>",
+      "findings": 2,
+      "id": "tests.quality",
+      "metrics": {
+        "assertion_density": 1.0,
+        "no_assertion": 0.0,
+        "weak_ratio": 0.0
+      },
+      "oracle": null,
+      "score": {
+        "n": 10,
+        "unit": "assertion_density",
+        "value": 1.0
+      },
+      "skipped": null,
+      "status": "fail",
+      "tier": 2
+    }
+  ],
+  "cupel": {
+    "schema": "https://tysont.github.io/cupel/schema/v1/run.json",
+    "version": "<version>"
+  },
+  "description": null,
+  "exit_code": 0,
+  "explanation": null,
+  "findings": [
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Extract the 5 leading statements these tests share into a fixture or setup helper, starting from `test_total_sums_every_line`."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "mechanical",
+        "lines": [
+          6,
+          15,
+          24
+        ],
+        "remediation_mode": "extract-fixture",
+        "setup_statements_min": 5,
+        "setup_tests_min": 3,
+        "statements": 5,
+        "tests": [
+          "tests.test_cart.test_total_sums_every_line",
+          "tests.test_cart.test_count_sums_every_quantity",
+          "tests.test_cart.test_names_keep_the_order_added"
+        ]
+      },
+      "id": "fnd_b09c17",
+      "kind": "test.duplicate-setup",
+      "location": {
+        "col": 1,
+        "end_col": 32,
+        "end_line": 12,
+        "file": "tests/test_cart.py",
+        "line": 6
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_00c71e297e90f234",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_b09c17 --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_cart.test_total_sums_every_line",
+        "hash": "sh_00c71e297e90f234",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_cart.test_total_sums_every_line` and 2 other test(s) repeat the same 5 leading statements"
+    },
+    {
+      "action": {
+        "hints": {},
+        "kind": "refactor_extract",
+        "priority": 2,
+        "summary": "Split `test_grade_picks_the_letter_by_branch` into one test per path, or parametrize it, so the test body neither loops nor branches."
+      },
+      "check": "tests.quality",
+      "confidence": 1.0,
+      "detail": null,
+      "evidence": {
+        "actionability": "guided",
+        "alternatives": 0,
+        "branches": 2,
+        "guards": 1,
+        "logic": 1,
+        "logic_max": 0,
+        "loops": 0,
+        "remediation_mode": "simplify",
+        "tables": 0
+      },
+      "id": "fnd_51508d",
+      "kind": "test.logic",
+      "location": {
+        "col": 1,
+        "end_col": 36,
+        "end_line": 16,
+        "file": "tests/test_grade.py",
+        "line": 8
+      },
+      "new_since_baseline": false,
+      "repro": "cupel check --only tests.quality --symbols sh_ce02a5ea826d7c66",
+      "severity": "warn",
+      "suppress": "cupel suppress fnd_51508d --reason '…'",
+      "suppressed": false,
+      "symbol": {
+        "display": "tests.test_grade.test_grade_picks_the_letter_by_branch",
+        "hash": "sh_ce02a5ea826d7c66",
+        "lang": "python"
+      },
+      "tier": 2,
+      "title": "`tests.test_grade.test_grade_picks_the_letter_by_branch` contains logic: 1 loop(s) or branch(es) (max 0)"
+    }
+  ],
+  "next_actions": [
+    {
+      "command": null,
+      "finding": "fnd_b09c17",
+      "kind": "refactor_extract",
+      "priority": 1,
+      "summary": "Extract the 5 leading statements these tests share into a fixture or setup helper, starting from `test_total_sums_every_line`."
+    },
+    {
+      "command": null,
+      "finding": "fnd_51508d",
+      "kind": "refactor_extract",
+      "priority": 2,
+      "summary": "Split `test_grade_picks_the_letter_by_branch` into one test per path, or parametrize it, so the test body neither loops nor branches."
+    }
+  ],
+  "oracles": null,
+  "plan": null,
+  "rankings": null,
+  "run": {
+    "baseline": null,
+    "budget_ms": null,
+    "config": {
+      "effective": {
+        "budget": null,
+        "checks": {},
+        "default_branch": null,
+        "depth": "standard",
+        "format": "json",
+        "gate": {
+          "changed": null,
+          "tree": null
+        },
+        "lang": {},
+        "oracles": {},
+        "profile": null,
+        "required_version": null,
+        "roots": {}
+      },
+      "sources": [
+        "flags",
+        "defaults"
+      ]
+    },
+    "depth": "standard",
+    "duration_ms": "<duration-ms>",
+    "git": null,
+    "id": "<run-id>",
+    "scope": {
+      "files": 7,
+      "languages": [
+        "python"
+      ],
+      "mode": "tree",
+      "roots": [
+        "."
+      ],
+      "symbols": 16
+    },
+    "seed": "<seed>",
+    "started": "<timestamp>",
+    "suite": {},
+    "toolchain": {},
+    "verb": "check"
+  },
+  "status": "pass",
+  "summary": {
+    "findings": {
+      "fail": 0,
+      "info": 0,
+      "warn": 2
+    },
+    "gate": null,
+    "new": 0,
+    "resolved": 0,
+    "suppressed": 0
+  },
+  "tests": null,
+  "total_findings": 2,
+  "truncated": false
+}
