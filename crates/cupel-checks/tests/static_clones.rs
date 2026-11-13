@@ -1452,5 +1452,13 @@ fn without_test_conventions_no_clone_is_test_code() {
     ];
     let (result, findings) = run(&defs);
     assert_eq!((findings.len(), findings[0].severity), (1, Severity::Warn));
-    assert_eq!(result.metrics["pairs"], 1.0);
+    assert_eq!(
+        result.metrics,
+        [
+            ("clusters".to_owned(), 0.0),
+            ("max_jaccard".to_owned(), 1.0),
+            ("pairs".to_owned(), 1.0),
+        ]
+        .into()
+    );
 }
