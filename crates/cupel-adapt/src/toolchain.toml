@@ -101,6 +101,13 @@ format = "lcov"
 commands = { "tool.mocha" = "<x> c8 --reporter=lcov mocha", "tool.node-test" = "<x> c8 --reporter=lcov node --test" }
 install = "<add> c8"
 
+# Node's own coverage: `node --test` writes LCOV through its built-in reporter, with no package to
+# install; `init` writes c8's command, and a root without c8 configures this one.
+[[rows.coverage]]
+id = "tool.node-test-coverage"
+format = "lcov"
+commands = { "tool.node-test" = "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}" }
+
 [[rows.bench]]
 id = "tool.bench-script"
 detect = [{ json = "package.json", path = ["scripts", "bench"] }]

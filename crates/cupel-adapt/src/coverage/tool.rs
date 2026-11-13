@@ -51,6 +51,9 @@ pub struct CoverageSpec {
     /// Node packages of which the tool needs one to measure coverage (Vitest's providers),
     /// resolved as Node resolves them; empty when it needs none.
     pub providers: &'static [&'static str],
+    /// A word the configured command must contain for this producer to run it, when another
+    /// producer pairs with the same runner (c8 and Node's own coverage with `node --test`).
+    pub uses: Option<&'static str>,
 }
 
 /// A coverage producer: `spec` run, or its report ingested, once per project root.
@@ -95,7 +98,10 @@ impl Producer<CoverageMap> for CoverageTool {
         if self.ingestible(ctx) {
             return Availability::Ready;
         }
-        if self.command(ctx, None).is_none() {
+        if !self
+            .command(ctx, None)
+            .is_some_and(|command| self.runs(&command))
+        {
             return Availability::Unconfigured {
                 key: format!("lang.{}.{KEY}", self.0.langs[0]),
             };
@@ -171,6 +177,16 @@ impl Producer<CoverageMap> for CoverageTool {
 }
 
 impl CoverageTool {
+    /// Whether `command` is one this producer runs: any, unless the spec names a word it uses,
+    /// which must be one of the command's words or the last part of one's path.
+    fn runs(&self, command: &str) -> bool {
+        self.0.uses.is_none_or(|word| {
+            command
+                .split_whitespace()
+                .any(|part| part.rsplit('/').next() == Some(word))
+        })
+    }
+
     /// Whether one of the spec's providers resolves from where `program` (the tool that would
     /// run) is installed, or from every directory coverage runs in; always without providers.
     fn provided(&self, ctx: &Ctx, program: &str) -> bool {

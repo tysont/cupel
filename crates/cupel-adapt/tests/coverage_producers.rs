@@ -135,7 +135,12 @@ fn coverage_producers_register_for_their_languages_in_toolchain_table_order() {
             .map(|producer| producer.id().to_string())
             .collect::<Vec<_>>()
     });
-    let ecma = ["tool.vitest-coverage", "tool.jest-coverage", "tool.c8"];
+    let ecma = [
+        "tool.vitest-coverage",
+        "tool.jest-coverage",
+        "tool.c8",
+        "tool.node-test-coverage",
+    ];
     assert_eq!(
         ids,
         [
@@ -287,6 +292,35 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
             "tool.jacoco-gradle",
         ]
     );
+}
+
+/// c8 and Node's own coverage both pair with `node --test`; each runs only a command that uses
+/// it, so a command for the other is not configured for it.
+#[test]
+fn a_node_test_coverage_producer_runs_only_a_command_that_uses_it() {
+    let registry = registry();
+    let dir = fixture("node-test");
+    let configured = ctx(dir.path(), "javascript", true);
+    let mut c8 = Ctx::new(dir.path().to_path_buf());
+    let table = Map::from_iter([(
+        "coverage".to_owned(),
+        json!("c8 --reporter=lcov node --test"),
+    )]);
+    c8.lang.insert(LangId::from("javascript"), table);
+    let found = [&configured, &c8].map(|ctx| {
+        ["tool.c8", "tool.node-test-coverage"]
+            .map(|id| producer(&registry, id, "javascript").availability(ctx))
+    });
+    let unconfigured = || Availability::Unconfigured {
+        key: "lang.javascript.coverage".to_owned(),
+    };
+    let ready = if cupel_core::find_program("node").is_some() {
+        Availability::Ready
+    } else {
+        found[0][1].clone()
+    };
+    assert_eq!(found[0], [unconfigured(), ready]);
+    assert_eq!(found[1][1], unconfigured());
 }
 
 #[test]
@@ -460,7 +494,7 @@ fn assert_covers(expected: &Expected) {
 }
 
 /// Every coverage producer the fixtures configure, with what it must report.
-const EXPECTED: [Expected; 8] = [
+const EXPECTED: [Expected; 9] = [
     Expected {
         producer: "tool.cargo-llvm-cov",
         lang: "rust",
@@ -491,6 +525,14 @@ const EXPECTED: [Expected; 8] = [
         repo: "javascript",
         tool: "jest",
         source: ("grade.js", 19, 9, Some(14)),
+        test: "grade.test.js",
+    },
+    Expected {
+        producer: "tool.node-test-coverage",
+        lang: "javascript",
+        repo: "node-test",
+        tool: "node",
+        source: ("grade.js", 38, 22, Some(6)),
         test: "grade.test.js",
     },
     Expected {

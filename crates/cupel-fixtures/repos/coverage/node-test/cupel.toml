@@ -1,0 +1,5 @@
+# The coverage fixture (ADR-079, ADR-196) for Node's own coverage: `node --test` writes LCOV through its
+# built-in reporter, with no coverage package installed. It has no committed cache: the coverage
+# producer tests run this command for real.
+[lang.javascript]
+coverage = "node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}"

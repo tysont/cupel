@@ -28,6 +28,7 @@ mod jacoco_gradle;
 mod jacoco_maven;
 mod jest_coverage;
 mod lcov;
+mod node_test_coverage;
 mod pytest_cov;
 mod tool;
 mod vitest_coverage;

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_189: The `node --test` runner reads Node's JUnit report, from Node 24.11.1
 
-**Date:** 2026-11-12 · **Status:** accepted · **Phase:** v0.2.7, item 6 · Details [075](CUPEL_DECISION_075.md), [139](CUPEL_DECISION_139.md)
+**Date:** 2026-11-12 · **Status:** accepted, detailed by [196](CUPEL_DECISION_196.md) · **Phase:** v0.2.7, item 6 · Details [075](CUPEL_DECISION_075.md), [139](CUPEL_DECISION_139.md)
 
 ## Context
 The toolchain table lists `tool.node-test` (`node --test`) as JavaScript's and TypeScript's runner when no Vitest or Jest is the root's, and `init` writes it, but no producer ran it or read its results. A `node:test` root (Molten's `containers/sandbox`) got no `test-results`, so every check that needs them skipped. Node writes JUnit XML with `--test-reporter=junit --test-reporter-destination=<file>`, which the JUnit parser reads. Before 24.11.1, Node's JUnit report does not say which file a test is in: a top-level test is a bare `<testcase>`, its `classname` the constant `test`. Node 22, which CI and `make dev-setup` pinned (ADR-139), writes that form.

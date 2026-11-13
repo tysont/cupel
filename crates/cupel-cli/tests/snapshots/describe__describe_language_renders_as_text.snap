@@ -51,6 +51,8 @@ toolchain
       with tool.mocha: <x> c8 --reporter=lcov mocha
       with tool.node-test: <x> c8 --reporter=lcov node --test
       install: <add> c8
+    tool.node-test-coverage  lcov · always
+      with tool.node-test: node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination={out}
   bench
     tool.bench-script  when `package.json` has `scripts.bench`
       <run> bench

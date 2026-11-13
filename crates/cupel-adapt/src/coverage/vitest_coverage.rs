@@ -16,6 +16,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     resolve: as_written,
     listing: every_file,
     providers: &["@vitest/coverage-v8", "@vitest/coverage-istanbul"],
+    uses: None,
 };
 
 inventory::submit!(crate::ToolProducer {
