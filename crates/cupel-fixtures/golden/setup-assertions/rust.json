@@ -48,6 +48,7 @@
         ],
         "remediation_mode": "extract-fixture",
         "setup_statements_min": 3,
+        "setup_tests_min": 2,
         "statements": 3,
         "tests": [
           "tests::masks::sum_test",
@@ -95,7 +96,12 @@
     "config": {
       "effective": {
         "budget": null,
-        "checks": {},
+        "checks": {
+          "tests.quality": {
+            "setup_statements_min": 3,
+            "setup_tests_min": 2
+          }
+        },
         "default_branch": null,
         "depth": "standard",
         "format": "json",
@@ -111,6 +117,7 @@
       },
       "sources": [
         "flags",
+        "cupel.toml",
         "defaults"
       ]
     },

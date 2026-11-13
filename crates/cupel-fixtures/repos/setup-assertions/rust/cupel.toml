@@ -1,0 +1,5 @@
+# Two-test groups sharing three statements, below the defaults (ADR-184), so the fixture's pairs of
+# tests show which leading statements count as setup.
+[checks."tests.quality"]
+setup_statements_min = 3
+setup_tests_min = 2
