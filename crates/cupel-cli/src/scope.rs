@@ -53,14 +53,16 @@ pub(crate) fn changed_lines(
 }
 
 /// A resolved scope: the project roots outside `[scope] exclude`, every file of the walk, and
-/// the files and range changes the request selects from it (ADR-065).
+/// the files and range changes the request selects from it (ADR-065), only under the configured
+/// roots when there are any (ADR-177).
 pub(crate) struct Scoped {
     pub info: ProjectInfo,
     pub tree: Vec<String>,
     pub files: ResolvedFiles,
 }
 
-/// Walks the repository and resolves `request` against the walk.
+/// Walks the repository and resolves `request` against the part of the walk under the configured
+/// roots; the whole walk stays in `tree` for the import graphs that read past them.
 pub(crate) fn resolve(
     writer: &Writer,
     config: &Config,
@@ -72,11 +74,72 @@ pub(crate) fn resolve(
     let roots: Vec<_> = config.file.roots.values().cloned().collect();
     let info = project::detect(writer, exclude, &roots);
     let tree = cupel_lang::walk_excluding(root, languages, &info, exclude);
-    let mut files = request.resolve_files(&tree, root, config.file.default_branch.as_deref())?;
+    let dirs = configured_dirs(config);
+    let in_roots = in_roots(&tree, &dirs);
+    let default_branch = config.file.default_branch.as_deref();
+    let mut files = request
+        .resolve_files(&in_roots, root, default_branch)
+        .map_err(|error| {
+            outside_roots(request, (&tree, &in_roots), &dirs).unwrap_or_else(|| error.into())
+        })?;
     files
         .changes
-        .retain(|change| !exclude.excludes(&change.path));
+        .retain(|change| !exclude.excludes(&change.path) && in_roots_dir(&change.path, &dirs));
     Ok(Scoped { info, tree, files })
+}
+
+/// The paths of the configured roots; empty without `[roots]`.
+fn configured_dirs(config: &Config) -> Vec<&str> {
+    config
+        .file
+        .roots
+        .values()
+        .map(|root| root.path.as_str())
+        .collect()
+}
+
+/// Whether `file` is in a run's scope by the configured roots `dirs`: under one, or anywhere
+/// without any (ADR-177).
+fn in_roots_dir(file: &str, dirs: &[&str]) -> bool {
+    dirs.is_empty() || cupel_core::is_under(file, dirs)
+}
+
+/// The files of `tree` under one of the configured roots `dirs`, all of them without any.
+fn in_roots(tree: &[String], dirs: &[&str]) -> Vec<String> {
+    tree.iter()
+        .filter(|file| in_roots_dir(file, dirs))
+        .cloned()
+        .collect()
+}
+
+/// The usage error for a `--paths` value that names files of the whole walk but none under the
+/// configured roots `dirs`; `None` when every value names some file in scope.
+fn outside_roots(
+    request: &ScopeRequest,
+    (tree, in_roots): (&[String], &[String]),
+    dirs: &[&str],
+) -> Option<CupelError> {
+    let names = |files: &[String], path: &str| {
+        let alone = ScopeRequest {
+            paths: vec![path.to_owned()],
+            ..ScopeRequest::default()
+        };
+        alone.resolve_files(files, Path::new("."), None).is_ok()
+    };
+    let path = request
+        .paths
+        .iter()
+        .find(|path| !names(in_roots, path) && names(tree, path))?;
+    Some(CupelError::bad_argument(
+        "--paths",
+        Some(path),
+        format!(
+            "`--paths {path}` names no source file under a configured root ({})",
+            dirs.join(", ")
+        ),
+        "Pass paths under a root that `[roots]` in cupel.toml names, or add a root for them."
+            .to_owned(),
+    ))
 }
 
 /// The languages that own at least one of `files`, in ID order.
@@ -119,4 +182,45 @@ pub(crate) fn git_info(root: &Path, resolved: &ResolvedFiles) -> Option<GitInfo>
         base: resolved.base.clone(),
         branch: head.branch,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn files(paths: &[&str]) -> Vec<String> {
+        paths.iter().map(|path| (*path).to_owned()).collect()
+    }
+
+    #[test]
+    fn the_configured_roots_hold_the_scope_and_none_holds_all_of_it() {
+        let tree = files(&[
+            "apps/agent/a.ts",
+            "packages/shared/b.ts",
+            "packages/sharedx/c.ts",
+        ]);
+        assert_eq!(
+            in_roots(&tree, &["packages/shared"]),
+            ["packages/shared/b.ts"]
+        );
+        assert_eq!(in_roots(&tree, &[]), tree);
+    }
+
+    #[test]
+    fn a_path_only_outside_the_roots_is_refused_by_name() {
+        let tree = files(&["apps/agent/a.ts", "packages/shared/b.ts"]);
+        let held = in_roots(&tree, &["packages/shared"]);
+        let request = |path: &str| ScopeRequest {
+            paths: vec!["packages/shared".to_owned(), path.to_owned()],
+            ..ScopeRequest::default()
+        };
+        let refused = outside_roots(&request("apps"), (&tree, &held), &["packages/shared"]);
+        let usage = refused.map(|error| error.to_string());
+        assert_eq!(
+            usage.as_deref(),
+            Some("`--paths apps` names no source file under a configured root (packages/shared)")
+        );
+        let missing = outside_roots(&request("nowhere"), (&tree, &held), &["packages/shared"]);
+        assert_eq!(missing.map(|error| error.to_string()), None);
+    }
 }

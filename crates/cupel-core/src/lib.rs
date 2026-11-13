@@ -151,7 +151,9 @@ pub use relation::{
 };
 pub use root_run::{RootRun, RunStatus};
 pub use schedule::{Job, Outcome, Production, Scheduler};
-pub use scope::{ChangedLines, ResolvedFiles, Scope, ScopeRequest, SymbolSelector, select_symbols};
+pub use scope::{
+    ChangedLines, ResolvedFiles, Scope, ScopeRequest, SymbolSelector, is_under, select_symbols,
+};
 pub use select::Selection;
 pub use simulation::{SimulationFailure, SimulationHarness, SimulationResults, SimulationStatus};
 pub use suppression::{Suppression, Suppressions, Until, apply_suppressions};

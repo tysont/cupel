@@ -52,16 +52,7 @@ impl Scope {
     /// of it): a run's configured roots, where its tests can reach (ADR-173).
     #[must_use]
     pub fn under(&self, dirs: &[&str]) -> Self {
-        let held = |file: &str| {
-            dirs.iter().any(|dir| {
-                let dir = dir.trim_start_matches("./").trim_end_matches('/');
-                dir == "."
-                    || dir.is_empty()
-                    || file
-                        .strip_prefix(dir)
-                        .is_some_and(|rest| rest.starts_with('/'))
-            })
-        };
+        let held = |file: &str| is_under(file, dirs);
         Self {
             files: self
                 .files
@@ -75,6 +66,19 @@ impl Scope {
                 .map(|keys| keys.iter().filter(|key| held(&key.file)).cloned().collect()),
         }
     }
+}
+
+/// Whether `file` is under one of `dirs`, both relative to the repository root (`.` holds every
+/// file).
+pub fn is_under(file: &str, dirs: &[&str]) -> bool {
+    dirs.iter().any(|dir| {
+        let dir = dir.trim_start_matches("./").trim_end_matches('/');
+        dir == "."
+            || dir.is_empty()
+            || file
+                .strip_prefix(dir)
+                .is_some_and(|rest| rest.starts_with('/'))
+    })
 }
 
 /// The scope flags of design §6.4, as given.

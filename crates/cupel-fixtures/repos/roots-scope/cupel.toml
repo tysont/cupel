@@ -1,0 +1,4 @@
+# A repository whose one configured root is `packages/shared`, beside an `apps/agent` that holds a complex
+# function, a cloned pair, and an import cycle: none of them is in scope (ADR-177).
+[roots]
+shared = { path = "packages/shared", lang = "typescript" }

@@ -1,0 +1,5 @@
+{
+  "name": "roots-scope",
+  "private": true,
+  "workspaces": ["packages/*", "apps/*"]
+}

@@ -127,7 +127,7 @@ Every verb takes the same global flags (below) and writes the same envelope. Run
 
 `init` detects project roots and languages and chooses test, coverage, and bench commands for each. It understands Cargo crates and workspaces, Go modules and workspaces, npm, pnpm, and yarn packages and workspaces (TypeScript when `tsconfig.json` is present), and Python projects (`pyproject.toml`, `setup.cfg`, `requirements.txt`).
 
-A workspace whose root `package.json` `test` script delegates to its packages (`pnpm -r test`) gets one root per package under `[roots]`, each tested by its own runner and configuration; configured `[roots]` are the project's roots, so editing them narrows what Cupel tests and mutates ([ADR-167](docs/adr/CUPEL_DECISION_167.md), [ADR-173](docs/adr/CUPEL_DECISION_173.md)), and a language they name no root of runs nothing anywhere, not even at the repository root ([ADR-171](docs/adr/CUPEL_DECISION_171.md)). A root whose own `test` script runs something other than the runner Cupel would choose and has no packages to split into (a wrapper script) gets no test or coverage command from `init`, and a run uses no runner there unless `[lang.<id>] runner` pins one ([ADR-166](docs/adr/CUPEL_DECISION_166.md)): a runner's command at that root would not be the project's tests and could reach tiers the project runs apart, such as tests against a deployed environment. `init` reports it as `init.runner-deferred` (a note naming the runner and the rule), and `cupel describe language <id>` lists each runner's `defer` rules ([ADR-162](docs/adr/CUPEL_DECISION_162.md)). Add `test` and `coverage` under `[lang.<id>]` for the packages Cupel should run.
+A workspace whose root `package.json` `test` script delegates to its packages (`pnpm -r test`) gets one root per package under `[roots]`, each tested by its own runner and configuration; configured `[roots]` are the project's roots, so editing them narrows what Cupel tests, mutates, and analyzes ([ADR-177](docs/adr/CUPEL_DECISION_177.md), [ADR-167](docs/adr/CUPEL_DECISION_167.md), [ADR-173](docs/adr/CUPEL_DECISION_173.md)), and a language they name no root of runs nothing anywhere, not even at the repository root ([ADR-171](docs/adr/CUPEL_DECISION_171.md)). A root whose own `test` script runs something other than the runner Cupel would choose and has no packages to split into (a wrapper script) gets no test or coverage command from `init`, and a run uses no runner there unless `[lang.<id>] runner` pins one ([ADR-166](docs/adr/CUPEL_DECISION_166.md)): a runner's command at that root would not be the project's tests and could reach tiers the project runs apart, such as tests against a deployed environment. `init` reports it as `init.runner-deferred` (a note naming the runner and the rule), and `cupel describe language <id>` lists each runner's `defer` rules ([ADR-162](docs/adr/CUPEL_DECISION_162.md)). Add `test` and `coverage` under `[lang.<id>]` for the packages Cupel should run.
 
 ```sh
 cupel init                   # preview: the envelope carries unified diffs of what would be written
@@ -180,11 +180,13 @@ Each schema's `$id` is the URL it is published at, under [`https://tysont.github
 
 | Flag | Scope |
 |---|---|
-| (none) | The whole tree, minus `[scope] exclude` and always `target`, `node_modules`, `vendor`, and `.cupel` |
+| (none) | The whole tree, minus `[scope] exclude` and always `target`, `node_modules`, `vendor`, and `.cupel`; with `[roots]`, only the files under some root |
 | `--changed` | Files changed since the merge base with `default_branch`, including uncommitted work |
 | `--base REF [--head REF]` | Files changed in an explicit range; `--head` defaults to the working tree |
 | `--paths P` | Files, directories, or globs (gitignore-aware); repeatable |
 | `--symbols S` | Symbols by qualified name (`shop.shipping.shipping_cost`) or structural hash (`sh_c7dca337c9ad7dd1`); repeatable |
+
+With `[roots]` configured, every check, the static ones included, reads only files under some root: a file outside all roots is not reported, not counted in any metric or gate bound, and not in a `--changed` or `--base` scope, and a `--paths` value naming only such files is refused ([ADR-177](docs/adr/CUPEL_DECISION_177.md)). Import resolution still reads past the roots to find an import's target, without reporting on it. Without `[roots]`, the whole repository is in scope.
 
 Under `--changed` or `--base` the symbols in scope are the functions and methods the range's changed lines touch (a file git does not track yet counts whole): a clone group is reported when one of its members was touched, every other per-symbol finding when its symbol was, so the changed gate rules on what the change wrote, and the tree gate grades the rest ([ADR-142](docs/adr/CUPEL_DECISION_142.md)). Facts are still produced for whole files, so a touched function's clone elsewhere in its file is found. A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weakening` compares tests between two revisions, so it runs only with `--changed` or `--base` and is reported as skipped on a tree.
 
@@ -1532,7 +1534,7 @@ required_version = ">=0.1"         # a Cargo version requirement this binary mus
 default_branch = "main"            # what --changed diffs against
 depth = "standard"
 
-[roots]                            # monorepos; when set, exactly these are the project's roots (ADR-167)
+[roots]                            # monorepos; when set, exactly these are the project's roots and scope (ADR-167, ADR-177)
 engine = { path = "engine", lang = "rust" }
 web = { path = "web", lang = "typescript" }
 

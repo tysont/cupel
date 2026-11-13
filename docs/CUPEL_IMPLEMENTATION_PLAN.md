@@ -2630,6 +2630,13 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-fixtures/tests/api_surface.rs`: through the binary, the Molten move reports nothing under `--base` and `--changed`, removing an item an unchanged entry re-exports is `api.breaking` (failed with the base side reading only the base tree), and dropping a subpath from `exports` removes what only it exposed (the manifest read at the base); the JavaScript and TypeScript libraries of the per-language history gained a `package.json` naming them as `main`;
     - the JavaScript and TypeScript `api-surface` fact goldens and the fact schema snapshot regenerated (`internal` on items no entry reaches).
 
+- **Item 14, `[roots]` scope every check** (2026-11-12, [ADR-177](adr/CUPEL_DECISION_177.md), [ADR-193](adr/CUPEL_DECISION_193.md)).
+  - The gap: configured `[roots]` decided what was tested and mutated, but the static checks read the whole walk, so Area 11's `gate.sh shared` gated `cyclomatic_max` on an `apps/agent` file.
+  - Now `scope::resolve` (`cupel-cli` `scope.rs`, shared by `check`, `survey`, `tests`, and a recomputed base) resolves the scope flags against the walk's files under some root (`cupel_core::is_under`, which `Scope::under` also uses) and drops a range's changes outside them, so no check, metric, or gate bound sees a file outside the roots and `--changed`/`--base` do not offer one. A `--paths` value naming only files outside the roots is a usage error naming the roots. The whole walk stays the import graph's (`tests --impacted`, ADR-190), and module resolution still reads past the roots. Without `[roots]`, nothing changes.
+  - Tests:
+    - `cupel-fixtures/tests/roots_scope.rs` on the `roots-scope` repository (`[roots]` naming `packages/shared` beside an `apps/agent` with a cyclomatic-15 function, a clone pair, and an import cycle): no finding, `scope.files` 1, `cyclomatic_max` 1, `pairs` 0, `cycles` 0 (failed first: three findings, `scope.files` 3); a change in `apps/agent` is not in a `--changed` scope (failed first: `files` 1); `--paths apps/agent` is refused naming the root (failed first: exit 0); without `cupel.toml` the three findings and metrics are back;
+    - `cupel-cli` `scope.rs` unit tests: the roots hold the scope, none holds all of it; a path only outside the roots is refused by name, a path matching nothing is left to the usual error.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

@@ -239,7 +239,7 @@ Deliberately absent: `fix` (agent fixes), `report` (envelope is the report; `--f
 --cases N                                   # generative case budget
 ```
 
-Scope resolution: `--symbols` ⊂ `--paths` ⊂ `--changed`/range ⊂ tree. Multiple scope flags intersect. A `--changed` scope with no changes returns a `pass` envelope with `scope.symbols: 0` and exit 0.
+Scope resolution: `--symbols` ⊂ `--paths` ⊂ `--changed`/range ⊂ tree. Multiple scope flags intersect. With `[roots]` configured, the tree is the files under some root, for every check, static ones included (ADR-177): a file outside all roots is not reported, not counted in any metric or bound, not in a range's files or changes, and a `--paths` value that names only such files is a usage error naming the roots. The import graphs that read past the scope (`tests --impacted`, ADR-190) still walk the whole repository, and module resolution reads files outside the roots to resolve imports. A `--changed` scope with no changes returns a `pass` envelope with `scope.symbols: 0` and exit 0.
 
 ### 6.5 Verb details
 
@@ -307,7 +307,7 @@ required_version = ">=0.4"
 default_branch   = "main"
 depth            = "standard"
 
-[roots]                                  # monorepo; omit for single-root
+[roots]                                  # monorepo; omit for single-root; when set, also every check's scope (ADR-177)
 rust   = { path = ".",      lang = "rust" }
 web    = { path = "web",    lang = "typescript" }
 
