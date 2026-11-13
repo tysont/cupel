@@ -343,6 +343,8 @@ fn run_info() -> RunInfo {
             symbols: 11,
             roots: vec![".".to_owned(), "web".to_owned()],
             languages: vec![LangId::from("rust"), LangId::from("typescript")],
+            paths: Vec::new(),
+            symbols_left_out: Vec::new(),
         }),
         depth: Some(CostClass::Deep),
         budget_ms: Some(20_000),

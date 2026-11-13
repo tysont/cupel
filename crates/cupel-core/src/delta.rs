@@ -1,5 +1,5 @@
 // ABOUTME: Deltas between two runs: findings new or resolved by `FindingId` and across symbol matches, check score
-// ABOUTME: changes, and per-symbol metrics over matched sets, applied to an envelope (ADR-046, ADR-131).
+// ABOUTME: changes, and per-symbol metrics over matched sets, applied to an envelope (ADR-046, ADR-131, ADR-206).
 use std::collections::{BTreeMap, BTreeSet};
 
 use crate::envelope::{BaselineRef, Envelope};
@@ -8,7 +8,8 @@ use crate::hash::{FindingId, SymbolHash};
 use crate::id::CheckId;
 use crate::matching::{Matched, SymbolMatch};
 use crate::rank::Measured;
-use crate::result::{Delta, SetDelta, SetFindings, SetMetric};
+use crate::result::{CheckStatus, Delta, SetDelta, SetFindings, SetMetric};
+use crate::scope::ScopeMode;
 
 /// How a run differs from the run it is compared with.
 #[derive(Debug, Clone, PartialEq)]
@@ -17,7 +18,8 @@ pub struct Deltas {
     pub new: Vec<FindingId>,
     /// The reference run's findings the current run lacks, in the reference run's order.
     pub resolved: Vec<Finding>,
-    /// Current score minus reference score, for each check scored in both runs.
+    /// Current score minus reference score, for each check scored and run to completion in both
+    /// runs.
     pub scores: BTreeMap<CheckId, f64>,
     /// Per check, the matched sets it had findings or per-symbol metrics on (ADR-131).
     pub sets: BTreeMap<CheckId, Vec<SetDelta>>,
@@ -97,6 +99,59 @@ pub struct Matching<'a> {
     pub means: BTreeSet<(CheckId, String)>,
 }
 
+/// What a run could report again: the checks that ran to completion in it and, unless it
+/// covered the whole tree, the files it considered less the symbols it left out (ADR-206).
+struct Reach<'a> {
+    completed: BTreeSet<&'a CheckId>,
+    /// `None` when the run covered the whole tree, or recorded no scope.
+    files: Option<BTreeSet<&'a str>>,
+    /// The displays of the symbols in `files` the run left out.
+    left_out: BTreeSet<&'a str>,
+}
+
+impl<'a> Reach<'a> {
+    fn of(run: &'a Envelope) -> Self {
+        let scope = run
+            .run
+            .scope
+            .as_ref()
+            .filter(|scope| scope.mode != ScopeMode::Tree);
+        let strs = |list: &'a [String]| list.iter().map(String::as_str).collect();
+        Reach {
+            completed: completed(run),
+            files: scope.map(|scope| strs(&scope.paths)),
+            left_out: scope.map_or_else(BTreeSet::new, |scope| strs(&scope.symbols_left_out)),
+        }
+    }
+
+    /// Whether the run could have reported `finding` of a reference run whose checks are
+    /// `checks`. A finding of no check of the reference (`doctor`, `init`) is the verb's own and
+    /// needs no check to run; a finding without a location needs a whole-tree run; a finding on
+    /// a symbol the run left out cannot be reported again.
+    fn covers(&self, finding: &Finding, checks: &BTreeSet<&CheckId>) -> bool {
+        let checked = !checks.contains(&finding.check) || self.completed.contains(&finding.check);
+        let located = match (&self.files, &finding.location) {
+            (None, _) => true,
+            (Some(files), Some(location)) => files.contains(location.file.as_str()),
+            (Some(_), None) => false,
+        };
+        let left_out = finding
+            .symbol
+            .as_ref()
+            .is_some_and(|symbol| self.left_out.contains(symbol.display.as_str()));
+        checked && located && !left_out
+    }
+}
+
+/// The checks of `run` that ran to completion: passed or failed, not partial, errored, or skipped.
+fn completed(run: &Envelope) -> BTreeSet<&CheckId> {
+    run.checks
+        .iter()
+        .filter(|check| matches!(check.status, CheckStatus::Pass | CheckStatus::Fail))
+        .map(|check| &check.id)
+        .collect()
+}
+
 /// Compares `current` with `against` by finding ID and check score.
 pub fn deltas(current: &Envelope, against: &Envelope) -> Deltas {
     deltas_matched(current, against, &Matching::default())
@@ -104,10 +159,15 @@ pub fn deltas(current: &Envelope, against: &Envelope) -> Deltas {
 
 /// Compares `current` with `against` by finding ID and check score, then across `matching`'s
 /// matches: a reference finding on a match's base set and a current finding of the same check
-/// and kind on its head set carry each other on, so neither is resolved or new (ADR-131).
+/// and kind on its head set carry each other on, so neither is resolved or new (ADR-131). A
+/// reference finding is resolved only when `current` could have reported it again (ADR-206).
 pub fn deltas_matched(current: &Envelope, against: &Envelope, matching: &Matching<'_>) -> Deltas {
     let before: BTreeSet<&FindingId> = against.findings.iter().map(|f| &f.id).collect();
     let after: BTreeSet<&FindingId> = current.findings.iter().map(|f| &f.id).collect();
+    let (reach, checks) = (
+        Reach::of(current),
+        against.checks.iter().map(|c| &c.id).collect(),
+    );
     let new: Vec<&Finding> = current
         .findings
         .iter()
@@ -116,7 +176,7 @@ pub fn deltas_matched(current: &Envelope, against: &Envelope, matching: &Matchin
     let resolved: Vec<&Finding> = against
         .findings
         .iter()
-        .filter(|f| !after.contains(&f.id))
+        .filter(|f| !after.contains(&f.id) && reach.covers(f, &checks))
         .collect();
     let mut carried: BTreeSet<FindingId> = BTreeSet::new();
     let mut sets: BTreeMap<CheckId, Vec<SetDelta>> = BTreeMap::new();
@@ -143,16 +203,20 @@ pub fn deltas_matched(current: &Envelope, against: &Envelope, matching: &Matchin
     }
 }
 
-/// Current score minus reference score, for each check scored in both runs.
+/// Current score minus reference score, for each check scored in both runs and run to completion
+/// in both.
 fn score_changes(current: &Envelope, against: &Envelope) -> BTreeMap<CheckId, f64> {
+    let (ran_now, ran_then) = (completed(current), completed(against));
     let reference_scores: BTreeMap<&CheckId, f64> = against
         .checks
         .iter()
+        .filter(|check| ran_then.contains(&check.id))
         .filter_map(|check| Some((&check.id, check.score.as_ref()?.value)))
         .collect();
     current
         .checks
         .iter()
+        .filter(|check| ran_now.contains(&check.id))
         .filter_map(|check| {
             let reference = reference_scores.get(&check.id)?;
             Some((check.id.clone(), check.score.as_ref()?.value - reference))

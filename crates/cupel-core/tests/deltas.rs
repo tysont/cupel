@@ -347,3 +347,173 @@ fn a_delta_without_sets_serializes_as_before() {
         json!({"vs": "baseline", "value": 0.5})
     );
 }
+
+// ---------------------------------------------------------------- what the current run could report
+
+/// A finding of `check` located in `file`, or without a location when `file` is empty.
+fn located(id: &str, check: &str, file: &str) -> Value {
+    let mut finding = finding(id);
+    finding["check"] = json!(check);
+    finding["location"] = match file {
+        "" => Value::Null,
+        _ => json!({"file": file, "line": 1, "col": null, "end_line": 2, "end_col": null}),
+    };
+    finding
+}
+
+/// A check result of `status` scored 0.5.
+fn ran(id: &str, status: &str) -> Value {
+    let mut check = check(id, Some(0.5));
+    check["status"] = json!(status);
+    check
+}
+
+/// A run of `checks` over `paths` under `mode`, with no findings.
+fn scoped(run: &str, mode: &str, paths: &[&str], checks: &[Value]) -> Envelope {
+    let mut envelope = envelope(run, &[], checks);
+    let scope = json!({
+        "mode": mode, "files": paths.len(), "symbols": 0, "roots": ["."],
+        "languages": ["rust"], "paths": paths
+    });
+    envelope.run.scope = Some(serde_json::from_value(scope).unwrap());
+    envelope
+}
+
+#[test]
+fn a_changed_run_resolves_only_findings_in_the_files_it_considered() {
+    let against = with_findings(
+        A,
+        vec![
+            located("fnd_000001", "static.complexity", "src/a.rs"),
+            located("fnd_000002", "static.complexity", "src/b.rs"),
+            located("fnd_000003", "static.complexity", ""),
+        ],
+        &[ran("static.complexity", "pass")],
+    );
+    let current = scoped(
+        B,
+        "changed",
+        &["src/a.rs"],
+        &[ran("static.complexity", "pass")],
+    );
+
+    assert_eq!(ids(&deltas(&current, &against).resolved), ["fnd_000001"]);
+}
+
+#[test]
+fn a_tree_run_resolves_findings_in_every_file_and_without_a_location() {
+    let against = with_findings(
+        A,
+        vec![
+            located("fnd_000001", "static.complexity", "src/a.rs"),
+            located("fnd_000002", "static.complexity", ""),
+        ],
+        &[ran("static.complexity", "pass")],
+    );
+    let current = scoped(B, "tree", &[], &[ran("static.complexity", "fail")]);
+
+    assert_eq!(
+        ids(&deltas(&current, &against).resolved),
+        ["fnd_000001", "fnd_000002"]
+    );
+}
+
+#[test]
+fn findings_of_a_check_that_did_not_run_to_completion_are_not_resolved() {
+    let against = with_findings(
+        A,
+        vec![
+            located("fnd_000001", "static.complexity", "src/a.rs"),
+            located("fnd_000002", "static.crap", "src/a.rs"),
+            located("fnd_000003", "static.clones", "src/a.rs"),
+            located("fnd_000004", "static.deps", "src/a.rs"),
+            located("fnd_000005", "static.dead", "src/a.rs"),
+        ],
+        &[
+            ran("static.complexity", "pass"),
+            ran("static.crap", "pass"),
+            ran("static.clones", "pass"),
+            ran("static.deps", "pass"),
+            ran("static.dead", "pass"),
+        ],
+    );
+    let current = scoped(
+        B,
+        "tree",
+        &[],
+        &[
+            ran("static.complexity", "fail"),
+            ran("static.crap", "skipped"),
+            ran("static.clones", "error"),
+            ran("static.deps", "partial"),
+        ],
+    );
+
+    assert_eq!(ids(&deltas(&current, &against).resolved), ["fnd_000001"]);
+}
+
+#[test]
+fn scores_change_only_for_checks_that_ran_to_completion_in_both_runs() {
+    let against = scoped(
+        A,
+        "tree",
+        &[],
+        &[ran("static.complexity", "pass"), ran("static.crap", "pass")],
+    );
+    let current = scoped(
+        B,
+        "tree",
+        &[],
+        &[
+            ran("static.complexity", "fail"),
+            ran("static.crap", "error"),
+        ],
+    );
+
+    let scores: Vec<String> = deltas(&current, &against)
+        .scores
+        .keys()
+        .map(ToString::to_string)
+        .collect();
+    assert_eq!(scores, ["static.complexity"]);
+}
+
+#[test]
+fn a_changed_run_resolves_no_finding_on_a_symbol_its_changes_left_out() {
+    let symbol = |mut finding: Value, display: &str| {
+        finding["symbol"] = json!({"display": display, "hash": OLD, "lang": "rust"});
+        finding
+    };
+    let against = with_findings(
+        A,
+        vec![
+            symbol(
+                located("fnd_000001", "static.complexity", "src/a.rs"),
+                "a::kept",
+            ),
+            symbol(
+                located("fnd_000002", "static.complexity", "src/a.rs"),
+                "a::gone",
+            ),
+            symbol(
+                located("fnd_000003", "static.complexity", "src/a.rs"),
+                "a::edited",
+            ),
+        ],
+        &[ran("static.complexity", "pass")],
+    );
+    let mut current = scoped(
+        B,
+        "changed",
+        &["src/a.rs"],
+        &[ran("static.complexity", "pass")],
+    );
+    let mut scope = serde_json::to_value(&current.run.scope).unwrap();
+    scope["symbols_left_out"] = json!(["a::kept"]);
+    current.run.scope = serde_json::from_value(scope).unwrap();
+
+    assert_eq!(
+        ids(&deltas(&current, &against).resolved),
+        ["fnd_000002", "fnd_000003"]
+    );
+}

@@ -87,6 +87,9 @@ pub struct Outcome {
     pub measurements: Vec<Measured>,
     /// Symbols in scope across languages.
     pub symbols: u64,
+    /// The displays of the symbols a range or `--symbols` left out of scope, sorted; empty when
+    /// neither narrows the symbols (ADR-206).
+    pub symbols_left_out: Vec<String>,
     /// Cancellation cut work short; the envelope is `partial`.
     pub interrupted: bool,
     /// What a dry run would do; `None` for a real run.
@@ -177,6 +180,7 @@ impl Scheduler<'_> {
             return Ok(Outcome {
                 findings: execution.store.findings,
                 symbols: prepared.symbols,
+                symbols_left_out: prepared.symbols_left_out.clone(),
                 test_results: execution.store.test_results,
                 mutation_outcomes: execution.store.mutation_outcomes,
                 refused: Some(red),
@@ -201,6 +205,7 @@ impl Scheduler<'_> {
             findings,
             measurements,
             symbols: prepared.symbols,
+            symbols_left_out: prepared.symbols_left_out.clone(),
             interrupted: interrupted || store.interrupted,
             plan: None,
             test_results: store.test_results,
@@ -255,6 +260,7 @@ impl Scheduler<'_> {
             findings,
             measurements: Vec::new(),
             symbols: prepared.symbols,
+            symbols_left_out: prepared.symbols_left_out.clone(),
             interrupted: store.interrupted,
             plan: Some(RunPlan {
                 would_run,
@@ -370,6 +376,7 @@ impl Scheduler<'_> {
             .values()
             .map(|scope| scope.symbols.as_ref().map_or(0, BTreeSet::len) as u64)
             .sum();
+        let symbols_left_out = left_out(job, store, &scopes, sink);
         let matrix = SupportMatrix::compute(
             self.checks,
             self.producers,
@@ -385,6 +392,7 @@ impl Scheduler<'_> {
             tasks: Vec::new(),
             skips: Vec::new(),
             symbols,
+            symbols_left_out,
         };
         for check in &job.selected {
             prepared.add(job, *check, &matrix, &scopes, store)?;
@@ -809,6 +817,7 @@ struct Prepared<'a> {
     tasks: Vec<Task<'a>>,
     skips: Vec<Skip<'a>>,
     symbols: u64,
+    symbols_left_out: Vec<String>,
 }
 
 impl<'a> Prepared<'a> {
@@ -987,6 +996,38 @@ fn symbols_in_scope(
         *seen |= hit;
     }
     Some(keys)
+}
+
+/// The displays of the symbols of the job's languages that `scopes` leave out, sorted; none when
+/// neither a range nor selectors narrow the symbols (ADR-206).
+fn left_out(
+    job: &Job<'_>,
+    store: &mut FactStore<'_>,
+    scopes: &HashMap<LangId, Scope>,
+    sink: &mut dyn EventSink,
+) -> Vec<String> {
+    if job.changed.is_none() && job.selectors.is_empty() {
+        return Vec::new();
+    }
+    let mut displays = BTreeSet::new();
+    for lang in &job.langs {
+        let Ok(produced) = store.ensure(FactKind::Symbols, lang, sink) else {
+            continue;
+        };
+        let Some(symbols) = produced.downcast_ref::<Symbols>() else {
+            continue;
+        };
+        let kept = scopes
+            .get(&lang.id)
+            .and_then(|scope| scope.symbols.as_ref());
+        let left = symbols
+            .symbols
+            .iter()
+            .filter(|symbol| !kept.is_some_and(|keys| keys.contains(&symbol.key())))
+            .map(|symbol| symbol.display.clone());
+        displays.extend(left);
+    }
+    displays.into_iter().collect()
 }
 
 /// Under a range, `keys` less the symbols of `lang` its changed lines do not touch (ADR-142);

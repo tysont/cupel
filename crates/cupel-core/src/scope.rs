@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::error::{ArgumentError, Result};
-use crate::git::{Change, Git};
+use crate::git::{Change, ChangeKind, Git};
 use crate::hash::SymbolHash;
 use crate::syntax::{NormTree, SymbolDef, SymbolKey, Symbols};
 
@@ -100,6 +100,23 @@ pub struct ResolvedFiles {
     /// Every path the range changes that the paths select, including deleted files and files
     /// no language owns; empty without a range (ADR-056).
     pub changes: Vec<Change>,
+}
+
+impl ResolvedFiles {
+    /// What `scope.paths` records for a run of `mode` over these files: nothing for `tree`,
+    /// otherwise the files with those the range deleted, sorted (ADR-206).
+    pub fn considered(&self, mode: ScopeMode) -> Vec<String> {
+        if mode == ScopeMode::Tree {
+            return Vec::new();
+        }
+        let deleted = self
+            .changes
+            .iter()
+            .filter(|change| change.kind == ChangeKind::Deleted)
+            .map(|change| &change.path);
+        let paths: BTreeSet<&String> = self.files.iter().chain(deleted).collect();
+        paths.into_iter().cloned().collect()
+    }
 }
 
 impl ScopeRequest {

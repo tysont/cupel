@@ -153,6 +153,8 @@ fn scope_info(request: &ScopeRequest, scoped: &scope::Scoped, langs: &[Lang]) ->
         symbols: 0,
         roots: scope::roots(&scoped.info, langs),
         languages: langs.iter().map(|lang| lang.id.clone()).collect(),
+        paths: scoped.files.considered(request.mode()),
+        symbols_left_out: Vec::new(),
     }
 }
 

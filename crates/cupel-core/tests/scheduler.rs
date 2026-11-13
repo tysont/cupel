@@ -1000,6 +1000,32 @@ fn under_a_range_the_symbols_in_scope_are_those_its_changed_lines_touch() {
     );
 }
 
+/// The displays of the symbols a run of `t.scoped` left out, with `changed` lines (if any) and
+/// `selectors`.
+fn left_out(changed: Option<(&str, (u32, u32))>, selectors: &[&str]) -> Vec<String> {
+    let world = World::new(
+        vec![check("t.scoped", &[FactKind::Symbols], scoped_files)],
+        "",
+    );
+    let (outcome, _) = world.run(&["rust"], |job| {
+        job.changed = changed.map(|(file, lines)| BTreeMap::from([(file.to_owned(), vec![lines])]));
+        job.selectors = selectors
+            .iter()
+            .map(|text| SymbolSelector::parse(text).unwrap())
+            .collect();
+    });
+    outcome.unwrap().symbols_left_out
+}
+
+#[test]
+fn a_run_names_the_symbols_its_range_or_selectors_left_out() {
+    // Each file's one symbol spans lines 1-2; b.x has no changed lines, so all of it is new.
+    assert_eq!(left_out(Some(("a.x", (3, 9))), &[]), ["a"]);
+    assert_eq!(left_out(Some(("a.x", (1, 1))), &[]), Vec::<String>::new());
+    assert_eq!(left_out(None, &["b"]), ["a"]);
+    assert_eq!(left_out(None, &[]), Vec::<String>::new());
+}
+
 #[test]
 fn a_cancelled_run_skips_unstarted_work_with_reason_timeout() {
     let world = World::new(vec![check("t.one", &[FactKind::Symbols], ok)], "");

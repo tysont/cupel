@@ -224,6 +224,8 @@ fn scope_info(
         symbols: outcome.symbols,
         roots: scope::roots(info, &langs),
         languages: langs.into_iter().map(|lang| lang.id).collect(),
+        paths: resolved.considered(request.mode()),
+        symbols_left_out: outcome.symbols_left_out.clone(),
     }
 }
 

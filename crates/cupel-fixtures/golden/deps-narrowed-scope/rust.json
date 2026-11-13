@@ -82,6 +82,9 @@
         "rust"
       ],
       "mode": "paths",
+      "paths": [
+        "src/value/index.rs"
+      ],
       "roots": [
         "."
       ],

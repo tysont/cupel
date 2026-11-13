@@ -423,10 +423,17 @@
         "python"
       ],
       "mode": "changed",
+      "paths": [
+        "src/billing.py",
+        "tests/test_billing.py"
+      ],
       "roots": [
         "."
       ],
-      "symbols": 5
+      "symbols": 5,
+      "symbols_left_out": [
+        "billing.describe"
+      ]
     },
     "seed": "<seed>",
     "started": "<timestamp>",

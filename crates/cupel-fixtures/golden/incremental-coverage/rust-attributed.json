@@ -132,10 +132,17 @@
         "rust"
       ],
       "mode": "range",
+      "paths": [
+        "src/lib.rs"
+      ],
       "roots": [
         "."
       ],
-      "symbols": 1
+      "symbols": 1,
+      "symbols_left_out": [
+        "add",
+        "negate"
+      ]
     },
     "seed": "<seed>",
     "started": "<timestamp>",

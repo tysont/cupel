@@ -4,11 +4,13 @@ mod support;
 
 use std::path::Path;
 
+use cupel_core::git::{Change, ChangeKind};
 use cupel_core::syntax::{
     NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, Visibility,
 };
 use cupel_core::{
-    Error, LangId, ScopeMode, ScopeRequest, SymbolHash, SymbolSelector, select_symbols,
+    Error, LangId, ResolvedFiles, ScopeMode, ScopeRequest, SymbolHash, SymbolSelector,
+    select_symbols,
 };
 use support::GitRepo;
 
@@ -338,4 +340,30 @@ fn a_scope_under_directories_keeps_only_what_they_hold() {
         ),
         (true, false)
     );
+}
+
+fn change(path: &str, kind: ChangeKind) -> Change {
+    Change {
+        path: path.to_owned(),
+        kind,
+    }
+}
+
+#[test]
+fn a_scoped_run_considers_its_files_and_the_files_its_range_deleted() {
+    let resolved = ResolvedFiles {
+        files: vec!["src/b.rs".to_owned(), "src/a.rs".to_owned()],
+        base: None,
+        changes: vec![
+            change("src/a.rs", ChangeKind::Modified),
+            change("go.mod", ChangeKind::Modified),
+            change("src/gone.rs", ChangeKind::Deleted),
+        ],
+    };
+
+    assert_eq!(
+        resolved.considered(ScopeMode::Changed),
+        ["src/a.rs", "src/b.rs", "src/gone.rs"]
+    );
+    assert_eq!(resolved.considered(ScopeMode::Tree), Vec::<String>::new());
 }

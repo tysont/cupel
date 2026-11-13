@@ -73,6 +73,9 @@
         "go"
       ],
       "mode": "range",
+      "paths": [
+        "prices/prices.go"
+      ],
       "roots": [
         "."
       ],

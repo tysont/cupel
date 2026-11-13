@@ -73,6 +73,9 @@
         "python"
       ],
       "mode": "range",
+      "paths": [
+        "src/shop/prices.py"
+      ],
       "roots": [
         "."
       ],

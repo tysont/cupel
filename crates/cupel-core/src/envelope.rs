@@ -141,6 +141,18 @@ pub struct ScopeInfo {
     pub roots: Vec<String>,
     /// Languages that saw at least one file in scope.
     pub languages: Vec<LangId>,
+    /// The files a run whose mode is not `tree` considered, with those its range deleted, so a
+    /// later comparison knows which findings the run could have reported again (ADR-206).
+    /// Absent when empty: a `tree` run considered every file and lists none.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub paths: Vec<String>,
+    /// The displays of the symbols in `paths` the run left out: under a range, those its changes
+    /// did not touch (ADR-142); with `--symbols`, those no selector matched. A later comparison
+    /// resolves no finding on them (ADR-206). Absent when empty.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub symbols_left_out: Vec<String>,
 }
 
 /// Tool name → version for every toolchain component the run used.

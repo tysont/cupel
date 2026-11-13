@@ -402,6 +402,8 @@ fn an_empty_scope_passes_every_rule_vacuously() {
         symbols: 0,
         roots: vec![".".to_owned()],
         languages: vec![],
+        paths: vec![],
+        symbols_left_out: vec![],
     });
     let gate = evaluate_gate(
         "gate.changed",
