@@ -40,6 +40,11 @@ pub enum ExplainSubject {
 pub struct Excerpt {
     /// Relative to the repository root.
     pub file: String,
+    /// The commit the lines were read at, from the finding's `action.hints.location_commit`;
+    /// absent when they are the working tree's.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub commit: Option<String>,
     pub lines: Vec<ExcerptLine>,
 }
 

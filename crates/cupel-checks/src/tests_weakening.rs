@@ -3,6 +3,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::git::ChangeKind;
+use cupel_core::hint::LOCATION_COMMIT;
 use cupel_core::matching::{self, Candidate};
 use cupel_core::syntax::{
     AssertionKind, AssertionStrength, NormTree, Span, SymbolKey, Symbols, TestCase, TestFrames,
@@ -521,6 +522,7 @@ impl TestsWeakening {
             .collect()
     }
 
+    /// `test.deleted`, located where the test was at the base commit.
     fn deleted(&self, old: &Test<'_>, commit: &str) -> Finding {
         let name = &old.case.name;
         let said = Said {
@@ -537,7 +539,12 @@ impl TestsWeakening {
                 old.file, old.case.span.line
             ),
         };
-        self.report(said, old, commit)
+        let mut finding = self.report(said, old, commit);
+        finding
+            .action
+            .hints
+            .insert(LOCATION_COMMIT.to_owned(), Value::String(commit.to_owned()));
+        finding
     }
 
     /// `snapshot.rewritten` for a modified snapshot, attributed to the head tests it belongs

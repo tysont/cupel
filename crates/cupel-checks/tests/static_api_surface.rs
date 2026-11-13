@@ -111,6 +111,10 @@ fn a_removed_item_is_breaking_and_located_where_it_was_at_the_base() {
     assert_eq!(finding.action.kind, ActionKind::Review);
     assert_eq!(finding.location.as_ref().unwrap().line, 9);
     assert_eq!(
+        finding.action.hints.get("location_commit"),
+        Some(&json!("c0ffee"))
+    );
+    assert_eq!(
         finding.evidence.0,
         *json!({
             "path": "m.gone",
@@ -158,6 +162,7 @@ fn a_changed_signature_or_kind_is_breaking_and_located_at_head() {
         json!([{"kind": "function", "signature": "(_: int, _: int) -> int"}])
     );
     assert_eq!(findings[1].location.as_ref().unwrap().line, 7);
+    assert_eq!(findings[0].action.hints.get("location_commit"), None);
 }
 
 #[test]

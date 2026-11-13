@@ -342,3 +342,36 @@ fn an_import_cycle_is_explained_with_the_cheapest_import_to_cut() {
         assert!(text.contains(line), "{line:?} in\n{text}");
     }
 }
+
+#[test]
+fn a_finding_located_at_a_commit_is_explained_with_that_commits_source() {
+    let repo = Repo::new();
+    repo.write("src/lib.rs", SOURCE);
+    assert!(repo.git(&["init", "-q"]) && repo.git(&["add", "."]));
+    assert!(repo.git(&["commit", "-q", "-m", "base"]));
+    let base = support::git(&repo.root(), &["rev-parse", "HEAD"]);
+    repo.write("src/lib.rs", "// one\n// two\nfn unrelated() {}\n// four\n");
+    let finding = hinted(
+        complexity_finding("fnd_0000c4", 3, 5),
+        "api.breaking",
+        "location_commit",
+        &json!(base),
+    );
+    repo.seed(&[envelope(
+        &run_id(1),
+        "check",
+        std::slice::from_ref(&finding),
+        &[],
+    )]);
+
+    let json = repo.run(&["explain", "fnd_0000c4"]).envelope();
+    let excerpt = &json["explanation"]["excerpt"];
+    assert_eq!(excerpt["commit"], json!(base));
+    assert_eq!(excerpt["lines"][2]["text"], json!("fn tangled() {"));
+    assert_eq!(excerpt["lines"][3]["text"], json!("    if a { b() }"));
+    let text = repo
+        .run(&["explain", "fnd_0000c4", "--format", "text"])
+        .stdout;
+    let header = format!("  src/lib.rs at {}", &base[..12]);
+    assert!(text.contains(&header), "{header:?} in\n{text}");
+}

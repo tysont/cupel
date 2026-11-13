@@ -278,6 +278,10 @@ fn a_deleted_test_is_located_where_it_was_at_the_base() {
     let (result, findings) = run(base, head, vec![]);
     assert_eq!(kinds(&findings), [("test.deleted", "gone")]);
     assert_eq!(
+        findings[0].action.hints.get("location_commit"),
+        Some(&json!("c0ffee"))
+    );
+    assert_eq!(
         findings[0].evidence.0,
         json!({"test": "gone", "file": "t.x", "line": 7})
             .as_object()

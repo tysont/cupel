@@ -2,6 +2,7 @@
 // ABOUTME: changed public items as `api.breaking` and added ones as `api.widened` (ADR-101, ADR-174).
 use std::collections::BTreeMap;
 
+use cupel_core::hint::LOCATION_COMMIT;
 use cupel_core::syntax::{ApiItem, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
@@ -458,7 +459,7 @@ fn shown(items: &[&ApiItem]) -> Vec<Shown> {
 
 impl StaticApiSurface {
     /// The finding about `path`, located at its first head item, or its first base item when
-    /// it is gone.
+    /// it is gone (then hinted as located at the base commit).
     fn finding(
         &self,
         path: &str,
@@ -480,6 +481,10 @@ impl StaticApiSurface {
             _ => Map::new(),
         };
         let (severity, title, summary) = said(change, path, commit);
+        let mut hints = Map::new();
+        if after.is_empty() {
+            hints.insert(LOCATION_COMMIT.to_owned(), Value::String(commit.to_owned()));
+        }
         Finding {
             suppress: format!("cupel suppress {id} --reason '…'"),
             repro: format!("cupel check --only {} --base {commit}", self.manifest.id),
@@ -498,7 +503,7 @@ impl StaticApiSurface {
                 kind: ActionKind::Review,
                 priority: 2,
                 summary,
-                hints: Map::new(),
+                hints,
             },
             new_since_baseline: false,
             suppressed: false,

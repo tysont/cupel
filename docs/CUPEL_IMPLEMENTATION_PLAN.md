@@ -2594,6 +2594,12 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-checks/tests/tests_flaky.rs`: an empty `impacted` skips the check with the reason, a non-empty one is judged as before;
     - `cupel-core/tests/producer_inputs.rs`: a producer sees its own language's `impacted` in its focus; `test_reruns.rs`: `TestReruns` v2.
 
+- **Item 2, `explain` on a removed symbol** (2026-11-12, design §6.5).
+  - The gap: a finding about what a range removed (`test.deleted`, and `api.breaking` for a removed item) is located where it was at the base, but `explain` read the excerpt from the working tree, so it showed whatever code now sits at those lines (Area 11).
+  - Now such a finding carries the test hint `action.hints.location_commit`, the range's base commit, and `explain` reads its excerpt from git at that commit (`Git::show`); `explanation.excerpt.commit` names the commit (absent for the working tree's lines), and the text header reads `<file> at <commit, 12 characters>`. A finding located at head (a changed signature, a weakened test) has no hint and reads as before.
+  - Additive in the run schema: an optional hint key and an optional `excerpt.commit`.
+  - Tests: `cupel-cli/tests/explain.rs` `a_finding_located_at_a_commit_is_explained_with_that_commits_source` (failed first: `excerpt.commit` null, the head file's lines); `cupel-checks/tests/static_api_surface.rs` and `tests_weakening.rs`: a removed item and a deleted test carry the base commit as `location_commit`, a changed signature does not; the run, finding, events, and plugin schema snapshots.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

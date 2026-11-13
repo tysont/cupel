@@ -693,7 +693,7 @@ fn explanation_block(explanation: &Explanation, findings: &[Finding], paint: &Pa
     out
 }
 
-/// The excerpt's file, then its numbered lines, the location's marked with `>`.
+/// The excerpt's file (and the commit it was read at), then its numbered lines, the location's marked with `>`.
 fn excerpt_lines(out: &mut String, excerpt: &Excerpt, paint: &Paint) {
     let width = excerpt
         .lines
@@ -701,7 +701,11 @@ fn excerpt_lines(out: &mut String, excerpt: &Excerpt, paint: &Paint) {
         .map(|line| line.line.to_string().len())
         .max()
         .unwrap_or(0);
-    let _ = writeln!(out, "  {}", paint.bold(&excerpt.file));
+    let file = match &excerpt.commit {
+        Some(commit) => format!("{} at {}", excerpt.file, &commit[..commit.len().min(12)]),
+        None => excerpt.file.clone(),
+    };
+    let _ = writeln!(out, "  {}", paint.bold(&file));
     for line in &excerpt.lines {
         let marker = if line.focus { ">" } else { " " };
         let _ = writeln!(out, "  {marker} {:>width$} | {}", line.line, line.text);

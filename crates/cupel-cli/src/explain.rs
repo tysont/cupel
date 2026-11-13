@@ -2,6 +2,8 @@
 // ABOUTME: check's last stored result with its findings and metrics. Reads the fact store; never re-runs.
 use std::path::Path;
 
+use cupel_core::git::Git;
+use cupel_core::hint::LOCATION_COMMIT;
 use cupel_core::{
     CheckId, Envelope, Excerpt, ExcerptLine, ExitCode, ExplainSubject, Explanation, Finding,
     FindingId, Location, RunId, Status, Writer,
@@ -23,10 +25,10 @@ fn finding_explanation(root: &Path, target: &str, finding: &Finding, run: RunId)
         subject: ExplainSubject::Finding,
         target: target.to_owned(),
         run,
-        excerpt: finding
-            .location
-            .as_ref()
-            .and_then(|location| excerpt(root, location)),
+        excerpt: finding.location.as_ref().and_then(|location| {
+            let commit = hints.get(LOCATION_COMMIT).and_then(Value::as_str);
+            excerpt(root, location, commit)
+        }),
         covering_tests: hints
             .get("covering_tests")
             .and_then(Value::as_array)
@@ -101,13 +103,13 @@ fn explained(
     envelope
 }
 
-/// The lines of `location`'s file around it, when the file is inside `root` and has them.
-fn excerpt(root: &Path, location: &Location) -> Option<Excerpt> {
-    let path = root.join(&location.file).canonicalize().ok()?;
-    if !path.starts_with(root) {
-        return None;
-    }
-    let text = std::fs::read_to_string(path).ok()?;
+/// The lines of `location`'s file around it, when the file is inside `root` and has them: the
+/// file as `commit` has it, or the working tree's without one.
+fn excerpt(root: &Path, location: &Location, commit: Option<&str>) -> Option<Excerpt> {
+    let text = match commit {
+        Some(commit) => committed(root, &location.file, commit)?,
+        None => working(root, &location.file)?,
+    };
     let lines: Vec<&str> = text.lines().collect();
     let last = u32::try_from(lines.len()).ok()?;
     let first = location.line.saturating_sub(CONTEXT).max(1);
@@ -117,6 +119,7 @@ fn excerpt(root: &Path, location: &Location) -> Option<Excerpt> {
     }
     Some(Excerpt {
         file: location.file.clone(),
+        commit: commit.map(str::to_owned),
         lines: (first..=end)
             .map(|line| ExcerptLine {
                 line,
@@ -125,6 +128,21 @@ fn excerpt(root: &Path, location: &Location) -> Option<Excerpt> {
             })
             .collect(),
     })
+}
+
+/// The working tree's `file`, when it is inside `root`.
+fn working(root: &Path, file: &str) -> Option<String> {
+    let path = root.join(file).canonicalize().ok()?;
+    if !path.starts_with(root) {
+        return None;
+    }
+    std::fs::read_to_string(path).ok()
+}
+
+/// `file` as `commit` has it, when git can read it there.
+fn committed(root: &Path, file: &str, commit: &str) -> Option<String> {
+    let bytes = Git::open(root)?.show(commit, file).ok()?;
+    String::from_utf8(bytes).ok()
 }
 
 #[cfg(test)]
@@ -160,7 +178,7 @@ mod tests {
     #[test]
     fn an_excerpt_stops_at_the_start_and_end_of_the_file() {
         let (_dir, root) = numbered(4);
-        let excerpt = excerpt(&root, &location(1, 4)).unwrap();
+        let excerpt = excerpt(&root, &location(1, 4), None).unwrap();
         assert_eq!(
             shown(&excerpt),
             [(1, true), (2, true), (3, true), (4, true)]
@@ -171,6 +189,6 @@ mod tests {
     #[test]
     fn a_location_past_the_end_of_the_file_has_no_excerpt() {
         let (_dir, root) = numbered(4);
-        assert_eq!(excerpt(&root, &location(9, 9)), None);
+        assert_eq!(excerpt(&root, &location(9, 9), None), None);
     }
 }

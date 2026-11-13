@@ -204,6 +204,11 @@ expression: pretty(&schema)
               "$ref": "#/$defs/DeepestBlock",
               "x-cupel-optional": true
             },
+            "location_commit": {
+              "description": "The commit whose version of the file the finding's location is in, when it is not the working tree: the range's base, for what the range removed.",
+              "type": "string",
+              "x-cupel-optional": true
+            },
             "nearest_test_file": {
               "description": "The test file nearest to the finding's site.",
               "type": "string",

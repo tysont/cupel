@@ -14,6 +14,10 @@ pub trait Hint: Serialize + DeserializeOwned + JsonSchema {
     const KEY: &'static str;
 }
 
+/// The key of the test hint naming the commit whose version of the file a finding's location is
+/// in, when it is not the working tree: the range's base, for what the range removed.
+pub const LOCATION_COMMIT: &str = "location_commit";
+
 /// Stores `hint` in `hints` under its key.
 pub fn insert<H: Hint>(hints: &mut Map<String, Value>, hint: &H) {
     if let Ok(value) = serde_json::to_value(hint) {
@@ -134,6 +138,14 @@ pub(crate) fn hints_schema(generator: &mut SchemaGenerator) -> Schema {
             "type": "array",
             "items": {"type": "string"},
             "description": "Tests that cover the finding's site.",
+            "x-cupel-optional": true,
+        }),
+    );
+    properties.insert(
+        LOCATION_COMMIT.to_owned(),
+        json!({
+            "type": "string",
+            "description": "The commit whose version of the file the finding's location is in, when it is not the working tree: the range's base, for what the range removed.",
             "x-cupel-optional": true,
         }),
     );

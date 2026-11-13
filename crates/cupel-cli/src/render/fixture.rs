@@ -612,6 +612,7 @@ fn explanation() -> Explanation {
             .expect("valid run ID"),
         excerpt: Some(Excerpt {
             file: "src/rewrite/planner.rs".to_owned(),
+            commit: None,
             lines: vec![
                 ExcerptLine {
                     line: 141,
