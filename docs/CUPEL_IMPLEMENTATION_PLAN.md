@@ -2576,6 +2576,20 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
   - The gap: Molten #660 changed `it("name", async () => {…})` to `it("name", { timeout: 120_000 }, async () => {…})` with the body unchanged, and Cupel 0.2.6 reported `test.deleted`: the JavaScript and TypeScript case patterns (`tests.scm`, and the closures `symbols.scm` makes) took the callback only right after the title.
   - Now an options object between the title and the callback (Vitest's and node:test's `it(name, options, fn)`) leaves the case what it is, skipped forms included.
   - Tests: `cupel-lang/tests/ecma_tests.rs` `a_case_with_an_options_object_before_its_callback_is_still_a_case` (failed first: no frame for the file); `cupel-fixtures/tests/weakening.rs` `a_test_that_gains_an_options_object_is_not_deleted` (failed first: `test.deleted`).
+- **Item 19, the Molten rerun** (2026-11-13, Molten `fbafa8f5` in the trial's `git clone --local` copies, clean environment under the no-egress sandbox, one package at a time; 0.2.6 release binary before, `5179bbbf` after, `containers/sandbox` coverage at `f9617d9c`). No file outside `.cupel/` changed in either clone.
+  - CLI parse (`check --depth quick`, static checks' time, median of five; the no-daemon runs read the fact cache after the first):
+
+    | | 0.2.6 | 0.2.7 |
+    |---|---|---|
+    | no daemon | 6,535 ms | 1,647 ms |
+    | warm daemon | 2,204 ms | 1,213 ms |
+    | no daemon ÷ daemon | 3.0× | 1.36× (target ≤ 1.5×) |
+    | first no-daemon run, empty cache | 9,669 ms | 5,632 ms |
+
+  - `tests.mutation` on `packages/shared` (`--depth deep --budget 2h`): wall 6,595 s → 3,628 s; build 3,802 s → 8 s (the baseline runs once, item 10); 907 mutants executed both times; 732 killed; survived 173 → 172 (one now `equivalent`); score 0.7276 → 0.7284; progress events on `--events` 2 → 909.
+  - Findings by check, the `a5` quick run with `[roots]` (3,695 → 2,328): `tests.quality` 1,718 → 459 (weak assertions 1,221 → 289, test logic 260 → 126, duplicate setup 200 → 7; item 18), `static.clones` 654 → 629, `static.complexity` 1,134 → 1,101, `static.dead-code` 41 → 19, `static.deps` 27 → 6 (unstable-abstract 25 → 4; item 15), `tests.assertion-density` 119 → 112 (the drops in clones, complexity, dead code, and density are files outside every root, item 14); `perf.footprint` 2, `static.crap` 0 unchanged.
+  - The `a1b` survey, no `[roots]` (3,693 → 2,435): only `tests.quality` (1,718 → 481) and `static.deps` (27 → 6) changed.
+  - `containers/sandbox`: `tests.coverage` skipped ("c8 unavailable") before and at `5179bbbf`; at `f9617d9c` it runs Node's own coverage: line 0.032 over 2,599 lines (the suite loads four of the package's modules; 88 functions are in files no test loaded), branch 0.80 over 56.
 
 - **Item 10, `property.cases-pinned`** (2026-11-12, [ADR-183](adr/CUPEL_DECISION_183.md)).
   - The gap: a property that sets its own count (Molten's six `fc.assert(…, { numRuns: 120 })`) ran at it under any `--cases`, silently, and a falsified one's `evidence.cases` said the budget.
