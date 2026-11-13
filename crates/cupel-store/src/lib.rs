@@ -58,6 +58,9 @@ use rusqlite::{Connection, OpenFlags, OptionalExtension, params};
 
 pub use crate::error::StoreError;
 use crate::lock::WriterLock;
+
+/// How many of the latest runs that used parsed facts keep the files they used (ADR-201).
+pub const PARSED_RUNS_KEPT: u32 = 20;
 use crate::migrations::MIGRATIONS;
 
 pub type Result<T, E = StoreError> = std::result::Result<T, E>;
@@ -925,11 +928,14 @@ impl Store {
 
     /// Keeps `facts`, derived by `build` in `run`, replacing a value kept under the same file
     /// and name, and drops every value another build derived: a new build misses every key.
+    /// Records that `run` used the files under `used`, then sweeps: drops the values of every
+    /// file none of the last [`PARSED_RUNS_KEPT`] runs that used any file used (ADR-201).
     pub fn record_parsed_facts(
         &self,
         build: &str,
         run: &RunId,
         facts: &[ParsedFact],
+        used: &[String],
     ) -> Result<()> {
         let run = run.to_string();
         self.write(|tx| {
@@ -941,7 +947,13 @@ impl Store {
             for fact in facts {
                 insert.execute(params![build, fact.key, fact.name, run, fact.payload])?;
             }
-            Ok(())
+            let mut insert_use = tx.prepare_cached(
+                "INSERT OR IGNORE INTO parsed_uses (run_id, file_key) VALUES (?1, ?2)",
+            )?;
+            for key in used {
+                insert_use.execute([&run, key])?;
+            }
+            sweep_parsed_facts(tx)
         })
     }
 
@@ -1026,6 +1038,21 @@ fn repeats_other_runs(envelope: &Envelope) -> bool {
         envelope.run.verb,
         Some(Verb::Explain | Verb::Baseline | Verb::Suppress)
     )
+}
+
+/// Forgets the uses of every run older than the last [`PARSED_RUNS_KEPT`] that used parsed facts,
+/// then drops the values of every file no remaining use names (ADR-201). Run IDs sort by start.
+fn sweep_parsed_facts(tx: &Connection) -> Result<()> {
+    tx.execute(
+        "DELETE FROM parsed_uses WHERE run_id NOT IN
+            (SELECT DISTINCT run_id FROM parsed_uses ORDER BY run_id DESC LIMIT ?1)",
+        [PARSED_RUNS_KEPT],
+    )?;
+    tx.execute(
+        "DELETE FROM parsed_facts WHERE file_key NOT IN (SELECT file_key FROM parsed_uses)",
+        [],
+    )?;
+    Ok(())
 }
 
 /// Stores one check's result in `run`, and its score as a metric.

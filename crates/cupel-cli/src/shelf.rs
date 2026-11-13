@@ -1,5 +1,6 @@
 // ABOUTME: The fact store as the parse cache's shelf (ADR-181, ADR-188): a run reads each file's derived values
 // ABOUTME: from the store by this build and the file's key, and keeps what it derives to record after the run.
+use std::collections::BTreeSet;
 use std::sync::{Mutex, OnceLock, PoisonError};
 
 use cupel_core::{RunId, Writer};
@@ -10,8 +11,8 @@ use cupel_store::{ParsedFact, Store};
 /// ninefold.
 const LEVEL: u8 = 1;
 
-/// The store of one repository, opened on the first read, and the values derived since, each
-/// deflated.
+/// The store of one repository, opened on the first read, and the values derived and the file
+/// keys used since, each value deflated.
 pub struct StoreShelf {
     writer: Writer,
     /// This binary's build (version and executable, as the daemon's, ADR-085 §4): values another
@@ -21,6 +22,7 @@ pub struct StoreShelf {
     /// that cannot be opened.
     store: OnceLock<Option<Mutex<Store>>>,
     kept: Mutex<Vec<ParsedFact>>,
+    used: Mutex<BTreeSet<String>>,
 }
 
 impl StoreShelf {
@@ -36,6 +38,7 @@ impl StoreShelf {
             build: build.to_string(),
             store: OnceLock::new(),
             kept: Mutex::default(),
+            used: Mutex::default(),
         })
     }
 
@@ -52,17 +55,19 @@ impl StoreShelf {
             .as_ref()
     }
 
-    /// Records the values kept since the last record, as derived in `run`.
+    /// Records the values kept and the files used since the last record, as `run`'s, which
+    /// sweeps the values of files no recent run used (ADR-201).
     pub fn record(&self, run: &RunId) -> Result<(), String> {
         let kept = std::mem::take(&mut *lock(&self.kept));
-        if kept.is_empty() {
+        let used: Vec<String> = std::mem::take(&mut *lock(&self.used)).into_iter().collect();
+        if kept.is_empty() && used.is_empty() {
             return Ok(());
         }
         let Some(store) = self.store() else {
             return Ok(());
         };
         lock(store)
-            .record_parsed_facts(&self.build, run, &kept)
+            .record_parsed_facts(&self.build, run, &kept, &used)
             .map_err(|error| error.to_string())
     }
 }
@@ -91,6 +96,10 @@ impl FactShelf for StoreShelf {
             payload,
         });
     }
+
+    fn used(&self, key: &str) {
+        lock(&self.used).insert(key.to_owned());
+    }
 }
 
 fn lock<T>(mutex: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
@@ -107,6 +116,7 @@ mod tests {
         let writer = Writer::new(dir.path(), false).unwrap();
         let value = br#"{"label":"call","children":[],"span":{"line":1,"col":1}}"#.repeat(200);
         let first = StoreShelf::new(&writer).unwrap();
+        first.used("file-a");
         first.keep("file-a", "norm-tree", value.clone());
         first.record(&RunId::generate()).unwrap();
 
@@ -123,5 +133,32 @@ mod tests {
         let later = StoreShelf::new(&writer).unwrap();
         assert_eq!(later.load("file-a"), [("norm-tree".to_owned(), value)]);
         assert_eq!(later.load("file-b"), []);
+    }
+
+    #[test]
+    fn a_run_that_derives_nothing_still_records_the_files_it_used_and_sweeps() {
+        let dir = tempfile::tempdir().unwrap();
+        let writer = Writer::new(dir.path(), false).unwrap();
+        let run = |n: u8| -> RunId {
+            format!("run_01JA2B3C4D5E6F7G8H9JKMNP{n:02}")
+                .parse()
+                .unwrap()
+        };
+        let first = StoreShelf::new(&writer).unwrap();
+        for key in ["file-a", "file-b"] {
+            first.used(key);
+            first.keep(key, "symbols", b"[1]".to_vec());
+        }
+        first.record(&run(1)).unwrap();
+        for n in 2..=21 {
+            let shelf = StoreShelf::new(&writer).unwrap();
+            shelf.used("file-b");
+            shelf.record(&run(n)).unwrap();
+        }
+        let later = StoreShelf::new(&writer).unwrap();
+        assert_eq!(
+            [later.load("file-a"), later.load("file-b")],
+            [vec![], vec![("symbols".to_owned(), b"[1]".to_vec())]]
+        );
     }
 }

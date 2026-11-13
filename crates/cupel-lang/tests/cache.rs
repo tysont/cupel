@@ -287,3 +287,29 @@ fn values_kept_on_a_shelf_are_read_by_a_later_cache_without_parsing() {
         "only the changed file is parsed and derived again"
     );
 }
+
+#[test]
+fn every_parse_tells_the_shelf_it_used_the_file_also_when_the_tree_is_in_memory() {
+    let (_dir, root) = repo(&[("a.rs", "fn a() {}\n"), ("c.py", "def c():\n    pass\n")]);
+    let files = vec!["a.rs".to_owned(), "c.py".to_owned()];
+    let shelf = std::sync::Arc::new(MemoryShelf::default());
+    let registry = shelved(&shelf);
+    registry.parse_all(&root, &files, &Cancellation::new());
+    let mut first = shelf.used();
+    first.sort();
+    first.dedup();
+    registry.parse_all(&root, &files, &Cancellation::new());
+    let mut both = shelf.used();
+    both.sort();
+    assert_eq!(
+        (first.len(), both),
+        (
+            2,
+            first
+                .iter()
+                .flat_map(|key| [key.clone(), key.clone()])
+                .collect()
+        ),
+        "each parse uses its file's key once, the in-memory one too"
+    );
+}

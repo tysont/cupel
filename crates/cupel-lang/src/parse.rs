@@ -20,6 +20,9 @@ pub trait FactShelf: Send + Sync {
     fn load(&self, key: &str) -> Vec<(String, Vec<u8>)>;
     /// Keeps `payload`, the value `name` derived from the file under `key`.
     fn keep(&self, key: &str, name: &str, payload: Vec<u8>);
+    /// Notes that a parse used the file under `key`, whether its values came from the shelf,
+    /// from memory, or from its tree, so the store keeps the values of files runs use (ADR-201).
+    fn used(&self, key: &str);
 }
 
 impl std::fmt::Debug for dyn FactShelf {
@@ -338,6 +341,7 @@ impl ParseCache {
         let (on_shelf, loaded) = kept_on
             .as_ref()
             .map_or((false, false), |(given, file_key)| {
+                given.used(file_key);
                 syntax.shelve(file, || given.load(file_key))
             });
         if on_shelf && loaded {

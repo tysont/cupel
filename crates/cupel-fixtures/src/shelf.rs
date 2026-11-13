@@ -9,12 +9,21 @@ use cupel_lang::{FactShelf, ParseCache};
 #[derive(Default)]
 pub struct MemoryShelf {
     files: Mutex<BTreeMap<String, BTreeMap<String, Vec<u8>>>>,
+    used: Mutex<Vec<String>>,
 }
 
 impl MemoryShelf {
     /// How many values are kept, over every file.
     pub fn kept(&self) -> usize {
         self.files().values().map(BTreeMap::len).sum()
+    }
+
+    /// The file keys parses used, in the order they used them, once per parse.
+    pub fn used(&self) -> Vec<String> {
+        self.used
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .clone()
     }
 
     /// A fresh parse cache, as a new process makes it, that keeps its values on `shelf`.
@@ -42,5 +51,12 @@ impl FactShelf for MemoryShelf {
             .entry(key.to_owned())
             .or_default()
             .insert(name.to_owned(), payload);
+    }
+
+    fn used(&self, key: &str) {
+        self.used
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .push(key.to_owned());
     }
 }

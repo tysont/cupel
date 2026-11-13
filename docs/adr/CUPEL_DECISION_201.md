@@ -1,6 +1,6 @@
 # CUPEL_DECISION_201: The sweep prunes parsed facts no recent run has used
 
-**Date:** 2026-11-13 · **Status:** accepted · **Phase:** v0.2.8, the owner's rulings after v0.2.7 · Amends [188](CUPEL_DECISION_188.md)
+**Date:** 2026-11-13 · **Status:** accepted; detailed by [204](CUPEL_DECISION_204.md) · **Phase:** v0.2.8, the owner's rulings after v0.2.7 · Amends [188](CUPEL_DECISION_188.md)
 
 ## Context
 ADR-188 stores parsed facts in the `parsed_facts` table keyed by file content hash and never removes a row, so the table grows with every edit.

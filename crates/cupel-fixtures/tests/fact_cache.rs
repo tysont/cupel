@@ -45,7 +45,7 @@ fn checked_once(lang: &str) -> tempfile::TempDir {
 fn forget_parsed_facts(dir: &Path) {
     let store = Store::open(&Writer::new(dir, false).unwrap()).unwrap();
     store
-        .record_parsed_facts("another build", &RunId::generate(), &[])
+        .record_parsed_facts("another build", &RunId::generate(), &[], &[])
         .unwrap();
 }
 

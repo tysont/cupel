@@ -851,6 +851,7 @@ baselines    (name PK, run_id)
 oracles      (name PK, kind, spec JSON, verified_at, verified_hash)
 mutation_baselines (suite_hash PK, elapsed_ms)                                     -- the mutation engine's unmutated baseline (ADR-185)
 parsed_facts (build, file_key, name, run_id, payload)  PK (build, file_key, name)  -- each file's derived values (ADR-181, ADR-188)
+parsed_uses  (run_id, file_key)  PK (run_id, file_key)                         -- the files each run's parses used, for the sweep (ADR-201, ADR-204)
 suppressions mirrored from .cupel/suppressions.toml
 ```
 
@@ -858,7 +859,7 @@ suppressions mirrored from .cupel/suppressions.toml
 
 Cache validity for a mutant outcome: `(symbol_hash, site_hash, suite_hash, toolchain_hash)` unchanged ⇒ reuse. `suite_hash` = hash of the structural hashes of all test symbols that cover the site (or of the test files when no per-test map, folded with the mutant's own root when it runs that root's suite alone, ADR-194). Scores are recomputed from the store on every run, so a cached kill contributes without re-execution.
 
-`parsed_facts` is the parse cache's shelf (ADR-188): every value a syntactic producer derives from one file (its share of a fact, its imports and references before resolution, its asserting test helpers, its first syntax error), deflated JSON, keyed by the file's path, content hash, language, and grammar, under the build that derived it (version and executable, as the daemon compares builds). A process reads a file's values in one query and parses the file only for a value the store lacks; a run's new values are written in one transaction after its run record, which also drops every other build's rows.
+`parsed_facts` is the parse cache's shelf (ADR-188): every value a syntactic producer derives from one file (its share of a fact, its imports and references before resolution, its asserting test helpers, its first syntax error), deflated JSON, keyed by the file's path, content hash, language, and grammar, under the build that derived it (version and executable, as the daemon compares builds). A process reads a file's values in one query and parses the file only for a value the store lacks; a run's new values are written in one transaction after its run record, which also drops every other build's rows. The same transaction records the file keys the run's parses used in `parsed_uses` and sweeps: it keeps the uses of the last 20 runs that used any, and drops the `parsed_facts` rows of every file none of them used (ADR-201, ADR-204).
 
 `.cupel/` is gitignored except `suppressions.toml` and any `baseline export` outputs the user commits.
 

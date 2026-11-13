@@ -223,6 +223,7 @@ fn migrations_run_from_empty_and_reopening_changes_nothing() {
             "mutation_baselines",
             "oracles",
             "parsed_facts",
+            "parsed_uses",
             "runs",
             "schema_version",
             "suppressions",
@@ -756,7 +757,7 @@ fn the_oracles_table_holds_only_verifications_so_every_column_is_required() {
             required("run_id"),
         ]
     );
-    assert_eq!(Store::SCHEMA_VERSION, 7);
+    assert_eq!(Store::SCHEMA_VERSION, 8);
 }
 
 #[test]
@@ -790,10 +791,16 @@ fn parsed_facts_are_read_by_build_and_file_and_a_build_keeps_only_its_own() {
                 fact("file-a", "norm-tree", b"[2]"),
                 fact("file-b", "symbols", b"[3]"),
             ],
+            &["file-a".to_owned(), "file-b".to_owned()],
         )
         .unwrap();
     store
-        .record_parsed_facts("build-1", &run_id(2), &[fact("file-a", "symbols", b"[4]")])
+        .record_parsed_facts(
+            "build-1",
+            &run_id(2),
+            &[fact("file-a", "symbols", b"[4]")],
+            &["file-a".to_owned()],
+        )
         .unwrap();
     assert_eq!(
         store.parsed_facts("build-1", "file-a").unwrap(),
@@ -806,7 +813,12 @@ fn parsed_facts_are_read_by_build_and_file_and_a_build_keeps_only_its_own() {
     assert_eq!(store.parsed_facts("build-2", "file-a").unwrap(), []);
 
     store
-        .record_parsed_facts("build-2", &run_id(3), &[fact("file-b", "symbols", b"[5]")])
+        .record_parsed_facts(
+            "build-2",
+            &run_id(3),
+            &[fact("file-b", "symbols", b"[5]")],
+            &["file-b".to_owned()],
+        )
         .unwrap();
     assert_eq!(
         store.parsed_facts("build-1", "file-b").unwrap(),
@@ -817,6 +829,39 @@ fn parsed_facts_are_read_by_build_and_file_and_a_build_keeps_only_its_own() {
         store.parsed_facts("build-2", "file-b").unwrap(),
         [("symbols".to_owned(), b"[5]".to_vec())]
     );
+}
+
+#[test]
+fn the_sweep_drops_parsed_facts_of_files_none_of_the_last_20_runs_used() {
+    let repo = Repo::new();
+    let store = repo.store();
+    let fact = |key: &str| ParsedFact {
+        key: key.to_owned(),
+        name: "symbols".to_owned(),
+        payload: b"[1]".to_vec(),
+    };
+    let used = |keys: &[&str]| keys.iter().map(|key| (*key).to_owned()).collect::<Vec<_>>();
+    store
+        .record_parsed_facts(
+            "build-1",
+            &run_id(1),
+            &[fact("file-a"), fact("file-b")],
+            &used(&["file-a", "file-b"]),
+        )
+        .unwrap();
+    let kept = |store: &Store| {
+        ["file-a", "file-b"].map(|key| store.parsed_facts("build-1", key).unwrap().len())
+    };
+    for n in 2..=20 {
+        store
+            .record_parsed_facts("build-1", &run_id(n), &[], &used(&["file-b"]))
+            .unwrap();
+    }
+    assert_eq!(kept(&store), [1, 1], "run 1 is among the last 20");
+    store
+        .record_parsed_facts("build-1", &run_id(21), &[], &used(&["file-b"]))
+        .unwrap();
+    assert_eq!(kept(&store), [0, 1], "no run of the last 20 used file-a");
 }
 
 /// Records runs 1 to `runs`, each from a thread of its own with a store of its own.

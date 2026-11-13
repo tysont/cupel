@@ -2,7 +2,7 @@
 // ABOUTME: how many have been applied (ADR-045 §4). Append new scripts; never edit an applied one.
 
 /// Every migration, in order. Migration `n` (1-based) moves the store from version `n - 1` to `n`.
-pub const MIGRATIONS: &[&str] = &[V1, V2, V3, V4, V5, V6, V7];
+pub const MIGRATIONS: &[&str] = &[V1, V2, V3, V4, V5, V6, V7, V8];
 
 /// Every table of design §8.8, with the ADR-045 §5 additions.
 const V1: &str = "
@@ -197,5 +197,15 @@ CREATE TABLE parsed_facts (
     run_id TEXT NOT NULL,
     payload BLOB NOT NULL,
     PRIMARY KEY (build, file_key, name)
+) WITHOUT ROWID;
+";
+
+/// The `parsed_uses` table (ADR-201, ADR-204): the file keys of `parsed_facts` each run read or derived, so
+/// the sweep after a run drops the parsed facts of files none of the last runs used.
+const V8: &str = "
+CREATE TABLE parsed_uses (
+    run_id TEXT NOT NULL,
+    file_key TEXT NOT NULL,
+    PRIMARY KEY (run_id, file_key)
 ) WITHOUT ROWID;
 ";
