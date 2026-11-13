@@ -1,5 +1,5 @@
 // ABOUTME: A `<= base` ratchet on `static.complexity.cyclomatic_max` end to end (ADR-199, ADR-205): one `if` added to
-// ABOUTME: a cyclomatic-3 function passes by the tolerance, eight passes within watch, and past watch fails.
+// ABOUTME: a cyclomatic-3 function passes by the tolerance, eight passes within watch, and crossing watch fails.
 use std::path::Path;
 use std::process::Command;
 
@@ -23,10 +23,10 @@ fn git(dir: &Path, args: &[&str]) {
 }
 
 /// The changed-scope `static.complexity` run, in `format`, of a branch whose commit replaces
-/// the base's `letter` with the fixture `head`'s.
-fn changed(dir: &Path, head: &str, format: &str) -> Outcome {
+/// the fixture `base`'s `letter` with the fixture `head`'s.
+fn changed(dir: &Path, (base, head): (&str, &str), format: &str) -> Outcome {
     git(dir, &["init", "--quiet", "--initial-branch", "main"]);
-    copy_repo("ratchet-watch/base", dir);
+    copy_repo(&format!("ratchet-watch/{base}"), dir);
     git(dir, &["add", "--all"]);
     git(dir, &["commit", "--quiet", "-m", "grade"]);
     git(dir, &["checkout", "--quiet", "-b", "work"]);
@@ -46,9 +46,9 @@ fn changed(dir: &Path, head: &str, format: &str) -> Outcome {
 }
 
 /// The exit code and the ratchet's gate rule, without what its values were measured on.
-fn ratchet(head: &str) -> (Option<i32>, Value) {
+fn ratchet(base: &str, head: &str) -> (Option<i32>, Value) {
     let dir = tempfile::tempdir().unwrap();
-    let outcome = changed(dir.path(), head, "json");
+    let outcome = changed(dir.path(), (base, head), "json");
     let gate = serde_json::to_value(&outcome.envelope().summary.gate).unwrap();
     let mut rule = gate["rules"][0].clone();
     if let Some(fields) = rule.as_object_mut() {
@@ -58,26 +58,31 @@ fn ratchet(head: &str) -> (Option<i32>, Value) {
     (outcome.code, rule)
 }
 
-/// The ratchet's rule with `actual` and `result`, bound 5 (the base's 3 plus the tolerance 2).
-fn rule(actual: f64, result: &str) -> Value {
-    json!({"rule": "static.complexity.cyclomatic_max <= base", "actual": actual, "bound": 5.0,
+/// The ratchet's rule with `actual`, `bound` (the base plus the tolerance 2), and `result`.
+fn rule(actual: f64, bound: f64, result: &str) -> Value {
+    json!({"rule": "static.complexity.cyclomatic_max <= base", "actual": actual, "bound": bound,
            "tolerance": 2.0, "result": result, "reason": null})
 }
 
 #[test]
 fn one_if_added_to_a_cyclomatic_3_function_passes_and_a_change_past_watch_fails() {
-    let mut within = rule(8.0, "pass");
-    within["watch"] = json!(10.0);
+    let watched = |mut rule: Value| {
+        rule["watch"] = json!(10.0);
+        rule
+    };
     assert_eq!(
         [
-            ratchet("one-branch"),
-            ratchet("within-watch"),
-            ratchet("past-watch")
+            ratchet("base", "one-branch"),
+            ratchet("base", "within-watch"),
+            ratchet("base", "past-watch"),
+            ratchet("near-watch", "past-watch"),
         ],
         [
-            (Some(0), rule(4.0, "pass")),
-            (Some(0), within),
-            (Some(1), rule(11.0, "fail")),
+            (Some(0), rule(4.0, 5.0, "pass")),
+            (Some(0), watched(rule(8.0, 5.0, "pass"))),
+            (Some(1), rule(11.0, 5.0, "fail")),
+            // 9 to 11 is within the tolerance, but crosses the watch (ADR-205).
+            (Some(1), watched(rule(11.0, 11.0, "fail"))),
         ]
     );
 }
@@ -85,7 +90,7 @@ fn one_if_added_to_a_cyclomatic_3_function_passes_and_a_change_past_watch_fails(
 #[test]
 fn the_text_gate_names_the_tolerance_and_the_watch_that_passed_the_rule() {
     let dir = tempfile::tempdir().unwrap();
-    let outcome = changed(dir.path(), "within-watch", "text");
+    let outcome = changed(dir.path(), ("base", "within-watch"), "text");
     assert_eq!(outcome.code, Some(0), "{}", outcome.stdout);
     let line = "pass  static.complexity.cyclomatic_max <= base  actual 8 (grade.letter at \
                 src/grade.py:5)  bound 5 (grade.letter at src/grade.py:5)  tolerance 2  \

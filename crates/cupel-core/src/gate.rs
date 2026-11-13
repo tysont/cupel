@@ -36,7 +36,7 @@ pub enum GateReference<'a> {
 /// Each gate key's tolerance, as `<check>.<metric>` (ADR-182, ADR-195): how far a rule against
 /// `base` that writes no offset lets the metric move past its reference value. A key not held
 /// has tolerance 0. A key may also hold a watch threshold (ADR-199, ADR-205): such a rule under
-/// `<=` or `<` never fails while the metric is at most it.
+/// `<=` or `<` passes while the metric is at most it, and fails when the metric crosses it.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Tolerances {
     tolerances: BTreeMap<String, f64>,
@@ -206,7 +206,7 @@ struct Evaluation {
     bound: Option<f64>,
     /// The tolerance that loosened `bound`, when one did.
     tolerance: Option<f64>,
-    /// The watch threshold that passed a value past `bound`, when one did.
+    /// The watch threshold that decided the result against `bound`, when one did.
     watch: Option<f64>,
     result: RuleOutcome,
     reason: Option<String>,
@@ -228,14 +228,23 @@ impl Evaluation {
         }
     }
 
-    /// Passes a failed comparison whose `actual` is at most `watch`, recording the threshold
-    /// that decided it (ADR-199, ADR-205).
-    fn within(&mut self, watch: Option<f64>) {
-        let Some(watch) = watch else {
+    /// Applies a largest-value ratchet's watch threshold to a comparison with `base` + δ
+    /// (ADR-199, ADR-205): at most `watch` passes; past it passes only when `base` was already
+    /// past it and the bound held, so crossing it fails. Records `watch` when it, not the bound,
+    /// decided the result.
+    fn watched(&mut self, watch: Option<f64>, base: Option<f64>) {
+        let (Some(watch), Some(actual), Some(base)) = (watch, self.actual, base) else {
             return;
         };
-        if self.result == RuleOutcome::Fail && self.actual.is_some_and(|actual| actual <= watch) {
-            self.result = RuleOutcome::Pass;
+        let result = if actual <= watch {
+            RuleOutcome::Pass
+        } else if base > watch {
+            self.result
+        } else {
+            RuleOutcome::Fail
+        };
+        if result != self.result {
+            self.result = result;
             self.watch = Some(watch);
         }
     }
@@ -297,8 +306,12 @@ fn evaluate_rule(
                 evaluation.tolerance = tolerance;
             }
             // The watch threshold comes with the default tolerance of an upper limit (ADR-205).
-            if tolerance.is_some() && matches!(op, Comparison::Le | Comparison::Lt) {
-                evaluation.within(tolerances.watch(&rule.key));
+            if matches!(op, Comparison::Le | Comparison::Lt) {
+                let base = evaluation
+                    .bound
+                    .zip(tolerance)
+                    .map(|(bound, by)| bound - by);
+                evaluation.watched(tolerances.watch(&rule.key), base);
             }
             evaluation
         }

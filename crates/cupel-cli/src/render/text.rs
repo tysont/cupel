@@ -224,7 +224,10 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .unwrap_or_default();
         let watch = rule
             .watch
-            .map(|watch| format!("  within watch {watch}"))
+            .map(|watch| match rule.result {
+                RuleOutcome::Pass => format!("  within watch {watch}"),
+                _ => format!("  past watch {watch}"),
+            })
             .unwrap_or_default();
         let reason = rule
             .reason

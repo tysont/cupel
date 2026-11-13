@@ -760,9 +760,18 @@ fn a_count_s_tolerance_raises_the_bound_of_an_upper_limit() {
 /// A ratchet on `static.complexity.cyclomatic_max` from a base of 3 to `actual`, with δ = 2
 /// and a watch threshold of 10, as `(bound, tolerance, watch, result)`.
 fn ratcheted(actual: f64, condition: &str) -> (Option<f64>, Option<f64>, Option<f64>, RuleOutcome) {
+    ratcheted_from(3.0, actual, condition)
+}
+
+/// [`ratcheted`] from a base of `base`.
+fn ratcheted_from(
+    base: f64,
+    actual: f64,
+    condition: &str,
+) -> (Option<f64>, Option<f64>, Option<f64>, RuleOutcome) {
     let key = "static.complexity.cyclomatic_max";
     let on = target("grade::letter", "src/grade.rs", 1);
-    let (current, reference) = (complexity(actual, &on), complexity(3.0, &on));
+    let (current, reference) = (complexity(actual, &on), complexity(base, &on));
     let tolerances = Tolerances::from_iter([(key.to_owned(), 2.0)]).watching(key, 10.0);
     let rule = tolerated(
         key,
@@ -797,6 +806,28 @@ fn a_largest_value_ratchet_allows_its_tolerance_and_never_fails_within_the_watch
     assert_eq!(
         [ratcheted(4.0, "<= base + 0"), ratcheted(6.0, "<= base + 3")],
         [(Some(3.0), None, None, Fail), (Some(6.0), None, None, Pass)]
+    );
+}
+
+#[test]
+fn a_function_crossing_the_watch_threshold_fails_and_one_already_past_it_may_move_by_the_tolerance()
+{
+    use RuleOutcome::{Fail, Pass};
+    // ADR-205: from at or below watch to past it fails, even within base + δ; a base already
+    // past watch keeps the tolerance.
+    assert_eq!(
+        [
+            ratcheted_from(9.0, 11.0, "<= base"),
+            ratcheted_from(10.0, 12.0, "<= base"),
+            ratcheted_from(12.0, 14.0, "<= base"),
+            ratcheted_from(12.0, 15.0, "<= base"),
+        ],
+        [
+            (Some(11.0), Some(2.0), Some(10.0), Fail),
+            (Some(12.0), Some(2.0), Some(10.0), Fail),
+            (Some(14.0), Some(2.0), None, Pass),
+            (Some(14.0), Some(2.0), None, Fail),
+        ]
     );
 }
 

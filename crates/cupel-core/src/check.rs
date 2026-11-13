@@ -140,8 +140,8 @@ pub struct MetricSpec {
     pub tolerance: Option<f64>,
     /// The setting of this check whose value is this largest-value `scope` metric's watch
     /// threshold, the most the check accepts of one target (ADR-199, ADR-205): a gate rule
-    /// against `base` under `<=` or `<` that writes no offset never fails while the metric is
-    /// at most it. Absent for every other metric.
+    /// against `base` under `<=` or `<` that writes no offset passes while the metric is at
+    /// most it, and fails when the metric crosses it. Absent for every other metric.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub watch: Option<String>,

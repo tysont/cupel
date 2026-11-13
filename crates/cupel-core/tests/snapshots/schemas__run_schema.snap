@@ -1663,7 +1663,7 @@ expression: pretty(&schema)
           "x-cupel-optional": true
         },
         "watch": {
-          "description": "The metric's watch threshold, when it passed a rule whose `actual` was past `bound`: a\nrule against `base` on a largest value under `<=` or `<` that writes no offset never\nfails while `actual` is at most it (ADR-199, ADR-205). Absent otherwise.",
+          "description": "The metric's watch threshold, when it rather than `bound` decided the result: a rule\nagainst `base` on a largest value under `<=` or `<` that writes no offset passes while\n`actual` is at most it, and fails when `actual` crosses it from a base at or below it\n(ADR-199, ADR-205). Absent otherwise.",
           "type": [
             "number",
             "null"
@@ -2284,7 +2284,7 @@ expression: pretty(&schema)
           "x-cupel-optional": true
         },
         "watch": {
-          "description": "The setting of this check whose value is this largest-value `scope` metric's watch\nthreshold, the most the check accepts of one target (ADR-199, ADR-205): a gate rule\nagainst `base` under `<=` or `<` that writes no offset never fails while the metric is\nat most it. Absent for every other metric.",
+          "description": "The setting of this check whose value is this largest-value `scope` metric's watch\nthreshold, the most the check accepts of one target (ADR-199, ADR-205): a gate rule\nagainst `base` under `<=` or `<` that writes no offset passes while the metric is at\nmost it, and fails when the metric crosses it. Absent for every other metric.",
           "type": [
             "string",
             "null"

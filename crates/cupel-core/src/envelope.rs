@@ -221,9 +221,10 @@ pub struct GateRule {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub tolerance: Option<f64>,
-    /// The metric's watch threshold, when it passed a rule whose `actual` was past `bound`: a
-    /// rule against `base` on a largest value under `<=` or `<` that writes no offset never
-    /// fails while `actual` is at most it (ADR-199, ADR-205). Absent otherwise.
+    /// The metric's watch threshold, when it rather than `bound` decided the result: a rule
+    /// against `base` on a largest value under `<=` or `<` that writes no offset passes while
+    /// `actual` is at most it, and fails when `actual` crosses it from a base at or below it
+    /// (ADR-199, ADR-205). Absent otherwise.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub watch: Option<f64>,
