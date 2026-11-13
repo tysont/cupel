@@ -164,8 +164,13 @@ false = { kind = "truthiness", strength = "weak" }
 ok = { kind = "truthiness", strength = "weak" }
 exist = { kind = "not-null", strength = "weak" }
 throw = { kind = "throws", strength = "weak" }
-include = { kind = "custom", strength = "weak" }
-contain = { kind = "custom", strength = "weak" }
+# A membership and a pattern pin the element or text they name, as Jest's do (ADR-200);
+# `deep.include` keys on its last link.
+include = { kind = "custom", strength = "strong" }
+includes = { kind = "custom", strength = "strong" }
+contain = { kind = "custom", strength = "strong" }
+contains = { kind = "custom", strength = "strong" }
+match = { kind = "custom", strength = "strong" }
 # node:assert and chai's assert.
 "assert.equal" = { kind = "equality", strength = "strong" }
 "assert.strictEqual" = { kind = "equality", strength = "strong" }
@@ -185,7 +190,8 @@ assert = { kind = "truthiness", strength = "weak" }
 "assert.isNotNull" = { kind = "not-null", strength = "weak" }
 "assert.throws" = { kind = "throws", strength = "weak" }
 "assert.rejects" = { kind = "throws", strength = "weak" }
-"assert.match" = { kind = "custom", strength = "weak" }
+"assert.include" = { kind = "custom", strength = "strong" }
+"assert.match" = { kind = "custom", strength = "strong" }
 # Idioms captured as @assertion.idiom.<key>.
 not-equal = { kind = "equality", strength = "weak" }
 not-nullish = { kind = "not-null", strength = "weak" }

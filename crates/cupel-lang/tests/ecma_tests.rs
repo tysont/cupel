@@ -522,6 +522,69 @@ it("holds an equal entry", () => {
 }
 
 #[test]
+fn chais_membership_pattern_and_partial_object_assertions_are_strong() {
+    let source = r#"const { assert, expect } = require("chai");
+
+it("lists the entry", () => {
+  expect(["a", "b"]).to.include("a");
+  expect(["a", "b"]).to.contain("b");
+  expect("abc").to.includes("b");
+  expect("abc").contains("c");
+});
+
+it("names the version", () => {
+  expect("v1.2").to.match(/v1/);
+});
+
+it("keeps the id", () => {
+  expect([{ id: 1 }]).to.deep.include({ id: 1 });
+});
+
+it("asserts through assert", () => {
+  assert.include(["a"], "a");
+  assert.match("v1.2", /v1/);
+});
+"#;
+    let file = assert_source_file("javascript", "a.spec.js", source, "mocha");
+    assert_eq!(
+        rows(&file),
+        [
+            case("lists the entry", &[(Custom, Strong); 4], Runs, &[], 3),
+            case("names the version", &[(Custom, Strong)], Runs, &[], 10),
+            case("keeps the id", &[(Custom, Strong)], Runs, &[], 14),
+            case("asserts through assert", &[(Custom, Strong); 2], Runs, &[], 18),
+        ]
+    );
+}
+
+#[test]
+fn jasmines_membership_pattern_and_partial_object_matchers_are_strong() {
+    let source = r#"describe("entries", () => {
+  it("lists the entry", () => {
+    expect(["a", "b"]).toContain("a");
+  });
+
+  it("names the version", () => {
+    expect("v1.2").toMatch(/v1/);
+  });
+
+  it("keeps the id", () => {
+    expect({ id: 1, name: "a" }).toEqual(jasmine.objectContaining({ id: 1 }));
+  });
+});
+"#;
+    let file = assert_source_file("javascript", "a.spec.js", source, "jest");
+    assert_eq!(
+        rows(&file),
+        [
+            case("lists the entry", &[(Custom, Strong)], Runs, &[], 2),
+            case("names the version", &[(Custom, Strong)], Runs, &[], 6),
+            case("keeps the id", &[(Equality, Strong)], Runs, &[], 10),
+        ]
+    );
+}
+
+#[test]
 fn a_playwright_suite_step_and_hook_are_not_cases() {
     let source = r#"import { expect, test } from "@playwright/test";
 
