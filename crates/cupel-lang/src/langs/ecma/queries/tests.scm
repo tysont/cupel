@@ -1,7 +1,7 @@
 ; JavaScript and TypeScript tests for vitest, jest, mocha (with chai and sinon), and node:test.
-; A case is the callback passed to `it`/`test` after its title (the same node symbols.scm makes
-; a closure, ADR-030). Earliest patterns win: frameworks by import first, then by usage;
-; assertion idioms before plain matchers.
+; A case is the callback passed to `it`/`test` after its title and any options object (the same
+; node symbols.scm makes a closure, ADR-030). Earliest patterns win: frameworks by import first,
+; then by usage; assertion idioms before plain matchers.
 
 ; Frameworks.
 (import_statement
@@ -54,6 +54,8 @@
     .
     (string) @test.name
     .
+    (object)?
+    .
     [(arrow_function) (function_expression)] @test.case)
   (#any-of? @_test "it" "test" "specify")
   (#any-of? @_skip "skip" "todo")) @test.skip
@@ -64,6 +66,8 @@
     .
     (string) @test.name
     .
+    (object)?
+    .
     [(arrow_function) (function_expression)] @test.case)
   (#any-of? @test.skip "xit" "xtest"))
 
@@ -72,6 +76,8 @@
   arguments: (arguments
     .
     (string) @test.name
+    .
+    (object)?
     .
     [(arrow_function) (function_expression)] @test.case)
   (#any-of? @_test "it" "test" "specify" "fit"))
@@ -85,6 +91,8 @@
   arguments: (arguments
     .
     (string) @test.name
+    .
+    (object)?
     .
     [(arrow_function) (function_expression)] @test.case)
   (#any-of? @_test "it" "test" "specify" "fit")

@@ -276,6 +276,23 @@ fn files_without_test_cases_have_no_frames() {
     );
 }
 
+/// Vitest's and node:test's `it(name, options, fn)`: the options object between the title and
+/// the callback leaves the case what it is.
+#[test]
+fn a_case_with_an_options_object_before_its_callback_is_still_a_case() {
+    let source = "import { it, expect } from \"vitest\";\n\nit(\"times out late\", { timeout: 120_000 }, async () => {\n  expect(await total()).toBe(6);\n});\n\nit.skip(\"waits\", { retry: 2 }, () => {});\n";
+    let dir = tree(&[("src/keys.test.ts", source)]);
+    let frames: TestFrames = produce("typescript", dir.path());
+    let keys = &assert_framework(&frames, "src/keys.test.ts", "vitest");
+    assert_eq!(
+        rows(keys),
+        [
+            case("times out late", &[(Equality, Strong)], Runs, &[], 3),
+            case("waits", &[], Skipped, &[], 7),
+        ]
+    );
+}
+
 #[test]
 fn a_file_without_framework_imports_is_jest_and_unknown_matchers_are_custom() {
     let dir = tree(&[(

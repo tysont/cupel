@@ -102,6 +102,8 @@
     .
     (string (string_fragment) @symbol.name)
     .
+    (object)?
+    .
     [
       (arrow_function body: (_) @symbol.body)
       (function_expression body: (statement_block) @symbol.body)
@@ -117,6 +119,8 @@
   arguments: (arguments
     .
     (string (string_fragment) @symbol.name)
+    .
+    (object)?
     .
     [
       (arrow_function body: (_) @symbol.body)

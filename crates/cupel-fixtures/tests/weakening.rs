@@ -613,3 +613,24 @@ fn a_dry_run_plans_the_check_without_checking_out_the_base() {
     );
     assert!(!repo.path().join(".cupel/work").exists());
 }
+
+/// Molten #660: a Vitest test that gains an options object, `it(name, { timeout }, fn)`, with
+/// its body unchanged, is the same test, not a deleted one.
+#[test]
+fn a_test_that_gains_an_options_object_is_not_deleted() {
+    let repo = Repo::new();
+    let test = "src/keys.test.ts";
+    let body = "async () => {\n  expect(await total()).toBe(6);\n}";
+    let header = "import { it, expect } from \"vitest\";\n\n";
+    repo.write(test, &format!("{header}it(\"lists keys\", {body});\n"));
+    let base = repo.commit("the test");
+    repo.write(
+        test,
+        &format!("{header}it(\"lists keys\", {{ timeout: 120_000 }}, {body});\n"),
+    );
+    repo.commit("a longer timeout");
+
+    let envelope = repo.check(&["--base", &base]);
+    assert_eq!(findings(&envelope), []);
+    assert_eq!(status(&envelope), CheckStatus::Pass);
+}
