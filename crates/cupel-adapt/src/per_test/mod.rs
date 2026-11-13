@@ -99,6 +99,9 @@ pub(crate) struct Site<'a> {
     pub packages: Vec<String>,
     /// A directory under `.cupel/` for this root's reports.
     pub area: PathBuf,
+    /// The language's other project roots, each relative to the repository root and absolute
+    /// and canonical: their files a test of this root runs are measured too (ADR-194).
+    pub others: Vec<(String, PathBuf)>,
 }
 
 impl Producer<PerTestMap> for PerTest {
@@ -208,7 +211,8 @@ impl Producer<PerTestMap> for PerTest {
     fn produce(&self, ctx: &ProduceCtx, _: &Scope, _: &mut dyn EventSink) -> Result<PerTestMap> {
         let mut tests = Vec::new();
         let mut measured = 0;
-        for (dir, packages) in roots(ctx) {
+        let all = roots(ctx);
+        for (dir, packages) in all.clone() {
             let path = ctx.ctx.root.join(&dir);
             let entry = ctx.writer.create_dir(
                 &ctx.writer
@@ -223,6 +227,7 @@ impl Producer<PerTestMap> for PerTest {
                 path: path.canonicalize().unwrap_or(path),
                 packages,
                 area: ctx.writer.create_dir(&entry.join("work"))?,
+                others: others(&ctx.ctx.root, &dir, &all),
             };
             let (found, count) = self.root(&site, &entry)?;
             measured += count;
@@ -460,16 +465,34 @@ impl Site<'_> {
         self.area.join(name)
     }
 
-    /// `path`, as a report names it (absolute, or relative to the root), relative to the root;
-    /// `None` for a file outside it.
+    /// `path`, as a report names it (absolute, or relative to the root), relative to the root:
+    /// a file of another root (ADR-194) through `..`; `None` for a file outside them all.
     pub fn file(&self, path: &str) -> Option<String> {
         let path = Path::new(path);
         let relative = if path.is_absolute() {
-            path.strip_prefix(&self.path).ok()?
+            match path.strip_prefix(&self.path) {
+                Ok(relative) => relative,
+                Err(_) => return self.beside(path),
+            }
         } else {
             path
         };
         Some(relative.to_string_lossy().replace('\\', "/"))
+    }
+
+    /// The absolute `path` of a file of one of the other roots, relative to this root.
+    fn beside(&self, path: &Path) -> Option<String> {
+        let (dir, rest) = self
+            .others
+            .iter()
+            .find_map(|(dir, other)| Some((dir, path.strip_prefix(other).ok()?)))?;
+        let up = if self.dir == "." {
+            0
+        } else {
+            self.dir.split('/').count()
+        };
+        let rest = rest.to_string_lossy().replace('\\', "/");
+        Some(format!("{}{dir}/{rest}", "../".repeat(up)))
     }
 
     /// `test`, measured relative to this root, made relative to the repository root.
@@ -480,12 +503,39 @@ impl Site<'_> {
             test.covered
                 .into_iter()
                 .map(|covered| CoveredLines {
-                    file: under(self.dir, &covered.file, "/"),
+                    file: resolved(&under(self.dir, &covered.file, "/")),
                     lines: covered.lines,
                 })
                 .collect(),
         )
     }
+}
+
+/// The project roots of `all` but `dir`, each with its absolute, canonical path under `repo`.
+fn others(repo: &Path, dir: &str, all: &[(String, Vec<String>)]) -> Vec<(String, PathBuf)> {
+    all.iter()
+        .filter(|(other, _)| other != dir)
+        .map(|(other, _)| {
+            let path = repo.join(other);
+            (other.clone(), path.canonicalize().unwrap_or(path))
+        })
+        .collect()
+}
+
+/// `path` (`/`-separated) with each `..` taking away the part before it: `checkout/../fees/x.py`
+/// is `fees/x.py`.
+fn resolved(path: &str) -> String {
+    let mut parts: Vec<&str> = Vec::new();
+    for part in path.split('/') {
+        match part {
+            ".." if parts.last().is_some_and(|last| *last != "..") => {
+                parts.pop();
+            }
+            "." => {}
+            _ => parts.push(part),
+        }
+    }
+    parts.join("/")
 }
 
 /// The error of `program` that did not finish its work, with the tail of its output.

@@ -138,6 +138,7 @@ mod tests {
             },
             source: String::new(),
             tests: None,
+            root: None,
             covered: true,
         }
     }

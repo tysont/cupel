@@ -157,7 +157,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
         (shape.needs, shape.wants, shape.tier, shape.cost),
         (
             vec![FactKind::Symbols, FactKind::MutationOutcomes],
-            vec![FactKind::TestConventions],
+            vec![FactKind::TestConventions, FactKind::ProjectInfo],
             3,
             CostClass::Standard
         )

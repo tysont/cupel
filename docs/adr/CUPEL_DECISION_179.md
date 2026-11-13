@@ -1,6 +1,6 @@
 # CUPEL_DECISION_179: A package's coverage and mutation use dependent packages' tests when a per-test map names them
 
-**Date:** 2026-11-11 · **Status:** accepted · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [167](CUPEL_DECISION_167.md) and [173](CUPEL_DECISION_173.md)
+**Date:** 2026-11-11 · **Status:** accepted; detailed by [194](CUPEL_DECISION_194.md) · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [167](CUPEL_DECISION_167.md) and [173](CUPEL_DECISION_173.md)
 
 ## Context
 With per-package roots, a root's coverage and mutation ran only that root's tests, so code another root's tests exercise read as uncovered. It was the largest source of false survivors on Molten: 15 of shared's 47, all killed by `apps/agent` tests.

@@ -393,3 +393,22 @@ fn a_finding_whose_tests_are_all_tests_says_so_instead_of_listing_them() {
     let line = "  covering tests  all tests (no per-test map)";
     assert!(text.contains(line), "{line:?} in\n{text}");
 }
+
+#[test]
+fn a_finding_whose_tests_were_its_own_roots_alone_names_that_root() {
+    let mut finding = hinted(
+        complexity_finding("fnd_0000c6", 3, 5),
+        "mutant.survived",
+        "all_tests",
+        &json!(true),
+    );
+    finding["action"]["hints"]["own_root"] = json!("fees");
+    let (json, text) = explained(&finding);
+    let explanation = &json["explanation"];
+    assert_eq!(
+        (&explanation["all_tests"], &explanation["own_root"]),
+        (&json!(true), &json!("fees"))
+    );
+    let line = "  covering tests  own tests of `fees` only; no per-test map";
+    assert!(text.contains(line), "{line:?} in\n{text}");
+}

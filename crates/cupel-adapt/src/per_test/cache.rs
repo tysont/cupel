@@ -7,7 +7,7 @@ use std::time::SystemTime;
 use cupel_core::{Attribution, CoveredLines, Exclude, TestCoverage};
 use serde::{Deserialize, Serialize};
 
-use super::functions::FunctionEdit;
+use super::functions::{FunctionEdit, line_hashes};
 use crate::fresh::{Changes, Sources, load};
 use crate::runner::{ID_SEPARATOR, under};
 
@@ -56,9 +56,22 @@ impl Cached {
         })
     }
 
-    /// The files under the root that changed since the entry was written.
+    /// The files under the root that changed since the entry was written, and the files of
+    /// other roots its tests ran (`..`-relative, ADR-194) whose lines are not as measured.
     pub fn changes(&self, repo: &Path, exclude: &Exclude) -> Changes {
-        self.sources.changes(repo, exclude, self.written)
+        let mut changes = self.sources.changes(repo, exclude, self.written);
+        let root = repo.join(&self.sources.dir);
+        changes.changed.extend(
+            self.lines
+                .iter()
+                .filter(|(file, measured)| {
+                    file.starts_with("../")
+                        && std::fs::read_to_string(root.join(file))
+                            .map_or(true, |now| line_hashes(&now) != **measured)
+                })
+                .map(|(file, _)| file.clone()),
+        );
+        changes
     }
 }
 

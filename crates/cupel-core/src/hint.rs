@@ -24,6 +24,25 @@ pub const ALL_TESTS: &str = "all_tests";
 /// How a finding's covering tests read when they are all tests (ADR-191).
 pub const ALL_TESTS_SAID: &str = "all tests (no per-test map)";
 
+/// The key of the test hint naming the project root whose own tests alone ran the finding's
+/// code: the language has several roots and no per-test map named a dependent root's tests
+/// (ADR-179, ADR-194).
+pub const OWN_ROOT: &str = "own_root";
+
+/// How a finding says only `root`'s own tests ran its code (ADR-179, ADR-194).
+pub fn own_tests_said(root: &str) -> String {
+    format!("own tests of `{root}` only; no per-test map")
+}
+
+/// `summary`, a sentence, with what it says of `root`'s own tests (ADR-194) before its full stop.
+pub fn with_own_tests(summary: &str, root: &str) -> String {
+    format!(
+        "{} ({}).",
+        summary.strip_suffix('.').unwrap_or(summary),
+        own_tests_said(root)
+    )
+}
+
 /// The key of the test hint naming the commit whose version of the file a finding's location is
 /// in, when it is not the working tree: the range's base, for what the range removed.
 pub const LOCATION_COMMIT: &str = "location_commit";

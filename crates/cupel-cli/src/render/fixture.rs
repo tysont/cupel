@@ -665,6 +665,7 @@ fn explanation() -> Explanation {
         }),
         covering_tests: vec!["rewrite::limit_tests::pushes_through_sort".to_owned()],
         all_tests: false,
+        own_root: None,
         nearest_test_file: Some("tests/rewrite/limit_tests.rs".to_owned()),
         metrics: vec![
             Metric {

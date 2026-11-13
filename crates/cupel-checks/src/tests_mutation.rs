@@ -3,8 +3,8 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::config::{ConfigError, MemoryLimit, Table, TimeLimit};
-use cupel_core::hint::{ALL_TESTS, COVERING_TESTS};
-use cupel_core::syntax::{SymbolDef, SymbolKey, Symbols, TestConventions};
+use cupel_core::hint::{ALL_TESTS, COVERING_TESTS, OWN_ROOT, with_own_tests};
+use cupel_core::syntax::{ProjectInfo, SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
     ExcludedTest, FactKind, Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant,
@@ -62,16 +62,43 @@ struct Survived {
     /// ("all tests (no per-test map)"); `tests_run` counts them.
     all_tests: bool,
     tests_run: u32,
+    /// With `all_tests` and several project roots, the root whose own tests alone those were:
+    /// no per-test map added the tests of roots that depend on it (ADR-179, ADR-194).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    own_root: Option<String>,
+}
+
+/// Evidence of `mutant.uncovered`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct Uncovered {
+    mutation: Mutation,
+    /// With several project roots and no per-test map, the root whose own tests alone ran
+    /// none of the site (ADR-179, ADR-194).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    own_root: Option<String>,
 }
 
 /// What a finding says about the tests behind it: the conventions that name its nearest test
-/// file, and whether a per-test map selected the tests run against each mutant.
+/// file, whether a per-test map selected the tests run against each mutant, and the language's
+/// project roots, whose own tests alone ran without one.
 struct TestHints<'a> {
     conventions: Option<&'a TestConventions>,
     per_test: bool,
+    info: Option<&'a ProjectInfo>,
 }
 
-/// Evidence of `mutant.out-of-memory` and `mutant.uncovered`.
+impl TestHints<'_> {
+    /// The root whose own tests alone ran `file`'s mutants: no per-test map, several roots.
+    fn own_root(&self, file: &str) -> Option<String> {
+        if self.per_test {
+            return None;
+        }
+        self.info?.own_root(file).map(str::to_owned)
+    }
+}
+
+/// Evidence of `mutant.out-of-memory`.
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 struct Site {
@@ -132,7 +159,7 @@ fn manifest() -> Manifest {
         tier: Tier::try_from(3).expect("tier 3 exists"),
         cost: CostClass::Standard,
         needs: vec![FactKind::Symbols, FactKind::MutationOutcomes],
-        wants: vec![FactKind::TestConventions],
+        wants: vec![FactKind::TestConventions, FactKind::ProjectInfo],
         findings: vec![
             kind::<Survived>(
                 "mutant.survived",
@@ -153,7 +180,7 @@ fn manifest() -> Manifest {
                 "The tests held more memory than the run's share of max_mutant_memory against \
                  the mutant and were killed (ADR-148).",
             ),
-            kind::<Site>(
+            kind::<Uncovered>(
                 "mutant.uncovered",
                 ActionKind::WriteTest,
                 "No test runs the site, so its mutant was not run.",
@@ -296,6 +323,7 @@ impl Check for TestsMutation {
         let tests = TestHints {
             conventions: facts.get::<TestConventions>().ok(),
             per_test: outcomes.per_test,
+            info: facts.get::<ProjectInfo>().ok(),
         };
         let mut tally = Tally::default();
         tally.time(outcomes);
@@ -583,7 +611,7 @@ impl TestsMutation {
         if surviving(mutant) {
             return Some(self.survived(mutant, symbol, hash, mutation, tests));
         }
-        let note = note(mutant, &symbol.file, mutation)?;
+        let note = note(mutant, &symbol.file, mutation, tests.own_root(&symbol.file))?;
         let mut finding =
             SymbolFinding::new(&self.manifest, note.kind, symbol, hash, note.evidence)
                 .described(note.title, note.summary)
@@ -606,6 +634,7 @@ impl TestsMutation {
         tests: &TestHints<'_>,
     ) -> Finding {
         let at = format!("{}:{}", symbol.file, mutant.span.line);
+        let own_root = tests.own_root(&symbol.file);
         let covering = if tests.per_test {
             mutant.tests.clone()
         } else {
@@ -616,7 +645,12 @@ impl TestsMutation {
             covering_tests: covering.clone(),
             all_tests: !tests.per_test,
             tests_run: u32::try_from(mutant.tests.len()).unwrap_or(u32::MAX),
+            own_root: own_root.clone(),
         };
+        let summary = format!(
+            "Add a test that fails when `{}` at {at} becomes `{}`.",
+            mutant.from, mutant.to
+        );
         let mut finding =
             SymbolFinding::new(&self.manifest, "mutant.survived", symbol, hash, evidence)
                 .described(
@@ -624,10 +658,9 @@ impl TestsMutation {
                         "Mutant survived: `{}` → `{}` at {at}",
                         mutant.from, mutant.to
                     ),
-                    format!(
-                        "Add a test that fails when `{}` at {at} becomes `{}`.",
-                        mutant.from, mutant.to
-                    ),
+                    own_root
+                        .as_deref()
+                        .map_or_else(|| summary.clone(), |root| with_own_tests(&summary, root)),
                 )
                 .at(Severity::Fail)
                 .at_site(&site_of(mutant), &mutant.span);
@@ -642,6 +675,12 @@ impl TestsMutation {
                 .action
                 .hints
                 .insert(ALL_TESTS.to_owned(), Value::Bool(true));
+        }
+        if let Some(root) = own_root {
+            finding
+                .action
+                .hints
+                .insert(OWN_ROOT.to_owned(), Value::String(root));
         }
         with_nearest_test(finding, symbol, tests.conventions)
     }
@@ -725,9 +764,9 @@ struct Note {
 }
 
 /// The note `mutant`, in `file`, calls for when it is not a plain survivor: possibly
-/// equivalent, timed out, killed over its memory budget, or uncovered; none for one killed
-/// or unviable.
-fn note(mutant: &Mutant, file: &str, mutation: Mutation) -> Option<Note> {
+/// equivalent, timed out, killed over its memory budget, or uncovered (by `own_root`'s own
+/// tests, when only they ran); none for one killed or unviable.
+fn note(mutant: &Mutant, file: &str, mutation: Mutation, own_root: Option<String>) -> Option<Note> {
     let at = format!("{file}:{}", mutant.span.line);
     let change = format!("`{}` → `{}`", mutant.from, mutant.to);
     let (kind, evidence, title, summary) = match (mutant.outcome, &mutant.equivalent) {
@@ -762,15 +801,21 @@ fn note(mutant: &Mutant, file: &str, mutation: Mutation) -> Option<Note> {
                  `mutation.jobs` if the tests honestly need more."
             ),
         ),
-        (MutantOutcome::Uncovered, _) => (
-            "mutant.uncovered",
-            serde_json::to_value(Site { mutation }),
-            format!("No test runs {at}; its mutant {change} was not run"),
-            format!(
+        (MutantOutcome::Uncovered, _) => {
+            let summary = format!(
                 "Write a test that runs line {} of {file}.",
                 mutant.span.line
-            ),
-        ),
+            );
+            (
+                "mutant.uncovered",
+                serde_json::to_value(Uncovered {
+                    mutation,
+                    own_root: own_root.clone(),
+                }),
+                format!("No test runs {at}; its mutant {change} was not run"),
+                own_root.map_or(summary.clone(), |root| with_own_tests(&summary, &root)),
+            )
+        }
         _ => return None,
     };
     Some(Note {

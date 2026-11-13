@@ -534,10 +534,26 @@ impl Execution<'_> {
         for planned in mutants {
             match &planned.tests {
                 Some(tests) => ids.extend(tests.iter().cloned()),
-                None => return self.whole.clone(),
+                None => return self.unnarrowed(planned),
             }
         }
         TestSelection::Tests(ids.into_iter().collect())
+    }
+
+    /// What `planned` runs when per-test selection did not narrow it: its own root's suite
+    /// when it has one (ADR-194), else the whole suite, less the slow tests left out of both.
+    fn unnarrowed(&self, planned: &Planned) -> TestSelection {
+        let Some(dir) = &planned.root else {
+            return self.whole.clone();
+        };
+        let except = match self.whole {
+            TestSelection::Except(ids) => ids.clone(),
+            _ => Vec::new(),
+        };
+        TestSelection::Root {
+            dir: dir.clone(),
+            except,
+        }
     }
 
     /// How every run of the production runs: in the runner's own order, with the run's seed (so
@@ -593,7 +609,7 @@ impl Execution<'_> {
         let selection = planned
             .tests
             .clone()
-            .map_or_else(|| self.whole.clone(), TestSelection::Tests);
+            .map_or_else(|| self.unnarrowed(planned), TestSelection::Tests);
         let limit = worker.limit;
         let started = Instant::now();
         let strategy = if id == 0 {
@@ -790,7 +806,7 @@ enum Share {
 fn selected(selection: &TestSelection) -> Option<usize> {
     match selection {
         TestSelection::Tests(ids) | TestSelection::Files(ids) => Some(ids.len()),
-        TestSelection::All | TestSelection::Except(_) => None,
+        TestSelection::All | TestSelection::Except(_) | TestSelection::Root { .. } => None,
     }
 }
 

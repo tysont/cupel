@@ -2656,6 +2656,20 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-checks/tests/static_clones.rs` `clones_whose_members_all_lie_in_test_files_are_info_and_leave_the_counts` (failed first: `TestConventions` undeclared) and `without_test_conventions_no_clone_is_test_code`;
     - the `tests.quality` and `static.clones` goldens (per language, surveys, describe) and the `survey` goldens regenerated; the README's settings table regenerated (`setup_tests_min`).
 
+- **Item 16, dependent packages' tests through a per-test map** (2026-11-13, [ADR-179](adr/CUPEL_DECISION_179.md), [ADR-194](adr/CUPEL_DECISION_194.md)).
+  - The gap: the two halves of ADR-179 were the wrong way round. Without a map a mutant ran `TestSelection::All`, every root's suite, so a dependent root's tests did run against it; with one, the per-test producers kept only a root's own files, so the map never named a dependent root's test and a mutant ran its own root's covering tests alone.
+  - Now (ADR-194), where a language has several project roots, configured or detected (`ProjectInfo::own_root`, the deepest holding a file):
+    - `tool.pytest-cov-per-test` measures each root with `--cov` for the other roots, recording their files through `..` and placing them at their repository paths; a cached root is measured again for the tests that ran another root's file whose lines changed (`Cached::changes`);
+    - `CoverageMap::with_tests` counts an instrumented line a test of the map ran as hit, for `tests.coverage` (which wants `PerTestMap` and `ProjectInfo`) and the mutation engine's coverage gate;
+    - without a map (or where the map names no test for a site), a mutant runs its own root's suite, `TestSelection::Root { dir, except }` (ADR-147's slow tests still out), its cache key folding in the root;
+    - and then `mutant.survived`, `mutant.uncovered`, and the three `coverage.*` findings carry evidence `own_root`, an action summary ending "(own tests of `<root>` only; no per-test map)", and (survivors and coverage) the hint `own_root`, which `explain` shows as `explanation.own_root`, its text `covering tests  own tests of <root> only; no per-test map`.
+  - Open: the Rust and Go per-test producers and the joint suite run measure their own root's files only; a coverage tool that lists only loaded files gains no file from the map.
+  - Tests:
+    - `cupel-fixtures/tests/dependent_tests.rs` on the `dependent-tests` repository (Python roots `fees` and `checkout`, whose tests alone reach `fees`' large-order boundary and `waived`): at `--depth deep` no finding, 4 mutants killed, coverage line 1.0 (failed first: the `>=` mutant survived on `fees`' own test, `waived` uncovered); at `standard` the `>=` survivor, two uncovered mutants, and the uncovered `waived` each name `own_root` `fees` (failed first: the survivor killed by `checkout`'s test, no `own_root`);
+    - `cupel-adapt/tests/per_test.rs`: `checkout`'s tests are measured on `fees/fees.py` and measured again when it changes (failed first: only `fees`' test covered it); `selection.rs`: a root's own suite runs in that root alone, less its own left-out tests;
+    - `cupel-core/tests/per_test.rs` (`with_tests`), `syntax_facts.rs` (`own_root`); `cupel-cli/tests/explain.rs` `a_finding_whose_tests_were_its_own_roots_alone_names_that_root` (failed first: `own_root` null);
+    - `cupel-cli/tests/suite_run.rs`'s planned needs gain `project-info`; the run schema snapshot, and the `describe` goldens of `tests.coverage` and `tests.mutation` (wants, evidence schemas), regenerated.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

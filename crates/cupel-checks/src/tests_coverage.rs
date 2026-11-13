@@ -3,14 +3,16 @@
 use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::coverage::{CoverageMap, Listing};
-use cupel_core::syntax::{NormTree, SymbolDef, SymbolKey, Symbols, TestConventions};
+use cupel_core::hint::{OWN_ROOT, with_own_tests};
+use cupel_core::syntax::{NormTree, ProjectInfo, SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
-    Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Plan, ProtectionMetric, Result,
-    Scope, Score, Severity, Stability, SymbolHash, Tier,
+    Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, PerTestMap, Plan,
+    ProtectionMetric, Result, Scope, Score, Severity, Stability, SymbolHash, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
+use serde_json::Value;
 
 use crate::finding::{SymbolFinding, with_nearest_test};
 use crate::manifest::{kind, metric, protection, ranked};
@@ -34,6 +36,10 @@ struct UncoveredSymbol {
     lines: u32,
     /// Of those, the ones that ran: none.
     covered: u32,
+    /// With several project roots and no per-test map, the root whose own tests alone were
+    /// measured: no map added the tests of roots that depend on it (ADR-179, ADR-194).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    own_root: Option<String>,
 }
 
 /// Evidence of `coverage.unloaded-file`.
@@ -44,6 +50,9 @@ struct UnloadedFile {
     lines: u32,
     /// Of those, the ones that ran: none.
     covered: u32,
+    /// As `coverage.uncovered-symbol`'s (ADR-194).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    own_root: Option<String>,
 }
 
 /// Evidence of `coverage.uncovered-branch`.
@@ -56,6 +65,9 @@ struct UncoveredBranch {
     uncovered: u32,
     /// The line of each branch no test took, in order, each once.
     lines: Vec<u32>,
+    /// As `coverage.uncovered-symbol`'s (ADR-194).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    own_root: Option<String>,
 }
 
 pub struct TestsCoverage {
@@ -80,7 +92,12 @@ fn manifest() -> Manifest {
         tier: Tier::try_from(2).expect("tier 2 exists"),
         cost: CostClass::Standard,
         needs: vec![FactKind::Symbols, FactKind::CoverageMap],
-        wants: vec![FactKind::NormTree, FactKind::TestConventions],
+        wants: vec![
+            FactKind::NormTree,
+            FactKind::TestConventions,
+            FactKind::PerTestMap,
+            FactKind::ProjectInfo,
+        ],
         findings: vec![
             kind::<UncoveredSymbol>(
                 "coverage.uncovered-symbol",
@@ -159,9 +176,17 @@ impl Check for TestsCoverage {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
+        let coverage = facts.get::<CoverageMap>()?;
+        let per_test = facts.get::<PerTestMap>().ok();
+        // A dependent root's tests the per-test map names cover a root's code (ADR-194).
+        let with_tests = per_test.map(|map| coverage.with_tests(map));
         let inputs = Inputs {
-            coverage: facts.get::<CoverageMap>()?,
+            coverage: with_tests.as_ref().unwrap_or(coverage),
             conventions: facts.get::<TestConventions>().ok(),
+            info: per_test
+                .is_none()
+                .then(|| facts.get::<ProjectInfo>().ok())
+                .flatten(),
             hashes: facts
                 .get::<NormTree>()
                 .map(hashes_by_symbol)
@@ -207,6 +232,9 @@ impl Check for TestsCoverage {
 struct Inputs<'a> {
     coverage: &'a CoverageMap,
     conventions: Option<&'a TestConventions>,
+    /// The language's project roots when no per-test map added a dependent root's tests, so a
+    /// finding names its own root (ADR-194).
+    info: Option<&'a ProjectInfo>,
     hashes: HashMap<&'a SymbolKey, &'a SymbolHash>,
 }
 
@@ -353,30 +381,49 @@ impl TestsCoverage {
         }
         // A symbol without a structural hash cannot be identified, so it is scored but not
         // reported; every language producing NormTree hashes every symbol.
-        self.finding(symbol, hash?, &measured, inputs.conventions)
+        self.finding(symbol, hash?, &measured, inputs)
     }
 
     /// `coverage.unloaded-file` when the suite never loaded the file, `coverage.uncovered-symbol`
     /// when nothing ran, else `coverage.uncovered-branch` when a measured branch was never taken.
+    /// Each says so when only its own root's tests were measured (ADR-194).
     fn finding(
         &self,
         symbol: &SymbolDef,
         hash: &SymbolHash,
         measured: &Measured,
-        conventions: Option<&TestConventions>,
+        inputs: &Inputs<'_>,
     ) -> Option<Finding> {
-        let finding = if measured.covered == 0 {
-            self.never_ran(symbol, hash, measured)
+        let own_root = inputs
+            .info
+            .and_then(|info| info.own_root(&symbol.file))
+            .map(str::to_owned);
+        let mut finding = if measured.covered == 0 {
+            self.never_ran(symbol, hash, measured, own_root.clone())
         } else {
-            self.uncovered_branch(symbol, hash, measured.branches.as_ref()?)?
+            let branches = measured.branches.as_ref()?;
+            self.uncovered_branch(symbol, hash, branches, own_root.clone())?
         };
-        Some(with_nearest_test(finding, symbol, conventions))
+        if let Some(root) = own_root {
+            finding.action.summary = with_own_tests(&finding.action.summary, &root);
+            finding
+                .action
+                .hints
+                .insert(OWN_ROOT.to_owned(), Value::String(root));
+        }
+        Some(with_nearest_test(finding, symbol, inputs.conventions))
     }
 
     /// The finding about a symbol none of whose lines ran: `coverage.uncovered-symbol`, or
     /// `coverage.unloaded-file` when the suite never loaded its file. Both kinds' evidence is
-    /// `{lines, covered}` (`UncoveredSymbol`, `UnloadedFile`).
-    fn never_ran(&self, symbol: &SymbolDef, hash: &SymbolHash, measured: &Measured) -> Finding {
+    /// `{lines, covered, own_root}` (`UncoveredSymbol`, `UnloadedFile`).
+    fn never_ran(
+        &self,
+        symbol: &SymbolDef,
+        hash: &SymbolHash,
+        measured: &Measured,
+        own_root: Option<String>,
+    ) -> Finding {
         let lines = measured.lines;
         let (kind, title, summary) = if measured.loaded {
             (
@@ -400,7 +447,11 @@ impl TestsCoverage {
                 ),
             )
         };
-        let evidence = UncoveredSymbol { lines, covered: 0 };
+        let evidence = UncoveredSymbol {
+            lines,
+            covered: 0,
+            own_root,
+        };
         SymbolFinding::new(&self.manifest, kind, symbol, hash, evidence)
             .described(title, summary)
             .finding()
@@ -413,6 +464,7 @@ impl TestsCoverage {
         symbol: &SymbolDef,
         hash: &SymbolHash,
         branches: &[(u32, u64)],
+        own_root: Option<String>,
     ) -> Option<Finding> {
         let mut lines: Vec<u32> = branches
             .iter()
@@ -439,6 +491,7 @@ impl TestsCoverage {
             branches: u32::try_from(branches.len()).unwrap_or(u32::MAX),
             uncovered,
             lines,
+            own_root,
         };
         let finding = SymbolFinding::new(
             &self.manifest,

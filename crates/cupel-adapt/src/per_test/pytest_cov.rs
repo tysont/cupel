@@ -67,7 +67,8 @@ fn measure(site: &Site<'_>, keep: &BTreeSet<String>) -> Result<Measured> {
     })
 }
 
-/// One pytest run with test contexts over `selected` node IDs (every test when empty).
+/// One pytest run with test contexts over `selected` node IDs (every test when empty), measuring
+/// the root's files and the other roots'.
 fn run(site: &Site<'_>, selected: &[String]) -> Result<Vec<TestCoverage>> {
     let config = site.report("coveragerc");
     let report = site.report("coverage.json");
@@ -78,8 +79,14 @@ fn run(site: &Site<'_>, selected: &[String]) -> Result<Vec<TestCoverage>> {
     site.ctx.writer.write(&config, rc.as_bytes())?;
     let _ = std::fs::remove_file(&report);
     let mut args: Vec<String> = QUIET.iter().map(|arg| (*arg).to_owned()).collect();
+    args.push("--cov=.".to_owned());
+    // A test of this root may run another root's code (ADR-194).
+    args.extend(
+        site.others
+            .iter()
+            .map(|(_, other)| format!("--cov={}", other.display())),
+    );
     args.extend([
-        "--cov=.".to_owned(),
         "--cov-context=test".to_owned(),
         format!("--cov-config={}", config.display()),
         format!("--cov-report=json:{}", report.display()),

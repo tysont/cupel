@@ -103,3 +103,21 @@ fn a_map_counts_the_tests_it_measured_and_those_its_cache_kept() {
         [(3, 0, false), (1, 2, false), (0, 3, true)]
     );
 }
+
+#[test]
+fn a_coverage_map_with_the_tests_of_a_map_counts_their_executed_instrumented_lines_as_hit() {
+    use cupel_core::coverage::{CoverageMap, FileCoverage};
+    let own = CoverageMap::new(vec![
+        FileCoverage::from_hits("src/lib.rs", &[(4, 2), (5, 0), (9, 0), (12, 0)], None),
+        FileCoverage::from_hits("src/other.rs", &[(1, 0)], None),
+    ]);
+    let with = own.with_tests(&map());
+    assert_eq!(
+        with,
+        CoverageMap::new(vec![
+            FileCoverage::from_hits("src/lib.rs", &[(4, 2), (5, 1), (9, 1), (12, 0)], None),
+            FileCoverage::from_hits("src/other.rs", &[(1, 0)], None),
+        ]),
+        "a line the map's tests ran counts once; a line not instrumented (src/util.rs:2) stays out"
+    );
+}

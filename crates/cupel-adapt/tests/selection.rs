@@ -219,14 +219,11 @@ fn a_runner_that_cannot_leave_a_test_out_gives_no_command_for_one() {
     }
 }
 
-#[test]
-fn a_selection_reaches_only_the_roots_that_hold_it_relative_to_each() {
-    let dir = tempfile::tempdir().unwrap();
+/// A context whose `ProjectInfo` holds the JavaScript roots `.`, `web`, and `web/app`, in `dir`.
+fn three_roots(dir: &std::path::Path) -> ProduceCtx {
     let mut ctx = ProduceCtx::new(
-        cupel_core::Ctx::new(dir.path().to_path_buf()),
-        cupel_core::Writer::new(dir.path(), false)
-            .unwrap()
-            .confined(),
+        cupel_core::Ctx::new(dir.to_path_buf()),
+        cupel_core::Writer::new(dir, false).unwrap().confined(),
         Cancellation::new(),
     );
     let root = |path: &str| ProjectRoot {
@@ -244,6 +241,21 @@ fn a_selection_reaches_only_the_roots_that_hold_it_relative_to_each() {
         })
         .share(),
     );
+    ctx
+}
+
+/// Each command's directory and command line.
+fn shown(commands: &[RunnerCommand]) -> Vec<(&str, &str)> {
+    commands
+        .iter()
+        .map(|RunnerCommand { dir, command }| (dir.as_str(), command.as_str()))
+        .collect()
+}
+
+#[test]
+fn a_selection_reaches_only_the_roots_that_hold_it_relative_to_each() {
+    let dir = tempfile::tempdir().unwrap();
+    let ctx = three_roots(dir.path());
     let registry = registry();
     let commands = runner(&registry, "tool.jest")
         .commands(
@@ -251,17 +263,44 @@ fn a_selection_reaches_only_the_roots_that_hold_it_relative_to_each() {
             &files(&["web/app/a.test.js", "web/b.test.js", "c.test.js"]),
         )
         .unwrap();
-    let shown: Vec<(&str, &str)> = commands
-        .iter()
-        .map(|RunnerCommand { dir, command }| (dir.as_str(), command.as_str()))
-        .collect();
     assert_eq!(
-        shown,
+        shown(&commands),
         [
             (".", "npx jest c.test.js"),
             ("web", "npx jest b.test.js"),
             ("web/app", "npx jest a.test.js")
         ]
+    );
+}
+
+#[test]
+fn a_roots_own_suite_runs_in_that_root_alone_less_its_left_out_tests() {
+    let dir = tempfile::tempdir().unwrap();
+    let ctx = three_roots(dir.path());
+    let registry = registry();
+    let own = |dir: &str, except: &[&str]| TestSelection::Root {
+        dir: dir.to_owned(),
+        except: except.iter().map(|id| (*id).to_owned()).collect(),
+    };
+    let commands = |selection: &TestSelection| {
+        runner(&registry, "tool.pytest")
+            .commands(&ctx, selection)
+            .unwrap()
+    };
+    assert_eq!(
+        shown(&commands(&own("web", &[]))),
+        [("web", "python -m pytest")]
+    );
+    assert_eq!(
+        shown(&commands(&own(
+            "web",
+            &["web: tests/test_a.py::test_slow", "slow.py::test_root"]
+        ))),
+        [(
+            "web",
+            "python -m pytest --deselect tests/test_a.py::test_slow"
+        )],
+        "only the root's own left-out tests"
     );
 }
 

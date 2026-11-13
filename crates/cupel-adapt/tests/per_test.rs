@@ -505,3 +505,60 @@ fn a_one_function_go_change_measures_again_only_the_test_that_ran_that_function(
         assert_eq!(seen, (1, 1, scale));
     }
 }
+
+/// The pytest-cov map of the `dependent-tests` fixture at `root`, its roots `fees` and `checkout`.
+fn dependent_map(root: &Path) -> PerTestMap {
+    let registry = registry();
+    let producer = producer(
+        &registry,
+        FactKind::PerTestMap,
+        "tool.pytest-cov-per-test",
+        "python",
+    );
+    let mut ctx = produce_ctx(root, "python", Cancellation::new());
+    ctx.upstream
+        .insert(Produced::new(support::project_info("python", &["fees", "checkout"])).share());
+    let fact = producer
+        .produce(&ctx, &Scope::default(), &mut Vec::new())
+        .unwrap();
+    fact.downcast::<PerTestMap>().unwrap()
+}
+
+#[test]
+fn a_roots_tests_are_measured_on_the_other_roots_files_they_run_and_rerun_when_those_change() {
+    if cupel_core::find_program("pytest").is_none() {
+        eprintln!("SKIPPED: pytest not installed; tool.pytest-cov-per-test was not run");
+        return;
+    }
+    let dir = tempfile::tempdir().unwrap();
+    cupel_fixtures::copy_repo("dependent-tests", dir.path());
+    let map = dependent_map(dir.path());
+    assert_eq!(
+        covering(&map, "fees/fees.py", 4, 5),
+        [
+            "checkout: tests/test_checkout.py::test_large_orders_ship_free",
+            "checkout: tests/test_checkout.py::test_small_orders_pay_the_fee",
+            "fees: tests/test_fees.py::test_small_orders_pay_the_fee",
+        ]
+    );
+    let waived = [
+        "checkout: tests/test_checkout.py::test_a_free_code_waives_the_fee",
+        "checkout: tests/test_checkout.py::test_large_orders_ship_free",
+        "checkout: tests/test_checkout.py::test_small_orders_pay_the_fee",
+    ];
+    assert_eq!(covering(&map, "fees/fees.py", 10, 10), waived);
+    assert_eq!(dependent_map(dir.path()).measured, 0, "nothing changed");
+    let path = dir.path().join("fees/fees.py");
+    let text = std::fs::read_to_string(&path).unwrap();
+    std::fs::write(
+        &path,
+        text.replace("code == \"FREE\"", "code in (\"FREE\",)"),
+    )
+    .unwrap();
+    let again = dependent_map(dir.path());
+    assert_eq!(
+        (again.measured, covering(&again, "fees/fees.py", 10, 10)),
+        (4, ids(&waived)),
+        "a change in `fees` measures again the tests of both roots that ran it"
+    );
+}

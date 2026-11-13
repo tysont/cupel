@@ -4,8 +4,8 @@ use std::collections::HashMap;
 
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{
-    MutationSites, NormTree, OperatorSet, Site, SymbolDef, SymbolKey, Symbols, TestConventions,
-    TestFrames,
+    MutationSites, NormTree, OperatorSet, ProjectInfo, Site, SymbolDef, SymbolKey, Symbols,
+    TestConventions, TestFrames,
 };
 use cupel_core::{
     CostClass, Focus, LineIndex, Mutant, MutantOutcome, PerTestMap, Scope, SymbolHash,
@@ -25,6 +25,9 @@ pub struct Inputs<'a> {
     pub frames: Option<&'a TestFrames>,
     /// The per-test map, when its runner is the one that runs the mutants.
     pub per_test: Option<&'a PerTestMap>,
+    /// The language's project roots: with several, a mutant no per-test map narrows runs its
+    /// own root's suite (ADR-179, ADR-194).
+    pub info: Option<&'a ProjectInfo>,
     pub focus: &'a Focus,
     pub scope: &'a Scope,
     pub operators: OperatorSet,
@@ -45,6 +48,9 @@ pub struct Planned {
     pub source: String,
     /// The tests to run against it; `None` for the whole suite.
     pub tests: Option<Vec<String>>,
+    /// With `tests` `None`, the project root whose own suite alone runs against it, when the
+    /// language has several (ADR-194); `None` for the whole suite.
+    pub root: Option<String>,
     /// Whether a test runs its site, so it is run (coverage gating).
     pub covered: bool,
 }
@@ -179,10 +185,12 @@ struct Planner<'a, 'r> {
 }
 
 /// How a site's mutants run: whether a test runs the site, the tests selected for it (`None`
-/// for the whole suite), and the suite hash of that selection.
+/// for the whole suite, or its own root's), the root whose suite that is, and the suite hash of
+/// that selection.
 struct Selection {
     covered: bool,
     tests: Option<Vec<String>>,
+    root: Option<String>,
     suite_hash: String,
 }
 
@@ -226,6 +234,7 @@ impl Planner<'_, '_> {
                     },
                     source: mutated,
                     tests: selection.tests.clone(),
+                    root: selection.root.clone(),
                     covered: selection.covered,
                 }
             })
@@ -234,7 +243,7 @@ impl Planner<'_, '_> {
 
     /// How `site` of `file` is run: covered when the coverage map records a hit on one of its
     /// lines; its tests those the per-test map says run its lines (the whole suite when there
-    /// is no map, or the map names none).
+    /// is no map, or the map names none, or with several roots its own root's suite).
     fn selection(&self, file: &str, site: &Site) -> Selection {
         let (line, end) = (site.span.line, site.span.end_line);
         let covered = self
@@ -252,13 +261,19 @@ impl Planner<'_, '_> {
             ids.sort();
             (!ids.is_empty()).then_some(ids)
         });
-        let suite_hash = tests.as_ref().map_or_else(
-            || self.inputs.suite_hash.to_owned(),
-            |ids| tests_hash(ids, self.inputs.per_test, self.read),
-        );
+        let root = tests
+            .is_none()
+            .then(|| self.inputs.info?.own_root(file).map(str::to_owned))
+            .flatten();
+        let suite_hash = match (&tests, &root) {
+            (Some(ids), _) => tests_hash(ids, self.inputs.per_test, self.read),
+            (None, Some(dir)) => digest(&[self.inputs.suite_hash, "root", dir]),
+            (None, None) => self.inputs.suite_hash.to_owned(),
+        };
         Selection {
             covered,
             tests,
+            root,
             suite_hash,
         }
     }
@@ -381,6 +396,7 @@ mod tests {
             conventions: None,
             frames: None,
             per_test: None,
+            info: None,
             focus: &Focus {
                 depth,
                 ..Focus::default()
@@ -470,6 +486,7 @@ mod tests {
             conventions: None,
             frames: None,
             per_test: None,
+            info: None,
             focus: &Focus::default(),
             scope: &Scope::of_files(vec![file.to_owned()]),
             operators: OperatorSet::Default,

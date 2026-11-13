@@ -50,6 +50,13 @@
                 ],
                 "type": "object"
               },
+              "own_root": {
+                "description": "With `all_tests` and several project roots, the root whose own tests alone those were:\nno per-test map added the tests of roots that depend on it (ADR-179, ADR-194).",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "tests_run": {
                 "format": "uint32",
                 "minimum": 0,
@@ -143,7 +150,7 @@
           "evidence": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": false,
-            "description": "Evidence of `mutant.out-of-memory` and `mutant.uncovered`.",
+            "description": "Evidence of `mutant.out-of-memory`.",
             "properties": {
               "mutation": {
                 "additionalProperties": false,
@@ -184,7 +191,7 @@
           "evidence": {
             "$schema": "https://json-schema.org/draft/2020-12/schema",
             "additionalProperties": false,
-            "description": "Evidence of `mutant.out-of-memory` and `mutant.uncovered`.",
+            "description": "Evidence of `mutant.uncovered`.",
             "properties": {
               "mutation": {
                 "additionalProperties": false,
@@ -209,12 +216,19 @@
                   "operator"
                 ],
                 "type": "object"
+              },
+              "own_root": {
+                "description": "With several project roots and no per-test map, the root whose own tests alone ran\nnone of the site (ADR-179, ADR-194).",
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             },
             "required": [
               "mutation"
             ],
-            "title": "Site",
+            "title": "Uncovered",
             "type": "object"
           },
           "kind": "mutant.uncovered",
@@ -440,7 +454,8 @@
       "tier": 3,
       "version": 1,
       "wants": [
-        "test-conventions"
+        "test-conventions",
+        "project-info"
       ]
     },
     "subject": "check"

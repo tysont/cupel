@@ -143,7 +143,12 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
         support::Shape::of(manifest),
         support::Shape {
             needs: vec![FactKind::Symbols, FactKind::CoverageMap],
-            wants: vec![FactKind::NormTree, FactKind::TestConventions],
+            wants: vec![
+                FactKind::NormTree,
+                FactKind::TestConventions,
+                FactKind::PerTestMap,
+                FactKind::ProjectInfo,
+            ],
             tier: 2,
             cost: CostClass::Standard,
             kinds: vec![

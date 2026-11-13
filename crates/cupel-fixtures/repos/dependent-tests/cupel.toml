@@ -1,0 +1,9 @@
+# The dependent-tests fixture (ADR-179, ADR-194): two Python roots, where `checkout` imports `fees` and its test is the
+# only one that charges a large order. With a per-test map, `fees`' coverage and mutants count that test; without
+# one, `fees` has its own tests only, and its findings say so.
+[roots]
+fees = { path = "fees", lang = "python" }
+checkout = { path = "checkout", lang = "python" }
+
+[lang.python]
+coverage = "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov=. --cov-report=lcov:{out}"

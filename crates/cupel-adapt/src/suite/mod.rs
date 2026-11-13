@@ -278,6 +278,8 @@ impl JointProducer for Suite {
                 path: path.canonicalize().unwrap_or(path),
                 packages,
                 area: ctx.writer.create_dir(&entry.join("work"))?,
+                // A joint run measures its own root's files alone (ADR-194).
+                others: Vec::new(),
             };
             let (root_run, obtained) = if let Some(kept) =
                 self.cached(&ctx.ctx.root, &ctx.ctx.exclude, &entry, &dir)

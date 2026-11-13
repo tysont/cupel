@@ -576,6 +576,22 @@ pub struct ProjectInfo {
 }
 fact!(ProjectInfo, ProjectInfo, "project-info", 2);
 
+impl ProjectInfo {
+    /// The root whose own tests are `file`'s when the language has several roots: the deepest
+    /// one holding it, whose suite alone runs against it without a per-test map (ADR-179,
+    /// ADR-194). `None` with one root or none, or for a file under no root.
+    pub fn own_root(&self, file: &str) -> Option<&str> {
+        if self.roots.len() < 2 {
+            return None;
+        }
+        self.roots
+            .iter()
+            .map(|root| root.path.as_str())
+            .filter(|dir| crate::is_under(file, &[dir]))
+            .max_by_key(|dir| if *dir == "." { 0 } else { dir.len() })
+    }
+}
+
 /// A directory with a build manifest of one language's ecosystem.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct ProjectRoot {

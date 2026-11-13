@@ -6,7 +6,8 @@ use std::time::{Duration, Instant};
 
 use cupel_core::coverage::CoverageMap;
 use cupel_core::syntax::{
-    ImportTarget, ModuleGraph, MutationSites, NormTree, Symbols, TestConventions, TestFrames,
+    ImportTarget, ModuleGraph, MutationSites, NormTree, ProjectInfo, Symbols, TestConventions,
+    TestFrames,
 };
 use cupel_core::{
     Availability, CheckId, CostClass, Ctx, Error, Event, EventSink, ExcludedTest, FactKind, Langs,
@@ -101,14 +102,17 @@ impl Producer<MutationOutcomes> for MutationEngine {
         let whole = whole_suite(&excluded);
         let suite_hash = whole_suite_hash(baseline, &excluded);
         let reachable = reachable(&ctx.ctx, scope);
+        // A dependent root's tests the per-test map names cover a root's code (ADR-194).
+        let covered = per_test.map(|map| coverage.with_tests(map));
         let inputs = Inputs {
             sites,
             symbols,
-            coverage,
+            coverage: covered.as_ref().unwrap_or(coverage),
             norm: upstream.get::<NormTree>(),
             conventions: upstream.get::<TestConventions>(),
             frames: upstream.get::<TestFrames>(),
             per_test,
+            info: upstream.get::<ProjectInfo>(),
             focus: &ctx.focus,
             scope: &reachable,
             operators: settings.operators,

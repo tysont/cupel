@@ -6,7 +6,7 @@ mod remedy;
 use std::fmt::Write as _;
 
 use cupel_core::config::{OracleConfig, OracleKind};
-use cupel_core::hint::ALL_TESTS_SAID;
+use cupel_core::hint::{ALL_TESTS_SAID, own_tests_said};
 use cupel_core::{
     CheckResult, Description, Envelope, Excerpt, Explanation, Finding, FindingId, GateOutcome,
     GateResult, GitInfo, ImpactBasis, LangId, Location, Metric, NextAction, OracleReport,
@@ -693,7 +693,9 @@ fn explanation_block(explanation: &Explanation, findings: &[Finding], paint: &Pa
     if let Some(finding) = explained {
         remedy::block(&mut out, &finding.action.hints, paint);
     }
-    let covering = if explanation.all_tests {
+    let covering = if let Some(root) = explanation.own_root.as_deref() {
+        own_tests_said(root)
+    } else if explanation.all_tests {
         ALL_TESTS_SAID.to_owned()
     } else {
         explanation.covering_tests.join(", ")

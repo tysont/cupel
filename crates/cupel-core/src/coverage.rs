@@ -1,10 +1,11 @@
 // ABOUTME: The `CoverageMap` fact payload (design §8.3.2): line hits and optional branch hits per file, as
 // ABOUTME: a coverage producer reports them (ADR-067), merged and sorted, with per-range queries (ADR-079).
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
+use crate::PerTestMap;
 use crate::fact::{Fact, FactEntry, FactKind};
 
 /// Which lines (and, when the producer measures them, branches) the test suite ran.
@@ -140,6 +141,31 @@ impl CoverageMap {
                 })
                 .collect(),
         }
+    }
+
+    /// This map with every instrumented line that a test of `map` executed counted as hit at
+    /// least once: a dependent root's tests that the per-test map names count toward a root's
+    /// coverage (ADR-179, ADR-194). A line the map names but this map does not instrument stays
+    /// out.
+    #[must_use]
+    pub fn with_tests(&self, map: &PerTestMap) -> Self {
+        let mut executed: BTreeMap<&str, BTreeSet<u32>> = BTreeMap::new();
+        for covered in map.tests.iter().flat_map(|test| &test.covered) {
+            executed
+                .entry(covered.file.as_str())
+                .or_default()
+                .extend(&covered.lines);
+        }
+        let mut with = self.clone();
+        for file in &mut with.files {
+            let Some(lines) = executed.get(file.file.as_str()) else {
+                continue;
+            };
+            for hits in file.lines.iter_mut().filter(|hits| hits.hits == 0) {
+                hits.hits = u64::from(lines.contains(&hits.line));
+            }
+        }
+        with
     }
 
     /// This map with its producer's `listing`.

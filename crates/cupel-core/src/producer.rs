@@ -330,6 +330,10 @@ pub enum TestSelection {
     Files(Vec<String>),
     /// The whole suite but these tests, by the IDs the runner's `TestResults` use (ADR-147).
     Except(Vec<String>),
+    /// The whole suite of the project root at `dir` (relative to the repository root) but the
+    /// tests of `except`: a root's own tests, without a per-test map to add its dependents'
+    /// (ADR-179, ADR-194).
+    Root { dir: String, except: Vec<String> },
 }
 
 /// A command a person or agent runs to run a selection in one project root.

@@ -25,6 +25,11 @@ pub struct Explanation {
     /// `action.hints.all_tests`: "all tests (no per-test map)", with `covering_tests` empty
     /// (ADR-191).
     pub all_tests: bool,
+    /// With `all_tests`, the project root whose own tests alone those were, from
+    /// `action.hints.own_root`: "own tests of `<root>` only; no per-test map" (ADR-194).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub own_root: Option<String>,
     /// The test file nearest to the finding's site, from `action.hints.nearest_test_file`.
     pub nearest_test_file: Option<String>,
     /// The check's metrics in that run, per symbol; empty for a finding.

@@ -371,6 +371,53 @@ fn project_info_payload_shape() {
     assert!(json["roots"][0].get("commands").is_none());
 }
 
+fn python_root(path: &str) -> ProjectRoot {
+    ProjectRoot {
+        path: path.into(),
+        lang: LangId::from("python"),
+        build_files: vec!["pyproject.toml".into()],
+        members: Vec::new(),
+        packages: Vec::new(),
+        skip_dirs: Vec::new(),
+        entries: Vec::new(),
+    }
+}
+
+#[test]
+fn a_file_has_an_own_root_only_among_several_roots_the_deepest_holding_it() {
+    let several = ProjectInfo {
+        roots: vec![
+            python_root("."),
+            python_root("fees"),
+            python_root("fees/vat"),
+        ],
+    };
+    let owners: Vec<Option<&str>> = ["fees/vat/rate.py", "fees/fees.py", "feesy.py", "tools/x.py"]
+        .iter()
+        .map(|file| several.own_root(file))
+        .collect();
+    assert_eq!(
+        owners,
+        [Some("fees/vat"), Some("fees"), Some("."), Some(".")]
+    );
+    let one = ProjectInfo {
+        roots: vec![python_root("fees")],
+    };
+    assert_eq!(
+        one.own_root("fees/fees.py"),
+        None,
+        "one root has no dependents"
+    );
+    let apart = ProjectInfo {
+        roots: vec![python_root("fees"), python_root("checkout")],
+    };
+    assert_eq!(
+        apart.own_root("scripts/run.py"),
+        None,
+        "a file under no root"
+    );
+}
+
 #[test]
 fn symbol_and_visibility_kinds() {
     assert_spellings(&[

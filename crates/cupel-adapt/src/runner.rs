@@ -435,34 +435,57 @@ impl Runner {
         let dirs: Vec<String> = roots.iter().map(|(dir, _)| dir.clone()).collect();
         let mut narrowed = Vec::new();
         for (index, root) in roots.into_iter().enumerate() {
-            let narrowing = match selection {
-                TestSelection::All => Vec::new(),
-                TestSelection::Tests(ids) => {
-                    let own = owned(ids, &root.0, &dirs, ID_SEPARATOR);
-                    if own.is_empty() {
-                        continue;
-                    }
-                    self.select(&Selected::Tests(&own))?
-                }
-                TestSelection::Files(files) => {
-                    let own = owned(files, &root.0, &dirs, "/");
-                    if own.is_empty() {
-                        continue;
-                    }
-                    self.select(&Selected::Files(&own))?
-                }
-                TestSelection::Except(ids) => {
-                    let own = owned(ids, &root.0, &dirs, ID_SEPARATOR);
-                    if own.is_empty() {
-                        Vec::new()
-                    } else {
-                        self.exclude(&own)?
-                    }
-                }
-            };
-            narrowed.push((index, root, narrowing));
+            if let Some(narrowing) = self.narrowing(selection, &root.0, &dirs)? {
+                narrowed.push((index, root, narrowing));
+            }
         }
         Ok(narrowed)
+    }
+
+    /// The arguments that narrow the run in the root at `dir` (among `dirs`) to `selection`;
+    /// `None` when `selection` holds none of its tests.
+    fn narrowing(
+        &self,
+        selection: &TestSelection,
+        dir: &str,
+        dirs: &[String],
+    ) -> Result<Option<Vec<String>>> {
+        let narrowing = match selection {
+            TestSelection::All => Vec::new(),
+            TestSelection::Tests(ids) => {
+                let own = owned(ids, dir, dirs, ID_SEPARATOR);
+                if own.is_empty() {
+                    return Ok(None);
+                }
+                self.select(&Selected::Tests(&own))?
+            }
+            TestSelection::Files(files) => {
+                let own = owned(files, dir, dirs, "/");
+                if own.is_empty() {
+                    return Ok(None);
+                }
+                self.select(&Selected::Files(&own))?
+            }
+            TestSelection::Except(ids) => self.excluding(ids, dir, dirs)?,
+            TestSelection::Root { dir: only, except } => {
+                if only != dir {
+                    return Ok(None);
+                }
+                self.excluding(except, dir, dirs)?
+            }
+        };
+        Ok(Some(narrowing))
+    }
+
+    /// The arguments that leave the tests of `ids` in the root at `dir` out of its run; none
+    /// when it holds none of them.
+    fn excluding(&self, ids: &[String], dir: &str, dirs: &[String]) -> Result<Vec<String>> {
+        let own = owned(ids, dir, dirs, ID_SEPARATOR);
+        if own.is_empty() {
+            Ok(Vec::new())
+        } else {
+            self.exclude(&own)
+        }
     }
 
     fn exclude(&self, ids: &[String]) -> Result<Vec<String>> {

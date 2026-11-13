@@ -1255,6 +1255,14 @@ expression: pretty(&schema)
             "null"
           ]
         },
+        "own_root": {
+          "description": "With `all_tests`, the project root whose own tests alone those were, from\n`action.hints.own_root`: \"own tests of `<root>` only; no per-test map\" (ADR-194).",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-cupel-optional": true
+        },
         "run": {
           "description": "The stored run the explanation comes from: the latest run that produced the finding, or\nthe latest run of the check.",
           "$ref": "#/$defs/RunId"
