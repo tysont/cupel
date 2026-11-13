@@ -291,6 +291,7 @@ fn a_public_function_whose_tests_hold_no_property_is_missing_one() {
             signature: "(_)".to_owned(),
             file: "src/units/percent.py".to_owned(),
             span: FUNCTION,
+            internal: false,
         }],
     };
     let (result, recorded) = run_over(

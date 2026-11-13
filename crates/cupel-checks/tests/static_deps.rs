@@ -91,6 +91,7 @@ impl World {
                 end_line: 1,
                 end_col: 2,
             },
+            internal: false,
         });
         self
     }

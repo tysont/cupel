@@ -2618,6 +2618,18 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-cli/tests/gate.rs`: a changed rule against the recomputed base names `wide::step` at `src/wide.rs:5` on both sides, in JSON and text (failed first on the text);
     - the render fixture's `static.crap.max <= base` rule, and the goldens of `static.complexity`, `static.crap`, `static.deps`, their surveys, `cli/sarif-check`, `deps-narrowed-scope`, `inline-callbacks`, and `symbol-matching`, regenerated.
 
+- **Item 13, a TypeScript package's API is its entries** (2026-11-12, [ADR-176](adr/CUPEL_DECISION_176.md), [ADR-192](adr/CUPEL_DECISION_192.md)).
+  - The gap: `static.api-surface` took every exported item of every file as public, so Area 11's move of `validateCustomManifest` between two files of `apps/agent` (private, an `exports` map of five entries, none under `tools/`) was a blocking `api.breaking`.
+  - Now the JavaScript and TypeScript `ApiSurface` producer marks `internal` each item that its package's entries do not reach (`cupel-lang` `langs/ecma/entries.rs`, through `Language::mark_internal`, a no-op in every other language), and `static.api-surface` leaves internal items off both sides. `static.deps`, `gen.property`, and `gen.differential` read the same items as before.
+  - The package is the nearest directory with a `package.json`; its entries are every target of `exports` (strings, arrays, subpaths, nested conditions), else `main`, `types`, and `typings`, resolved as imports are. A target naming no file is built output standing for the same path under `src` (`./dist/esm/index.d.ts` → `src/index.ts`); a `*` target exposes every file it matches. Re-exports (`export … from`, `export *`) are followed transitively by name. No manifest, or one naming no entries, exposes nothing.
+  - Each side reads its own manifest: the base tree also holds the changed manifests (`BaseTree::checkout`'s `manifest`, not among its files), and a base-side producer gets `Focus::base_side`, so its `Imports` reads changed paths from the base tree and the rest from the repository (an unchanged entry is the same on both sides).
+  - Open (ADR-192): an export of an import (`import { f }; export { f }`), another package re-exporting this package's internal file, `exports` exclusions, built output whose source is not under `src`.
+  - Tests:
+    - `cupel-checks/tests/static_api_surface.rs` `internal_items_are_not_api_surface` (failed first: the internal moves reported as removed and added);
+    - `cupel-lang/tests/ecma_entries.rs`: an `exports` map with subpaths and conditions exposing its entries and their re-exports by name, `main`/`types`/`typings`/a string `exports` of built output, a wildcard, the nearest manifest and no manifest, and Rust, Go, Python, and Java unmarked (the four ecma tests failed first: every item public);
+    - `cupel-fixtures/tests/api_surface.rs`: through the binary, the Molten move reports nothing under `--base` and `--changed`, removing an item an unchanged entry re-exports is `api.breaking` (failed with the base side reading only the base tree), and dropping a subpath from `exports` removes what only it exposed (the manifest read at the base); the JavaScript and TypeScript libraries of the per-language history gained a `package.json` naming them as `main`;
+    - the JavaScript and TypeScript `api-surface` fact goldens and the fact schema snapshot regenerated (`internal` on items no entry reaches).
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

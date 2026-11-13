@@ -45,11 +45,11 @@
 //! reported.
 use std::collections::{BTreeMap, HashSet};
 
-use cupel_core::FactKind;
 use cupel_core::syntax::{
     Assertion, AssertionKind, AssertionStrength, Mock, SkipMarker, Span, TestCase, TestFile,
     TestFrames,
 };
+use cupel_core::{FactKind, ProduceCtx};
 use serde::{Deserialize, Serialize};
 use tree_sitter::Node;
 
@@ -406,7 +406,12 @@ fn called(node: Node<'_>) -> Called {
 /// convention such as Go's call handing `t` to a function) in every language, and any helper call
 /// where the language's tests share helpers by directory (a Go package's `_test.go` helpers, a
 /// Python test package's harness `TestCase`).
-fn resolve_helpers(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn Language) {
+fn resolve_helpers(
+    frames: &mut TestFrames,
+    parsed: &[Parsed],
+    language: &dyn Language,
+    _: &ProduceCtx,
+) {
     if !language.spec().has(QueryFile::Tests) {
         return;
     }

@@ -142,6 +142,7 @@ mod tests {
             signature: "(_: int) -> int".to_owned(),
             file: "src/pricing.py".to_owned(),
             span: span(line, line + 2),
+            internal: false,
         }
     }
 

@@ -3,8 +3,10 @@
 use std::path::Path;
 use std::sync::Arc;
 
-use cupel_core::syntax::ProjectInfo;
-use cupel_core::{Cancellation, Lang, LangFamily, LangId, ProducerId, ProducerRegistry, Stability};
+use cupel_core::syntax::{ApiSurface, ProjectInfo};
+use cupel_core::{
+    Cancellation, Lang, LangFamily, LangId, ProduceCtx, ProducerId, ProducerRegistry, Stability,
+};
 use rayon::prelude::*;
 
 use crate::langs::ecosystems;
@@ -34,6 +36,10 @@ pub trait Language: Send + Sync {
     /// syntactic facts; a language registers a hand-written producer only where queries
     /// cannot express the fact.
     fn register(&self, reg: &mut ProducerRegistry);
+    /// Marks the items of `surface` that no entry of their package exposes as internal, reading
+    /// manifests and re-exports on the side `ctx` produces (ADR-176). A language whose public
+    /// items are all API, as every one but JavaScript and TypeScript, leaves them as they are.
+    fn mark_internal(&self, _surface: &mut ApiSurface, _ctx: &ProduceCtx) {}
 }
 
 /// The language and family pair the support matrix works with.
@@ -88,6 +94,16 @@ impl LanguageRegistry {
         self.languages
             .iter()
             .find(|language| owns(language.as_ref(), path))
+    }
+
+    /// Whether `path` is a package manifest some language's ecosystem reads (`package.json`,
+    /// `Cargo.toml`, …), by its file name.
+    pub fn is_manifest(&self, path: &str) -> bool {
+        let name = path.rsplit('/').next().unwrap_or(path);
+        self.languages
+            .iter()
+            .filter_map(|language| language.ecosystem())
+            .any(|ecosystem| ecosystem.manifests.contains(&name))
     }
 
     pub fn ids(&self) -> Vec<LangId> {

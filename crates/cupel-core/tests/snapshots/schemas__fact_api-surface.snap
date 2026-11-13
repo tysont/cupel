@@ -27,6 +27,11 @@ expression: pretty(&schema)
         "file": {
           "type": "string"
         },
+        "internal": {
+          "description": "Whether no entry of the item's package exposes it, so it is not public API though its\nfile exports it: a JavaScript or TypeScript item that its `package.json` `exports` map,\nor `main` and `types`, do not reach (ADR-176). Absent (false) in every other language.",
+          "type": "boolean",
+          "x-cupel-optional": true
+        },
         "kind": {
           "$ref": "#/$defs/ApiItemKind"
         },

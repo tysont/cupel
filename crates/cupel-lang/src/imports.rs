@@ -38,8 +38,8 @@ use std::sync::{Arc, Mutex, PoisonError};
 
 use cupel_core::syntax::{EdgeKind, ImportAlias, ModuleGraph};
 use cupel_core::{
-    Availability, Cancellation, CostClass, Ctx, EventSink, FactKind, Langs, ProduceCtx, Producer,
-    ProducerId, Result, Scope,
+    Availability, BaseSide, Cancellation, CostClass, Ctx, EventSink, FactKind, Langs, ProduceCtx,
+    Producer, ProducerId, Result, Scope,
 };
 use globset::Glob;
 use serde::{Deserialize, Serialize};
@@ -300,6 +300,9 @@ pub(crate) fn unquote(text: &str) -> &str {
 /// case: module systems and other machines do not. Listings are read once per directory.
 pub struct Imports<'a> {
     root: &'a Path,
+    /// On a range's base side, where the files `root` (the base tree) does not hold are: a path
+    /// the range did not change is read from the repository (ADR-192).
+    base: Option<&'a BaseSide>,
     language: &'a dyn Language,
     cache: &'a ParseCache,
     scope: Vec<String>,
@@ -329,11 +332,20 @@ impl<'a> Imports<'a> {
     ) -> Self {
         Self {
             root,
+            base: None,
             language,
             cache,
             scope,
             listings: Mutex::new(HashMap::new()),
         }
+    }
+
+    /// What a resolver sees on a range's base side, `base` saying where the files the base
+    /// tree at `root` does not hold are; at head (`None`), only `root`.
+    #[must_use]
+    pub(crate) fn beside(mut self, base: Option<&'a BaseSide>) -> Self {
+        self.base = base;
+        self
     }
 }
 
@@ -362,7 +374,15 @@ impl Imports<'_> {
         if !self.is_file(path) {
             return None;
         }
-        fs::read_to_string(self.root.join(path)).ok()
+        fs::read_to_string(self.root_of(path).join(path)).ok()
+    }
+
+    /// The directory that holds `path` on this side: the root, or on a base side the
+    /// repository for a path the range did not change.
+    fn root_of(&self, path: &str) -> &Path {
+        let normal = components(path).map_or_else(String::new, |parts| parts.join("/"));
+        self.base
+            .map_or(self.root, |base| base.root_of(self.root, &normal))
     }
 
     /// Subdirectories of `dir` (relative to the root), sorted.
@@ -454,7 +474,7 @@ impl Imports<'_> {
         }
         let exact = key.is_empty() || self.is_dir(&key);
         let listing = Arc::new(if exact {
-            Listing::read(&self.root.join(&key))
+            self.read_listing(&key)
         } else {
             Listing::default()
         });
@@ -465,11 +485,26 @@ impl Imports<'_> {
         listing
     }
 
+    /// The listing of the directory `key` on this side: the root's, or on a base side the base
+    /// tree's entries the range changed with the repository's it did not.
+    fn read_listing(&self, key: &str) -> Listing {
+        let mut listing = Listing::read(&self.root.join(key));
+        if let Some(base) = self.base {
+            let unchanged = Listing::read(&base.repository.join(key));
+            let changed = |name: &String| base.changed.contains(&join(key, name));
+            listing
+                .files
+                .extend(unchanged.files.into_iter().filter(|name| !changed(name)));
+            listing.dirs.extend(unchanged.dirs);
+        }
+        listing
+    }
+
     /// The imports of `path`, parsed through the cache; empty when it cannot be parsed.
     pub fn of(&self, path: &str) -> FileImports {
         parse_one(
             self.cache,
-            self.root,
+            self.root_of(path),
             path,
             self.language,
             &Cancellation::new(),

@@ -10,6 +10,7 @@ use std::time::Duration;
 
 use serde_json::{Map, Value};
 
+use crate::base::BaseSide;
 use crate::cancel::Cancellation;
 use crate::config::{RootConfig, Table};
 use crate::error::Result;
@@ -115,6 +116,10 @@ pub struct Focus {
     /// chooses them, for producers that rerun only those (ADR-186, ADR-190); `None` without a
     /// range or when the run chose none for the language.
     pub impacted: Option<ImpactedTests>,
+    /// When producing a range's base side, where the files the base tree does not hold are
+    /// (ADR-192), for producers that read beyond the changed files (a package's entries); `None`
+    /// at head and without a range.
+    pub base_side: Option<BaseSide>,
 }
 
 /// The tests a range impacts in one language (ADR-190): by the runner's test IDs where a
@@ -139,6 +144,7 @@ impl Default for Focus {
             jobs: None,
             cases: None,
             impacted: None,
+            base_side: None,
         }
     }
 }

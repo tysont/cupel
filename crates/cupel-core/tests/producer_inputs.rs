@@ -278,6 +278,7 @@ fn a_producer_gets_the_runs_depth_changed_lines_and_its_languages_impacted_tests
             jobs: None,
             cases: Some(7),
             impacted: Some(impacted("tests/a.rs")),
+            base_side: None,
         })
     );
 }

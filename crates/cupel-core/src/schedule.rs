@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::num::NonZeroUsize;
 use std::time::Instant;
 
-use crate::base::BaseTree;
+use crate::base::{BaseSide, BaseTree};
 use crate::budget::{Resources, TaskDuration, TaskShape};
 use crate::cancel::Cancellation;
 use crate::check::{Check, CheckCtx, CheckRegistry, Manifest, Plan};
@@ -1051,6 +1051,9 @@ struct FactStore<'a> {
     changed: Option<ChangedLines>,
     /// The commit the range starts from, for `Focus::base` (ADR-103 §5).
     base_commit: Option<String>,
+    /// On the base side of a range, what it reads beyond the base tree, for
+    /// `Focus::base_side` (ADR-192); `None` at head.
+    base_side: Option<BaseSide>,
     /// Per language, the symbols `--symbols` selected; empty without selectors.
     selected: HashMap<LangId, BTreeSet<crate::syntax::SymbolKey>>,
     files: Vec<String>,
@@ -1095,7 +1098,9 @@ impl<'a> FactStore<'a> {
 
     /// The base side of a range: the base versions of the changed files (ADR-056).
     fn at(scheduler: &Scheduler<'a>, job: &Job<'a>, base: &BaseTree) -> Self {
-        Self::over(scheduler, job, base.root.clone(), base.files.clone())
+        let mut store = Self::over(scheduler, job, base.root.clone(), base.files.clone());
+        store.base_side = Some(base.side(job.writer.root()));
+        store
     }
 
     fn over(
@@ -1120,6 +1125,7 @@ impl<'a> FactStore<'a> {
             depth: job.depth,
             changed: job.changed.clone(),
             base_commit: job.base.as_ref().map(|base| base.range.commit.clone()),
+            base_side: None,
             selected: HashMap::new(),
             files,
             made: HashMap::new(),
@@ -1374,6 +1380,7 @@ impl<'a> FactStore<'a> {
             jobs: self.jobs,
             cases: self.cases,
             impacted: self.impacted.get(&lang.id).cloned(),
+            base_side: self.base_side.clone(),
         }
     }
 

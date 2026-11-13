@@ -24,17 +24,18 @@
 //! right before a closing bracket or at the end is dropped.
 use std::collections::BTreeMap;
 
-use cupel_core::FactKind;
 use cupel_core::syntax::{ApiItem, ApiItemKind, ApiSurface};
+use cupel_core::{FactKind, ProduceCtx};
 use serde_json::Value;
 use tree_sitter::Node;
 
 use crate::contract::capture;
+use crate::language::Language;
 use crate::namespace::{Namespaces, Scope};
 use crate::parse::Parsed;
 use crate::producer::{QueryProducer, Source};
 use crate::query::{Match, matches, span};
-use crate::spec::QueryFile;
+use crate::spec::{LanguageSpec, QueryFile};
 
 /// What a local name becomes in a signature.
 const LOCAL: &str = "_";
@@ -43,9 +44,21 @@ inventory::submit!(crate::generic::GenericProducer {
     kind: FactKind::ApiSurface,
     drives: |spec| spec.has(QueryFile::Api),
     attach: |language, cache, reg| {
-        reg.register::<ApiSurface, _>(QueryProducer::new(language, cache, extract));
+        reg.register::<ApiSurface, _>(
+            QueryProducer::new(language, cache, extract).finishing(mark_internal),
+        );
     },
 });
+
+/// Marks the items no entry of their package exposes, as their language says (ADR-176).
+fn mark_internal(
+    surface: &mut ApiSurface,
+    _: &[Parsed],
+    language: &dyn Language,
+    ctx: &ProduceCtx,
+) {
+    language.mark_internal(surface, ctx);
+}
 
 /// The `ApiSurface` extractor.
 ///
@@ -78,12 +91,7 @@ pub fn extract(source: &Source<'_>) -> ApiSurface {
     let mut items: Vec<(&Match<'_, '_>, ApiItemKind, Node<'_>)> = chosen.into_values().collect();
     items.sort_by_key(|(_, _, node)| node.start_byte());
     let none: [Scope<'_>; 0] = [];
-    let tight_after = &spec.tables().api.tight_after;
-    let literals = spec
-        .tables()
-        .normalize
-        .as_ref()
-        .map_or(&[][..], |rules| rules.literals.as_slice());
+    let spelling = Spelling::of(spec);
     ApiSurface {
         items: items
             .into_iter()
@@ -95,18 +103,10 @@ pub fn extract(source: &Source<'_>) -> ApiSurface {
                 Some(ApiItem {
                     path: namespaces.display(&namespace, name),
                     kind,
-                    signature: signature(
-                        parsed,
-                        node,
-                        &signature_nodes,
-                        &locals,
-                        Spelling {
-                            tight_after,
-                            literals,
-                        },
-                    ),
+                    signature: signature(parsed, node, &signature_nodes, &locals, spelling),
                     file: parsed.file.clone(),
                     span: span(node),
+                    internal: false,
                 })
             })
             .collect(),
@@ -129,6 +129,20 @@ struct Spelling<'a> {
     tight_after: &'a [String],
     /// Node kinds read as one token.
     literals: &'a [String],
+}
+
+impl<'a> Spelling<'a> {
+    /// The spelling `spec`'s tables give.
+    fn of(spec: &'a LanguageSpec) -> Self {
+        Self {
+            tight_after: &spec.tables().api.tight_after,
+            literals: spec
+                .tables()
+                .normalize
+                .as_ref()
+                .map_or(&[][..], |rules| rules.literals.as_slice()),
+        }
+    }
 }
 
 /// The normalized signature spanning `nodes`, read from the tokens of `item`.

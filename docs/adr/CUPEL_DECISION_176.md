@@ -1,6 +1,6 @@
 # CUPEL_DECISION_176: A TypeScript package's API is what its `exports` map exposes
 
-**Date:** 2026-11-11 · **Status:** accepted · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [101](CUPEL_DECISION_101.md) and [174](CUPEL_DECISION_174.md)
+**Date:** 2026-11-11 · **Status:** accepted; detailed by [192](CUPEL_DECISION_192.md) · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [101](CUPEL_DECISION_101.md) and [174](CUPEL_DECISION_174.md)
 
 ## Context
 Area 11's one blocking false finding was `api.breaking` on a function moved inside `apps/agent`, a `"private": true` package whose `package.json` `exports` map names five entry files, none the moved one's. `static.api-surface` treated every exported item of every file as public, so a move no importer outside the package could see counted as a removal.

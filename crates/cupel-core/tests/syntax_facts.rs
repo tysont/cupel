@@ -305,6 +305,7 @@ fn api_surface_payload_shape() {
             signature: "fn(&mut self, $int) -> $bool".into(),
             file: "src/lib.rs".into(),
             span: span(10),
+            internal: false,
         }],
     });
     assert_eq!(json["items"][0]["kind"], json!("method"));

@@ -74,7 +74,7 @@ mod writer;
 pub use actions::{NEXT_ACTIONS, next_actions};
 pub use analyzer::{AnalyzerLevel, AnalyzerReport, AnalyzerResult, AnalyzerRun, AnalyzerStatus};
 pub use attribution::{ATTRIBUTION_KEY, Attribution, attributions};
-pub use base::{BaseTree, Range};
+pub use base::{BaseSide, BaseTree, Range};
 pub use bench::{BenchBase, BenchSamples, Benchmark};
 pub use cancel::Cancellation;
 pub use check::{

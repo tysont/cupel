@@ -93,7 +93,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 | `static.crap` | `CC² × (1 − coverage)³ + CC`; wants `CoverageMap`; `--no-coverage` forces (CC only) | `crap.high` (≥30), `crap.watch` (5–30) | build |
 | `static.clones` | Type 1/2/3 clones via normalized-AST subtree fingerprints + Jaccard; MinHash bucketing before pairwise | `clone.pair`, `clone.cluster` | build |
 | `static.deps` | Module graph: afferent/efferent coupling, instability, abstractness, distance from main sequence, cycles, layering-rule violations from config | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | build |
-| `static.api-surface` | Public API diff vs base: removed/changed signatures, visibility changes | `api.breaking`, `api.widened` | build + wrap (`cargo-semver-checks`, `api-extractor` where present) |
+| `static.api-surface` | Public API diff vs base: removed/changed signatures, visibility changes; a JavaScript or TypeScript package's API is what its `package.json` entries expose (ADR-176) | `api.breaking`, `api.widened` | build + wrap (`cargo-semver-checks`, `api-extractor` where present) |
 | `static.dead-code` | Unreachable/unused symbols and exports | `dead.symbol`, `dead.export` | build |
 | `static.analyze` | Runs the ecosystem's type checker at strictest config, linters, CodeQL/Semgrep if configured; normalizes to findings | `analyze.<tool>.<rule>` | wrap |
 
@@ -608,7 +608,7 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `MutationSites` | per symbol: `Site { operator: Relational \| Arith \| Boolean \| Literal \| …, set: Default \| Extended, from, to[], site_hash }` | language | mutation engine |
 | `TestFrames` | test cases: `Assertion { kind: Equality \| Truthiness \| NotNull \| Throws \| Snapshot \| Custom, strength }`, mocks, skip markers, setup blocks, framework | language | `tests.quality`, `tests.weakening`, `tests.flaky` |
 | `ModuleGraph` | resolved import edges per root: `File \| External \| Unresolved`, with relative-import flags | language | `static.deps`, `static.dead-code`, impact fallback, overlays |
-| `ApiSurface` | public items with normalized signatures | language | `static.api-surface` |
+| `ApiSurface` | public items with normalized signatures; JavaScript and TypeScript items no entry of their package exposes marked `internal` (ADR-176, ADR-192) | language | `static.api-surface` |
 | `Roots` | symbols live by convention (entry points, exports, tests, framework hooks) | language | `static.dead-code` |
 | `TestConventions` | test files for a source file; is-test predicate | language | `write_test` hints, scope |
 | `ProjectInfo` | detected roots: path, language, build files, workspace members, dirs to skip — no commands; the CLI joins it with the toolchain table (§8.7, ADR-037) | language | `init`, `doctor`, toolchain selection |

@@ -1,5 +1,6 @@
 // ABOUTME: `static.api-surface` end to end: per language, a temporary git history that removes, changes, and adds
-// ABOUTME: public items, checked with --base and --changed by the real binary, and the `no-breaking` gate (ADR-101).
+// ABOUTME: public items, checked with --base and --changed by the real binary, the `no-breaking` gate (ADR-101), and
+// ABOUTME: a TypeScript package whose API is what its package.json entries expose (ADR-176).
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -127,6 +128,12 @@ impl Repo {
 /// and the base commit.
 fn history(library: &Library) -> (Repo, String) {
     let repo = Repo::new();
+    if matches!(library.lang, "javascript" | "typescript") {
+        repo.write(
+            "package.json",
+            &format!("{{ \"main\": \"{}\" }}\n", library.file),
+        );
+    }
     repo.write(library.file, library.base);
     let base = repo.commit("the library");
     repo.git(&["checkout", "--quiet", "-b", "work"]);
@@ -315,4 +322,122 @@ fn the_no_breaking_gate_fails_on_a_break_and_passes_once_it_is_suppressed() {
         repo.path(),
     );
     assert_eq!(passed.code, Some(0), "{}", passed.stdout);
+}
+
+/// Molten's `apps/agent` at the base: a private package whose `exports` map names entry files,
+/// none under `tools/`; its index re-exports one tool, and its server entry imports another.
+const AGENT: [(&str, &str); 5] = [
+    (
+        "apps/agent/package.json",
+        "{\n  \"name\": \"agent\",\n  \"private\": true,\n  \"exports\": {\n    \".\": \"./src/index.ts\",\n    \"./server\": { \"types\": \"./src/server.ts\", \"default\": \"./src/server.ts\" },\n    \"./extra\": \"./src/extra.ts\"\n  }\n}\n",
+    ),
+    (
+        "apps/agent/src/index.ts",
+        "export { shared } from './tools/shared';\n",
+    ),
+    (
+        "apps/agent/src/server.ts",
+        "import { validateCustomManifest } from './tools/extension-authoring';\n\nexport function serve(text: string): boolean {\n  return validateCustomManifest(text);\n}\n",
+    ),
+    (
+        "apps/agent/src/tools/extension-authoring.ts",
+        "export function validateCustomManifest(text: string): boolean {\n  return text.length > 0;\n}\n\nexport function author(): number {\n  return 1;\n}\n",
+    ),
+    (
+        "apps/agent/src/tools/shared.ts",
+        "export function shared(): number {\n  return 2;\n}\n\nexport function other(): number {\n  return 3;\n}\n",
+    ),
+];
+
+/// The agent package committed on `main`, with `src/extra.ts`, and branch `work` checked out.
+/// Returns the repository and the base commit.
+fn agent() -> (Repo, String) {
+    let repo = Repo::new();
+    for (path, text) in AGENT {
+        repo.write(path, text);
+    }
+    repo.write(
+        "apps/agent/src/extra.ts",
+        "export function old(): number {\n  return 4;\n}\n",
+    );
+    let base = repo.commit("the agent");
+    repo.git(&["checkout", "--quiet", "-b", "work"]);
+    (repo, base)
+}
+
+/// Area 11's false finding: a function moved to another file of its package, its importer
+/// updated, is internal on both sides, so no `api.breaking`; nor is removing an item no entry
+/// exposes.
+#[test]
+fn moving_an_item_no_entry_exposes_inside_its_package_is_not_breaking() {
+    let (repo, base) = agent();
+    repo.write(
+        "apps/agent/src/tools/extension-authoring.ts",
+        "export function author(): number {\n  return 1;\n}\n",
+    );
+    repo.write(
+        "apps/agent/src/tools/manifest.ts",
+        "export function validateCustomManifest(text: string): boolean {\n  return text.length > 0;\n}\n",
+    );
+    repo.write(
+        "apps/agent/src/server.ts",
+        "import { validateCustomManifest } from './tools/manifest';\n\nexport function serve(text: string): boolean {\n  return validateCustomManifest(text);\n}\n",
+    );
+    repo.write(
+        "apps/agent/src/tools/shared.ts",
+        "export function shared(): number {\n  return 2;\n}\n",
+    );
+    repo.commit("move the manifest check");
+    for scope in [&["--base", base.as_str()][..], &["--changed"]] {
+        let envelope = repo.check(scope, 0);
+        assert_eq!(findings(&envelope), [], "{scope:?}");
+        assert_eq!(envelope.checks[0].status, CheckStatus::Pass, "{scope:?}");
+    }
+}
+
+/// Removing an item an entry re-exports breaks the package's API, though the entry itself is
+/// unchanged (read from the repository on the base side).
+#[test]
+fn removing_an_item_an_entry_re_exports_is_breaking() {
+    let (repo, base) = agent();
+    repo.write(
+        "apps/agent/src/tools/shared.ts",
+        "export function other(): number {\n  return 3;\n}\n",
+    );
+    repo.commit("drop shared");
+    let envelope = repo.check(&["--base", &base], 0);
+    assert_eq!(
+        findings(&envelope),
+        [(
+            "api.breaking".to_owned(),
+            "removed".to_owned(),
+            "shared".to_owned()
+        )]
+    );
+}
+
+/// Each side's entries are its own manifest's: a range that drops a subpath from `exports`
+/// makes what only it exposed internal at head, which removes it from the API.
+#[test]
+fn the_manifest_is_read_at_each_side_of_the_range() {
+    let (repo, base) = agent();
+    let (path, manifest) = AGENT[0];
+    repo.write(
+        path,
+        &manifest.replace(",\n    \"./extra\": \"./src/extra.ts\"", ""),
+    );
+    repo.write(
+        "apps/agent/src/extra.ts",
+        "export function old(): number {\n  return 4;\n}\n\nexport function fresh(): number {\n  return 5;\n}\n",
+    );
+    repo.commit("extra is internal");
+    let envelope = repo.check(&["--base", &base], 0);
+    assert_eq!(
+        findings(&envelope),
+        [(
+            "api.breaking".to_owned(),
+            "removed".to_owned(),
+            "old".to_owned()
+        )]
+    );
 }

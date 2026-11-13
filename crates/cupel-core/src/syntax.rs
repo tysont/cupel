@@ -478,6 +478,12 @@ pub struct ApiItem {
     pub signature: String,
     pub file: String,
     pub span: Span,
+    /// Whether no entry of the item's package exposes it, so it is not public API though its
+    /// file exports it: a JavaScript or TypeScript item that its `package.json` `exports` map,
+    /// or `main` and `types`, do not reach (ADR-176). Absent (false) in every other language.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub internal: bool,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]

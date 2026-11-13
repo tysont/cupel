@@ -1,13 +1,16 @@
 // ABOUTME: JavaScript and TypeScript: one implementation with two language IDs in the `ecma` family,
 // ABOUTME: sharing queries and tables; each prepends its own query files, and `.tsx` parses as TSX.
+mod entries;
 pub mod project;
 mod resolve;
 
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
+use cupel_core::syntax::ApiSurface;
+use cupel_core::{LangFamily, LangId, ProduceCtx, ProducerRegistry, Stability};
 
+use crate::imports::Imports;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::project::Ecosystem;
@@ -150,5 +153,19 @@ impl Language for Ecma {
             Dialect::TypeScript => resolve::typescript,
         };
         crate::references::register_resolved(language, &self.cache, resolve, reg);
+    }
+
+    /// A package's API is what its manifest's entries expose (ADR-176).
+    fn mark_internal(&self, surface: &mut ApiSurface, ctx: &ProduceCtx) {
+        let mut files: Vec<String> = surface.items.iter().map(|item| item.file.clone()).collect();
+        files.dedup();
+        let imports = Imports::new(&ctx.ctx.root, self, &self.cache, files)
+            .beside(ctx.focus.base_side.as_ref());
+        entries::mark_internal(
+            surface,
+            &imports,
+            self.dialect == Dialect::TypeScript,
+            &self.spec().tables().namespace,
+        );
     }
 }

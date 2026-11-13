@@ -14,6 +14,7 @@
     },
     {
       "file": "src/clones_settlement.js",
+      "internal": true,
       "kind": "function",
       "path": "clones_settlement.settleInvoices",
       "signature": "(_, _)",
@@ -26,6 +27,7 @@
     },
     {
       "file": "src/clones_settlement.js",
+      "internal": true,
       "kind": "function",
       "path": "clones_settlement.reconcilePayments",
       "signature": "(_, _)",
@@ -38,6 +40,7 @@
     },
     {
       "file": "src/clones_settlement.js",
+      "internal": true,
       "kind": "function",
       "path": "clones_settlement.orderLines",
       "signature": "(_, _, _)",
@@ -50,6 +53,7 @@
     },
     {
       "file": "src/clones_settlement.js",
+      "internal": true,
       "kind": "function",
       "path": "clones_settlement.refundLines",
       "signature": "(_, _, _)",
@@ -62,6 +66,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "function",
       "path": "complexity.label",
       "signature": "(_, _)",
@@ -74,6 +79,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "function",
       "path": "complexity.settle",
       "signature": "(_, _)",
@@ -86,6 +92,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "function",
       "path": "complexity.openAccount",
       "signature": "(_, _, _, _, _, _)",
@@ -98,6 +105,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "function",
       "path": "complexity.statementTemplate",
       "signature": "()",
@@ -110,6 +118,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "function",
       "path": "complexity.net",
       "signature": "(_, _)",
@@ -122,6 +131,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "type",
       "path": "complexity.Statement",
       "signature": "",
@@ -134,6 +144,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "method",
       "path": "complexity.Statement.constructor",
       "signature": "(_)",
@@ -146,6 +157,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "method",
       "path": "complexity.Statement.line",
       "signature": "(_)",
@@ -158,6 +170,7 @@
     },
     {
       "file": "src/complexity.js",
+      "internal": true,
       "kind": "function",
       "path": "complexity.month",
       "signature": "(_)",
@@ -170,6 +183,7 @@
     },
     {
       "file": "src/crap_scores.js",
+      "internal": true,
       "kind": "function",
       "path": "crap_scores.overdue",
       "signature": "(_, _)",
@@ -182,6 +196,7 @@
     },
     {
       "file": "src/crap_scores.js",
+      "internal": true,
       "kind": "function",
       "path": "crap_scores.clamp",
       "signature": "(_, _, _)",
@@ -194,6 +209,7 @@
     },
     {
       "file": "src/crap_scores.js",
+      "internal": true,
       "kind": "function",
       "path": "crap_scores.toCents",
       "signature": "(_)",
@@ -206,6 +222,7 @@
     },
     {
       "file": "src/dead_export.js",
+      "internal": true,
       "kind": "function",
       "path": "dead_export.unusedTotal",
       "signature": "(_)",
@@ -218,6 +235,7 @@
     },
     {
       "file": "src/decide.js",
+      "internal": true,
       "kind": "function",
       "path": "decide.classify",
       "signature": "(_, _)",
@@ -230,6 +248,7 @@
     },
     {
       "file": "src/decide.js",
+      "internal": true,
       "kind": "function",
       "path": "decide.firstOverdraft",
       "signature": "(_)",
@@ -242,6 +261,7 @@
     },
     {
       "file": "src/decide.js",
+      "internal": true,
       "kind": "function",
       "path": "decide.label",
       "signature": "(_)",
@@ -254,6 +274,7 @@
     },
     {
       "file": "src/decide.js",
+      "internal": true,
       "kind": "function",
       "path": "decide.parseCents",
       "signature": "(_)",
@@ -266,6 +287,7 @@
     },
     {
       "file": "src/deps_cycle/alpha.js",
+      "internal": true,
       "kind": "constant",
       "path": "deps_cycle.alpha.ALPHA",
       "signature": "",
@@ -278,6 +300,7 @@
     },
     {
       "file": "src/deps_cycle/beta.js",
+      "internal": true,
       "kind": "constant",
       "path": "deps_cycle.beta.BETA",
       "signature": "",
@@ -290,6 +313,7 @@
     },
     {
       "file": "src/deps_cycle/beta.js",
+      "internal": true,
       "kind": "constant",
       "path": "deps_cycle.beta.BOTH",
       "signature": "",
@@ -302,6 +326,7 @@
     },
     {
       "file": "src/deps_layers/domain/order.js",
+      "internal": true,
       "kind": "constant",
       "path": "deps_layers.domain.order.ORDER",
       "signature": "",
@@ -314,6 +339,7 @@
     },
     {
       "file": "src/deps_layers/infra/store.js",
+      "internal": true,
       "kind": "constant",
       "path": "deps_layers.infra.store.EMPTY_STORE",
       "signature": "",
@@ -326,6 +352,7 @@
     },
     {
       "file": "src/format.cjs",
+      "internal": true,
       "kind": "function",
       "path": "format.money",
       "signature": "(_)",
@@ -338,6 +365,7 @@
     },
     {
       "file": "src/index.js",
+      "internal": true,
       "kind": "module",
       "path": "geometry",
       "signature": "",
@@ -350,6 +378,7 @@
     },
     {
       "file": "src/index.js",
+      "internal": true,
       "kind": "constant",
       "path": "MAX_ENTRIES",
       "signature": "",
@@ -362,6 +391,7 @@
     },
     {
       "file": "src/index.js",
+      "internal": true,
       "kind": "variable",
       "path": "currency",
       "signature": "",
@@ -374,6 +404,7 @@
     },
     {
       "file": "src/inline.js",
+      "internal": true,
       "kind": "function",
       "path": "inline.double",
       "signature": "(_)",
@@ -386,6 +417,7 @@
     },
     {
       "file": "src/ledger.js",
+      "internal": true,
       "kind": "function",
       "path": "ledger.load",
       "signature": "(_)",
@@ -398,6 +430,7 @@
     },
     {
       "file": "src/math.js",
+      "internal": true,
       "kind": "function",
       "path": "math.add",
       "signature": "(_, _)",
@@ -410,6 +443,7 @@
     },
     {
       "file": "src/math.js",
+      "internal": true,
       "kind": "function",
       "path": "math.range",
       "signature": "(_, _)",
@@ -422,6 +456,7 @@
     },
     {
       "file": "src/money/cents.js",
+      "internal": true,
       "kind": "function",
       "path": "money.cents.toCents",
       "signature": "(_)",
@@ -434,6 +469,7 @@
     },
     {
       "file": "src/plugin.js",
+      "internal": true,
       "kind": "function",
       "path": "plugin.default",
       "signature": "(_)",
@@ -446,6 +482,7 @@
     },
     {
       "file": "src/pricing.js",
+      "internal": true,
       "kind": "function",
       "path": "pricing.discounted",
       "signature": "(_, _)",
@@ -458,6 +495,7 @@
     },
     {
       "file": "src/pricing.js",
+      "internal": true,
       "kind": "function",
       "path": "pricing.tally",
       "signature": "(_)",
@@ -470,6 +508,7 @@
     },
     {
       "file": "src/rates.js",
+      "internal": true,
       "kind": "function",
       "path": "rates.doubled",
       "signature": "(_)",
@@ -482,6 +521,7 @@
     },
     {
       "file": "src/references.js",
+      "internal": true,
       "kind": "function",
       "path": "references.exportedRate",
       "signature": "(_)",
@@ -494,6 +534,7 @@
     },
     {
       "file": "src/references.js",
+      "internal": true,
       "kind": "function",
       "path": "references.importedRate",
       "signature": "(_)",
@@ -506,6 +547,7 @@
     },
     {
       "file": "src/references.js",
+      "internal": true,
       "kind": "function",
       "path": "references.rateNamed",
       "signature": "(_, _)",
@@ -518,6 +560,7 @@
     },
     {
       "file": "src/references.js",
+      "internal": true,
       "kind": "function",
       "path": "references.evaluate",
       "signature": "(_)",
@@ -530,6 +573,7 @@
     },
     {
       "file": "src/references.js",
+      "internal": true,
       "kind": "type",
       "path": "references.Tariff",
       "signature": "",
@@ -542,6 +586,7 @@
     },
     {
       "file": "src/references.js",
+      "internal": true,
       "kind": "method",
       "path": "references.Tariff.charge",
       "signature": "(_)",
@@ -554,6 +599,7 @@
     },
     {
       "file": "src/shapes/geometry.js",
+      "internal": true,
       "kind": "type",
       "path": "shapes.geometry.Circle",
       "signature": "",
@@ -566,6 +612,7 @@
     },
     {
       "file": "src/shapes/geometry.js",
+      "internal": true,
       "kind": "method",
       "path": "shapes.geometry.Circle.constructor",
       "signature": "(_)",
@@ -578,6 +625,7 @@
     },
     {
       "file": "src/shapes/geometry.js",
+      "internal": true,
       "kind": "method",
       "path": "shapes.geometry.Circle.area",
       "signature": "()",
@@ -590,6 +638,7 @@
     },
     {
       "file": "src/shapes/geometry.js",
+      "internal": true,
       "kind": "method",
       "path": "shapes.geometry.Circle.unit",
       "signature": "()",
@@ -602,6 +651,7 @@
     },
     {
       "file": "src/shapes/geometry.js",
+      "internal": true,
       "kind": "function",
       "path": "shapes.geometry.scale",
       "signature": "(_, _)",
@@ -614,6 +664,7 @@
     },
     {
       "file": "src/twins.js",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotal",
       "signature": "(_, _)",
@@ -626,6 +677,7 @@
     },
     {
       "file": "src/twins.js",
+      "internal": true,
       "kind": "function",
       "path": "twins.sumAfterCharge",
       "signature": "(_, _)",
@@ -638,6 +690,7 @@
     },
     {
       "file": "src/twins.js",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalFloor",
       "signature": "(_, _)",
@@ -650,6 +703,7 @@
     },
     {
       "file": "src/twins.js",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalLaidOut",
       "signature": "(_, _)",
@@ -662,6 +716,7 @@
     },
     {
       "file": "src/twins.js",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalPlus",
       "signature": "(_, _)",
@@ -674,6 +729,7 @@
     },
     {
       "file": "src/twins.js",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalCapped",
       "signature": "(_, _)",
@@ -686,6 +742,7 @@
     },
     {
       "file": "src/twins.js",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalProduct",
       "signature": "(_, _)",

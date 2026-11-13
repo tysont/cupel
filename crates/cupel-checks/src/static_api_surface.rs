@@ -1,5 +1,5 @@
 // ABOUTME: `static.api-surface`: diffs ApiSurface between a range's base and head by path and reports removed or
-// ABOUTME: changed public items as `api.breaking` and added ones as `api.widened` (ADR-101, ADR-174).
+// ABOUTME: changed public items as `api.breaking` and added ones as `api.widened` (ADR-101, ADR-174, ADR-176).
 use std::collections::BTreeMap;
 
 use cupel_core::hint::LOCATION_COMMIT;
@@ -194,7 +194,8 @@ impl Check for StaticApiSurface {
 }
 
 /// One side's public items by path, each path's items in fact order, and the paths in the
-/// order they first appear in the fact (which orders the findings).
+/// order they first appear in the fact (which orders the findings). Internal items, which no
+/// entry of their package exposes, are not on it (ADR-176).
 struct Side<'a> {
     paths: BTreeMap<&'a str, Vec<&'a ApiItem>>,
     order: Vec<&'a str>,
@@ -204,7 +205,7 @@ impl<'a> Side<'a> {
     fn of(surface: &'a ApiSurface) -> Self {
         let mut paths: BTreeMap<&str, Vec<&ApiItem>> = BTreeMap::new();
         let mut order = Vec::new();
-        for item in &surface.items {
+        for item in surface.items.iter().filter(|item| !item.internal) {
             let items = paths.entry(&item.path).or_default();
             if items.is_empty() {
                 order.push(item.path.as_str());

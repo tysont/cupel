@@ -109,11 +109,7 @@ pub fn typescript(imports: &Imports<'_>) -> ModuleGraph {
 }
 
 fn graph(imports: &Imports<'_>, typescript: bool) -> ModuleGraph {
-    let resolver = Resolver {
-        imports,
-        typescript,
-        manifests: RefCell::new(HashMap::new()),
-    };
+    let resolver = Resolver::new(imports, typescript);
     let packages = resolver.packages();
     let mut roots: BTreeMap<String, Vec<ImportEdge>> = packages
         .iter()
@@ -141,16 +137,27 @@ fn graph(imports: &Imports<'_>, typescript: bool) -> ModuleGraph {
 
 /// A `package.json` found in the repository.
 #[derive(Debug, Clone)]
-struct Package {
+pub(super) struct Package {
     dir: String,
     name: Option<String>,
 }
 
-struct Resolver<'a, 'b> {
+pub(super) struct Resolver<'a, 'b> {
     imports: &'a Imports<'b>,
     typescript: bool,
     /// Parsed JSON files by path; `None` when missing or invalid.
     manifests: RefCell<HashMap<String, Option<Value>>>,
+}
+
+impl<'a, 'b> Resolver<'a, 'b> {
+    /// The resolver of `imports`' files, by TypeScript's rules when `typescript`.
+    pub(super) fn new(imports: &'a Imports<'b>, typescript: bool) -> Self {
+        Self {
+            imports,
+            typescript,
+            manifests: RefCell::new(HashMap::new()),
+        }
+    }
 }
 
 impl Resolver<'_, '_> {
@@ -169,7 +176,12 @@ impl Resolver<'_, '_> {
         }
     }
 
-    fn resolve(&self, packages: &[Package], from: &str, specifier: &str) -> ImportTarget {
+    pub(super) fn resolve(
+        &self,
+        packages: &[Package],
+        from: &str,
+        specifier: &str,
+    ) -> ImportTarget {
         let dir = parent(from);
         let found = |path: Option<String>| {
             path.map_or(ImportTarget::Unresolved, |path| ImportTarget::File { path })
@@ -283,7 +295,7 @@ impl Resolver<'_, '_> {
 
     /// The file `path` names: itself, its TypeScript source, with an extension, or a
     /// directory's `main` or `index`.
-    fn probe(&self, path: &str) -> Option<String> {
+    pub(super) fn probe(&self, path: &str) -> Option<String> {
         if self.imports.is_file(path) {
             return Some(path.to_owned());
         }
@@ -325,7 +337,7 @@ impl Resolver<'_, '_> {
         self.with_extension(&join(dir, "index"))
     }
 
-    fn extensions(&self) -> &'static [&'static str] {
+    pub(super) fn extensions(&self) -> &'static [&'static str] {
         if self.typescript {
             TYPESCRIPT_EXTENSIONS
         } else {
@@ -347,7 +359,7 @@ impl Resolver<'_, '_> {
     }
 
     /// A JSON file (comments and trailing commas allowed, as tsconfig permits), cached.
-    fn json(&self, path: &str) -> Option<Value> {
+    pub(super) fn json(&self, path: &str) -> Option<Value> {
         self.manifests
             .borrow_mut()
             .entry(path.to_owned())
@@ -359,7 +371,7 @@ impl Resolver<'_, '_> {
     }
 
     /// The root package, its workspaces, and the nearest package above each file in scope.
-    fn packages(&self) -> Vec<Package> {
+    pub(super) fn packages(&self) -> Vec<Package> {
         let mut dirs = self.workspace_dirs();
         dirs.extend(
             self.imports
@@ -400,7 +412,7 @@ impl Resolver<'_, '_> {
 
     /// The directory of the nearest `package.json` at or above `file`'s directory (`.` for the
     /// root).
-    fn package_dir_of(&self, file: &str) -> Option<String> {
+    pub(super) fn package_dir_of(&self, file: &str) -> Option<String> {
         let mut current = parent(file).to_owned();
         while !self.imports.is_file(&join(&current, "package.json")) {
             current = parent_dir(&current)?;
@@ -444,7 +456,7 @@ fn conditional(target: &Value, star: Option<&str>) -> Option<String> {
 }
 
 /// What `*` in `pattern` stands for when `pattern` matches `text` (empty for an exact match).
-fn match_pattern(pattern: &str, text: &str) -> Option<String> {
+pub(super) fn match_pattern(pattern: &str, text: &str) -> Option<String> {
     match pattern.split_once('*') {
         None => (pattern == text).then(String::new),
         Some((prefix, suffix)) => text
@@ -501,7 +513,7 @@ fn parent_dir(dir: &str) -> Option<String> {
 }
 
 /// `a/b/../c` as `a/c`.
-fn normalize(path: &str) -> String {
+pub(super) fn normalize(path: &str) -> String {
     let mut parts: Vec<&str> = Vec::new();
     for part in path.split('/') {
         match part {

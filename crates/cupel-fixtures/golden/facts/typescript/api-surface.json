@@ -14,6 +14,7 @@
     },
     {
       "file": "src/clones_settlement.ts",
+      "internal": true,
       "kind": "interface",
       "path": "clones_settlement.Invoice",
       "signature": "",
@@ -26,6 +27,7 @@
     },
     {
       "file": "src/clones_settlement.ts",
+      "internal": true,
       "kind": "function",
       "path": "clones_settlement.settleInvoices",
       "signature": "(_: Invoice[], _: number): [number, number]",
@@ -38,6 +40,7 @@
     },
     {
       "file": "src/clones_settlement.ts",
+      "internal": true,
       "kind": "function",
       "path": "clones_settlement.reconcilePayments",
       "signature": "(_: readonly Invoice[], _: number): [number, number]",
@@ -50,6 +53,7 @@
     },
     {
       "file": "src/clones_settlement.ts",
+      "internal": true,
       "kind": "function",
       "path": "clones_settlement.orderLines",
       "signature": "(_: number[], _: number[], _: number): string[]",
@@ -62,6 +66,7 @@
     },
     {
       "file": "src/clones_settlement.ts",
+      "internal": true,
       "kind": "function",
       "path": "clones_settlement.refundLines",
       "signature": "(_: number[], _: number[], _: number): string[]",
@@ -74,6 +79,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "function",
       "path": "complexity.label",
       "signature": "(_: number, _: number): string",
@@ -86,6 +92,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "function",
       "path": "complexity.settle",
       "signature": "(_: number[] [], _: number): number",
@@ -98,6 +105,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "function",
       "path": "complexity.openAccount",
       "signature": "(_: string, _: string, _: number, _: boolean, _: number, _: number): string",
@@ -110,6 +118,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "function",
       "path": "complexity.statementTemplate",
       "signature": "(): string[]",
@@ -122,6 +131,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "function",
       "path": "complexity.net",
       "signature": "(_: number, _: number): number",
@@ -134,6 +144,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "type",
       "path": "complexity.Statement",
       "signature": "",
@@ -146,6 +157,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "method",
       "path": "complexity.Statement.constructor",
       "signature": "(_: string)",
@@ -158,6 +170,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "method",
       "path": "complexity.Statement.line",
       "signature": "(_: number): string",
@@ -170,6 +183,7 @@
     },
     {
       "file": "src/complexity.ts",
+      "internal": true,
       "kind": "function",
       "path": "complexity.month",
       "signature": "(_: number): string",
@@ -182,6 +196,7 @@
     },
     {
       "file": "src/crap_scores.ts",
+      "internal": true,
       "kind": "function",
       "path": "crap_scores.overdue",
       "signature": "(_: number[], _: number): number",
@@ -194,6 +209,7 @@
     },
     {
       "file": "src/crap_scores.ts",
+      "internal": true,
       "kind": "function",
       "path": "crap_scores.clamp",
       "signature": "(_: number, _: number, _: number): number",
@@ -206,6 +222,7 @@
     },
     {
       "file": "src/crap_scores.ts",
+      "internal": true,
       "kind": "function",
       "path": "crap_scores.toCents",
       "signature": "(_: number): number",
@@ -218,6 +235,7 @@
     },
     {
       "file": "src/dead_export.ts",
+      "internal": true,
       "kind": "function",
       "path": "dead_export.unusedTotal",
       "signature": "(_: number[]): number",
@@ -230,6 +248,7 @@
     },
     {
       "file": "src/decide.ts",
+      "internal": true,
       "kind": "interface",
       "path": "decide.Entry",
       "signature": "",
@@ -242,6 +261,7 @@
     },
     {
       "file": "src/decide.ts",
+      "internal": true,
       "kind": "function",
       "path": "decide.classify",
       "signature": "(_: number, _: number): string",
@@ -254,6 +274,7 @@
     },
     {
       "file": "src/decide.ts",
+      "internal": true,
       "kind": "function",
       "path": "decide.firstOverdraft",
       "signature": "(_: Entry[]): Entry | null",
@@ -266,6 +287,7 @@
     },
     {
       "file": "src/decide.ts",
+      "internal": true,
       "kind": "function",
       "path": "decide.label",
       "signature": "(_: \"deposit\" | \"withdrawal\" | string): string",
@@ -278,6 +300,7 @@
     },
     {
       "file": "src/decide.ts",
+      "internal": true,
       "kind": "function",
       "path": "decide.parseCents",
       "signature": "(_: string | undefined): number",
@@ -290,6 +313,7 @@
     },
     {
       "file": "src/deps_cycle/alpha.ts",
+      "internal": true,
       "kind": "constant",
       "path": "deps_cycle.alpha.ALPHA",
       "signature": "",
@@ -302,6 +326,7 @@
     },
     {
       "file": "src/deps_cycle/beta.ts",
+      "internal": true,
       "kind": "constant",
       "path": "deps_cycle.beta.BETA",
       "signature": "",
@@ -314,6 +339,7 @@
     },
     {
       "file": "src/deps_cycle/beta.ts",
+      "internal": true,
       "kind": "constant",
       "path": "deps_cycle.beta.BOTH",
       "signature": "",
@@ -326,6 +352,7 @@
     },
     {
       "file": "src/deps_layers/domain/order.ts",
+      "internal": true,
       "kind": "type",
       "path": "deps_layers.domain.order.Order",
       "signature": "",
@@ -338,6 +365,7 @@
     },
     {
       "file": "src/deps_layers/infra/store.ts",
+      "internal": true,
       "kind": "type",
       "path": "deps_layers.infra.store.Store",
       "signature": "",
@@ -350,6 +378,7 @@
     },
     {
       "file": "src/deps_layers/port.ts",
+      "internal": true,
       "kind": "interface",
       "path": "deps_layers.port.Port",
       "signature": "",
@@ -362,6 +391,7 @@
     },
     {
       "file": "src/deps_layers/port.ts",
+      "internal": true,
       "kind": "method",
       "path": "deps_layers.port.Port.place",
       "signature": "(_: Order): void",
@@ -374,6 +404,7 @@
     },
     {
       "file": "src/index.ts",
+      "internal": true,
       "kind": "module",
       "path": "geometry",
       "signature": "",
@@ -386,6 +417,7 @@
     },
     {
       "file": "src/index.ts",
+      "internal": true,
       "kind": "constant",
       "path": "MAX_ENTRIES",
       "signature": "number",
@@ -398,6 +430,7 @@
     },
     {
       "file": "src/index.ts",
+      "internal": true,
       "kind": "variable",
       "path": "currency",
       "signature": "string",
@@ -410,6 +443,7 @@
     },
     {
       "file": "src/index.ts",
+      "internal": true,
       "kind": "type",
       "path": "Cents",
       "signature": "",
@@ -422,6 +456,7 @@
     },
     {
       "file": "src/index.ts",
+      "internal": true,
       "kind": "type",
       "path": "Currency",
       "signature": "",
@@ -434,6 +469,7 @@
     },
     {
       "file": "src/inline.ts",
+      "internal": true,
       "kind": "function",
       "path": "inline.double",
       "signature": "(_: number): number",
@@ -446,6 +482,7 @@
     },
     {
       "file": "src/ledger.ts",
+      "internal": true,
       "kind": "function",
       "path": "ledger.load",
       "signature": "(_: string, _: Registry): number",
@@ -458,6 +495,7 @@
     },
     {
       "file": "src/legacy.ts",
+      "internal": true,
       "kind": "function",
       "path": "legacy.Legacy.round",
       "signature": "(_: number): number",
@@ -470,6 +508,7 @@
     },
     {
       "file": "src/legacy.ts",
+      "internal": true,
       "kind": "module",
       "path": "legacy.Legacy",
       "signature": "",
@@ -482,6 +521,7 @@
     },
     {
       "file": "src/math.ts",
+      "internal": true,
       "kind": "function",
       "path": "math.add",
       "signature": "(_: number, _: number): number",
@@ -494,6 +534,7 @@
     },
     {
       "file": "src/math.ts",
+      "internal": true,
       "kind": "function",
       "path": "math.range",
       "signature": "(_: number, _: number): Generator<number>",
@@ -506,6 +547,7 @@
     },
     {
       "file": "src/plugin.ts",
+      "internal": true,
       "kind": "interface",
       "path": "plugin.Registry",
       "signature": "",
@@ -518,6 +560,7 @@
     },
     {
       "file": "src/plugin.ts",
+      "internal": true,
       "kind": "method",
       "path": "plugin.Registry.register",
       "signature": "(_: string, _: { version: number }): void",
@@ -530,6 +573,7 @@
     },
     {
       "file": "src/plugin.ts",
+      "internal": true,
       "kind": "function",
       "path": "plugin.default",
       "signature": "(_: Registry): void",
@@ -542,6 +586,7 @@
     },
     {
       "file": "src/pricing.ts",
+      "internal": true,
       "kind": "function",
       "path": "pricing.discounted",
       "signature": "(_: number, _: boolean): number",
@@ -554,6 +599,7 @@
     },
     {
       "file": "src/pricing.ts",
+      "internal": true,
       "kind": "function",
       "path": "pricing.tally",
       "signature": "(_: number[]): { total: number; overdrawn: boolean }",
@@ -566,6 +612,7 @@
     },
     {
       "file": "src/rates.ts",
+      "internal": true,
       "kind": "function",
       "path": "rates.doubled",
       "signature": "(_: number): number",
@@ -578,6 +625,7 @@
     },
     {
       "file": "src/references.ts",
+      "internal": true,
       "kind": "function",
       "path": "references.exportedRate",
       "signature": "(_: number): number",
@@ -590,6 +638,7 @@
     },
     {
       "file": "src/references.ts",
+      "internal": true,
       "kind": "function",
       "path": "references.importedRate",
       "signature": "(_: number): number",
@@ -602,6 +651,7 @@
     },
     {
       "file": "src/references.ts",
+      "internal": true,
       "kind": "function",
       "path": "references.rateNamed",
       "signature": "(_: string, _: number): number",
@@ -614,6 +664,7 @@
     },
     {
       "file": "src/references.ts",
+      "internal": true,
       "kind": "function",
       "path": "references.evaluate",
       "signature": "(_: string): number",
@@ -626,6 +677,7 @@
     },
     {
       "file": "src/references.ts",
+      "internal": true,
       "kind": "type",
       "path": "references.Tariff",
       "signature": "",
@@ -638,6 +690,7 @@
     },
     {
       "file": "src/references.ts",
+      "internal": true,
       "kind": "method",
       "path": "references.Tariff.charge",
       "signature": "(_: number): number",
@@ -650,6 +703,7 @@
     },
     {
       "file": "src/shapes/geometry.ts",
+      "internal": true,
       "kind": "type",
       "path": "shapes.geometry.Shape",
       "signature": "",
@@ -662,6 +716,7 @@
     },
     {
       "file": "src/shapes/geometry.ts",
+      "internal": true,
       "kind": "method",
       "path": "shapes.geometry.Shape.area",
       "signature": "(): number",
@@ -674,6 +729,7 @@
     },
     {
       "file": "src/shapes/geometry.ts",
+      "internal": true,
       "kind": "method",
       "path": "shapes.geometry.Shape.describe",
       "signature": "(): string",
@@ -686,6 +742,7 @@
     },
     {
       "file": "src/shapes/geometry.ts",
+      "internal": true,
       "kind": "type",
       "path": "shapes.geometry.Circle",
       "signature": "",
@@ -698,6 +755,7 @@
     },
     {
       "file": "src/shapes/geometry.ts",
+      "internal": true,
       "kind": "method",
       "path": "shapes.geometry.Circle.constructor",
       "signature": "(readonly _: number)",
@@ -710,6 +768,7 @@
     },
     {
       "file": "src/shapes/geometry.ts",
+      "internal": true,
       "kind": "method",
       "path": "shapes.geometry.Circle.area",
       "signature": "(): number",
@@ -722,6 +781,7 @@
     },
     {
       "file": "src/shapes/geometry.ts",
+      "internal": true,
       "kind": "method",
       "path": "shapes.geometry.Circle.unit",
       "signature": "(): Circle",
@@ -734,6 +794,7 @@
     },
     {
       "file": "src/shapes/geometry.ts",
+      "internal": true,
       "kind": "function",
       "path": "shapes.geometry.scale",
       "signature": "(_: Circle, _: number): Circle",
@@ -746,6 +807,7 @@
     },
     {
       "file": "src/shapes/index.ts",
+      "internal": true,
       "kind": "module",
       "path": "shapes.math",
       "signature": "",
@@ -758,6 +820,7 @@
     },
     {
       "file": "src/twins.ts",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotal",
       "signature": "(_: number[], _: number): number",
@@ -770,6 +833,7 @@
     },
     {
       "file": "src/twins.ts",
+      "internal": true,
       "kind": "function",
       "path": "twins.sumAfterCharge",
       "signature": "(_: readonly number[], _: number): number",
@@ -782,6 +846,7 @@
     },
     {
       "file": "src/twins.ts",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalFloor",
       "signature": "(_: number[], _: number): number",
@@ -794,6 +859,7 @@
     },
     {
       "file": "src/twins.ts",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalLaidOut",
       "signature": "(_: number[], _: number): number",
@@ -806,6 +872,7 @@
     },
     {
       "file": "src/twins.ts",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalPlus",
       "signature": "(_: number[], _: number): number",
@@ -818,6 +885,7 @@
     },
     {
       "file": "src/twins.ts",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalCapped",
       "signature": "(_: number[], _: number): number",
@@ -830,6 +898,7 @@
     },
     {
       "file": "src/twins.ts",
+      "internal": true,
       "kind": "function",
       "path": "twins.netTotalProduct",
       "signature": "(_: number[], _: number): number",
@@ -842,6 +911,7 @@
     },
     {
       "file": "src/widget.tsx",
+      "internal": true,
       "kind": "function",
       "path": "widget.Badge",
       "signature": "(_: { label: string; count: number })",

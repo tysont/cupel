@@ -128,11 +128,9 @@ pub(crate) fn run_touching(
     let (info, resolved) = (scoped.info, scoped.files);
     let mut selected = selection(config, args).select(catalog.checks())?;
     let oracle = Selected::choose(writer, config, args.oracle.as_deref(), &mut selected)?;
-    let base_files = base_files(catalog.language_registry(), &resolved);
-    let langs = scope::languages_of(
-        catalog.language_registry(),
-        resolved.files.iter().chain(&base_files),
-    );
+    let languages = catalog.language_registry();
+    let base_files = base_files(languages, &resolved);
+    let langs = scope::languages_of(languages, resolved.files.iter().chain(&base_files));
     let git = scope::git_info(writer.root(), &resolved);
     let tree = touched.is_none().then_some(scoped.tree);
     let mut job = Job {
@@ -140,7 +138,7 @@ pub(crate) fn run_touching(
         writer,
         cancel: run.cancellation().clone(),
         config,
-        base: base_tree(invocation, &resolved, &base_files, &selected)?,
+        base: base_tree(invocation, languages, &resolved, &base_files, &selected)?,
         selected,
         langs: langs.clone(),
         files: resolved.files.clone(),
@@ -390,9 +388,11 @@ pub(crate) fn base_files(languages: &LanguageRegistry, resolved: &ResolvedFiles)
 }
 
 /// The base side of a range scope: checked out into the run's scratch directory when a
-/// selected check reads it, else only described (ADR-056). `None` without a range.
+/// selected check reads it, with the changed manifests `languages` read, else only described
+/// (ADR-056, ADR-192). `None` without a range.
 fn base_tree(
     invocation: &Invocation<'_>,
+    languages: &LanguageRegistry,
     resolved: &ResolvedFiles,
     files: &[String],
     selected: &[&dyn Check],
@@ -408,9 +408,13 @@ fn base_tree(
     let reads_base = selected.iter().any(|check| !check.base_needs().is_empty());
     let git = Git::open(invocation.writer.root()).filter(|_| reads_base && !invocation.dry_run);
     Ok(Some(match git {
-        Some(git) => BaseTree::checkout(range, &git, &scratch, |path| {
-            files.iter().any(|file| file == path)
-        })?,
+        Some(git) => BaseTree::checkout(
+            range,
+            &git,
+            &scratch,
+            |path| files.iter().any(|file| file == path),
+            |path| languages.is_manifest(path),
+        )?,
         None => BaseTree::planned(range, &scratch),
     }))
 }

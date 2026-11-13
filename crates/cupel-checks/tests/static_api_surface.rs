@@ -27,6 +27,7 @@ fn item(path: &str, kind: ApiItemKind, signature: &str, file: &str, line: u32) -
             end_line: line + 2,
             end_col: 2,
         },
+        internal: false,
     }
 }
 
@@ -306,6 +307,32 @@ fn trailing_parameters_a_caller_may_leave_out_widen_a_signature() {
         ),
         ["changed"]
     );
+}
+
+/// An item no entry of its package exposes is internal (ADR-176): moving, removing, or adding
+/// one is neither breaking nor widening, and a public item that became internal is removed.
+#[test]
+fn internal_items_are_not_api_surface() {
+    let internal = |path: &str, file: &str| ApiItem {
+        internal: true,
+        ..item(path, ApiItemKind::Function, "()", file, 1)
+    };
+    let base = vec![
+        internal("tools.a.validate", "tools/a.x"),
+        internal("tools.a.dropped", "tools/a.x"),
+        function("m.hidden", "()", 3),
+    ];
+    let head = vec![
+        internal("tools.b.validate", "tools/b.x"),
+        internal("tools.b.fresh", "tools/b.x"),
+        internal("m.hidden", "lib.x"),
+    ];
+    let (result, findings) = run(base, head);
+    assert_eq!(
+        reported(&findings),
+        [("api.breaking", "m.hidden", "removed")]
+    );
+    assert_eq!(result.score, Some(score(1.0, "breaking", 1)));
 }
 
 #[test]

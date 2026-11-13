@@ -50,8 +50,9 @@ merge_list!(ApiSurface, items);
 merge_list!(Roots, roots);
 
 /// Completes a merged fact with what only the files together say (a helper one file defines
-/// and another calls), given every parsed file of the scope.
-pub type Finish<F> = fn(&mut F, &[Parsed], &dyn Language);
+/// and another calls, a package's entries), given every parsed file of the scope and what the
+/// producer sees.
+pub type Finish<F> = fn(&mut F, &[Parsed], &dyn Language, &ProduceCtx);
 
 /// A producer that runs `extract` over every file of its language in scope. Every generic
 /// producer (`QuerySymbols`, `QueryDecisions`, …) is one of these with its own extractor.
@@ -117,7 +118,7 @@ impl<F: Fact + Merge + Clone> Producer<F> for QueryProducer<F> {
             fact.merge(part);
         }
         if let Some(finish) = self.finish {
-            finish(&mut fact, &parsed, language);
+            finish(&mut fact, &parsed, language, ctx);
         }
         Ok(fact)
     }
