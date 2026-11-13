@@ -78,3 +78,24 @@ fn the_metrics_compared_as_weighted_means_across_matched_symbols_are_crap_and_mo
         ]
     );
 }
+
+#[test]
+fn the_only_metric_with_a_ratchet_tolerance_is_the_mutation_score_at_two_hundredths() {
+    let registry = support::registry();
+    let tolerated: Vec<(String, f64)> = registry
+        .iter()
+        .flat_map(|check| {
+            let id = check.manifest().id.as_str().to_owned();
+            check
+                .manifest()
+                .metrics
+                .iter()
+                .filter_map(move |metric| {
+                    let tolerance = metric.tolerance?;
+                    Some((format!("{id}.{}", metric.name), tolerance))
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    assert_eq!(tolerated, [("tests.mutation.score".to_owned(), 0.02)]);
+}

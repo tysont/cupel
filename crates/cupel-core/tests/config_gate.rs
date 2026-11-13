@@ -198,7 +198,7 @@ fn assert_parse_error((key, condition): (&str, &str), message: &str) {
     assert_eq!(err.to_string(), message);
 }
 
-fn relative(op: Comparison, offset: f64) -> GateCondition {
+fn relative(op: Comparison, offset: Option<f64>) -> GateCondition {
     GateCondition::Relative { op, offset }
 }
 
@@ -209,37 +209,37 @@ fn parses_every_comparison_against_the_reference_value() {
             "static.clones.pairs",
             "<= base",
             key("static.clones", Some("pairs")),
-            relative(Comparison::Le, 0.0),
+            relative(Comparison::Le, None),
         ),
         (
             "tests.mutation.score",
             ">= base - 0.02",
             key("tests.mutation", Some("score")),
-            relative(Comparison::Ge, -0.02),
+            relative(Comparison::Ge, Some(-0.02)),
         ),
         (
             "static.crap.max",
             "> base + 1",
             key("static.crap", Some("max")),
-            relative(Comparison::Gt, 1.0),
+            relative(Comparison::Gt, Some(1.0)),
         ),
         (
             "static.crap.max",
             "<base",
             key("static.crap", Some("max")),
-            relative(Comparison::Lt, 0.0),
+            relative(Comparison::Lt, None),
         ),
         (
             "static.deps.cycles",
             "  ==base+0  ",
             key("static.deps", Some("cycles")),
-            relative(Comparison::Eq, 0.0),
+            relative(Comparison::Eq, Some(0.0)),
         ),
         (
             "tests.mutation.score",
             ">=base-0.5",
             key("tests.mutation", Some("score")),
-            relative(Comparison::Ge, -0.5),
+            relative(Comparison::Ge, Some(-0.5)),
         ),
     ]);
 }
@@ -250,8 +250,8 @@ fn a_rule_against_the_reference_value_round_trips_through_its_display() {
         ("<= base", "static.clones.pairs <= base"),
         (">= base - 0.02", "static.clones.pairs >= base - 0.02"),
         ("> base + 1", "static.clones.pairs > base + 1"),
-        ("==base+0", "static.clones.pairs == base"),
-        ("<base-0", "static.clones.pairs < base"),
+        ("==base+0", "static.clones.pairs == base + 0"),
+        ("<base-0", "static.clones.pairs < base - 0"),
     ];
     let displayed: Vec<String> = cases
         .iter()

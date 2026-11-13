@@ -14,6 +14,7 @@ fn metric(name: &str, per: MetricPer) -> MetricSpec {
         summary: format!("{name} summary"),
         per,
         protection: None,
+        tolerance: None,
     }
 }
 

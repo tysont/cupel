@@ -42,6 +42,7 @@ pub fn ranked(name: &str, per: MetricPer, summary: &str) -> MetricSpec {
         summary: summary.to_owned(),
         per,
         protection: None,
+        tolerance: None,
     }
 }
 

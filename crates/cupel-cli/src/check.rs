@@ -10,7 +10,8 @@ use cupel_core::{
     BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, FactKind, Finding, GateReference,
     GitInfo, ImpactedTests, Job, Lang, LangId, Manifest, Measured, Outcome, PlannedInstall,
     PlannedWrite, ProducerRegistry, Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest,
-    Selection, Status, SuiteReuse, Verb, Writer, apply_gate, evaluate_gate, gate_for, next_actions,
+    Selection, Status, SuiteReuse, Tolerances, Verb, Writer, apply_gate, evaluate_gate, gate_for,
+    next_actions,
 };
 use cupel_lang::LanguageRegistry;
 
@@ -45,19 +46,23 @@ pub fn verb(
 
 /// Grades a finished `check` or `survey` envelope after suppressions and deltas: `check`
 /// evaluates the applicable gate unless `--no-gate` (ADR-060), with `reference` as `base`
-/// (ADR-130), then both rank `next_actions` (ADR-061). Plans and errors pass through unchanged.
+/// (ADR-130) and the invocation's checks' metric tolerances (ADR-195), then both rank
+/// `next_actions` (ADR-061). Plans and errors pass through unchanged.
 pub fn grade(
     envelope: &mut Envelope,
     verb: Verb,
     args: &ScopeArgs,
-    config: &Config,
+    invocation: &Invocation<'_>,
     reference: &GateReference,
 ) {
     if !matches!(envelope.status, Status::Pass | Status::Partial) {
         return;
     }
-    if let Some((table, rules)) = gate_rules(envelope, verb, args, config) {
-        let gate = evaluate_gate(table, rules, envelope, reference);
+    if let Ok(config) = invocation.config
+        && let Some((table, rules)) = gate_rules(envelope, verb, args, config)
+    {
+        let tolerances = Tolerances::declared(invocation.catalog().checks());
+        let gate = evaluate_gate(table, rules, envelope, reference, &tolerances);
         apply_gate(envelope, gate);
     }
     envelope.next_actions = next_actions(envelope, &rerun(verb, args));

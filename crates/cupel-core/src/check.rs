@@ -121,7 +121,7 @@ impl FindingKindSpec {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 pub struct MetricSpec {
     pub name: String,
     pub summary: String,
@@ -132,6 +132,12 @@ pub struct MetricSpec {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub protection: Option<ProtectionMetric>,
+    /// How far a gate rule against `base` that writes no offset lets this `scope` metric move
+    /// past its reference value (ADR-182, ADR-195): a sampled ratio's run-to-run noise. Absent
+    /// is 0, as for every count.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub tolerance: Option<f64>,
 }
 
 /// Whether a described entity's contract may still change.

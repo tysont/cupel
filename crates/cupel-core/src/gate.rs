@@ -1,6 +1,9 @@
 // ABOUTME: Gate evaluation (design §6.7, ADR-060, ADR-130): picks `[gate.changed]` or `[gate.tree]` by scope mode,
-// ABOUTME: evaluates each rule against a graded envelope's metrics, findings, and reference run, and applies the result.
-use crate::config::{Comparison, GateCondition, GateConfig, GateRuleSpec, GateSection};
+// ABOUTME: evaluates each rule against a graded envelope's metrics, findings, reference run, and tolerances, and applies the result.
+use std::collections::BTreeMap;
+
+use crate::check::CheckRegistry;
+use crate::config::{Comparison, GateCondition, GateConfig, GateKey, GateRuleSpec, GateSection};
 use crate::envelope::{Envelope, GateOutcome, GateResult, GateRule, RuleOutcome};
 use crate::finding::Severity;
 use crate::rank::Target;
@@ -25,6 +28,39 @@ pub enum GateReference<'a> {
     Missing(String),
 }
 
+/// Each gate key's tolerance, as `<check>.<metric>` (ADR-182, ADR-195): how far a rule against
+/// `base` that writes no offset lets the metric move past its reference value. A key not held
+/// has tolerance 0.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct Tolerances(BTreeMap<String, f64>);
+
+impl Tolerances {
+    /// The tolerances the registered checks' manifests declare on their metrics.
+    pub fn declared(checks: &CheckRegistry) -> Self {
+        checks
+            .iter()
+            .flat_map(|check| {
+                let manifest = check.manifest();
+                manifest.metrics.iter().filter_map(|metric| {
+                    let tolerance = metric.tolerance?;
+                    Some((format!("{}.{}", manifest.id, metric.name), tolerance))
+                })
+            })
+            .collect()
+    }
+
+    /// The tolerance of `key`'s metric; 0 when none is declared.
+    pub fn of(&self, key: &GateKey) -> f64 {
+        self.0.get(&key.to_string()).copied().unwrap_or(0.0)
+    }
+}
+
+impl FromIterator<(String, f64)> for Tolerances {
+    fn from_iter<I: IntoIterator<Item = (String, f64)>>(iter: I) -> Self {
+        Self(iter.into_iter().collect())
+    }
+}
+
 /// The gate table a scope is graded by, as `(name, rules)`: `[gate.changed]` for change-based
 /// scopes, `[gate.tree]` otherwise. The rules are `None` when the configuration lacks the table.
 pub fn gate_for(config: &GateConfig, mode: ScopeMode) -> (&'static str, Option<&GateSection>) {
@@ -47,17 +83,19 @@ pub fn needs_reference(rules: &[GateRuleSpec]) -> bool {
 
 /// Evaluates `rules` (the table named `evaluated`) against a graded envelope: its suppressions
 /// and deltas are already applied, so suppressed findings are `info` and do not count. A rule
-/// against `base` compares with `reference`'s value of the same metric.
+/// against `base` compares with `reference`'s value of the same metric, loosened by the metric's
+/// tolerance in `tolerances` unless the rule writes an offset.
 pub fn evaluate_gate(
     evaluated: &str,
     rules: &[GateRuleSpec],
     envelope: &Envelope,
     reference: &GateReference,
+    tolerances: &Tolerances,
 ) -> GateResult {
     let rules: Vec<GateRule> = rules
         .iter()
         .map(|rule| {
-            let evaluation = evaluate_rule(rule, envelope, reference);
+            let evaluation = evaluate_rule(rule, envelope, reference, tolerances);
             let (actual_target, bound_target) = targets(rule, envelope, reference, &evaluation);
             GateRule {
                 rule: rule.to_string(),
@@ -65,6 +103,7 @@ pub fn evaluate_gate(
                 actual_target,
                 bound: evaluation.bound,
                 bound_target,
+                tolerance: evaluation.tolerance,
                 result: evaluation.result,
                 reason: evaluation.reason,
             }
@@ -96,6 +135,8 @@ pub fn apply_gate(envelope: &mut Envelope, gate: GateResult) {
 struct Evaluation {
     actual: Option<f64>,
     bound: Option<f64>,
+    /// The tolerance that loosened `bound`, when one did.
+    tolerance: Option<f64>,
     result: RuleOutcome,
     reason: Option<String>,
 }
@@ -105,6 +146,7 @@ impl Evaluation {
         Self {
             actual: Some(actual),
             bound: Some(bound),
+            tolerance: None,
             result: if passed {
                 RuleOutcome::Pass
             } else {
@@ -118,6 +160,7 @@ impl Evaluation {
         Self {
             actual,
             bound: None,
+            tolerance: None,
             result: RuleOutcome::Skipped,
             reason: Some(reason),
         }
@@ -128,6 +171,7 @@ fn evaluate_rule(
     rule: &GateRuleSpec,
     envelope: &Envelope,
     reference: &GateReference,
+    tolerances: &Tolerances,
 ) -> Evaluation {
     // Nothing in scope (an unchanged `--changed`) passes every rule vacuously (ADR-060 §6).
     if envelope
@@ -139,6 +183,7 @@ fn evaluate_rule(
         return Evaluation {
             actual: None,
             bound: None,
+            tolerance: None,
             result: RuleOutcome::Pass,
             reason: None,
         };
@@ -156,10 +201,28 @@ fn evaluate_rule(
             compared_metric(rule, entry, op, Ok(bound))
         }
         GateCondition::Relative { op, offset } => {
+            let (offset, tolerance) = match offset {
+                Some(offset) => (offset, None),
+                None => loosened(op, tolerances.of(&rule.key)),
+            };
             let bound = reference_value(rule, reference).map(|base| base + offset);
-            compared_metric(rule, entry, op, bound)
+            let mut evaluation = compared_metric(rule, entry, op, bound);
+            if evaluation.bound.is_some() {
+                evaluation.tolerance = tolerance;
+            }
+            evaluation
         }
         GateCondition::None | GateCondition::NoBreaking => presence(rule, envelope, entry),
+    }
+}
+
+/// The offset from `base` that `tolerance` gives a rule under `op`, with the tolerance applied:
+/// below the reference for a lower limit, above it for an upper one, and none for `==`.
+fn loosened(op: Comparison, tolerance: f64) -> (f64, Option<f64>) {
+    match op {
+        Comparison::Ge | Comparison::Gt => (-tolerance, Some(tolerance)),
+        Comparison::Le | Comparison::Lt => (tolerance, Some(tolerance)),
+        Comparison::Eq => (0.0, None),
     }
 }
 

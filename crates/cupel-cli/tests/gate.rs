@@ -337,7 +337,7 @@ fn a_tree_rule_against_base_compares_with_the_stored_baseline() {
     assert_eq!(held.code, 0, "{}", held.stdout);
     assert_eq!(
         gate(&held.envelope())["rules"][0],
-        json!({"rule": "static.clones.pairs <= base", "actual": 1.0, "bound": 1.0,
+        json!({"rule": "static.clones.pairs <= base", "actual": 1.0, "bound": 1.0, "tolerance": 0.0,
                "result": "pass", "reason": null})
     );
 
@@ -349,7 +349,7 @@ fn a_tree_rule_against_base_compares_with_the_stored_baseline() {
     assert_eq!(grown.code, 1, "{}", grown.stdout);
     assert_eq!(
         gate(&grown.envelope())["rules"][0],
-        json!({"rule": "static.clones.pairs <= base", "actual": 3.0, "bound": 1.0,
+        json!({"rule": "static.clones.pairs <= base", "actual": 3.0, "bound": 1.0, "tolerance": 0.0,
                "result": "fail", "reason": null})
     );
 }
@@ -394,7 +394,7 @@ fn a_changed_rule_against_base_recomputes_the_value_at_the_base_commit() {
     assert_eq!(
         rules_of(&widened),
         json!([
-            {"rule": "static.complexity.params_max <= base", "actual": 8.0, "bound": 7.0,
+            {"rule": "static.complexity.params_max <= base", "actual": 8.0, "bound": 7.0, "tolerance": 0.0,
              "result": "fail", "reason": null},
             {"rule": "static.complexity.cyclomatic_max >= base - 0.5", "actual": 2.0,
              "bound": 1.5, "result": "pass", "reason": null}
@@ -406,7 +406,7 @@ fn a_changed_rule_against_base_recomputes_the_value_at_the_base_commit() {
     assert_eq!(narrowed.code, 0, "{}", narrowed.stdout);
     assert_eq!(
         rules_of(&narrowed)[0],
-        json!({"rule": "static.complexity.params_max <= base", "actual": 6.0, "bound": 7.0,
+        json!({"rule": "static.complexity.params_max <= base", "actual": 6.0, "bound": 7.0, "tolerance": 0.0,
                "result": "pass", "reason": null})
     );
 
@@ -425,7 +425,7 @@ fn a_changed_rule_against_base_recomputes_the_value_at_the_base_commit() {
     assert_eq!(compared.code, 1, "{}", compared.stdout);
     assert_eq!(
         rules_of(&compared)[0],
-        json!({"rule": "static.complexity.params_max <= base", "actual": 9.0, "bound": 6.0,
+        json!({"rule": "static.complexity.params_max <= base", "actual": 9.0, "bound": 6.0, "tolerance": 0.0,
                "result": "fail", "reason": null}),
         "--against names the reference run, so nothing is recomputed"
     );
@@ -477,7 +477,7 @@ fn a_changed_rule_against_base_compares_the_symbols_the_change_touched_at_the_ba
     );
     assert_eq!(
         rule,
-        json!({"rule": "static.complexity.cyclomatic_max <= base", "actual": 2.0, "bound": 1.0,
+        json!({"rule": "static.complexity.cyclomatic_max <= base", "actual": 2.0, "bound": 1.0, "tolerance": 0.0,
                "result": "fail", "reason": null, "actual_target": null, "bound_target": null}),
         "the base is `step` as it was, not the untouched `wide` beside it"
     );

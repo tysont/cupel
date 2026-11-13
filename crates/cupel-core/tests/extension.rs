@@ -286,6 +286,7 @@ fn manifest_round_trips_with_kebab_fact_kinds() {
         summary: "Killed ratio.".into(),
         per: MetricPer::Scope,
         protection: None,
+        tolerance: None,
     });
     let value = serde_json::to_value(&m).unwrap();
     assert_eq!(value["needs"], json!(["mutation-outcomes"]));

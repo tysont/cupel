@@ -38,9 +38,10 @@ pub enum GateCondition {
         op: Comparison,
         threshold: Threshold,
     },
-    /// The metric compares with its value in the reference run plus `offset` (`<= base`,
-    /// `>= base - 0.02`; ADR-130).
-    Relative { op: Comparison, offset: f64 },
+    /// The metric compares with its value in the reference run plus `offset` (`>= base - 0.02`;
+    /// ADR-130). With no offset written (`<= base`), the metric's tolerance loosens the bound
+    /// (ADR-182, ADR-195).
+    Relative { op: Comparison, offset: Option<f64> },
     /// The check produced no findings.
     None,
     /// The check found no breaking change.
@@ -129,13 +130,15 @@ impl fmt::Display for GateCondition {
                 let suffix = if threshold.percent { "%" } else { "" };
                 write!(f, "{} {}{suffix}", op.symbol(), threshold.value)
             }
-            Self::Relative { op, offset } if *offset > 0.0 => {
-                write!(f, "{} {BASE} + {offset}", op.symbol())
-            }
-            Self::Relative { op, offset } if *offset < 0.0 => {
-                write!(f, "{} {BASE} - {}", op.symbol(), -offset)
-            }
-            Self::Relative { op, .. } => write!(f, "{} {BASE}", op.symbol()),
+            Self::Relative {
+                op,
+                offset: Some(offset),
+            } if offset.is_sign_negative() => write!(f, "{} {BASE} - {}", op.symbol(), -offset),
+            Self::Relative {
+                op,
+                offset: Some(offset),
+            } => write!(f, "{} {BASE} + {offset}", op.symbol()),
+            Self::Relative { op, offset: None } => write!(f, "{} {BASE}", op.symbol()),
             Self::None | Self::NoBreaking => f.write_str(self.word()),
         }
     }
@@ -248,11 +251,11 @@ fn relative_operand(operand: &str) -> Option<&str> {
     boundary.then(|| rest.trim())
 }
 
-/// The signed offset written after `base`: nothing, or `+`/`-` and a non-negative number in
-/// the metric's unit.
-fn parse_offset(offset: &str) -> Result<f64, String> {
+/// The signed offset written after `base`: nothing (`None`), or `+`/`-` and a non-negative
+/// number in the metric's unit.
+fn parse_offset(offset: &str) -> Result<Option<f64>, String> {
     if offset.is_empty() {
-        return Ok(0.0);
+        return Ok(None);
     }
     let (sign, factor, magnitude) = match (offset.strip_prefix('+'), offset.strip_prefix('-')) {
         (Some(magnitude), _) => ('+', 1.0, magnitude.trim()),
@@ -275,7 +278,7 @@ fn parse_offset(offset: &str) -> Result<f64, String> {
         ));
     }
     match magnitude.parse::<f64>() {
-        Ok(value) if value.is_finite() && value >= 0.0 => Ok(factor * value),
+        Ok(value) if value.is_finite() && value >= 0.0 => Ok(Some(factor * value)),
         _ => Err(format!(
             "`{BASE} {sign}` expects a non-negative number, such as `{BASE} {sign} 0.02`"
         )),

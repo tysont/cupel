@@ -2670,6 +2670,16 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-core/tests/per_test.rs` (`with_tests`), `syntax_facts.rs` (`own_root`); `cupel-cli/tests/explain.rs` `a_finding_whose_tests_were_its_own_roots_alone_names_that_root` (failed first: `own_root` null);
     - `cupel-cli/tests/suite_run.rs`'s planned needs gain `project-info`; the run schema snapshot, and the `describe` goldens of `tests.coverage` and `tests.mutation` (wants, evidence schemas), regenerated.
 
+- **Item 17, per-metric ratchet tolerance** (2026-11-13, [ADR-182](adr/CUPEL_DECISION_182.md), [ADR-195](adr/CUPEL_DECISION_195.md)).
+  - The gap: a rule against `base` compared with the reference value exactly, so a sampled ratio such as `tests.mutation.score` failed `>= base` at random, and nothing said where a metric's tolerance would live.
+  - Now (ADR-195 §1 to §3) a check's manifest declares `tolerance` on a `scope` metric (absent 0); `tests.mutation` declares 0.02 on `score`, and every count stays exact. A rule against `base` with no offset written is loosened by it: base − δ under `>=`/`>`, base + δ under `<=`/`<`, none under `==`. A written offset, `- 0` included, replaces δ (`GateCondition::Relative`'s `offset` is `None` when none is written). The gate reads the registered checks' tolerances (`Tolerances::declared`), and a rule that applied one carries `tolerance` in `summary.gate.rules[]` (text: `tolerance 0.02` after the bound).
+  - Open: Molten's M8-3 (`[gate.changed]` in its `cupel.md`) is to use these values; Molten's repository is not edited here.
+  - Tests:
+    - `cupel-core/tests/gate.rs` `a_rule_against_base_loosens_its_bound_by_the_metric_s_tolerance_unless_it_writes_an_offset` (0.75 passes `>= base` and `> base` against 0.76 with bound 0.74; `>= base - 0` and `== base` fail at 0.76) and `a_count_s_tolerance_raises_the_bound_of_an_upper_limit` (both failed first: `Tolerances` and `GateRule.tolerance` did not exist); the `<= base` expectations there and in `cupel-cli/tests/gate.rs` gain `tolerance: 0`;
+    - `cupel-checks/tests/registration.rs` `the_only_metric_with_a_ratchet_tolerance_is_the_mutation_score_at_two_hundredths` (failed first: no `tolerance` on `MetricSpec`);
+    - `cupel-core/tests/config_gate.rs`: `<= base` parses with no offset and `==base+0` with an offset of 0, and each displays as written;
+    - the render snapshots (the fixture's `<= base` rule shows `tolerance 0`), the run and plugin schema snapshots, and `tests.mutation`'s describe golden regenerated.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

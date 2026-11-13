@@ -19,12 +19,14 @@ fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
                     summary: String::new(),
                     per: MetricPer::Symbol,
                     protection: None,
+                    tolerance: None,
                 },
                 None => MetricSpec {
                     name: (*name).to_owned(),
                     summary: String::new(),
                     per: MetricPer::Scope,
                     protection: None,
+                    tolerance: None,
                 },
             })
             .collect(),

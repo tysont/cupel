@@ -565,7 +565,7 @@ fn graded(
             )?;
             if let (Some(verb), Ok(config)) = (envelope.run.verb, config) {
                 let reference = reference::resolve(invocation, config, scope, &envelope, compared);
-                check::grade(&mut envelope, verb, scope, config, &reference.as_gate());
+                check::grade(&mut envelope, verb, scope, invocation, &reference.as_gate());
             }
             if let Some(VerbArgs::Check { scaffold: true, .. }) = &cli.verb {
                 scaffold::apply(

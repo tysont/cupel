@@ -542,7 +542,8 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
                 },
                 "reason": null,
                 "result": "fail",
-                "rule": "static.crap.max <= base"
+                "rule": "static.crap.max <= base",
+                "tolerance": 0.0
               },
               {
                 "actual": null,

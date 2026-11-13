@@ -321,7 +321,8 @@
         {
           "name": "score",
           "per": "scope",
-          "summary": "Killed / (killed + survived + uncovered), the score; 1 when nothing was scored."
+          "summary": "Killed / (killed + survived + uncovered), the score; 1 when nothing was scored.",
+          "tolerance": 0.02
         },
         {
           "name": "killed",

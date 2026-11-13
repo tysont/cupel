@@ -218,6 +218,10 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .filter(|_| rule.rule.contains(" base"))
             .map(|bound| format!("  bound {bound}{}", on(rule.bound_target.as_ref())))
             .unwrap_or_default();
+        let tolerance = rule
+            .tolerance
+            .map(|tolerance| format!("  tolerance {tolerance}"))
+            .unwrap_or_default();
         let reason = rule
             .reason
             .as_ref()
@@ -225,7 +229,7 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .unwrap_or_default();
         let _ = writeln!(
             out,
-            "  {}  {}{actual}{bound}{reason}",
+            "  {}  {}{actual}{bound}{tolerance}{reason}",
             paint.rule(rule.result),
             rule.rule
         );

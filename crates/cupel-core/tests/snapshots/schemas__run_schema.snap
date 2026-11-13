@@ -1620,7 +1620,7 @@ expression: pretty(&schema)
           "x-cupel-optional": true
         },
         "bound": {
-          "description": "The value `actual` was compared with: the threshold, the reference value plus the\noffset for a rule against `base` (ADR-130), or 0 for a presence rule; null when the\nrule was not evaluated.",
+          "description": "The value `actual` was compared with: the threshold, the reference value plus the\noffset or less strict by the tolerance for a rule against `base` (ADR-130, ADR-195), or\n0 for a presence rule; null when the rule was not evaluated.",
           "type": [
             "number",
             "null"
@@ -1652,6 +1652,15 @@ expression: pretty(&schema)
         "rule": {
           "description": "The rule as written, such as `tests.mutation.score >= 0.80`.",
           "type": "string"
+        },
+        "tolerance": {
+          "description": "The metric's tolerance that loosened `bound`, for a rule against `base` that writes no\noffset and orders the values (ADR-182, ADR-195): 0 for a count. Absent otherwise: a\nwritten offset replaces the tolerance, and `==` takes none.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double",
+          "x-cupel-optional": true
         }
       },
       "required": [
@@ -2255,6 +2264,15 @@ expression: pretty(&schema)
         },
         "summary": {
           "type": "string"
+        },
+        "tolerance": {
+          "description": "How far a gate rule against `base` that writes no offset lets this `scope` metric move\npast its reference value (ADR-182, ADR-195): a sampled ratio's run-to-run noise. Absent\nis 0, as for every count.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double",
+          "x-cupel-optional": true
         }
       },
       "required": [

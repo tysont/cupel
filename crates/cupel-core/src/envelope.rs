@@ -207,14 +207,20 @@ pub struct GateRule {
     #[schemars(extend("x-cupel-optional" = true))]
     pub actual_target: Option<Target>,
     /// The value `actual` was compared with: the threshold, the reference value plus the
-    /// offset for a rule against `base` (ADR-130), or 0 for a presence rule; null when the
-    /// rule was not evaluated.
+    /// offset or less strict by the tolerance for a rule against `base` (ADR-130, ADR-195), or
+    /// 0 for a presence rule; null when the rule was not evaluated.
     pub bound: Option<f64>,
     /// What the reference value behind `bound` was measured on, for a rule against `base` whose
     /// metric has targets; absent otherwise, as for a threshold.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub bound_target: Option<Target>,
+    /// The metric's tolerance that loosened `bound`, for a rule against `base` that writes no
+    /// offset and orders the values (ADR-182, ADR-195): 0 for a count. Absent otherwise: a
+    /// written offset replaces the tolerance, and `==` takes none.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub tolerance: Option<f64>,
     pub result: RuleOutcome,
     /// Why a `skipped` rule was not evaluated, such as `no reference: no baseline is set`;
     /// null otherwise.

@@ -111,8 +111,8 @@ pub use flake::{RunOrder, TestRerun, TestReruns};
 pub use footprint::{Artifact, Dependency, Footprint, FootprintBase, Vulnerability};
 pub use fuzz::{FuzzCrash, FuzzResults, FuzzStatus, FuzzTarget};
 pub use gate::{
-    GATE_CHANGED, GATE_TREE, GateReference, NO_REFERENCE, apply_gate, evaluate_gate, gate_for,
-    needs_reference,
+    GATE_CHANGED, GATE_TREE, GateReference, NO_REFERENCE, Tolerances, apply_gate, evaluate_gate,
+    gate_for, needs_reference,
 };
 pub use grade::{CostClass, Tier};
 pub use hash::{FindingId, SiteHash, SymbolHash};

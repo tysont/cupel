@@ -1,6 +1,6 @@
 # CUPEL_DECISION_182: Gate ratchets have a per-metric tolerance, and the baseline advances only on a passing default-branch run
 
-**Date:** 2026-11-11 · **Status:** accepted · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [175](CUPEL_DECISION_175.md) and [130](CUPEL_DECISION_130.md)
+**Date:** 2026-11-11 · **Status:** accepted; detailed by [195](CUPEL_DECISION_195.md) · **Phase:** v0.2.7, the owner's rulings on the Molten field trial · Amends [175](CUPEL_DECISION_175.md) and [130](CUPEL_DECISION_130.md)
 
 ## Context
 ADR-175 made a range's base the touched symbols at the base, and left open how much a ratcheted metric may move. Sampled ratios such as the mutation score move between runs with no change in the code, so a zero tolerance on them fails at random, while any tolerance on counts lets regressions through.

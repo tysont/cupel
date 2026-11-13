@@ -233,9 +233,37 @@ fn settings() -> Vec<SettingSpec> {
     .collect()
 }
 
+/// How far `score >= base` lets the score fall below the reference by default: a sampled ratio
+/// moves between runs of unchanged code (ADR-182).
+const SCORE_TOLERANCE: f64 = 0.02;
+
 /// The metrics this check reports: gate keys, then what `survey` ranks.
 fn metrics() -> Vec<MetricSpec> {
-    let mut metrics: Vec<MetricSpec> = [
+    let mut metrics = scope_metrics();
+    metrics.extend(phase_metrics());
+    metrics.extend([
+        ranked(
+            "survivors",
+            MetricPer::Symbol,
+            "Mutants of the function that survived.",
+        ),
+        protection(
+            "mutation_score",
+            ProtectionMetric::MutationScore,
+            "Killed / (killed + survived + uncovered) over the function's mutants; absent when none was scored.",
+        ),
+        protection(
+            "tests",
+            ProtectionMetric::Tests,
+            "Distinct tests run against the function's mutants.",
+        ),
+    ]);
+    metrics
+}
+
+/// The gate keys over the scope's mutants, `score` with its ratchet tolerance.
+fn scope_metrics() -> Vec<MetricSpec> {
+    [
         (
             "score",
             "Killed / (killed + survived + uncovered), the score; 1 when nothing was scored.",
@@ -272,27 +300,11 @@ fn metrics() -> Vec<MetricSpec> {
         ),
     ]
     .into_iter()
-    .map(|(name, summary)| metric(name, summary))
-    .collect();
-    metrics.extend(phase_metrics());
-    metrics.extend([
-        ranked(
-            "survivors",
-            MetricPer::Symbol,
-            "Mutants of the function that survived.",
-        ),
-        protection(
-            "mutation_score",
-            ProtectionMetric::MutationScore,
-            "Killed / (killed + survived + uncovered) over the function's mutants; absent when none was scored.",
-        ),
-        protection(
-            "tests",
-            ProtectionMetric::Tests,
-            "Distinct tests run against the function's mutants.",
-        ),
-    ]);
-    metrics
+    .map(|(name, summary)| MetricSpec {
+        tolerance: (name == "score").then_some(SCORE_TOLERANCE),
+        ..metric(name, summary)
+    })
+    .collect()
 }
 
 impl Check for TestsMutation {

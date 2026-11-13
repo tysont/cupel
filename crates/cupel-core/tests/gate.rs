@@ -3,7 +3,7 @@
 use cupel_core::config::{ConfigFile, GateRuleSpec};
 use cupel_core::{
     Envelope, ExitCode, GateOutcome, GateReference, GateResult, GateRule, RuleOutcome, ScopeInfo,
-    ScopeMode, Status, apply_gate, evaluate_gate, gate_for,
+    ScopeMode, Status, Tolerances, apply_gate, evaluate_gate, gate_for,
 };
 use serde_json::{Value, json};
 
@@ -75,9 +75,26 @@ fn unset() -> GateReference<'static> {
     GateReference::Missing("no baseline is set".to_owned())
 }
 
-/// One rule's result against `envelope`, with `reference` as `base`.
+/// One rule's result against `envelope`, with `reference` as `base` and no metric tolerances.
 fn against(key: &str, condition: &str, envelope: &Envelope, reference: &GateReference) -> GateRule {
-    let gate = evaluate_gate("gate.tree", &[rule(key, condition)], envelope, reference);
+    tolerated(key, condition, envelope, reference, &Tolerances::default())
+}
+
+/// One rule's result against `envelope`, with `reference` as `base` and `tolerances` declared.
+fn tolerated(
+    key: &str,
+    condition: &str,
+    envelope: &Envelope,
+    reference: &GateReference,
+    tolerances: &Tolerances,
+) -> GateRule {
+    let gate = evaluate_gate(
+        "gate.tree",
+        &[rule(key, condition)],
+        envelope,
+        reference,
+        tolerances,
+    );
     gate.rules.into_iter().next().unwrap()
 }
 
@@ -100,6 +117,7 @@ fn gate_rule(
         actual_target: None,
         bound,
         bound_target: None,
+        tolerance: None,
         result,
         reason: reason.map(str::to_owned),
     }
@@ -173,6 +191,7 @@ fn a_rule_whose_metric_or_check_is_absent_is_skipped_and_fails_the_gate() {
         &[rule("tests.weakening", "none")],
         &skipped,
         &unset(),
+        &Tolerances::default(),
     );
     assert_eq!(gate.result, GateOutcome::Fail);
 }
@@ -288,6 +307,7 @@ fn the_gate_passes_only_when_every_rule_passes_and_reports_rules_as_written() {
         ],
         &envelope,
         &unset(),
+        &Tolerances::default(),
     );
     assert_eq!(gate.evaluated, "gate.changed");
     assert_eq!(gate.result, GateOutcome::Fail);
@@ -303,7 +323,13 @@ fn the_gate_passes_only_when_every_rule_passes_and_reports_rules_as_written() {
             ("tests.mutation.score >= 0.8", RuleOutcome::Fail),
         ]
     );
-    let empty = evaluate_gate("gate.tree", &[], &envelope, &unset());
+    let empty = evaluate_gate(
+        "gate.tree",
+        &[],
+        &envelope,
+        &unset(),
+        &Tolerances::default(),
+    );
     assert_eq!(empty.result, GateOutcome::Pass);
 }
 
@@ -382,6 +408,7 @@ fn an_empty_scope_passes_every_rule_vacuously() {
         ],
         &empty,
         &unset(),
+        &Tolerances::default(),
     );
     assert_eq!(gate.result, GateOutcome::Pass);
     assert!(gate.rules.iter().all(|rule| rule.actual.is_none()));
@@ -485,44 +512,19 @@ fn a_rule_against_base_compares_with_the_reference_value_plus_its_offset() {
     .into_iter()
     .map(|condition| against("static.crap.max", condition, &current, &base))
     .collect();
+    let crap =
+        |rule: &str, bound: f64, result| gate_rule(rule, Some(20.0), Some(bound), result, None);
     assert_eq!(
         rules,
         [
-            gate_rule(
-                "static.crap.max <= base",
-                Some(20.0),
-                Some(20.0),
-                RuleOutcome::Pass,
-                None
+            with_tolerance(
+                crap("static.crap.max <= base", 20.0, RuleOutcome::Pass),
+                0.0
             ),
-            gate_rule(
-                "static.crap.max < base",
-                Some(20.0),
-                Some(20.0),
-                RuleOutcome::Fail,
-                None
-            ),
-            gate_rule(
-                "static.crap.max >= base + 1",
-                Some(20.0),
-                Some(21.0),
-                RuleOutcome::Fail,
-                None,
-            ),
-            gate_rule(
-                "static.crap.max > base - 0.5",
-                Some(20.0),
-                Some(19.5),
-                RuleOutcome::Pass,
-                None,
-            ),
-            gate_rule(
-                "static.crap.max == base",
-                Some(20.0),
-                Some(20.0),
-                RuleOutcome::Pass,
-                None
-            ),
+            with_tolerance(crap("static.crap.max < base", 20.0, RuleOutcome::Fail), 0.0),
+            crap("static.crap.max >= base + 1", 21.0, RuleOutcome::Fail),
+            crap("static.crap.max > base - 0.5", 19.5, RuleOutcome::Pass),
+            crap("static.crap.max == base", 20.0, RuleOutcome::Pass),
         ]
     );
 }
@@ -575,6 +577,7 @@ fn a_rule_against_base_without_a_reference_value_is_skipped_and_fails_the_gate()
         &[rule("static.crap.max", "<= base")],
         &current,
         &unset(),
+        &Tolerances::default(),
     );
     assert_eq!(gate.result, GateOutcome::Fail);
 }
@@ -635,4 +638,102 @@ fn a_rule_names_the_targets_its_actual_and_its_reference_bound_were_measured_on(
     ))
     .unwrap();
     assert_eq!(untargeted.get("actual_target"), None);
+}
+
+/// `gate_rule` for a rule against `base` whose bound applied the metric's `tolerance`.
+fn with_tolerance(mut rule: GateRule, tolerance: f64) -> GateRule {
+    rule.tolerance = Some(tolerance);
+    rule
+}
+
+#[test]
+fn a_rule_against_base_loosens_its_bound_by_the_metric_s_tolerance_unless_it_writes_an_offset() {
+    let current = measured();
+    let reference = envelope(
+        "pass",
+        &[
+            check("static.crap", "pass", &json!({"max": 20.0})),
+            check("tests.mutation", "pass", &json!({"score": 0.76})),
+        ],
+        &[],
+    );
+    let base = GateReference::Run(&reference);
+    let tolerances = Tolerances::from_iter([("tests.mutation.score".to_owned(), 0.02)]);
+    let rules: Vec<GateRule> = [
+        ("tests.mutation.score", ">= base"),
+        ("tests.mutation.score", "> base"),
+        ("tests.mutation.score", ">= base - 0"),
+        ("tests.mutation.score", "== base"),
+        ("static.crap.max", "<= base"),
+    ]
+    .into_iter()
+    .map(|(key, condition)| tolerated(key, condition, &current, &base, &tolerances))
+    .collect();
+    let score = |rule: &str, bound: f64, result: RuleOutcome| {
+        gate_rule(rule, Some(0.75), Some(bound), result, None)
+    };
+    assert_eq!(
+        rules,
+        [
+            with_tolerance(
+                score(
+                    "tests.mutation.score >= base",
+                    0.76 - 0.02,
+                    RuleOutcome::Pass
+                ),
+                0.02
+            ),
+            with_tolerance(
+                score(
+                    "tests.mutation.score > base",
+                    0.76 - 0.02,
+                    RuleOutcome::Pass
+                ),
+                0.02
+            ),
+            score("tests.mutation.score >= base - 0", 0.76, RuleOutcome::Fail),
+            score("tests.mutation.score == base", 0.76, RuleOutcome::Fail),
+            with_tolerance(
+                gate_rule(
+                    "static.crap.max <= base",
+                    Some(20.0),
+                    Some(20.0),
+                    RuleOutcome::Pass,
+                    None
+                ),
+                0.0
+            ),
+        ]
+    );
+}
+
+#[test]
+fn a_count_s_tolerance_raises_the_bound_of_an_upper_limit() {
+    let current = measured();
+    let reference = envelope(
+        "pass",
+        &[check("static.crap", "pass", &json!({"max": 19.0}))],
+        &[],
+    );
+    let tolerances = Tolerances::from_iter([("static.crap.max".to_owned(), 1.0)]);
+    let rule = tolerated(
+        "static.crap.max",
+        "< base",
+        &current,
+        &GateReference::Run(&reference),
+        &tolerances,
+    );
+    assert_eq!(
+        rule,
+        with_tolerance(
+            gate_rule(
+                "static.crap.max < base",
+                Some(20.0),
+                Some(20.0),
+                RuleOutcome::Fail,
+                None
+            ),
+            1.0
+        )
+    );
 }

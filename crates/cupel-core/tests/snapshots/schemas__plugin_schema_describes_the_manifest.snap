@@ -634,6 +634,15 @@ expression: pretty(&schema)
         },
         "summary": {
           "type": "string"
+        },
+        "tolerance": {
+          "description": "How far a gate rule against `base` that writes no offset lets this `scope` metric move\npast its reference value (ADR-182, ADR-195): a sampled ratio's run-to-run noise. Absent\nis 0, as for every count.",
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double",
+          "x-cupel-optional": true
         }
       },
       "required": [

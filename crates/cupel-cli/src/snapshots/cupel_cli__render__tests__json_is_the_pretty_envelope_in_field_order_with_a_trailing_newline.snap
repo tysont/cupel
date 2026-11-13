@@ -363,6 +363,7 @@ expression: out
               "end_col": 6
             }
           },
+          "tolerance": 0.0,
           "result": "fail",
           "reason": null
         },
