@@ -18,6 +18,11 @@ use support::{Recorded, combined, language, pairs, span};
 
 const ID: &str = "tests.quality";
 
+/// Duplicate setup at two tests sharing three statements, below the defaults (ADR-184).
+fn pairs_of_three() -> Value {
+    json!({"setup_statements_min": 3, "setup_tests_min": 2})
+}
+
 /// A statement whose structure is named by `shape`: equal shapes are equal statements.
 fn statement(shape: &str) -> NormNode {
     NormNode::new(
@@ -705,6 +710,7 @@ fn tests_repeating_their_leading_statements_are_one_duplicate_setup_finding() {
             .in_file("u.x")
             .with_body(with_tail(&["check"])),
     ])
+    .config(json!({"setup_statements_min": 3}))
     .go();
     assert_eq!(
         support::kinds(&findings),
@@ -717,6 +723,7 @@ fn tests_repeating_their_leading_statements_are_one_duplicate_setup_finding() {
             "actionability": "mechanical",
             "statements": 3,
             "setup_statements_min": 3,
+            "setup_tests_min": 3,
             "tests": ["t::first", "t::second", "t::third"],
             "lines": [1, 20, 30],
         })
@@ -724,6 +731,57 @@ fn tests_repeating_their_leading_statements_are_one_duplicate_setup_finding() {
         .unwrap()
     );
     assert_eq!(findings[0].action.kind, ActionKind::RefactorExtract);
+}
+
+#[test]
+fn duplicate_setup_needs_three_tests_sharing_five_statements_by_default() {
+    let setup = |count: usize, tail: &str| {
+        let mut body =
+            statements(&["open", "deposit", "deposit", "deposit", "deposit", "fund"][..count]);
+        body.extend(statements(&[tail]));
+        body
+    };
+    let (_, findings) = Run::of(vec![
+        case("five_one", 1).with_body(setup(5, "check")),
+        case("five_two", 10).with_body(setup(5, "verify")),
+        case("five_three", 20).with_body(setup(5, "inspect")),
+        // Two tests sharing six statements are too few tests.
+        case("pair_one", 1)
+            .in_file("u.x")
+            .with_body(setup(6, "check")),
+        case("pair_two", 10)
+            .in_file("u.x")
+            .with_body(setup(6, "verify")),
+        // Three tests sharing four statements share too few.
+        case("four_one", 1)
+            .in_file("v.x")
+            .with_body(setup(4, "check")),
+        case("four_two", 10)
+            .in_file("v.x")
+            .with_body(setup(4, "verify")),
+        case("four_three", 20)
+            .in_file("v.x")
+            .with_body(setup(4, "inspect")),
+    ])
+    .go();
+    assert_eq!(
+        support::kinds(&findings),
+        pairs(&[("t::five_one", "test.duplicate-setup")])
+    );
+    assert_eq!(
+        (
+            &findings[0].evidence.0["statements"],
+            &findings[0].evidence.0["setup_statements_min"],
+            &findings[0].evidence.0["setup_tests_min"],
+            &findings[0].evidence.0["tests"],
+        ),
+        (
+            &json!(5),
+            &json!(5),
+            &json!(3),
+            &json!(["t::five_one", "t::five_two", "t::five_three"])
+        )
+    );
 }
 
 #[test]
@@ -766,6 +824,7 @@ fn a_statement_holding_an_assertion_ends_the_setup_tests_share() {
                 &["open", "deposit", "deposit", "deposit", "check"],
             )),
     ])
+    .config(pairs_of_three())
     .go();
     assert_eq!(
         support::kinds(&findings),
@@ -781,6 +840,7 @@ fn the_shared_prefix_counts_every_statement_all_members_repeat() {
         case("first", 1).with_body(body("x")),
         case("second", 10).with_body(body("y")),
     ])
+    .config(pairs_of_three())
     .go();
     assert_eq!(findings[0].evidence.0["statements"], json!(4));
 }
@@ -810,6 +870,7 @@ fn statements_wrapped_in_one_list_node_are_compared_and_leaf_lists_are_not_state
         case("let_one", 20).with_body(declaration("first")),
         case("let_two", 30).with_body(declaration("second")),
     ])
+    .config(pairs_of_three())
     .go();
     assert_eq!(
         support::kinds(&findings),
@@ -819,7 +880,7 @@ fn statements_wrapped_in_one_list_node_are_compared_and_leaf_lists_are_not_state
         case("one", 1).with_body(statements(&setup)),
         case("two", 10).with_body(statements(&["open", "deposit", "deposit", "other"])),
     ])
-    .config(json!({"setup_statements_min": 4}))
+    .config(json!({"setup_statements_min": 4, "setup_tests_min": 2}))
     .go();
     assert!(longer.is_empty(), "{longer:?}");
 }
@@ -910,7 +971,8 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
                 "mock_density_max",
                 "mocks_min",
                 "logic_max",
-                "setup_statements_min"
+                "setup_statements_min",
+                "setup_tests_min"
             ]
         );
     }

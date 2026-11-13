@@ -45,8 +45,14 @@ const LIMITS: Limits = Limits::new(&[
     ),
     (
         "setup_statements_min",
-        3,
+        5,
         "The fewest leading statements tests in one file must share to be test.duplicate-setup.",
+    ),
+    (
+        "setup_tests_min",
+        3,
+        "The fewest tests in one file that must share their leading statements to be \
+         test.duplicate-setup.",
     ),
 ]);
 
@@ -145,6 +151,7 @@ struct DuplicateSetup {
     /// Leading statements every test in the group repeats.
     statements: u32,
     setup_statements_min: u32,
+    setup_tests_min: u32,
     /// Each test in the group, in file order.
     tests: Vec<String>,
     /// The first line of each test in the group.
@@ -216,8 +223,8 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
         kind::<DuplicateSetup>(
             "test.duplicate-setup",
             ActionKind::RefactorExtract,
-            "Tests in one file repeat the same setup_statements_min or more leading \
-             statements before their first assertion.",
+            "setup_tests_min or more tests in one file repeat the same setup_statements_min \
+             or more leading statements before their first assertion.",
         ),
     ]
 }
@@ -371,6 +378,7 @@ struct Settings {
     mocks_min: u32,
     logic_max: u32,
     setup_statements_min: u32,
+    setup_tests_min: u32,
 }
 
 impl Settings {
@@ -382,6 +390,7 @@ impl Settings {
             mocks_min: value("mocks_min"),
             logic_max: value("logic_max"),
             setup_statements_min: value("setup_statements_min"),
+            setup_tests_min: value("setup_tests_min"),
         })
     }
 }
@@ -648,10 +657,14 @@ impl TestsQuality {
     /// One finding per group of a file's tests that repeat the same leading statements, about
     /// the group's first test (ADR-055).
     fn duplicate_setup(&self, candidates: &[Candidate<'_>], limits: &Settings) -> Vec<Finding> {
-        setup_groups(candidates, limits.setup_statements_min as usize)
-            .into_iter()
-            .map(|members| self.duplicate_group(&members, limits))
-            .collect()
+        setup_groups(
+            candidates,
+            limits.setup_statements_min as usize,
+            limits.setup_tests_min as usize,
+        )
+        .into_iter()
+        .map(|members| self.duplicate_group(&members, limits))
+        .collect()
     }
 
     /// The finding for one group of tests sharing their leading statements, about its first.
@@ -686,6 +699,7 @@ impl TestsQuality {
                 actionability: Actionability::Mechanical,
                 statements,
                 setup_statements_min: limits.setup_statements_min,
+                setup_tests_min: limits.setup_tests_min,
                 tests: members
                     .iter()
                     .map(|member| member.subject.symbol.display.clone())
@@ -749,12 +763,13 @@ fn setup_length(body: &[NormNode], case: &TestCase) -> usize {
         .unwrap_or(body.len())
 }
 
-/// The groups of two or more candidates whose first `min` statements are equal setup (they come
-/// before each case's first assertion, and more statements follow them), each sorted by line,
-/// the groups by their first line.
+/// The groups of at least `tests` candidates, and never fewer than two, whose first `min`
+/// statements are equal setup (they come before each case's first assertion, and more statements
+/// follow them), each sorted by line, the groups by their first line (ADR-184).
 fn setup_groups<'c, 's>(
     candidates: &'c [Candidate<'s>],
     min: usize,
+    tests: usize,
 ) -> Vec<Vec<&'c Candidate<'s>>> {
     let mut groups: BTreeMap<Vec<u8>, Vec<&Candidate<'_>>> = BTreeMap::new();
     for candidate in candidates {
@@ -770,7 +785,7 @@ fn setup_groups<'c, 's>(
     }
     let mut groups: Vec<_> = groups
         .into_values()
-        .filter(|members| members.len() > 1)
+        .filter(|members| members.len() >= tests.max(2))
         .map(|mut members| {
             members.sort_by_key(|member| member.subject.symbol.span.line);
             members

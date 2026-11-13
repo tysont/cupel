@@ -322,6 +322,11 @@
                 "minimum": 0,
                 "type": "integer"
               },
+              "setup_tests_min": {
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
               "statements": {
                 "description": "Leading statements every test in the group repeats.",
                 "format": "uint32",
@@ -341,6 +346,7 @@
               "actionability",
               "statements",
               "setup_statements_min",
+              "setup_tests_min",
               "tests",
               "lines"
             ],
@@ -348,7 +354,7 @@
             "type": "object"
           },
           "kind": "test.duplicate-setup",
-          "summary": "Tests in one file repeat the same setup_statements_min or more leading statements before their first assertion."
+          "summary": "setup_tests_min or more tests in one file repeat the same setup_statements_min or more leading statements before their first assertion."
         }
       ],
       "id": "tests.quality",
@@ -396,9 +402,14 @@
           "summary": "The most loops, alternatives, and unguarded branches a test may have before test.logic."
         },
         {
-          "default": 3,
+          "default": 5,
           "name": "setup_statements_min",
           "summary": "The fewest leading statements tests in one file must share to be test.duplicate-setup."
+        },
+        {
+          "default": 3,
+          "name": "setup_tests_min",
+          "summary": "The fewest tests in one file that must share their leading statements to be test.duplicate-setup."
         }
       ],
       "stability": "experimental",

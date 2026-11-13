@@ -4,7 +4,7 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 9,
+      "findings": 8,
       "id": "tests.quality",
       "metrics": {
         "assertion_density": 1.1724137931034482,
@@ -349,52 +349,6 @@
       },
       "tier": 2,
       "title": "`tests.test_quality_signals.test_tallies_are_logged_and_mailed` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "refactor_extract",
-        "priority": 2,
-        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `test_deposits_keep_the_owner`."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "mechanical",
-        "lines": [
-          42,
-          49
-        ],
-        "remediation_mode": "extract-fixture",
-        "setup_statements_min": 3,
-        "statements": 3,
-        "tests": [
-          "tests.test_quality_signals.test_deposits_keep_the_owner",
-          "tests.test_quality_signals.test_deposits_accumulate"
-        ]
-      },
-      "id": "fnd_cc14c6",
-      "kind": "test.duplicate-setup",
-      "location": {
-        "col": 1,
-        "end_col": 34,
-        "end_line": 46,
-        "file": "tests/test_quality_signals.py",
-        "line": 42
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_7c9a217fc22f1006",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_cc14c6 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "tests.test_quality_signals.test_deposits_keep_the_owner",
-        "hash": "sh_7c9a217fc22f1006",
-        "lang": "python"
-      },
-      "tier": 2,
-      "title": "`tests.test_quality_signals.test_deposits_keep_the_owner` and 1 other test(s) repeat the same 3 leading statements"
     }
   ],
   "rankings": [

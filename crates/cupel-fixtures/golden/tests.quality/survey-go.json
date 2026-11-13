@@ -4,7 +4,7 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 10,
+      "findings": 9,
       "id": "tests.quality",
       "metrics": {
         "assertion_density": 1.1111111111111112,
@@ -147,52 +147,6 @@
       },
       "tier": 2,
       "title": "`ledger.TestMailGoesThroughEveryNotifier` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "refactor_extract",
-        "priority": 2,
-        "summary": "Extract the 3 leading statements these tests share into a fixture or setup helper, starting from `TestDepositsKeepTheOwner`."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "mechanical",
-        "lines": [
-          46,
-          53
-        ],
-        "remediation_mode": "extract-fixture",
-        "setup_statements_min": 3,
-        "statements": 3,
-        "tests": [
-          "ledger.TestDepositsKeepTheOwner",
-          "ledger.TestDepositsAccumulate"
-        ]
-      },
-      "id": "fnd_31d301",
-      "kind": "test.duplicate-setup",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 51,
-        "file": "ledger_quality_test.go",
-        "line": 46
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_009a1b16914c5764",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_31d301 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "ledger.TestDepositsKeepTheOwner",
-        "hash": "sh_009a1b16914c5764",
-        "lang": "go"
-      },
-      "tier": 2,
-      "title": "`ledger.TestDepositsKeepTheOwner` and 1 other test(s) repeat the same 3 leading statements"
     },
     {
       "action": {
