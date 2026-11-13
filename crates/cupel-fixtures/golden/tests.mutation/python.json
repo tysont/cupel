@@ -49,10 +49,7 @@
     {
       "action": {
         "hints": {
-          "covering_tests": [
-            "tests/test_large.py::test_discounts_a_large_member_order",
-            "tests/test_small.py::test_keeps_a_small_order"
-          ]
+          "all_tests": true
         },
         "kind": "write_test",
         "priority": 2,
@@ -62,10 +59,8 @@
       "confidence": 0.95,
       "detail": null,
       "evidence": {
-        "covering_tests": [
-          "tests/test_large.py::test_discounts_a_large_member_order",
-          "tests/test_small.py::test_keeps_a_small_order"
-        ],
+        "all_tests": true,
+        "covering_tests": [],
         "mutation": {
           "from": ">=",
           "operator": "relational",

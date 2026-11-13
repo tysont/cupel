@@ -49,10 +49,7 @@
     {
       "action": {
         "hints": {
-          "covering_tests": [
-            "discount.large-test/discounts-a-large-member-order",
-            "discount.small-test/keeps-a-small-order"
-          ]
+          "all_tests": true
         },
         "kind": "write_test",
         "priority": 2,
@@ -62,10 +59,8 @@
       "confidence": 0.95,
       "detail": null,
       "evidence": {
-        "covering_tests": [
-          "discount.large-test/discounts-a-large-member-order",
-          "discount.small-test/keeps-a-small-order"
-        ],
+        "all_tests": true,
+        "covering_tests": [],
         "mutation": {
           "from": ">=",
           "operator": "relational",
@@ -98,10 +93,7 @@
     {
       "action": {
         "hints": {
-          "covering_tests": [
-            "discount.large-test/discounts-a-large-member-order",
-            "discount.small-test/keeps-a-small-order"
-          ]
+          "all_tests": true
         },
         "kind": "write_test",
         "priority": 2,
@@ -111,10 +103,8 @@
       "confidence": 0.95,
       "detail": null,
       "evidence": {
-        "covering_tests": [
-          "discount.large-test/discounts-a-large-member-order",
-          "discount.small-test/keeps-a-small-order"
-        ],
+        "all_tests": true,
+        "covering_tests": [],
         "mutation": {
           "from": "*",
           "operator": "arith-mul-div",

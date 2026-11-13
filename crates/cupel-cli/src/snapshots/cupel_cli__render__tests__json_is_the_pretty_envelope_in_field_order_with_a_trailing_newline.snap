@@ -510,6 +510,7 @@ expression: out
     "covering_tests": [
       "rewrite::limit_tests::pushes_through_sort"
     ],
+    "all_tests": false,
     "nearest_test_file": "tests/rewrite/limit_tests.rs",
     "metrics": [
       {

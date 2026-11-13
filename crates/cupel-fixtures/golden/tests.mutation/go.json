@@ -49,10 +49,7 @@
     {
       "action": {
         "hints": {
-          "covering_tests": [
-            "example.com/discount/TestDiscountsALargeMemberOrder",
-            "example.com/discount/TestKeepsASmallOrder"
-          ]
+          "all_tests": true
         },
         "kind": "write_test",
         "priority": 2,
@@ -62,10 +59,8 @@
       "confidence": 0.95,
       "detail": null,
       "evidence": {
-        "covering_tests": [
-          "example.com/discount/TestDiscountsALargeMemberOrder",
-          "example.com/discount/TestKeepsASmallOrder"
-        ],
+        "all_tests": true,
+        "covering_tests": [],
         "mutation": {
           "from": ">=",
           "operator": "relational",

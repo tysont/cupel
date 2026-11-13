@@ -49,10 +49,7 @@
     {
       "action": {
         "hints": {
-          "covering_tests": [
-            "large/tests/large.rs::discounts_a_large_member_order",
-            "small/tests/small.rs::keeps_a_small_order"
-          ],
+          "all_tests": true,
           "nearest_test_file": "tests/large.rs"
         },
         "kind": "write_test",
@@ -63,10 +60,8 @@
       "confidence": 0.95,
       "detail": null,
       "evidence": {
-        "covering_tests": [
-          "large/tests/large.rs::discounts_a_large_member_order",
-          "small/tests/small.rs::keeps_a_small_order"
-        ],
+        "all_tests": true,
+        "covering_tests": [],
         "mutation": {
           "from": ">=",
           "operator": "relational",

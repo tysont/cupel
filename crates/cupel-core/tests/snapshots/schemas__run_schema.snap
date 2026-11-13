@@ -144,6 +144,11 @@ expression: pretty(&schema)
           "description": "Kind-specific pointers, such as `nearest_test_file` or `covering_tests`, and the\nremediation hints of `crate::hint` (ADR-133).",
           "type": "object",
           "properties": {
+            "all_tests": {
+              "description": "Present and true when every test ran against the finding's site, with no per-test map to select them: all tests (no per-test map); `covering_tests` is then absent.",
+              "type": "boolean",
+              "x-cupel-optional": true
+            },
             "cheapest_cut": {
               "$ref": "#/$defs/CheapestCut",
               "x-cupel-optional": true
@@ -153,7 +158,7 @@ expression: pretty(&schema)
               "x-cupel-optional": true
             },
             "covering_tests": {
-              "description": "Tests that cover the finding's site.",
+              "description": "Tests that cover the finding's site, as a per-test map selected them.",
               "type": "array",
               "items": {
                 "type": "string"
@@ -1206,6 +1211,10 @@ expression: pretty(&schema)
       "description": "Context for one finding or one check result, read from the fact store. The finding or check\nresult itself is in the envelope's `findings` or `checks`.",
       "type": "object",
       "properties": {
+        "all_tests": {
+          "description": "Whether every test covers the finding's site as far as Cupel knows, from\n`action.hints.all_tests`: \"all tests (no per-test map)\", with `covering_tests` empty\n(ADR-191).",
+          "type": "boolean"
+        },
         "covering_tests": {
           "description": "Tests that cover the finding's site, from `action.hints.covering_tests`.",
           "type": "array",
@@ -1251,6 +1260,7 @@ expression: pretty(&schema)
         }
       },
       "required": [
+        "all_tests",
         "covering_tests",
         "excerpt",
         "metrics",

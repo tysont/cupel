@@ -242,7 +242,7 @@ fn an_explanation_round_trips_inside_an_envelope() {
             {"line": 141, "text": "fn push_limit() {", "focus": false},
             {"line": 142, "text": "    if limit <= offset {", "focus": true}
         ]},
-        "covering_tests": ["pushes_through_sort"],
+        "covering_tests": ["pushes_through_sort"], "all_tests": false,
         "nearest_test_file": "tests/rewrite/limit_tests.rs",
         "metrics": [{"symbol": "sh_4b1d9e0c4b1d9e0c", "key": "cyclomatic", "value": 7.0},
                     {"symbol": null, "key": "score", "value": 0.5}]

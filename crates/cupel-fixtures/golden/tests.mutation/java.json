@@ -62,6 +62,7 @@
       "confidence": 0.95,
       "detail": null,
       "evidence": {
+        "all_tests": false,
         "covering_tests": [
           "discount.LargeTest#discountsALargeMemberOrder",
           "discount.SmallTest#keepsASmallOrder"
@@ -110,6 +111,7 @@
       "confidence": 0.95,
       "detail": null,
       "evidence": {
+        "all_tests": false,
         "covering_tests": [
           "discount.SmallTest#keepsASmallOrder"
         ],

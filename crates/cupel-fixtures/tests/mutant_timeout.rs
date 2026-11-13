@@ -87,24 +87,22 @@ fn a_slow_test_no_per_test_selection_narrows_is_left_out_of_every_mutant_with_a_
     let baseline_ms = evidence["baseline_ms"].as_u64().unwrap();
     assert!(baseline_ms > 60_000, "{baseline_ms}");
     // `Half` has no test but the slow one, so its mutants survive every run that leaves it out:
-    // the tests each ran against are the fast test alone.
-    let survivors: Vec<(&str, &serde_json::Value)> = envelope
+    // each ran all tests but the slow one, the fast test alone, with no per-test map to name it.
+    let survivors: Vec<(&str, &serde_json::Value, &serde_json::Value)> = envelope
         .findings
         .iter()
         .filter(|finding| finding.kind == "mutant.survived")
         .map(|finding| {
             let symbol = finding.symbol.as_ref().map_or("", |s| s.display.as_str());
-            (symbol, &finding.evidence.0["covering_tests"])
+            let evidence = &finding.evidence.0;
+            (symbol, &evidence["all_tests"], &evidence["tests_run"])
         })
         .collect();
     assert!(!survivors.is_empty(), "{}", outcome.stdout);
-    for (symbol, tests) in survivors {
+    for survivor in survivors {
         assert_eq!(
-            (symbol, tests),
-            (
-                "slow.Half",
-                &serde_json::json!(["example.com/slow/TestDouble"])
-            )
+            survivor,
+            ("slow.Half", &serde_json::json!(true), &serde_json::json!(1))
         );
     }
 }

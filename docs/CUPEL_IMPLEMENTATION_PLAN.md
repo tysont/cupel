@@ -2600,6 +2600,14 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
   - Additive in the run schema: an optional hint key and an optional `excerpt.commit`.
   - Tests: `cupel-cli/tests/explain.rs` `a_finding_located_at_a_commit_is_explained_with_that_commits_source` (failed first: `excerpt.commit` null, the head file's lines); `cupel-checks/tests/static_api_surface.rs` and `tests_weakening.rs`: a removed item and a deleted test carry the base commit as `location_commit`, a changed signature does not; the run, finding, events, and plugin schema snapshots.
 
+- **Item 4, `covering_tests` without a per-test map** (2026-11-12, [ADR-191](adr/CUPEL_DECISION_191.md), ADR-179).
+  - The gap: without a per-test map every mutant runs the whole suite, so `mutant.survived` listed the package's every test as `covering_tests`, in its evidence and its hints: 1,007 per survivor on Molten's `packages/shared`.
+  - The JSON shape (ADR-191): `covering_tests` stays an array of test IDs, so no consumer reads a sentence as a test; it is the tests a per-test map selected, empty without one. A flag says the rest: evidence `all_tests` (true without a map, false with one; `tests_run` still counts what ran), hint `all_tests: true` in place of the `covering_tests` hint, and `explanation.all_tests`, whose text reads `covering tests  all tests (no per-test map)`. Additive in `v1`; the change of meaning of an empty `covering_tests` is ADR-191's.
+  - Tests:
+    - `cupel-checks/tests/tests_mutation.rs` `a_survivor_without_a_per_test_map_says_all_tests_ran_instead_of_listing_them`, and the survivor with a map has `all_tests: false` (both failed first: no `all_tests`);
+    - `cupel-cli/tests/explain.rs` `a_finding_whose_tests_are_all_tests_says_so_instead_of_listing_them` (failed first: `all_tests` null);
+    - `cupel-fixtures/tests/mutant_timeout.rs`: the slow test left out shows as `tests_run` 1 with `all_tests`; the `tests.mutation` goldens (every language but Java, whose PIT run selects per test) and `describe` golden, the schema and render snapshots regenerated.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

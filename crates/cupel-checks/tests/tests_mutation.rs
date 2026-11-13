@@ -66,8 +66,14 @@ fn mutant(line: u32, col: u32, from: &str, to: &str, outcome: MutantOutcome) -> 
     }
 }
 
-/// Facts with `discount`, outcomes of `mutants`, and test conventions pairing its file.
+/// Facts with `discount`, outcomes of `mutants` whose tests a per-test map selected, and test
+/// conventions pairing its file.
 fn facts(mutants: Vec<Mutant>) -> Facts {
+    facts_mapped(mutants, true)
+}
+
+/// As [`facts`], the mutants' tests selected by a per-test map when `per_test` holds.
+fn facts_mapped(mutants: Vec<Mutant>, per_test: bool) -> Facts {
     let check = support::check(ID);
     let mut facts = Facts::for_manifest(check.manifest());
     facts
@@ -80,7 +86,7 @@ fn facts(mutants: Vec<Mutant>) -> Facts {
             ProducerId::from("engine.test"),
             Some(ProducerId::from("tool.pytest")),
             CostClass::Standard,
-            false,
+            per_test,
             mutants,
         ))
         .unwrap();
@@ -206,6 +212,7 @@ fn a_surviving_mutant_is_a_failing_finding_at_its_site_naming_the_tests_that_mis
         json!({
             "mutation": {"from": ">=", "to": ">", "operator": "relational"},
             "covering_tests": ["tests/test_large.py::test_large"],
+            "all_tests": false,
             "tests_run": 1
         })
     );
@@ -226,6 +233,26 @@ fn a_surviving_mutant_is_a_failing_finding_at_its_site_naming_the_tests_that_mis
         "discount.discount"
     );
     assert_eq!(result.status, CheckStatus::Fail);
+}
+
+#[test]
+fn a_survivor_without_a_per_test_map_says_all_tests_ran_instead_of_listing_them() {
+    let mut survivor = mutant(6, 14, ">=", ">", MutantOutcome::Survived);
+    survivor.tests = vec!["t::a".to_owned(), "t::b".to_owned(), "t::c".to_owned()];
+    let facts = facts_mapped(vec![survivor], false);
+    let (_, recorded) = support::recorded(support::check(ID), &facts, scope(), json!({})).unwrap();
+    let finding = &recorded.findings[0];
+    let evidence = Value::Object(finding.evidence.0.clone());
+    assert_eq!(
+        (
+            &evidence["covering_tests"],
+            &evidence["all_tests"],
+            &evidence["tests_run"]
+        ),
+        (&json!([]), &json!(true), &json!(3))
+    );
+    assert_eq!(finding.action.hints.get("covering_tests"), None);
+    assert_eq!(finding.action.hints.get("all_tests"), Some(&json!(true)));
 }
 
 #[test]

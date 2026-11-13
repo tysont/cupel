@@ -184,6 +184,11 @@ expression: pretty(&schema)
           "description": "Kind-specific pointers, such as `nearest_test_file` or `covering_tests`, and the\nremediation hints of `crate::hint` (ADR-133).",
           "type": "object",
           "properties": {
+            "all_tests": {
+              "description": "Present and true when every test ran against the finding's site, with no per-test map to select them: all tests (no per-test map); `covering_tests` is then absent.",
+              "type": "boolean",
+              "x-cupel-optional": true
+            },
             "cheapest_cut": {
               "$ref": "#/$defs/CheapestCut",
               "x-cupel-optional": true
@@ -193,7 +198,7 @@ expression: pretty(&schema)
               "x-cupel-optional": true
             },
             "covering_tests": {
-              "description": "Tests that cover the finding's site.",
+              "description": "Tests that cover the finding's site, as a per-test map selected them.",
               "type": "array",
               "items": {
                 "type": "string"

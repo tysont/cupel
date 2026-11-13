@@ -272,7 +272,7 @@ Every described entity carries `stability: stable | experimental`. Every schema'
 
 **`survey`** — Same scope/depth machinery; no gate, no baseline required. Output adds `rankings`: top-N per dimension (worst CRAP, largest clone clusters, weakest mutation score, most-coupled modules, flakiest tests, dependency cycles), and `targets`: the symbols findings ask to protect (`write_test`, `strengthen_assertion`) or simplify (`reduce_complexity`, `refactor_extract`), joined across the dimensions, each with its protection (mutation score, coverage, tests) and `recommend: protect | simplify | both`, ordered protect-first because refactoring unprotected code is unsafe; `next_actions` follow that order (ADR-132). Intended as the first command on an unfamiliar repo.
 
-**`explain`** — `explain <finding-id>` returns the finding plus: source excerpt with context (read at the commit `action.hints.location_commit` names when the finding has one: the range's base, for a deleted test or a removed public item, so the excerpt is the removed code, `excerpt.commit` saying so), the mutant diff / counterexample / clone pair side-by-side, covering tests, nearest test file, a test skeleton (for `write_test` actions), and a `repro`. `explain <check-id>` returns the last run's full result for that check including per-symbol scores. Reads from the fact store; never re-runs.
+**`explain`** — `explain <finding-id>` returns the finding plus: source excerpt with context (read at the commit `action.hints.location_commit` names when the finding has one: the range's base, for a deleted test or a removed public item, so the excerpt is the removed code, `excerpt.commit` saying so), the mutant diff / counterexample / clone pair side-by-side, covering tests ("all tests (no per-test map)" when `action.hints.all_tests` says every test ran, ADR-191), nearest test file, a test skeleton (for `write_test` actions), and a `repro`. `explain <check-id>` returns the last run's full result for that check including per-symbol scores. Reads from the fact store; never re-runs.
 
 **`baseline`** — `set [--from run:ID] --write` names the current (or given) run as baseline. `show` prints it. `diff [--against run:ID|REF]` compares two runs as an envelope with `summary.new/resolved`. `export FILE`/`import FILE` serialize a baseline as JSON (committable). Multiple named baselines: `--name`.
 
@@ -499,7 +499,8 @@ Under a range (`--changed`, `--base`), the symbols the range removed are matched
   "title": "Mutant survived: `<=` → `<` at planner.rs:142",
   "detail": "No test distinguishes limit == offset from limit < offset.",
   "evidence": {"mutation": {"from": "<=", "to": "<", "operator": "relational"},
-               "tests_run": 118, "covering_tests": ["rewrite::limit_tests::pushes_through_sort"]},
+               "tests_run": 118, "covering_tests": ["rewrite::limit_tests::pushes_through_sort"],
+               "all_tests": false},
   "action": {"kind": "write_test", "priority": 1,
              "summary": "Add a test where limit == offset asserting the boundary.",
              "hints": {"nearest_test_file": "tests/rewrite/limit_tests.rs",

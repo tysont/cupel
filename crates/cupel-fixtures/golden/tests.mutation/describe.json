@@ -15,8 +15,12 @@
             "additionalProperties": false,
             "description": "Evidence of `mutant.survived`.",
             "properties": {
+              "all_tests": {
+                "description": "Whether every test ran against the mutant, with no per-test map to select them\n(\"all tests (no per-test map)\"); `tests_run` counts them.",
+                "type": "boolean"
+              },
               "covering_tests": {
-                "description": "The tests that ran against the mutant and passed.",
+                "description": "The tests a per-test map selected that ran against the mutant and passed; empty when\n`all_tests`.",
                 "items": {
                   "type": "string"
                 },
@@ -55,6 +59,7 @@
             "required": [
               "mutation",
               "covering_tests",
+              "all_tests",
               "tests_run"
             ],
             "title": "Survived",

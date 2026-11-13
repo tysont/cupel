@@ -21,6 +21,10 @@ pub struct Explanation {
     pub excerpt: Option<Excerpt>,
     /// Tests that cover the finding's site, from `action.hints.covering_tests`.
     pub covering_tests: Vec<String>,
+    /// Whether every test covers the finding's site as far as Cupel knows, from
+    /// `action.hints.all_tests`: "all tests (no per-test map)", with `covering_tests` empty
+    /// (ADR-191).
+    pub all_tests: bool,
     /// The test file nearest to the finding's site, from `action.hints.nearest_test_file`.
     pub nearest_test_file: Option<String>,
     /// The check's metrics in that run, per symbol; empty for a finding.

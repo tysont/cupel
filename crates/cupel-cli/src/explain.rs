@@ -3,7 +3,7 @@
 use std::path::Path;
 
 use cupel_core::git::Git;
-use cupel_core::hint::LOCATION_COMMIT;
+use cupel_core::hint::{ALL_TESTS, COVERING_TESTS, LOCATION_COMMIT};
 use cupel_core::{
     CheckId, Envelope, Excerpt, ExcerptLine, ExitCode, ExplainSubject, Explanation, Finding,
     FindingId, Location, RunId, Status, Writer,
@@ -30,7 +30,7 @@ fn finding_explanation(root: &Path, target: &str, finding: &Finding, run: RunId)
             excerpt(root, location, commit)
         }),
         covering_tests: hints
-            .get("covering_tests")
+            .get(COVERING_TESTS)
             .and_then(Value::as_array)
             .map(|tests| {
                 tests
@@ -39,6 +39,7 @@ fn finding_explanation(root: &Path, target: &str, finding: &Finding, run: RunId)
                     .collect()
             })
             .unwrap_or_default(),
+        all_tests: hints.get(ALL_TESTS) == Some(&Value::Bool(true)),
         nearest_test_file: hints
             .get("nearest_test_file")
             .and_then(Value::as_str)
@@ -80,6 +81,7 @@ pub fn run(run: &Run, writer: &Writer, target: &str) -> Result<Envelope, CupelEr
         run: last.run,
         excerpt: None,
         covering_tests: Vec::new(),
+        all_tests: false,
         nearest_test_file: None,
         metrics: last.metrics,
     };

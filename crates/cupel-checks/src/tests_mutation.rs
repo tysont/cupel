@@ -3,6 +3,7 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::config::{ConfigError, MemoryLimit, Table, TimeLimit};
+use cupel_core::hint::{ALL_TESTS, COVERING_TESTS};
 use cupel_core::syntax::{SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
@@ -54,9 +55,20 @@ struct Mutation {
 #[serde(deny_unknown_fields)]
 struct Survived {
     mutation: Mutation,
-    /// The tests that ran against the mutant and passed.
+    /// The tests a per-test map selected that ran against the mutant and passed; empty when
+    /// `all_tests`.
     covering_tests: Vec<String>,
+    /// Whether every test ran against the mutant, with no per-test map to select them
+    /// ("all tests (no per-test map)"); `tests_run` counts them.
+    all_tests: bool,
     tests_run: u32,
+}
+
+/// What a finding says about the tests behind it: the conventions that name its nearest test
+/// file, and whether a per-test map selected the tests run against each mutant.
+struct TestHints<'a> {
+    conventions: Option<&'a TestConventions>,
+    per_test: bool,
 }
 
 /// Evidence of `mutant.out-of-memory` and `mutant.uncovered`.
@@ -281,7 +293,10 @@ impl Check for TestsMutation {
             .iter()
             .map(|symbol| (symbol.key(), symbol))
             .collect();
-        let conventions = facts.get::<TestConventions>().ok();
+        let tests = TestHints {
+            conventions: facts.get::<TestConventions>().ok(),
+            per_test: outcomes.per_test,
+        };
         let mut tally = Tally::default();
         tally.time(outcomes);
         let mut by_symbol: BTreeMap<&SymbolKey, Protection<'_>> = BTreeMap::new();
@@ -298,7 +313,7 @@ impl Check for TestsMutation {
                 .entry(&mutant.symbol)
                 .or_insert_with(|| Protection::of(symbol, mutant.symbol_hash.as_ref()))
                 .count(mutant);
-            if let Some(finding) = self.finding(mutant, symbol, conventions) {
+            if let Some(finding) = self.finding(mutant, symbol, &tests) {
                 tally.findings += 1;
                 sink.emit(Event::Finding(Box::new(finding)));
             }
@@ -557,7 +572,7 @@ impl TestsMutation {
         &self,
         mutant: &Mutant,
         symbol: &SymbolDef,
-        conventions: Option<&TestConventions>,
+        tests: &TestHints<'_>,
     ) -> Option<Finding> {
         let hash = mutant.symbol_hash.as_ref()?;
         let mutation = Mutation {
@@ -566,7 +581,7 @@ impl TestsMutation {
             operator: operator(mutant),
         };
         if surviving(mutant) {
-            return Some(self.survived(mutant, symbol, hash, mutation, conventions));
+            return Some(self.survived(mutant, symbol, hash, mutation, tests));
         }
         let note = note(mutant, &symbol.file, mutation)?;
         let mut finding =
@@ -577,22 +592,29 @@ impl TestsMutation {
         if note.kind == "mutant.equivalent?" {
             finding.confidence = EQUIVALENT_CONFIDENCE;
         }
-        Some(with_nearest_test(finding, symbol, conventions))
+        Some(with_nearest_test(finding, symbol, tests.conventions))
     }
 
-    /// `mutant.survived` about `mutant`, with the tests that missed it.
+    /// `mutant.survived` about `mutant`, with the tests that missed it: those a per-test map
+    /// selected, or, without one, that all tests ran (ADR-191).
     fn survived(
         &self,
         mutant: &Mutant,
         symbol: &SymbolDef,
         hash: &SymbolHash,
         mutation: Mutation,
-        conventions: Option<&TestConventions>,
+        tests: &TestHints<'_>,
     ) -> Finding {
         let at = format!("{}:{}", symbol.file, mutant.span.line);
+        let covering = if tests.per_test {
+            mutant.tests.clone()
+        } else {
+            Vec::new()
+        };
         let evidence = Survived {
             mutation,
-            covering_tests: mutant.tests.clone(),
+            covering_tests: covering.clone(),
+            all_tests: !tests.per_test,
             tests_run: u32::try_from(mutant.tests.len()).unwrap_or(u32::MAX),
         };
         let mut finding =
@@ -610,11 +632,18 @@ impl TestsMutation {
                 .at(Severity::Fail)
                 .at_site(&site_of(mutant), &mutant.span);
         finding.confidence = 0.95;
-        finding.action.hints.insert(
-            "covering_tests".to_owned(),
-            Value::Array(mutant.tests.iter().cloned().map(Value::String).collect()),
-        );
-        with_nearest_test(finding, symbol, conventions)
+        if tests.per_test {
+            finding.action.hints.insert(
+                COVERING_TESTS.to_owned(),
+                Value::Array(covering.into_iter().map(Value::String).collect()),
+            );
+        } else {
+            finding
+                .action
+                .hints
+                .insert(ALL_TESTS.to_owned(), Value::Bool(true));
+        }
+        with_nearest_test(finding, symbol, tests.conventions)
     }
 }
 

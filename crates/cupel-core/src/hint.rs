@@ -14,6 +14,16 @@ pub trait Hint: Serialize + DeserializeOwned + JsonSchema {
     const KEY: &'static str;
 }
 
+/// The key of the test hint listing the tests that cover the finding's site.
+pub const COVERING_TESTS: &str = "covering_tests";
+
+/// The key of the test hint saying every test covers the finding's site as far as Cupel knows:
+/// no per-test map selected tests, so `covering_tests` is absent (ADR-191).
+pub const ALL_TESTS: &str = "all_tests";
+
+/// How a finding's covering tests read when they are all tests (ADR-191).
+pub const ALL_TESTS_SAID: &str = "all tests (no per-test map)";
+
 /// The key of the test hint naming the commit whose version of the file a finding's location is
 /// in, when it is not the working tree: the range's base, for what the range removed.
 pub const LOCATION_COMMIT: &str = "location_commit";
@@ -133,11 +143,19 @@ pub(crate) fn hints_schema(generator: &mut SchemaGenerator) -> Schema {
         }),
     );
     properties.insert(
-        "covering_tests".to_owned(),
+        COVERING_TESTS.to_owned(),
         json!({
             "type": "array",
             "items": {"type": "string"},
-            "description": "Tests that cover the finding's site.",
+            "description": "Tests that cover the finding's site, as a per-test map selected them.",
+            "x-cupel-optional": true,
+        }),
+    );
+    properties.insert(
+        ALL_TESTS.to_owned(),
+        json!({
+            "type": "boolean",
+            "description": "Present and true when every test ran against the finding's site, with no per-test map to select them: all tests (no per-test map); `covering_tests` is then absent.",
             "x-cupel-optional": true,
         }),
     );

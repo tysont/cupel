@@ -375,3 +375,21 @@ fn a_finding_located_at_a_commit_is_explained_with_that_commits_source() {
     let header = format!("  src/lib.rs at {}", &base[..12]);
     assert!(text.contains(&header), "{header:?} in\n{text}");
 }
+
+#[test]
+fn a_finding_whose_tests_are_all_tests_says_so_instead_of_listing_them() {
+    let finding = hinted(
+        complexity_finding("fnd_0000c5", 3, 5),
+        "mutant.survived",
+        "all_tests",
+        &json!(true),
+    );
+    let (json, text) = explained(&finding);
+    let explanation = &json["explanation"];
+    assert_eq!(
+        (&explanation["covering_tests"], &explanation["all_tests"]),
+        (&json!([]), &json!(true))
+    );
+    let line = "  covering tests  all tests (no per-test map)";
+    assert!(text.contains(line), "{line:?} in\n{text}");
+}

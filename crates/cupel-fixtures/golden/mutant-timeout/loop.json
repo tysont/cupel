@@ -49,9 +49,7 @@
     {
       "action": {
         "hints": {
-          "covering_tests": [
-            "tests/test_count.py::test_counts_to_three"
-          ],
+          "all_tests": true,
           "nearest_test_file": "tests/test_count.py"
         },
         "kind": "write_test",
@@ -62,9 +60,8 @@
       "confidence": 0.95,
       "detail": null,
       "evidence": {
-        "covering_tests": [
-          "tests/test_count.py::test_counts_to_three"
-        ],
+        "all_tests": true,
+        "covering_tests": [],
         "mutation": {
           "from": "0",
           "operator": "zero-one",
