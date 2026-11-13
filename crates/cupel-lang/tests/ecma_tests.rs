@@ -473,6 +473,38 @@ it("asserts nothing", () => {
 }
 
 #[test]
+fn membership_pattern_and_partial_object_matchers_are_strong() {
+    let source = r#"import { expect, it } from "vitest";
+
+it("lists the entry", () => {
+  expect(["a", "b"]).toContain("a");
+});
+
+it("names the version", () => {
+  expect("v1.2").toMatch(/v1/);
+});
+
+it("keeps the id", () => {
+  expect({ id: 1, name: "a" }).toMatchObject({ id: 1 });
+});
+
+it("holds an equal entry", () => {
+  expect([{ id: 1 }]).toContainEqual({ id: 1 });
+});
+"#;
+    let file = assert_source_file("javascript", "a.test.js", source, "vitest");
+    assert_eq!(
+        rows(&file),
+        [
+            case("lists the entry", &[(Custom, Strong)], Runs, &[], 3),
+            case("names the version", &[(Custom, Strong)], Runs, &[], 7),
+            case("keeps the id", &[(Equality, Strong)], Runs, &[], 11),
+            case("holds an equal entry", &[(Custom, Weak)], Runs, &[], 15),
+        ]
+    );
+}
+
+#[test]
 fn a_playwright_suite_step_and_hook_are_not_cases() {
     let source = r#"import { expect, test } from "@playwright/test";
 

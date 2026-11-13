@@ -129,8 +129,8 @@ toHaveBeenLastCalledWith = { kind = "equality", strength = "strong" }
 toHaveBeenNthCalledWith = { kind = "equality", strength = "strong" }
 toHaveBeenCalledTimes = { kind = "equality", strength = "strong" }
 toHaveReturnedWith = { kind = "equality", strength = "strong" }
-# A partial match pins only some of the value.
-toMatchObject = { kind = "equality", strength = "weak" }
+# A partial match pins the properties it names (ADR-184).
+toMatchObject = { kind = "equality", strength = "strong" }
 toBeTruthy = { kind = "truthiness", strength = "weak" }
 toBeFalsy = { kind = "truthiness", strength = "weak" }
 toBeDefined = { kind = "not-null", strength = "weak" }
@@ -142,11 +142,12 @@ toMatchInlineSnapshot = { kind = "snapshot", strength = "strong" }
 toMatchFileSnapshot = { kind = "snapshot", strength = "strong" }
 toThrowErrorMatchingSnapshot = { kind = "snapshot", strength = "strong" }
 toThrowErrorMatchingInlineSnapshot = { kind = "snapshot", strength = "strong" }
-# Ranges, memberships, patterns, and "was called" rule out values without pinning one.
+# A membership and a pattern pin the element or text they name (ADR-184).
+toContain = { kind = "custom", strength = "strong" }
+toMatch = { kind = "custom", strength = "strong" }
+# Ranges, an equal member, and "was called" rule out values without pinning one.
 toHaveBeenCalled = { kind = "custom", strength = "weak" }
-toContain = { kind = "custom", strength = "weak" }
 toContainEqual = { kind = "custom", strength = "weak" }
-toMatch = { kind = "custom", strength = "weak" }
 toBeInstanceOf = { kind = "custom", strength = "weak" }
 toBeGreaterThan = { kind = "custom", strength = "weak" }
 toBeGreaterThanOrEqual = { kind = "custom", strength = "weak" }

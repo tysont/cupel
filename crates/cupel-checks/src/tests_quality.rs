@@ -191,8 +191,8 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
         kind::<WeakAssertion>(
             "test.weak-assertion",
             ActionKind::StrengthenAssertion,
-            "Every assertion in the test is weak: truthiness, presence, inequality, or \
-             a partial match.",
+            "Every assertion in the test is weak: truthiness, presence, inequality, a \
+             range, or a call made with any arguments.",
         ),
         kind::<NoAssertion>(
             "test.no-assertion",
