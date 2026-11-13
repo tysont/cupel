@@ -9,7 +9,7 @@
       "metrics": {
         "clusters": 1.0,
         "max_jaccard": 1.0,
-        "pairs": 18.0
+        "pairs": 17.0
       },
       "oracle": null,
       "score": {
@@ -337,6 +337,7 @@
           "nodes": 29,
           "symbol": "ledger.TestParseCentsRejectsBlanks"
         },
+        "shape": "test-code",
         "threshold": 0.82
       },
       "id": "fnd_258580",
@@ -350,7 +351,7 @@
       },
       "new_since_baseline": false,
       "repro": "cupel check --only static.clones --symbols sh_1484de0443216190",
-      "severity": "warn",
+      "severity": "info",
       "suppress": "cupel suppress fnd_258580 --reason '…'",
       "suppressed": false,
       "symbol": {
@@ -640,17 +641,17 @@
     },
     {
       "command": null,
-      "finding": "fnd_258580",
+      "finding": "fnd_3514a9",
       "kind": "refactor_extract",
       "priority": 4,
-      "summary": "Extract what `TestBlankAmountsAreRejected` and `TestParseCentsRejectsBlanks` share into one function and call it from both."
+      "summary": "Extract the structure `netTotal` shares with 5 other symbols into one function and call it from each."
     },
     {
       "command": null,
-      "finding": "fnd_3514a9",
+      "finding": "fnd_258580",
       "kind": "refactor_extract",
       "priority": 5,
-      "summary": "Extract the structure `netTotal` shares with 5 other symbols into one function and call it from each."
+      "summary": "Extract what `TestBlankAmountsAreRejected` and `TestParseCentsRejectsBlanks` share into one function and call it from both."
     }
   ],
   "oracles": null,
@@ -720,8 +721,8 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 0,
-      "warn": 5
+      "info": 1,
+      "warn": 4
     },
     "gate": null,
     "new": 0,

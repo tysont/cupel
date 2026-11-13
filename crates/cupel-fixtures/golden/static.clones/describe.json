@@ -271,22 +271,12 @@
                 "type": "object"
               },
               "shape": {
-                "anyOf": [
-                  {
-                    "description": "What every member of a clone group is, when that explains their likeness (ADR-158 §3).",
-                    "oneOf": [
-                      {
-                        "const": "enum-mapping",
-                        "description": "An `as_str`-style accessor: the body is one match or switch whose arms each map a\npattern to a constant. Such accessors share their shape by necessity, so the group is\nreported at `info` and left out of the counts.",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
+                "description": "`enum-mapping` when both symbols map enum variants to constants (ADR-158 §3),\n`test-code` when both lie in test files (ADR-184); absent otherwise.",
+                "enum": [
+                  "enum-mapping",
+                  "test-code"
                 ],
-                "description": "`enum-mapping` when both symbols map enum variants to constants (ADR-158 §3); absent\notherwise."
+                "type": "string"
               },
               "threshold": {
                 "format": "double",
@@ -519,22 +509,12 @@
                 "type": "array"
               },
               "shape": {
-                "anyOf": [
-                  {
-                    "description": "What every member of a clone group is, when that explains their likeness (ADR-158 §3).",
-                    "oneOf": [
-                      {
-                        "const": "enum-mapping",
-                        "description": "An `as_str`-style accessor: the body is one match or switch whose arms each map a\npattern to a constant. Such accessors share their shape by necessity, so the group is\nreported at `info` and left out of the counts.",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
+                "description": "`enum-mapping` when every member maps enum variants to constants (ADR-158 §3),\n`test-code` when every member lies in a test file (ADR-184); absent otherwise.",
+                "enum": [
+                  "enum-mapping",
+                  "test-code"
                 ],
-                "description": "`enum-mapping` when every member maps enum variants to constants (ADR-158 §3); absent\notherwise."
+                "type": "string"
               },
               "threshold": {
                 "format": "double",
@@ -703,17 +683,17 @@
         {
           "name": "pairs",
           "per": "scope",
-          "summary": "Pairs of symbols at least `threshold` similar, apart from enum mappings."
+          "summary": "Pairs of symbols at least `threshold` similar, apart from enum mappings and clones within test files."
         },
         {
           "name": "clusters",
           "per": "scope",
-          "summary": "Groups of three or more similar symbols, apart from enum mappings."
+          "summary": "Groups of three or more similar symbols, apart from enum mappings and clones within test files."
         },
         {
           "name": "max_jaccard",
           "per": "scope",
-          "summary": "The highest similarity of any pair, apart from enum mappings."
+          "summary": "The highest similarity of any pair, apart from enum mappings and clones within test files."
         },
         {
           "name": "cluster_size",
@@ -746,7 +726,9 @@
       "summary": "Type 1, 2, and 3 clones: functions whose normalized syntax trees share most subtree fingerprints, compared within a language family. Type 1 has the same tokens; type 2 the same tree with identifiers or literals renamed, listed in `renamed`; type 3 statements inserted, removed, or changed, listed in `edits`. Limitation: what normalization erases (layout, comments, the function's own name, and the annotations, attributes, or modifiers a language's normalizer drops) is not compared, so a copy that differs only there is type 1, and two functions that differ only in literals (two lookup tables of the same shape) are type-2 clones (ADR-136).",
       "tier": 0,
       "version": 1,
-      "wants": []
+      "wants": [
+        "test-conventions"
+      ]
     },
     "subject": "check"
   },

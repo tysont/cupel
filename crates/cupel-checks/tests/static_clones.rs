@@ -1,11 +1,12 @@
 // ABOUTME: static.clones over synthetic facts: pairs, clusters, clone types, settings, scope, family-wide
-// ABOUTME: comparison, finding identity, order (ADR-050), the common-subtree hint (ADR-133), what differs (ADR-136).
+// ABOUTME: comparison, finding identity, order (ADR-050), the common-subtree hint (ADR-133), what differs (ADR-136), test code (ADR-184).
 mod support;
 
 use cupel_core::config::ConfigError;
 use cupel_core::hint::{self, CommonSubtree, Parameter, ParameterKind, PlacedSubtree};
 use cupel_core::syntax::{
-    NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, Visibility,
+    NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, TestConventions,
+    Visibility,
 };
 use cupel_core::{
     ActionKind, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding, FindingId,
@@ -271,7 +272,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
         support::Shape::of(manifest),
         support::Shape {
             needs: vec![FactKind::Symbols, FactKind::NormTree],
-            wants: vec![],
+            wants: vec![FactKind::TestConventions],
             tier: 0,
             cost: cupel_core::CostClass::Quick,
             kinds: vec![
@@ -1384,4 +1385,72 @@ fn a_block_of_constant_statements_without_a_match_is_not_a_mapping() {
         (finding.severity, evidence.get("shape")),
         (Severity::Warn, None)
     );
+}
+
+// ---------------------------------------------------------------- test code (ADR-184)
+
+/// `facts` for `defs` with test conventions whose one glob matches `tests/**`.
+fn facts_with_tests(defs: &[Def]) -> Facts {
+    let mut facts = facts(defs, &[]);
+    facts
+        .insert(TestConventions {
+            test_globs: vec!["tests/**".to_owned()],
+            pairs: Vec::new(),
+        })
+        .unwrap();
+    facts
+}
+
+#[test]
+fn clones_whose_members_all_lie_in_test_files_are_info_and_leave_the_counts() {
+    let mut changed = body(&OPERATORS);
+    changed[0] = statement("<<");
+    let defs = [
+        def("tests/a.x", "one", 1, function(body(&OPERATORS))),
+        def("tests/b.x", "two", 1, function(body(&OPERATORS))),
+        def("tests/c.x", "three", 1, function(changed)),
+        def("tests/d.x", "four", 1, function(body(&OTHER_OPERATORS))),
+        def("src/d.x", "five", 1, function(body(&OTHER_OPERATORS))),
+    ];
+    let (result, findings) =
+        run_with(&facts_with_tests(&defs), every_symbol(&[&defs]), json!({})).unwrap();
+    let shapes: Vec<(&str, Severity, Option<&Value>)> = findings
+        .iter()
+        .map(|finding| {
+            (
+                finding.kind.as_str(),
+                finding.severity,
+                finding.evidence.0.get("shape"),
+            )
+        })
+        .collect();
+    assert_eq!(
+        shapes,
+        [
+            ("clone.pair", Severity::Warn, None),
+            ("clone.cluster", Severity::Info, Some(&json!("test-code"))),
+        ]
+    );
+    assert_eq!(
+        result.metrics,
+        [
+            ("clusters".to_owned(), 0.0),
+            ("max_jaccard".to_owned(), 1.0),
+            ("pairs".to_owned(), 1.0),
+        ]
+        .into(),
+        "only the pair with a member outside the tests counts"
+    );
+    assert_eq!(result.status, CheckStatus::Fail);
+}
+
+#[test]
+fn without_test_conventions_no_clone_is_test_code() {
+    let defs = [
+        def("tests/a.x", "one", 1, function(body(&OPERATORS))),
+        def("tests/b.x", "two", 1, function(body(&OPERATORS))),
+    ];
+    let (result, findings) = run(&defs);
+    assert_eq!((findings.len(), findings[0].severity), (1, Severity::Warn));
+    assert_eq!(result.metrics["pairs"], 1.0);
 }

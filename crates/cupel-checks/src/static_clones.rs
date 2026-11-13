@@ -7,7 +7,7 @@ use std::hash::{Hash, Hasher};
 use cupel_core::config::{ConfigError, Table};
 use cupel_core::hint::{self, CommonSubtree, Parameter, ParameterKind, PlacedSubtree};
 use cupel_core::similarity::{Fingerprints, Similar, combine, mix, search, token_digest};
-use cupel_core::syntax::{NormNode, NormTree, Span, SymbolDef, Symbols};
+use cupel_core::syntax::{NormNode, NormTree, Span, SymbolDef, Symbols, TestConventions};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, FindingKindSpec, Location, Manifest,
@@ -174,9 +174,10 @@ struct ClonePair {
     threshold: f64,
     left: Member,
     right: Member,
-    /// `enum-mapping` when both symbols map enum variants to constants (ADR-158 §3); absent
-    /// otherwise.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// `enum-mapping` when both symbols map enum variants to constants (ADR-158 §3),
+    /// `test-code` when both lie in test files (ADR-184); absent otherwise.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(with = "Shape")]
     shape: Option<Shape>,
 }
 
@@ -200,20 +201,24 @@ struct CloneCluster {
     /// reverse; empty otherwise.
     edits: Vec<Edit>,
     threshold: f64,
-    /// `enum-mapping` when every member maps enum variants to constants (ADR-158 §3); absent
-    /// otherwise.
-    #[serde(skip_serializing_if = "Option::is_none")]
+    /// `enum-mapping` when every member maps enum variants to constants (ADR-158 §3),
+    /// `test-code` when every member lies in a test file (ADR-184); absent otherwise.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(with = "Shape")]
     shape: Option<Shape>,
 }
 
-/// What every member of a clone group is, when that explains their likeness (ADR-158 §3).
+/// What every member of a clone group is, when that explains their likeness (ADR-158 §3,
+/// ADR-184). Either is reported at `info` and left out of the counts. The variants carry plain
+/// comments, so the schema is one string enum the evidence validator reads (ADR-043).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 #[serde(rename_all = "kebab-case")]
 enum Shape {
-    /// An `as_str`-style accessor: the body is one match or switch whose arms each map a
-    /// pattern to a constant. Such accessors share their shape by necessity, so the group is
-    /// reported at `info` and left out of the counts.
+    // An `as_str`-style accessor: the body is one match or switch whose arms each map a
+    // pattern to a constant. Such accessors share their shape by necessity.
     EnumMapping,
+    // Code in test files: tests repeat their arrange and act steps on purpose.
+    TestCode,
 }
 
 pub struct StaticClones {
@@ -231,7 +236,7 @@ impl StaticClones {
                 tier: Tier::try_from(0).expect("tier 0 exists"),
                 cost: CostClass::Quick,
                 needs: vec![FactKind::Symbols, FactKind::NormTree],
-                wants: vec![],
+                wants: vec![FactKind::TestConventions],
                 findings: finding_kinds(),
                 metrics: metrics(),
                 settings: Settings::specs(),
@@ -256,6 +261,8 @@ impl StaticClones {
 /// symbol-key order.
 fn comparable<'a>(facts: &'a Facts, settings: &Settings) -> Result<Vec<Compared<'a>>> {
     let trees = trees_by_symbol(facts.family::<NormTree>()?);
+    let conventions = facts.family::<TestConventions>().unwrap_or_default();
+    let in_tests = |file: &str| conventions.iter().any(|tests| tests.is_test(file));
     let mut compared: Vec<Compared<'a>> = facts
         .family::<Symbols>()?
         .into_iter()
@@ -270,6 +277,7 @@ fn comparable<'a>(facts: &'a Facts, settings: &Settings) -> Result<Vec<Compared<
                 prints: Fingerprints::of(root),
                 tokens: token_digest(root),
                 mapping: enum_mapping(symbol, root),
+                test: in_tests(&symbol.file),
             })
         })
         .filter(|compared| compared.prints.nodes >= settings.min_nodes)
@@ -301,15 +309,15 @@ fn metrics() -> Vec<MetricSpec> {
     vec![
         metric(
             "pairs",
-            "Pairs of symbols at least `threshold` similar, apart from enum mappings.",
+            "Pairs of symbols at least `threshold` similar, apart from enum mappings and clones within test files.",
         ),
         metric(
             "clusters",
-            "Groups of three or more similar symbols, apart from enum mappings.",
+            "Groups of three or more similar symbols, apart from enum mappings and clones within test files.",
         ),
         metric(
             "max_jaccard",
-            "The highest similarity of any pair, apart from enum mappings.",
+            "The highest similarity of any pair, apart from enum mappings and clones within test files.",
         ),
         ranked(
             "cluster_size",
@@ -364,7 +372,7 @@ impl Check for StaticClones {
                 findings += 1;
                 sink.emit(Event::Finding(Box::new(report.finding(group))));
                 sink.measure(report.size(group));
-                if report.shape(group).is_none() {
+                if report.shape(&group.members).is_none() {
                     warned = true;
                     reported.include(group);
                 }
@@ -412,6 +420,8 @@ struct Compared<'a> {
     tokens: Option<u64>,
     /// Whether it maps enum variants to constants (ADR-158 §3).
     mapping: bool,
+    /// Whether it lies in a test file, by the language's test conventions (ADR-184).
+    test: bool,
 }
 
 fn lines(symbol: &SymbolDef) -> u32 {
@@ -473,8 +483,8 @@ fn root(parent: &mut [usize], mut index: usize) -> usize {
     index
 }
 
-/// The `scope` metrics over the groups reported (ADR-063), apart from enum mappings, which are
-/// reported at `info` (ADR-158 §3).
+/// The `scope` metrics over the groups reported (ADR-063), apart from enum mappings and clones
+/// within test files, which are reported at `info` (ADR-158 §3, ADR-184).
 #[derive(Default)]
 struct Reported {
     pairs: usize,
@@ -529,8 +539,8 @@ impl Report<'_> {
             .parse()
             .expect("sixteen hex digits make a valid site hash");
         let id = FindingId::compute(&self.check.manifest.id, kind, first.hash, Some(&site));
-        let severity = match self.shape(group) {
-            Some(Shape::EnumMapping) => Severity::Info,
+        let severity = match self.shape(&group.members) {
+            Some(Shape::EnumMapping | Shape::TestCode) => Severity::Info,
             None => Severity::Warn,
         };
         Finding {
@@ -562,13 +572,16 @@ impl Report<'_> {
         }
     }
 
-    /// What every member of `group` is, when that explains their likeness (ADR-158 §3).
-    fn shape(&self, group: &Group) -> Option<Shape> {
-        group
-            .members
-            .iter()
-            .all(|index| self.compared[*index].mapping)
-            .then_some(Shape::EnumMapping)
+    /// What every one of `members` is, when that explains their likeness (ADR-158 §3,
+    /// ADR-184).
+    fn shape(&self, members: &[usize]) -> Option<Shape> {
+        let all =
+            |is: fn(&Compared<'_>) -> bool| members.iter().all(|index| is(&self.compared[*index]));
+        if all(|compared| compared.mapping) {
+            Some(Shape::EnumMapping)
+        } else {
+            all(|compared| compared.test).then_some(Shape::TestCode)
+        }
     }
 
     /// The remediation hints of a `kind` finding about `group`: a cluster's common subtree
@@ -635,7 +648,7 @@ impl Report<'_> {
             threshold: self.settings.threshold,
             left: member(left),
             right: member(right),
-            shape: (left.mapping && right.mapping).then_some(Shape::EnumMapping),
+            shape: self.shape(&[pair.left, pair.right]),
         });
         (PAIR, title, summary, evidence)
     }
@@ -679,7 +692,7 @@ impl Report<'_> {
             renamed,
             edits,
             threshold: self.settings.threshold,
-            shape: self.shape(group),
+            shape: self.shape(&group.members),
         });
         (CLUSTER, title, summary, evidence)
     }

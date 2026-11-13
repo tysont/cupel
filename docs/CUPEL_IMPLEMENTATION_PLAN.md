@@ -2646,6 +2646,16 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-lang/tests/api_abstract.rs`: TypeScript, Java, Python, Rust, and Go mark exactly their abstract classes and type aliases (all three failed first: every item `false`);
     - the TypeScript `api-surface` fact golden, the fact schema snapshot, and `static.deps`' describe golden regenerated.
 
+- **Item 18, test-quality calibration** (2026-11-12, [ADR-184](adr/CUPEL_DECISION_184.md)).
+  - The gap: 1,221 Molten tests were `test.weak-assertion` for `toContain`, `toMatch`, or `toMatchObject`; a loop around an assertion over computed cases was `test.logic`; two tests sharing three statements were `test.duplicate-setup`; and ~540 of Molten's 655 clone groups lay inside test files and counted toward `static.clones.pairs`.
+  - Now: (1) the JavaScript and TypeScript assertion table makes `toContain` and `toMatch` strong custom assertions and `toMatchObject` a strong equality (`toContainEqual`, ranges, and `toHaveBeenCalled` stay weak); (2) `tests.quality` counts a loop as a table (`tables`, not `loops`) when it iterates a table written in place (ADR-069) or its span holds one of the case's assertions, while branches, ternaries, and catches count as before; (3) `test.duplicate-setup` needs `setup_tests_min` (new setting, default 3) tests sharing `setup_statements_min` (default 5, was 3) leading statements, and its evidence carries both; (4) `static.clones` wants `TestConventions` and gives a group whose members all lie in test files `shape` `test-code` at `info`, outside `pairs`, `clusters`, and `max_jaccard`, as enum mappings are (ADR-158 §3). The `shape` evidence's schema is a plain string enum, which the evidence validator reads (ADR-043); the earlier `Option` of a documented enum was `anyOf`, which no golden had exercised. Cupel's own `pairs` went from 145 to 47 (`clusters` 15 to 5).
+  - Open: the owner named the jest/vitest matchers only, so chai's `include`/`contain` and `assert.match` stay weak; Rust's in-source `#[cfg(test)]` modules are not test files by path, so their clones still count. The per-language `tests.quality` fixtures' one `test.logic` (a loop asserting over computed cases) and one `test.duplicate-setup` (two tests sharing three statements) no longer fire, so those kinds have unit tests but no end-to-end fixture.
+  - Tests:
+    - `cupel-lang/tests/ecma_tests.rs` `membership_pattern_and_partial_object_matchers_are_strong` (failed first: all four weak);
+    - `cupel-checks/tests/tests_quality.rs` `a_loop_holding_an_assertion_is_table_driven_but_branching_inside_it_is_logic` (failed first: the asserting loop reported as logic) and `duplicate_setup_needs_three_tests_sharing_five_statements_by_default` (failed first: the pair and the four-statement group reported); the older duplicate-setup tests now set their thresholds;
+    - `cupel-checks/tests/static_clones.rs` `clones_whose_members_all_lie_in_test_files_are_info_and_leave_the_counts` (failed first: `TestConventions` undeclared) and `without_test_conventions_no_clone_is_test_code`;
+    - the `tests.quality` and `static.clones` goldens (per language, surveys, describe) and the `survey` goldens regenerated; the README's settings table regenerated (`setup_tests_min`).
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

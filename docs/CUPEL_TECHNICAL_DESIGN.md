@@ -91,7 +91,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 |---|---|---|---|
 | `static.complexity` | Cyclomatic, cognitive (nesting-weighted), nesting depth, param count, length per symbol | `complexity.high`, `nesting.deep`, `params.many`, `function.long` | build |
 | `static.crap` | `CC² × (1 − coverage)³ + CC`; wants `CoverageMap`; `--no-coverage` forces (CC only) | `crap.high` (≥30), `crap.watch` (5–30) | build |
-| `static.clones` | Type 1/2/3 clones via normalized-AST subtree fingerprints + Jaccard; MinHash bucketing before pairwise | `clone.pair`, `clone.cluster` | build |
+| `static.clones` | Type 1/2/3 clones via normalized-AST subtree fingerprints + Jaccard; MinHash bucketing before pairwise; groups wholly in test files at info, outside the gate metrics (ADR-184) | `clone.pair`, `clone.cluster` | build |
 | `static.deps` | Module graph: afferent/efferent coupling, instability, abstractness (abstract exported members over exported members, ADR-178), distance from main sequence, cycles, layering-rule violations from config | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | build |
 | `static.api-surface` | Public API diff vs base: removed/changed signatures, visibility changes; a JavaScript or TypeScript package's API is what its `package.json` entries expose (ADR-176) | `api.breaking`, `api.widened` | build + wrap (`cargo-semver-checks`, `api-extractor` where present) |
 | `static.dead-code` | Unreachable/unused symbols and exports | `dead.symbol`, `dead.export` | build |
@@ -103,7 +103,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 |---|---|---|---|---|
 | `tests.coverage` | Line/branch coverage; MC/DC where tooling supports; **per-test coverage map** when available | `coverage.uncovered-symbol`, `coverage.uncovered-branch`, `coverage.unloaded-file` | standard | wrap (coverage producers) |
 | `tests.mutation` | Killed / (killed + survived + uncovered) (ADR-141); coverage-gated; differential; per-test selection; schemata for compiled langs | `mutant.survived`, `mutant.timeout`, `mutant.out-of-memory`, `mutant.uncovered`, `mutant.equivalent?` (low confidence) | standard (changed symbols) / deep (touched files) / exhaustive (tree) | build (Py, Go, Rust, TS) + wrap (PIT for JVM, Stryker optional) |
-| `tests.quality` | SCRAP-style: assertion density, weak assertions, mock density, logic in tests, duplicated setup | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | quick | build |
+| `tests.quality` | SCRAP-style: assertion density, weak assertions, mock density, logic in tests (a loop holding an assertion is a table, a branch is logic), duplicated setup (≥3 tests sharing ≥5 statements); calibration in ADR-184 | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | quick | build |
 | `tests.weakening` | **Diff of the test suite itself** vs base: removed assertions, skipped/disabled tests, loosened matchers, rewritten snapshots, widened `any`-style matchers | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | quick | build |
 | `tests.flaky` | Rerun impacted tests N times with shuffled order, varied seeds, parallelism | `test.flaky`, `test.order-dependent` | standard | build over runner producers |
 

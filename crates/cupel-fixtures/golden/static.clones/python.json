@@ -9,7 +9,7 @@
       "metrics": {
         "clusters": 1.0,
         "max_jaccard": 1.0,
-        "pairs": 9.0
+        "pairs": 8.0
       },
       "oracle": null,
       "score": {
@@ -496,6 +496,7 @@
           "nodes": 42,
           "symbol": "tests.test_ledger_case.TestBalancesThroughTheHarness.test_balances_of_larger_pairs"
         },
+        "shape": "test-code",
         "threshold": 0.82
       },
       "id": "fnd_91de73",
@@ -509,7 +510,7 @@
       },
       "new_since_baseline": false,
       "repro": "cupel check --only static.clones --symbols sh_016947fcf4a2d214",
-      "severity": "warn",
+      "severity": "info",
       "suppress": "cupel suppress fnd_91de73 --reason '…'",
       "suppressed": false,
       "symbol": {
@@ -618,8 +619,8 @@
   "summary": {
     "findings": {
       "fail": 0,
-      "info": 0,
-      "warn": 4
+      "info": 1,
+      "warn": 3
     },
     "gate": null,
     "new": 0,

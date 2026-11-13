@@ -9,7 +9,7 @@
       "metrics": {
         "clusters": 1.0,
         "max_jaccard": 1.0,
-        "pairs": 18.0
+        "pairs": 17.0
       },
       "oracle": null,
       "score": {
@@ -330,6 +330,7 @@
           "nodes": 29,
           "symbol": "ledger.TestParseCentsRejectsBlanks"
         },
+        "shape": "test-code",
         "threshold": 0.82
       },
       "id": "fnd_258580",
@@ -343,7 +344,7 @@
       },
       "new_since_baseline": false,
       "repro": "cupel check --only static.clones --symbols sh_1484de0443216190",
-      "severity": "warn",
+      "severity": "info",
       "suppress": "cupel suppress fnd_258580 --reason '…'",
       "suppressed": false,
       "symbol": {
