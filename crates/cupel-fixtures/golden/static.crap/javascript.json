@@ -6,6 +6,19 @@
       "duration_ms": "<duration-ms>",
       "findings": 1,
       "id": "static.crap",
+      "metric_targets": {
+        "max": {
+          "display": "grade.refund",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 36,
+            "file": "grade.js",
+            "line": 22
+          },
+          "symbol": "sh_cf850445a855f417"
+        }
+      },
       "metrics": {
         "max": 42.0,
         "mean": 15.690666666666669

@@ -6,6 +6,63 @@
       "duration_ms": "<duration-ms>",
       "findings": 4,
       "id": "static.complexity",
+      "metric_targets": {
+        "cognitive_max": {
+          "display": "ledger.complexity/settle",
+          "location": {
+            "col": 1,
+            "end_col": 15,
+            "end_line": 30,
+            "file": "src/ledger/complexity.clj",
+            "line": 20
+          },
+          "symbol": "sh_44cec65dd328a478"
+        },
+        "cyclomatic_max": {
+          "display": "ledger.complexity/label",
+          "location": {
+            "col": 1,
+            "end_col": 19,
+            "end_line": 18,
+            "file": "src/ledger/complexity.clj",
+            "line": 4
+          },
+          "symbol": "sh_3f6b8dd416106191"
+        },
+        "length_max": {
+          "display": "ledger.complexity/statement-template",
+          "location": {
+            "col": 1,
+            "end_col": 24,
+            "end_line": 100,
+            "file": "src/ledger/complexity.clj",
+            "line": 37
+          },
+          "symbol": "sh_53240e95f71b95f7"
+        },
+        "nesting_max": {
+          "display": "ledger.complexity/settle",
+          "location": {
+            "col": 1,
+            "end_col": 15,
+            "end_line": 30,
+            "file": "src/ledger/complexity.clj",
+            "line": 20
+          },
+          "symbol": "sh_44cec65dd328a478"
+        },
+        "params_max": {
+          "display": "ledger.complexity/open-account",
+          "location": {
+            "col": 1,
+            "end_col": 77,
+            "end_line": 35,
+            "file": "src/ledger/complexity.clj",
+            "line": 32
+          },
+          "symbol": "sh_07e9a3fcee33ec80"
+        }
+      },
       "metrics": {
         "cognitive_max": 15.0,
         "cyclomatic_max": 11.0,

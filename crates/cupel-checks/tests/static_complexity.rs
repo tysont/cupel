@@ -371,6 +371,37 @@ fn the_result_reports_each_scope_metric_as_the_largest_value_in_scope() {
 }
 
 #[test]
+fn each_scope_metric_names_the_first_symbol_with_its_largest_value() {
+    let mut world = two_symbols();
+    world.symbols.push((symbol("long", 40, 30, 7), vec![]));
+    let (result, _) = run(&world, json!({}));
+    let named: Vec<(&str, &str, u32)> = result
+        .metric_targets
+        .iter()
+        .map(|(metric, target)| {
+            let line = target.location.as_ref().map_or(0, |location| location.line);
+            (metric.as_str(), target.display.as_str(), line)
+        })
+        .collect();
+    assert_eq!(
+        named,
+        [
+            ("cognitive_max", "m::wide", 1),
+            ("cyclomatic_max", "m::wide", 1),
+            ("length_max", "m::long", 40),
+            ("nesting_max", "m::wide", 1),
+            ("params_max", "m::wide", 1),
+        ]
+    );
+    let (empty, _) = run(&World { symbols: vec![] }, json!({}));
+    assert!(
+        empty.metric_targets.is_empty(),
+        "{:?}",
+        empty.metric_targets
+    );
+}
+
+#[test]
 fn each_symbol_in_scope_is_measured_for_cyclomatic_and_cognitive_rankings() {
     let world = two_symbols();
     let check = support::check(ID);

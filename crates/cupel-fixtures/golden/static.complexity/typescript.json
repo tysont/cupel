@@ -6,6 +6,63 @@
       "duration_ms": "<duration-ms>",
       "findings": 4,
       "id": "static.complexity",
+      "metric_targets": {
+        "cognitive_max": {
+          "display": "complexity.settle",
+          "location": {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 45,
+            "file": "src/complexity.ts",
+            "line": 31
+          },
+          "symbol": "sh_7b6a36c322da7c7c"
+        },
+        "cyclomatic_max": {
+          "display": "complexity.label",
+          "location": {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 29,
+            "file": "src/complexity.ts",
+            "line": 3
+          },
+          "symbol": "sh_89983ab5c464c8d1"
+        },
+        "length_max": {
+          "display": "complexity.statementTemplate",
+          "location": {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 122,
+            "file": "src/complexity.ts",
+            "line": 58
+          },
+          "symbol": "sh_4726b12fa399cfed"
+        },
+        "nesting_max": {
+          "display": "complexity.settle",
+          "location": {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 45,
+            "file": "src/complexity.ts",
+            "line": 31
+          },
+          "symbol": "sh_7b6a36c322da7c7c"
+        },
+        "params_max": {
+          "display": "complexity.openAccount",
+          "location": {
+            "col": 8,
+            "end_col": 2,
+            "end_line": 56,
+            "file": "src/complexity.ts",
+            "line": 47
+          },
+          "symbol": "sh_254ee3901ff330b3"
+        }
+      },
       "metrics": {
         "cognitive_max": 15.0,
         "cyclomatic_max": 11.0,

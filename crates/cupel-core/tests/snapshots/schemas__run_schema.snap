@@ -480,6 +480,14 @@ expression: pretty(&schema)
         "id": {
           "$ref": "#/$defs/CheckId"
         },
+        "metric_targets": {
+          "description": "The target each metric that is a largest or smallest value over targets was measured on,\nby metric name, such as the function whose cyclomatic complexity is `cyclomatic_max`.\nCounts and ratios have none. Absent when empty, as `notes`.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/Target"
+          },
+          "x-cupel-optional": true
+        },
         "metrics": {
           "description": "The value of each `scope` metric the check measured, by metric name; the gate reads\nthem as `<check-id>.<metric>` (ADR-060).",
           "type": "object",
@@ -1591,6 +1599,18 @@ expression: pretty(&schema)
           ],
           "format": "double"
         },
+        "actual_target": {
+          "description": "What `actual` was measured on, when the rule's metric is a largest or smallest value\nover targets (the check's `metric_targets`); absent otherwise.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-cupel-optional": true
+        },
         "bound": {
           "description": "The value `actual` was compared with: the threshold, the reference value plus the\noffset for a rule against `base` (ADR-130), or 0 for a presence rule; null when the\nrule was not evaluated.",
           "type": [
@@ -1598,6 +1618,18 @@ expression: pretty(&schema)
             "null"
           ],
           "format": "double"
+        },
+        "bound_target": {
+          "description": "What the reference value behind `bound` was measured on, for a rule against `base` whose\nmetric has targets; absent otherwise, as for a threshold.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "x-cupel-optional": true
         },
         "reason": {
           "description": "Why a `skipped` rule was not evaluated, such as `no reference: no baseline is set`;\nnull otherwise.",

@@ -10,6 +10,7 @@ use crate::finding::Symbol;
 use crate::grade::{CostClass, Tier};
 use crate::hash::FindingId;
 use crate::id::{CheckId, LangId, ToolId};
+use crate::rank::Target;
 
 /// One check's outcome within a run.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
@@ -23,6 +24,12 @@ pub struct CheckResult {
     /// them as `<check-id>.<metric>` (ADR-060).
     #[serde(default)]
     pub metrics: BTreeMap<String, f64>,
+    /// The target each metric that is a largest or smallest value over targets was measured on,
+    /// by metric name, such as the function whose cyclomatic complexity is `cyclomatic_max`.
+    /// Counts and ratios have none. Absent when empty, as `notes`.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub metric_targets: BTreeMap<String, Target>,
     pub delta: Option<Delta>,
     /// Number of findings this check produced.
     pub findings: u64,

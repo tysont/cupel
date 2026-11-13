@@ -66,6 +66,7 @@ impl Check for NeedsTestResults {
                 n: results.tests.len() as u64,
             }),
             metrics: BTreeMap::new(),
+            metric_targets: BTreeMap::new(),
             delta: None,
             findings: 0,
             duration_ms: 0,

@@ -53,6 +53,7 @@ impl PluginCheck {
             cost: self.manifest.cost,
             score: reported.score,
             metrics: reported.metrics,
+            metric_targets: BTreeMap::new(),
             delta: None,
             findings,
             duration_ms: 0,

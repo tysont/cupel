@@ -650,7 +650,14 @@ fn the_result_reports_cycles_violations_and_the_largest_distance() {
         ]
         .into()
     );
+    let named: Vec<(&str, &str)> = result
+        .metric_targets
+        .iter()
+        .map(|(metric, target)| (metric.as_str(), target.display.as_str()))
+        .collect();
+    assert_eq!(named, [("max_distance", "m")], "counts are no module's");
     let (empty, _) = run(&World::default(), json!({}));
+    assert!(empty.metric_targets.is_empty());
     assert!(
         empty.metrics.values().all(|value| *value == 0.0),
         "{:?}",

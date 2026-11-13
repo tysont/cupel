@@ -442,7 +442,14 @@ fn the_result_reports_the_largest_and_mean_crap_of_the_scored_symbols() {
         [("max".to_owned(), 42.0), ("mean".to_owned(), 22.0)].into(),
         "CRAP 42 and 2; the test file is not scored"
     );
+    let named: Vec<(&str, &str)> = result
+        .metric_targets
+        .iter()
+        .map(|(metric, target)| (metric.as_str(), target.display.as_str()))
+        .collect();
+    assert_eq!(named, [("max", "m::risky")], "a mean is no symbol's");
     let (empty, _) = run(&World::of(vec![]), json!({}));
+    assert!(empty.metric_targets.is_empty());
     assert_eq!(
         empty.metrics,
         [("max".to_owned(), 0.0), ("mean".to_owned(), 0.0)].into()

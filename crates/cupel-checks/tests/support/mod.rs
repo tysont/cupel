@@ -65,6 +65,7 @@ pub fn language(check: &dyn Check, metrics: &[(&str, f64)], n: u64) -> CheckResu
             .iter()
             .map(|(name, value)| ((*name).to_owned(), *value))
             .collect::<BTreeMap<_, _>>(),
+        metric_targets: BTreeMap::new(),
         delta: None,
         findings: 0,
         duration_ms: 0,

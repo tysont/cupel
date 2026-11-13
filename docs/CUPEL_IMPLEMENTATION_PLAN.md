@@ -2608,6 +2608,16 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
     - `cupel-cli/tests/explain.rs` `a_finding_whose_tests_are_all_tests_says_so_instead_of_listing_them` (failed first: `all_tests` null);
     - `cupel-fixtures/tests/mutant_timeout.rs`: the slow test left out shows as `tests_run` 1 with `all_tests`; the `tests.mutation` goldens (every language but Java, whose PIT run selects per test) and `describe` golden, the schema and render snapshots regenerated.
 
+- **Item 5, gate rules name their symbols** (2026-11-12, ADR-130, ADR-175).
+  - The gap: a check's `scope` metrics were bare numbers, so a rule read `cyclomatic_max` actual 30, bound 18, and an agent found which functions those were only among per-function warnings (Area 11).
+  - Now a check result carries `metric_targets`: for each metric that is a largest value over targets, the first target with that value (`Target`: display, symbol hash, location, as rankings name them). The scheduler combines them across languages as the language whose own value is the combined one. `evaluate_gate` puts the current run's on the rule as `actual_target`, and for a rule against `base` the reference run's (recomputed base, `--against`, or the baseline) as `bound_target`; the text reads `actual 30 (fmt::render at src/fmt.rs:12)  bound 18 (…)`. Both optional and absent when there is none, so the `v1` schema only grows; a reference stored before this has none, so its bound names nothing.
+  - Which metrics have one: `static.complexity`'s `cyclomatic_max`, `cognitive_max`, `nesting_max`, `params_max`, `length_max`; `static.crap.max`; `static.deps.max_distance` (a module). Counts (`cycles`, `pairs`, `survived`, …), ratios and means (`tests.mutation.score`, `tests.coverage.line`, `static.crap.mean`, …), and presence rules have none, and nor does a threshold bound. Not carried: `static.clones.max_jaccard` (a pair, not one target) and `perf.bench.regression` (a benchmark); no `scope` metric is a smallest value. Plugins report none.
+  - Tests:
+    - `cupel-core/tests/gate.rs` `a_rule_names_the_targets_its_actual_and_its_reference_bound_were_measured_on` (failed first: no `actual_target`); `scheduler.rs`: the combined target is the largest language's (failed first with the combining left out);
+    - `cupel-checks/tests/static_complexity.rs` `each_scope_metric_names_the_first_symbol_with_its_largest_value`, `static_crap.rs`, `static_deps.rs` (each failed first: no targets);
+    - `cupel-cli/tests/gate.rs`: a changed rule against the recomputed base names `wide::step` at `src/wide.rs:5` on both sides, in JSON and text (failed first on the text);
+    - the render fixture's `static.crap.max <= base` rule, and the goldens of `static.complexity`, `static.crap`, `static.deps`, their surveys, `cli/sarif-check`, `deps-narrowed-scope`, `inline-callbacks`, and `symbol-matching`, regenerated.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:

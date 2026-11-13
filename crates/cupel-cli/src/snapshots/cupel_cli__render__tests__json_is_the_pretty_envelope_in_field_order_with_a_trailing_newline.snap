@@ -338,6 +338,35 @@ expression: out
           "reason": null
         },
         {
+          "rule": "static.crap.max <= base",
+          "actual": 42.5,
+          "actual_target": {
+            "display": "rewrite::Planner::push_limit",
+            "symbol": "sh_4b1d9e0c4b1d9e01",
+            "location": {
+              "file": "src/rewrite/planner.rs",
+              "line": 140,
+              "col": 5,
+              "end_line": 171,
+              "end_col": 6
+            }
+          },
+          "bound": 12.0,
+          "bound_target": {
+            "display": "rewrite::Planner::push_limit",
+            "symbol": "sh_4b1d9e0c4b1d9e01",
+            "location": {
+              "file": "src/rewrite/planner.rs",
+              "line": 131,
+              "col": 5,
+              "end_line": 162,
+              "end_col": 6
+            }
+          },
+          "result": "fail",
+          "reason": null
+        },
+        {
           "rule": "perf.bench.regression < 5%",
           "actual": null,
           "bound": null,

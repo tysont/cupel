@@ -97,7 +97,9 @@ fn gate_rule(
     GateRule {
         rule: rule.to_owned(),
         actual,
+        actual_target: None,
         bound,
+        bound_target: None,
         result,
         reason: reason.map(str::to_owned),
     }
@@ -575,4 +577,62 @@ fn a_rule_against_base_without_a_reference_value_is_skipped_and_fails_the_gate()
         &unset(),
     );
     assert_eq!(gate.result, GateOutcome::Fail);
+}
+
+/// What a symbol in `file` at `line` is as a metric's target.
+fn target(display: &str, file: &str, line: u32) -> Value {
+    json!({
+        "display": display, "symbol": null,
+        "location": {"file": file, "line": line, "col": 1, "end_line": line + 9, "end_col": 2}
+    })
+}
+
+/// A run in which `static.complexity` reported `cyclomatic_max` as `value`, measured on `on`.
+fn complexity(value: f64, on: &Value) -> Envelope {
+    let mut result = check(
+        "static.complexity",
+        "fail",
+        &json!({"cyclomatic_max": value, "length_max": 40.0}),
+    );
+    result["metric_targets"] = json!({"cyclomatic_max": on});
+    envelope("pass", &[result], &[])
+}
+
+#[test]
+fn a_rule_names_the_targets_its_actual_and_its_reference_bound_were_measured_on() {
+    let (head, base) = (
+        target("a::worst", "src/a.rs", 3),
+        target("b::was", "src/b.rs", 7),
+    );
+    let current = complexity(30.0, &head);
+    let reference = complexity(18.0, &base);
+    let against_base = against(
+        "static.complexity.cyclomatic_max",
+        "<= base",
+        &current,
+        &GateReference::Run(&reference),
+    );
+    let serialized = serde_json::to_value(&against_base).unwrap();
+    assert_eq!(
+        (&serialized["actual_target"], &serialized["bound_target"]),
+        (&head, &base)
+    );
+    // A threshold is no target's value, and a metric that is no target's has none.
+    let threshold = serde_json::to_value(against(
+        "static.complexity.cyclomatic_max",
+        "<= 18",
+        &current,
+        &unset(),
+    ))
+    .unwrap();
+    assert_eq!(threshold["actual_target"], head);
+    assert_eq!(threshold.get("bound_target"), None);
+    let untargeted = serde_json::to_value(against(
+        "static.complexity.length_max",
+        "<= 60",
+        &current,
+        &unset(),
+    ))
+    .unwrap();
+    assert_eq!(untargeted.get("actual_target"), None);
 }

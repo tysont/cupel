@@ -15,7 +15,7 @@ use crate::hash::FindingId;
 use crate::id::{LangId, RunId};
 use crate::oracle::OracleReport;
 use crate::per_test_impact::TestsReport;
-use crate::rank::Rankings;
+use crate::rank::{Rankings, Target};
 pub use crate::result::{
     CheckResult, CheckStatus, Delta, Score, SetDelta, SetFindings, SetMetric, SkipReason, Skipped,
 };
@@ -201,10 +201,20 @@ pub struct GateRule {
     pub rule: String,
     /// The measured value; null when the rule could not be evaluated.
     pub actual: Option<f64>,
+    /// What `actual` was measured on, when the rule's metric is a largest or smallest value
+    /// over targets (the check's `metric_targets`); absent otherwise.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub actual_target: Option<Target>,
     /// The value `actual` was compared with: the threshold, the reference value plus the
     /// offset for a rule against `base` (ADR-130), or 0 for a presence rule; null when the
     /// rule was not evaluated.
     pub bound: Option<f64>,
+    /// What the reference value behind `bound` was measured on, for a rule against `base` whose
+    /// metric has targets; absent otherwise, as for a threshold.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub bound_target: Option<Target>,
     pub result: RuleOutcome,
     /// Why a `skipped` rule was not evaluated, such as `no reference: no baseline is set`;
     /// null otherwise.

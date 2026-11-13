@@ -6,6 +6,63 @@
       "duration_ms": "<duration-ms>",
       "findings": 4,
       "id": "static.complexity",
+      "metric_targets": {
+        "cognitive_max": {
+          "display": "ledger.Complexity.settle",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 54,
+            "file": "src/main/java/ledger/Complexity.java",
+            "line": 40
+          },
+          "symbol": "sh_6519bb6d84c93862"
+        },
+        "cyclomatic_max": {
+          "display": "ledger.Complexity.label",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 37,
+            "file": "src/main/java/ledger/Complexity.java",
+            "line": 11
+          },
+          "symbol": "sh_2d30bc640f6376a8"
+        },
+        "length_max": {
+          "display": "ledger.Complexity.statementTemplate",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 125,
+            "file": "src/main/java/ledger/Complexity.java",
+            "line": 62
+          },
+          "symbol": "sh_0239427f4a754522"
+        },
+        "nesting_max": {
+          "display": "ledger.Complexity.settle",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 54,
+            "file": "src/main/java/ledger/Complexity.java",
+            "line": 40
+          },
+          "symbol": "sh_6519bb6d84c93862"
+        },
+        "params_max": {
+          "display": "ledger.Complexity.openAccount",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 59,
+            "file": "src/main/java/ledger/Complexity.java",
+            "line": 57
+          },
+          "symbol": "sh_7cffa2a2aeeddbfa"
+        }
+      },
       "metrics": {
         "cognitive_max": 15.0,
         "cyclomatic_max": 11.0,

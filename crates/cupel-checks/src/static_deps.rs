@@ -213,20 +213,13 @@ impl Check for StaticDeps {
             findings.extend(found);
         }
         ctx.cancel.checkpoint()?;
-        let mut max_distance: f64 = 0.0;
-        for module in &graph.modules {
-            if let Some(distance) = measure_module(&graph, &types, module, sink) {
-                max_distance = max_distance.max(distance);
-            }
-            if let Some(finding) = self.unstable_abstract(&graph, &types, module, &settings) {
-                findings.push(finding);
-            }
-        }
+        let farthest = self.modules(&graph, &types, &settings, sink, &mut findings);
+        let (max_distance, farthest) = farthest.map_or((0.0, None), |(max, on)| (max, Some(on)));
         let count = findings.len() as u64;
         for finding in findings {
             sink.emit(Event::Finding(Box::new(finding)));
         }
-        Ok(outcome::result(
+        let mut result = outcome::result(
             &self.manifest,
             outcome::status(count > 0),
             Some(Score {
@@ -240,7 +233,11 @@ impl Check for StaticDeps {
                 ("violations".to_owned(), as_value(violations)),
             ]),
             count,
-        ))
+        );
+        result.metric_targets = farthest
+            .map(|on| BTreeMap::from([("max_distance".to_owned(), on)]))
+            .unwrap_or_default();
+        Ok(result)
     }
 
     /// Cycles are counts, so per-language scores add up (ADR-052).
@@ -257,14 +254,41 @@ impl Check for StaticDeps {
     }
 }
 
+impl StaticDeps {
+    /// Measures every module and reports each `dep.unstable-abstract` into `findings`; the
+    /// first module farthest from the main sequence, with its distance.
+    fn modules(
+        &self,
+        graph: &Graph,
+        types: &TypeCounts,
+        settings: &Settings,
+        sink: &mut dyn EventSink,
+        findings: &mut Vec<Finding>,
+    ) -> Option<(f64, Target)> {
+        let mut farthest: Option<(f64, Target)> = None;
+        for module in &graph.modules {
+            if let Some((distance, target)) = measure_module(graph, types, module, sink)
+                && farthest.as_ref().is_none_or(|(max, _)| distance > *max)
+            {
+                farthest = Some((distance, target));
+            }
+            if let Some(finding) = self.unstable_abstract(graph, types, module, settings) {
+                findings.push(finding);
+            }
+        }
+        farthest
+    }
+}
+
 /// Reports `module`'s coupling and, where defined, its distance from the main sequence for
-/// `survey`'s rankings (ADR-062); the distance, rounded as in evidence.
+/// `survey`'s rankings (ADR-062); the distance, rounded as in evidence, and the module as a
+/// target.
 fn measure_module(
     graph: &Graph,
     types: &TypeCounts,
     module: &str,
     sink: &mut dyn EventSink,
-) -> Option<f64> {
+) -> Option<(f64, Target)> {
     let coupling = graph.coupling(module);
     let target = Target {
         display: module.to_owned(),
@@ -286,9 +310,9 @@ fn measure_module(
     sink.measure(Measurement {
         metric: "distance".to_owned(),
         value: distance,
-        target,
+        target: target.clone(),
     });
-    Some(distance)
+    Some((distance, target))
 }
 
 #[allow(

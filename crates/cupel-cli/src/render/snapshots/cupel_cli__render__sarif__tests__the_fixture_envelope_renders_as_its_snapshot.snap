@@ -516,6 +516,35 @@ expression: "render(&fixture::envelope(), Some(Path::new(\"/work/exonym\")))"
                 "rule": "tests.weakening none"
               },
               {
+                "actual": 42.5,
+                "actual_target": {
+                  "display": "rewrite::Planner::push_limit",
+                  "location": {
+                    "col": 5,
+                    "end_col": 6,
+                    "end_line": 171,
+                    "file": "src/rewrite/planner.rs",
+                    "line": 140
+                  },
+                  "symbol": "sh_4b1d9e0c4b1d9e01"
+                },
+                "bound": 12.0,
+                "bound_target": {
+                  "display": "rewrite::Planner::push_limit",
+                  "location": {
+                    "col": 5,
+                    "end_col": 6,
+                    "end_line": 162,
+                    "file": "src/rewrite/planner.rs",
+                    "line": 131
+                  },
+                  "symbol": "sh_4b1d9e0c4b1d9e01"
+                },
+                "reason": null,
+                "result": "fail",
+                "rule": "static.crap.max <= base"
+              },
+              {
                 "actual": null,
                 "bound": null,
                 "reason": "`perf.bench` did not run to completion",

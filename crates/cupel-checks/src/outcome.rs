@@ -19,6 +19,7 @@ pub fn result(
         cost: manifest.cost,
         score,
         metrics,
+        metric_targets: BTreeMap::new(),
         delta: None,
         findings,
         duration_ms: 0,

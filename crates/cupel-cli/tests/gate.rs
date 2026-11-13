@@ -21,6 +21,18 @@ fn gate(envelope: &Value) -> &Value {
     &envelope["summary"]["gate"]
 }
 
+/// The gate's rules without what each value was measured on.
+fn untargeted(envelope: &Value) -> Value {
+    let mut rules = gate(envelope)["rules"].clone();
+    for rule in rules.as_array_mut().into_iter().flatten() {
+        if let Some(fields) = rule.as_object_mut() {
+            fields.remove("actual_target");
+            fields.remove("bound_target");
+        }
+    }
+    rules
+}
+
 #[test]
 fn the_gate_is_evaluated_by_default_when_its_table_exists() {
     let repo = repo("[gate.tree]\n\"static.complexity.cyclomatic_max\" = \"<= 3\"\n");
@@ -374,7 +386,7 @@ fn a_changed_rule_against_base_recomputes_the_value_at_the_base_commit() {
         return;
     };
     let check = ["check", "--changed", "--only", "static.complexity"];
-    let rules_of = |outcome: &support::Outcome| gate(&outcome.envelope())["rules"].clone();
+    let rules_of = |outcome: &support::Outcome| untargeted(&outcome.envelope());
 
     repo.write("src/wide.rs", &with_params(8));
     let widened = repo.run(&check);
@@ -445,12 +457,43 @@ fn a_changed_rule_against_base_compares_the_symbols_the_change_touched_at_the_ba
     repo.write("src/wide.rs", &beside_wide(true));
     let outcome = repo.run(&["check", "--changed", "--only", "static.complexity"]);
     assert_eq!(outcome.code, 1, "{}", outcome.stdout);
+    let mut rule = gate(&outcome.envelope())["rules"][0].clone();
+    let named = |target: Value| {
+        let location = &target["location"];
+        (
+            target["display"].clone(),
+            location["file"].clone(),
+            location["line"].clone(),
+        )
+    };
+    let step = (json!("wide::step"), json!("src/wide.rs"), json!(5));
     assert_eq!(
-        gate(&outcome.envelope())["rules"][0],
+        (
+            named(rule["actual_target"].take()),
+            named(rule["bound_target"].take())
+        ),
+        (step.clone(), step),
+        "each value names the function it was measured on"
+    );
+    assert_eq!(
+        rule,
         json!({"rule": "static.complexity.cyclomatic_max <= base", "actual": 2.0, "bound": 1.0,
-               "result": "fail", "reason": null}),
+               "result": "fail", "reason": null, "actual_target": null, "bound_target": null}),
         "the base is `step` as it was, not the untouched `wide` beside it"
     );
+    let text = repo
+        .run(&[
+            "check",
+            "--changed",
+            "--only",
+            "static.complexity",
+            "--format",
+            "text",
+        ])
+        .stdout;
+    let line = "static.complexity.cyclomatic_max <= base  actual 2 (wide::step at src/wide.rs:5)  \
+                bound 1 (wide::step at src/wide.rs:5)";
+    assert!(text.contains(line), "{line:?} in\n{text}");
 }
 
 #[test]
@@ -463,7 +506,7 @@ fn a_changed_rule_against_base_has_no_reference_when_every_changed_file_is_new()
     let outcome = repo.run(&["check", "--changed", "--only", "static.complexity"]);
     assert_eq!(outcome.code, 1, "{}", outcome.stdout);
     assert_eq!(
-        gate(&outcome.envelope())["rules"][0],
+        untargeted(&outcome.envelope())[0],
         json!({"rule": "static.complexity.params_max <= base", "actual": 2.0, "bound": null,
                "result": "skipped",
                "reason": "no reference: none of the range's files existed at its base"})

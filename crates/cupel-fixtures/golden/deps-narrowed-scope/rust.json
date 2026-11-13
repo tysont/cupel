@@ -6,6 +6,19 @@
       "duration_ms": "<duration-ms>",
       "findings": 0,
       "id": "static.deps",
+      "metric_targets": {
+        "max_distance": {
+          "display": "src/value/index.rs",
+          "location": {
+            "col": null,
+            "end_col": null,
+            "end_line": 1,
+            "file": "src/value/index.rs",
+            "line": 1
+          },
+          "symbol": null
+        }
+      },
       "metrics": {
         "cycles": 0.0,
         "max_distance": 0.667,

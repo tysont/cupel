@@ -9,7 +9,7 @@ use cupel_core::syntax::{
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
     FactKind, Facts, Finding, FindingKindSpec, Manifest, Measurement, MetricPer, MetricSpec, Plan,
-    Result, Scope, Score, Severity, Stability, SymbolHash, Tier,
+    Result, Scope, Score, Severity, Stability, SymbolHash, Target, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -198,6 +198,8 @@ struct Inputs<'a> {
 struct Tally {
     scored: u64,
     worst: f64,
+    /// The first symbol scored `worst`.
+    worst_of: Option<Target>,
     total: f64,
     findings: u64,
     /// Some symbol is `crap.high`.
@@ -205,9 +207,12 @@ struct Tally {
 }
 
 impl Tally {
-    fn add(&mut self, crap: f64) {
+    fn add(&mut self, crap: f64, target: &Target) {
         self.scored += 1;
-        self.worst = self.worst.max(crap);
+        if self.worst_of.is_none() || crap > self.worst {
+            self.worst = crap;
+            self.worst_of = Some(target.clone());
+        }
         self.total += crap;
     }
 
@@ -227,13 +232,19 @@ impl Tally {
             ("max".to_owned(), self.worst),
             ("mean".to_owned(), self.mean()),
         ]);
-        outcome::result(
+        let mut result = outcome::result(
             manifest,
             outcome::status(self.flagged),
             Some(score),
             metrics,
             self.findings,
-        )
+        );
+        if let Some(target) = &self.worst_of {
+            result
+                .metric_targets
+                .insert("max".to_owned(), target.clone());
+        }
+        result
     }
 
     /// The mean CRAP of the scored symbols; 0 for none.
@@ -293,11 +304,12 @@ impl StaticCrap {
         let covered = symbol_coverage(inputs.coverage, symbol)?;
         let cyclomatic = cyclomatic(inputs.decisions.get(&key).copied().unwrap_or_default());
         let crap = crap(cyclomatic, covered);
-        tally.add(crap);
+        let target = symbol_target(symbol, inputs.hashes.get(&key).copied());
+        tally.add(crap, &target);
         sink.measure(Measurement {
             metric: "crap".to_owned(),
             value: crap,
-            target: symbol_target(symbol, inputs.hashes.get(&key).copied()),
+            target,
         });
         // A symbol without a structural hash cannot be identified, so it is scored but not
         // reported; every language producing NormTree hashes every symbol.

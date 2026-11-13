@@ -7,7 +7,7 @@ use cupel_core::syntax::{Decision, DecisionKind, Decisions, NormTree, Span, Symb
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
     Facts, Finding, FindingKindSpec, Manifest, Measurement, MetricPer, MetricSpec, Plan, Result,
-    Scope, Score, Stability, SymbolHash, Tier,
+    Scope, Score, Stability, SymbolHash, Target, Tier,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -211,7 +211,7 @@ impl Check for StaticComplexity {
             let decided = decisions.get(&key).copied().unwrap_or_default();
             let metrics = Metrics::of(symbol, decided);
             measured += 1;
-            worst.include(symbol, &metrics);
+            worst.include(symbol, hashes.get(&key).copied(), &metrics);
             measure(sink, symbol, hashes.get(&key).copied(), &metrics);
             // A symbol without a structural hash cannot be identified, so it is measured but
             // not reported; every language producing NormTree hashes every symbol.
@@ -229,17 +229,19 @@ impl Check for StaticComplexity {
                 sink.emit(Event::Finding(Box::new(finding)));
             }
         }
-        Ok(outcome::result(
+        let mut result = outcome::result(
             &self.manifest,
             outcome::status(findings > 0),
             Some(Score {
-                value: f64::from(worst.cyclomatic),
+                value: f64::from(worst.cyclomatic.value),
                 unit: "cyclomatic_max".to_owned(),
                 n: measured,
             }),
             worst.metrics(),
             findings,
-        ))
+        );
+        result.metric_targets = worst.targets();
+        Ok(result)
     }
 
     /// The largest value, over the symbols of every language (ADR-042).
@@ -427,36 +429,64 @@ impl Metrics {
 }
 
 /// The largest value of each metric over the symbols in scope: the check's `scope` metrics
-/// (ADR-042, ADR-060).
+/// (ADR-042, ADR-060), each with the first symbol that has it.
 #[derive(Default)]
 struct Worst {
-    cyclomatic: u32,
-    cognitive: u32,
-    depth: u32,
-    parameters: u32,
-    lines: u32,
+    cyclomatic: Largest,
+    cognitive: Largest,
+    depth: Largest,
+    parameters: Largest,
+    lines: Largest,
 }
 
 impl Worst {
-    fn include(&mut self, symbol: &SymbolDef, metrics: &Metrics) {
-        self.cyclomatic = self.cyclomatic.max(metrics.cyclomatic);
-        self.cognitive = self.cognitive.max(metrics.cognitive);
-        self.depth = self.depth.max(metrics.depth);
-        self.parameters = self.parameters.max(symbol.parameters);
-        self.lines = self.lines.max(metrics.lines);
+    fn include(&mut self, symbol: &SymbolDef, hash: Option<&SymbolHash>, metrics: &Metrics) {
+        self.cyclomatic.include(metrics.cyclomatic, symbol, hash);
+        self.cognitive.include(metrics.cognitive, symbol, hash);
+        self.depth.include(metrics.depth, symbol, hash);
+        self.parameters.include(symbol.parameters, symbol, hash);
+        self.lines.include(metrics.lines, symbol, hash);
+    }
+
+    fn named(&self) -> [(&'static str, &Largest); 5] {
+        [
+            ("cyclomatic_max", &self.cyclomatic),
+            ("cognitive_max", &self.cognitive),
+            ("nesting_max", &self.depth),
+            ("params_max", &self.parameters),
+            ("length_max", &self.lines),
+        ]
     }
 
     fn metrics(&self) -> BTreeMap<String, f64> {
-        [
-            ("cyclomatic_max", self.cyclomatic),
-            ("cognitive_max", self.cognitive),
-            ("nesting_max", self.depth),
-            ("params_max", self.parameters),
-            ("length_max", self.lines),
-        ]
-        .into_iter()
-        .map(|(name, value)| (name.to_owned(), f64::from(value)))
-        .collect()
+        self.named()
+            .into_iter()
+            .map(|(name, largest)| (name.to_owned(), f64::from(largest.value)))
+            .collect()
+    }
+
+    /// The symbol behind each metric, for a scope with any symbol.
+    fn targets(&self) -> BTreeMap<String, Target> {
+        self.named()
+            .into_iter()
+            .filter_map(|(name, largest)| Some((name.to_owned(), largest.on.clone()?)))
+            .collect()
+    }
+}
+
+/// One metric's largest value so far and the first symbol that has it.
+#[derive(Default)]
+struct Largest {
+    value: u32,
+    on: Option<Target>,
+}
+
+impl Largest {
+    fn include(&mut self, value: u32, symbol: &SymbolDef, hash: Option<&SymbolHash>) {
+        if self.on.is_none() || value > self.value {
+            self.value = value;
+            self.on = Some(symbol_target(symbol, hash));
+        }
     }
 }
 

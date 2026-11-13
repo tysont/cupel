@@ -6,6 +6,19 @@
       "duration_ms": "<duration-ms>",
       "findings": 1,
       "id": "static.crap",
+      "metric_targets": {
+        "max": {
+          "display": "grade.Grade.refund",
+          "location": {
+            "col": 5,
+            "end_col": 6,
+            "end_line": 43,
+            "file": "src/main/java/grade/Grade.java",
+            "line": 29
+          },
+          "symbol": "sh_8e5ebc7b01d11cc7"
+        }
+      },
       "metrics": {
         "max": 42.0,
         "mean": 15.690666666666669

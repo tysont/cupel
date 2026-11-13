@@ -6,6 +6,19 @@
       "duration_ms": "<duration-ms>",
       "findings": 3,
       "id": "static.deps",
+      "metric_targets": {
+        "max_distance": {
+          "display": "src/deps_layers/infra/store.py",
+          "location": {
+            "col": null,
+            "end_col": null,
+            "end_line": 1,
+            "file": "src/deps_layers/infra/store.py",
+            "line": 1
+          },
+          "symbol": null
+        }
+      },
       "metrics": {
         "cycles": 1.0,
         "max_distance": 1.0,

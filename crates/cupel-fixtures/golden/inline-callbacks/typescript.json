@@ -6,6 +6,63 @@
       "duration_ms": "<duration-ms>",
       "findings": 1,
       "id": "static.complexity",
+      "metric_targets": {
+        "cognitive_max": {
+          "display": "handle.handle",
+          "location": {
+            "col": 14,
+            "end_col": 93,
+            "end_line": 3,
+            "file": "src/handle.ts",
+            "line": 3
+          },
+          "symbol": "sh_bd70a480cf24b4de"
+        },
+        "cyclomatic_max": {
+          "display": "handle.handle",
+          "location": {
+            "col": 14,
+            "end_col": 93,
+            "end_line": 3,
+            "file": "src/handle.ts",
+            "line": 3
+          },
+          "symbol": "sh_bd70a480cf24b4de"
+        },
+        "length_max": {
+          "display": "tests.handle.handles every value",
+          "location": {
+            "col": 27,
+            "end_col": 2,
+            "end_line": 71,
+            "file": "tests/handle.test.ts",
+            "line": 5
+          },
+          "symbol": "sh_a3b129b7016edf82"
+        },
+        "nesting_max": {
+          "display": "handle.handle",
+          "location": {
+            "col": 14,
+            "end_col": 93,
+            "end_line": 3,
+            "file": "src/handle.ts",
+            "line": 3
+          },
+          "symbol": "sh_bd70a480cf24b4de"
+        },
+        "params_max": {
+          "display": "handle.handle",
+          "location": {
+            "col": 14,
+            "end_col": 93,
+            "end_line": 3,
+            "file": "src/handle.ts",
+            "line": 3
+          },
+          "symbol": "sh_bd70a480cf24b4de"
+        }
+      },
       "metrics": {
         "cognitive_max": 0.0,
         "cyclomatic_max": 1.0,

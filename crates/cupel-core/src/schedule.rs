@@ -26,7 +26,7 @@ use crate::oracle::RunOracle;
 use crate::producer::{
     Availability, Ctx, Focus, ImpactedTests, ProduceCtx, ProducerRegistry, Upstream,
 };
-use crate::rank::{Measured, Measurement};
+use crate::rank::{Measured, Measurement, Target};
 use crate::result::{CheckResult, CheckStatus, SkipReason, Skipped};
 use crate::scope::{ChangedLines, Scope, SymbolSelector, select_symbols, touched};
 use crate::syntax::{NormTree, Symbols};
@@ -765,6 +765,7 @@ fn unfinished(manifest: &Manifest, status: CheckStatus, skipped: Option<Skipped>
         cost: manifest.cost,
         score: None,
         metrics: BTreeMap::new(),
+        metric_targets: BTreeMap::new(),
         delta: None,
         findings: 0,
         duration_ms: 0,
@@ -1589,13 +1590,15 @@ impl<'a> CheckRun<'a> {
                 .max_by_key(|status| rank(*status))
                 .unwrap_or(CheckStatus::Pass);
             let scores: Vec<_> = ran.iter().filter_map(|r| r.score.clone()).collect();
+            let metrics = combine_metrics(self.check, &ran);
             CheckResult {
                 id: manifest.id.clone(),
                 status,
                 tier: manifest.tier,
                 cost: manifest.cost,
                 score: self.check.combine(&scores),
-                metrics: combine_metrics(self.check, &ran),
+                metric_targets: combine_targets(&ran, &metrics),
+                metrics,
                 delta: None,
                 findings: self.findings.len() as u64,
                 duration_ms,
@@ -1640,6 +1643,23 @@ fn combine_metrics(check: &dyn Check, ran: &[CheckResult]) -> BTreeMap<String, f
             check
                 .combine_metric(name, &reported)
                 .map(|value| (name.to_owned(), value))
+        })
+        .collect()
+}
+
+/// The target of each combined metric: that of a language whose own value is the combined one,
+/// as a largest or smallest value is; none for a metric no language measured on a target.
+fn combine_targets(
+    ran: &[CheckResult],
+    metrics: &BTreeMap<String, f64>,
+) -> BTreeMap<String, Target> {
+    metrics
+        .iter()
+        .filter_map(|(name, value)| {
+            ran.iter().find_map(|result| {
+                let target = result.metric_targets.get(name)?;
+                (result.metrics.get(name) == Some(value)).then(|| (name.clone(), target.clone()))
+            })
         })
         .collect()
 }
@@ -1735,6 +1755,7 @@ fn skipped_entry(check: &dyn Check, skips: Vec<Skipped>) -> CheckResult {
         cost: manifest.cost,
         score: None,
         metrics: BTreeMap::new(),
+        metric_targets: BTreeMap::new(),
         delta: None,
         findings: 0,
         duration_ms: 0,

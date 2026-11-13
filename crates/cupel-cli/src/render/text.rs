@@ -210,13 +210,13 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
     for rule in &gate.rules {
         let actual = rule
             .actual
-            .map(|actual| format!("  actual {actual}"))
+            .map(|actual| format!("  actual {actual}{}", on(rule.actual_target.as_ref())))
             .unwrap_or_default();
         // A rule against `base` does not show the value it was compared with; the others do.
         let bound = rule
             .bound
             .filter(|_| rule.rule.contains(" base"))
-            .map(|bound| format!("  bound {bound}"))
+            .map(|bound| format!("  bound {bound}{}", on(rule.bound_target.as_ref())))
             .unwrap_or_default();
         let reason = rule
             .reason
@@ -231,6 +231,20 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
         );
     }
     out
+}
+
+/// What a gate rule's value was measured on, as ` (name at file:line)`; empty for none.
+fn on(target: Option<&Target>) -> String {
+    let Some(target) = target else {
+        return String::new();
+    };
+    match &target.location {
+        Some(location) => format!(
+            " ({} at {}:{})",
+            target.display, location.file, location.line
+        ),
+        None => format!(" ({})", target.display),
+    }
 }
 
 /// Whether a run's new and resolved findings were counted against a reference run (a baseline,

@@ -109,6 +109,7 @@ fn skipped(check: &dyn Check) -> CheckResult {
         cost: manifest.cost,
         score: None,
         metrics: std::collections::BTreeMap::new(),
+        metric_targets: std::collections::BTreeMap::new(),
         delta: None,
         findings: 0,
         duration_ms: 0,

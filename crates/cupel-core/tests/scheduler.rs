@@ -166,6 +166,7 @@ fn passing(id: &str, score: Option<Score>) -> CheckResult {
         cost: CostClass::Quick,
         score,
         metrics: BTreeMap::new(),
+        metric_targets: BTreeMap::new(),
         delta: None,
         findings: 0,
         duration_ms: 0,
@@ -724,6 +725,12 @@ fn measuring(ctx: &CheckCtx, _: &Facts, sink: &mut dyn EventSink) -> Result<Chec
     }
     let mut result = passing("t.measured", None);
     result.metrics.insert("bound".to_owned(), bound);
+    let on = Target {
+        display: format!("bound {bound}"),
+        symbol: None,
+        location: None,
+    };
+    result.metric_targets.insert("bound".to_owned(), on);
     Ok(result)
 }
 
@@ -739,6 +746,10 @@ fn scope_metrics_combine_across_languages_by_the_largest_value() {
     assert_eq!(
         checks[0].metrics,
         BTreeMap::from([("bound".to_owned(), 7.0)])
+    );
+    assert_eq!(
+        checks[0].metric_targets["bound"].display, "bound 7",
+        "the target of the language whose value is the largest"
     );
 }
 

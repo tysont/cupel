@@ -3,6 +3,7 @@
 use crate::config::{Comparison, GateCondition, GateConfig, GateRuleSpec, GateSection};
 use crate::envelope::{Envelope, GateOutcome, GateResult, GateRule, RuleOutcome};
 use crate::finding::Severity;
+use crate::rank::Target;
 use crate::result::{CheckResult, CheckStatus};
 use crate::scope::ScopeMode;
 use crate::status::{ExitCode, Status};
@@ -57,10 +58,13 @@ pub fn evaluate_gate(
         .iter()
         .map(|rule| {
             let evaluation = evaluate_rule(rule, envelope, reference);
+            let (actual_target, bound_target) = targets(rule, envelope, reference, &evaluation);
             GateRule {
                 rule: rule.to_string(),
                 actual: evaluation.actual,
+                actual_target,
                 bound: evaluation.bound,
+                bound_target,
                 result: evaluation.result,
                 reason: evaluation.reason,
             }
@@ -191,6 +195,26 @@ fn presence(rule: &GateRuleSpec, envelope: &Envelope, entry: &CheckResult) -> Ev
     )]
     let actual = present as f64;
     Evaluation::compared(actual, 0.0, present == 0)
+}
+
+/// What the rule's `actual` and `bound` were measured on (the checks' `metric_targets`), when
+/// each was measured: the current run's, and the reference run's for a rule against `base`.
+fn targets(
+    rule: &GateRuleSpec,
+    envelope: &Envelope,
+    reference: &GateReference,
+    evaluation: &Evaluation,
+) -> (Option<Target>, Option<Target>) {
+    let target = |run: &Envelope| {
+        let metric = rule.key.metric.as_ref()?;
+        completed(run, rule)?.metric_targets.get(metric).cloned()
+    };
+    let actual = evaluation.actual.and_then(|_| target(envelope));
+    let bound = match (reference, &rule.condition, evaluation.bound) {
+        (GateReference::Run(run), GateCondition::Relative { .. }, Some(_)) => target(run),
+        _ => None,
+    };
+    (actual, bound)
 }
 
 /// The rule's metric as `entry` reports it.

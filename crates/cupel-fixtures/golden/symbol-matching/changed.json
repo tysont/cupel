@@ -148,6 +148,63 @@
       "duration_ms": "<duration-ms>",
       "findings": 2,
       "id": "static.complexity",
+      "metric_targets": {
+        "cognitive_max": {
+          "display": "billing.settle_invoices",
+          "location": {
+            "col": 1,
+            "end_col": 17,
+            "end_line": 24,
+            "file": "src/billing.py",
+            "line": 5
+          },
+          "symbol": "sh_97617fb7eb7ddc72"
+        },
+        "cyclomatic_max": {
+          "display": "billing.settle_invoices",
+          "location": {
+            "col": 1,
+            "end_col": 17,
+            "end_line": 24,
+            "file": "src/billing.py",
+            "line": 5
+          },
+          "symbol": "sh_97617fb7eb7ddc72"
+        },
+        "length_max": {
+          "display": "billing.reconcile",
+          "location": {
+            "col": 1,
+            "end_col": 30,
+            "end_line": 58,
+            "file": "src/billing.py",
+            "line": 38
+          },
+          "symbol": "sh_6c75eac73669478d"
+        },
+        "nesting_max": {
+          "display": "billing.settle_invoices",
+          "location": {
+            "col": 1,
+            "end_col": 17,
+            "end_line": 24,
+            "file": "src/billing.py",
+            "line": 5
+          },
+          "symbol": "sh_97617fb7eb7ddc72"
+        },
+        "params_max": {
+          "display": "billing.settle_invoices",
+          "location": {
+            "col": 1,
+            "end_col": 17,
+            "end_line": 24,
+            "file": "src/billing.py",
+            "line": 5
+          },
+          "symbol": "sh_97617fb7eb7ddc72"
+        }
+      },
       "metrics": {
         "cognitive_max": 18.0,
         "cyclomatic_max": 12.0,

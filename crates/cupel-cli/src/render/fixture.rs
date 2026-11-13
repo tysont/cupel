@@ -404,6 +404,7 @@ fn checks() -> Vec<CheckResult> {
                 n: 34,
             }),
             metrics: BTreeMap::from([("score".to_owned(), 0.71), ("survivors".to_owned(), 10.0)]),
+            metric_targets: BTreeMap::new(),
             delta: Some(Delta {
                 vs: "baseline".to_owned(),
                 value: -0.12,
@@ -422,6 +423,7 @@ fn checks() -> Vec<CheckResult> {
             cost: CostClass::Exhaustive,
             score: None,
             metrics: BTreeMap::new(),
+            metric_targets: BTreeMap::new(),
             delta: None,
             findings: 0,
             duration_ms: 0,
@@ -456,21 +458,36 @@ fn summary() -> Summary {
                 GateRule {
                     rule: "tests.mutation.score >= 0.80".to_owned(),
                     actual: Some(0.71),
+                    actual_target: None,
                     bound: Some(0.8),
+                    bound_target: None,
                     result: RuleOutcome::Fail,
                     reason: None,
                 },
                 GateRule {
                     rule: "tests.weakening none".to_owned(),
                     actual: Some(0.0),
+                    actual_target: None,
                     bound: Some(0.0),
+                    bound_target: None,
                     result: RuleOutcome::Pass,
+                    reason: None,
+                },
+                GateRule {
+                    rule: "static.crap.max <= base".to_owned(),
+                    actual: Some(42.5),
+                    actual_target: Some(push_limit(140)),
+                    bound: Some(12.0),
+                    bound_target: Some(push_limit(131)),
+                    result: RuleOutcome::Fail,
                     reason: None,
                 },
                 GateRule {
                     rule: "perf.bench.regression < 5%".to_owned(),
                     actual: None,
+                    actual_target: None,
                     bound: None,
+                    bound_target: None,
                     result: RuleOutcome::Skipped,
                     reason: Some("`perf.bench` did not run to completion".to_owned()),
                 },
@@ -536,6 +553,21 @@ fn rankings() -> Rankings {
 
 /// A target to protect with its protection and one value, and one to simplify with nothing
 /// measured.
+/// `push_limit` in the planner, as a measurement's target, starting at `line`.
+fn push_limit(line: u32) -> Target {
+    Target {
+        display: "rewrite::Planner::push_limit".to_owned(),
+        symbol: Some("sh_4b1d9e0c4b1d9e01".parse().expect("valid hash")),
+        location: Some(Location {
+            file: "src/rewrite/planner.rs".to_owned(),
+            line,
+            col: Some(5),
+            end_line: line + 31,
+            end_col: Some(6),
+        }),
+    }
+}
+
 fn targets() -> Vec<RecommendedTarget> {
     vec![
         RecommendedTarget {
