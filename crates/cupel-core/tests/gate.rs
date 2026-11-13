@@ -530,7 +530,7 @@ fn a_rule_against_base_compares_with_the_reference_value_plus_its_offset() {
 }
 
 #[test]
-fn a_rule_against_base_without_a_reference_value_is_skipped_and_fails_the_gate() {
+fn a_rule_against_base_without_a_reference_value_is_skipped() {
     let current = measured();
     let unmeasured = envelope(
         "pass",
@@ -572,14 +572,29 @@ fn a_rule_against_base_without_a_reference_value_is_skipped_and_fails_the_gate()
             ),
         ]
     );
-    let gate = evaluate_gate(
-        "gate.tree",
-        &[rule("static.crap.max", "<= base")],
-        &current,
-        &unset(),
-        &Tolerances::default(),
+}
+
+#[test]
+fn a_rule_without_a_reference_leaves_the_gate_to_the_other_rules() {
+    // The rule lacking a reference is skipped and the others decide (ADR-198).
+    let current = measured();
+    let gate = |condition: &str| {
+        evaluate_gate(
+            "gate.tree",
+            &[
+                rule("static.crap.max", "<= base"),
+                rule("tests.mutation.score", condition),
+            ],
+            &current,
+            &unset(),
+            &Tolerances::default(),
+        )
+        .result
+    };
+    assert_eq!(
+        [gate(">= 0.7"), gate(">= 0.8")],
+        [GateOutcome::Pass, GateOutcome::Fail]
     );
-    assert_eq!(gate.result, GateOutcome::Fail);
 }
 
 /// What a symbol in `file` at `line` is as a metric's target.

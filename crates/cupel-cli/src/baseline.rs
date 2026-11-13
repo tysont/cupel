@@ -4,8 +4,8 @@ use std::path::Path;
 
 use cupel_core::git::Git;
 use cupel_core::{
-    ActionKind, BaselineRef, Envelope, EventSink, ExitCode, GateRule, NO_REFERENCE, NextAction,
-    PlannedWrite, RuleOutcome, RunId, RunPlan, Status, WriteError, Writer, deltas,
+    ActionKind, BaselineRef, Envelope, EventSink, ExitCode, NextAction, PlannedWrite, RunId,
+    RunPlan, Status, WriteError, Writer, deltas,
 };
 use cupel_store::Store;
 
@@ -71,38 +71,11 @@ fn default_branch(invocation: &Invocation<'_>) -> Option<String> {
 /// What every refusal of a run as a baseline ends with (ADR-182).
 const ONLY_PASSING_DEFAULT: &str = "a baseline names only a passing run on the default branch";
 
-/// Whether `envelope`'s run passed, as a baseline's run must: its status is `pass`, or its gate
-/// failed only on rules against `base` that had no reference, as a run before the first
-/// baseline does (ADR-195 §4).
-fn passed(envelope: &Envelope) -> bool {
-    match envelope.status {
-        Status::Pass => true,
-        Status::Fail => envelope
-            .summary
-            .gate
-            .as_ref()
-            .is_some_and(|gate| gate.rules.iter().all(passed_but_for_a_reference)),
-        Status::Partial | Status::Error | Status::Plan => false,
-    }
-}
-
-/// Whether a gate rule passed, or was skipped only because `base` had no reference value.
-fn passed_but_for_a_reference(rule: &GateRule) -> bool {
-    match rule.result {
-        RuleOutcome::Pass => true,
-        RuleOutcome::Skipped => rule
-            .reason
-            .as_deref()
-            .is_some_and(|reason| reason.starts_with(NO_REFERENCE)),
-        RuleOutcome::Fail | RuleOutcome::Unsupported => false,
-    }
-}
-
 /// Why `envelope`'s run cannot be a baseline: it did not pass, or it was recorded in a work tree
 /// on a branch other than `default` (a detached `HEAD` included). `None` when it can.
 fn unfit(envelope: &Envelope, default: Option<&str>) -> Option<String> {
     let id = envelope.run.id;
-    if !passed(envelope) {
+    if envelope.status != Status::Pass {
         let status = serde_json::to_value(envelope.status)
             .ok()
             .and_then(|value| value.as_str().map(str::to_owned))

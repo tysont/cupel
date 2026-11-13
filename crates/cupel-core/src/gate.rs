@@ -109,7 +109,7 @@ pub fn evaluate_gate(
             }
         })
         .collect();
-    let result = if rules.iter().all(|rule| rule.result == RuleOutcome::Pass) {
+    let result = if rules.iter().all(passes) {
         GateOutcome::Pass
     } else {
         GateOutcome::Fail
@@ -119,6 +119,21 @@ pub fn evaluate_gate(
         evaluated: evaluated.to_owned(),
         rules,
     }
+}
+
+/// Whether `rule` lets the gate pass: it passed, or it compares with `base` and was skipped
+/// because there is no reference value (ADR-198).
+fn passes(rule: &GateRule) -> bool {
+    rule.result == RuleOutcome::Pass || lacks_reference(rule)
+}
+
+/// Whether `rule` was skipped because `base` has no reference value (ADR-130, ADR-198).
+pub fn lacks_reference(rule: &GateRule) -> bool {
+    rule.result == RuleOutcome::Skipped
+        && rule
+            .reason
+            .as_deref()
+            .is_some_and(|reason| reason.starts_with(NO_REFERENCE))
 }
 
 /// Records `gate` in `summary.gate`; a failed gate turns a `pass` envelope into `fail`, exit 1.

@@ -408,23 +408,24 @@ fn gated(n: u8, reason: &str) -> cupel_core::Envelope {
 }
 
 #[test]
-fn a_run_whose_gate_failed_only_for_want_of_a_reference_can_be_the_baseline() {
+fn a_run_whose_gate_failed_is_refused_whatever_its_skipped_rules_lacked() {
+    // A rule without a reference no longer fails a gate (ADR-198), so a failed gate is refused
+    // as any other is: `baseline set` needs a passing run.
     let repo = Repo::new();
     repo.seed(&[
         gated(1, "no reference: no baseline is set"),
         gated(2, "`static.clones` was skipped (unsupported)"),
     ]);
-    let refused = assert_usage(&repo.run(&["baseline", "set", "--write"]));
-    assert_eq!(
-        refused["title"],
+    let refusal = |n: u8| {
+        let from = format!("run:{}", run_id(n));
+        assert_usage(&repo.run(&["baseline", "set", "--from", &from, "--write"]))["title"].clone()
+    };
+    let title = |n: u8| {
         json!(format!(
             "The run {} did not pass (status `fail`); a baseline names only a passing run on \
              the default branch",
-            run_id(2)
+            run_id(n)
         ))
-    );
-    let from = format!("run:{}", run_id(1));
-    let set = repo.run(&["baseline", "set", "--from", &from, "--write"]);
-    assert_eq!(set.code, 0, "{}", set.stdout);
-    assert_eq!(baseline_id(&repo), json!(run_id(1)));
+    };
+    assert_eq!([refusal(1), refusal(2)], [title(1), title(2)]);
 }

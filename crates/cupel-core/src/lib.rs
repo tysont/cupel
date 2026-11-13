@@ -112,7 +112,7 @@ pub use footprint::{Artifact, Dependency, Footprint, FootprintBase, Vulnerabilit
 pub use fuzz::{FuzzCrash, FuzzResults, FuzzStatus, FuzzTarget};
 pub use gate::{
     GATE_CHANGED, GATE_TREE, GateReference, NO_REFERENCE, Tolerances, apply_gate, evaluate_gate,
-    gate_for, needs_reference,
+    gate_for, lacks_reference, needs_reference,
 };
 pub use grade::{CostClass, Tier};
 pub use hash::{FindingId, SiteHash, SymbolHash};

@@ -303,6 +303,52 @@ fn clone_of(name: &str) -> String {
     )
 }
 
+/// The first run of `check` before any baseline: its rule `static.clones.pairs <= base` is
+/// skipped, says so in one `baseline.missing` info finding and in text, and the gate passes
+/// (ADR-198). Returns the run's envelope.
+fn passed_without_a_baseline(repo: &Repo, check: &[&str]) -> Value {
+    let unset = repo.run(check);
+    assert_eq!(unset.code, 0, "{}", unset.stdout);
+    let envelope = unset.envelope();
+    assert_eq!(
+        (&envelope["status"], gate(&envelope)["result"].clone()),
+        (&json!("pass"), json!("pass"))
+    );
+    assert_eq!(
+        gate(&envelope)["rules"][0],
+        json!({"rule": "static.clones.pairs <= base", "actual": 1.0, "bound": null,
+               "result": "skipped", "reason": "no reference: no baseline is set"})
+    );
+    let missing: Vec<&Value> = envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|finding| finding["kind"] == json!("baseline.missing"))
+        .collect();
+    assert_eq!(missing.len(), 1, "{}", envelope["findings"]);
+    assert_eq!(
+        (
+            &missing[0]["check"],
+            &missing[0]["severity"],
+            &missing[0]["title"],
+            &missing[0]["evidence"],
+        ),
+        (
+            &json!("gate"),
+            &json!("info"),
+            &json!(
+                "The gate rule `static.clones.pairs <= base` was skipped: no reference: no baseline is set"
+            ),
+            &json!({"rule": "static.clones.pairs <= base", "reason": "no reference: no baseline is set"}),
+        )
+    );
+    assert_eq!(envelope["summary"]["findings"]["info"], json!(1));
+    let text = repo.run(&["check", "--only", "static.clones", "--format", "text"]);
+    let line = "skipped  static.clones.pairs <= base  actual 1  (no reference: no baseline is set)";
+    assert!(text.stdout.contains(line), "{line:?} in\n{}", text.stdout);
+    envelope
+}
+
 #[test]
 fn a_tree_rule_against_base_compares_with_the_stored_baseline() {
     let repo = repo("[gate.tree]\n\"static.clones.pairs\" = \"<= base\"\n");
@@ -312,14 +358,7 @@ fn a_tree_rule_against_base_compares_with_the_stored_baseline() {
     );
     let check = ["check", "--only", "static.clones"];
 
-    let unset = repo.run(&check);
-    assert_eq!(unset.code, 1, "{}", unset.stdout);
-    let envelope = unset.envelope();
-    assert_eq!(
-        gate(&envelope)["rules"][0],
-        json!({"rule": "static.clones.pairs <= base", "actual": 1.0, "bound": null,
-               "result": "skipped", "reason": "no reference: no baseline is set"})
-    );
+    let envelope = passed_without_a_baseline(&repo, &check);
     assert_eq!(
         envelope["next_actions"][0],
         json!({
@@ -504,7 +543,7 @@ fn a_changed_rule_against_base_has_no_reference_when_every_changed_file_is_new()
     };
     repo.write("src/narrow.rs", &with_params(2));
     let outcome = repo.run(&["check", "--changed", "--only", "static.complexity"]);
-    assert_eq!(outcome.code, 1, "{}", outcome.stdout);
+    assert_eq!(outcome.code, 0, "{}", outcome.stdout);
     assert_eq!(
         untargeted(&outcome.envelope())[0],
         json!({"rule": "static.complexity.params_max <= base", "actual": 2.0, "bound": null,

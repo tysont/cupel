@@ -7,18 +7,20 @@ use cupel_core::config::{Config, GateRuleSpec};
 use cupel_core::git::{ChangeKind, Git};
 use cupel_core::syntax::ProjectInfo;
 use cupel_core::{
-    BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, FactKind, Finding, GateReference,
-    GitInfo, ImpactedTests, Job, Lang, LangId, Manifest, Measured, Outcome, PlannedInstall,
-    PlannedWrite, ProducerRegistry, Range, ResolvedFiles, Scheduler, ScopeInfo, ScopeRequest,
-    Selection, Status, SuiteReuse, Tolerances, Verb, Writer, apply_gate, evaluate_gate, gate_for,
-    next_actions,
+    ActionKind, BaseTree, ChangedLines, Check, Envelope, EventSink, ExitCode, FactKind, Finding,
+    GateReference, GateResult, GitInfo, ImpactedTests, Job, Lang, LangId, Manifest, Measured,
+    Outcome, PlannedInstall, PlannedWrite, ProducerRegistry, Range, ResolvedFiles, Scheduler,
+    ScopeInfo, ScopeRequest, Selection, Severity, SeverityCounts, Status, SuiteReuse, Tolerances,
+    Verb, Writer, apply_gate, evaluate_gate, gate_for, lacks_reference, next_actions,
 };
 use cupel_lang::LanguageRegistry;
+use serde_json::json;
 
 use crate::cli::ScopeArgs;
 use crate::error::CupelError;
 use crate::install::{self, Permission};
 use crate::oracle::select::Selected;
+use crate::problem::Problem;
 use crate::resources;
 use crate::run::{Executions, Invocation, Run, shell_quote};
 use crate::scope;
@@ -63,9 +65,39 @@ pub fn grade(
     {
         let tolerances = Tolerances::declared(invocation.catalog().checks());
         let gate = evaluate_gate(table, rules, envelope, reference, &tolerances);
+        let missing = missing_baselines(&gate, &invocation.run.repro());
+        envelope.findings.extend(missing);
+        envelope.summary.findings = SeverityCounts::of(&envelope.findings);
+        envelope.total_findings = envelope.findings.len() as u64;
         apply_gate(envelope, gate);
     }
     envelope.next_actions = next_actions(envelope, &rerun(verb, args));
+}
+
+/// One `baseline.missing` finding at info per rule of `gate` skipped because `base` had no
+/// reference value (ADR-198); such a rule does not fail the gate.
+fn missing_baselines(gate: &GateResult, repro: &str) -> Vec<Finding> {
+    gate.rules
+        .iter()
+        .filter(|rule| lacks_reference(rule))
+        .map(|rule| {
+            let reason = rule.reason.clone().unwrap_or_default();
+            Problem {
+                check: "gate",
+                kind: "baseline.missing",
+                subject: rule.rule.clone(),
+                severity: Severity::Info,
+                title: format!("The gate rule `{}` was skipped: {reason}", rule.rule),
+                detail: None,
+                evidence: json!({"rule": rule.rule, "reason": reason}),
+                action: ActionKind::Configure,
+                fix: "Set a baseline with `cupel baseline set --write` from a passing run on \
+                      the default branch, or pass --against REF|run:ID."
+                    .to_owned(),
+            }
+            .finding(repro)
+        })
+        .collect()
 }
 
 /// The gate table `grade` evaluates on `envelope`, as `(name, rules)`: none for `survey`, under

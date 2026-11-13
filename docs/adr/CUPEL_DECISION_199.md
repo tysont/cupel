@@ -1,6 +1,6 @@
 # CUPEL_DECISION_199: Ratchets on largest-value metrics allow +2 and never fail below the check's watch threshold
 
-**Date:** 2026-11-13 · **Status:** accepted · **Phase:** v0.2.8, the owner's rulings after v0.2.7 · Amends [175](CUPEL_DECISION_175.md), [182](CUPEL_DECISION_182.md) and [195](CUPEL_DECISION_195.md)
+**Date:** 2026-11-13 · **Status:** accepted; detailed by [205](CUPEL_DECISION_205.md) · **Phase:** v0.2.8, the owner's rulings after v0.2.7 · Amends [175](CUPEL_DECISION_175.md), [182](CUPEL_DECISION_182.md) and [195](CUPEL_DECISION_195.md)
 
 ## Context
 Molten #661 added one `if` to a two-branch function; `static.complexity.cyclomatic_max <= base` failed at actual 3, bound 2, because over a small changed scope the base maximum is that same small function. ADR-182 gave counts δ = 0, which treats a largest value like a count.
