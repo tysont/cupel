@@ -208,6 +208,31 @@ impl Case {
         }
     }
 
+    /// The case's decisions: its own kinds, then its tables, clauses, and placed loops.
+    fn decisions(&self) -> Vec<Decision> {
+        self.decisions
+            .iter()
+            .map(|kind| (*kind, false, false, None))
+            .chain((0..self.tables).map(|_| (DecisionKind::Loop, true, false, None)))
+            .chain(self.clauses.iter().map(|kind| (*kind, false, true, None)))
+            .chain(
+                self.loops_at
+                    .iter()
+                    .map(|at| (DecisionKind::Loop, false, false, Some(*at))),
+            )
+            .map(|(kind, table, expression, span)| Decision {
+                span,
+                kind,
+                nesting: 0,
+                cyclomatic: 1,
+                cognitive: 1,
+                table,
+                continues: false,
+                expression,
+            })
+            .collect()
+    }
+
     fn tree(&self) -> NormNode {
         let body = if self.wrapped {
             NormNode::new("body", vec![NormNode::new("list", self.body.clone())])
@@ -278,31 +303,7 @@ impl World {
                         .iter()
                         .map(|case| SymbolDecisions {
                             symbol: case.symbol().key(),
-                            decisions: case
-                                .decisions
-                                .iter()
-                                .map(|kind| (*kind, false, false, None))
-                                .chain(
-                                    (0..case.tables)
-                                        .map(|_| (DecisionKind::Loop, true, false, None)),
-                                )
-                                .chain(case.clauses.iter().map(|kind| (*kind, false, true, None)))
-                                .chain(
-                                    case.loops_at
-                                        .iter()
-                                        .map(|at| (DecisionKind::Loop, false, false, Some(*at))),
-                                )
-                                .map(|(kind, table, expression, span)| Decision {
-                                    span,
-                                    kind,
-                                    nesting: 0,
-                                    cyclomatic: 1,
-                                    cognitive: 1,
-                                    table,
-                                    continues: false,
-                                    expression,
-                                })
-                                .collect(),
+                            decisions: case.decisions(),
                         })
                         .collect(),
                 })
