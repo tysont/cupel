@@ -47,6 +47,11 @@ impl Twin {
         }
     }
 
+    /// The copy of the directory.
+    pub fn root(&self) -> &Path {
+        &self.root
+    }
+
     /// Runs `args` through a daemon on the copy and compares its code, redacted stdout, and
     /// redacted stderr with the cold run's.
     ///
@@ -271,12 +276,17 @@ fn copy(from: &Path, into: &Path) -> io::Result<()> {
     Ok(())
 }
 
-/// Copies one symlink or regular file; anything else (a socket, a pipe) is left out.
+/// Copies one symlink or regular file; anything else (a socket, a pipe) is left out. A file
+/// keeps its modification time, which `fs::copy` keeps on macOS and not on Linux: freshness
+/// trusts a file not modified since its record (ADR-079 §4), so a copy dated in the order it was
+/// made would trust a source edited after the record whenever the record was copied later.
 fn copy_entry(kind: fs::FileType, path: &Path, target: &Path) -> io::Result<()> {
     if kind.is_symlink() {
         symlink(&fs::read_link(path)?, path, target)
     } else if kind.is_file() {
-        fs::copy(path, target).map(|_| ())
+        let modified = fs::metadata(path)?.modified()?;
+        fs::copy(path, target)?;
+        fs::File::open(target)?.set_modified(modified)
     } else {
         Ok(())
     }

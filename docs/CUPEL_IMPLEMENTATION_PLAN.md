@@ -2748,6 +2748,11 @@ The owner's method (2026-11-13):
 
 #### Notes
 
+- **V2 — the daemon parity twin keeps each file's modification time** (2026-11-13).
+  - The gap: on ubuntu-24.04, `make parity` failed `incremental_coverage.rs` `a_change_to_the_data_an_attribution_names_reruns_the_binarys_test_alone` (intermittently at a32669ab, then on every run at 3b106577; neither commit touches this path): the cold run reran the binary's test (`mode: incremental`) and the daemon's run on the copy reported `mode: cached`, `rerun: 0`. The twin copied files with `fs::copy`, which keeps the modification time on macOS (clonefile) and dates the copy now on Linux. Freshness trusts a file modified before its `sources.json` without rehashing it (ADR-079 §4), so whenever the copy reached `tests/data/pairs.txt` a clock tick before `.cupel/cache/.../sources.json` (directory order and coarse ext4 timestamps decide), the edited data file looked older than the record and the twin found nothing changed.
+  - Now the twin sets each copied file's modification time to the original's, so it is the identical copy ADR-085 §11 says it is, on every platform. Cupel itself is unchanged.
+  - Tests: `cupel-fixtures/tests/parity.rs` `a_copy_keeps_each_files_modification_time` (two read-only files with fixed past times; observed failing first in a Linux container, `rust:1.92-bookworm`, with the copy dated at copy time; it passes on macOS either way). The CI diff was reproduced exactly on macOS by copying in reverse name order with each file dated at copy time; with the fix, the same reverse order passes and `DAEMON_PARITY=1 cargo test -p cupel-fixtures --test incremental_coverage` passed three runs in a row.
+
 ## 4. Cross-phase checklist
 
 Run this at the end of every step, before committing:
