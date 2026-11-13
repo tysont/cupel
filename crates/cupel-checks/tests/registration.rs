@@ -80,9 +80,11 @@ fn the_metrics_compared_as_weighted_means_across_matched_symbols_are_crap_and_mo
 }
 
 #[test]
-fn the_only_metric_with_a_ratchet_tolerance_is_the_mutation_score_at_two_hundredths() {
+fn the_metrics_with_a_ratchet_tolerance_are_the_mutation_score_and_complexity_s_largest_values() {
+    // ADR-195: the mutation score at two hundredths; ADR-199, ADR-205: one function's largest
+    // complexity and nesting at 2, each watched at its limit setting.
     let registry = support::registry();
-    let tolerated: Vec<(String, f64)> = registry
+    let tolerated: Vec<(String, f64, Option<String>)> = registry
         .iter()
         .flat_map(|check| {
             let id = check.manifest().id.as_str().to_owned();
@@ -92,10 +94,26 @@ fn the_only_metric_with_a_ratchet_tolerance_is_the_mutation_score_at_two_hundred
                 .iter()
                 .filter_map(move |metric| {
                     let tolerance = metric.tolerance?;
-                    Some((format!("{id}.{}", metric.name), tolerance))
+                    let key = format!("{id}.{}", metric.name);
+                    Some((key, tolerance, metric.watch.clone()))
                 })
                 .collect::<Vec<_>>()
         })
         .collect();
-    assert_eq!(tolerated, [("tests.mutation.score".to_owned(), 0.02)]);
+    let largest = |name: &str| {
+        (
+            format!("static.complexity.{name}"),
+            2.0,
+            Some(name.to_owned()),
+        )
+    };
+    assert_eq!(
+        tolerated,
+        [
+            largest("cyclomatic_max"),
+            largest("cognitive_max"),
+            largest("nesting_max"),
+            ("tests.mutation.score".to_owned(), 0.02, None),
+        ]
+    );
 }

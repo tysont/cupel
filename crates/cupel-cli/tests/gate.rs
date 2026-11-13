@@ -486,7 +486,8 @@ fn beside_wide(branched: bool) -> String {
 #[test]
 fn a_changed_rule_against_base_compares_the_symbols_the_change_touched_at_the_base() {
     let Some(repo) =
-        committed("[gate.changed]\n\"static.complexity.cyclomatic_max\" = \"<= base\"\n")
+        // `+ 0` keeps the rule exact, without the metric's tolerance and watch (ADR-205).
+        committed("[gate.changed]\n\"static.complexity.cyclomatic_max\" = \"<= base + 0\"\n")
     else {
         return;
     };
@@ -516,7 +517,7 @@ fn a_changed_rule_against_base_compares_the_symbols_the_change_touched_at_the_ba
     );
     assert_eq!(
         rule,
-        json!({"rule": "static.complexity.cyclomatic_max <= base", "actual": 2.0, "bound": 1.0, "tolerance": 0.0,
+        json!({"rule": "static.complexity.cyclomatic_max <= base + 0", "actual": 2.0, "bound": 1.0,
                "result": "fail", "reason": null, "actual_target": null, "bound_target": null}),
         "the base is `step` as it was, not the untouched `wide` beside it"
     );
@@ -530,7 +531,7 @@ fn a_changed_rule_against_base_compares_the_symbols_the_change_touched_at_the_ba
             "text",
         ])
         .stdout;
-    let line = "static.complexity.cyclomatic_max <= base  actual 2 (wide::step at src/wide.rs:5)  \
+    let line = "static.complexity.cyclomatic_max <= base + 0  actual 2 (wide::step at src/wide.rs:5)  \
                 bound 1 (wide::step at src/wide.rs:5)";
     assert!(text.contains(line), "{line:?} in\n{text}");
 }

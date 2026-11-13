@@ -148,18 +148,32 @@ fn finding_kinds() -> Vec<FindingKindSpec> {
     ]
 }
 
+/// How far a ratchet on one function's largest complexity or nesting may rise past its base
+/// (ADR-199): a branch or two added to a simple function.
+const LARGEST_TOLERANCE: f64 = 2.0;
+
+/// A gate key that is one function's largest value, ratcheted with `LARGEST_TOLERANCE` and
+/// watched at the limit setting of the same name (ADR-199, ADR-205).
+fn largest(name: &str, summary: &str) -> MetricSpec {
+    MetricSpec {
+        tolerance: Some(LARGEST_TOLERANCE),
+        watch: Some(name.to_owned()),
+        ..metric(name, summary)
+    }
+}
+
 /// The metrics this check reports: gate keys, then what `survey` ranks.
 fn metrics() -> Vec<MetricSpec> {
     vec![
-        metric(
+        largest(
             "cyclomatic_max",
             "The largest modified cyclomatic complexity in scope (a match counts once).",
         ),
-        metric(
+        largest(
             "cognitive_max",
             "The largest cognitive complexity in scope.",
         ),
-        metric("nesting_max", "The deepest nesting in scope."),
+        largest("nesting_max", "The deepest nesting in scope."),
         metric(
             "params_max",
             "The most parameters any symbol in scope declares.",

@@ -48,8 +48,8 @@ pub fn verb(
 
 /// Grades a finished `check` or `survey` envelope after suppressions and deltas: `check`
 /// evaluates the applicable gate unless `--no-gate` (ADR-060), with `reference` as `base`
-/// (ADR-130) and the invocation's checks' metric tolerances (ADR-195), then both rank
-/// `next_actions` (ADR-061). Plans and errors pass through unchanged.
+/// (ADR-130) and the invocation's checks' metric tolerances and watch thresholds (ADR-195,
+/// ADR-205), then both rank `next_actions` (ADR-061). Plans and errors pass through unchanged.
 pub fn grade(
     envelope: &mut Envelope,
     verb: Verb,
@@ -63,7 +63,13 @@ pub fn grade(
     if let Ok(config) = invocation.config
         && let Some((table, rules)) = gate_rules(envelope, verb, args, config)
     {
-        let tolerances = Tolerances::declared(invocation.catalog().checks());
+        let langs = envelope
+            .run
+            .scope
+            .as_ref()
+            .map(|scope| scope.languages.clone())
+            .unwrap_or_default();
+        let tolerances = Tolerances::declared(invocation.catalog().checks(), config, &langs);
         let gate = evaluate_gate(table, rules, envelope, reference, &tolerances);
         let missing = missing_baselines(&gate, &invocation.run.repro());
         envelope.findings.extend(missing);

@@ -302,6 +302,7 @@ fn scope_metrics() -> Vec<MetricSpec> {
     .into_iter()
     .map(|(name, summary)| MetricSpec {
         tolerance: (name == "score").then_some(SCORE_TOLERANCE),
+        watch: None,
         ..metric(name, summary)
     })
     .collect()

@@ -1,0 +1,4 @@
+# ABOUTME: A changed-scope ratchet on the largest cyclomatic complexity, with static.complexity's
+# ABOUTME: default tolerance (+2) and watch threshold (its cyclomatic_max limit, 10).
+[gate.changed]
+"static.complexity.cyclomatic_max" = "<= base"

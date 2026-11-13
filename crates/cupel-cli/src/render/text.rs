@@ -222,6 +222,10 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .tolerance
             .map(|tolerance| format!("  tolerance {tolerance}"))
             .unwrap_or_default();
+        let watch = rule
+            .watch
+            .map(|watch| format!("  within watch {watch}"))
+            .unwrap_or_default();
         let reason = rule
             .reason
             .as_ref()
@@ -229,7 +233,7 @@ fn gate_block(gate: &GateResult, paint: &Paint) -> String {
             .unwrap_or_default();
         let _ = writeln!(
             out,
-            "  {}  {}{actual}{bound}{tolerance}{reason}",
+            "  {}  {}{actual}{bound}{tolerance}{watch}{reason}",
             paint.rule(rule.result),
             rule.rule
         );

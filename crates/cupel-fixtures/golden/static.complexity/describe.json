@@ -242,17 +242,23 @@
         {
           "name": "cyclomatic_max",
           "per": "scope",
-          "summary": "The largest modified cyclomatic complexity in scope (a match counts once)."
+          "summary": "The largest modified cyclomatic complexity in scope (a match counts once).",
+          "tolerance": 2.0,
+          "watch": "cyclomatic_max"
         },
         {
           "name": "cognitive_max",
           "per": "scope",
-          "summary": "The largest cognitive complexity in scope."
+          "summary": "The largest cognitive complexity in scope.",
+          "tolerance": 2.0,
+          "watch": "cognitive_max"
         },
         {
           "name": "nesting_max",
           "per": "scope",
-          "summary": "The deepest nesting in scope."
+          "summary": "The deepest nesting in scope.",
+          "tolerance": 2.0,
+          "watch": "nesting_max"
         },
         {
           "name": "params_max",

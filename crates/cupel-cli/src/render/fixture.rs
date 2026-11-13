@@ -455,48 +455,56 @@ fn summary() -> Summary {
             result: GateOutcome::Fail,
             evaluated: "gate.changed".to_owned(),
             rules: vec![
+                gate_rule(
+                    "tests.mutation.score >= 0.80",
+                    Some(0.71),
+                    Some(0.8),
+                    RuleOutcome::Fail,
+                ),
+                gate_rule(
+                    "tests.weakening none",
+                    Some(0.0),
+                    Some(0.0),
+                    RuleOutcome::Pass,
+                ),
                 GateRule {
-                    rule: "tests.mutation.score >= 0.80".to_owned(),
-                    actual: Some(0.71),
-                    actual_target: None,
-                    bound: Some(0.8),
-                    bound_target: None,
-                    tolerance: None,
-                    result: RuleOutcome::Fail,
-                    reason: None,
-                },
-                GateRule {
-                    rule: "tests.weakening none".to_owned(),
-                    actual: Some(0.0),
-                    actual_target: None,
-                    bound: Some(0.0),
-                    bound_target: None,
-                    tolerance: None,
-                    result: RuleOutcome::Pass,
-                    reason: None,
-                },
-                GateRule {
-                    rule: "static.crap.max <= base".to_owned(),
-                    actual: Some(42.5),
                     actual_target: Some(push_limit(140)),
-                    bound: Some(12.0),
                     bound_target: Some(push_limit(131)),
                     tolerance: Some(0.0),
-                    result: RuleOutcome::Fail,
-                    reason: None,
+                    ..gate_rule(
+                        "static.crap.max <= base",
+                        Some(42.5),
+                        Some(12.0),
+                        RuleOutcome::Fail,
+                    )
                 },
                 GateRule {
-                    rule: "perf.bench.regression < 5%".to_owned(),
-                    actual: None,
-                    actual_target: None,
-                    bound: None,
-                    bound_target: None,
-                    tolerance: None,
-                    result: RuleOutcome::Skipped,
                     reason: Some("`perf.bench` did not run to completion".to_owned()),
+                    ..gate_rule(
+                        "perf.bench.regression < 5%",
+                        None,
+                        None,
+                        RuleOutcome::Skipped,
+                    )
                 },
             ],
         }),
+    }
+}
+
+/// A gate rule's result with `actual`, `bound` and `result`, measured on no target and with no
+/// tolerance, watch, or reason.
+fn gate_rule(rule: &str, actual: Option<f64>, bound: Option<f64>, result: RuleOutcome) -> GateRule {
+    GateRule {
+        rule: rule.to_owned(),
+        actual,
+        actual_target: None,
+        bound,
+        bound_target: None,
+        tolerance: None,
+        watch: None,
+        result,
+        reason: None,
     }
 }
 

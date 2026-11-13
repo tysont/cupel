@@ -15,6 +15,7 @@ fn metric(name: &str, per: MetricPer) -> MetricSpec {
         per,
         protection: None,
         tolerance: None,
+        watch: None,
     }
 }
 

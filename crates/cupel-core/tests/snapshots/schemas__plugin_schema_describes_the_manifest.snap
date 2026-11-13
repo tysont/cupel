@@ -643,6 +643,14 @@ expression: pretty(&schema)
           ],
           "format": "double",
           "x-cupel-optional": true
+        },
+        "watch": {
+          "description": "The setting of this check whose value is this largest-value `scope` metric's watch\nthreshold, the most the check accepts of one target (ADR-199, ADR-205): a gate rule\nagainst `base` under `<=` or `<` that writes no offset never fails while the metric is\nat most it. Absent for every other metric.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "x-cupel-optional": true
         }
       },
       "required": [

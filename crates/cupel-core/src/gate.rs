@@ -2,10 +2,15 @@
 // ABOUTME: evaluates each rule against a graded envelope's metrics, findings, reference run, and tolerances, and applies the result.
 use std::collections::BTreeMap;
 
-use crate::check::CheckRegistry;
-use crate::config::{Comparison, GateCondition, GateConfig, GateKey, GateRuleSpec, GateSection};
+use serde_json::Value;
+
+use crate::check::{CheckRegistry, Manifest};
+use crate::config::{
+    Comparison, Config, GateCondition, GateConfig, GateKey, GateRuleSpec, GateSection, Table,
+};
 use crate::envelope::{Envelope, GateOutcome, GateResult, GateRule, RuleOutcome};
 use crate::finding::Severity;
+use crate::id::LangId;
 use crate::rank::Target;
 use crate::result::{CheckResult, CheckStatus};
 use crate::scope::ScopeMode;
@@ -30,34 +35,82 @@ pub enum GateReference<'a> {
 
 /// Each gate key's tolerance, as `<check>.<metric>` (ADR-182, ADR-195): how far a rule against
 /// `base` that writes no offset lets the metric move past its reference value. A key not held
-/// has tolerance 0.
+/// has tolerance 0. A key may also hold a watch threshold (ADR-199, ADR-205): such a rule under
+/// `<=` or `<` never fails while the metric is at most it.
 #[derive(Debug, Clone, Default, PartialEq)]
-pub struct Tolerances(BTreeMap<String, f64>);
+pub struct Tolerances {
+    tolerances: BTreeMap<String, f64>,
+    watches: BTreeMap<String, f64>,
+}
 
 impl Tolerances {
-    /// The tolerances the registered checks' manifests declare on their metrics.
-    pub fn declared(checks: &CheckRegistry) -> Self {
-        checks
-            .iter()
-            .flat_map(|check| {
-                let manifest = check.manifest();
-                manifest.metrics.iter().filter_map(|metric| {
-                    let tolerance = metric.tolerance?;
-                    Some((format!("{}.{}", manifest.id, metric.name), tolerance))
-                })
-            })
-            .collect()
+    /// The tolerances the registered checks' manifests declare on their metrics, and the watch
+    /// thresholds: the value of the setting a metric names as its watch, configured in
+    /// `config` or its default, the lowest over `langs` (the language-neutral one when empty).
+    pub fn declared(checks: &CheckRegistry, config: &Config, langs: &[LangId]) -> Self {
+        let mut declared = Self::default();
+        for check in checks.iter() {
+            let manifest = check.manifest();
+            for metric in &manifest.metrics {
+                let key = format!("{}.{}", manifest.id, metric.name);
+                if let Some(tolerance) = metric.tolerance {
+                    declared.tolerances.insert(key.clone(), tolerance);
+                }
+                let watch = metric.watch.as_deref();
+                if let Some(watch) = watch.and_then(|name| setting(manifest, name, config, langs)) {
+                    declared.watches.insert(key, watch);
+                }
+            }
+        }
+        declared
+    }
+
+    /// These tolerances with `watch` as the watch threshold of `key`.
+    #[must_use]
+    pub fn watching(mut self, key: &str, watch: f64) -> Self {
+        self.watches.insert(key.to_owned(), watch);
+        self
     }
 
     /// The tolerance of `key`'s metric; 0 when none is declared.
     pub fn of(&self, key: &GateKey) -> f64 {
-        self.0.get(&key.to_string()).copied().unwrap_or(0.0)
+        self.tolerances
+            .get(&key.to_string())
+            .copied()
+            .unwrap_or(0.0)
     }
+
+    /// The watch threshold of `key`'s metric, when it has one.
+    pub fn watch(&self, key: &GateKey) -> Option<f64> {
+        self.watches.get(&key.to_string()).copied()
+    }
+}
+
+/// The numeric setting `name` of the check `manifest` describes: configured, else its
+/// default; the lowest over `langs`, each with its override merged.
+fn setting(manifest: &Manifest, name: &str, config: &Config, langs: &[LangId]) -> Option<f64> {
+    let default = manifest
+        .settings
+        .iter()
+        .find(|setting| setting.name == name)
+        .and_then(|setting| setting.default.as_f64());
+    let value = |table: &Table| table.get(name).and_then(Value::as_f64).or(default);
+    if langs.is_empty() {
+        let neutral = config.file.checks.get(&manifest.id);
+        return neutral.map_or(default, |checked| value(&checked.params));
+    }
+    langs
+        .iter()
+        .filter_map(|lang| value(&config.check_config(&manifest.id, lang)))
+        .reduce(f64::min)
 }
 
 impl FromIterator<(String, f64)> for Tolerances {
     fn from_iter<I: IntoIterator<Item = (String, f64)>>(iter: I) -> Self {
-        Self(iter.into_iter().collect())
+        Self {
+            tolerances: iter.into_iter().collect(),
+            watches: BTreeMap::new(),
+        }
     }
 }
 
@@ -104,6 +157,7 @@ pub fn evaluate_gate(
                 bound: evaluation.bound,
                 bound_target,
                 tolerance: evaluation.tolerance,
+                watch: evaluation.watch,
                 result: evaluation.result,
                 reason: evaluation.reason,
             }
@@ -152,6 +206,8 @@ struct Evaluation {
     bound: Option<f64>,
     /// The tolerance that loosened `bound`, when one did.
     tolerance: Option<f64>,
+    /// The watch threshold that passed a value past `bound`, when one did.
+    watch: Option<f64>,
     result: RuleOutcome,
     reason: Option<String>,
 }
@@ -162,6 +218,7 @@ impl Evaluation {
             actual: Some(actual),
             bound: Some(bound),
             tolerance: None,
+            watch: None,
             result: if passed {
                 RuleOutcome::Pass
             } else {
@@ -171,11 +228,24 @@ impl Evaluation {
         }
     }
 
+    /// Passes a failed comparison whose `actual` is at most `watch`, recording the threshold
+    /// that decided it (ADR-199, ADR-205).
+    fn within(&mut self, watch: Option<f64>) {
+        let Some(watch) = watch else {
+            return;
+        };
+        if self.result == RuleOutcome::Fail && self.actual.is_some_and(|actual| actual <= watch) {
+            self.result = RuleOutcome::Pass;
+            self.watch = Some(watch);
+        }
+    }
+
     fn skipped(actual: Option<f64>, reason: String) -> Self {
         Self {
             actual,
             bound: None,
             tolerance: None,
+            watch: None,
             result: RuleOutcome::Skipped,
             reason: Some(reason),
         }
@@ -199,6 +269,7 @@ fn evaluate_rule(
             actual: None,
             bound: None,
             tolerance: None,
+            watch: None,
             result: RuleOutcome::Pass,
             reason: None,
         };
@@ -224,6 +295,10 @@ fn evaluate_rule(
             let mut evaluation = compared_metric(rule, entry, op, bound);
             if evaluation.bound.is_some() {
                 evaluation.tolerance = tolerance;
+            }
+            // The watch threshold comes with the default tolerance of an upper limit (ADR-205).
+            if tolerance.is_some() && matches!(op, Comparison::Le | Comparison::Lt) {
+                evaluation.within(tolerances.watch(&rule.key));
             }
             evaluation
         }

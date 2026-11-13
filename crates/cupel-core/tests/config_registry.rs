@@ -20,6 +20,7 @@ fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
                     per: MetricPer::Symbol,
                     protection: None,
                     tolerance: None,
+                    watch: None,
                 },
                 None => MetricSpec {
                     name: (*name).to_owned(),
@@ -27,6 +28,7 @@ fn declared(id: &str, metrics: &[&str]) -> Box<dyn Check> {
                     per: MetricPer::Scope,
                     protection: None,
                     tolerance: None,
+                    watch: None,
                 },
             })
             .collect(),

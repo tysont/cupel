@@ -1,9 +1,12 @@
 // ABOUTME: Tests for gate evaluation (ADR-060): every operator passing and failing, absent metrics and
 // ABOUTME: checks, presence after suppression, `no-breaking`, rules against a reference run, table choice, and status.
+mod support;
+
 use cupel_core::config::{ConfigFile, GateRuleSpec};
 use cupel_core::{
-    Envelope, ExitCode, GateOutcome, GateReference, GateResult, GateRule, RuleOutcome, ScopeInfo,
-    ScopeMode, Status, Tolerances, apply_gate, evaluate_gate, gate_for,
+    CheckRegistry, Envelope, ExitCode, GateOutcome, GateReference, GateResult, GateRule, LangId,
+    MetricPer, MetricSpec, RuleOutcome, ScopeInfo, ScopeMode, SettingSpec, Status, Tolerances,
+    apply_gate, evaluate_gate, gate_for,
 };
 use serde_json::{Value, json};
 
@@ -118,6 +121,7 @@ fn gate_rule(
         bound,
         bound_target: None,
         tolerance: None,
+        watch: None,
         result,
         reason: reason.map(str::to_owned),
     }
@@ -750,5 +754,98 @@ fn a_count_s_tolerance_raises_the_bound_of_an_upper_limit() {
             ),
             1.0
         )
+    );
+}
+
+/// A ratchet on `static.complexity.cyclomatic_max` from a base of 3 to `actual`, with δ = 2
+/// and a watch threshold of 10, as `(bound, tolerance, watch, result)`.
+fn ratcheted(actual: f64, condition: &str) -> (Option<f64>, Option<f64>, Option<f64>, RuleOutcome) {
+    let key = "static.complexity.cyclomatic_max";
+    let on = target("grade::letter", "src/grade.rs", 1);
+    let (current, reference) = (complexity(actual, &on), complexity(3.0, &on));
+    let tolerances = Tolerances::from_iter([(key.to_owned(), 2.0)]).watching(key, 10.0);
+    let rule = tolerated(
+        key,
+        condition,
+        &current,
+        &GateReference::Run(&reference),
+        &tolerances,
+    );
+    (rule.bound, rule.tolerance, rule.watch, rule.result)
+}
+
+#[test]
+fn a_largest_value_ratchet_allows_its_tolerance_and_never_fails_within_the_watch_threshold() {
+    use RuleOutcome::{Fail, Pass};
+    assert_eq!(
+        [
+            ratcheted(5.0, "<= base"),
+            ratcheted(8.0, "<= base"),
+            ratcheted(10.0, "<= base"),
+            ratcheted(11.0, "<= base"),
+            ratcheted(9.0, "< base"),
+        ],
+        [
+            (Some(5.0), Some(2.0), None, Pass),
+            (Some(5.0), Some(2.0), Some(10.0), Pass),
+            (Some(5.0), Some(2.0), Some(10.0), Pass),
+            (Some(5.0), Some(2.0), None, Fail),
+            (Some(5.0), Some(2.0), Some(10.0), Pass),
+        ]
+    );
+    // A written offset replaces the tolerance and the watch threshold with it (ADR-205).
+    assert_eq!(
+        [ratcheted(4.0, "<= base + 0"), ratcheted(6.0, "<= base + 3")],
+        [(Some(3.0), None, None, Fail), (Some(6.0), None, None, Pass)]
+    );
+}
+
+#[test]
+fn the_declared_watch_threshold_is_the_lowest_limit_among_the_scope_s_languages() {
+    let dir = tempfile::tempdir().unwrap();
+    let config = support::config_at(
+        dir.path(),
+        "[checks.\"static.complexity\"]\ncyclomatic_max = 8\n\
+         [checks.\"static.complexity\".lang.go]\ncyclomatic_max = 6\n",
+    );
+    let mut manifest = support::manifest("static.complexity", &[], &[]);
+    manifest.settings = ["cyclomatic_max", "cognitive_max"]
+        .map(|name| SettingSpec {
+            name: name.to_owned(),
+            default: json!(15),
+            summary: String::new(),
+            configures: None,
+        })
+        .to_vec();
+    manifest.metrics = ["cyclomatic_max", "cognitive_max", "length_max"]
+        .map(|name| MetricSpec {
+            name: name.to_owned(),
+            summary: String::new(),
+            per: MetricPer::Scope,
+            protection: None,
+            tolerance: Some(2.0),
+            watch: (name != "length_max").then(|| name.to_owned()),
+        })
+        .to_vec();
+    let mut checks = CheckRegistry::default();
+    checks
+        .register(Box::new(support::Passing(manifest)))
+        .unwrap();
+    let watch = |langs: &[&str], metric: &str| {
+        let langs: Vec<LangId> = langs.iter().map(|lang| LangId::from(*lang)).collect();
+        let key = GateRuleSpec::parse(&format!("static.complexity.{metric}"), "<= base")
+            .unwrap()
+            .key;
+        Tolerances::declared(&checks, &config, &langs).watch(&key)
+    };
+    assert_eq!(
+        [
+            watch(&["rust"], "cyclomatic_max"),
+            watch(&["rust", "go"], "cyclomatic_max"),
+            watch(&[], "cyclomatic_max"),
+            watch(&["rust"], "cognitive_max"),
+            watch(&["rust"], "length_max"),
+        ],
+        [Some(8.0), Some(6.0), Some(8.0), Some(15.0), None]
     );
 }
