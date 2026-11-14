@@ -11,7 +11,7 @@ fn item(path: &str, signature: &str) -> (String, ApiItemKind, String) {
     (path.to_owned(), Function, signature.to_owned())
 }
 
-/// The ApiSurface items of `source` as `src/a/core.clj`.
+/// The `ApiSurface` items of `source` as `src/a/core.clj`.
 fn surface(source: &str) -> Vec<(String, ApiItemKind, String)> {
     let dir = tree(&[("src/a/core.clj", source)]);
     let api: ApiSurface = produce("clojure", dir.path());
