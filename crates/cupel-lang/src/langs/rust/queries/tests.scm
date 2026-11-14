@@ -212,6 +212,13 @@
     (identifier) @_method
     (#eq? @_method "is_err"))) @test.assertion @assertion.idiom.is-err
 
+; `r.unwrap_err()` and `r.expect_err("…")` panic unless `r` is an error, the check
+; `assert!(r.is_err())` makes; `unwrap` and `expect` are setup, no assertion.
+(call_expression
+  function: (field_expression
+    field: (field_identifier) @_method)
+  (#any-of? @_method "unwrap_err" "expect_err")) @test.assertion @assertion.idiom.is-err
+
 (macro_invocation
   macro: (identifier) @assertion.name
   (#match? @assertion.name "^(debug_|prop_)?assert")) @test.assertion

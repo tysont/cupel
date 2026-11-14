@@ -214,6 +214,17 @@ const ASSERTION_FORMS: &[(&str, &[(AssertionKind, AssertionStrength)])] = &[
         &[(Custom, Strong)],
     ),
     ("helper(&outcome);", &[]),
+    // `unwrap_err` and `expect_err` panic unless the result is an error, as `assert!(r.is_err())`
+    // fails; `unwrap` and `expect` are setup.
+    ("parse(\"+\").unwrap_err();", &[(Throws, Weak)]),
+    (
+        "parse(\"+\").expect_err(\"rejects a sign\");",
+        &[(Throws, Weak)],
+    ),
+    (
+        "parse(\"1\").unwrap();\n    parse(\"2\").expect(\"a digit\");",
+        &[],
+    ),
 ];
 
 #[test]

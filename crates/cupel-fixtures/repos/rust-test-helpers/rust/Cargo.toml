@@ -1,0 +1,8 @@
+# ABOUTME: A crate whose integration tests check errors with `unwrap_err` and `expect_err`, beside a test that only
+# ABOUTME: unwraps: the error checks assert and the unwrapping test asserts nothing (V18, clap's `tests/builder`).
+[package]
+name = "digits"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
