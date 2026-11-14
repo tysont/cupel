@@ -2709,7 +2709,7 @@ The integrator runs the batch on branch `batch-0.2.7`, one TDD fix per item, gat
 
 **Goal:** The owner's rulings on v0.2.7's open questions (2026-11-13), shipped as `v0.2.8` before the validation pass.
 
-**Status:** in progress.
+**Status:** complete. Tagged `v0.2.8` at 1a3534e3 (2026-11-13) and verified: SHA256SUMS, `release.sh verify` on every archive, both macOS binaries, `install.sh` on macOS, Ubuntu 24.04 amd64 and Alpine 3.20 arm64, and `cargo binstall`; CI green. Item 8 also carries the daemon parity twin fix (V2), cherry-picked onto the release commit after Linux CI failed `make parity` on it.
 
 Owner's rulings, verbatim:
 1. "init for node --test packages writes Node's built-in coverage command; c8 only when it is already in devDependencies." ([ADR-197](adr/CUPEL_DECISION_197.md))
@@ -2736,7 +2736,7 @@ Items 1–7 are the rulings in order; 8 is `v0.2.8`: tag, verify the release as 
 
 **Goal:** Validate Cupel on a real repository per language, with PR replay as the method, and ship the fixes as `v0.2.9`.
 
-**Status:** not started; follows v0.2.8.
+**Status:** in progress.
 
 The owner's method (2026-11-13):
 - Repositories: Rust clap, Python httpx, Go hashicorp/raft, Java jackson-core, Clojure ring.
