@@ -132,9 +132,7 @@ impl Check for StaticApiSurface {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        let tests = facts.get::<TestConventions>().ok();
-        let head = Side::of(facts.get::<ApiSurface>()?, tests);
-        let base = Side::of(facts.base::<ApiSurface>()?, tests);
+        let (base, head) = Side::both(facts)?;
         let commit = facts.range().map_or("", |range| range.commit.as_str());
         let reexports = Reexports::of(facts.get::<ModuleGraph>().ok());
         let mut findings = Vec::new();
@@ -206,6 +204,15 @@ struct Side<'a> {
 }
 
 impl<'a> Side<'a> {
+    /// The base and head sides of `facts`, each without the items in test files.
+    fn both(facts: &'a Facts) -> Result<(Self, Self)> {
+        let tests = facts.get::<TestConventions>().ok();
+        Ok((
+            Self::of(facts.base::<ApiSurface>()?, tests),
+            Self::of(facts.get::<ApiSurface>()?, tests),
+        ))
+    }
+
     fn of(surface: &'a ApiSurface, tests: Option<&TestConventions>) -> Self {
         let mut paths: BTreeMap<&str, Vec<&ApiItem>> = BTreeMap::new();
         let mut order = Vec::new();
