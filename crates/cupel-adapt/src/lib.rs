@@ -82,6 +82,7 @@ pub mod metamorphic;
 mod model_check;
 mod node_test;
 mod per_test;
+pub mod plugin;
 mod proof;
 mod property;
 mod pytest;

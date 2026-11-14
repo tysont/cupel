@@ -631,6 +631,27 @@ fn need(uses: &mut Vec<(String, Vec<String>)>, program: String, purpose: &str) {
 }
 
 fn toolchain(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec<Requirement> {
+    let purposes = purposes(config, repo, info);
+    let mut uses: Vec<(String, Vec<String>)> = Vec::new();
+    for (command, purpose) in &purposes {
+        for program in programs(command) {
+            need(&mut uses, program, purpose);
+        }
+    }
+    let programs = uses.into_iter().map(|(program, needed_for)| Requirement {
+        probe: cupel_adapt::toolchain::probe(&program),
+        tool: ToolId::from(program.as_str()),
+        needed_for: needed_for.join(", "),
+        required: false,
+        versioned: false,
+        install: None,
+    });
+    programs.chain(plugins(&purposes, repo)).collect()
+}
+
+/// Each command a language would use, with what uses it: `[lang.<id>] <key>`, and the
+/// toolchain producer for a command `init` would choose; in language order.
+fn purposes(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec<(String, String)> {
     let configured = |lang: &LangId, key: &str| {
         config
             .and_then(|config| config.file.lang.get(lang))
@@ -644,31 +665,52 @@ fn toolchain(config: Option<&Config>, repo: &Path, info: &ProjectInfo) -> Vec<Re
     }
     langs.sort();
     langs.dedup();
-    let mut uses: Vec<(String, Vec<String>)> = Vec::new();
+    let mut purposes = Vec::new();
     for lang in langs {
         let root = info.roots.iter().find(|root| root.lang == *lang);
-        let purposes = commands(repo, root)
+        purposes.extend(
+            commands(repo, root).into_iter().filter_map(
+                |(key, command, producer)| match configured(lang, key) {
+                    Some(command) => Some((command, format!("[lang.{lang}] {key}"))),
+                    None => Some((command?, format!("[lang.{lang}] {key} ({})", producer?))),
+                },
+            ),
+        );
+    }
+    purposes
+}
+
+/// One requirement per Python plugin the commands of `purposes` need (pytest-cov for
+/// `pytest --cov`), probed by asking the command's interpreter for its module and installed as
+/// the plugin's toolchain row says. A plugin whose program is not on `PATH` waits until it is:
+/// the program is the tool to install first.
+fn plugins(purposes: &[(String, String)], repo: &Path) -> Vec<Requirement> {
+    let mut requirements: Vec<Requirement> = Vec::new();
+    for (command, purpose) in purposes {
+        let needed = cupel_adapt::plugin::needed(command, repo)
             .into_iter()
-            .filter_map(|(key, command, producer)| match configured(lang, key) {
-                Some(command) => Some((command, format!("[lang.{lang}] {key}"))),
-                None => Some((command?, format!("[lang.{lang}] {key} ({})", producer?))),
-            });
-        for (command, purpose) in purposes {
-            for program in programs(&command) {
-                need(&mut uses, program, &purpose);
+            .filter(|plugin| cupel_core::find_program(plugin.program).is_some());
+        for plugin in needed {
+            match requirements
+                .iter_mut()
+                .find(|known| known.tool == plugin.tool)
+            {
+                Some(known) => {
+                    known.needed_for.push_str(", ");
+                    known.needed_for.push_str(purpose);
+                }
+                None => requirements.push(Requirement {
+                    tool: plugin.tool,
+                    needed_for: purpose.clone(),
+                    required: false,
+                    probe: plugin.probe,
+                    versioned: false,
+                    install: plugin.install,
+                }),
             }
         }
     }
-    uses.into_iter()
-        .map(|(program, needed_for)| Requirement {
-            probe: cupel_adapt::toolchain::probe(&program),
-            tool: ToolId::from(program.as_str()),
-            needed_for: needed_for.join(", "),
-            required: false,
-            versioned: false,
-            install: None,
-        })
-        .collect()
+    requirements
 }
 
 /// The `test`, `coverage`, and `bench` commands the toolchain table chooses for `root`, each

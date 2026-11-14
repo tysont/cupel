@@ -342,6 +342,74 @@ fn a_vitest_without_a_coverage_provider_is_a_missing_tool_naming_the_provider() 
     );
 }
 
+/// Doctor's exit code and its `doctor.tool-missing` findings about `pytest-cov`, as (severity,
+/// needed for, install), in a Python
+/// repository configured with pytest-cov's command whose `pytest` runs under an interpreter that
+/// finds a module (`import_status` 0) or none (1), with only that interpreter's programs and the
+/// system's on PATH.
+#[cfg(unix)]
+fn pytest_cov_missing(import_status: u8) -> (i32, Vec<(Value, Value, Value)>) {
+    use std::os::unix::fs::PermissionsExt;
+    let repo = Repo::new();
+    repo.write("requirements.txt", "pytest\ncoverage[toml]\n");
+    repo.write("shop/__init__.py", "");
+    repo.write("tests/test_shop.py", "def test_shop():\n    pass\n");
+    repo.write(
+        "cupel.toml",
+        "depth = \"standard\"\n\n[lang.python]\ntest = \"python -m pytest\"\ncoverage = \"python -m pytest --cov=. --cov-report=lcov:{out}\"\n",
+    );
+    let bin = repo.path("venv/bin");
+    let python =
+        format!("#!/bin/sh\n[ \"$1\" = -c ] && exit {import_status}\necho Python 3.12.0\n");
+    let pytest = format!("#!{}/python\necho pytest 8.3.0\n", bin.display());
+    for (name, text) in [
+        ("python", python.as_str()),
+        ("pytest", pytest.as_str()),
+        ("coverage", "#!/bin/sh\necho Coverage.py 7.6.0\n"),
+    ] {
+        repo.write(&format!("venv/bin/{name}"), text);
+        std::fs::set_permissions(bin.join(name), std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
+    let path = format!("{}:/usr/bin:/bin", bin.display());
+    let outcome = repo.run_with(cupel().env("PATH", path), &["doctor"]);
+    let missing = outcome.envelope()["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|finding| finding["kind"] == json!("doctor.tool-missing"))
+        .filter(|finding| finding["evidence"]["tool"] == json!("pytest-cov"))
+        .map(|finding| {
+            (
+                finding["severity"].clone(),
+                finding["evidence"]["needed_for"].clone(),
+                finding["evidence"]["install"].clone(),
+            )
+        })
+        .collect();
+    (outcome.code, missing)
+}
+
+/// pytest-cov's command passes `--cov`, which pytest rejects without the plugin; doctor names
+/// the plugin the interpreter running pytest cannot find, with its row's install, as it names a
+/// missing program of a command (a warning), and says nothing of it when the interpreter finds
+/// it.
+#[cfg(unix)]
+#[test]
+fn a_pytest_without_pytest_cov_is_a_missing_tool_naming_the_plugin() {
+    assert_eq!(
+        pytest_cov_missing(1),
+        (
+            0,
+            vec![(
+                json!("warn"),
+                json!("[lang.python] coverage"),
+                json!("python -m pip install pytest-cov")
+            )]
+        )
+    );
+    assert_eq!(pytest_cov_missing(0).1, vec![]);
+}
+
 /// Writes `bytes` into slot 0 of `lang` in the repository's `.cupel/work/slots/` (ADR-159).
 fn slots(repo: &Repo, lang: &str, bytes: usize) {
     let slot = repo.root().join(".cupel/work/slots").join(lang).join("0");
