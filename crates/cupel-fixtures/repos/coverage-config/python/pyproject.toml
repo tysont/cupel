@@ -1,0 +1,12 @@
+# ABOUTME: A project that chooses its coverage files itself (`include`) and makes every warning an error, as
+# ABOUTME: encode/httpx does; a `--cov=<source>` run then fails on coverage.py's include-ignored warning.
+[project]
+name = "shop"
+version = "0.1.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error"]
+
+[tool.coverage.run]
+include = ["shop/*", "tests/*"]

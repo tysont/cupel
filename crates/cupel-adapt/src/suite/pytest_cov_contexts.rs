@@ -57,7 +57,8 @@ fn is_cov(word: &str) -> bool {
 }
 
 /// The `--cov` words the run passes: the configured command's sources, else the root's
-/// `packages` (its source directory, ADR-152), else the bare `--cov`.
+/// `packages` (its source directory, ADR-152), else, for a root whose project's coverage
+/// configuration chooses its files (ADR-208), the bare `--cov`.
 fn cov_words(site: &Site<'_>) -> Vec<String> {
     let configured: Vec<String> = site
         .ctx
@@ -135,7 +136,7 @@ fn run(site: &Site<'_>, rerun: &Rerun) -> Result<SuiteRun> {
             format!("--cov-report=lcov:{}", lcov.display()),
         ])
         .collect();
-    let listing = pytest_cov_listing(&args.join(" "));
+    let listing = pytest_cov_listing(&args.join(" "), &site.packages);
     args.extend(selected);
     let captured = site.run("pytest", &args, &env)?;
     let found = std::fs::read_to_string(&junit)

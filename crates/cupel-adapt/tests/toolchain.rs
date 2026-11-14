@@ -118,6 +118,12 @@ fn python_fixtures_get_pytest_or_unittest_through_their_launcher() {
         commands("python", &fixture("python-pyproject"), &[], &["src"]).coverage,
         Some("uv run python -m pytest --cov=src --cov-report=lcov:{out}".to_owned())
     );
+    // A root whose coverage configuration chooses its files carries none (ADR-208): the
+    // command's `--cov` is bare.
+    assert_eq!(
+        commands("python", &fixture("python-pyproject"), &[], &[]).coverage,
+        Some("uv run python -m pytest --cov --cov-report=lcov:{out}".to_owned())
+    );
     assert_fixture(
         "python-pyproject",
         ".",

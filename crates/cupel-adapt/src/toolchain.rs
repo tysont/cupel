@@ -375,9 +375,15 @@ impl Selection<'_> {
     }
 }
 
-/// `template` with `<packages>` and each of the launcher's `<name>` placeholders filled in.
+/// `template` with `<packages>` and each of the launcher's `<name>` placeholders filled in. An
+/// option given the packages (`--cov=<packages>`) is bare without any (ADR-208).
 fn fill(template: &str, launcher: Option<&Launcher>, packages: &str) -> String {
-    let mut command = template.replace("<packages>", packages);
+    let mut command = if packages.is_empty() {
+        template.replace("=<packages>", "")
+    } else {
+        template.to_owned()
+    };
+    command = command.replace("<packages>", packages);
     for (name, value) in launcher.iter().flat_map(|launcher| &launcher.values) {
         command = command.replace(&format!("<{name}>"), value);
     }

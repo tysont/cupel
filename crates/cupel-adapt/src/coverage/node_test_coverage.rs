@@ -20,7 +20,7 @@ static SPEC: CoverageSpec = CoverageSpec {
 };
 
 /// Node lists only the files the suite loaded, and leaves its test files out.
-fn listing(_: &str) -> Listing {
+fn listing(_: &str, _: &[String]) -> Listing {
     Listing::Loaded
 }
 

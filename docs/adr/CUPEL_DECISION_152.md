@@ -1,6 +1,6 @@
 # CUPEL_DECISION_152: `tests.coverage` and the files no test loads
 
-**Date:** 2026-10-28 · **Status:** accepted · **Phase:** P10.4
+**Date:** 2026-10-28 · **Status:** accepted; §1 (a root whose coverage configuration chooses its files has no source) and §4 (such a root's map lists every file) amended by [208](CUPEL_DECISION_208.md) · **Phase:** P10.4
 
 ## Context
 

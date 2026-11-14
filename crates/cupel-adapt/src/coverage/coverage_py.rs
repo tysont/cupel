@@ -20,12 +20,13 @@ static SPEC: CoverageSpec = CoverageSpec {
 };
 
 /// coverage.py lists every file under a source (`--source=<dir>` or `--source <dir>`) and,
-/// without one, only the files the suite loaded (ADR-152).
-fn listing(command: &str) -> Listing {
-    if command
+/// without one, only the files the suite loaded (ADR-152), unless the root has no packages: its
+/// project's configuration chooses the files (ADR-208).
+fn listing(command: &str, packages: &[String]) -> Listing {
+    let source = command
         .split_whitespace()
-        .any(|word| word == "--source" || word.starts_with("--source="))
-    {
+        .any(|word| word == "--source" || word.starts_with("--source="));
+    if source || packages.is_empty() {
         Listing::All
     } else {
         Listing::Loaded
@@ -52,8 +53,18 @@ mod tests {
                 "coverage run -m unittest && coverage lcov -o {out}",
                 "coverage run --sources-are-elsewhere -m unittest",
             ]
-            .map(listing),
+            .map(|command| listing(command, &[".".to_owned()])),
             [Listing::All, Listing::All, Listing::Loaded, Listing::Loaded]
+        );
+    }
+
+    /// A root without packages is one whose project's configuration chooses the files
+    /// (ADR-208): its report lists them, whatever the command.
+    #[test]
+    fn a_root_whose_project_chooses_its_files_lists_every_file() {
+        assert_eq!(
+            listing("coverage run -m unittest && coverage lcov -o {out}", &[]),
+            Listing::All
         );
     }
 }

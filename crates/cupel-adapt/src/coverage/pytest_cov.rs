@@ -20,12 +20,15 @@ static SPEC: CoverageSpec = CoverageSpec {
 };
 
 /// coverage.py lists every file under a source (`--cov=<source>`) and, without one (`--cov`, or
-/// `--cov=` for no filtering), only the files the suite loaded (ADR-152).
-pub(crate) fn listing(command: &str) -> Listing {
-    if command.split_whitespace().any(|word| {
+/// `--cov=` for no filtering), only the files the suite loaded (ADR-152), unless the root has no
+/// packages: its project's configuration chooses the files, and a file it leaves out is not one
+/// the suite failed to load (ADR-208).
+pub(crate) fn listing(command: &str, packages: &[String]) -> Listing {
+    let source = command.split_whitespace().any(|word| {
         word.strip_prefix("--cov=")
             .is_some_and(|source| !source.is_empty())
-    }) {
+    });
+    if source || packages.is_empty() {
         Listing::All
     } else {
         Listing::Loaded
@@ -53,7 +56,7 @@ mod tests {
                 "pytest --cov= --cov-report=lcov:{out}",
                 "pytest --cov-report=lcov:{out}",
             ]
-            .map(listing),
+            .map(|command| listing(command, &[".".to_owned()])),
             [
                 Listing::All,
                 Listing::All,
@@ -61,6 +64,16 @@ mod tests {
                 Listing::Loaded,
                 Listing::Loaded
             ]
+        );
+    }
+
+    /// A root without packages is one whose project's configuration chooses the files
+    /// (ADR-208): its report lists them, whatever the command.
+    #[test]
+    fn a_root_whose_project_chooses_its_files_lists_every_file() {
+        assert_eq!(
+            listing("pytest --cov --cov-report=lcov:{out}", &[]),
+            Listing::All
         );
     }
 }
