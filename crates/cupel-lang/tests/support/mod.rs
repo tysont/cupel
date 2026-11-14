@@ -347,6 +347,19 @@ pub fn items(api: &ApiSurface, file: &str) -> Vec<(String, ApiItemKind, String)>
         .collect()
 }
 
+/// The paths of the items `lang` reports under the tree of `files`, internal ones marked `!`.
+pub fn exposure(lang: &str, files: &[(&str, &str)]) -> Vec<String> {
+    let dir = tree(files);
+    let api: ApiSurface = produce(lang, dir.path());
+    api.items
+        .iter()
+        .map(|item| {
+            let mark = if item.internal { "!" } else { "" };
+            format!("{mark}{}", item.path)
+        })
+        .collect()
+}
+
 pub fn reasons(roots: &Roots, symbols: &Symbols, display: &str) -> Vec<RootReason> {
     let symbol: &SymbolDef = symbols
         .symbols

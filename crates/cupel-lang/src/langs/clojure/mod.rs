@@ -2,13 +2,16 @@
 // ABOUTME: producers it registers: a NormTree that keeps called functions, and namespace resolution (ADR-109).
 mod normalize;
 pub mod project;
+mod published;
 mod resolve;
 
 use std::path::Path;
 use std::sync::{Arc, LazyLock};
 
-use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
+use cupel_core::syntax::ApiSurface;
+use cupel_core::{LangFamily, LangId, ProduceCtx, ProducerRegistry, Stability};
 
+use crate::imports::Imports;
 use crate::language::Language;
 use crate::parse::ParseCache;
 use crate::project::Ecosystem;
@@ -81,5 +84,14 @@ impl Language for Clojure {
         crate::generic::register(&language, &self.cache, reg);
         normalize::register(&language, &self.cache, reg);
         resolve::register(language, &self.cache, reg);
+    }
+
+    /// A project's API is what its published source paths hold (ADR-215).
+    fn mark_internal(&self, surface: &mut ApiSurface, ctx: &ProduceCtx) {
+        let mut files: Vec<String> = surface.items.iter().map(|item| item.file.clone()).collect();
+        files.dedup();
+        let imports = Imports::new(&ctx.ctx.root, self, &self.cache, files)
+            .beside(ctx.focus.base_side.as_ref());
+        published::mark_internal(surface, &imports);
     }
 }

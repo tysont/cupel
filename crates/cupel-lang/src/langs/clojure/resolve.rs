@@ -248,11 +248,7 @@ fn manifests_below(imports: &Imports<'_>, dir: &str, depth: usize, found: &mut V
 /// The project directory of `file`: the nearest directory above it with a `deps.edn`, `.` when
 /// none has one.
 fn project_of(imports: &Imports<'_>, file: &str) -> String {
-    std::path::Path::new(file)
-        .ancestors()
-        .skip(1)
-        .map(|dir| dir.to_string_lossy().into_owned())
-        .find(|dir| imports.is_file(&join(dir, MANIFEST)))
+    super::published::nearest_holding(imports, file, &[MANIFEST])
         .filter(|dir| !dir.is_empty())
         .unwrap_or_else(|| ".".to_owned())
 }

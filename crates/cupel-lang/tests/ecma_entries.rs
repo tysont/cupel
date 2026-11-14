@@ -3,20 +3,7 @@
 mod support;
 
 use cupel_core::syntax::ApiSurface;
-use support::{fixture, produce, tree};
-
-/// The paths of the items `lang` reports under the tree of `files`, internal ones marked `!`.
-fn exposure(lang: &str, files: &[(&str, &str)]) -> Vec<String> {
-    let dir = tree(files);
-    let api: ApiSurface = produce(lang, dir.path());
-    api.items
-        .iter()
-        .map(|item| {
-            let mark = if item.internal { "!" } else { "" };
-            format!("{mark}{}", item.path)
-        })
-        .collect()
-}
+use support::{exposure, fixture, produce};
 
 /// Molten's `apps/agent`: private, with an `exports` map of subpaths and conditions naming
 /// entry files, none under `tools/`.

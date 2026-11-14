@@ -1,6 +1,7 @@
 // ABOUTME: `static.api-surface` end to end: per language, a temporary git history that removes, changes, and adds
 // ABOUTME: public items, checked with --base and --changed by the real binary, the `no-breaking` gate (ADR-101), and
-// ABOUTME: a TypeScript package whose API is what its package.json entries expose (ADR-176).
+// ABOUTME: a TypeScript package whose API is what its package.json entries expose (ADR-176), and a Clojure project
+// ABOUTME: whose API is what its published source paths hold (ADR-215).
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -8,7 +9,7 @@ use std::process::Command;
 use cupel_core::{CheckStatus, Envelope, Severity, SkipReason};
 use cupel_fixtures::evidence;
 use cupel_fixtures::matrix::Registries;
-use cupel_fixtures::run_cupel;
+use cupel_fixtures::{copy_repo, run_cupel};
 use serde_json::Value;
 
 const CHECK: &str = "static.api-surface";
@@ -438,6 +439,46 @@ fn the_manifest_is_read_at_each_side_of_the_range() {
             "api.breaking".to_owned(),
             "removed".to_owned(),
             "old".to_owned()
+        )]
+    );
+}
+
+/// clj-commons/clj-yaml PR #181's false gate: a range that changes a babashka script on
+/// `bb.edn`'s paths beside the library on `deps.edn`'s `:paths` breaks only the library.
+#[test]
+fn a_clojure_change_outside_the_published_source_paths_is_not_breaking() {
+    let repo = Repo::new();
+    copy_repo("clojure-api-paths/clojure", repo.path());
+    repo.commit("the library and its scripts");
+    repo.git(&["checkout", "--quiet", "-b", "work"]);
+    let library = "src/clj_yaml/core.clj";
+    let text = fs::read_to_string(repo.path().join(library)).unwrap();
+    repo.write(
+        library,
+        &text.replace(
+            "(defn generate-string [data] (str data))",
+            "(defn generate-string [data opts] (str data opts))",
+        ),
+    );
+    let script = "script/publish.clj";
+    let text = fs::read_to_string(repo.path().join(script)).unwrap();
+    repo.write(
+        script,
+        &text
+            .replace(
+                "(defn clojars-deploy [jar] jar)",
+                "(defn clojars-deploy [jar opts] [jar opts])",
+            )
+            .replace("\n(defn -main [& _] nil)\n", ""),
+    );
+    repo.commit("the change");
+    let envelope = repo.check(&["--changed"], 0);
+    assert_eq!(
+        findings(&envelope),
+        [(
+            "api.breaking".to_owned(),
+            "changed".to_owned(),
+            "core/generate-string".to_owned()
         )]
     );
 }

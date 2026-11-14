@@ -37,8 +37,9 @@ pub trait Language: Send + Sync {
     /// cannot express the fact.
     fn register(&self, reg: &mut ProducerRegistry);
     /// Marks the items of `surface` that no entry of their package exposes as internal, reading
-    /// manifests and re-exports on the side `ctx` produces (ADR-176). A language whose public
-    /// items are all API, as every one but JavaScript and TypeScript, leaves them as they are.
+    /// manifests and re-exports on the side `ctx` produces (ADR-176); for Clojure, the items
+    /// outside the project's published source paths (ADR-215). A language whose public items
+    /// are all API, as every other one, leaves them as they are.
     fn mark_internal(&self, _surface: &mut ApiSurface, _ctx: &ProduceCtx) {}
 }
 
