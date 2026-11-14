@@ -1,0 +1,13 @@
+diff --git a/grammar.js b/grammar.js
+index 4a0ff4b..26c9f75 100644
+--- a/grammar.js
++++ b/grammar.js
+@@ -979,6 +979,8 @@ module.exports = grammar({
+       field('macro', choice(
+         $.scoped_identifier,
+         $.identifier,
++        // A macro may be named like a primitive type (snapbox's `str!`); its name is an identifier.
++        alias(choice(...primitiveTypes), $.identifier),
+         $._reserved_identifier,
+       )),
+       '!',

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ABOUTME: Rebuilds the vendored tree-sitter grammars (ADR-161): each upstream tag, plus its patch from vendor/patches,
+# ABOUTME: Rebuilds the vendored tree-sitter grammars (ADR-161, ADR-213): each upstream tag, plus its patch from vendor/patches,
 # ABOUTME: regenerated with the tree-sitter CLI the release used, copied into vendor/<crate>. Needs git, node, and network.
 set -euo pipefail
 
@@ -57,4 +57,11 @@ generate="$(cli 0.25.8)"
 (cd "$js" && "$generate" generate)
 publish "$js" "$root/vendor/tree-sitter-javascript" bindings/rust grammar.js queries src tree-sitter.json
 
-echo "vendor/tree-sitter-typescript and vendor/tree-sitter-javascript rebuilt; git diff vendor shows any change"
+# Rust. The published parser.c was generated before the 0.24.2 version bump, so it records 0.24.1 in its metadata.
+clone tree-sitter-rust 0.24.2
+rs="$work/tree-sitter-rust-0.24.2"
+generate="$(cli 0.26.7)"
+(cd "$rs" && "$generate" generate)
+publish "$rs" "$root/vendor/tree-sitter-rust" bindings/rust grammar.js queries src tree-sitter.json
+
+echo "vendor/tree-sitter-typescript, vendor/tree-sitter-javascript, and vendor/tree-sitter-rust rebuilt; git diff vendor shows any change"

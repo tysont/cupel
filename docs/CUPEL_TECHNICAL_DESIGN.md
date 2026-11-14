@@ -741,9 +741,9 @@ There is no per-language capability struct. What a language supports is exactly 
 
 | LangId | Family | Grammars | Notes |
 |---|---|---|---|
-| `javascript` | `ecma` | tree-sitter-javascript (`.js .jsx .mjs .cjs`) | ESM and CJS imports; Node resolution for `resolve_import`/`overlay_deps` |
-| `typescript` | `ecma` | tree-sitter-typescript `typescript` (`.ts .mts .cts`), `tsx` (`.tsx`) | Shares queries/tables with `javascript` via a common module; `tsconfig.json` `paths` honored in resolution |
-| `rust` | `rust` | tree-sitter-rust | Module tree from `mod` declarations and `Cargo.toml` workspace members; schemata first target |
+| `javascript` | `ecma` | tree-sitter-javascript (`.js .jsx .mjs .cjs`), vendored and patched ([ADR-161](adr/CUPEL_DECISION_161.md)) | ESM and CJS imports; Node resolution for `resolve_import`/`overlay_deps` |
+| `typescript` | `ecma` | tree-sitter-typescript `typescript` (`.ts .mts .cts`), `tsx` (`.tsx`), vendored and patched ([ADR-161](adr/CUPEL_DECISION_161.md)) | Shares queries/tables with `javascript` via a common module; `tsconfig.json` `paths` honored in resolution |
+| `rust` | `rust` | tree-sitter-rust, vendored and patched ([ADR-213](adr/CUPEL_DECISION_213.md)) | Module tree from `mod` declarations and `Cargo.toml` workspace members; schemata first target |
 | `go` | `go` | tree-sitter-go | Package-level imports; `go.mod`/`go.work`; per-test coverage by `-run` narrowing; native fuzz and `-race` |
 | `python` | `python` | tree-sitter-python | Package resolution via `__init__.py`, `pyproject`/`setup.cfg` roots; pytest-cov contexts for per-test coverage |
 

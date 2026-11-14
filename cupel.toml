@@ -4,7 +4,7 @@ depth = "standard"
 
 # The fixture crate's repositories are analysis data for Cupel's tests, not Cupel's code
 # (ADR-065); the whole crate is left out so the dogfood grades the six product crates. The vendored
-# grammars are third-party code (ADR-161).
+# grammars are third-party code (ADR-161, ADR-213).
 [scope]
 exclude = ["crates/cupel-fixtures/**", "vendor/**"]
 

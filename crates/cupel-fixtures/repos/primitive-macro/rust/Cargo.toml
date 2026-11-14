@@ -1,0 +1,8 @@
+# ABOUTME: A crate whose test names its expected text with a local `str!` macro, as snapbox's users do (V17,
+# ABOUTME: clap's `tests/builder`): rustc accepts it, so Cupel reports no `lang.parse-error`.
+[package]
+name = "greeting"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]

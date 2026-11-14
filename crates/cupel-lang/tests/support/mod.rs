@@ -13,7 +13,7 @@ use cupel_core::{
         Symbols, TestCase, TestFile, TestFrames, Visibility,
     },
 };
-use cupel_lang::{LanguageRegistry, walk_excluding};
+use cupel_lang::{LanguageRegistry, parse_scope, walk_excluding};
 
 /// The fixture repository for `lang` in cupel-fixtures.
 pub fn fixture(lang: &str) -> PathBuf {
@@ -117,6 +117,42 @@ fn produce_with<F: Fact>(
         .downcast::<F>()
         .expect("the producer makes its declared fact");
     (fact, events)
+}
+
+/// The files of `files` (name, text) that the language `lang` reports as `lang.parse-error`, parsed from a fresh
+/// directory.
+pub fn parse_errors(lang: &str, files: &[(&str, &str)]) -> Vec<String> {
+    let dir = tempfile::tempdir().unwrap();
+    for (name, text) in files {
+        std::fs::write(dir.path().join(name), text).unwrap();
+    }
+    let registry = LanguageRegistry::builtin();
+    let language = registry.get(&lang.into()).unwrap();
+    let writer = Writer::new(dir.path(), false).unwrap().confined();
+    let ctx = ProduceCtx::new(
+        Ctx::new(writer.root().to_path_buf()),
+        writer,
+        Cancellation::new(),
+    );
+    let scope = Scope::of_files(files.iter().map(|(name, _)| (*name).to_owned()).collect());
+    let mut events = Vec::new();
+    parse_scope(
+        registry.cache(),
+        &ctx,
+        &scope,
+        language.as_ref(),
+        &mut events,
+    )
+    .unwrap();
+    events
+        .iter()
+        .filter_map(|event| match event {
+            Event::Finding(finding) if finding.kind == "lang.parse-error" => {
+                finding.location.as_ref().map(|at| at.file.clone())
+            }
+            _ => None,
+        })
+        .collect()
 }
 
 /// Writes `files` (path, contents) under a fresh temporary directory.

@@ -1,45 +1,8 @@
 // ABOUTME: JavaScript and TypeScript constructs the compilers accept and the upstream grammars rejected (ADR-161):
 // ABOUTME: a bare `&` in JSX text and attribute strings, and `unique` as an identifier; none is a parse error.
-use std::fs;
+mod support;
 
-use cupel_core::{Cancellation, Ctx, Event, ProduceCtx, Scope, Writer};
-use cupel_lang::{LanguageRegistry, parse_scope};
-
-/// The files of `files` (name, text) that the language `lang` reports as `lang.parse-error`, parsed from a fresh
-/// directory.
-fn parse_errors(lang: &str, files: &[(&str, &str)]) -> Vec<String> {
-    let dir = tempfile::tempdir().unwrap();
-    for (name, text) in files {
-        fs::write(dir.path().join(name), text).unwrap();
-    }
-    let registry = LanguageRegistry::builtin();
-    let language = registry.get(&lang.into()).unwrap();
-    let writer = Writer::new(dir.path(), false).unwrap().confined();
-    let ctx = ProduceCtx::new(
-        Ctx::new(writer.root().to_path_buf()),
-        writer,
-        Cancellation::new(),
-    );
-    let scope = Scope::of_files(files.iter().map(|(name, _)| (*name).to_owned()).collect());
-    let mut events = Vec::new();
-    parse_scope(
-        registry.cache(),
-        &ctx,
-        &scope,
-        language.as_ref(),
-        &mut events,
-    )
-    .unwrap();
-    events
-        .iter()
-        .filter_map(|event| match event {
-            Event::Finding(finding) if finding.kind == "lang.parse-error" => {
-                finding.location.as_ref().map(|at| at.file.clone())
-            }
-            _ => None,
-        })
-        .collect()
-}
+use support::parse_errors;
 
 /// JSX with a bare `&`: in text, in a double- and a single-quoted attribute, beside character references.
 const JSX: [(&str, &str); 5] = [
