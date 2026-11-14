@@ -10,6 +10,9 @@
 //!   `@assertion.name` (a node whose text, whitespace removed, is the key). The key is looked
 //!   up in `[tests.assertions]`; unknown keys get `[tests].unknown_assertion`. When several
 //!   patterns match one assertion node, the earliest wins, so idioms come first.
+//! - `@assertion.extent` (optional) on a node enclosing the match's assertion whose span is the
+//!   assertion's: the `try` statement a failure call ends, whose handlers are then the assertion's
+//!   own, so they are no logic (ADR-212).
 //! - `@assertion.helper` on the name a call is made by: when that name is a function of the
 //!   same file that is not a case and holds an assertion (a helper such as
 //!   `test_encode_ok(&cases)`), the call asserts with the class of the helper's first strong
@@ -221,7 +224,7 @@ fn attach_assertions(
             Assertion {
                 kind: class.kind,
                 strength: class.strength,
-                span: span(node),
+                span: span(m.node(capture::ASSERTION_EXTENT).unwrap_or(node)),
             },
         );
         let slot = assertions.entry(node.id()).or_insert_with(|| entry.clone());

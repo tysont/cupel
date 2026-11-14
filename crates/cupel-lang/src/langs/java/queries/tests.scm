@@ -100,6 +100,17 @@
   name: (identifier) @assertion.name
   (#eq? @assertion.name "toMatchSnapshot")) @test.assertion
 
+; `try { act(); fail(…); } catch (E e) { … }`: `assertThrows` spelled out. The `fail` call is a
+; throws assertion spanning the `try`, whose catch clauses are its own and no logic (ADR-212).
+(try_statement
+  body: (block
+    (expression_statement
+      (method_invocation
+        name: (identifier) @_fail) @test.assertion @assertion.idiom.expected-exception)
+    .)
+  (catch_clause)
+  (#eq? @_fail "fail")) @assertion.extent
+
 ; JUnit's static assertions, called bare or through `Assertions`/`Assert`; `fail()` too.
 (method_invocation
   name: (identifier) @assertion.name

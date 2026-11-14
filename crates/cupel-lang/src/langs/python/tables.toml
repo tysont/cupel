@@ -119,6 +119,9 @@ truthy = { kind = "truthiness", strength = "weak" }
 raises = { kind = "throws", strength = "strong" }
 # `pytest.fail(…)`, `self.fail(…)`: some condition held, as Go's bare failure call and JUnit's `fail`.
 fails = { kind = "truthiness", strength = "weak" }
+# A `try` whose block ends in one of them, with `except` clauses: `pytest.raises` spelled out
+# (ADR-212).
+expected-exception = { kind = "throws", strength = "strong" }
 # unittest assert methods.
 assertEqual = { kind = "equality", strength = "strong" }
 assertEquals = { kind = "equality", strength = "strong" }

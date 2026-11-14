@@ -169,6 +169,20 @@
   (#eq? @_pytest "pytest")
   (#eq? @_raises "raises")) @test.assertion @assertion.idiom.raises
 
+; `try: act(); pytest.fail(…)` with `except E:`: `pytest.raises` spelled out. The failure call is a
+; throws assertion spanning the `try`, whose `except` clauses are its own and no logic (ADR-212).
+(try_statement
+  body: (block
+    (expression_statement
+      (call
+        function: (attribute
+          object: (identifier) @_object
+          attribute: (identifier) @_fail)) @test.assertion @assertion.idiom.expected-exception)
+    .)
+  (except_clause)
+  (#any-of? @_object "pytest" "self")
+  (#eq? @_fail "fail")) @assertion.extent
+
 ; `pytest.fail(…)` and unittest's `self.fail(…)` fail the test where they run: the `if` guarding one
 ; is the condition the test rules out, as Go's `t.Fatal` and JUnit's `fail` are.
 (call

@@ -77,6 +77,11 @@ struct Case {
     clauses: Vec<DecisionKind>,
     /// Loops not over a table written in place, where each is, after `clauses`.
     loops_at: Vec<Span>,
+    /// Exception handlers, where each is, after `loops_at`.
+    catches_at: Vec<Span>,
+    /// Strong throws assertions spanning a whole `try` (the expected-exception idiom), after
+    /// `assertions`.
+    throws_over: Vec<Span>,
     body: Vec<NormNode>,
     /// The body's statements sit inside one list node, as Go's do.
     wrapped: bool,
@@ -95,6 +100,8 @@ fn case(name: &'static str, line: u32) -> Case {
         tables: 0,
         clauses: Vec::new(),
         loops_at: Vec::new(),
+        catches_at: Vec::new(),
+        throws_over: Vec::new(),
         body: Vec::new(),
         wrapped: false,
     }
@@ -141,6 +148,18 @@ impl Case {
     /// Loops spanning each of `spans`, none over a table written in place.
     fn looping_at(mut self, spans: &[Span]) -> Self {
         self.loops_at = spans.to_vec();
+        self
+    }
+
+    /// Catch clauses spanning each of `spans`.
+    fn catching_at(mut self, spans: &[Span]) -> Self {
+        self.catches_at = spans.to_vec();
+        self
+    }
+
+    /// A strong throws assertion spanning each of `spans`, besides the others.
+    fn expecting_throws_over(mut self, spans: &[Span]) -> Self {
+        self.throws_over = spans.to_vec();
         self
     }
 
@@ -192,6 +211,11 @@ impl Case {
                     strength: *strength,
                     span: self.asserted_on.get(n).map_or(at, |line| span(*line, 1)),
                 })
+                .chain(self.throws_over.iter().map(|over| Assertion {
+                    kind: AssertionKind::Throws,
+                    strength: AssertionStrength::Strong,
+                    span: *over,
+                }))
                 .collect(),
             mocks: (0..self.mocks)
                 .map(|n| Mock {
@@ -219,6 +243,11 @@ impl Case {
                 self.loops_at
                     .iter()
                     .map(|at| (DecisionKind::Loop, false, false, Some(*at))),
+            )
+            .chain(
+                self.catches_at
+                    .iter()
+                    .map(|at| (DecisionKind::Catch, false, false, Some(*at))),
             )
             .map(|(kind, table, expression, span)| Decision {
                 span,
@@ -676,6 +705,42 @@ fn a_loop_holding_an_assertion_is_table_driven_but_branching_inside_it_is_logic(
                 &json!(1),
                 &json!(2)
             ),
+        ]
+    );
+}
+
+#[test]
+fn a_catch_of_a_try_that_asserts_the_exception_is_not_logic_but_another_catch_is() {
+    let (_, findings) = Run::of(vec![
+        // `try { decode(…); fail(…); } catch (IllegalArgumentException e) { assertEquals(…) }`:
+        // the `try` is one throws assertion and its handler is part of it.
+        case("expected_exception", 200)
+            .expecting_throws_over(&[span(201, 5)])
+            .catching_at(&[span(203, 3)]),
+        // `try { decode(…); } catch (IllegalArgumentException e) { assertEquals(…) }`
+        case("caught_without_failing", 210)
+            .asserting_on(&[213])
+            .catching_at(&[span(212, 3)]),
+        // A throws assertion beside a catch it does not span.
+        case("caught_beside_an_expectation", 220)
+            .expecting_throws_over(&[span(221, 2)])
+            .catching_at(&[span(224, 3)]),
+    ])
+    .go();
+    let logic: Vec<(&str, &Value)> = findings
+        .iter()
+        .map(|finding| {
+            (
+                finding.symbol.as_ref().unwrap().display.as_str(),
+                &finding.evidence.0["alternatives"],
+            )
+        })
+        .collect();
+    assert_eq!(
+        logic,
+        [
+            ("t::caught_without_failing", &json!(1)),
+            ("t::caught_beside_an_expectation", &json!(1)),
         ]
     );
 }

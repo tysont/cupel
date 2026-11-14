@@ -54,6 +54,7 @@ pub mod capture {
     pub const TEST_NAME: &str = "test.name";
     pub const TEST_ASSERTION: &str = "test.assertion";
     pub const ASSERTION_NAME: &str = "assertion.name";
+    pub const ASSERTION_EXTENT: &str = "assertion.extent";
     pub const ASSERTION_IDIOM_PREFIX: &str = "assertion.idiom.";
     pub const ASSERTION_HELPER: &str = "assertion.helper";
     pub const ASSERTION_MACRO: &str = "assertion.macro";
@@ -223,6 +224,7 @@ const TESTS: Contract = Contract {
     optional: &[
         c::TEST_ASSERTION,
         c::ASSERTION_NAME,
+        c::ASSERTION_EXTENT,
         c::ASSERTION_HELPER,
         c::ASSERTION_MACRO,
         c::ASSERTION_EXPANSION,

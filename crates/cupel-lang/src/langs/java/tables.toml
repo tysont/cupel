@@ -105,6 +105,8 @@ assertNotNull = { kind = "not-null", strength = "weak" }
 assertDoesNotThrow = { kind = "not-null", strength = "weak" }
 assertThrows = { kind = "throws", strength = "strong" }
 assertThrowsExactly = { kind = "throws", strength = "strong" }
+# A `try` whose block ends in `fail(…)`, with catch clauses: `assertThrows` spelled out (ADR-212).
+expected-exception = { kind = "throws", strength = "strong" }
 # JUnit 4's `@Test(expected = X.class)` names the exception.
 expected = { kind = "throws", strength = "strong" }
 # AssertJ, by the first matcher after `assertThat(…)`; `assertThatThrownBy(…)` is `thrown`.

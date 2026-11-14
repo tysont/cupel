@@ -1,0 +1,4 @@
+// ABOUTME: The build of the codec fixture: JUnit 5 on the test classpath.
+// ABOUTME: Only static checks read it; no test runs.
+plugins { id 'java' }
+dependencies { testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2' }

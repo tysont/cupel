@@ -559,6 +559,24 @@ pub fn expected(cases: &[Expected]) -> Vec<CaseRow> {
         .collect()
 }
 
+/// Each case's assertions as (case, kind, strength, first line, last line).
+pub fn assertion_lines(file: &TestFile) -> Vec<(&str, AssertionKind, AssertionStrength, u32, u32)> {
+    file.cases
+        .iter()
+        .flat_map(|case| {
+            case.assertions.iter().map(|assertion| {
+                (
+                    case.name.as_str(),
+                    assertion.kind,
+                    assertion.strength,
+                    assertion.span.line,
+                    assertion.span.end_line,
+                )
+            })
+        })
+        .collect()
+}
+
 /// The test file of a repository holding only `source` at `path`, after asserting its framework.
 pub fn assert_source_file(lang: &str, path: &str, source: &str, framework: &str) -> TestFile {
     let dir = tree(&[(path, source)]);

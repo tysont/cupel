@@ -1,0 +1,3 @@
+// ABOUTME: A Java project whose tests spell `assertThrows` out as a `try` ending in `fail`, the shape of
+// ABOUTME: jackson-core's Base64VariantTest, beside a try/catch that asserts no exception (V15, ADR-212).
+rootProject.name = 'codec'

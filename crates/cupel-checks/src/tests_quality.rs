@@ -3,8 +3,8 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::syntax::{
-    AssertionStrength, Decision, DecisionKind, Decisions, NormNode, NormTree, SymbolDef, SymbolKey,
-    Symbols, TestCase, TestFile, TestFrames,
+    AssertionKind, AssertionStrength, Decision, DecisionKind, Decisions, NormNode, NormTree,
+    SymbolDef, SymbolKey, Symbols, TestCase, TestFile, TestFrames,
 };
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Error, Event, EventSink,
@@ -414,9 +414,11 @@ impl LogicCount {
     fn of(case: &TestCase, decisions: &[Decision]) -> Self {
         // A comprehension's clauses compute a value; the case's statements still run in one
         // straight line (ADR-138 §9).
+        // A handler inside a throws assertion is that assertion's own: the `try` whose block ends
+        // in a failure call is `assertThrows` spelled out (ADR-212).
         let decisions: Vec<&Decision> = decisions
             .iter()
-            .filter(|decision| !decision.expression)
+            .filter(|decision| !decision.expression && !expected_exception(decision, case))
             .collect();
         let of_kinds = |kinds: &[DecisionKind]| {
             count(
@@ -446,6 +448,16 @@ impl LogicCount {
     fn logic(&self) -> u32 {
         self.loops + self.alternatives + self.branches.saturating_sub(self.guards)
     }
+}
+
+/// Whether `decision` is an exception handler that one of the case's throws assertions spans.
+fn expected_exception(decision: &Decision, case: &TestCase) -> bool {
+    decision.kind == DecisionKind::Catch
+        && decision.span.as_ref().is_some_and(|span| {
+            case.assertions.iter().any(|assertion| {
+                assertion.kind == AssertionKind::Throws && assertion.span.contains(span)
+            })
+        })
 }
 
 /// Whether a loop runs a table of cases: it iterates one written in place (ADR-069), or its body

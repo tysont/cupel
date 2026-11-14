@@ -5,8 +5,8 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs};
 use support::{
-    Expected, assert_framework, assert_source_file, assert_test_file, case, expected, fixture,
-    produce, properties, property, rows, tree,
+    Expected, assert_framework, assert_source_file, assert_test_file, assertion_lines, case,
+    expected, fixture, produce, properties, property, rows, tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -466,5 +466,36 @@ fn a_failure_call_under_a_guard_is_an_assertion_as_a_go_failure_call_is() {
             &[],
             4
         )]
+    );
+}
+
+#[test]
+fn a_try_whose_block_ends_in_a_failure_call_is_one_raises_assertion_spanning_its_handlers() {
+    let file = assert_source_file(
+        "python",
+        "tests/test_decode.py",
+        "import pytest\n\
+         \n\
+         def test_decode_raises():\n    \
+         try:\n        \
+         decode(\"-%8en\")\n        \
+         pytest.fail(\"Expecting ValueError\")\n    \
+         except ValueError as e:\n        \
+         assert str(e) == \"bad\"\n\
+         \n\
+         def test_decode_caught():\n    \
+         try:\n        \
+         decode(\"x\")\n    \
+         except ValueError as e:\n        \
+         assert str(e) == \"bad\"\n",
+        "pytest",
+    );
+    assert_eq!(
+        assertion_lines(&file),
+        [
+            ("test_decode_raises", Throws, Strong, 4, 8),
+            ("test_decode_raises", Equality, Strong, 8, 8),
+            ("test_decode_caught", Equality, Strong, 14, 14),
+        ]
     );
 }
