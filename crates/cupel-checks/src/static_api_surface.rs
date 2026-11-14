@@ -3,7 +3,9 @@
 use std::collections::BTreeMap;
 
 use cupel_core::hint::LOCATION_COMMIT;
-use cupel_core::syntax::{ApiItem, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph};
+use cupel_core::syntax::{
+    ApiItem, ApiSurface, EdgeKind, ImportEdge, ImportTarget, ModuleGraph, TestConventions,
+};
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
     Evidence, FactKind, Facts, Finding, FindingId, Location, Manifest, Plan, Result, Scope, Score,
@@ -64,7 +66,7 @@ impl StaticApiSurface {
             tier: Tier::try_from(0).expect("tier 0 exists"),
             cost: CostClass::Quick,
             needs: vec![FactKind::ApiSurface],
-            wants: vec![FactKind::ModuleGraph],
+            wants: vec![FactKind::ModuleGraph, FactKind::TestConventions],
             findings: Vec::new(),
             metrics: Vec::new(),
             settings: SETTINGS.specs(),
@@ -130,8 +132,9 @@ impl Check for StaticApiSurface {
         sink: &mut dyn EventSink,
     ) -> Result<CheckResult> {
         SETTINGS.read(&self.manifest.id, &ctx.config)?;
-        let head = Side::of(facts.get::<ApiSurface>()?);
-        let base = Side::of(facts.base::<ApiSurface>()?);
+        let tests = facts.get::<TestConventions>().ok();
+        let head = Side::of(facts.get::<ApiSurface>()?, tests);
+        let base = Side::of(facts.base::<ApiSurface>()?, tests);
         let commit = facts.range().map_or("", |range| range.commit.as_str());
         let reexports = Reexports::of(facts.get::<ModuleGraph>().ok());
         let mut findings = Vec::new();
@@ -195,17 +198,23 @@ impl Check for StaticApiSurface {
 
 /// One side's public items by path, each path's items in fact order, and the paths in the
 /// order they first appear in the fact (which orders the findings). Internal items, which no
-/// entry of their package exposes, are not on it (ADR-176).
+/// entry of their package exposes, are not on it (ADR-176), nor items defined in a test file by
+/// the language's test conventions, which no package exposes.
 struct Side<'a> {
     paths: BTreeMap<&'a str, Vec<&'a ApiItem>>,
     order: Vec<&'a str>,
 }
 
 impl<'a> Side<'a> {
-    fn of(surface: &'a ApiSurface) -> Self {
+    fn of(surface: &'a ApiSurface, tests: Option<&TestConventions>) -> Self {
         let mut paths: BTreeMap<&str, Vec<&ApiItem>> = BTreeMap::new();
         let mut order = Vec::new();
-        for item in surface.items.iter().filter(|item| !item.internal) {
+        let in_tests = |item: &&ApiItem| tests.is_some_and(|tests| tests.is_test(&item.file));
+        for item in surface
+            .items
+            .iter()
+            .filter(|item| !item.internal && !in_tests(item))
+        {
             let items = paths.entry(&item.path).or_default();
             if items.is_empty() {
                 order.push(item.path.as_str());

@@ -4,7 +4,7 @@ mod support;
 
 use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, EdgeKind, ImportAlias, ImportEdge, ImportTarget, ModuleGraph,
-    RootImports, Span,
+    RootImports, Span, TestConventions,
 };
 use cupel_core::{
     ActionKind, CheckId, CheckResult, CheckStatus, CostClass, FactKind, Facts, Finding, FindingId,
@@ -45,15 +45,29 @@ fn run(base: Vec<ApiItem>, head: Vec<ApiItem>) -> (CheckResult, Vec<Finding>) {
     run_with(base, head, Vec::new())
 }
 
-/// [`run`] with a head module graph of `edges`.
+/// [`run`] with a head module graph of `edges`; files below `test/` are tests.
 fn run_with(
     base: Vec<ApiItem>,
     head: Vec<ApiItem>,
     edges: Vec<ImportEdge>,
 ) -> (CheckResult, Vec<Finding>) {
     let check = support::check(ID);
-    let mut facts = Facts::for_manifest(check.manifest());
+    let mut facts = Facts::declaring(
+        check
+            .manifest()
+            .needs
+            .iter()
+            .chain(&check.manifest().wants)
+            .copied()
+            .chain([FactKind::TestConventions]),
+    );
     facts.insert(surface(head)).unwrap();
+    facts
+        .insert(TestConventions {
+            test_globs: vec!["test/**".to_owned()],
+            pairs: Vec::new(),
+        })
+        .unwrap();
     facts
         .insert(ModuleGraph {
             roots: vec![RootImports {
@@ -337,6 +351,37 @@ fn internal_items_are_not_api_surface() {
     assert_eq!(result.score, Some(score(1.0, "breaking", 1)));
 }
 
+/// A test file is no package's API: items defined in one are not compared on either side, so a
+/// test helper whose signature changed, a removed one, and an added one report nothing.
+#[test]
+fn items_in_test_files_are_not_api_surface() {
+    let in_test = |path: &str, signature: &str| {
+        item(
+            path,
+            ApiItemKind::Function,
+            signature,
+            "test/ring/session.clj",
+            30,
+        )
+    };
+    let base = vec![
+        in_test("ring.session-test/get-session-cookie", "[_]"),
+        in_test("ring.session-test/gone", "[]"),
+        function("ring.session/wrap", "[_]", 1),
+    ];
+    let head = vec![
+        in_test("ring.session-test/get-session-cookie", "[_ _]"),
+        in_test("ring.session-test/fresh", "[]"),
+        function("ring.session/wrap", "[_ _]", 1),
+    ];
+    let (result, findings) = run(base, head);
+    assert_eq!(
+        reported(&findings),
+        [("api.breaking", "ring.session/wrap", "changed")]
+    );
+    assert_eq!(result.score, Some(score(1.0, "breaking", 1)));
+}
+
 #[test]
 fn a_lost_overload_is_breaking_even_when_another_is_added() {
     let base = vec![function("m.f", "(_: string)", 1)];
@@ -379,7 +424,7 @@ fn the_manifest_needs_api_surface_on_both_sides() {
         Shape::of(check.manifest()),
         Shape {
             needs: vec![FactKind::ApiSurface],
-            wants: vec![FactKind::ModuleGraph],
+            wants: vec![FactKind::ModuleGraph, FactKind::TestConventions],
             tier: 0,
             cost: CostClass::Quick,
             kinds: vec![
