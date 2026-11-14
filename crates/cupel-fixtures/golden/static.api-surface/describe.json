@@ -178,7 +178,8 @@
       "tier": 0,
       "version": 1,
       "wants": [
-        "module-graph"
+        "module-graph",
+        "test-conventions"
       ]
     },
     "subject": "check"
