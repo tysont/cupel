@@ -191,17 +191,18 @@ fn project_dirs(ctx: &ProduceCtx) -> Vec<String> {
 }
 
 /// The dependencies the same files listed at the range's base commit; `None` outside a range
-/// or a git work tree.
+/// or a git work tree. A file the repository does not track, such as a library's ignored
+/// `Cargo.lock` that cargo writes on each build, is no part of any range's change, so the base
+/// reads it as head does.
 fn base(ctx: &ProduceCtx, ecosystem: &Ecosystem, projects: &[Project]) -> Option<FootprintBase> {
     let commit = ctx.focus.base.as_ref()?;
     let git = Git::open(&ctx.ctx.root)?;
     let mut dependencies = Vec::new();
     for project in projects {
         for file in &project.manifests {
-            let Ok(bytes) = git.show(commit, file) else {
+            let Some(text) = at_base(&git, commit, &ctx.ctx.root, file) else {
                 continue;
             };
-            let text = String::from_utf8_lossy(&bytes);
             merge(
                 &mut dependencies,
                 (ecosystem.parse)(file, &text, &project.context),
@@ -212,6 +213,18 @@ fn base(ctx: &ProduceCtx, ecosystem: &Ecosystem, projects: &[Project]) -> Option
         commit: commit.clone(),
         dependencies,
     })
+}
+
+/// `file` as the base commit has it, or as the work tree has it when the repository does not
+/// track it; `None` when neither has it.
+fn at_base(git: &Git, commit: &str, root: &Path, file: &str) -> Option<String> {
+    match git.show(commit, file) {
+        Ok(bytes) => Some(String::from_utf8_lossy(&bytes).into_owned()),
+        Err(_) if !git.tracks(file).unwrap_or(true) => {
+            std::fs::read_to_string(root.join(file)).ok()
+        }
+        Err(_) => None,
+    }
 }
 
 /// Adds `listed` to `dependencies`, each package of a file once: projects sharing a lockfile list

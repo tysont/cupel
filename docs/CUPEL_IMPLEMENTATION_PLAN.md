@@ -2824,6 +2824,10 @@ The owner's method (2026-11-13):
   - The gap: on tokio-rs/bytes, `static.dead-code` reported `buf::buf_impl::_assert_trait_object` and `buf::buf_mut::_assert_trait_object` (`src/buf/buf_impl.rs:2967`): `fn _assert_trait_object(_b: &dyn Buf) {}`, which exists so the compiler fails when `Buf` stops being object-safe. A leading `_` is rustc's own mark for unused on purpose; it never warns about such an item.
   - Now Rust's `api.scm` roots a `function_item` whose name starts with `_` (`@root.hook`, the reason Go's name-pattern roots use).
   - Tests: `cupel-lang/tests/rust_api.rs` `a_function_named_with_a_leading_underscore_is_kept_on_purpose` (observed failing first with no root); `cupel-fixtures/tests/intentionally_unused.rs` over `repos/intentionally-unused/rust` (observed failing first with `dead.symbol` on `_assert_trait_object`; now only the uncalled private function).
+- **V22 — a lockfile the repository does not track is the same at the base** (2026-11-14).
+  - The gap: on tokio-rs/bytes, every replayed PR with a Rust change reported `perf.footprint` `footprint.grew` "dependencies grew from 0 to 45". bytes ignores `Cargo.lock` (a library), so cargo writes it in the work tree on each build and `git show <base>:Cargo.lock` has nothing: the base side read no dependencies while head read 45, though no PR changed one.
+  - Now `tool.footprint` reads a manifest the repository does not track (`Git::tracks`, `git ls-files`) from the work tree for the base side too: a range changes only tracked files. A lockfile a PR adds and tracks is still absent at the base, so its dependencies still grow.
+  - Tests: `cupel-adapt/tests/footprint.rs` `a_lockfile_the_repository_does_not_track_is_the_same_at_the_base` over the Rust `perf-footprint` fixture with `Cargo.lock` ignored (observed failing first with an empty base).
 
 ## 4. Cross-phase checklist
 

@@ -237,6 +237,23 @@ fn under_a_range_the_same_manifests_are_read_at_the_base_commit() {
     assert_eq!(footprint.dependencies.len(), 2);
 }
 
+#[test]
+fn a_lockfile_the_repository_does_not_track_is_the_same_at_the_base() {
+    let dir = fixture("rust");
+    fs::write(dir.path().join(".gitignore"), "Cargo.lock\n").unwrap();
+    support::git(dir.path(), &["init", "--quiet"]);
+    support::git(dir.path(), &["add", "--all"]);
+    support::git(dir.path(), &["commit", "--quiet", "-m", "base"]);
+    let base = support::git(dir.path(), &["rev-parse", "HEAD"]);
+    let mut ranged = ctx(dir.path(), "rust", json!({}));
+    ranged.focus.base = Some(base);
+    let footprint = produce(&ranged, "rust");
+    assert_eq!(
+        footprint.base.expect("a base under a range").dependencies,
+        footprint.dependencies
+    );
+}
+
 /// A pnpm workspace's lockfile: the root's own tooling, member `apps/a` needing `left-pad`, and
 /// member `apps/b` needing a scoped package (resolved with a peer) and linking `apps/a`; the
 /// two packages need each other.

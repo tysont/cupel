@@ -189,6 +189,12 @@ impl Git {
         self.output(&args)
     }
 
+    /// Whether the index tracks `path` (relative to the root): a file git ignores or has never
+    /// added is not tracked.
+    pub fn tracks(&self, path: &str) -> Result<bool, GitError> {
+        Ok(!self.names(&["ls-files", "-z", "--", path])?.is_empty())
+    }
+
     /// The contents of `path` (relative to the root) at the commit `rev`.
     pub fn show(&self, rev: &str, path: &str) -> Result<Vec<u8>, GitError> {
         self.bytes(&["show", &format!("{rev}:./{path}")])
