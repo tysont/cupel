@@ -1,4 +1,4 @@
-// ABOUTME: Three tests of the decoder: two expect its exception with a `try` ending in `fail`, one catches the
+// ABOUTME: Four tests of the decoder: three expect its exception with a `try` ending in `fail`, one catches the
 // ABOUTME: exception without expecting it, whose catch is test.logic.
 package codec;
 
@@ -26,6 +26,16 @@ class DecoderTest {
             Assertions.fail();
         } catch (IllegalArgumentException e) {
             assertEquals("Illegal character in abc1", e.getMessage());
+        }
+    }
+
+    @Test
+    void decodeRejectsSpacesFromAReader() throws Exception {
+        try (java.io.StringReader reader = new java.io.StringReader("a b")) {
+            Decoder.decode(Character.toString((char) reader.read()) + " ");
+            fail("Expecting exception: IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Illegal character in a ", e.getMessage());
         }
     }
 

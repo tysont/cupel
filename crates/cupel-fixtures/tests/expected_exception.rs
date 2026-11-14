@@ -33,6 +33,6 @@ fn a_try_ending_in_fail_is_an_expected_exception_and_another_catch_is_logic() {
             "test.logic",
             "codec.DecoderTest.decodeCountsLettersOrExplains"
         )],
-        "the two tests whose `try` ends in `fail` assert the exception"
+        "the three tests whose `try` ends in `fail` assert the exception"
     );
 }

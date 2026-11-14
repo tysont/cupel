@@ -110,3 +110,35 @@ fn a_try_whose_block_ends_in_fail_is_one_throws_assertion_spanning_its_handlers(
         ]
     );
 }
+
+#[test]
+fn a_try_with_resources_whose_block_ends_in_fail_is_one_throws_assertion() {
+    let file = assert_source_file(
+        "java",
+        "src/test/java/a/ParseTest.java",
+        "package a;\n\
+         \n\
+         import static org.junit.jupiter.api.Assertions.*;\n\
+         import org.junit.jupiter.api.Test;\n\
+         \n\
+         class ParseTest {\n    \
+         @Test\n    \
+         void testParseThrows() throws Exception {\n        \
+         try (Parser p = open(\"{x}\")) {\n            \
+         p.next();\n            \
+         fail(\"Should not pass\");\n        \
+         } catch (IllegalStateException e) {\n            \
+         assertEquals(\"x\", e.getMessage());\n        \
+         }\n    \
+         }\n\
+         }\n",
+        "junit5",
+    );
+    assert_eq!(
+        assertion_lines(&file),
+        [
+            ("testParseThrows", Throws, Strong, 9, 14),
+            ("testParseThrows", Equality, Strong, 13, 13),
+        ]
+    );
+}
