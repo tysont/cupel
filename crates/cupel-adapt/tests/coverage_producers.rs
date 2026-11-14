@@ -149,7 +149,11 @@ fn coverage_producers_register_for_their_languages_in_toolchain_table_order() {
             vec!["tool.pytest-cov", "tool.coverage-py"],
             ecma.to_vec(),
             ecma.to_vec(),
-            vec!["tool.jacoco-maven", "tool.jacoco-gradle"],
+            vec![
+                "tool.jacoco-maven-project",
+                "tool.jacoco-maven",
+                "tool.jacoco-gradle"
+            ],
             vec!["tool.cloverage"],
         ]
         .map(|ids| ids.into_iter().map(str::to_owned).collect::<Vec<_>>())
@@ -269,6 +273,7 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
     let python = Ctx::new(repo_path("coverage/python"));
     let maven = Ctx::new(repo_path("coverage/java"));
     let gradle = Ctx::new(repo_path("coverage/gradle"));
+    let bound = Ctx::new(repo_path("jacoco-bound/java"));
     let mut unittest = Ctx::new(repo_path("coverage/python"));
     unittest.lang.insert(
         LangId::from("python"),
@@ -282,6 +287,7 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
             preferred("python", &unittest),
             preferred("java", &maven),
             preferred("java", &gradle),
+            preferred("java", &bound),
         ],
         [
             "tool.jest-coverage",
@@ -290,6 +296,7 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
             "tool.coverage-py",
             "tool.jacoco-maven",
             "tool.jacoco-gradle",
+            "tool.jacoco-maven-project",
         ]
     );
 }

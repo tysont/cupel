@@ -1,5 +1,5 @@
 // ABOUTME: Detection rules of the toolchain table: what must be true of a project root on disk for a
-// ABOUTME: launcher or tool to be chosen (a file, here or above, its text, a package mention, or a JSON value).
+// ABOUTME: launcher or tool to be chosen (a file, here or above, its text, a package mention, a JSON value, or a Maven goal).
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -44,6 +44,9 @@ pub enum Rule {
         #[serde(default)]
         members: bool,
     },
+    /// The Maven build of the root's `pom.xml` runs the goal `maven_goal` of `plugin`
+    /// (`groupId:artifactId`) itself, as its POM and the parents Cupel can read declare it.
+    MavenGoal { maven_goal: String, plugin: String },
     /// Every rule holds.
     All { all: Vec<Rule> },
 }
@@ -103,6 +106,9 @@ impl Rule {
                     found(dirs.root)
                 }
             }
+            Self::MavenGoal { maven_goal, plugin } => {
+                crate::maven_pom::runs_goal(dirs.root, plugin, maven_goal)
+            }
             Self::All { all } => all.iter().all(|rule| rule.holds(dirs)),
         }
     }
@@ -146,6 +152,9 @@ impl Rule {
                     )
                     .collect::<String>();
                 format!("`{json}`{place} has `{}`{value}", path.join("."))
+            }
+            Self::MavenGoal { maven_goal, plugin } => {
+                format!("the Maven build runs `{plugin}`'s `{maven_goal}` goal itself")
             }
             Self::All { all } => all
                 .iter()

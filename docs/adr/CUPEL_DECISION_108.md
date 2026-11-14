@@ -1,6 +1,6 @@
 # CUPEL_DECISION_108: Java: grammar, syntactic facts, test conventions, the Maven and Gradle toolchain, and mutation through PIT
 
-**Date:** 2026-10-17 · **Status:** accepted · **Phase:** P6.4
+**Date:** 2026-10-17 · **Status:** accepted; Maven coverage of a build that runs JaCoCo's agent itself amended by [209](CUPEL_DECISION_209.md) · **Phase:** P6.4
 
 ## Context
 

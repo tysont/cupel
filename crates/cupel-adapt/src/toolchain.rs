@@ -154,6 +154,17 @@ pub fn detects(id: &ProducerId, root: &Path) -> bool {
         .is_some_and(|tool| tool.eligible(&dirs))
 }
 
+/// Whether the tool `id`'s own detection rules hold at `root`, its `defer` rules aside (a tool
+/// with no rules always holds; a tool the table does not list never does).
+pub fn selects(id: &ProducerId, root: &Path) -> bool {
+    let dirs = Dirs { root, members: &[] };
+    rows()
+        .iter()
+        .flat_map(Row::tools)
+        .find(|tool| tool.id == *id)
+        .is_some_and(|tool| detected(&tool.detect, &dirs))
+}
+
 /// Whether a `defer` rule of the tool `id` holds at `root` (ADR-162).
 pub fn defers(id: &ProducerId, root: &Path) -> bool {
     let dirs = Dirs { root, members: &[] };

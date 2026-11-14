@@ -148,6 +148,30 @@ fn python_fixtures_get_pytest_or_unittest_through_their_launcher() {
     );
 }
 
+/// A Maven build that runs `JaCoCo`'s agent itself (the module declares the plugin and its
+/// parent binds `prepare-agent`, as jackson-core's does) gets `test` and the project's own
+/// `jacoco:report`, since a second agent by coordinate kills the forked JVM; any other Maven
+/// build gets the goals by coordinate.
+#[test]
+fn a_maven_build_that_runs_jacocos_agent_itself_gets_the_projects_own_report_goal() {
+    let bound = cupel_fixtures::repo_path("jacoco-bound/java");
+    let plain = cupel_fixtures::repo_path("coverage/java");
+    assert_eq!(
+        [
+            commands("java", &bound, &[], &[]).coverage,
+            commands("java", &plain, &[], &[]).coverage
+        ],
+        [
+            Some("mvn -B --no-transfer-progress test jacoco:report".to_owned()),
+            Some(
+                "mvn -B --no-transfer-progress org.jacoco:jacoco-maven-plugin:0.8.13:prepare-agent \
+                 test org.jacoco:jacoco-maven-plugin:0.8.13:report"
+                    .to_owned()
+            )
+        ]
+    );
+}
+
 #[test]
 fn each_monorepo_root_gets_its_own_ecosystems_commands() {
     assert_fixture(

@@ -121,11 +121,16 @@ impl Producer<CoverageMap> for CoverageTool {
         }
     }
 
-    /// Detected with a runner the toolchain table pairs it with: the pinned runner when one is
-    /// pinned, else one whose rules hold in a directory its languages' tests run in (the
-    /// configured roots, else the repository root), as runners are detected; a producer with
-    /// one command for every runner always is.
+    /// Detected where its own rules hold in a directory its languages' tests run in (the
+    /// configured roots, else the repository root), with a runner the toolchain table pairs it
+    /// with: the pinned runner when one is pinned, else one whose rules hold in such a
+    /// directory, as runners are detected; a producer with one command for every runner always
+    /// is.
     fn detected(&self, ctx: &Ctx) -> bool {
+        let dirs = crate::runner::run_dirs(ctx, &self.languages());
+        if !dirs.iter().any(|dir| toolchain::selects(&self.id(), dir)) {
+            return false;
+        }
         let companions = toolchain::companions(&self.id());
         if companions.is_empty() {
             return true;
@@ -139,9 +144,7 @@ impl Producer<CoverageMap> for CoverageTool {
             Some(pin) => {
                 runner.as_str() == pin || runner.as_str().strip_prefix("tool.") == Some(pin)
             }
-            None => crate::runner::run_dirs(ctx, &self.languages())
-                .iter()
-                .any(|dir| toolchain::detects(runner, dir)),
+            None => dirs.iter().any(|dir| toolchain::detects(runner, dir)),
         })
     }
 

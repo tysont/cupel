@@ -297,8 +297,15 @@ command = "mvn -B --no-transfer-progress test"
 id = "tool.gradle"
 command = "gradle test --console=plain"
 
-# JaCoCo by coordinate needs no `pom.xml` change; under Gradle the build must apply the `jacoco`
-# plugin with XML reports on.
+# A Maven build that runs JaCoCo's agent itself gets `test` and its own plugin's report goal: a
+# second agent by coordinate kills the forked JVM (ADR-209). JaCoCo by coordinate needs no
+# `pom.xml` change; under Gradle the build must apply the `jacoco` plugin with XML reports on.
+[[rows.coverage]]
+id = "tool.jacoco-maven-project"
+format = "jacoco"
+detect = [{ maven_goal = "prepare-agent", plugin = "org.jacoco:jacoco-maven-plugin" }]
+commands = { "tool.maven" = "mvn -B --no-transfer-progress test jacoco:report" }
+
 [[rows.coverage]]
 id = "tool.jacoco-maven"
 format = "jacoco"

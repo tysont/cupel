@@ -39,7 +39,9 @@
 //! directory (or, with `above = true`, in it or a directory above it); `{ contains, in }` a root file contains the text; `{ mentions, in }` a file in the
 //! root or a member, matched by glob, names the package (not as part of a longer name);
 //! `{ json, path, prefix?, members? }` a JSON file has a value at `path` (a string starting
-//! with `prefix`, when given), in the root or also in members; `{ all = [...] }` every rule.
+//! with `prefix`, when given), in the root or also in members; `{ maven_goal, plugin }` the
+//! root's Maven build runs the plugin's goal itself, by its POM and the parents on disk or in the
+//! local repository; `{ all = [...] }` every rule.
 //! `<packages>` is filled from `ProjectRoot.packages`; `{out}`, `{name}`, and `{id}` stay for
 //! the producers to fill at run time (design §6.7).
 
@@ -78,6 +80,7 @@ mod jest;
 mod linearizability;
 mod madsim;
 mod maven;
+mod maven_pom;
 pub mod metamorphic;
 mod model_check;
 mod node_test;

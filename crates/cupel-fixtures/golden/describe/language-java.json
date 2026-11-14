@@ -131,6 +131,20 @@
         {
           "commands": [
             {
+              "command": "mvn -B --no-transfer-progress test jacoco:report",
+              "runner": "tool.maven"
+            }
+          ],
+          "detect": [
+            "the Maven build runs `org.jacoco:jacoco-maven-plugin`'s `prepare-agent` goal itself"
+          ],
+          "format": "jacoco",
+          "install": null,
+          "producer": "tool.jacoco-maven-project"
+        },
+        {
+          "commands": [
+            {
               "command": "mvn -B --no-transfer-progress org.jacoco:jacoco-maven-plugin:0.8.13:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.13:report",
               "runner": "tool.maven"
             }
