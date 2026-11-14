@@ -275,6 +275,21 @@
   ]
   (#not-match? @assertion.helper "^assert_"))
 
+; A call through a module path (`common::register_example::<R>(…)`, `crate::common::f(…)`,
+; `super::common::f(…)`), which asserts when the file that path names defines an asserting function
+; of the call's last segment (ADR-214); a function of this file of that name does not count.
+(call_expression
+  function: [
+    (scoped_identifier
+      path: [(identifier) (scoped_identifier name: (identifier))] @assertion.module
+      name: (identifier) @assertion.helper)
+    (generic_function
+      function: (scoped_identifier
+        path: [(identifier) (scoped_identifier name: (identifier))] @assertion.module
+        name: (identifier) @assertion.helper))
+  ]
+  (#not-match? @assertion.helper "^assert_"))
+
 ; The same call written inside a macro's tokens (a `quickcheck!` property's body, a macro's
 ; argument): the grammar leaves it as tokens, so the name and its `(…)` are siblings.
 (token_tree

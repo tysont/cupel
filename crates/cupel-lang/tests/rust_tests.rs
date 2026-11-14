@@ -479,3 +479,129 @@ fn values_parse() {
         ]
     );
 }
+
+/// An integration test crate whose test files call helpers of its sibling modules by path (clap's
+/// `common::register_example::<RuntimeBuilder>(…)`): an asserting helper and a setup function of
+/// `tests/suite/common.rs`, a helper of the `tests/common/mod.rs` idiom, and an asserting function of
+/// the calling file that a path naming another module does not reach.
+const MODULE_HELPERS: &[(&str, &str)] = &[
+    (
+        "tests/suite/main.rs",
+        "mod common;\nmod flags;\nmod nested;\n",
+    ),
+    (
+        "tests/suite/common.rs",
+        r#"pub fn check_flag(cmd: &Cmd, flag: &str) {
+    assert!(cmd.has(flag));
+    assert_eq!(cmd.get(flag), Some(1));
+}
+
+pub fn command() -> Cmd {
+    Cmd::new("app")
+}
+"#,
+    ),
+    (
+        "tests/suite/flags.rs",
+        r#"use crate::common;
+
+fn verify(cmd: &Cmd) {
+    assert!(cmd.valid());
+}
+
+#[test]
+fn checks_through_the_module() {
+    common::check_flag(&common::command(), "v");
+}
+
+#[test]
+fn checks_through_the_crate_with_a_turbofish() {
+    crate::common::check_flag::<u8>(&common::command(), "v");
+}
+
+#[test]
+fn only_sets_up() {
+    common::command();
+}
+
+#[test]
+fn names_a_module_without_a_file() {
+    other::verify(&common::command());
+}
+"#,
+    ),
+    (
+        "tests/suite/nested/deep.rs",
+        r#"#[test]
+fn checks_from_a_nested_module() {
+    super::super::common::check_flag(&super::super::common::command(), "v");
+}
+"#,
+    ),
+    (
+        "tests/common/mod.rs",
+        "pub fn check(ok: bool) {\n    assert!(ok);\n}\n",
+    ),
+    (
+        "tests/it.rs",
+        "mod common;\n\n#[test]\nfn checks_through_a_shared_module() {\n    common::check(true);\n}\n",
+    ),
+];
+
+#[test]
+fn a_call_through_a_module_path_asserts_as_the_function_of_the_file_the_path_names_does() {
+    let dir = tree(MODULE_HELPERS);
+    let frames: TestFrames = produce("rust", dir.path());
+    assert_eq!(
+        rows(file(&frames, "tests/suite/flags.rs")),
+        [
+            case(
+                "checks_through_the_module",
+                &[(Equality, Strong)],
+                Runs,
+                &[],
+                8
+            ),
+            case(
+                "checks_through_the_crate_with_a_turbofish",
+                &[(Equality, Strong)],
+                Runs,
+                &[],
+                13
+            ),
+            case("only_sets_up", &[], Runs, &[], 18),
+            case("names_a_module_without_a_file", &[], Runs, &[], 23),
+        ]
+    );
+    assert_eq!(
+        rows(file(&frames, "tests/suite/nested/deep.rs")),
+        [case(
+            "checks_from_a_nested_module",
+            &[(Equality, Strong)],
+            Runs,
+            &[],
+            2
+        )]
+    );
+    assert_eq!(
+        rows(file(&frames, "tests/it.rs")),
+        [case(
+            "checks_through_a_shared_module",
+            &[(Truthiness, Weak)],
+            Runs,
+            &[],
+            4
+        )]
+    );
+}
+
+#[test]
+fn a_call_through_a_module_path_asserts_nothing_when_the_scope_leaves_out_the_module_file() {
+    // A `--changed` run that touches a test file but not its helper module reads no assertion there.
+    let dir = tree(MODULE_HELPERS);
+    let frames: TestFrames = produce_scoped("rust", dir.path(), &["tests/suite/flags.rs"]);
+    assert_eq!(
+        rows(file(&frames, "tests/suite/flags.rs"))[0],
+        case("checks_through_the_module", &[], Runs, &[], 8)
+    );
+}

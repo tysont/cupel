@@ -23,6 +23,12 @@
 //!   tests share helpers by directory, any helper call does, and a call that is already an
 //!   assertion is none when the directory's files define that name only without an assertion (a
 //!   Go setup helper handed `t`). One level: a helper's own calls of helpers are not followed.
+//! - `@assertion.module` (with `@assertion.helper`) on the module path a call is made through
+//!   (`common` in `common::check(…)`, `crate::common`, `super::common`): the call names no function
+//!   of its own file, and asserts with the class of the helper's first strong assertion, else its
+//!   first, when the file that path names defines an asserting function of that name (ADR-214).
+//!   The path, its leading `crate`, `self`, and `super` left out, names `<path>.rs` or
+//!   `<path>/mod.rs` in the calling file's directory or the nearest ancestor holding one in scope.
 //! - `@assertion.macro` on the name of a macro the file defines (the definition is the name's
 //!   parent node) and `@assertion.expansion` on the name a macro is invoked by: when the
 //!   invoked macro is one the file defines outside every case and its definition holds an
@@ -113,7 +119,10 @@ pub fn extract(source: &Source<'_>) -> TestFrames {
     let mut loose = attach_assertions(&mut cases, parsed, &found, rules);
     expand_macros(&mut cases, &mut loose, parsed, &found);
     let helpers = file_helpers(source, &cases, &loose);
-    for (case, node) in helper_calls(&cases, &found) {
+    for (case, node, _) in helper_calls(&cases, &found)
+        .into_iter()
+        .filter(|(_, _, module)| module.is_none())
+    {
         if let (Some(class), Some(case)) = (helpers.get(parsed.text(node)), cases.get_mut(&case)) {
             assert_through(&mut case.assertions, *class, called(node));
         }
@@ -348,13 +357,21 @@ fn file_macros(
         .collect()
 }
 
-/// Each `@assertion.helper` node inside a case, with its case.
-fn helper_calls<'t>(cases: &Cases<'t>, found: &[Match<'_, 't>]) -> Vec<(usize, Node<'t>)> {
+/// Each `@assertion.helper` node inside a case, with its case and the `@assertion.module` path the
+/// call is made through, if any.
+fn helper_calls<'t>(
+    cases: &Cases<'t>,
+    found: &[Match<'_, 't>],
+) -> Vec<(usize, Node<'t>, Option<Node<'t>>)> {
     found
         .iter()
         .filter_map(|m| {
             let node = m.node(capture::ASSERTION_HELPER)?;
-            Some((owner(cases, m, node)?, node))
+            Some((
+                owner(cases, m, node)?,
+                node,
+                m.node(capture::ASSERTION_MODULE),
+            ))
         })
         .collect()
 }
@@ -422,6 +439,7 @@ fn resolve_helpers(
         return;
     }
     let mut shared: BTreeMap<(String, String), Class> = BTreeMap::new();
+    let mut by_file: BTreeMap<(String, String), Class> = BTreeMap::new();
     let mut defined: BTreeSet<(String, String)> = BTreeSet::new();
     let mut unresolved: Vec<Unresolved> = Vec::new();
     for parsed in parsed {
@@ -435,10 +453,20 @@ fn resolve_helpers(
                 .map(|name| (dir.to_owned(), name)),
         );
         for (name, class) in helpers.asserting {
+            by_file.insert((parsed.file.clone(), name.clone()), class);
             shared.entry((dir.to_owned(), name)).or_insert(class);
         }
     }
+    let files: BTreeSet<String> = parsed.iter().map(|parsed| parsed.file.clone()).collect();
     for unresolved in unresolved {
+        if let Some(module) = &unresolved.module {
+            let class = module_file(&unresolved.file, module, &files)
+                .and_then(|file| by_file.get(&(file.clone(), unresolved.name.clone())));
+            if let Some(class) = class {
+                assert_through_cases(frames, &unresolved.file, unresolved.call, *class);
+            }
+            continue;
+        }
         let key = (directory(&unresolved.file).to_owned(), unresolved.name);
         if let Some(class) = shared.get(&key) {
             assert_through_cases(frames, &unresolved.file, unresolved.call, *class);
@@ -467,6 +495,38 @@ struct Unresolved {
     name: String,
     /// Whether the call is already read as an assertion.
     asserts: bool,
+    /// The module path the call is made through, `/`-separated, without its leading `crate`,
+    /// `self`, and `super` (`common` for `crate::common::check(…)`).
+    module: Option<String>,
+}
+
+/// A module path's segments below the crate or the current module, `/`-separated.
+fn module_path(path: &str) -> String {
+    path.split("::")
+        .map(str::trim)
+        .skip_while(|segment| matches!(*segment, "crate" | "self" | "super"))
+        .collect::<Vec<_>>()
+        .join("/")
+}
+
+/// The file in `files` that the module path `module` names from `caller`: `<module>.rs` or
+/// `<module>/mod.rs` in the caller's directory, else in the nearest ancestor that holds one.
+fn module_file<'f>(caller: &str, module: &str, files: &'f BTreeSet<String>) -> Option<&'f String> {
+    let mut dir = directory(caller);
+    loop {
+        let base = if dir.is_empty() {
+            module.to_owned()
+        } else {
+            format!("{dir}/{module}")
+        };
+        let found = [format!("{base}.rs"), format!("{base}/mod.rs")]
+            .into_iter()
+            .find_map(|candidate| files.get(&candidate));
+        if found.is_some() || dir.is_empty() {
+            return found;
+        }
+        dir = directory(dir);
+    }
 }
 
 /// The asserting helpers of the file `parsed`, the names it defines, and its helper calls that
@@ -494,16 +554,19 @@ fn helpers_of(parsed: &Parsed, language: &dyn Language) -> FileHelpers {
     };
     let unresolved = helper_calls(&cases, &found)
         .into_iter()
-        .filter_map(|(case, node)| {
+        .filter_map(|(case, node, module)| {
             let (name, call) = (parsed.text(node), called(node));
             let asserts = cases
                 .get(&case)
                 .is_some_and(|case| case.assertions.iter().any(|a| call.is(a)));
-            ((asserts || shared_by_directory) && !helpers.contains_key(name)).then(|| Unresolved {
+            let module = module.map(|path| module_path(parsed.text(path)));
+            let local = (asserts || shared_by_directory) && !helpers.contains_key(name);
+            (module.is_some() || local).then(|| Unresolved {
                 file: parsed.file.clone(),
                 call,
                 name: name.to_owned(),
                 asserts,
+                module,
             })
         })
         .collect();
