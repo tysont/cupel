@@ -1,0 +1,7 @@
+# Captured from the real tool on a module whose `fetch` package imports a module that cannot be
+# fetched (GOPROXY=off), beside a package with no tests and one with twenty passing tests; the
+# other files here are its unedited output. `dir` is where it ran.
+tool = "go1.25.0 darwin/arm64"
+dir = "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/work/go-build-output"
+command = "GOPROXY=off GOFLAGS=-mod=mod go test -json -coverprofile=cover.out ./..."
+exit_code = 1

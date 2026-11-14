@@ -1,0 +1,94 @@
+{"ImportPath":"github.com/hashicorp/go-metrics","Action":"build-output","Output":"# example.com/tally/fetch\n"}
+{"ImportPath":"github.com/hashicorp/go-metrics","Action":"build-output","Output":"fetch/fetch.go:3:8: cannot find module providing package github.com/hashicorp/go-metrics: module lookup disabled by GOPROXY=off\n"}
+{"ImportPath":"github.com/hashicorp/go-metrics","Action":"build-fail"}
+{"Time":"2026-11-13T19:41:05.114135-08:00","Action":"start","Package":"example.com/tally/fetch"}
+{"Time":"2026-11-13T19:41:05.114332-08:00","Action":"output","Package":"example.com/tally/fetch","Output":"FAIL\texample.com/tally/fetch [setup failed]\n"}
+{"Time":"2026-11-13T19:41:05.114339-08:00","Action":"fail","Package":"example.com/tally/fetch","Elapsed":0,"FailedBuild":"github.com/hashicorp/go-metrics"}
+{"Time":"2026-11-13T19:41:05.314776-08:00","Action":"start","Package":"example.com/tally/bench"}
+{"Time":"2026-11-13T19:41:05.43529-08:00","Action":"output","Package":"example.com/tally/bench","Output":"\texample.com/tally/bench\t\tcoverage: 0.0% of statements\n"}
+{"Time":"2026-11-13T19:41:05.508513-08:00","Action":"pass","Package":"example.com/tally/bench","Elapsed":0.194}
+{"Time":"2026-11-13T19:41:05.692801-08:00","Action":"start","Package":"example.com/tally/tally"}
+{"Time":"2026-11-13T19:41:06.780216-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal01"}
+{"Time":"2026-11-13T19:41:06.780383-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal01","Output":"=== RUN   TestTotal01\n"}
+{"Time":"2026-11-13T19:41:06.780418-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal01","Output":"--- PASS: TestTotal01 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.780429-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal01","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.780443-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal02"}
+{"Time":"2026-11-13T19:41:06.78045-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal02","Output":"=== RUN   TestTotal02\n"}
+{"Time":"2026-11-13T19:41:06.780458-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal02","Output":"--- PASS: TestTotal02 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.780471-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal02","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.780478-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal03"}
+{"Time":"2026-11-13T19:41:06.780485-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal03","Output":"=== RUN   TestTotal03\n"}
+{"Time":"2026-11-13T19:41:06.780492-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal03","Output":"--- PASS: TestTotal03 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.7805-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal03","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.78051-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal04"}
+{"Time":"2026-11-13T19:41:06.780534-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal04","Output":"=== RUN   TestTotal04\n"}
+{"Time":"2026-11-13T19:41:06.780541-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal04","Output":"--- PASS: TestTotal04 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.780551-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal04","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.780558-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal05"}
+{"Time":"2026-11-13T19:41:06.780565-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal05","Output":"=== RUN   TestTotal05\n"}
+{"Time":"2026-11-13T19:41:06.780571-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal05","Output":"--- PASS: TestTotal05 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.780629-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal05","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.78064-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal06"}
+{"Time":"2026-11-13T19:41:06.780693-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal06","Output":"=== RUN   TestTotal06\n"}
+{"Time":"2026-11-13T19:41:06.780702-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal06","Output":"--- PASS: TestTotal06 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.780707-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal06","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.780713-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal07"}
+{"Time":"2026-11-13T19:41:06.780718-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal07","Output":"=== RUN   TestTotal07\n"}
+{"Time":"2026-11-13T19:41:06.780724-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal07","Output":"--- PASS: TestTotal07 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.780729-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal07","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.780734-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal08"}
+{"Time":"2026-11-13T19:41:06.780738-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal08","Output":"=== RUN   TestTotal08\n"}
+{"Time":"2026-11-13T19:41:06.780751-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal08","Output":"--- PASS: TestTotal08 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.780757-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal08","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.780762-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal09"}
+{"Time":"2026-11-13T19:41:06.780766-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal09","Output":"=== RUN   TestTotal09\n"}
+{"Time":"2026-11-13T19:41:06.780771-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal09","Output":"--- PASS: TestTotal09 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.780776-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal09","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.78078-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal10"}
+{"Time":"2026-11-13T19:41:06.780802-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal10","Output":"=== RUN   TestTotal10\n"}
+{"Time":"2026-11-13T19:41:06.78083-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal10","Output":"--- PASS: TestTotal10 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.78085-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal10","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.780858-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal11"}
+{"Time":"2026-11-13T19:41:06.780866-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal11","Output":"=== RUN   TestTotal11\n"}
+{"Time":"2026-11-13T19:41:06.78095-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal11","Output":"--- PASS: TestTotal11 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781018-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal11","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781028-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal12"}
+{"Time":"2026-11-13T19:41:06.781059-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal12","Output":"=== RUN   TestTotal12\n"}
+{"Time":"2026-11-13T19:41:06.781108-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal12","Output":"--- PASS: TestTotal12 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781131-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal12","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781182-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal13"}
+{"Time":"2026-11-13T19:41:06.78119-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal13","Output":"=== RUN   TestTotal13\n"}
+{"Time":"2026-11-13T19:41:06.781225-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal13","Output":"--- PASS: TestTotal13 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781275-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal13","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781288-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal14"}
+{"Time":"2026-11-13T19:41:06.781293-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal14","Output":"=== RUN   TestTotal14\n"}
+{"Time":"2026-11-13T19:41:06.781298-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal14","Output":"--- PASS: TestTotal14 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781304-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal14","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781309-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal15"}
+{"Time":"2026-11-13T19:41:06.781317-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal15","Output":"=== RUN   TestTotal15\n"}
+{"Time":"2026-11-13T19:41:06.781323-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal15","Output":"--- PASS: TestTotal15 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781328-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal15","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781333-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal16"}
+{"Time":"2026-11-13T19:41:06.781338-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal16","Output":"=== RUN   TestTotal16\n"}
+{"Time":"2026-11-13T19:41:06.781342-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal16","Output":"--- PASS: TestTotal16 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781346-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal16","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781351-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal17"}
+{"Time":"2026-11-13T19:41:06.781356-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal17","Output":"=== RUN   TestTotal17\n"}
+{"Time":"2026-11-13T19:41:06.781361-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal17","Output":"--- PASS: TestTotal17 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781366-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal17","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.78137-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal18"}
+{"Time":"2026-11-13T19:41:06.781375-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal18","Output":"=== RUN   TestTotal18\n"}
+{"Time":"2026-11-13T19:41:06.78138-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal18","Output":"--- PASS: TestTotal18 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781385-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal18","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781389-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal19"}
+{"Time":"2026-11-13T19:41:06.781394-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal19","Output":"=== RUN   TestTotal19\n"}
+{"Time":"2026-11-13T19:41:06.781398-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal19","Output":"--- PASS: TestTotal19 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781403-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal19","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781408-08:00","Action":"run","Package":"example.com/tally/tally","Test":"TestTotal20"}
+{"Time":"2026-11-13T19:41:06.781416-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal20","Output":"=== RUN   TestTotal20\n"}
+{"Time":"2026-11-13T19:41:06.781422-08:00","Action":"output","Package":"example.com/tally/tally","Test":"TestTotal20","Output":"--- PASS: TestTotal20 (0.00s)\n"}
+{"Time":"2026-11-13T19:41:06.781433-08:00","Action":"pass","Package":"example.com/tally/tally","Test":"TestTotal20","Elapsed":0}
+{"Time":"2026-11-13T19:41:06.781438-08:00","Action":"output","Package":"example.com/tally/tally","Output":"PASS\n"}
+{"Time":"2026-11-13T19:41:06.782079-08:00","Action":"output","Package":"example.com/tally/tally","Output":"coverage: 100.0% of statements\n"}
+{"Time":"2026-11-13T19:41:06.782927-08:00","Action":"output","Package":"example.com/tally/tally","Output":"ok  \texample.com/tally/tally\t1.090s\tcoverage: 100.0% of statements\n"}
+{"Time":"2026-11-13T19:41:06.785024-08:00","Action":"pass","Package":"example.com/tally/tally","Elapsed":1.092}

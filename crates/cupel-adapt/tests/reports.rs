@@ -317,6 +317,64 @@ fn a_go_package_that_does_not_build_is_one_errored_test_with_the_compiler_output
 }
 
 #[test]
+fn a_go_package_whose_setup_failed_is_errored_with_the_build_output_that_says_why() {
+    let capture = Capture::of("go-test", "setup-failed");
+    let tests = test2json::parse(&capture.file("stdout.jsonl"), &capture.file("stderr.txt"));
+    let fetch = &tests[0];
+    assert_eq!(
+        (fetch.id.as_str(), fetch.outcome, fetch.output.as_deref()),
+        (
+            "example.com/tally/fetch",
+            Errored,
+            Some(
+                "# example.com/tally/fetch\n\
+                 fetch/fetch.go:3:8: cannot find module providing package \
+                 github.com/hashicorp/go-metrics: module lookup disabled by GOPROXY=off\n\
+                 FAIL\texample.com/tally/fetch [setup failed]\n\n\
+                 go: finding module for package github.com/hashicorp/go-metrics"
+            )
+        )
+    );
+    assert_eq!(
+        tests
+            .iter()
+            .filter(|test| test.outcome.is_failure())
+            .count(),
+        1
+    );
+}
+
+/// The events of a build of `package` that failed with `output`, before every event of the green
+/// capture: what `go test -json -coverprofile` printed when the toolchain had no `covdata`.
+fn after_a_failed_build(package: &str, output: &str) -> String {
+    let build_output = serde_json::json!({
+        "ImportPath": package, "Action": "build-output", "Output": format!("{output}\n")
+    });
+    let build_fail = serde_json::json!({"ImportPath": package, "Action": "build-fail"});
+    let green = Capture::of("go-test", "green").file("stdout.jsonl");
+    format!("{build_output}\n{build_fail}\n{green}")
+}
+
+#[test]
+fn a_go_build_that_failed_with_no_failed_package_is_one_errored_test_with_its_output() {
+    let stdout = after_a_failed_build("example.com/tally/bench", "go: no such tool \"covdata\"");
+    let tests = test2json::parse(&stdout, "");
+    let failures: Vec<_> = tests
+        .iter()
+        .filter(|test| test.outcome.is_failure())
+        .map(|test| (test.id.as_str(), test.outcome, test.output.as_deref()))
+        .collect();
+    assert_eq!(
+        failures,
+        [(
+            "example.com/tally/bench",
+            Errored,
+            Some("go: no such tool \"covdata\"")
+        )]
+    );
+}
+
+#[test]
 fn jest_json_names_each_test_by_file_and_titles_relative_to_the_run() {
     let capture = Capture::of("jest", "red");
     let tests = jest_json::parse(&capture.file("report.json"), &capture.ran_in).unwrap();
