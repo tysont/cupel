@@ -232,15 +232,29 @@
 
 ; Helpers: a call that hands the test's `t` to a function of the package (`expectSuccess(t,
 ; err)`, `check(t, got, want)`) delegates its assertions to it, as `t.Helper()` marks, and
-; asserts as the helper does when the package's test files in scope define it (else custom,
-; strong); a constructor (`newServer(t)`) sets up. A subtest run from a named function (`t.Run(name,
-; tc.test)`) asserts in that function; one run from a literal is part of its case already.
+; asserts as the helper does when the package's files in scope define it, not at all when they
+; define it without an assertion (a setup helper taking `t` for `t.TempDir()`), and as custom,
+; strong when they do not define it; a constructor (`newServer(t)`) sets up. A subtest run from a
+; named function (`t.Run(name, tc.test)`) asserts in that function; one run from a literal is part
+; of its case already.
 (call_expression
   function: (identifier) @assertion.helper
   arguments: (argument_list
     (identifier) @_t)
   (#any-of? @_t "t" "b" "tb")
   (#not-match? @assertion.helper "^[Nn]ew")) @test.assertion @assertion.idiom.helper
+
+; A call of a method or another package's function that hands it `t` (`c.VerifyLog(t, n)`) asserts
+; only as a function or method of that name in the package's files in scope does: the receiver's
+; type is not known, and another package's helper is not in scope.
+(call_expression
+  function: (selector_expression
+    operand: (_) @_receiver
+    field: (field_identifier) @assertion.helper)
+  arguments: (argument_list
+    (identifier) @_t)
+  (#any-of? @_t "t" "b" "tb")
+  (#not-any-of? @_receiver "t" "b" "tb" "assert" "require" "snaps"))
 
 (call_expression
   function: (selector_expression

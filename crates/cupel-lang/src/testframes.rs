@@ -16,8 +16,10 @@
 //!   assertion, else its first: an assertion a pattern already captured at the call takes that
 //!   class, else one is added. When the file defines no such function, a call that is already
 //!   an assertion takes the class of an asserting function of that name in another file of the
-//!   same directory in scope (a Go package's shared `_test.go` helpers). One level: a helper's
-//!   own calls of helpers are not followed.
+//!   same directory in scope (a Go package's shared `_test.go` helpers). Where the language's
+//!   tests share helpers by directory, any helper call does, and a call that is already an
+//!   assertion is none when the directory's files define that name only without an assertion (a
+//!   Go setup helper handed `t`). One level: a helper's own calls of helpers are not followed.
 //! - `@assertion.macro` on the name of a macro the file defines (the definition is the name's
 //!   parent node) and `@assertion.expansion` on the name a macro is invoked by: when the
 //!   invoked macro is one the file defines outside every case and its definition holds an
@@ -43,7 +45,7 @@
 //! to the innermost case containing it. A mock outside every case (a module-level mock) is the
 //! file's, in `TestFile::mocks`, and no case's (ADR-164). Only files with at least one case are
 //! reported.
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 use cupel_core::syntax::{
     Assertion, AssertionKind, AssertionStrength, Mock, SkipMarker, Span, TestCase, TestFile,
@@ -404,8 +406,9 @@ fn called(node: Node<'_>) -> Called {
 /// Gives each helper call that names no helper of its own file the class of an asserting helper
 /// of that name in another file of the same directory: a call that is already an assertion (a
 /// convention such as Go's call handing `t` to a function) in every language, and any helper call
-/// where the language's tests share helpers by directory (a Go package's `_test.go` helpers, a
-/// Python test package's harness `TestCase`).
+/// where the language's tests share helpers by directory (a Go package's helpers, a Python test
+/// package's harness `TestCase`). There, a call that is already an assertion and names only
+/// functions of the directory that hold none (a Go setup helper handed `t`) is no assertion.
 fn resolve_helpers(
     frames: &mut TestFrames,
     parsed: &[Parsed],
@@ -416,12 +419,19 @@ fn resolve_helpers(
         return;
     }
     let mut shared: BTreeMap<(String, String), Class> = BTreeMap::new();
+    let mut defined: BTreeSet<(String, String)> = BTreeSet::new();
     let mut unresolved: Vec<Unresolved> = Vec::new();
     for parsed in parsed {
-        let (helpers, calls) = parsed.derived("test-helpers", || helpers_of(parsed, language));
+        let helpers = parsed.derived("test-helpers", || helpers_of(parsed, language));
         let dir = directory(&parsed.file);
-        unresolved.extend(calls);
-        for (name, class) in helpers {
+        unresolved.extend(helpers.unresolved);
+        defined.extend(
+            helpers
+                .defined
+                .into_iter()
+                .map(|name| (dir.to_owned(), name)),
+        );
+        for (name, class) in helpers.asserting {
             shared.entry((dir.to_owned(), name)).or_insert(class);
         }
     }
@@ -429,24 +439,37 @@ fn resolve_helpers(
         let key = (directory(&unresolved.file).to_owned(), unresolved.name);
         if let Some(class) = shared.get(&key) {
             assert_through_cases(frames, &unresolved.file, unresolved.call, *class);
+        } else if unresolved.asserts && defined.contains(&key) {
+            unassert_cases(frames, &unresolved.file, unresolved.call);
         }
     }
 }
 
-/// A helper call already read as an assertion that names no asserting helper of its own file.
+/// What one file says about helpers.
+#[derive(Clone, Serialize, Deserialize)]
+struct FileHelpers {
+    /// Its asserting helpers, by name, with the class each passes on.
+    asserting: BTreeMap<String, Class>,
+    /// The names of the functions and methods it defines, where the language's tests share
+    /// helpers by directory; else none.
+    defined: BTreeSet<String>,
+    unresolved: Vec<Unresolved>,
+}
+
+/// A helper call that names no asserting helper of its own file.
 #[derive(Clone, Serialize, Deserialize)]
 struct Unresolved {
     file: String,
     call: Called,
     name: String,
+    /// Whether the call is already read as an assertion.
+    asserts: bool,
 }
 
-/// The asserting helpers of the test file `parsed`, and its helper calls that name none of them
-/// and are already assertions or, where the language shares helpers by directory, any call.
-fn helpers_of(
-    parsed: &Parsed,
-    language: &dyn Language,
-) -> (BTreeMap<String, Class>, Vec<Unresolved>) {
+/// The asserting helpers of the file `parsed`, the names it defines, and its helper calls that
+/// name none of its asserting helpers and are already assertions or, where the language shares
+/// helpers by directory, any call.
+fn helpers_of(parsed: &Parsed, language: &dyn Language) -> FileHelpers {
     let spec = language.spec();
     let query = spec
         .query(QueryFile::Tests, &parsed.grammar)
@@ -455,8 +478,17 @@ fn helpers_of(
     let mut cases = collect_cases(parsed, &found);
     let mut loose = attach_assertions(&mut cases, parsed, &found, &spec.tables().tests);
     expand_macros(&mut cases, &mut loose, parsed, &found);
-    let helpers = file_helpers(&Source { parsed, language }, &cases, &loose);
+    let source = Source { parsed, language };
+    let helpers = file_helpers(&source, &cases, &loose);
     let shared_by_directory = spec.tables().tests.directory_helpers;
+    let defined = if shared_by_directory {
+        definitions(parsed, language)
+            .into_iter()
+            .map(|definition| definition.symbol.name)
+            .collect()
+    } else {
+        BTreeSet::new()
+    };
     let unresolved = helper_calls(&cases, &found)
         .into_iter()
         .filter_map(|(case, node)| {
@@ -468,10 +500,15 @@ fn helpers_of(
                 file: parsed.file.clone(),
                 call,
                 name: name.to_owned(),
+                asserts,
             })
         })
         .collect();
-    (helpers, unresolved)
+    FileHelpers {
+        asserting: helpers,
+        defined,
+        unresolved,
+    }
 }
 
 /// Every case of `file` whose lines hold `call` asserts there with `class`.
@@ -485,6 +522,19 @@ fn assert_through_cases(frames: &mut TestFrames, file: &str, call: Called, class
             if case.span.line <= call.at.line && call.at.line <= case.span.end_line {
                 assert_through(&mut case.assertions, class, call);
             }
+        }
+    }
+}
+
+/// Every case of `file` whose lines hold `call` no longer asserts there.
+fn unassert_cases(frames: &mut TestFrames, file: &str, call: Called) {
+    for test_file in frames
+        .files
+        .iter_mut()
+        .filter(|test_file| test_file.file == file)
+    {
+        for case in &mut test_file.cases {
+            case.assertions.retain(|assertion| !call.is(assertion));
         }
     }
 }

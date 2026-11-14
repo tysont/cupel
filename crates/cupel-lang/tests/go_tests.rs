@@ -439,3 +439,68 @@ fn a_helper_of_another_test_file_of_the_package_asserts_as_it_does() {
         [case("TestElsewhere", &[(Custom, Strong)], Runs, &[], 5)]
     );
 }
+
+/// A package's cluster, outside its test files: a method that asserts on the `t` it is handed and
+/// one that takes `t` only to register cleanup.
+const CLUSTER: &str = r#"package fuzzy
+
+import "testing"
+
+type cluster struct{ nodes []string }
+
+func (c *cluster) VerifyLog(t *testing.T, want int) {
+	t.Helper()
+	if len(c.nodes) != want {
+		t.Errorf("nodes = %d, want %d", len(c.nodes), want)
+	}
+}
+
+func (c *cluster) Stop(t *testing.T) {
+	t.Helper()
+	t.Cleanup(func() { c.nodes = nil })
+}
+
+func scratch(t *testing.T) string {
+	t.Helper()
+	return t.TempDir()
+}
+"#;
+
+/// Tests that hand `t` to the cluster's methods and to a setup function of the package.
+const CLUSTER_TEST: &str = r#"package fuzzy
+
+import "testing"
+
+func TestTheLogIsVerified(t *testing.T) {
+	c := &cluster{nodes: []string{"a"}}
+	c.VerifyLog(t, 1)
+}
+
+func TestTheClusterOnlyStops(t *testing.T) {
+	c := &cluster{}
+	c.Stop(t)
+}
+
+func TestAScratchDirectoryIsNoAssertion(t *testing.T) {
+	_ = scratch(t)
+}
+
+func TestAnUnknownMethodIsNoAssertion(t *testing.T) {
+	remote.Verify(t)
+}
+"#;
+
+#[test]
+fn a_method_or_function_handed_the_test_asserts_only_when_the_package_defines_it_asserting() {
+    let dir = tree(&[("cluster.go", CLUSTER), ("cluster_test.go", CLUSTER_TEST)]);
+    let frames: TestFrames = produce("go", dir.path());
+    assert_eq!(
+        rows(file(&frames, "cluster_test.go")),
+        [
+            case("TestTheLogIsVerified", &[(Equality, Strong)], Runs, &[], 5),
+            case("TestTheClusterOnlyStops", &[], Runs, &[], 10),
+            case("TestAScratchDirectoryIsNoAssertion", &[], Runs, &[], 15),
+            case("TestAnUnknownMethodIsNoAssertion", &[], Runs, &[], 19),
+        ]
+    );
+}

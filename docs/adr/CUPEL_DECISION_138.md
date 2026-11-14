@@ -1,6 +1,6 @@
 # CUPEL_DECISION_138: External dogfood: the method, the repository selection criteria, and the triage rubric
 
-**Date:** 2026-10-21 · **Status:** accepted; §2 (Running) amended on 2026-10-24 by the owner's ruling (a budgeted `standard` survey, then `deep` on the survey's top ten hot spots), with ADR-147's mutant cap · **Phase:** P9.9
+**Date:** 2026-10-21 · **Status:** accepted; §8's Go helper rule amended on 2026-11-13 by [207](CUPEL_DECISION_207.md): a selector call handing `t` asserts when the package defines that name asserting, and a call naming a function the package defines without an assertion is none; §2 (Running) amended on 2026-10-24 by the owner's ruling (a budgeted `standard` survey, then `deep` on the survey's top ten hot spots), with ADR-147's mutant cap · **Phase:** P9.9
 
 ## Context
 
