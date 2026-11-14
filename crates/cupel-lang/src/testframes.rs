@@ -460,11 +460,7 @@ fn resolve_helpers(
     let files: BTreeSet<String> = parsed.iter().map(|parsed| parsed.file.clone()).collect();
     for unresolved in unresolved {
         if let Some(module) = &unresolved.module {
-            let class = module_file(&unresolved.file, module, &files)
-                .and_then(|file| by_file.get(&(file.clone(), unresolved.name.clone())));
-            if let Some(class) = class {
-                assert_through_cases(frames, &unresolved.file, unresolved.call, *class);
-            }
+            assert_through_module(frames, &unresolved, module, &files, &by_file);
             continue;
         }
         let key = (directory(&unresolved.file).to_owned(), unresolved.name);
@@ -473,6 +469,22 @@ fn resolve_helpers(
         } else if unresolved.asserts && defined.contains(&key) {
             unassert_cases(frames, &unresolved.file, unresolved.call);
         }
+    }
+}
+
+/// Gives a helper call through a module path (`common::check(…)`) the class of the function of
+/// that name in the file the path names, when that function asserts (ADR-214).
+fn assert_through_module(
+    frames: &mut TestFrames,
+    unresolved: &Unresolved,
+    module: &str,
+    files: &BTreeSet<String>,
+    by_file: &BTreeMap<(String, String), Class>,
+) {
+    let class = module_file(&unresolved.file, module, files)
+        .and_then(|file| by_file.get(&(file.clone(), unresolved.name.clone())));
+    if let Some(class) = class {
+        assert_through_cases(frames, &unresolved.file, unresolved.call, *class);
     }
 }
 
