@@ -2808,6 +2808,10 @@ The owner's method (2026-11-13):
   - The gap: rerun on jackson-core after V15, `test.logic` fell from 279 to 186, not by the 168 expected; most of the 71 remaining alternatives-only findings were `try (JsonParser p = createParser(…)) { p.nextToken(); fail("Should not pass, mode: "+mode); } catch (StreamReadException e) { … }` (`ErrorReportConfigurationTest.java:267`). tree-sitter-java parses that as `try_with_resources_statement`, which V15's pattern did not name. A `try` without `fail` whose catch only checks the message (`ErrorReportConfigurationTest.java:210`) stays logic: that test passes when nothing throws.
   - Now Java's `tests.scm` gives `try_with_resources_statement` the same pattern.
   - Tests: `cupel-lang/tests/java_tests.rs` `a_try_with_resources_whose_block_ends_in_fail_is_one_throws_assertion` (observed failing first with `fail` as `truthiness`/`weak`); `cupel-fixtures/tests/expected_exception.rs` over `repos/expected-exception/java`, which gains a try-with-resources test (observed failing first with `test.logic` on it).
+- **V21 — a Rust function named with a leading `_` is no dead code** (2026-11-14).
+  - The gap: on tokio-rs/bytes, `static.dead-code` reported `buf::buf_impl::_assert_trait_object` and `buf::buf_mut::_assert_trait_object` (`src/buf/buf_impl.rs:2967`): `fn _assert_trait_object(_b: &dyn Buf) {}`, which exists so the compiler fails when `Buf` stops being object-safe. A leading `_` is rustc's own mark for unused on purpose; it never warns about such an item.
+  - Now Rust's `api.scm` roots a `function_item` whose name starts with `_` (`@root.hook`, the reason Go's name-pattern roots use).
+  - Tests: `cupel-lang/tests/rust_api.rs` `a_function_named_with_a_leading_underscore_is_kept_on_purpose` (observed failing first with no root); `cupel-fixtures/tests/intentionally_unused.rs` over `repos/intentionally-unused/rust` (observed failing first with `dead.symbol` on `_assert_trait_object`; now only the uncalled private function).
 
 ## 4. Cross-phase checklist
 

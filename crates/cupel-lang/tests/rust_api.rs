@@ -134,3 +134,20 @@ fn an_async_runtime_main_is_an_entry_point() {
     let symbols: Symbols = produce("rust", dir.path());
     assert_eq!(reasons(&roots, &symbols, "main"), [RootReason::EntryPoint]);
 }
+
+#[test]
+fn a_function_named_with_a_leading_underscore_is_kept_on_purpose() {
+    let dir = tree(&[(
+        "src/lib.rs",
+        "pub trait Buf {}\nfn _assert_trait_object(_b: &dyn Buf) {}\nfn helper() {}\n",
+    )]);
+    let roots: Roots = produce("rust", dir.path());
+    let symbols: Symbols = produce("rust", dir.path());
+    assert_eq!(
+        [
+            reasons(&roots, &symbols, "_assert_trait_object"),
+            reasons(&roots, &symbols, "helper"),
+        ],
+        [vec![RootReason::FrameworkHook], vec![]]
+    );
+}
