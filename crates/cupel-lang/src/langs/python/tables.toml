@@ -105,7 +105,7 @@ framework = "pytest"
 directory_helpers = true
 
 [tests.assertions]
-# Idioms captured as @assertion.idiom.<key> from `assert` statements and `pytest.raises`.
+# Idioms captured as @assertion.idiom.<key> from `assert` statements, `pytest.raises`, and failure calls.
 equal = { kind = "equality", strength = "strong" }
 approx = { kind = "equality", strength = "strong" }
 is-none = { kind = "equality", strength = "strong" }
@@ -117,6 +117,8 @@ ordering = { kind = "custom", strength = "weak" }
 membership = { kind = "custom", strength = "weak" }
 truthy = { kind = "truthiness", strength = "weak" }
 raises = { kind = "throws", strength = "strong" }
+# `pytest.fail(…)`, `self.fail(…)`: some condition held, as Go's bare failure call and JUnit's `fail`.
+fails = { kind = "truthiness", strength = "weak" }
 # unittest assert methods.
 assertEqual = { kind = "equality", strength = "strong" }
 assertEquals = { kind = "equality", strength = "strong" }

@@ -169,6 +169,15 @@
   (#eq? @_pytest "pytest")
   (#eq? @_raises "raises")) @test.assertion @assertion.idiom.raises
 
+; `pytest.fail(…)` and unittest's `self.fail(…)` fail the test where they run: the `if` guarding one
+; is the condition the test rules out, as Go's `t.Fatal` and JUnit's `fail` are.
+(call
+  function: (attribute
+    object: (identifier) @_object
+    attribute: (identifier) @_fail)
+  (#any-of? @_object "pytest" "self")
+  (#eq? @_fail "fail")) @test.assertion @assertion.idiom.fails
+
 ; unittest assert methods, keyed by name.
 (call
   function: (attribute
@@ -186,7 +195,7 @@
 ; Helpers: a call by plain name (`verify(found)`) or of a method on `self` (`self.flakes(source,
 ; UndefinedName)`), which asserts as the function it names does when this file, or another file of
 ; its directory (a test package's harness `TestCase`), defines one that asserts; `self.assert…`
-; calls are assertions above.
+; and `self.fail` calls are assertions above.
 (call
   function: (identifier) @assertion.helper)
 
@@ -195,7 +204,7 @@
     object: (identifier) @_self
     attribute: (identifier) @assertion.helper)
   (#eq? @_self "self")
-  (#not-match? @assertion.helper "^assert"))
+  (#not-match? @assertion.helper "^(assert|fail$)"))
 
 ; Skips inside a case: `pytest.skip("…")`, `self.skipTest("…")`.
 (call

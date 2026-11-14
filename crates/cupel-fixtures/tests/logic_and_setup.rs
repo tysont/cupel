@@ -1,5 +1,5 @@
-// ABOUTME: `test.logic` and `test.duplicate-setup` end to end over Python tests at the default thresholds: a branch
-// ABOUTME: in a test is logic and a loop holding an assertion is not; three tests sharing five setup statements fire.
+// ABOUTME: `test.logic` and `test.duplicate-setup` end to end over Python tests at the default thresholds: a branch is
+// ABOUTME: logic, a loop holding an assertion or an `if` guarding `pytest.fail` is not; three tests sharing setup fire.
 use std::path::Path;
 use std::process::Command;
 
@@ -53,7 +53,13 @@ fn a_branch_is_logic_and_three_tests_sharing_five_setup_statements_are_duplicate
                 Some("tests.test_grade.test_grade_picks_the_letter_by_branch"),
                 Some("tests/test_grade.py"),
             ),
-        ]
+            (
+                "test.weak-assertion",
+                Some("tests.test_grade_guard.test_grade_gives_a_letter_to_every_score"),
+                Some("tests/test_grade_guard.py"),
+            ),
+        ],
+        "`if unlettered: pytest.fail(…)` is a weak assertion and the `if` its guard, not logic"
     );
     outcome.assert_golden("logic-and-setup/python");
 }

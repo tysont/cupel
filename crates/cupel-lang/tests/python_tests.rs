@@ -422,3 +422,49 @@ fn a_call_of_an_asserting_helper_or_of_a_base_class_method_beside_it_asserts() {
         [case("test_no_helper_beside_it", &[], Runs, &[], 4)]
     );
 }
+
+#[test]
+fn a_failure_call_under_a_guard_is_an_assertion_as_a_go_failure_call_is() {
+    let pytest = &assert_source_file(
+        "python",
+        "tests/test_fail.py",
+        "import pytest\n\
+         \n\
+         def test_every_error_is_mapped():\n    \
+         unmapped = [e for e in ERRORS if e not in MAPPED]\n    \
+         if unmapped:  # pragma: no cover\n        \
+         pytest.fail(f\"Unmapped: {unmapped}\")\n",
+        "pytest",
+    );
+    assert_eq!(
+        rows(pytest),
+        [case(
+            "test_every_error_is_mapped",
+            &[(Truthiness, Weak)],
+            Runs,
+            &[],
+            3
+        )]
+    );
+    let unittest = &assert_source_file(
+        "python",
+        "tests/test_fail_case.py",
+        "import unittest\n\
+         \n\
+         class Mapped(unittest.TestCase):\n    \
+         def test_every_error_is_mapped(self):\n        \
+         if unmapped():\n            \
+         self.fail(\"unmapped\")\n",
+        "unittest",
+    );
+    assert_eq!(
+        rows(unittest),
+        [case(
+            "test_every_error_is_mapped",
+            &[(Truthiness, Weak)],
+            Runs,
+            &[],
+            4
+        )]
+    );
+}
