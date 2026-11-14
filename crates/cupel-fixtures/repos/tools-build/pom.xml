@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ABOUTME: A POM template with no coordinates: tools.build's write-pom fills groupId, artifactId, and version at release, -->
+<!-- ABOUTME: so Maven cannot build it ("'groupId' is missing") and it is no Maven project. -->
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <name>shop/pricing</name>
+  <description>Prices with a Java helper</description>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+</project>

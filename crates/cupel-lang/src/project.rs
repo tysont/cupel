@@ -23,8 +23,26 @@ use cupel_core::{
 /// root of it is described.
 pub struct Ecosystem {
     pub manifests: &'static [&'static str],
+    /// Whether the manifest at a path is one the ecosystem builds; one that is not (a template
+    /// another tool fills, say) marks no root and is no build file.
+    pub builds: fn(&Path) -> bool,
     pub skip_dirs: &'static [&'static str],
     pub describe: fn(&Candidate) -> ProjectRoot,
+}
+
+impl Ecosystem {
+    /// The manifests in `dir` that the ecosystem builds.
+    fn manifests_in<'a>(&'a self, dir: &'a Path) -> impl Iterator<Item = &'static str> + 'a {
+        self.manifests.iter().copied().filter(move |manifest| {
+            let path = dir.join(manifest);
+            path.is_file() && (self.builds)(&path)
+        })
+    }
+}
+
+/// [`Ecosystem::builds`] for an ecosystem that builds every manifest it names.
+pub fn every_manifest(_: &Path) -> bool {
+    true
 }
 
 /// A directory holding an ecosystem's manifest, with the directories below it that hold that
@@ -55,9 +73,7 @@ impl Candidate {
             .dirs()
             .flat_map(|dir| {
                 self.ecosystem
-                    .manifests
-                    .iter()
-                    .filter(move |manifest| dir.join(manifest).is_file())
+                    .manifests_in(dir)
                     .map(move |manifest| relative(&dir.join(manifest), &self.dir))
             })
             .collect();
@@ -146,11 +162,7 @@ fn walk(
     skip: &Skip<'_>,
     candidates: &mut Vec<Candidate>,
 ) {
-    if ecosystem
-        .manifests
-        .iter()
-        .any(|manifest| dir.join(manifest).is_file())
-    {
+    if ecosystem.manifests_in(dir).next().is_some() {
         match candidates
             .iter_mut()
             .find(|candidate| dir.starts_with(&candidate.dir))

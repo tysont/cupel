@@ -149,6 +149,42 @@ fn maven_and_gradle_roots_are_java_roots_with_their_subprojects_as_members() {
     );
 }
 
+/// The Java roots of a tree holding one `pom.xml` in each of `a` to `e`, as `poms` give them.
+fn maven_roots(poms: [&str; 5]) -> Vec<String> {
+    let files: Vec<(String, &str)> = ["a", "b", "c", "d", "e"]
+        .iter()
+        .zip(poms)
+        .map(|(dir, pom)| (format!("{dir}/pom.xml"), pom))
+        .collect();
+    let files: Vec<(&str, &str)> = files
+        .iter()
+        .map(|(path, pom)| (path.as_str(), *pom))
+        .collect();
+    let dir = tree(&files);
+    produce::<ProjectInfo>("java", dir.path())
+        .roots
+        .into_iter()
+        .map(|root| root.path)
+        .collect()
+}
+
+/// Maven builds a POM only with its coordinates: its own artifactId, and a groupId and version
+/// of its own or from its parent. A template that tools.build fills at release has none.
+#[test]
+fn a_pom_without_its_coordinates_is_no_maven_root() {
+    let roots = maven_roots([
+        "<project><groupId>g</groupId><artifactId>a</artifactId><version>1</version></project>",
+        "<project><parent><groupId>g</groupId><artifactId>p</artifactId><version>1</version>\
+         </parent><artifactId>b</artifactId></project>",
+        "<project><modelVersion>4.0.0</modelVersion><name>clj-commons/clj-yaml</name></project>",
+        "<project><parent><groupId>g</groupId><artifactId>p</artifactId><version>1</version>\
+         </parent></project>",
+        "<project><dependencies><dependency><groupId>g</groupId><artifactId>x</artifactId>\
+         <version>1</version></dependency></dependencies></project>",
+    ]);
+    assert_eq!(roots, ["a", "b"]);
+}
+
 #[test]
 fn deps_edn_roots_are_clojure_roots_and_no_recognized_root_is_unregistered() {
     let dir = tree(&[
@@ -188,9 +224,11 @@ fn every_walk_skips_the_generated_directories_of_every_registered_ecosystem() {
         .flat_map(|ecosystem| ecosystem.skip_dirs.iter().copied())
         .filter(|dir| !dir.starts_with('.'))
         .collect();
+    // Each file holds `{}`, which every ecosystem's last manifest builds (a `pom.xml` needs its
+    // coordinates, a Gradle settings script does not).
     let manifests: BTreeSet<&str> = ecosystems
         .iter()
-        .map(|ecosystem| ecosystem.manifests[0])
+        .filter_map(|ecosystem| ecosystem.manifests.last().copied())
         .collect();
     let files: Vec<String> = std::iter::once("control")
         .chain(generated.iter().copied())

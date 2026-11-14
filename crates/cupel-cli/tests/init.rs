@@ -227,7 +227,10 @@ fn init_describes_itself_without_a_pending_step() {
 #[test]
 fn init_writes_java_and_clojure_roots_with_their_runners_and_reports_no_unsupported_root() {
     let repo = cargo_repo();
-    repo.write("svc/pom.xml", "<project/>\n");
+    repo.write(
+        "svc/pom.xml",
+        "<project><groupId>g</groupId><artifactId>svc</artifactId><version>1</version></project>\n",
+    );
     repo.write("tools/deps.edn", "{}\n");
 
     let preview = repo.run(&["init"]);

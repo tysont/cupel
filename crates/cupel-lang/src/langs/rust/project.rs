@@ -1,9 +1,10 @@
 // ABOUTME: Cargo roots for `ProjectInfo`: `Cargo.toml`, with nested manifests as workspace members and
 // ABOUTME: `target/` as the generated directory (ADR-021, ADR-037).
-use crate::project::Ecosystem;
+use crate::project::{Ecosystem, every_manifest};
 
 pub const ECOSYSTEM: Ecosystem = Ecosystem {
     manifests: &["Cargo.toml"],
+    builds: every_manifest,
     skip_dirs: &["target"],
     describe: |candidate| candidate.root("rust", Vec::new()),
 };

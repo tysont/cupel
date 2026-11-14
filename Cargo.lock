@@ -424,6 +424,7 @@ dependencies = [
  "inventory",
  "proptest",
  "rayon",
+ "roxmltree",
  "serde",
  "serde_json",
  "tempfile",

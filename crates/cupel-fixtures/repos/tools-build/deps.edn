@@ -1,0 +1,12 @@
+;; ABOUTME: A tools.deps Clojure project whose Java sources tools.build compiles (`:deps/prep-lib`) and whose
+;; ABOUTME: pom.xml is a template the build fills at release, as clj-commons/clj-yaml's is.
+{:paths ["src/clojure" "target/classes"]
+ :deps {org.clojure/clojure {:mvn/version "1.12.3"}}
+ :deps/prep-lib {:alias :build
+                 :fn compile-java
+                 :ensure "target/classes"}
+ :aliases
+ {:test {:extra-paths ["test"]}
+  :build {:extra-paths ["build"]
+          :deps {io.github.clojure/tools.build {:mvn/version "0.10.14"}}
+          :ns-default build}}}

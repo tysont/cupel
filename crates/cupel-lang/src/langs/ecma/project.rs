@@ -7,10 +7,11 @@ use std::path::Path;
 use cupel_core::syntax::ProjectRoot;
 use serde_json::Value;
 
-use crate::project::{Candidate, Ecosystem};
+use crate::project::{Candidate, Ecosystem, every_manifest};
 
 pub const ECOSYSTEM: Ecosystem = Ecosystem {
     manifests: &["package.json"],
+    builds: every_manifest,
     skip_dirs: &["node_modules", "dist", "coverage"],
     describe,
 };

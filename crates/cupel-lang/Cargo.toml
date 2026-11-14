@@ -27,6 +27,7 @@ ignore.workspace = true
 globset.workspace = true
 inventory.workspace = true
 rayon.workspace = true
+roxmltree.workspace = true
 
 [dev-dependencies]
 cupel-fixtures.workspace = true

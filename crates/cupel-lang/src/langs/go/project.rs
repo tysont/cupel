@@ -2,10 +2,11 @@
 // ABOUTME: every package of the module, or of each module a `go.work` uses (ADR-021, ADR-037).
 use cupel_core::syntax::ProjectRoot;
 
-use crate::project::{Candidate, Ecosystem};
+use crate::project::{Candidate, Ecosystem, every_manifest};
 
 pub const ECOSYSTEM: Ecosystem = Ecosystem {
     manifests: &["go.work", "go.mod"],
+    builds: every_manifest,
     skip_dirs: &["vendor"],
     describe,
 };
