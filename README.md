@@ -900,7 +900,7 @@ Checks that depend on running the test suite read a `test-results` fact, which C
 | Python | `pytest` (when the project mentions it), `unittest` | JUnit XML; `unittest -v` output |
 | JavaScript, TypeScript | `vitest`, `jest` (whichever `package.json` depends on), `node --test` (Node's built-in runner, when neither is the root's runner) | the Jest JSON report; `node --test`'s JUnit XML (Node 24.11.1 or later, which names each test's file) |
 | Java | Maven (`mvn test`, when a `pom.xml` exists), Gradle (`gradle test --rerun`) | Surefire's and Gradle's JUnit XML, one file per test class |
-| Clojure | `clojure.test` through the Clojure CLI (`clojure -M:test` and a runner script Cupel writes under `.cupel/`) | `clojure.test.junit` XML |
+| Clojure | `clojure.test` through the Clojure CLI (`clojure -M:test` and a runner script Cupel writes under `.cupel/`; an alias Cupel adds clears the `:test` alias's `:main-opts`, such as cognitect-labs/test-runner's or Kaocha's, so the script runs with that alias's paths and dependencies, [ADR-210](docs/adr/CUPEL_DECISION_210.md)) | `clojure.test.junit` XML |
 
 A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in the root's `node_modules/.bin`); otherwise checks that need test results are skipped as `unavailable` with the tool named, and `cupel doctor` says what to install (`cupel doctor --fix --install` installs it). `[lang.<id>] runner` chooses one explicitly, by its name with or without the `tool.` prefix:
 
@@ -1027,7 +1027,7 @@ coverage = "npx vitest run --coverage --coverage.reporter=lcov"   # no {out}: co
 | Python | `pytest-cov` (with pytest), `coverage.py` (with unittest) | with `--cov-branch` |
 | JavaScript, TypeScript | `vitest --coverage`, `jest --coverage`, `node --test --experimental-test-coverage` (for a `node --test` root without `c8` in `devDependencies`), `c8` (with Mocha, or a `node --test` root that lists it) | yes |
 | Java | JaCoCo through Maven (its goals by coordinate around `mvn test`; for a build that runs JaCoCo's `prepare-agent` itself, by its `pom.xml` and the parents on disk or in the local repository, `mvn test jacoco:report` with the project's own plugin, since a second agent kills the forked JVM, [ADR-209](docs/adr/CUPEL_DECISION_209.md)), JaCoCo through Gradle (`gradle test jacocoTestReport`, with the `jacoco` plugin applied and XML reports on) | yes |
-| Clojure | Cloverage (`-Sdeps` adds it for the run, `--lcov`) | no |
+| Clojure | Cloverage (`-Sdeps` adds it for the run, with an alias clearing the `:test` alias's `:main-opts`, `--lcov`) | no |
 
 Without a `coverage` command a language's `tests.coverage` is skipped as `unconfigured` and `static.crap` reports no CRAP; with one but without the tool, it is `unavailable` and `cupel doctor` names the tool. A report is reused instead of rerunning the suite while it is fresh: Cupel records the hash of every file under the project root when it makes one (and trusts files not modified since), and a report the tool left at its default location is used when it is newer than every source. A command that exits non-zero gives no coverage and a `coverage.run-failed` finding, since a red suite has no meaningful coverage.
 

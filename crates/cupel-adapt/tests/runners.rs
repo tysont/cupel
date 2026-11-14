@@ -106,6 +106,19 @@ fn run(id: &str, lang: &str, repo: &str, red: bool) -> Option<TestResults> {
     if red {
         copy_repo(&format!("test-results/red/{repo}"), dir.path());
     }
+    run_in(&dir, id, lang)
+}
+
+/// A run of the runner `id` for `lang` on a copy of the fixture repository `repo`; `None`
+/// (reported as skipped) when the runner's tool is not installed.
+fn run_repo(id: &str, lang: &str, repo: &str) -> Option<TestResults> {
+    let dir = tempfile::tempdir().unwrap();
+    copy_repo(repo, dir.path());
+    run_in(&dir, id, lang)
+}
+
+/// A run of the runner `id` for `lang` in `dir`; `None` when its tool is not installed.
+fn run_in(dir: &tempfile::TempDir, id: &str, lang: &str) -> Option<TestResults> {
     let registry = registry();
     let producer = runner(&registry, id, lang);
     let ctx = Ctx::new(dir.path().to_path_buf());
@@ -325,6 +338,30 @@ fn gradle_runs_the_java_fixture() {
 #[test]
 fn clojure_test_runs_the_clojure_fixture() {
     assert_runs(&CLOJURE_TEST);
+}
+
+/// Runs `tool.clojure-test` on a copy of the fixture repository `repo` and checks it reported
+/// exactly `expected`; skipped with a reason when the Clojure CLI is not installed.
+fn assert_clojure_reports(repo: &str, expected: &[(&str, TestOutcome)]) {
+    let Some(results) = run_repo("tool.clojure-test", "clojure", repo) else {
+        return;
+    };
+    let expected: Vec<(String, TestOutcome)> = expected
+        .iter()
+        .map(|(test, outcome)| ((*test).to_owned(), *outcome))
+        .collect();
+    assert_eq!(outcomes(&results), expected, "{results:?}");
+}
+
+/// A `:test` alias whose `:main-opts` run another test runner (cognitect-labs/test-runner's
+/// `-m cognitect.test-runner`, here a stand-in that runs nothing) lends its paths to Cupel's
+/// runner script without running that main.
+#[test]
+fn clojure_test_runs_its_script_where_the_test_alias_has_main_opts() {
+    assert_clojure_reports(
+        "tools-build",
+        &[("shop.pricing-test/discount-takes-the-percent-off", Passed)],
+    );
 }
 
 #[test]

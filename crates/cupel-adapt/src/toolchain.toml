@@ -328,8 +328,10 @@ race = []
 id = "tool.clojure-test"
 command = "clojure -M:test"
 
-# Cloverage by coordinate needs no `deps.edn` change; it instruments `src` and runs `test`.
+# Cloverage by coordinate needs no `deps.edn` change; it instruments `src` and runs `test`. The
+# `:cupel/no-main` alias clears the `:main-opts` a `:test` alias may have (a test runner's `-m`,
+# which a `-m` on the command line does not replace), so Cloverage's main runs (ADR-210).
 [[rows.coverage]]
 id = "tool.cloverage"
 format = "lcov"
-commands = { "tool.clojure-test" = "clojure -Sdeps '{:deps {cloverage/cloverage {:mvn/version \"1.2.4\"}}}' -M:test -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary" }
+commands = { "tool.clojure-test" = "clojure -Sdeps '{:deps {cloverage/cloverage {:mvn/version \"1.2.4\"}} :aliases {:cupel/no-main {:main-opts []}}}' -M:test:cupel/no-main -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary" }

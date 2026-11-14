@@ -55,12 +55,20 @@ fn script(root: &Root) -> PathBuf {
     script
 }
 
-/// `clojure -M:test <script> <report>`: the `:test` alias puts the test paths on the classpath
-/// (the CLI only warns when a project does not declare it). Narrowing names tests and files after.
+/// An alias the command line defines with empty `:main-opts`: named after `:test`, it replaces
+/// the `:main-opts` that alias may have (cognitect-labs/test-runner's or Kaocha's), since the
+/// last alias's win, while `:test`'s paths and dependencies stay (ADR-210).
+const NO_MAIN: &str = "{:aliases {:cupel/no-main {:main-opts []}}}";
+
+/// `clojure -Sdeps <NO_MAIN> -M:test:cupel/no-main <script> <report>`: the `:test` alias puts the
+/// test paths on the classpath (the CLI only warns when a project does not declare it) and the
+/// CLI runs Cupel's script, not the alias's main. Narrowing names tests and files after.
 fn command(root: &Root) -> Vec<String> {
     vec![
         root.program.clone(),
-        "-M:test".to_owned(),
+        "-Sdeps".to_owned(),
+        NO_MAIN.to_owned(),
+        "-M:test:cupel/no-main".to_owned(),
         script(root).display().to_string(),
         root.report.display().to_string(),
     ]

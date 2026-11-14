@@ -828,7 +828,7 @@ Producers are registered per language in a **toolchain table** in `cupel-adapt`,
 | `go` | go test -json | go test -coverprofile → coverprofile | go test -bench + benchstat | `-run` narrowing per test | go vet, staticcheck |
 | `python` | pytest, unittest | pytest-cov / coverage.py → lcov, Cobertura XML | pytest-benchmark, hyperfine | `--cov-context=test` | mypy `--strict`, ruff |
 | `java` (ADR-108) | Maven Surefire, Gradle → JUnit XML | JaCoCo through Maven (by coordinate, or the build's own plugin where it runs the agent itself, ADR-209) or Gradle → JaCoCo XML | — | none (module-graph fallback) | — |
-| `clojure` (ADR-109) | `clojure.test` through the Clojure CLI → JUnit XML | Cloverage → lcov | — | none (module-graph fallback) | — |
+| `clojure` (ADR-109) | `clojure.test` through the Clojure CLI, with the `:test` alias's paths but not its `:main-opts` (ADR-210) → JUnit XML | Cloverage → lcov | — | none (module-graph fallback) | — |
 
 A producer's detection rules are judged where it runs: a runner's, a coverage producer's companion runner's, and a bench producer's that measures each root (criterion, pytest-benchmark) in each configured root of its language, or the repository root without `[roots]`; hyperfine's in the repository root, whose `cupel.toml` lists its commands.
 
