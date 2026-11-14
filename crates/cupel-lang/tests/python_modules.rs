@@ -498,3 +498,45 @@ fn imports_of_names_listed_in_all_are_re_exports() {
         ]
     );
 }
+
+#[test]
+fn imports_under_a_type_checking_guard_are_type_edges() {
+    let dir = tree(&[
+        ("pyproject.toml", "[project]\nname = \"shop\"\n"),
+        ("shop/__init__.py", ""),
+        (
+            "shop/cart.py",
+            "import typing\n\
+             from typing import TYPE_CHECKING\n\
+             \n\
+             if typing.TYPE_CHECKING:\n    \
+             import ssl\n    \
+             from .prices import total\n\
+             if TYPE_CHECKING:\n    \
+             from .order import Order\n\
+             else:\n    \
+             from .order import Draft\n\
+             from .prices import tax\n",
+        ),
+        (
+            "shop/order.py",
+            "class Order:\n    pass\n\nclass Draft:\n    pass\n",
+        ),
+        (
+            "shop/prices.py",
+            "def total():\n    pass\n\ndef tax():\n    pass\n",
+        ),
+    ]);
+    assert_eq!(
+        kinds(&produce::<ModuleGraph>("python", dir.path())),
+        [
+            kind("shop/cart.py", "typing", EdgeKind::Import),
+            kind("shop/cart.py", "typing.TYPE_CHECKING", EdgeKind::Import),
+            kind("shop/cart.py", "ssl", EdgeKind::Type),
+            kind("shop/cart.py", ".prices.total", EdgeKind::Type),
+            kind("shop/cart.py", ".order.Order", EdgeKind::Type),
+            kind("shop/cart.py", ".order.Draft", EdgeKind::Import),
+            kind("shop/cart.py", ".prices.tax", EdgeKind::Import),
+        ]
+    );
+}

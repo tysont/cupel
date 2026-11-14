@@ -32,3 +32,17 @@
         (tuple (string (string_content) @reexport.name))
       ]))
   (#eq? @_all "__all__"))
+
+; An import under `if TYPE_CHECKING:` or `if typing.TYPE_CHECKING:` runs only for a type checker,
+; never at run time: an import of types alone (ADR-211). Its `else:` branch runs.
+(if_statement
+  condition: [
+    (identifier) @_guard
+    (attribute attribute: (identifier) @_guard)
+  ]
+  consequence: (block
+    [
+      (import_statement)
+      (import_from_statement)
+    ] @import.type)
+  (#eq? @_guard "TYPE_CHECKING"))

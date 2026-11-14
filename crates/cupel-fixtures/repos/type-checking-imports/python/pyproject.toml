@@ -1,0 +1,5 @@
+# ABOUTME: A package whose import cycles close only through imports under a TYPE_CHECKING guard, beside one
+# ABOUTME: cycle of imports that run, the shape of encode/httpx (V13, ADR-211).
+[project]
+name = "relay"
+version = "0.1.0"
