@@ -451,14 +451,16 @@ pub struct ReferenceRules {
 }
 
 /// `[api]`: how `QueryApi` spaces the tokens of a signature, beyond the shared rules documented
-/// in `cupel_lang::api`.
+/// in `cupel_lang::api`, and which nodes are no part of one.
 ///
 /// ```toml
 /// [api]
 /// tight_after = ["]", "..."]   # no space after these tokens: Go's `[]T`, `map[K]V`, `...T`
+/// skip = ["meta_lit"]          # node kinds that give a signature no token: Clojure's `^String`
 /// ```
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
 #[serde(deny_unknown_fields, default)]
 pub struct ApiRules {
     pub tight_after: Vec<String>,
+    pub skip: Vec<String>,
 }

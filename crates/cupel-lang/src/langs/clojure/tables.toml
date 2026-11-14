@@ -91,6 +91,11 @@ property = { kind = "custom", strength = "strong" }
 
 # Tests sit below `test/` in a namespace named for the one they test with a `-test` suffix:
 # `src/ledger/core.clj` is tested by `test/ledger/core_test.clj`.
+# Metadata on a parameter vector or a parameter (`^String`, `^{:tag long}`, `^:once`, `#^String`)
+# is a hint to the compiler, not part of what callers pass: a signature is its arity and names.
+[api]
+skip = ["meta_lit", "old_meta_lit"]
+
 [conventions]
 test_globs = ["test/**", "**/test/**"]
 

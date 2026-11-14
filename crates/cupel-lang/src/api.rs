@@ -18,7 +18,8 @@
 //! - `@root.entry-point` and `@root.hook` belong to `QueryRoots` (see `cupel_lang::roots`).
 //!
 //! A node whose kind is in `[normalize].literals` (a string literal, say) is one token, its
-//! source text, so quotes stay attached to what they quote. Tokens are joined by single spaces, except none before `, ) ] > : ; ? .` and `::`, none
+//! source text, so quotes stay attached to what they quote. A node whose kind is in
+//! `[api].skip` (Clojure's metadata, say) gives no token. Tokens are joined by single spaces, except none before `, ) ] > : ; ? .` and `::`, none
 //! after `( [ < & * ' .` and `::` or after a token in `[api].tight_after`, and none before an
 //! opening bracket that follows a name (the `_` standing for a local is not a name); a comma
 //! right before a closing bracket or at the end is dropped.
@@ -130,6 +131,8 @@ struct Spelling<'a> {
     tight_after: &'a [String],
     /// Node kinds read as one token.
     literals: &'a [String],
+    /// Node kinds that give no token.
+    skip: &'a [String],
 }
 
 impl<'a> Spelling<'a> {
@@ -137,6 +140,7 @@ impl<'a> Spelling<'a> {
     fn of(spec: &'a LanguageSpec) -> Self {
         Self {
             tight_after: &spec.tables().api.tight_after,
+            skip: &spec.tables().api.skip,
             literals: spec
                 .tables()
                 .normalize
@@ -162,7 +166,7 @@ fn signature(
     };
     let mut tokens: Vec<String> = Vec::new();
     let mut last_local = None;
-    tokens_of(item, spelling.literals, &mut |leaf| {
+    tokens_of(item, spelling, &mut |leaf| {
         if leaf.start_byte() < start || leaf.end_byte() > end {
             return;
         }
@@ -184,19 +188,20 @@ fn signature(
     join(&tokens, spelling.tight_after)
 }
 
-/// Calls `visit` on every token below `node`, in document order, skipping comments: a leaf, or
-/// a node whose kind is one of `literals`.
-fn tokens_of<'t>(node: Node<'t>, literals: &[String], visit: &mut dyn FnMut(Node<'t>)) {
-    if node.is_extra() {
+/// Calls `visit` on every token below `node`, in document order, skipping comments and the
+/// nodes of `spelling`'s `skip` kinds: a leaf, or a node whose kind is one of its `literals`.
+fn tokens_of<'t>(node: Node<'t>, spelling: Spelling<'_>, visit: &mut dyn FnMut(Node<'t>)) {
+    let is = |kinds: &[String]| kinds.iter().any(|kind| kind == node.kind());
+    if node.is_extra() || is(spelling.skip) {
         return;
     }
-    if node.child_count() == 0 || literals.iter().any(|kind| kind == node.kind()) {
+    if node.child_count() == 0 || is(spelling.literals) {
         visit(node);
         return;
     }
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
-        tokens_of(child, literals, visit);
+        tokens_of(child, spelling, visit);
     }
 }
 
