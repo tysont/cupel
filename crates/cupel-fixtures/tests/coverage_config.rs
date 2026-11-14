@@ -126,7 +126,11 @@ fn the_joint_runs_per_test_contexts_still_name_the_tests_of_each_file() {
         .map(|test| test["id"].clone())
         .collect();
     assert_eq!(
-        (code, tests, impacted["tests"]["languages"][0]["reused"].clone()),
+        (
+            code,
+            tests,
+            impacted["tests"]["languages"][0]["reused"].clone()
+        ),
         (
             Some(0),
             vec![json!(
