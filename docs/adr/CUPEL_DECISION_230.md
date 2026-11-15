@@ -1,6 +1,6 @@
 # CUPEL_DECISION_230: A tools.deps project's own `:deps/prep-lib` runs before Cupel's Clojure runs, and doctor reports it while it is not done
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 3 (Q-clj-1) · Details [109](CUPEL_DECISION_109.md) and [210](CUPEL_DECISION_210.md) (the Clojure runner and Cloverage)
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 10 (Q-clj-1) · Details [109](CUPEL_DECISION_109.md) and [210](CUPEL_DECISION_210.md) (the Clojure runner and Cloverage)
 
 ## Context
 Validating v0.2.9 on clj-commons/clj-yaml, the survey errored with `ClassNotFoundException clj_yaml.MarkedConstructor`: clj-yaml's Clojure code imports Java classes its own build compiles, and `git clean -x` had removed them. Its `deps.edn` says so: `:deps/prep-lib {:alias :build :fn compile-java :ensure "target/classes"}`, with `target/classes` on its `:paths`. Cupel never ran that build; the validation compiled the classes in a hook after each checkout (NOTES Q-clj-1: "recommend init (or the suite) runs the project's own prep … before tests when declared; otherwise doctor says so").

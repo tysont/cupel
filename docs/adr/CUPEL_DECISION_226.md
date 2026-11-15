@@ -1,6 +1,6 @@
 # CUPEL_DECISION_226: A function unused on purpose is neither dead code nor uncovered
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 7 · Amends [079](CUPEL_DECISION_079.md)
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 11 (Q-rs-7) · Amends [079](CUPEL_DECISION_079.md)
 
 ## Context
 V21 (v0.2.9, `crates/cupel-lang/src/langs/rust/queries/api.scm`) made a Rust function whose name starts with `_` a root, so `static.dead-code` no longer reports tokio-rs/bytes' `fn _assert_trait_object(_b: &dyn Buf) {}` (`src/buf/buf_impl.rs:2968`, and its `BufMut` twin): rustc's leading-underscore convention says the function is unused on purpose, and this one exists only so the build fails when `Buf` stops being object-safe. `tests.coverage` still reports both as `coverage.uncovered-symbol` (out/bytes/survey.json, 2 findings): literally true, since nothing calls them, but no test could or should. NOTES Q-rs-7 recommended exempting them the same way. The owner's ruling (2026-11-14): "_-prefixed functions are exempt from uncovered findings as well as dead code."

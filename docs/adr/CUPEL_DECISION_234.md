@@ -1,6 +1,6 @@
 # CUPEL_DECISION_234: A Leiningen `project.clj` is a Clojure root
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 7 (G2) · Amends [109](CUPEL_DECISION_109.md) (Clojure roots) and [215](CUPEL_DECISION_215.md)'s note that Leiningen is no root; uses [162](CUPEL_DECISION_162.md)'s `defer` and [228](CUPEL_DECISION_228.md)'s `not` rule
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 12 (Leiningen roots) · Amends [109](CUPEL_DECISION_109.md) (Clojure roots) and [215](CUPEL_DECISION_215.md)'s note that Leiningen is no root; uses [162](CUPEL_DECISION_162.md)'s `defer` and [228](CUPEL_DECISION_228.md)'s `not` rule
 
 ## Context
 Validating v0.2.9 on ring-clojure/ring, a Leiningen project (`project.clj` at the top and in each of `ring-core/`, `ring-servlet/`, and the rest; no `deps.edn`), `init` wrote a `cupel.toml` with no `[lang.clojure]` table and no root: only the Clojure CLI's `deps.edn` made a Clojure root, so ring had static checks only and no test, coverage, or mutation (NOTES G2). ADR-215 already reads `project.clj`'s `:source-paths` for the API and says "Leiningen is not otherwise a Cupel root".

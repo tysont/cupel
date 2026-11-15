@@ -1,6 +1,6 @@
 # CUPEL_DECISION_223: Python's `assert a in b` is a strong assertion
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 4 · Amends [034](CUPEL_DECISION_034.md); the Python counterpart of [184](CUPEL_DECISION_184.md) and [200](CUPEL_DECISION_200.md)
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 7 (Q-py-3) · Amends [034](CUPEL_DECISION_034.md); the Python counterpart of [184](CUPEL_DECISION_184.md) and [200](CUPEL_DECISION_200.md)
 
 ## Context
 The v0.2.9 validation on encode/httpx found `assert "x" in str(headers)` (`tests/test_auth.py:319`) classified as a weak `custom` assertion: the Python `membership` idiom (`assert a in b`, `assert a not in b`, ADR-034) was `custom`/`weak`. ADR-184 made Jest's and Vitest's `toContain` and `toMatch` strong (a membership or a pattern pins the element or text it names), and ADR-200 extended that to Chai and Jasmine. NOTES Q-py-3 recommended Python `assert a in b` strong too, for consistency. The owner's ruling (2026-11-14): "assert a in b is strong."

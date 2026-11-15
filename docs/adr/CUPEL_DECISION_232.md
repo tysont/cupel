@@ -1,6 +1,6 @@
 # CUPEL_DECISION_232: clippy's E0554 is a note
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 5 (Q-rs-5) · Details [102](CUPEL_DECISION_102.md) (analyzers and their levels)
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 11 (Q-rs-5) · Details [102](CUPEL_DECISION_102.md) (analyzers and their levels)
 
 ## Context
 Validating v0.2.9 on tokio-rs/bytes, `static.analyze` reported three `analyze.clippy.E0554` findings, "`#![feature]` may not be used on the stable release channel", at line 1 of each nightly-only benchmark (`benches/buf.rs`, `benches/bytes.rs`, `benches/bytes_mut.rs`, which open with `#![feature(test)]`). rustc gives E0554 at level `error`, so each was a `fail` finding and failed the check (`out/bytes/survey.json`). bytes runs those benches on nightly; nothing in their code is wrong. NOTES Q-rs-5 recommended treating a target clippy cannot build on the active toolchain as an analyzer limitation.

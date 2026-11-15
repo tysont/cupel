@@ -1,6 +1,6 @@
 # CUPEL_DECISION_216: A run only its budget cut short may be the baseline
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 1 · Amends [195](CUPEL_DECISION_195.md) §4 and [198](CUPEL_DECISION_198.md); relies on [205](CUPEL_DECISION_205.md) §1
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 1 (Q-all-1) · Amends [195](CUPEL_DECISION_195.md) §4 and [198](CUPEL_DECISION_198.md); relies on [205](CUPEL_DECISION_205.md) §1
 
 ## Context
 ADR-195 §4 lets `baseline set` and `baseline import` name only a run whose status is `pass`, and ADR-198 kept that. The v0.2.9 validation set baselines the way the owner's method says: `cupel survey --depth standard --budget 30m`, then `cupel baseline set --write`. On four of the eight repositories the survey ended `partial` (exit 5) only because the budget left work out, and `baseline set` refused it (`out/<repo>/baseline-set.json`: "The run … did not pass (status `partial`); a baseline names only a passing run on the default branch"), so those repositories had no baseline and `baseline diff` had no reference:

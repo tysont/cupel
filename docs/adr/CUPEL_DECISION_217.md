@@ -1,6 +1,6 @@
 # CUPEL_DECISION_217: Budgets, timeouts, and run durations count awake time, by one named clock
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 2 · Details [086](CUPEL_DECISION_086.md) §6 and [020](CUPEL_DECISION_020.md) §5
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 2 (Q-all-2) · Details [086](CUPEL_DECISION_086.md) §6 and [020](CUPEL_DECISION_020.md) §5
 
 ## Context
 The v0.2.9 validation's cold `survey --budget 30m` on hashicorp/raft took 4 142 s of wall clock (15:52:15 to 17:01:17 in the harness log). Its envelope's `duration_ms` was 1 800 358 and its checks' durations add up to about 1 660 s. That left about 2 340 s outside both the budget and the reported duration (NOTES V4). The validation later withdrew V4 as a Cupel defect: the Mac had been asleep for that gap (lid closed, on battery), and the harness has held `caffeinate -ims` since.

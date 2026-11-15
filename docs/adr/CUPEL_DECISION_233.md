@@ -1,6 +1,6 @@
 # CUPEL_DECISION_233: `init` writes a starter `[gate.changed]` of ratchets
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 6 (G1) · Amends [021](CUPEL_DECISION_021.md) (the `cupel.toml` `init` writes); rules as [017](CUPEL_DECISION_017.md), [130](CUPEL_DECISION_130.md), [199](CUPEL_DECISION_199.md) and [205](CUPEL_DECISION_205.md) define them
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 12 (starter gate) · Amends [021](CUPEL_DECISION_021.md) (the `cupel.toml` `init` writes); rules as [017](CUPEL_DECISION_017.md), [130](CUPEL_DECISION_130.md), [199](CUPEL_DECISION_199.md) and [205](CUPEL_DECISION_205.md) define them
 
 ## Context
 Validating v0.2.9 on eight repositories, `init` wrote no `[gate]` table, so `check --changed --gate` on a freshly initialized repository refused with exit 2 (`--gate` without the applicable table is a usage error). The validation appended Molten's adopter-written `[gate.changed]` to every clone to replay pull requests (NOTES G1).

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_219: A test that fails with no mutant applied is left out of every mutant's run
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 4 · Details [185](CUPEL_DECISION_185.md); the analogue of [147](CUPEL_DECISION_147.md) §3–4
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 8 (Q-py-4) · Details [185](CUPEL_DECISION_185.md); the analogue of [147](CUPEL_DECISION_147.md) §3–4
 
 ## Context
 Before it runs a file's mutants as file copies, the mutation engine runs the whole suite once in the first slot with no mutant applied. This is the baseline that times every copy (ADR-185). When that run is red, the slot does not reproduce the tree, and the engine errors: `tests.mutation` ends `error` with "the unmutated tree does not pass its tests in the mutation overlay at …".

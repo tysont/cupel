@@ -1,6 +1,6 @@
 # CUPEL_DECISION_229: Cupel's pytest runs pass the arguments `[lang.python] test` gives pytest
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 2 (Q-py-2) · Details [084](CUPEL_DECISION_084.md) (the joint run), [149](CUPEL_DECISION_149.md) (its incremental reruns)
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 7 (Q-py-2) · Details [084](CUPEL_DECISION_084.md) (the joint run), [149](CUPEL_DECISION_149.md) (its incremental reruns)
 
 ## Context
 Validating v0.2.9 on encode/httpx, three tests marked `@pytest.mark.network` (`tests/test_proxies.py:104,114`) fail without network, and httpx documents the marker for network-disabled builds. The joint suite run (`tool.pytest-cov-contexts`, ADR-084) builds its own `pytest …` argument list and ignores `[lang.python] test`, so a person cannot deselect tests from `cupel.toml`; only `PYTEST_ADDOPTS='-m "not network"'` or pytest's own configuration reached the run (NOTES Q-py-2: "recommend the joint run appends the configured test command's extra pytest arguments"). The pytest runner (`tool.pytest`) and the per-test producer (`tool.pytest-cov-per-test`) build their argument lists the same way and ignore it too.

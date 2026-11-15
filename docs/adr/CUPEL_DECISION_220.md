@@ -1,6 +1,6 @@
 # CUPEL_DECISION_220: A loop that neither asserts nor branches builds inputs and is no test logic
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 1 · Amends [054](CUPEL_DECISION_054.md) and [184](CUPEL_DECISION_184.md) §2
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 4 (Q-go-1) · Amends [054](CUPEL_DECISION_054.md) and [184](CUPEL_DECISION_184.md) §2
 
 ## Context
 The v0.2.9 validation replayed hashicorp/raft (Go). `tests.quality` reported 51 `test.logic` findings; 38 of them held loops only: setup loops building servers and inputs, and polling loops. 8 more held `if !reflect.DeepEqual(a, b) { t.Fatalf(…) }` equality guards, which are already guards. `configuration_test.go:301` (`TestConfiguration_encodeDecodePeers`) is the typical case: `for i := 0; i < 3; i++ { configuration.Servers = append(configuration.Servers, Server{…}) }` builds a three-server configuration, then the test encodes, decodes, and compares it once; the finding counted `loops: 1`. The validation recommended (NOTES Q-go-1): "a loop with no assertion and no branch inside (pure construction of fixtures) is not test.logic". The owner's ruling (2026-11-14): "setup loops are not test logic."

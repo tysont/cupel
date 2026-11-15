@@ -1,6 +1,6 @@
 # CUPEL_DECISION_218: A snapshot rewritten beside a code change is still a `tests.weakening` failure
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 3 · Confirms [057](CUPEL_DECISION_057.md)
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 3 (Q-all-3) · Confirms [057](CUPEL_DECISION_057.md)
 
 ## Context
 ADR-057 makes `snapshot.rewritten` a `tests.weakening` finding at `fail`: a stored snapshot that existed at the base commit and that the range changed, attributed to the changed tests it belongs to, and not reported when a test the snapshot belongs to is new (the snapshot may only have grown). `"tests.weakening" = "none"` in `[gate.changed]` then fails on it.

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_222: A compile-time assertion in a test is a strong assertion of that test
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 3 · Amends [032](CUPEL_DECISION_032.md) and [070](CUPEL_DECISION_070.md)
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 6 (Q-go-3, Q-rs-2) · Amends [032](CUPEL_DECISION_032.md) and [070](CUPEL_DECISION_070.md)
 
 ## Context
 The v0.2.9 validation found compile-time conformance tests reported as `test.no-assertion`:

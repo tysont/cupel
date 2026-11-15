@@ -1,6 +1,6 @@
 # CUPEL_DECISION_225: `unreachable!` in a test's local impl is no assertion
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 6
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 11 (Q-rs-6)
 
 ## Context
 On tokio-rs/bytes (Rust), `test_deref_bufmut_forwards` (`tests/test_buf_mut.rs:275`) defines a local `struct Special` and `unsafe impl BufMut for Special` whose `remaining_mut`, `chunk_mut`, and `advance_mut` are `unreachable!(…)`, then calls `put_u8` four ways. The test checks that each call reaches the specialized `put_u8` and none of the defaults: a default would reach an `unreachable!` and panic. `tests.quality` reports it as `test.no-assertion`. NOTES Q-rs-6 recommended it stays so: the check is indirect, and a reader cannot see from the test's body what is checked. The owner's ruling (2026-11-14): "unreachable! in a local impl is not an assertion."

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_228: `init` writes coverage.py's command for a pytest root that does not declare pytest-cov
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 1 (Q-py-1) · The Python analogue of [197](CUPEL_DECISION_197.md); [208](CUPEL_DECISION_208.md) unchanged
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 7 (Q-py-1) · The Python analogue of [197](CUPEL_DECISION_197.md); [208](CUPEL_DECISION_208.md) unchanged
 
 ## Context
 Validating v0.2.9 on encode/httpx, `init` wrote `coverage = "python -m pytest --cov=. --cov-report=lcov:{out}"` (`tool.pytest-cov`) although httpx declares no pytest-cov: its `requirements.txt` pins `pytest` and `coverage[toml]==7.10.6`. The survey then refused (ADR-076) on `pytest: error: unrecognized arguments: --cov=. --cov-context=test`. V6 made `doctor` name the missing plugin, and left which row `init` picks to the owner (NOTES Q-py-1: "recommend coverage.py (`coverage run -m pytest`), as ruling 1 did for c8 vs node --test").

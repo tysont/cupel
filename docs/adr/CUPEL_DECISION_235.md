@@ -1,6 +1,6 @@
 # CUPEL_DECISION_235: npm and PyPI publish through trusted publishing, the tap through a deploy key, each turned on by the owner after registering
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item publishing · Amends [128](CUPEL_DECISION_128.md)
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 15 (publishing) · Amends [128](CUPEL_DECISION_128.md)
 
 ## Context
 

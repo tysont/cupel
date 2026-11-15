@@ -1,6 +1,6 @@
 # CUPEL_DECISION_231: Rust coverage runs doctests on a nightly toolchain, and a function only a doctest it did not run may cover is `coverage.doctest-only`
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 4 (Q-rs-4) · Details [079](CUPEL_DECISION_079.md) (coverage producers and `tests.coverage`); a field on two facts, not a new fact kind
+**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.3.0, item 11 (Q-rs-4) · Details [079](CUPEL_DECISION_079.md) (coverage producers and `tests.coverage`); a field on two facts, not a new fact kind
 
 ## Context
 Validating v0.2.9 on tokio-rs/bytes, the survey reported 159 `coverage.uncovered-symbol`, many of them `Buf::try_get_*`, which only their own doctests exercise (`src/buf/buf_impl.rs:1200`, `/// assert_eq!(Ok(0x08_u8), buf.try_get_u8());`). Cupel's coverage command, `cargo llvm-cov --lcov --output-path {out}`, runs no doctests: `cargo llvm-cov --doctests` is unstable and needs a nightly toolchain. NOTES Q-rs-4 recommended running doctests under coverage when a nightly toolchain is present, and otherwise reporting "a symbol whose own doc comment has a runnable example" at `info` as covered only by doctests and not measured.
