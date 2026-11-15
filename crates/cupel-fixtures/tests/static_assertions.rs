@@ -33,7 +33,10 @@ fn quality(repo: &str) -> Vec<(String, String)> {
 fn a_go_conformance_test_asserts_and_a_test_that_only_builds_does_not() {
     assert_eq!(
         quality("static-assertions/go"),
-        [("test.no-assertion".to_owned(), "lru.TestNewBuilds".to_owned())]
+        [(
+            "test.no-assertion".to_owned(),
+            "lru.TestNewBuilds".to_owned()
+        )]
     );
 }
 

@@ -1,0 +1,10 @@
+# ABOUTME: A crate whose tests assert through methods named `assert…` and `debug_assert…`, and through the
+# ABOUTME: `debug_assert!` macros, which count unless `debug_assertions = false` (ADR-224).
+[package]
+name = "commands"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]

@@ -366,6 +366,19 @@
     field: (field_identifier) @_assert)
   (#eq? @_assert "assert")) @test.assertion @assertion.idiom.process
 
+; A method named `assert…` (`.assert_success()`, `x.assert_eq(&y)`) checks what its project defines;
+; one named `debug_assert…` (clap's `Command::debug_assert()`) does so with debug assertions on
+; (ADR-224).
+(call_expression
+  function: (field_expression
+    field: (field_identifier) @_method)
+  (#match? @_method "^debug_assert")) @test.assertion @assertion.idiom.debug-method
+
+(call_expression
+  function: (field_expression
+    field: (field_identifier) @_method)
+  (#match? @_method "^assert")) @test.assertion @assertion.idiom.method
+
 ; mockall: `MockThing::new()`.
 (call_expression
   function: (scoped_identifier

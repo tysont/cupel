@@ -1080,6 +1080,7 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
         (json!({"mock_density_max": -1}), "mock_density_max"),
         (json!({"logic_max": "none"}), "logic_max"),
         (json!({"setup_statements_min": 2.5}), "setup_statements_min"),
+        (json!({"debug_assertions": "no"}), "debug_assertions"),
     ] {
         let (named, valid) = support::setting_error(check, config);
         assert_eq!(named, key);
@@ -1090,10 +1091,33 @@ fn unknown_settings_and_bad_values_are_configuration_errors() {
                 "mocks_min",
                 "logic_max",
                 "setup_statements_min",
-                "setup_tests_min"
+                "setup_tests_min",
+                "debug_assertions"
             ]
         );
     }
+}
+
+/// `debug_assertions` configures the assertions `TestFrames` holds, so its producer reads it
+/// (ADR-147, ADR-224); the check accepts a boolean and runs as before.
+#[test]
+fn debug_assertions_is_a_boolean_that_configures_test_frames() {
+    let check = support::check(ID);
+    let setting = check
+        .manifest()
+        .settings
+        .iter()
+        .find(|setting| setting.name == "debug_assertions")
+        .expect("declared");
+    assert_eq!(
+        (&setting.default, setting.configures),
+        (&json!(true), Some(FactKind::TestFrames))
+    );
+    let (result, findings) = Run::of(vec![case("asserts", 1)])
+        .config(json!({"debug_assertions": false}))
+        .go();
+    assert!(findings.is_empty(), "{findings:?}");
+    assert_eq!(result.status, CheckStatus::Pass);
 }
 
 #[test]

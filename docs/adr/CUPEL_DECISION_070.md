@@ -1,6 +1,6 @@
 # CUPEL_DECISION_070: Rust assertions that pin a value, assertion helpers, and process assertions
 
-**Date:** 2026-10-14 · **Status:** accepted; compile-time assertions in a test are strong per [222](CUPEL_DECISION_222.md) · **Phase:** P2.10
+**Date:** 2026-10-14 · **Status:** accepted; compile-time assertions in a test are strong per [222](CUPEL_DECISION_222.md); any method named `assert…` or `debug_assert…` asserts, and debug assertions count unless `debug_assertions = false`, per [224](CUPEL_DECISION_224.md) · **Phase:** P2.10
 
 ## Context
 

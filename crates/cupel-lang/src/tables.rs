@@ -351,6 +351,7 @@ impl Default for TestRules {
             unknown_assertion: AssertionClass {
                 kind: AssertionKind::Custom,
                 strength: AssertionStrength::Strong,
+                debug: false,
             },
             assertions: BTreeMap::new(),
             directory_helpers: false,
@@ -373,6 +374,11 @@ impl TestRules {
 pub struct AssertionClass {
     pub kind: AssertionKind,
     pub strength: AssertionStrength,
+    /// Evaluated only in a build with debug assertions (Rust's `debug_assert!`): the
+    /// `debug_assertions` setting a check declares for `TestFrames`, when false, leaves it out
+    /// (ADR-224).
+    #[serde(default)]
+    pub debug: bool,
 }
 
 /// `[conventions]`: how `GlobTestConventions` recognizes test files and pairs them with sources.

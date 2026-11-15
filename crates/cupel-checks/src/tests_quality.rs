@@ -21,11 +21,12 @@ use crate::metrics::{
     case_key, decisions_by_symbol, scored, sum, symbol_target, trees_by_symbol, weighted_mean,
 };
 use crate::outcome;
-use crate::settings::Limits;
+use crate::settings::{Flag, Limits};
 
 const ID: &str = "tests.quality";
 
-/// The settings and their defaults (ADR-054). A finding fires when a value exceeds its maximum.
+/// The settings and their defaults (ADR-054). A finding fires when a value exceeds its maximum;
+/// `debug_assertions` configures the assertions `TestFrames` holds (ADR-224).
 const LIMITS: Limits = Limits::new(&[
     (
         "mock_density_max",
@@ -54,7 +55,14 @@ const LIMITS: Limits = Limits::new(&[
         "The fewest tests in one file that must share their leading statements to be \
          test.duplicate-setup.",
     ),
-]);
+])
+.with_flags(&[Flag {
+    name: "debug_assertions",
+    default: true,
+    summary: "Whether assertions only a build with debug assertions evaluates (`debug_assert…` \
+              macros and methods) count as assertions; false leaves them out of every test.",
+    configures: Some(FactKind::TestFrames),
+}]);
 
 /// How a finding is fixed, after SCRAP's remediation modes.
 #[derive(Clone, Copy, Serialize, JsonSchema)]

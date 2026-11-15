@@ -417,6 +417,12 @@
           "default": 3,
           "name": "setup_tests_min",
           "summary": "The fewest tests in one file that must share their leading statements to be test.duplicate-setup."
+        },
+        {
+          "configures": "test-frames",
+          "default": true,
+          "name": "debug_assertions",
+          "summary": "Whether assertions only a build with debug assertions evaluates (`debug_assert…` macros and methods) count as assertions; false leaves them out of every test."
         }
       ],
       "stability": "experimental",

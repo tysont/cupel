@@ -92,14 +92,14 @@ framework = "rust-test"
 
 [tests.assertions]
 assert_eq = { kind = "equality", strength = "strong" }
-debug_assert_eq = { kind = "equality", strength = "strong" }
+debug_assert_eq = { kind = "equality", strength = "strong", debug = true }
 prop_assert_eq = { kind = "equality", strength = "strong" }
 # Inequality rules out one value and allows every other: weak.
 assert_ne = { kind = "equality", strength = "weak" }
-debug_assert_ne = { kind = "equality", strength = "weak" }
+debug_assert_ne = { kind = "equality", strength = "weak", debug = true }
 prop_assert_ne = { kind = "equality", strength = "weak" }
 assert = { kind = "truthiness", strength = "weak" }
-debug_assert = { kind = "truthiness", strength = "weak" }
+debug_assert = { kind = "truthiness", strength = "weak", debug = true }
 prop_assert = { kind = "truthiness", strength = "weak" }
 assert_snapshot = { kind = "snapshot", strength = "strong" }
 assert_debug_snapshot = { kind = "snapshot", strength = "strong" }
@@ -111,6 +111,10 @@ equal = { kind = "equality", strength = "strong" }
 not-equal = { kind = "equality", strength = "weak" }
 one-value = { kind = "equality", strength = "strong" }
 process = { kind = "custom", strength = "strong" }
+# A method named `assert…` checks what its project defines; one named `debug_assert…` does so only
+# with debug assertions on (ADR-224).
+method = { kind = "custom", strength = "strong" }
+debug-method = { kind = "custom", strength = "strong", debug = true }
 compile-test = { kind = "custom", strength = "strong" }
 is-present = { kind = "not-null", strength = "weak" }
 is-err = { kind = "throws", strength = "weak" }

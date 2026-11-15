@@ -66,6 +66,19 @@ pub fn produce_rooted<F: Fact>(lang: &str, root: &Path, roots: &[(&str, &str)]) 
     fact
 }
 
+/// Produces `F` for `lang` over every source file under `root`, the settings checks declare for
+/// the fact configured as `settings` (ADR-147), panicking on any event.
+pub fn produce_configured<F: Fact>(
+    lang: &str,
+    root: &Path,
+    settings: serde_json::Map<String, serde_json::Value>,
+) -> F {
+    let (fact, events) =
+        produce_with_settings::<F>(lang, root, &Exclude::default(), None, Vec::new(), settings);
+    assert!(events.is_empty(), "{events:?}");
+    fact
+}
+
 /// Produces `F` for `lang` over `root` with `scope`, or every file the walk finds.
 fn produce_over<F: Fact>(
     lang: &str,
@@ -84,6 +97,19 @@ fn produce_with<F: Fact>(
     scope: Option<Scope>,
     roots: Vec<cupel_core::config::RootConfig>,
 ) -> (F, Vec<Event>) {
+    produce_with_settings::<F>(lang, root, exclude, scope, roots, serde_json::Map::new())
+}
+
+/// Produces `F` for `lang` over `root` with `scope`, `roots` as the configured `[roots]`, and
+/// `settings` as the settings checks declare for the fact.
+fn produce_with_settings<F: Fact>(
+    lang: &str,
+    root: &Path,
+    exclude: &Exclude,
+    scope: Option<Scope>,
+    roots: Vec<cupel_core::config::RootConfig>,
+    settings: serde_json::Map<String, serde_json::Value>,
+) -> (F, Vec<Event>) {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
@@ -93,7 +119,7 @@ fn produce_with<F: Fact>(
         .next()
         .unwrap_or_else(|| panic!("no {} producer for {lang}", F::KIND));
     let writer = Writer::new(root, false).unwrap().confined();
-    let ctx = ProduceCtx::new(
+    let mut ctx = ProduceCtx::new(
         Ctx {
             exclude: exclude.clone(),
             roots,
@@ -102,6 +128,7 @@ fn produce_with<F: Fact>(
         writer,
         Cancellation::new(),
     );
+    ctx.settings = settings;
     let scope = scope.unwrap_or_else(|| {
         Scope::of_files(walk_excluding(
             root,

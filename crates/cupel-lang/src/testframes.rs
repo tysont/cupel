@@ -49,6 +49,10 @@
 //!   function; it documents only cases other patterns found. A case's doc is its doc nodes' texts
 //!   in document order, one per line.
 //!
+//! A `[tests.assertions]` class with `debug = true` is a debug assertion (`debug_assert!`): when the
+//! `debug_assertions` setting a check declares for `TestFrames` is `false`, every debug assertion is
+//! left out of the case holding it, after helpers are resolved (ADR-224).
+//!
 //! An assertion, mock, skip, or property captured in the same match as a `@test.case` belongs to that
 //! case (attributes and decorators sit outside the function they mark); otherwise it belongs
 //! to the innermost case containing it. A mock outside every case (a module-level mock) is the
@@ -94,10 +98,81 @@ inventory::submit!(crate::generic::GenericProducer {
     drives: |spec| spec.has(QueryFile::Tests),
     attach: |language, cache, reg| {
         reg.register::<TestFrames, _>(
-            QueryProducer::new(language, cache, extract).finishing(resolve_helpers),
+            QueryProducer::new(language, cache, extract).finishing(finish),
         );
     },
 });
+
+/// The setting a check declares for `TestFrames` (ADR-147): `false` leaves debug assertions out
+/// (ADR-224). Unset, they count.
+pub const DEBUG_ASSERTIONS: &str = "debug_assertions";
+
+/// Completes the merged fact: helper calls across files ([`resolve_helpers`]), then debug
+/// assertions left out when the settings say so ([`leave_out_debug`]).
+fn finish(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn Language, ctx: &ProduceCtx) {
+    resolve_helpers(frames, parsed, language, ctx);
+    if ctx.settings.get(DEBUG_ASSERTIONS) == Some(&serde_json::Value::Bool(false)) {
+        leave_out_debug(frames, parsed, language);
+    }
+}
+
+/// Removes from every case each assertion a debug class won (ADR-224).
+fn leave_out_debug(frames: &mut TestFrames, parsed: &[Parsed], language: &dyn Language) {
+    if !language.spec().has(QueryFile::Tests) {
+        return;
+    }
+    for parsed in parsed {
+        let debug = parsed.derived("test-debug-assertions", || debug_spans(parsed, language));
+        if debug.is_empty() {
+            continue;
+        }
+        for test_file in frames.files.iter_mut().filter(|f| f.file == parsed.file) {
+            for case in &mut test_file.cases {
+                case.assertions
+                    .retain(|assertion| !debug.contains(&assertion.span));
+            }
+        }
+    }
+}
+
+/// Where the debug assertions of `parsed` are: the span of each assertion node whose earliest
+/// pattern classifies it with a debug class.
+fn debug_spans(parsed: &Parsed, language: &dyn Language) -> Vec<Span> {
+    let spec = language.spec();
+    let rules = &spec.tables().tests;
+    let query = spec
+        .query(QueryFile::Tests, &parsed.grammar)
+        .unwrap_or_else(|error| panic!("{} tests.scm: {error}", language.id()));
+    let mut earliest: BTreeMap<usize, (usize, bool, Span)> = BTreeMap::new();
+    for m in matches(&query, parsed) {
+        let Some(node) = m.node(capture::TEST_ASSERTION) else {
+            continue;
+        };
+        let debug = rules.classify(&assertion_key(parsed, &m)).debug;
+        let at = span(m.node(capture::ASSERTION_EXTENT).unwrap_or(node));
+        let slot = earliest.entry(node.id()).or_insert((m.pattern, debug, at));
+        if m.pattern < slot.0 {
+            *slot = (m.pattern, debug, at);
+        }
+    }
+    earliest
+        .into_values()
+        .filter(|(_, debug, _)| *debug)
+        .map(|(_, _, at)| at)
+        .collect()
+}
+
+/// The `[tests.assertions]` key of the assertion `m` captures: its idiom, else its name's text
+/// without whitespace, else empty.
+fn assertion_key(parsed: &Parsed, m: &Match<'_, '_>) -> String {
+    m.prefixed(capture::ASSERTION_IDIOM_PREFIX)
+        .map(|(key, _)| key.to_owned())
+        .or_else(|| {
+            m.node(capture::ASSERTION_NAME)
+                .map(|n| parsed.text(n).split_whitespace().collect())
+        })
+        .unwrap_or_default()
+}
 
 /// The `TestFrames` extractor.
 ///
@@ -218,15 +293,7 @@ fn attach_assertions(
         let Some(node) = m.node(capture::TEST_ASSERTION) else {
             continue;
         };
-        let key = m
-            .prefixed(capture::ASSERTION_IDIOM_PREFIX)
-            .map(|(key, _)| key.to_owned())
-            .or_else(|| {
-                m.node(capture::ASSERTION_NAME)
-                    .map(|n| parsed.text(n).split_whitespace().collect())
-            })
-            .unwrap_or_default();
-        let class = rules.classify(&key);
+        let class = rules.classify(&assertion_key(parsed, m));
         let entry = (
             m.pattern,
             owner(cases, m, node),

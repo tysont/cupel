@@ -5,8 +5,8 @@ mod support;
 use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::{Because, Runs, Skipped};
 use support::{
-    assert_framework, assert_test_file, case, file, fixture, produce, produce_scoped, properties,
-    property, rows, tree,
+    assert_framework, assert_test_file, case, file, fixture, produce, produce_configured,
+    produce_scoped, properties, property, rows, tree,
 };
 
 use AssertionKind::{Custom, Equality, NotNull, Snapshot, Throws, Truthiness};
@@ -255,6 +255,14 @@ const ASSERTION_FORMS: &[(&str, &[(AssertionKind, AssertionStrength)])] = &[
         "fn foo<T: Send>(t: T) { drop(t) }\n    foo(ArgGroup::new(\"test\"));",
         &[],
     ),
+    // A method named `assert…` or `debug_assert…` checks what its project defines (ADR-224).
+    ("cmd.debug_assert();", &[(Custom, Strong)]),
+    (
+        "Command::new(\"serve\").assert_success();",
+        &[(Custom, Strong)],
+    ),
+    ("value.assert_eq(&other);", &[(Custom, Strong)]),
+    ("debug_assert_eq!(total, 3);", &[(Equality, Strong)]),
 ];
 
 #[test]
@@ -634,4 +642,30 @@ fn a_call_through_a_module_path_asserts_nothing_when_the_scope_leaves_out_the_mo
         rows(file(&frames, "tests/suite/flags.rs"))[0],
         case("checks_through_the_module", &[], Runs, &[], 8)
     );
+}
+
+/// A test asserting with debug assertions (`debug_assert…` macros and methods) beside one plain
+/// assertion.
+const DEBUG_ASSERTIONS: &str = "#[test]\nfn t() {\n    debug_assert!(ready(x));\n    cmd.debug_assert();\n    debug_assert_eq!(a, b);\n    assert!(ready(y));\n}\n";
+
+#[test]
+fn debug_assertions_count_unless_the_setting_turns_them_off() {
+    let dir = tree(&[("tests/t.rs", DEBUG_ASSERTIONS)]);
+    let classes = |frames: &TestFrames| rows(file(frames, "tests/t.rs"))[0].1.clone();
+    let counted: TestFrames = produce("rust", dir.path());
+    assert_eq!(
+        classes(&counted),
+        [
+            (Truthiness, Weak),
+            (Custom, Strong),
+            (Equality, Strong),
+            (Truthiness, Weak)
+        ]
+    );
+    let settings = serde_json::Map::from_iter([(
+        "debug_assertions".to_owned(),
+        serde_json::Value::Bool(false),
+    )]);
+    let left_out: TestFrames = produce_configured("rust", dir.path(), settings);
+    assert_eq!(classes(&left_out), [(Truthiness, Weak)]);
 }
