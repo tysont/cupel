@@ -15,7 +15,7 @@ Open: how narrowly to apply it.
 Chosen: (a), the narrowest reading, keeping the kind the finding already has.
 
 ## Decision
-The clippy reader gives every diagnostic coded `E0554` the analyzer level `note`, so `static.analyze` reports `analyze.clippy.E0554` at `info`. Every other code keeps rustc's level. `info` findings count in `diagnostics` but not in `errors`, and fail neither the check nor a `"static.analyze" = "none"` gate rule (ADR-102).
+The clippy reader gives every diagnostic coded `E0554` the analyzer level `note`, so `static.analyze` reports `analyze.clippy.E0554` at `info`. Every other code keeps rustc's level. `info` findings count in `diagnostics` but not in `errors`, and fail neither the check nor a `"static.analyze" = "none"` gate rule.
 
 ## Consequences
 - bytes' three E0554 findings are `info`, and its `static.analyze` passes on what clippy can check.
