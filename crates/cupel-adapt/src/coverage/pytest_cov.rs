@@ -16,7 +16,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     resolve: as_written,
     listing,
     providers: &[],
-    uses: None,
+    uses: Some("--cov"),
 };
 
 /// coverage.py lists every file under a source (`--cov=<source>`) and, without one (`--cov`, or

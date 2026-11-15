@@ -189,6 +189,9 @@
               "runner": "tool.pytest"
             }
           ],
+          "defer": [
+            "not (`pyproject.toml` or `setup.cfg` or `requirements*.txt` in the root or a member mentions `pytest-cov`)"
+          ],
           "detect": [],
           "format": "lcov",
           "install": "<add> pytest-cov",
@@ -196,6 +199,10 @@
         },
         {
           "commands": [
+            {
+              "command": "<m> coverage run -m pytest && <m> coverage lcov -o {out}",
+              "runner": "tool.pytest"
+            },
             {
               "command": "<m> coverage run -m unittest && <m> coverage lcov -o {out}",
               "runner": "tool.unittest"

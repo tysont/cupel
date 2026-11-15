@@ -1,5 +1,5 @@
-// ABOUTME: The coverage.py coverage producer for Python, paired with the unittest runner: the configured command
-// ABOUTME: (`coverage run -m unittest && coverage lcov -o {out}`), LCOV or Cobertura.
+// ABOUTME: The coverage.py coverage producer for Python, paired with the unittest and pytest runners: the configured
+// ABOUTME: command (`coverage run -m unittest && coverage lcov -o {out}`, or `-m pytest`), LCOV or Cobertura.
 use cupel_core::coverage::{CoverageMap, Listing};
 
 use super::tool::{CoverageSpec, CoverageTool, as_written};

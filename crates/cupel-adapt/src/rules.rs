@@ -1,5 +1,5 @@
 // ABOUTME: Detection rules of the toolchain table: what must be true of a project root on disk for a
-// ABOUTME: launcher or tool to be chosen (a file, here or above, its text, a package mention, a JSON value, or a Maven goal).
+// ABOUTME: launcher or tool to be chosen (a file, here or above, its text, a package mention, a JSON value, a Maven goal, or their negation).
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -49,6 +49,8 @@ pub enum Rule {
     MavenGoal { maven_goal: String, plugin: String },
     /// Every rule holds.
     All { all: Vec<Rule> },
+    /// The rule does not hold.
+    Not { not: Box<Rule> },
 }
 
 /// A project root on disk as rules see it: its directory and its members' directories.
@@ -110,6 +112,7 @@ impl Rule {
                 crate::maven_pom::runs_goal(dirs.root, plugin, maven_goal)
             }
             Self::All { all } => all.iter().all(|rule| rule.holds(dirs)),
+            Self::Not { not } => !not.holds(dirs),
         }
     }
 
@@ -161,6 +164,7 @@ impl Rule {
                 .map(Self::describe)
                 .collect::<Vec<_>>()
                 .join(", and "),
+            Self::Not { not } => format!("not ({})", not.describe()),
         }
     }
 }
@@ -229,10 +233,11 @@ mod tests {
                 { mentions = "m", in = ["c*"] },
                 { json = "p.json", path = ["k"], prefix = "v@", members = true },
                 { all = [{ file = "a" }, { file = "b" }] },
+                { not = { file = "a" } },
             ]"#,
         )
         .unwrap();
-        assert_eq!(rules.detect.len(), 5);
+        assert_eq!(rules.detect.len(), 6);
         assert!(toml::from_str::<Rules>("detect = [{ file = \"a\", typo = 1 }]").is_err());
     }
 

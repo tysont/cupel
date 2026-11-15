@@ -330,6 +330,30 @@ fn a_node_test_coverage_producer_runs_only_a_command_that_uses_it() {
     assert_eq!(found[1][1], unconfigured());
 }
 
+/// pytest-cov and coverage.py both pair with pytest; pytest-cov runs only a command with a
+/// `--cov` option, so coverage.py's command around pytest is not configured for it (ADR-228).
+#[test]
+fn pytest_cov_runs_only_a_command_with_a_cov_option() {
+    let registry = registry();
+    let dir = fixture("python");
+    let configured = |command: &str| {
+        let mut ctx = Ctx::new(dir.path().to_path_buf());
+        let table = Map::from_iter([("coverage".to_owned(), json!(command))]);
+        ctx.lang.insert(LangId::from("python"), table);
+        producer(&registry, "tool.pytest-cov", "python").availability(&ctx)
+    };
+    let unconfigured = Availability::Unconfigured {
+        key: "lang.python.coverage".to_owned(),
+    };
+    let found = [
+        "python -m coverage run -m pytest && python -m coverage lcov -o {out}",
+        "python -m pytest --cov=. --cov-report=lcov:{out}",
+        "python -m pytest --cov --cov-report=lcov:{out}",
+    ]
+    .map(|command| configured(command) == unconfigured);
+    assert_eq!(found, [true, false, false]);
+}
+
 #[test]
 fn a_configured_root_detects_its_coverage_producer_from_its_own_runner() {
     let registry = registry();

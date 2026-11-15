@@ -3,7 +3,7 @@
 use cupel_core::Status;
 use cupel_fixtures::{copy_repo, run_cupel};
 
-const CASES: [&str; 11] = [
+const CASES: [&str; 12] = [
     "cargo-single",
     "cargo-workspace",
     "go-module",
@@ -11,6 +11,7 @@ const CASES: [&str; 11] = [
     "node-test",
     "pnpm-ts-workspace",
     "python-pyproject",
+    "python-coverage",
     "python-requirements",
     "monorepo",
     "maven",

@@ -188,7 +188,10 @@ fn each_monorepo_root_gets_its_own_ecosystems_commands() {
         &[],
         &expected(
             Some("poetry run python -m pytest"),
-            Some("poetry run python -m pytest --cov=. --cov-report=lcov:{out}"),
+            Some(
+                "poetry run python -m coverage run -m pytest && poetry run python -m coverage \
+                 lcov -o {out}",
+            ),
             None,
         ),
     );
@@ -317,6 +320,37 @@ fn a_member_dependency_selects_the_runner_and_package_manager_fields_select_the_
             Some("pnpm c8 --reporter=lcov mocha"),
             None
         )
+    );
+}
+
+/// A pytest root gets pytest-cov's command only where a manifest declares pytest-cov, and
+/// coverage.py's (`coverage run -m pytest`) everywhere else (ADR-228), with any launcher.
+#[test]
+fn a_pytest_root_gets_coverage_py_unless_it_declares_pytest_cov() {
+    let declared = support::repository(&[("requirements-dev.txt", "pytest\npytest-cov==6\n")]);
+    let coverage = support::repository(&[("requirements.txt", "pytest==8\ncoverage[toml]==7\n")]);
+    let bare = support::repository(&[("pytest.ini", "[pytest]\n")]);
+    let uv = support::repository(&[
+        ("pyproject.toml", "[dependency-groups]\ndev = [\"pytest\"]\n"),
+        ("uv.lock", ""),
+    ]);
+    let coverage_py = |dir: &Path| commands("python", dir, &[], &["."]).coverage;
+    assert_eq!(
+        [
+            coverage_py(declared.path()),
+            coverage_py(coverage.path()),
+            coverage_py(bare.path()),
+            coverage_py(uv.path()),
+        ],
+        [
+            Some("python -m pytest --cov=. --cov-report=lcov:{out}".to_owned()),
+            Some("python -m coverage run -m pytest && python -m coverage lcov -o {out}".to_owned()),
+            Some("python -m coverage run -m pytest && python -m coverage lcov -o {out}".to_owned()),
+            Some(
+                "uv run python -m coverage run -m pytest && uv run python -m coverage lcov -o {out}"
+                    .to_owned()
+            ),
+        ]
     );
 }
 

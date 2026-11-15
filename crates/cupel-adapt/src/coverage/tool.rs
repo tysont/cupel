@@ -53,7 +53,9 @@ pub struct CoverageSpec {
     /// resolved as Node resolves them; empty when it needs none.
     pub providers: &'static [&'static str],
     /// A word the configured command must contain for this producer to run it, when another
-    /// producer pairs with the same runner (c8 and Node's own coverage with `node --test`).
+    /// producer pairs with the same runner (c8 and Node's own coverage with `node --test`,
+    /// pytest-cov's `--cov` and coverage.py with pytest); an option given a value (`--cov=src`)
+    /// contains its name.
     pub uses: Option<&'static str>,
 }
 
@@ -182,12 +184,14 @@ impl Producer<CoverageMap> for CoverageTool {
 
 impl CoverageTool {
     /// Whether `command` is one this producer runs: any, unless the spec names a word it uses,
-    /// which must be one of the command's words or the last part of one's path.
+    /// which must be one of the command's words, the last part of one's path, or the name of an
+    /// option one gives a value (`--cov` of `--cov=src`).
     fn runs(&self, command: &str) -> bool {
         self.0.uses.is_none_or(|word| {
-            command
-                .split_whitespace()
-                .any(|part| part.rsplit('/').next() == Some(word))
+            command.split_whitespace().any(|part| {
+                part.rsplit('/').next() == Some(word)
+                    || part.split_once('=').is_some_and(|(name, _)| name == word)
+            })
         })
     }
 

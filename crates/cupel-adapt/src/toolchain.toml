@@ -180,16 +180,19 @@ install = "<add> pytest"
 id = "tool.unittest"
 command = "<m> unittest"
 
+# pytest-cov's command is written only where a manifest declares the plugin; a pytest root
+# without it gets coverage.py's command around pytest (ADR-228).
 [[rows.coverage]]
 id = "tool.pytest-cov"
 format = "lcov"
+defer = [{ not = { mentions = "pytest-cov", in = ["pyproject.toml", "setup.cfg", "requirements*.txt"] } }]
 commands = { "tool.pytest" = "<m> pytest --cov=<packages> --cov-report=lcov:{out}" }
 install = "<add> pytest-cov"
 
 [[rows.coverage]]
 id = "tool.coverage-py"
 format = "lcov"
-commands = { "tool.unittest" = "<m> coverage run -m unittest && <m> coverage lcov -o {out}" }
+commands = { "tool.pytest" = "<m> coverage run -m pytest && <m> coverage lcov -o {out}", "tool.unittest" = "<m> coverage run -m unittest && <m> coverage lcov -o {out}" }
 install = "<add> coverage"
 
 [[rows.bench]]
