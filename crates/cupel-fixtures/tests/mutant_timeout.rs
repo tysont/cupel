@@ -1,7 +1,8 @@
-// ABOUTME: A mutant's run is capped and slow tests are left out of whole-suite runs, end to end (ADR-147): the real binary
-// ABOUTME: cuts two looping mutants at `max_mutant_timeout` and leaves a 61 s Go test out of every mutant with a finding.
+// ABOUTME: A mutant's run is capped and slow tests are left out of whole-suite runs, end to end (ADR-147, 236): the real binary
+// ABOUTME: cuts two looping mutants at `max_mutant_timeout`, on time with a `ps` that never answers, and leaves a 61 s Go
+// ABOUTME: test out of every mutant with a finding.
 use cupel_core::{Envelope, Severity};
-use cupel_fixtures::{copy_repo, run_cupel, run_cupel_measuring};
+use cupel_fixtures::{copy_repo, run_cupel, run_cupel_measuring, run_cupel_with_env};
 
 /// Whether `program` is on `PATH`; prints the skip line when it is not.
 fn installed(program: &str, what: &str) -> bool {
@@ -48,6 +49,72 @@ fn a_mutant_that_loops_is_cut_at_max_mutant_timeout() {
     let ran_ms = envelope.checks[0].duration_ms;
     assert!(ran_ms < 600_000, "{ran_ms} ms");
     outcome.assert_golden("mutant-timeout/loop");
+}
+
+/// A `ps` that answers no listing in time, first on a `PATH` that is otherwise the caller's: it
+/// sleeps past the 5 s listing timeout, and only a little past it, as a listing under way when
+/// `cupel` exits is left to end on its own.
+#[cfg(unix)]
+fn path_with_a_hung_ps(bin: &std::path::Path) -> std::ffi::OsString {
+    use std::os::unix::fs::PermissionsExt;
+    let ps = bin.join("ps");
+    std::fs::write(&ps, "#!/bin/sh\nexec sleep 8\n").unwrap();
+    std::fs::set_permissions(&ps, std::fs::Permissions::from_mode(0o755)).unwrap();
+    let mut path = std::ffi::OsString::from(bin);
+    path.push(":");
+    path.push(std::env::var_os("PATH").unwrap_or_default());
+    path
+}
+
+#[cfg(unix)]
+#[test]
+fn with_a_ps_that_never_answers_every_mutant_timeout_still_fires_on_time() {
+    if !installed("pytest", "the hung-ps mutant-timeout fixture") {
+        return;
+    }
+    let dir = tempfile::tempdir().unwrap();
+    copy_repo("mutant-timeout/loop", dir.path());
+    let toml = dir.path().join("cupel.toml");
+    let config = std::fs::read_to_string(&toml).unwrap();
+    std::fs::write(&toml, config.replace("\"30s\"", "\"10s\"")).unwrap();
+    let bin = tempfile::tempdir().unwrap();
+    let path = path_with_a_hung_ps(bin.path());
+    let outcome = run_cupel_with_env(
+        &[
+            "check",
+            "--only",
+            "tests.mutation",
+            "--format",
+            "json",
+            "--events",
+            ".cupel/events.jsonl",
+        ],
+        dir.path(),
+        &[("PATH", &path)],
+    );
+    let envelope = outcome.envelope();
+    assert_eq!(
+        findings(envelope),
+        [
+            "mutant.survived Mutant survived: `0` → `1` at count.py:2",
+            "mutant.timeout Mutant timed out: `+=` → `-=` at count.py:4",
+            "mutant.timeout Mutant timed out: `1` → `0` at count.py:4",
+        ],
+        "{}",
+        outcome.stdout
+    );
+    // Every listing outlasts its 5 s timeout, so each is killed then and skipped; no wait loop waits
+    // on one, so the looping mutants, which run side by side, end at their 10 s cap. A reader
+    // that waited on a listing would end each up to 5 s late, and a kill that listed its groups
+    // up to 10 s more.
+    let ran_ms = envelope.checks[0].duration_ms;
+    assert!(ran_ms < 20_000, "{ran_ms} ms");
+    let events = std::fs::read_to_string(dir.path().join(".cupel/events.jsonl")).unwrap();
+    let skipped = events
+        .lines()
+        .filter(|line| line.contains(r#"{"ev":"sampler.timeout","timeout_ms":5000}"#))
+        .count();
+    assert!(skipped >= 1, "{events}");
 }
 
 #[test]

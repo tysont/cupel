@@ -1,11 +1,21 @@
 // ABOUTME: What the machine and a run's processes hold in memory, read without unsafe code (ADR-148): physical memory
 // ABOUTME: from the system, and a run's resident set and process groups from `ps` samples shared by every `Process`.
 use std::collections::BTreeSet;
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex, MutexGuard, OnceLock, PoisonError};
 use std::time::{Duration, Instant};
 
-/// How old a sample may be before the next reader takes a new one.
+use crate::clock;
+
+/// How old a sample may be before the next reader starts a new one.
 const SAMPLE_AGE: Duration = Duration::from_millis(200);
+
+/// How long one `ps` listing may run before its sample is skipped (ADR-236), in milliseconds as
+/// the `sampler.timeout` event reports it.
+pub(crate) const LIST_TIMEOUT_MS: u64 = 5_000;
+const LIST_TIMEOUT: Duration = Duration::from_millis(LIST_TIMEOUT_MS);
+
+/// How often a listing is checked for having ended.
+const LIST_POLL: Duration = Duration::from_millis(10);
 
 /// `ps` rounds a process's age to whole seconds, so a process started in the same second as the
 /// child may read as this much older than it.
@@ -65,14 +75,42 @@ impl std::fmt::Display for Held {
     }
 }
 
-/// Every running process, as of `taken`.
+/// Every running process, from a listing started at `started` and ended at `ended`.
 struct Sample {
-    taken: Instant,
+    started: Instant,
+    ended: Instant,
     processes: Arc<Vec<Listed>>,
 }
 
-/// The latest sample, shared by every `Process` that watches its child's memory.
-static SAMPLE: Mutex<Option<Sample>> = Mutex::new(None);
+/// What every `Process` that watches its child's memory shares. Its lock is held only to read or
+/// write these fields, never across a listing (ADR-236).
+struct Sampler {
+    latest: Option<Sample>,
+    /// When the newest listing under way on its own thread started.
+    listing: Option<Instant>,
+    /// The last listing that ended or timed out timed out: a kill signals the child's own group
+    /// without listing again until one ends in time.
+    stalled: bool,
+    /// Listings that timed out since [`take_sampler_timeouts`] last took the count.
+    timeouts: u64,
+}
+
+static SAMPLER: Mutex<Sampler> = Mutex::new(Sampler {
+    latest: None,
+    listing: None,
+    stalled: false,
+    timeouts: 0,
+});
+
+fn sampler() -> MutexGuard<'static, Sampler> {
+    SAMPLER.lock().unwrap_or_else(PoisonError::into_inner)
+}
+
+/// How many process listings timed out since the last call, each a memory sample skipped and a
+/// `sampler.timeout` event to report (ADR-236).
+pub(crate) fn take_sampler_timeouts() -> u64 {
+    std::mem::take(&mut sampler().timeouts)
+}
 
 /// The machine's physical memory in bytes; `None` where it cannot be read.
 pub fn physical_memory() -> Option<u64> {
@@ -126,6 +164,9 @@ pub(crate) fn resident_since(pid: u32, not_before: Instant) -> Option<Held> {
 /// own first, then every other group one of its descendants is in. Only `pid`'s where no sample
 /// can be taken.
 pub(crate) fn groups(pid: u32, spawned: Instant) -> Vec<u32> {
+    if sampler().stalled {
+        return vec![pid];
+    }
     let Some(processes) = list() else {
         return vec![pid];
     };
@@ -172,23 +213,75 @@ fn members(processes: &[Listed], pid: u32, age: Duration) -> BTreeSet<u32> {
     }
 }
 
-/// The latest sample, renewed when older than `SAMPLE_AGE` or taken before `not_before`.
+/// The latest sample when it ended less than `SAMPLE_AGE` ago and started at `not_before` or
+/// later. Otherwise `None` at once, with a listing for the next sample started on its own thread
+/// unless one that started at `not_before` or later is under way, or the sampler is stalled and
+/// any is: a reader never waits on `ps`, so a listing that hangs delays no timeout and the budget
+/// goes unmeasured instead (ADR-236). A listing from before `not_before` cannot serve the reader,
+/// so it starts its own rather than wait for that one to end first.
 fn sample_since(not_before: Instant) -> Option<Arc<Vec<Listed>>> {
-    let mut latest = SAMPLE
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner);
-    if let Some(sample) = latest.as_ref()
-        && sample.taken.elapsed() < SAMPLE_AGE
-        && sample.taken >= not_before
+    let started = {
+        let mut sampler = sampler();
+        if let Some(sample) = sampler.latest.as_ref()
+            && sample.ended.elapsed() < SAMPLE_AGE
+            && sample.started >= not_before
+        {
+            return Some(Arc::clone(&sample.processes));
+        }
+        if sampler
+            .listing
+            .is_some_and(|listing| sampler.stalled || listing >= not_before)
+        {
+            return None;
+        }
+        let started = clock::now();
+        sampler.listing = Some(started);
+        started
+    };
+    if std::thread::Builder::new()
+        .name("memory-sample".to_owned())
+        .spawn(move || renew(started))
+        .is_err()
     {
-        return Some(Arc::clone(&sample.processes));
+        ended(started);
     }
-    let processes = Arc::new(list()?);
-    *latest = Some(Sample {
-        taken: Instant::now(),
-        processes: Arc::clone(&processes),
-    });
-    Some(processes)
+    None
+}
+
+/// Lists every process from `started` and keeps the listing as the latest sample, unless a
+/// listing that started later already is.
+fn renew(started: Instant) {
+    /// Marks the listing ended however `renew` ends, so a panic in it cannot stop the sampler.
+    struct Ended(Instant);
+    impl Drop for Ended {
+        fn drop(&mut self) {
+            ended(self.0);
+        }
+    }
+    let _ended = Ended(started);
+    let Some(processes) = list() else {
+        return;
+    };
+    let mut sampler = sampler();
+    if sampler
+        .latest
+        .as_ref()
+        .is_none_or(|latest| latest.started < started)
+    {
+        sampler.latest = Some(Sample {
+            started,
+            ended: clock::now(),
+            processes: Arc::new(processes),
+        });
+    }
+}
+
+/// Clears the listing under way when it is the one that started at `started`.
+fn ended(started: Instant) {
+    let mut sampler = sampler();
+    if sampler.listing == Some(started) {
+        sampler.listing = None;
+    }
 }
 
 /// Every running process from `ps`, which macOS and Linux both print as the pid, the parent's
@@ -201,31 +294,64 @@ fn list() -> Option<Vec<Listed>> {
         "-A", "-o", "pid=", "-o", "ppid=", "-o", "pgid=", "-o", "rss=", "-o", "etime=", "-o",
         "comm=",
     ]);
-    listed_by(&mut ps)
+    listed_by(&mut ps, LIST_TIMEOUT)
 }
 
-/// The processes `command` lists in `ps`'s columns; `None` where it cannot run or fails. The
-/// listing goes to an unlinked file read once `command` exits, not to a pipe read to its end: a
-/// process that inherited the pipe would hold that end back for as long as it lives.
+/// The processes `command` lists in `ps`'s columns; `None` where it cannot run, fails, or runs
+/// past `timeout`, which is killed, counted, and marks the sampler stalled (ADR-236). The listing
+/// goes to an unlinked file read once `command` exits, not to a pipe read to its end: a process
+/// that inherited the pipe would hold that end back for as long as it lives.
 #[cfg(unix)]
-fn listed_by(command: &mut std::process::Command) -> Option<Vec<Listed>> {
+fn listed_by(command: &mut std::process::Command, timeout: Duration) -> Option<Vec<Listed>> {
     use std::io::{Read, Seek};
     use std::process::Stdio;
     let mut out = tempfile::tempfile().ok()?;
-    let status = command
+    let mut child = command
         .stdin(Stdio::null())
         .stdout(out.try_clone().ok()?)
         .stderr(Stdio::null())
-        .status()
+        .spawn()
         .ok()?;
+    let Some(status) = ended_within(&mut child, timeout) else {
+        let _ = child.kill();
+        let _ = child.wait();
+        let mut sampler = sampler();
+        sampler.timeouts += 1;
+        sampler.stalled = true;
+        return None;
+    };
+    sampler().stalled = false;
     if !status.success() {
         return None;
     }
     let mut stdout = Vec::new();
     out.rewind().ok()?;
     out.read_to_end(&mut stdout).ok()?;
+    Some(parsed(&String::from_utf8_lossy(&stdout)))
+}
+
+/// How `child` exited, when it did within `timeout`; `None` when it is still running then or
+/// can no longer be waited for.
+#[cfg(unix)]
+fn ended_within(
+    child: &mut std::process::Child,
+    timeout: Duration,
+) -> Option<std::process::ExitStatus> {
+    let until = clock::now() + timeout;
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => return Some(status),
+            Ok(None) if clock::now() < until => std::thread::sleep(LIST_POLL),
+            _ => return None,
+        }
+    }
+}
+
+/// The processes in `ps`'s columns, one per line; a line that does not parse is left out.
+#[cfg(unix)]
+fn parsed(text: &str) -> Vec<Listed> {
     let mut processes = Vec::new();
-    for line in String::from_utf8_lossy(&stdout).lines() {
+    for line in text.lines() {
         let fields: Vec<&str> = line.split_whitespace().collect();
         if let [pid, ppid, pgid, kib, etime, ref command @ ..] = fields[..]
             && let (Ok(pid), Ok(ppid), Ok(pgid), Ok(kib), Some(age)) = (
@@ -246,7 +372,7 @@ fn listed_by(command: &mut std::process::Command) -> Option<Vec<Listed>> {
             });
         }
     }
-    Some(processes)
+    processes
 }
 
 /// The elapsed time `ps` prints as `[[dd-]hh:]mm:ss`; `None` for anything else.
@@ -299,13 +425,38 @@ mod tests {
         let mut ps = std::process::Command::new("sh");
         ps.args(["-c", "echo '10 1 10 4 00:01 ps'; sleep 20 &"]);
         let started = Instant::now();
-        let listed = listed_by(&mut ps).unwrap();
+        let listed = listed_by(&mut ps, LIST_TIMEOUT).unwrap();
         assert!(
             started.elapsed() < Duration::from_secs(10),
             "the listing waited {:?} for a process holding its output",
             started.elapsed()
         );
         assert_eq!(listed.len(), 1);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_listing_that_outlasts_its_timeout_is_skipped_counted_and_stops_the_kill_listing() {
+        let _serial = sampler_tests();
+        let mut ps = std::process::Command::new("sh");
+        ps.args(["-c", "exec sleep 30"]);
+        let started = Instant::now();
+        let listed = listed_by(&mut ps, Duration::from_millis(200));
+        assert!(
+            started.elapsed() < Duration::from_secs(5),
+            "the listing ran {:?} past its timeout",
+            started.elapsed()
+        );
+        // Stalled, a kill signals the child's own group without waiting on another listing.
+        assert_eq!(
+            (
+                listed.is_none(),
+                take_sampler_timeouts(),
+                groups(4_000_000, Instant::now())
+            ),
+            (true, 1, vec![4_000_000])
+        );
+        let _ = list();
     }
 
     #[test]
@@ -372,28 +523,80 @@ mod tests {
 
     /// When the latest shared sample was taken.
     fn latest_taken() -> Option<Instant> {
-        SAMPLE
+        sampler().latest.as_ref().map(|sample| sample.started)
+    }
+
+    /// Held by each test that reads or sets the shared sampler, so none sees another's state.
+    static SAMPLER_TESTS: Mutex<()> = Mutex::new(());
+
+    fn sampler_tests() -> std::sync::MutexGuard<'static, ()> {
+        SAMPLER_TESTS
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .as_ref()
-            .map(|sample| sample.taken)
+    }
+
+    /// `pid`'s run from the first sample taken at `since` or later: a reading starts the listing
+    /// and returns at once, and a later one finds it.
+    fn resident_once_sampled(pid: u32, since: Instant) -> Option<Held> {
+        let until = Instant::now() + LIST_TIMEOUT + Duration::from_secs(1);
+        loop {
+            let held = resident_since(pid, since);
+            if held.is_some() || Instant::now() >= until {
+                return held;
+            }
+            std::thread::sleep(Duration::from_millis(10));
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_reading_after_a_listing_under_way_started_starts_its_own_and_is_served_by_it() {
+        let _serial = sampler_tests();
+        // A listing that started before the child's spawn cannot serve it; waiting for it and
+        // then for another would let a run that ends within two listings escape its budget.
+        sampler().listing = Some(Instant::now());
+        let mark = Instant::now() + Duration::from_millis(1);
+        std::thread::sleep(Duration::from_millis(2));
+        assert_eq!(
+            resident_once_sampled(std::process::id(), mark).map(|held| held.bytes() > 0),
+            Some(true),
+            "no listing started after the mark served the reading"
+        );
+        sampler().listing = None;
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_reading_while_another_listing_is_under_way_returns_at_once_with_no_sample() {
+        let _serial = sampler_tests();
+        let started = Instant::now();
+        sampler().listing = Some(started);
+        let held = resident_since(std::process::id(), started);
+        let waited = started.elapsed();
+        sampler().listing = None;
+        assert_eq!(
+            (held.is_none(), waited < Duration::from_millis(100)),
+            (true, true),
+            "the reading waited {waited:?}"
+        );
     }
 
     /// `ps` is Unix: Windows takes no sample (`list` is `None` there).
     #[cfg(unix)]
     #[test]
     fn a_reading_not_before_an_instant_renews_a_shared_sample_older_than_it() {
+        let _serial = sampler_tests();
         let me = std::process::id();
         let start = Instant::now();
         assert_eq!(
-            resident_since(me, start).map(|held| held.bytes() > 0),
+            resident_once_sampled(me, start).map(|held| held.bytes() > 0),
             Some(true),
             "ps lists this process"
         );
         let before = latest_taken().expect("the reading left a sample");
         let mark = Instant::now();
         assert_eq!(
-            resident_since(me, mark).map(|held| held.bytes() > 0),
+            resident_once_sampled(me, mark).map(|held| held.bytes() > 0),
             Some(true)
         );
         let after = latest_taken().expect("the reading left a sample");

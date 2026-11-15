@@ -850,6 +850,7 @@ fn event_name(event: &Event) -> &'static str {
         Event::Finding(finding) if finding.check.as_str() == "lang" => "producer-finding",
         Event::Finding(_) => "finding",
         Event::Progress { .. } => "progress",
+        Event::SamplerTimeout { .. } => "sampler.timeout",
         Event::CheckEnd { .. } => "check.end",
         Event::RunEnd { .. } => "run.end",
     }

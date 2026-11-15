@@ -84,7 +84,7 @@ impl Outcome {
 /// When the binary has not been built or cannot be started, and when it prints JSON that is
 /// neither an envelope nor a SARIF log, which breaks the output contract.
 pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
-    run(args, cwd, true)
+    run(args, cwd, true, &[])
 }
 
 /// Runs `cupel <args>` in `cwd` as [`run_cupel`] does, but never through the parity daemon: for
@@ -97,10 +97,20 @@ pub fn run_cupel(args: &[&str], cwd: &Path) -> Outcome {
 ///
 /// As [`run_cupel`].
 pub fn run_cupel_measuring(args: &[&str], cwd: &Path) -> Outcome {
-    run(args, cwd, false)
+    run(args, cwd, false, &[])
 }
 
-fn run(args: &[&str], cwd: &Path, parity: bool) -> Outcome {
+/// Runs `cupel <args>` in `cwd` as [`run_cupel_measuring`] does, with `env` set on top of the
+/// cleaned environment: for a run that needs a program on `PATH` replaced by a stand-in.
+///
+/// # Panics
+///
+/// As [`run_cupel`].
+pub fn run_cupel_with_env(args: &[&str], cwd: &Path, env: &[(&str, &std::ffi::OsStr)]) -> Outcome {
+    run(args, cwd, false, env)
+}
+
+fn run(args: &[&str], cwd: &Path, parity: bool, env: &[(&str, &std::ffi::OsStr)]) -> Outcome {
     let twin = (parity && crate::parity::enabled()).then(|| crate::parity::Twin::of(cwd));
     let tool = crate::mcp_parity::tool(args).filter(|_| parity && crate::mcp_parity::enabled());
     let mcp_twin = tool.map(|tool| (tool, crate::parity::Twin::of(cwd)));
@@ -116,6 +126,7 @@ fn run(args: &[&str], cwd: &Path, parity: bool) -> Outcome {
     // run gets its own: no golden sees another run's slots or the machine's.
     let tmp = tempfile::tempdir().expect("a temporary directory for the run");
     command.env("TMPDIR", tmp.path());
+    command.envs(env.iter().copied());
     let output = command
         .output()
         .unwrap_or_else(|error| panic!("cannot run cupel {args:?} in {}: {error}", cwd.display()));

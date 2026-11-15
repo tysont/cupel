@@ -155,6 +155,25 @@ expression: pretty(&schema)
       ]
     },
     {
+      "description": "A memory sample was skipped: its `ps` listing ran past `timeout_ms` and was killed, and\nthe memory budget went unmeasured until a listing ended in time (ADR-236).",
+      "type": "object",
+      "properties": {
+        "ev": {
+          "type": "string",
+          "const": "sampler.timeout"
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "format": "uint64",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "ev",
+        "timeout_ms"
+      ]
+    },
+    {
       "type": "object",
       "properties": {
         "ev": {

@@ -257,7 +257,7 @@ fn unknown_event_tag_is_rejected() {
     assert_eq!(
         error.to_string(),
         "unknown variant `run.start`, expected one of `plan`, `check.start`, `finding`, \
-         `progress`, `check.end`, `skip`, `run.end`"
+         `progress`, `check.end`, `skip`, `sampler.timeout`, `run.end`"
     );
 }
 

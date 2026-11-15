@@ -40,6 +40,10 @@ pub enum Event {
     },
     #[serde(rename = "skip")]
     Skip { id: CheckId, reason: SkipReason },
+    /// A memory sample was skipped: its `ps` listing ran past `timeout_ms` and was killed, and
+    /// the memory budget went unmeasured until a listing ended in time (ADR-236).
+    #[serde(rename = "sampler.timeout")]
+    SamplerTimeout { timeout_ms: u64 },
     #[serde(rename = "run.end")]
     RunEnd { status: Status, exit_code: ExitCode },
 }

@@ -1541,6 +1541,22 @@ impl<'a> FactStore<'a> {
     }
 }
 
+/// Emits check `id`'s `check.end`, after one `sampler.timeout` for each memory sample its
+/// producers skipped since the last report, because its `ps` listing ran past its timeout
+/// (ADR-236).
+fn end_check(sink: &mut dyn EventSink, id: &CheckId, status: CheckStatus, duration_ms: u64) {
+    for _ in 0..crate::memory::take_sampler_timeouts() {
+        sink.emit(Event::SamplerTimeout {
+            timeout_ms: crate::memory::LIST_TIMEOUT_MS,
+        });
+    }
+    sink.emit(Event::CheckEnd {
+        id: id.clone(),
+        status,
+        duration_ms,
+    });
+}
+
 /// One check across its languages: per-language results, findings, and progress.
 struct CheckRun<'a> {
     check: &'a dyn Check,
@@ -1656,11 +1672,7 @@ impl<'a> CheckRun<'a> {
                 notes,
             }
         };
-        sink.emit(Event::CheckEnd {
-            id: manifest.id.clone(),
-            status: result.status,
-            duration_ms,
-        });
+        end_check(sink, &manifest.id, result.status, duration_ms);
         Finished {
             result,
             findings: self.findings,
