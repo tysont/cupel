@@ -84,7 +84,10 @@ fn checked_with(dir: &Path, body: &str) -> (u64, u64) {
 fn a_file_s_parsed_facts_are_kept_while_one_of_the_last_20_runs_used_them_and_pruned_after() {
     // ADR-201 through the binary: a run keeps what it parsed and records the files it used;
     // the sweep after each run drops the facts of a file version none of the last 20 runs used.
-    let (old, new) = ("def pruned():\n    return 1\n", "def pruned():\n    return 2\n");
+    let (old, new) = (
+        "def pruned():\n    return 1\n",
+        "def pruned():\n    return 2\n",
+    );
     let dir = tempfile::tempdir().unwrap();
     copy_repo("python", dir.path());
     let (_, parsed) = checked_with(dir.path(), old);
