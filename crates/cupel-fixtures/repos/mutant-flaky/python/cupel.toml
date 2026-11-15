@@ -1,0 +1,5 @@
+# The flaky-in-the-overlay fixture (ADR-219): `test_outside_mutation_slots` passes in the repository and fails in
+# every mutation slot, mutated or not, as a timing test that fails under parallel slots does. It is left out of
+# every mutant's run with one `mutant.flaky-test-excluded`, and the other tests score the mutants.
+[lang.python]
+coverage = "PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider --cov=. --cov-branch --cov-report=lcov:{out}"

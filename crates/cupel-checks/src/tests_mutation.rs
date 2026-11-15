@@ -1,5 +1,5 @@
 // ABOUTME: `tests.mutation`: scores MutationOutcomes, whoever produced them (ADR-080): surviving mutants as failures at their
-// ABOUTME: site; timeouts, memory, uncovered sites, slow tests, equivalents, fallbacks as notes; the engine's phases as metrics.
+// ABOUTME: site; timeouts, memory, uncovered sites, slow and flaky tests, equivalents, fallbacks as notes; the engine's phases as metrics.
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use cupel_core::config::{ConfigError, MemoryLimit, Table, TimeLimit};
@@ -7,10 +7,10 @@ use cupel_core::hint::{ALL_TESTS, COVERING_TESTS, OWN_ROOT, with_own_tests};
 use cupel_core::syntax::{ProjectInfo, SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    ExcludedTest, FactKind, Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, Mutant,
-    MutantOutcome, MutationOutcomes, MutationPhase, MutationStrategy, Plan, ProtectionMetric,
-    Result, Scope, Score, SettingSpec, Severity, SiteHash, Stability, SymbolHash, Tier,
-    UnfinishedTest,
+    ExcludedTest, FactKind, Facts, Finding, FlakyTest, Manifest, Measurement, MetricPer,
+    MetricSpec, Mutant, MutantOutcome, MutationOutcomes, MutationPhase, MutationStrategy, Plan,
+    ProtectionMetric, Result, Scope, Score, SettingSpec, Severity, SiteHash, Stability, SymbolHash,
+    Tier, UnfinishedTest,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -116,6 +116,16 @@ struct TimedOut {
     slowest: Option<Vec<UnfinishedTest>>,
 }
 
+/// Evidence of `mutant.flaky-test-excluded`.
+#[derive(Serialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+struct FlakyTestEvidence {
+    /// The runner's ID of the test.
+    test: String,
+    /// Its file, when the runner names one.
+    file: Option<String>,
+}
+
 /// Evidence of `mutant.slow-test-excluded`.
 #[derive(Serialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
@@ -195,6 +205,12 @@ fn manifest() -> Manifest {
                 ActionKind::Review,
                 "A test slower than 60 s in the baseline was left out of the mutants' runs \
                  that per-test selection did not narrow (ADR-147).",
+            ),
+            kind::<FlakyTestEvidence>(
+                "mutant.flaky-test-excluded",
+                ActionKind::Review,
+                "A test that failed in the mutation overlay with no mutant applied, though the \
+                 baseline passed it, was left out of every mutant's run (ADR-219).",
             ),
         ],
         metrics: metrics(),
@@ -365,6 +381,10 @@ impl Check for TestsMutation {
         for test in &outcomes.excluded {
             tally.findings += 1;
             sink.emit(Event::Finding(Box::new(self.slow_test(test))));
+        }
+        for test in &outcomes.flaky {
+            tally.findings += 1;
+            sink.emit(Event::Finding(Box::new(self.flaky_test(test))));
         }
         Ok(tally.result(&self.manifest))
     }
@@ -759,6 +779,37 @@ impl TestsMutation {
                 test: test.id.clone(),
                 file: test.file.clone(),
                 baseline_ms: test.baseline_ms,
+            })
+            .unwrap_or(Value::Null),
+            location: None,
+            repro: format!("cupel check --only {ID}"),
+        }
+        .finding(&self.manifest)
+    }
+
+    /// `mutant.flaky-test-excluded` about `test`, which failed with no mutant applied and was
+    /// left out of every mutant's run (ADR-219).
+    fn flaky_test(&self, test: &FlakyTest) -> Finding {
+        SubjectFinding {
+            kind: "mutant.flaky-test-excluded",
+            subject: test.id.clone(),
+            severity: Severity::Info,
+            confidence: 1.0,
+            title: format!(
+                "Test left out of mutant runs: `{}` failed in the mutation overlay with no \
+                 mutant applied",
+                test.id
+            ),
+            summary: format!(
+                "`{}` passed in the baseline but failed in a mutation slot with nothing \
+                 mutated, so no mutant's run includes it and it kills none. Make it pass \
+                 there: it may depend on timing, its working directory, the environment, or \
+                 other tests running beside it.",
+                test.id
+            ),
+            evidence: serde_json::to_value(FlakyTestEvidence {
+                test: test.id.clone(),
+                file: test.file.clone(),
             })
             .unwrap_or(Value::Null),
             location: None,

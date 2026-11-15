@@ -4,7 +4,7 @@ use std::path::Path;
 use std::sync::OnceLock;
 use std::time::Duration;
 
-use cupel_core::{RunnerCommand, Writer};
+use cupel_core::{FlakyTest, RunnerCommand, Writer};
 use cupel_store::Store;
 
 use crate::overlay;
@@ -17,6 +17,9 @@ pub struct Baseline<'a> {
     /// The engine, the runner, and its tool's version.
     pub toolchain_hash: &'a str,
     elapsed: OnceLock<Duration>,
+    /// The tests that failed it with no mutant applied, left out of every mutant's run
+    /// (ADR-219); set once, when it is measured.
+    flaky: OnceLock<Vec<FlakyTest>>,
 }
 
 impl<'a> Baseline<'a> {
@@ -25,7 +28,19 @@ impl<'a> Baseline<'a> {
             suite_hash,
             toolchain_hash,
             elapsed: OnceLock::new(),
+            flaky: OnceLock::new(),
         }
+    }
+
+    /// The tests left out of every mutant's run for failing the baseline with no mutant
+    /// applied; empty until it is measured, and when none did.
+    pub fn flaky(&self) -> &[FlakyTest] {
+        self.flaky.get().map_or(&[], Vec::as_slice)
+    }
+
+    /// Keeps `flaky` as the tests left out of every mutant's run.
+    pub fn keep_flaky(&self, flaky: Vec<FlakyTest>) {
+        let _ = self.flaky.set(flaky);
     }
 
     /// How long the baseline took, once this production measured or read it.

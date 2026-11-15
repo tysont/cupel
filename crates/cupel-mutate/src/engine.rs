@@ -134,6 +134,7 @@ impl Producer<MutationOutcomes> for MutationEngine {
         if runs_whole {
             outcomes.excluded = excluded;
         }
+        outcomes.flaky = reference.flaky().to_vec();
         outcomes.phases = running.phases.rows();
         Ok(outcomes)
     }

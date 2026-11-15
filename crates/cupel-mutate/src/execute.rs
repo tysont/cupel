@@ -7,9 +7,9 @@ use std::sync::mpsc::{Sender, channel};
 use std::time::{Duration, Instant};
 
 use cupel_core::{
-    BuildOutcome, Ctx, Error, MutantOutcome, MutationPhase, MutationStrategy, Prebuilt, ProduceCtx,
-    Result, RunOptions, Runner, TestRun, TestSelection, UnfinishedTest, WriteError, Writer,
-    physical_memory,
+    BuildOutcome, Ctx, Error, FlakyTest, MutantOutcome, MutationPhase, MutationStrategy, Prebuilt,
+    ProduceCtx, Result, RunOptions, Runner, TestRun, TestSelection, UnfinishedTest, WriteError,
+    Writer, physical_memory,
 };
 
 use tempfile::TempDir;
@@ -387,6 +387,37 @@ impl Execution<'_> {
         }
         let slot = &self.slots[0];
         let ctx = self.slot_ctx(slot)?;
+        let (ran, elapsed) = self.measure(slot, &ctx, run, self.whole)?;
+        if ran.results.is_green() {
+            if let Some(key) = &key {
+                baseline::store(&self.ctx.writer, key, elapsed);
+            }
+            return Ok(self.reference.keep(elapsed));
+        }
+        let Some(flaky) = self.flaky_in(&ran) else {
+            return Err(self.red_in_overlay(slot, &ran));
+        };
+        // The tests that failed with no mutant applied are left out of every mutant's run
+        // (ADR-219), so the baseline is measured again without them. It is not stored: the
+        // next production measures it again and finds which tests fail then.
+        let (again, elapsed) = self.measure(slot, &ctx, run, &except(self.whole, &flaky))?;
+        if !again.results.is_green() {
+            return Err(self.red_in_overlay(slot, &again));
+        }
+        self.reference.keep_flaky(flaky);
+        Ok(self.reference.keep(elapsed))
+    }
+
+    /// Runs `selection` once with no mutant in `slot` (`ctx` is the slot's), `run`'s file
+    /// holding one more trailing newline and its importers written, then puts the file back:
+    /// the baseline's measurement (ADR-185). A run the cancellation reached is an error.
+    fn measure(
+        &self,
+        slot: &Slot,
+        ctx: &ProduceCtx,
+        run: &FileRun<'_>,
+        selection: &TestSelection,
+    ) -> Result<(TestRun, Duration)> {
         for (importer, text) in run.importers {
             write(slot, importer, text)?;
         }
@@ -399,28 +430,71 @@ impl Execution<'_> {
                 file: None,
                 phase: MutationPhase::Build,
             },
-            &ctx,
-            self.whole,
+            ctx,
+            selection,
             &self.options(None, 0),
         );
         write(slot, run.file, run.original)?;
-        let (ran, elapsed) = measured?;
+        let measured = measured?;
         // A run the cancellation reached measured nothing to keep.
         self.ctx.cancel.checkpoint()?;
-        if !ran.results.is_green() {
-            return Err(Error::Process {
-                program: self.runner.id().to_string(),
-                message: format!(
-                    "the unmutated tree does not pass its tests in the mutation overlay at {}: {}",
-                    slot.root().display(),
-                    why_red(&ran)
-                ),
-            });
+        Ok(measured)
+    }
+
+    /// The tests `ran`, a red baseline in the overlay, failed, when the run otherwise reached
+    /// its end and the runner can leave tests out of a run (ADR-219); `None` otherwise, as
+    /// when the build failed or a runner cannot deselect.
+    fn flaky_in(&self, ran: &TestRun) -> Option<Vec<FlakyTest>> {
+        if ran.results.incomplete().next().is_some() {
+            return None;
         }
-        if let Some(key) = &key {
-            baseline::store(&self.ctx.writer, key, elapsed);
+        let mut flaky: Vec<FlakyTest> = ran
+            .results
+            .failures()
+            .map(|test| FlakyTest {
+                id: test.id.clone(),
+                file: test.file.clone(),
+            })
+            .collect();
+        flaky.sort_by(|a, b| a.id.cmp(&b.id));
+        flaky.dedup_by(|a, b| a.id == b.id);
+        let selection = except(self.whole, &flaky);
+        let deselects = self.runner.commands(self.ctx, &selection).is_some();
+        (!flaky.is_empty() && deselects).then_some(flaky)
+    }
+
+    /// The error of a baseline that is not green in `slot`'s overlay: the slot does not
+    /// reproduce the tree's.
+    fn red_in_overlay(&self, slot: &Slot, ran: &TestRun) -> Error {
+        Error::Process {
+            program: self.runner.id().to_string(),
+            message: format!(
+                "the unmutated tree does not pass its tests in the mutation overlay at {}: {}",
+                slot.root().display(),
+                why_red(ran)
+            ),
         }
-        Ok(self.reference.keep(elapsed))
+    }
+
+    /// What a mutant that per-test selection did not narrow runs: the whole suite, less the
+    /// slow tests (ADR-147) and the tests that failed with no mutant applied (ADR-219).
+    fn whole(&self) -> TestSelection {
+        except(self.whole, self.reference.flaky())
+    }
+
+    /// The tests per-test selection chose for `planned`, less those that failed with no
+    /// mutant applied; `None` when it chose none, or none is left, so the mutant runs
+    /// the whole suite (ADR-219).
+    fn narrowed(&self, planned: &Planned) -> Option<Vec<String>> {
+        let flaky = self.reference.flaky();
+        let tests: Vec<String> = planned
+            .tests
+            .as_ref()?
+            .iter()
+            .filter(|id| !flaky.iter().any(|test| &test.id == *id))
+            .cloned()
+            .collect();
+        (!tests.is_empty()).then_some(tests)
     }
 
     /// The runner's start-up for a run of one test in `slot` (ADR-160 §3): the wall time of the
@@ -434,13 +508,13 @@ impl Execution<'_> {
         run: &FileRun<'_>,
         prebuilt: Option<&Prebuilt>,
     ) -> Result<Option<Duration>> {
-        let ids: BTreeSet<&String> = run
+        let ids: BTreeSet<String> = run
             .mutants
             .iter()
-            .filter_map(|planned| planned.tests.as_ref())
+            .filter_map(|planned| self.narrowed(planned))
             .flatten()
             .collect();
-        let ids: Vec<String> = ids.into_iter().cloned().collect();
+        let ids: Vec<String> = ids.into_iter().collect();
         let Some(fastest) = sequence::order(&ids, self.baseline).into_iter().next() else {
             return Ok(None);
         };
@@ -532,8 +606,8 @@ impl Execution<'_> {
     fn union(&self, mutants: &[&Planned]) -> TestSelection {
         let mut ids = BTreeSet::new();
         for planned in mutants {
-            match &planned.tests {
-                Some(tests) => ids.extend(tests.iter().cloned()),
+            match self.narrowed(planned) {
+                Some(tests) => ids.extend(tests),
                 None => return self.unnarrowed(planned),
             }
         }
@@ -543,11 +617,12 @@ impl Execution<'_> {
     /// What `planned` runs when per-test selection did not narrow it: its own root's suite
     /// when it has one (ADR-194), else the whole suite, less the slow tests left out of both.
     fn unnarrowed(&self, planned: &Planned) -> TestSelection {
+        let whole = self.whole();
         let Some(dir) = &planned.root else {
-            return self.whole.clone();
+            return whole;
         };
-        let except = match self.whole {
-            TestSelection::Except(ids) => ids.clone(),
+        let except = match whole {
+            TestSelection::Except(ids) => ids,
             _ => Vec::new(),
         };
         TestSelection::Root {
@@ -593,7 +668,8 @@ impl Execution<'_> {
         id: u32,
         prebuilt: Option<&Prebuilt>,
     ) -> Result<Ran> {
-        if let (Some(tests), Some(startup)) = (&planned.tests, worker.startup) {
+        let narrowed = self.narrowed(planned);
+        if let (Some(tests), Some(startup)) = (&narrowed, worker.startup) {
             let sequence = Sequence {
                 tests: sequence::order(tests, self.baseline),
                 caps: Caps {
@@ -606,10 +682,7 @@ impl Execution<'_> {
             };
             return self.sequence(worker, planned, &sequence);
         }
-        let selection = planned
-            .tests
-            .clone()
-            .map_or_else(|| self.unnarrowed(planned), TestSelection::Tests);
+        let selection = narrowed.map_or_else(|| self.unnarrowed(planned), TestSelection::Tests);
         let limit = worker.limit;
         let started = Instant::now();
         let strategy = if id == 0 {
@@ -800,6 +873,21 @@ impl Found {
 enum Share {
     Slot,
     Alone,
+}
+
+/// `whole`, a run of the whole suite, also leaving out `left_out`.
+fn except(whole: &TestSelection, left_out: &[FlakyTest]) -> TestSelection {
+    if left_out.is_empty() {
+        return whole.clone();
+    }
+    let ids = left_out.iter().map(|test| test.id.clone());
+    match whole {
+        TestSelection::All => TestSelection::Except(ids.collect()),
+        TestSelection::Except(already) => {
+            TestSelection::Except(already.iter().cloned().chain(ids).collect())
+        }
+        other => other.clone(),
+    }
 }
 
 /// How many tests `selection` names; `None` for the whole suite, however narrowed.

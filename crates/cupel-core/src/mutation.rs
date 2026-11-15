@@ -30,6 +30,12 @@ pub struct MutationOutcomes {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub excluded: Vec<ExcludedTest>,
+    /// The tests that failed in the mutation overlay with no mutant applied, though the
+    /// baseline passed them, and were left out of every mutant's run (ADR-219), sorted by ID;
+    /// absent when none was.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub flaky: Vec<FlakyTest>,
     /// The phases the production went through, in the order they ended: its timeline, from
     /// which each phase's total is read (ADR-150). Absent when no mutant ran.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -117,6 +123,16 @@ pub struct ExcludedTest {
     pub baseline_ms: u64,
 }
 
+/// A test left out of every mutant's run because it failed in the mutation overlay with no
+/// mutant applied (ADR-219).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct FlakyTest {
+    /// The runner's ID of the test.
+    pub id: String,
+    /// The file the runner attributes it to, relative to the repository root.
+    pub file: Option<String>,
+}
+
 impl Fact for MutationOutcomes {
     const KIND: FactKind = FactKind::MutationOutcomes;
     const VERSION: u32 = 3;
@@ -150,6 +166,7 @@ impl MutationOutcomes {
             per_test,
             mutants,
             excluded: Vec::new(),
+            flaky: Vec::new(),
             phases: Vec::new(),
         }
     }

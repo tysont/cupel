@@ -171,6 +171,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
             ("mutant.uncovered", ActionKind::WriteTest),
             ("mutant.equivalent?", ActionKind::Review),
             ("mutant.slow-test-excluded", ActionKind::Review),
+            ("mutant.flaky-test-excluded", ActionKind::Review),
         ]
     );
     assert_eq!(shape.metrics, metrics());

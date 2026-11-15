@@ -25,6 +25,14 @@ expression: pretty(&schema)
       },
       "x-cupel-optional": true
     },
+    "flaky": {
+      "description": "The tests that failed in the mutation overlay with no mutant applied, though the\nbaseline passed them, and were left out of every mutant's run (ADR-219), sorted by ID;\nabsent when none was.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/FlakyTest"
+      },
+      "x-cupel-optional": true
+    },
     "mutants": {
       "description": "One per (site, replacement), sorted by file, position, then replacement.",
       "type": "array",
@@ -99,6 +107,27 @@ expression: pretty(&schema)
       },
       "required": [
         "baseline_ms",
+        "file",
+        "id"
+      ]
+    },
+    "FlakyTest": {
+      "description": "A test left out of every mutant's run because it failed in the mutation overlay with no\nmutant applied (ADR-219).",
+      "type": "object",
+      "properties": {
+        "file": {
+          "description": "The file the runner attributes it to, relative to the repository root.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "description": "The runner's ID of the test.",
+          "type": "string"
+        }
+      },
+      "required": [
         "file",
         "id"
       ]

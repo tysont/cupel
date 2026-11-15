@@ -85,8 +85,9 @@ fn an_uncovered_mutant_is_never_run() {
 }
 
 /// A file's mutants that end in an error leave every slot holding the original file, not the
-/// reference's copy or a mutant (ADR-141 §3): here the reference run is red, since a test fails
-/// wherever it runs from a mutation slot, as a cancelled or budget-stopped run would leave it.
+/// reference's copy or a mutant (ADR-141 §3): here the reference run is red, since pytest exits
+/// before reporting wherever it runs from a mutation slot, so no failing test can be left out
+/// (ADR-219), as a cancelled or budget-stopped run would leave it.
 #[test]
 fn mutants_that_end_in_an_error_leave_the_slots_holding_the_original_file() {
     if !support::installed("pytest", "the Python mutation fixture") {
@@ -94,8 +95,8 @@ fn mutants_that_end_in_an_error_leave_the_slots_holding_the_original_file() {
     }
     let dir = support::fixture("tests.mutation/python");
     std::fs::write(
-        dir.path().join("tests/test_place.py"),
-        "def test_runs_outside_a_mutation_slot():\n    assert \"/.cupel/work/slots/\" not in __file__\n",
+        dir.path().join("conftest.py"),
+        "import os\n\nif \"/.cupel/work/slots/\" in __file__:\n    os._exit(3)\n",
     )
     .unwrap();
     let produced = support::produce(dir.path(), "python", &support::Run::default());

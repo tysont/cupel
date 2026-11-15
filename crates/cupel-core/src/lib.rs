@@ -126,8 +126,8 @@ pub use model_check::{
     Counterexample, HarnessStatus, ModelCheckResults, ModelHarness, RefutedProperty,
 };
 pub use mutation::{
-    ExcludedTest, Mutant, MutantOutcome, MutationOutcomes, MutationPhase, MutationStrategy,
-    PhaseDuration, SLOW_TEST_MS, UnfinishedTest,
+    ExcludedTest, FlakyTest, Mutant, MutantOutcome, MutationOutcomes, MutationPhase,
+    MutationStrategy, PhaseDuration, SLOW_TEST_MS, UnfinishedTest,
 };
 pub use oracle::{OracleReport, OracleState, RunOracle, oracle_content_digest, oracle_identity};
 pub use per_test::{CoveredLines, LineIndex, PerTestMap, TestCoverage, case_name};
