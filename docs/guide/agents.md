@@ -24,6 +24,8 @@ Every command exits with one of these codes, and the envelope's `exit_code` alwa
 | 6 | internal | Cupel bug; the envelope includes a bug-report payload. |
 <!-- end:exit-codes -->
 
+A Claude Code `Stop` hook that runs the gate, and the MCP server configuration, are in the [README](../../README.md#using-cupel-with-an-agent); every MCP tool's arguments and results are in [Usage](usage.md#mcp).
+
 ## Learning Cupel from Cupel
 
 An agent can learn Cupel from Cupel. `cupel describe --all` is one JSON document with every verb, flag, exit code, and schema. `cupel describe <check>` and `cupel describe finding <kind>` explain any check or finding the agent meets. Every verb accepts `--describe`, and `--dry-run` shows exactly what a command would do before it does anything.

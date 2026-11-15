@@ -14,7 +14,7 @@ Install the latest release into `~/.local/bin` (Linux and macOS; [every route](d
 curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh | sh
 ```
 
-<!-- captured by scripts/readme-capture.sh with cupel 0.2.9 built from batch-0.3.0 at a64a6303, on hashicorp/golang-lru at 2bb29091 (main) with one change on agent/add-all; … marks a trim -->
+<!-- captured by scripts/readme-capture.sh with a release build of cupel 0.2.9 from batch-0.3.0 at a64a6303, on hashicorp/golang-lru at 2bb29091 (main) with one change on agent/add-all; … marks a trim -->
 ```console
 $ cupel --version
 cupel 0.2.9
@@ -58,16 +58,16 @@ cupel init: pass (exit 0)
 $ cupel survey
 cupel survey: pass (exit 0)
 
-summary   175 findings · fail 55 · warn 43 · info 77 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
+summary   177 findings · fail 57 · warn 43 · info 77 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
 
 checks
   …
-  static.clones             fail     tier 0 · quick · score 48 pairs (n 150) · … · 26 findings · 439 ms
-  static.complexity         fail     tier 0 · quick · score 27 cyclomatic_max (n 168) · … · 24 findings · 26 ms
+  static.clones             fail     tier 0 · quick · score 48 pairs (n 150) · … · 26 findings · 11 ms
+  static.complexity         fail     tier 0 · quick · score 27 cyclomatic_max (n 168) · … · 24 findings · 5 ms
   …
-  tests.coverage            fail     tier 2 · standard · score 0.9202279202279202 line_ratio (n 702) · … · 2 findings · 405 ms · …
-  tests.flaky               pass     tier 2 · standard · score 0 unstable (n 48) · … · 0 findings · 4383 ms
-  tests.mutation            fail     tier 3 · standard · score 0.5672268907563025 killed_ratio (n 238) · …
+  tests.coverage            fail     tier 2 · standard · score 0.9202279202279202 line_ratio (n 702) · … · 2 findings · 4 ms · …
+  tests.flaky               pass     tier 2 · standard · score 0 unstable (n 48) · … · 0 findings · 4225 ms
+  tests.mutation            fail     tier 3 · standard · score 0.5588235294117647 killed_ratio (n 238) · …
   …
   targets  68 recommended, protect first
      …
@@ -104,8 +104,8 @@ fail (2)
       fnd_400a22 · assertion.removed · tier 2 · confidence 1
       at lru_test.go:181:1-205:2
       evidence: base 6 · head 5 · test "TestLRUContainsOrAdd" (full: cupel explain fnd_400a22)
-      action restore_test (priority 1): Restore the assertions removed from `TestLRUContainsOrAdd` (see it at e28b6a599275113972f81b47dbfa6436780d0f5c); if one is wrong, replace it with a correct one rather than dropping it.
-      repro: cupel check --only tests.weakening --base e28b6a599275113972f81b47dbfa6436780d0f5c
+      action restore_test (priority 1): Restore the assertions removed from `TestLRUContainsOrAdd` (see it at 6b7ee5edfb58a09b396b0b28cc46378a193c04a8); if one is wrong, replace it with a correct one rather than dropping it.
+      repro: cupel check --only tests.weakening --base 6b7ee5edfb58a09b396b0b28cc46378a193c04a8
       suppress: cupel suppress fnd_400a22 --reason '…'
   static.analyze
     staticcheck SA4006: this value of evict is never used
@@ -124,7 +124,7 @@ info (4)
     No test runs lru.go:147; its mutant `>=` → `>` was not run
       …
 next actions
-  1. restore_test: Restore the assertions removed from `TestLRUContainsOrAdd` (see it at e28b6a599275113972f81b47dbfa6436780d0f5c); if one is wrong, replace it with a correct one rather than dropping it. (finding fnd_400a22)
+  1. restore_test: Restore the assertions removed from `TestLRUContainsOrAdd` (see it at 6b7ee5edfb58a09b396b0b28cc46378a193c04a8); if one is wrong, replace it with a correct one rather than dropping it. (finding fnd_400a22)
   2. fix_bug: Fix what staticcheck reports at lru_test.go:198 (SA4006), or configure staticcheck if the rule does not apply to this project. (finding fnd_b8f153)
   3. write_test: Write a test that calls `AddAll`. (finding fnd_eec201)
   …
@@ -198,7 +198,7 @@ gate      fail (gate.changed)
 [exit 2]
 ```
 
-Claude Code ends the turn anyway after eight consecutive blocks, and a hook that runs past its timeout (600 s by default) is cancelled; a long run can be bounded with `--budget`, whose `partial` result (exit 5) also lets Claude stop.
+Claude Code ends the turn anyway after eight consecutive blocks with no tool call between them, and a hook that runs past its timeout (600 s by default) is cancelled; a long run can be bounded with `--budget`, whose `partial` result (exit 5) also lets Claude stop.
 
 **MCP.** `cupel serve --mcp` is a Model Context Protocol server on stdio for clients that call tools rather than run commands. Each tool takes its verb's flags as arguments and returns the same envelope ([details](docs/guide/usage.md#mcp)):
 
@@ -241,10 +241,10 @@ Every verb prints one JSON envelope on stdout (`--format text` renders it for pe
       "action": {
         "kind": "restore_test",
         "priority": 1,
-        "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at e28b6a599275113972f81b47dbfa6436780d0f5c); if one is wrong, replace it with a correct one rather than dropping it.",
+        "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at 6b7ee5edfb58a09b396b0b28cc46378a193c04a8); if one is wrong, replace it with a correct one rather than dropping it.",
         "hints": {}
       },
-      "repro": "cupel check --only tests.weakening --base e28b6a599275113972f81b47dbfa6436780d0f5c",
+      "repro": "cupel check --only tests.weakening --base 6b7ee5edfb58a09b396b0b28cc46378a193c04a8",
       "suppress": "cupel suppress fnd_400a22 --reason '…'",
       "new_since_baseline": false,
       "suppressed": false
@@ -255,7 +255,7 @@ Every verb prints one JSON envelope on stdout (`--format text` renders it for pe
       "priority": 1,
       "finding": "fnd_400a22",
       "kind": "restore_test",
-      "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at e28b6a599275113972f81b47dbfa6436780d0f5c); if one is wrong, replace it with a correct one rather than dropping it.",
+      "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at 6b7ee5edfb58a09b396b0b28cc46378a193c04a8); if one is wrong, replace it with a correct one rather than dropping it.",
       "command": null
     },
     {

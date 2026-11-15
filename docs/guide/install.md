@@ -8,8 +8,8 @@ Each [GitHub Release](https://github.com/tysont/cupel/releases) carries one arch
 
 ```sh
 sha256sum --ignore-missing -c SHA256SUMS     # on macOS: shasum -a 256 --ignore-missing -c SHA256SUMS
-tar -xzf cupel-0.2.9-x86_64-unknown-linux-musl.tar.gz
-install cupel-0.2.9-x86_64-unknown-linux-musl/cupel ~/.local/bin/
+tar -xzf cupel-<version>-x86_64-unknown-linux-musl.tar.gz
+install cupel-<version>-x86_64-unknown-linux-musl/cupel ~/.local/bin/
 ```
 
 On Windows, extract the `.zip` and put `cupel.exe` on your PATH; `cupel serve` listens on a named pipe there ([ADR-137](../adr/CUPEL_DECISION_137.md)). Commands Cupel runs through `sh -c` (configured coverage and oracle commands, `--install`) need `sh` on PATH, as Git for Windows provides, and a timeout stops the command but not the processes it started. WSL runs the Linux archive without these limits.
