@@ -61,6 +61,7 @@ fn symbol_def() -> SymbolDef {
         },
         body: Some(span(11)),
         parameters: 2,
+        doc_example: false,
     }
 }
 
@@ -449,7 +450,7 @@ fn each_payload_declares_its_own_kind_and_version() {
     assert_eq!(
         declared,
         [
-            (FactKind::Symbols, 2),
+            (FactKind::Symbols, 3),
             (FactKind::Decisions, 3),
             (FactKind::NormTree, 1),
             (FactKind::MutationSites, 1),

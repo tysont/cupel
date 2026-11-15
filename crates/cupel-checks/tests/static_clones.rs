@@ -133,6 +133,7 @@ impl Def {
             },
             body: self.body,
             parameters: 2,
+            doc_example: false,
         }
     }
 

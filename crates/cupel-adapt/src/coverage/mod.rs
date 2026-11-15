@@ -33,6 +33,7 @@ mod pytest_cov;
 mod tool;
 mod vitest_coverage;
 
+pub use cargo_llvm_cov::nightly_coverage;
 pub use cobertura::parse_cobertura;
 pub use coverprofile::parse_coverprofile;
 pub use error::ReportError;

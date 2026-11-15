@@ -170,3 +170,91 @@ fn methods_of_an_impl_for_a_reference_or_a_primitive_are_methods_on_that_type() 
         ],
     );
 }
+
+/// A crate whose functions' doc comments hold examples rustdoc runs and examples it does not.
+const DOCUMENTED: &str = r#"/// Adds one.
+///
+/// ```
+/// assert_eq!(demo::add_one(1), 2);
+/// ```
+pub fn add_one(x: u32) -> u32 {
+    x + 1
+}
+
+/// ```ignore
+/// demo::skipped();
+/// ```
+pub fn skipped() {}
+
+/// ```no_run
+/// demo::compiled();
+/// ```
+pub fn compiled() {}
+
+/// ```text
+/// demo::prose()
+/// ```
+pub fn prose() {}
+
+/// An example that names something else.
+///
+/// ```
+/// let _ = 1;
+/// ```
+pub fn unnamed() {}
+
+/// ~~~rust,should_panic
+/// demo::panics();
+/// ~~~
+#[inline]
+pub fn panics() {
+    panic!()
+}
+
+pub struct S;
+
+impl S {
+    /** ```
+    demo::S::method();
+    ``` */
+    pub fn method() {}
+}
+
+// A plain comment is no documentation: ```
+// demo::plain();
+pub fn plain() {}
+"#;
+
+/// A function's own doc comment holds a runnable example when a fenced block in it is one
+/// rustdoc runs (no info string, or `rust` and its test attributes; not `ignore`, `no_run`,
+/// `compile_fail`, or another language) and names the function (ADR-231).
+#[test]
+fn a_function_whose_own_doc_comment_holds_a_runnable_example_naming_it_says_so() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("Cargo.toml"),
+        "[package]\nname = \"demo\"\nversion = \"0.1.0\"\n",
+    )
+    .unwrap();
+    std::fs::create_dir(dir.path().join("src")).unwrap();
+    std::fs::write(dir.path().join("src/lib.rs"), DOCUMENTED).unwrap();
+    let symbols: Symbols = produce("rust", dir.path());
+    let documented: Vec<(&str, bool)> = symbols
+        .symbols
+        .iter()
+        .map(|symbol| (symbol.display.as_str(), symbol.doc_example))
+        .collect();
+    assert_eq!(
+        documented,
+        [
+            ("add_one", true),
+            ("skipped", false),
+            ("compiled", false),
+            ("prose", false),
+            ("unnamed", false),
+            ("panics", true),
+            ("S::method", true),
+            ("plain", false),
+        ]
+    );
+}

@@ -19,7 +19,7 @@ expression: pretty(&schema)
   "required": [
     "symbols"
   ],
-  "x-cupel-fact-version": 2,
+  "x-cupel-fact-version": 3,
   "$defs": {
     "LangId": {
       "description": "A language's ID, such as `rust` or `typescript`. Languages are registered by\n`cupel-lang`; core never enumerates them (ADR-011).",
@@ -75,6 +75,11 @@ expression: pretty(&schema)
         "display": {
           "description": "`namespace::name`.",
           "type": "string"
+        },
+        "doc_example": {
+          "description": "Whether its own documentation comment holds an example the language's documentation\ntests run (a Rust doctest that is neither `ignore`, `no_run`, nor `compile_fail`), which\na coverage run measures only when it runs them (ADR-231). Absent when false.",
+          "type": "boolean",
+          "x-cupel-optional": true
         },
         "file": {
           "type": "string"

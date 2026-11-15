@@ -27,6 +27,7 @@ fn one_symbol_per_file(source: &Source<'_>) -> Symbols {
             },
             body: None,
             parameters: 0,
+            doc_example: false,
         }],
     }
 }

@@ -128,6 +128,43 @@
           },
           "kind": "coverage.unloaded-file",
           "summary": "No test loaded the function's file, so the coverage tool never listed it."
+        },
+        {
+          "action": "write_test",
+          "evidence": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "description": "Evidence of `coverage.uncovered-symbol`.",
+            "properties": {
+              "covered": {
+                "description": "Of those, the ones that ran: none.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "lines": {
+                "description": "The symbol's instrumented lines.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "own_root": {
+                "description": "With several project roots and no per-test map, the root whose own tests alone were\nmeasured: no map added the tests of roots that depend on it (ADR-179, ADR-194).",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "lines",
+              "covered"
+            ],
+            "title": "UncoveredSymbol",
+            "type": "object"
+          },
+          "kind": "coverage.doctest-only",
+          "summary": "No test ran the function, and its own documentation holds an example the coverage run did not run, so that example alone may cover it."
         }
       ],
       "id": "tests.coverage",

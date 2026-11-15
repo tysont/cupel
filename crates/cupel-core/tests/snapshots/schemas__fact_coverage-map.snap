@@ -9,6 +9,11 @@ expression: pretty(&schema)
   "description": "Which lines (and, when the producer measures them, branches) the test suite ran.\n\nFiles are sorted by path, lines by number, and branches by line and index, each once; build\none with [`CoverageMap::new`] to get that shape from records in any order (ADR-079).",
   "type": "object",
   "properties": {
+    "doc_examples": {
+      "description": "Whether the run ran the examples in the code's documentation (Rust's doctests), so a\nfunction its own example calls is measured as the example ran it (ADR-231). Absent when\nit did not, so a map recorded before the field existed reads and writes as before.",
+      "type": "boolean",
+      "x-cupel-optional": true
+    },
     "files": {
       "type": "array",
       "items": {

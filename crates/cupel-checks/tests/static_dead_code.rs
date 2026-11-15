@@ -48,6 +48,7 @@ fn symbol(
         },
         body: None,
         parameters: 0,
+        doc_example: false,
     }
 }
 

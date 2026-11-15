@@ -194,6 +194,7 @@ impl Case {
             span: self.span(),
             body: None,
             parameters: 0,
+            doc_example: false,
         }
     }
 

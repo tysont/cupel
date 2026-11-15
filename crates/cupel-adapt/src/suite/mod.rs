@@ -996,6 +996,7 @@ mod tests {
                 },
                 body: None,
                 parameters: 0,
+                doc_example: false,
             })
             .collect();
         let norm = spans

@@ -32,6 +32,7 @@ fn symbol(name: &str, line: u32, lines: u32, parameters: u32) -> SymbolDef {
         },
         body: None,
         parameters,
+        doc_example: false,
     }
 }
 

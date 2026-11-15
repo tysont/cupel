@@ -350,6 +350,7 @@ mod tests {
             },
             body: None,
             parameters: 1,
+            doc_example: false,
         }
     }
 

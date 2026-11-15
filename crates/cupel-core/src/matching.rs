@@ -419,6 +419,7 @@ mod tests {
                     },
                     body: None,
                     parameters: 1,
+                    doc_example: false,
                 });
                 let json = serde_json::to_string(&root).unwrap();
                 let digest = blake3::hash(json.as_bytes()).to_hex();

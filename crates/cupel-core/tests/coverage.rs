@@ -30,6 +30,7 @@ fn building_a_map_merges_records_of_one_file_adding_hits_and_sorts_everything() 
                 file("b.rs", &[(3, 1)], None),
             ],
             listing: Listing::All,
+            doc_examples: false,
         }
     );
 }

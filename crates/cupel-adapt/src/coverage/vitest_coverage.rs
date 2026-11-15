@@ -18,6 +18,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     providers: &["@vitest/coverage-v8", "@vitest/coverage-istanbul"],
     uses: None,
     prepare: None,
+    examples: None,
 };
 
 inventory::submit!(crate::ToolProducer {

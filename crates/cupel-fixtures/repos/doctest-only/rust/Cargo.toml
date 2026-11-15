@@ -1,0 +1,8 @@
+# ABOUTME: A crate one of whose functions only its doctest calls, as tokio-rs/bytes' `Buf::try_get_*` are (Q-rs-4):
+# ABOUTME: without a nightly toolchain coverage runs no doctest, so the function is coverage.doctest-only at info.
+[package]
+name = "tally"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]

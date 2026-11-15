@@ -60,6 +60,11 @@ pub struct CoverageSpec {
     /// What prepares a root (absolute) before the command runs there, such as a Clojure
     /// project's own `:deps/prep-lib` build (ADR-230); `None` when nothing does.
     pub prepare: Option<fn(&Path, &Cancellation) -> Result<()>>,
+    /// The configured command made to run the code's documentation examples too, in a root
+    /// (absolute), where the machine can (`cargo llvm-cov --doctests` on a nightly toolchain,
+    /// ADR-231), or the command itself when it already runs them; `None` to run it as
+    /// configured, measuring no example.
+    pub examples: Option<fn(&str, &Path) -> Option<String>>,
 }
 
 /// A coverage producer: `spec` run, or its report ingested, once per project root.
@@ -169,6 +174,7 @@ impl Producer<CoverageMap> for CoverageTool {
         // same listing; the merged map keeps it.
         let mut files = Vec::new();
         let mut listing = Listing::All;
+        let mut doc_examples = false;
         for (dir, packages) in roots(ctx) {
             let skip_dirs = self.skip_dirs(ctx, &dir);
             let tree = Tree {
@@ -179,9 +185,12 @@ impl Producer<CoverageMap> for CoverageTool {
             };
             let map = self.root(ctx, &tree, &packages, sink)?;
             listing = map.listing;
+            doc_examples = map.doc_examples;
             files.extend(map.files);
         }
-        Ok(CoverageMap::new(files).listed(listing))
+        Ok(CoverageMap::new(files)
+            .listed(listing)
+            .with_doc_examples(doc_examples))
     }
 }
 
@@ -240,14 +249,20 @@ impl CoverageTool {
         let command = self.command(&ctx.ctx, Some(&ctx.config));
         let listing = (self.0.listing)(command.as_deref().unwrap_or_default(), packages);
         let root = canonical(&tree.root());
+        let examples = self
+            .0
+            .examples
+            .zip(command.as_deref())
+            .and_then(|(examples, command)| examples(command, &root));
+        let doc_examples = examples.is_some();
         let map = match self
             .cached(&entry, tree)
             .or_else(|| self.existing(&root, tree))
         {
             Some(map) => map,
-            None => self.run(ctx, command, &root, tree, sink)?,
+            None => self.run(ctx, examples.or(command), &root, tree, sink)?,
         };
-        Ok(map.listed(listing))
+        Ok(map.listed(listing).with_doc_examples(doc_examples))
     }
 
     /// The report in the cache entry `entry`, when it was made for this root and is fresh.

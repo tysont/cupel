@@ -265,6 +265,7 @@ fn def(display: &str, line: u32) -> SymbolDef {
         },
         body: None,
         parameters: 0,
+        doc_example: false,
     }
 }
 

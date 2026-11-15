@@ -140,6 +140,7 @@ fn symbols(frames: &TestFrames, trees: &[(&str, NormNode)]) -> (Symbols, NormTre
                 span: case.span,
                 body: None,
                 parameters: 0,
+                doc_example: false,
             };
             let mut hasher = DefaultHasher::new();
             serde_json::to_string(root).unwrap().hash(&mut hasher);

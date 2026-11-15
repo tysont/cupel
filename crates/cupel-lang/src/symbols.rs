@@ -199,6 +199,7 @@ impl<'t> Context<'_, 't> {
                 span: span(node),
                 body: body.map(span),
                 parameters,
+                doc_example: self.language.doc_example(parsed, node, name),
             },
         })
     }

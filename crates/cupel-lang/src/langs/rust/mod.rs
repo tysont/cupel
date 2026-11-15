@@ -1,5 +1,6 @@
 // ABOUTME: Rust: one grammar for `.rs`, the queries and tables under this directory, and the
 // ABOUTME: producers it registers, including hand-written module resolution.
+mod doc_examples;
 pub mod project;
 mod resolve;
 
@@ -9,7 +10,7 @@ use std::sync::{Arc, LazyLock};
 use cupel_core::{LangFamily, LangId, ProducerRegistry, Stability};
 
 use crate::language::Language;
-use crate::parse::ParseCache;
+use crate::parse::{ParseCache, Parsed};
 use crate::project::Ecosystem;
 use crate::spec::LanguageSpec;
 
@@ -72,6 +73,10 @@ impl Language for Rust {
 
     fn ecosystem(&self) -> Option<&'static Ecosystem> {
         Some(&project::ECOSYSTEM)
+    }
+
+    fn doc_example(&self, parsed: &Parsed, node: tree_sitter::Node<'_>, name: &str) -> bool {
+        doc_examples::runs_one(parsed, node, name)
     }
 
     fn register(&self, reg: &mut ProducerRegistry) {

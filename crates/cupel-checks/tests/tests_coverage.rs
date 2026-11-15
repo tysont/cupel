@@ -34,6 +34,7 @@ fn symbol(name: &str, file: &str, line: u32) -> SymbolDef {
         },
         body: None,
         parameters: 0,
+        doc_example: false,
     }
 }
 
@@ -155,6 +156,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
                 ("coverage.uncovered-symbol", ActionKind::WriteTest),
                 ("coverage.uncovered-branch", ActionKind::WriteTest),
                 ("coverage.unloaded-file", ActionKind::WriteTest),
+                ("coverage.doctest-only", ActionKind::WriteTest),
             ],
             metrics: vec![
                 ("line", MetricPer::Scope),
@@ -165,7 +167,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
                 ("uncovered_lines", MetricPer::Symbol),
                 ("line_coverage", MetricPer::Symbol),
             ],
-            evidence: vec!["object"; 3],
+            evidence: vec!["object"; 4],
         }
     );
     let protection: Vec<(&str, Option<ProtectionMetric>)> = manifest
@@ -210,6 +212,64 @@ fn a_symbol_none_of_whose_lines_ran_is_an_uncovered_symbol_warning() {
         result.status,
         CheckStatus::Fail,
         "an uncovered symbol fails"
+    );
+}
+
+/// [`three_symbols`] with `a`'s own documentation holding an example, under a map whose run
+/// ran the documentation's examples when `ran`.
+fn documented(ran: bool) -> World {
+    let mut world = three_symbols(false);
+    world.symbols[0].doc_example = true;
+    world.coverage = world
+        .coverage
+        .map(|coverage| coverage.with_doc_examples(ran));
+    world
+}
+
+/// A function no test ran whose own documentation holds an example, under a run that did not
+/// run the examples (doctests without a nightly toolchain), is `coverage.doctest-only`
+/// at info and fails nothing; under a run that did, it never ran at all, and is uncovered
+/// (ADR-231).
+#[test]
+fn an_uncovered_symbol_with_a_doc_example_the_run_did_not_run_is_doctest_only_at_info() {
+    let shape = |ran: bool| {
+        let (result, findings) = run(&documented(ran));
+        let found: Vec<(String, Severity, Value)> = findings
+            .iter()
+            .filter(|finding| finding.kind != "coverage.uncovered-branch")
+            .map(|finding| {
+                (
+                    finding.kind.clone(),
+                    finding.severity,
+                    Value::Object(finding.evidence.0.clone()),
+                )
+            })
+            .collect();
+        (result.status, result.metrics["uncovered"], found)
+    };
+    assert_eq!(
+        shape(false),
+        (
+            CheckStatus::Pass,
+            1.0,
+            vec![(
+                "coverage.doctest-only".to_owned(),
+                Severity::Info,
+                json!({"lines": 2, "covered": 0})
+            )]
+        )
+    );
+    assert_eq!(
+        shape(true),
+        (
+            CheckStatus::Fail,
+            1.0,
+            vec![(
+                "coverage.uncovered-symbol".to_owned(),
+                Severity::Warn,
+                json!({"lines": 2, "covered": 0})
+            )]
+        )
     );
 }
 

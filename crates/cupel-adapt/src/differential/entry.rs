@@ -132,6 +132,7 @@ mod tests {
             span: span(3, 5),
             body: None,
             parameters: 1,
+            doc_example: false,
         }
     }
 

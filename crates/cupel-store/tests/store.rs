@@ -653,6 +653,7 @@ fn symbol(name: &str) -> SymbolDef {
         },
         body: None,
         parameters: 0,
+        doc_example: false,
     }
 }
 

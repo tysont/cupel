@@ -21,6 +21,12 @@ pub struct CoverageMap {
     #[serde(default, skip_serializing_if = "Listing::is_all")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub listing: Listing,
+    /// Whether the run ran the examples in the code's documentation (Rust's doctests), so a
+    /// function its own example calls is measured as the example ran it (ADR-231). Absent when
+    /// it did not, so a map recorded before the field existed reads and writes as before.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub doc_examples: bool,
 }
 
 /// Which files a coverage report lists (ADR-152). `tests.coverage` reads a file absent from a map
@@ -123,6 +129,7 @@ impl CoverageMap {
         }
         Self {
             listing: Listing::All,
+            doc_examples: false,
             files: files
                 .into_iter()
                 .map(|(file, merged)| FileCoverage {
@@ -172,6 +179,15 @@ impl CoverageMap {
     #[must_use]
     pub fn listed(self, listing: Listing) -> Self {
         Self { listing, ..self }
+    }
+
+    /// This map, saying whether its run ran the documentation's examples (ADR-231).
+    #[must_use]
+    pub fn with_doc_examples(self, doc_examples: bool) -> Self {
+        Self {
+            doc_examples,
+            ..self
+        }
     }
 
     /// Whether the producer measured branches in any file; `tests.coverage` notes

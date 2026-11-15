@@ -36,6 +36,7 @@ fn symbol(name: &str, line: u32, end_line: u32) -> SymbolDef {
         span: lines(line, end_line),
         body: None,
         parameters: 1,
+        doc_example: false,
     }
 }
 

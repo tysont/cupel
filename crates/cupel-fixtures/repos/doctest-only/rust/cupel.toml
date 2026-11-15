@@ -1,0 +1,4 @@
+# ABOUTME: The coverage command `cupel init` writes for a Rust crate, which the doctest-only fixture test runs.
+# ABOUTME: Cupel adds `--doctests` under the nightly toolchain where one with llvm-tools is installed.
+[lang.rust]
+coverage = "cargo llvm-cov --lcov --output-path {out}"

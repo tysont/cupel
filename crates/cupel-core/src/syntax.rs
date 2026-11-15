@@ -55,7 +55,7 @@ pub struct SymbolKey {
 pub struct Symbols {
     pub symbols: Vec<SymbolDef>,
 }
-fact!(Symbols, Symbols, "symbols", 2);
+fact!(Symbols, Symbols, "symbols", 3);
 
 /// One function, method, or named closure.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -74,6 +74,12 @@ pub struct SymbolDef {
     pub body: Option<Span>,
     /// Declared parameters, not counting a receiver (`self`, `cls`, `this`, a Go receiver).
     pub parameters: u32,
+    /// Whether its own documentation comment holds an example the language's documentation
+    /// tests run (a Rust doctest that is neither `ignore`, `no_run`, nor `compile_fail`), which
+    /// a coverage run measures only when it runs them (ADR-231). Absent when false.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub doc_example: bool,
 }
 
 impl SymbolDef {

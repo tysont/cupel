@@ -113,6 +113,7 @@ pub fn symbols_of(scope: &Scope) -> Symbols {
         },
         body: None,
         parameters: 0,
+        doc_example: false,
     };
     Symbols {
         symbols: scope.files.iter().map(symbol).collect(),

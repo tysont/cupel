@@ -25,6 +25,10 @@ const ID: &str = "tests.coverage";
 /// The check has no settings; any key is a configuration error.
 const SETTINGS: Limits = Limits::new(&[]);
 
+/// The kind of a function no test ran whose own documentation example the run did not run
+/// (ADR-231).
+const DOCTEST_ONLY: &str = "coverage.doctest-only";
+
 /// What the result notes when the coverage map measured no branches (design §8.3.2).
 const BRANCHES_UNAVAILABLE: &str = "branches: unavailable";
 
@@ -113,6 +117,12 @@ fn manifest() -> Manifest {
                 "coverage.unloaded-file",
                 ActionKind::WriteTest,
                 "No test loaded the function's file, so the coverage tool never listed it.",
+            ),
+            kind::<UncoveredSymbol>(
+                DOCTEST_ONLY,
+                ActionKind::WriteTest,
+                "No test ran the function, and its own documentation holds an example the \
+                 coverage run did not run, so that example alone may cover it.",
             ),
         ],
         metrics: metrics(),
@@ -399,7 +409,13 @@ impl TestsCoverage {
             .and_then(|info| info.own_root(&symbol.file))
             .map(str::to_owned);
         let mut finding = if measured.covered == 0 {
-            self.never_ran(symbol, hash, measured, own_root.clone())
+            self.never_ran(
+                symbol,
+                hash,
+                measured,
+                own_root.clone(),
+                inputs.coverage.doc_examples,
+            )
         } else {
             let branches = measured.branches.as_ref()?;
             self.uncovered_branch(symbol, hash, branches, own_root.clone())?
@@ -414,18 +430,34 @@ impl TestsCoverage {
         Some(with_nearest_test(finding, symbol, inputs.conventions))
     }
 
-    /// The finding about a symbol none of whose lines ran: `coverage.uncovered-symbol`, or
-    /// `coverage.unloaded-file` when the suite never loaded its file. Both kinds' evidence is
-    /// `{lines, covered, own_root}` (`UncoveredSymbol`, `UnloadedFile`).
+    /// The finding about a symbol none of whose lines ran: `coverage.uncovered-symbol`;
+    /// `coverage.unloaded-file` when the suite never loaded its file; or `coverage.doctest-only`,
+    /// at info, when its own documentation holds an example the run did not run (ADR-231). Each
+    /// kind's evidence is `{lines, covered, own_root}` (`UncoveredSymbol`, `UnloadedFile`).
     fn never_ran(
         &self,
         symbol: &SymbolDef,
         hash: &SymbolHash,
         measured: &Measured,
         own_root: Option<String>,
+        examples_ran: bool,
     ) -> Finding {
         let lines = measured.lines;
-        let (kind, title, summary) = if measured.loaded {
+        let doctest_only = measured.loaded && symbol.doc_example && !examples_ran;
+        let (kind, title, summary) = if doctest_only {
+            (
+                DOCTEST_ONLY,
+                format!(
+                    "`{}` never ran under test, and the example in its documentation was not run",
+                    symbol.display
+                ),
+                format!(
+                    "Run coverage with the documentation's examples, or write a test that calls \
+                     `{}`.",
+                    symbol.name
+                ),
+            )
+        } else if measured.loaded {
             (
                 "coverage.uncovered-symbol",
                 format!(
@@ -452,9 +484,13 @@ impl TestsCoverage {
             covered: 0,
             own_root,
         };
-        SymbolFinding::new(&self.manifest, kind, symbol, hash, evidence)
-            .described(title, summary)
-            .finding()
+        let finding = SymbolFinding::new(&self.manifest, kind, symbol, hash, evidence)
+            .described(title, summary);
+        if doctest_only {
+            finding.at(Severity::Info).finding()
+        } else {
+            finding.finding()
+        }
     }
 
     /// The finding about `branches` (`(line, hits)`) of a symbol that ran, when one was never

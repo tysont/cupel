@@ -66,6 +66,7 @@ fn function(file: &str, name: &str, visibility: Visibility, parameters: u32) -> 
         span: FUNCTION,
         body: None,
         parameters,
+        doc_example: false,
     }
 }
 

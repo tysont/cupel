@@ -64,6 +64,7 @@ fn function(file: &str, name: &str, line: u32, visibility: Visibility) -> Symbol
         span: span(line, 3),
         body: None,
         parameters: 1,
+        doc_example: false,
     }
 }
 

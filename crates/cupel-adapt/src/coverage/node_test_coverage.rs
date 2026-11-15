@@ -18,6 +18,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     providers: &[],
     uses: Some("--experimental-test-coverage"),
     prepare: None,
+    examples: None,
 };
 
 /// Node lists only the files the suite loaded, and leaves its test files out.

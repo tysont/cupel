@@ -41,6 +41,12 @@ pub trait Language: Send + Sync {
     /// outside the project's published source paths (ADR-215). A language whose public items
     /// are all API, as every other one, leaves them as they are.
     fn mark_internal(&self, _surface: &mut ApiSurface, _ctx: &ProduceCtx) {}
+    /// Whether the definition `node` of `parsed`, named `name`, has its own documentation
+    /// comment holding an example the language's documentation tests run and that names it
+    /// (a Rust doctest, ADR-231). A language whose documentation runs no examples has none.
+    fn doc_example(&self, _parsed: &Parsed, _node: tree_sitter::Node<'_>, _name: &str) -> bool {
+        false
+    }
 }
 
 /// The language and family pair the support matrix works with.

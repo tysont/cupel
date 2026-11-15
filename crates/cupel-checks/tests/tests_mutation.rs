@@ -34,6 +34,7 @@ fn discount() -> SymbolDef {
         },
         body: None,
         parameters: 2,
+        doc_example: false,
     }
 }
 

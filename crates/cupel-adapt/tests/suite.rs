@@ -291,6 +291,7 @@ fn symbols(lang: &str, functions: &[(&str, u32, u32)]) -> Symbols {
                 span: span(*line, *end_line),
                 body: None,
                 parameters: 0,
+                doc_example: false,
             })
             .collect(),
     }
