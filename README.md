@@ -129,6 +129,22 @@ Every verb takes the same global flags (below) and writes the same envelope. Run
 
 A workspace whose root `package.json` `test` script delegates to its packages (`pnpm -r test`) gets one root per package under `[roots]`, each tested by its own runner and configuration; configured `[roots]` are the project's roots, so editing them narrows what Cupel tests, mutates, and analyzes ([ADR-177](docs/adr/CUPEL_DECISION_177.md), [ADR-167](docs/adr/CUPEL_DECISION_167.md), [ADR-173](docs/adr/CUPEL_DECISION_173.md)), and a language they name no root of runs nothing anywhere, not even at the repository root ([ADR-171](docs/adr/CUPEL_DECISION_171.md)). A root whose own `test` script runs something other than the runner Cupel would choose and has no packages to split into (a wrapper script) gets no test or coverage command from `init`, and a run uses no runner there unless `[lang.<id>] runner` pins one ([ADR-166](docs/adr/CUPEL_DECISION_166.md)): a runner's command at that root would not be the project's tests and could reach tiers the project runs apart, such as tests against a deployed environment. `init` reports it as `init.runner-deferred` (a note naming the runner and the rule), and `cupel describe language <id>` lists each runner's `defer` rules ([ADR-162](docs/adr/CUPEL_DECISION_162.md)). Add `test` and `coverage` under `[lang.<id>]` for the packages Cupel should run.
 
+Every `cupel.toml` it writes starts with a `[gate.changed]` of ratchets, each rule under a comment saying what it holds, so `cupel check --changed --gate` gates a change at once ([ADR-233](docs/adr/CUPEL_DECISION_233.md)); a rule against `base` compares with the range's base, and is skipped without failing where there is nothing to compare with, such as a change whose files are all new ([ADR-205](docs/adr/CUPEL_DECISION_205.md)):
+
+```toml
+[gate.changed]
+# No test is weakened: no assertion removed, matcher loosened, test skipped or deleted, or snapshot rewritten.
+"tests.weakening" = "none"
+# The mutation score is at least the base's less 0.02.
+"tests.mutation.score" = ">= base - 0.02"
+# The largest cyclomatic complexity stays within cyclomatic_max, or, past it at the base already, grows by 2 at most.
+"static.complexity.cyclomatic_max" = "<= base"
+# No more pairs of cloned functions than the base has.
+"static.clones.pairs" = "<= base"
+# No breaking change to the public API.
+"static.api-surface" = "no-breaking"
+```
+
 ```sh
 cupel init                   # preview: the envelope carries unified diffs of what would be written
 cupel init --write           # write cupel.toml and .cupel/.gitignore

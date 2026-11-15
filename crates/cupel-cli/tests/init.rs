@@ -423,3 +423,48 @@ fn a_run_runs_tests_only_in_the_roots_cupel_toml_names() {
         [true, false]
     );
 }
+
+/// The rules `[gate.changed]` holds as `init` writes it, in order, as the gate prints them.
+const STARTER_GATE: [&str; 5] = [
+    "tests.weakening none",
+    "tests.mutation.score >= base - 0.02",
+    "static.complexity.cyclomatic_max <= base",
+    "static.clones.pairs <= base",
+    "static.api-surface no-breaking",
+];
+
+/// `init` writes a starter `[gate.changed]` of ratchets, each rule under a comment saying what
+/// it holds (ADR-233): the written file loads, and `check --changed --gate` on the freshly
+/// initialized repository evaluates exactly those rules instead of refusing for want of a gate.
+#[test]
+fn init_writes_a_starter_changed_gate_that_check_changed_gate_evaluates() {
+    let repo = Repo::new();
+    repo.write("notes.txt", "first\n");
+    if !repo.git(&["init", "--quiet", "--initial-branch", "main"]) {
+        eprintln!("SKIPPED: git not installed");
+        return;
+    }
+    let written = repo.run(&["init", "--write"]);
+    assert_eq!(written.code, 0, "{}", written.stdout);
+    let text = std::fs::read_to_string(repo.path("cupel.toml")).unwrap();
+    let table = text.split("[gate.changed]\n").nth(1).unwrap_or_default();
+    let commented = table
+        .lines()
+        .collect::<Vec<_>>()
+        .windows(2)
+        .filter(|pair| pair[0].starts_with("# ") && pair[1].starts_with('"'))
+        .count();
+    assert_eq!(commented, STARTER_GATE.len(), "{text}");
+    assert!(repo.git(&["add", "."]) && repo.git(&["commit", "--quiet", "-m", "start"]));
+    repo.write("notes.txt", "second\n");
+    let outcome = repo.run(&["check", "--changed", "--gate", "--depth", "quick"]);
+    assert_ne!(outcome.code, 2, "{}", outcome.stdout);
+    let envelope = outcome.envelope();
+    let rules: Vec<&str> = envelope["summary"]["gate"]["rules"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|rule| rule["rule"].as_str())
+        .collect();
+    assert_eq!(rules, STARTER_GATE, "{}", outcome.stdout);
+}

@@ -25,7 +25,7 @@
     "would_skip": [],
     "would_write": [
       {
-        "diff": "--- /dev/null\n+++ b/cupel.toml\n@@ -0,0 +1,6 @@\n+# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.\n+depth = \"standard\"\n+\n+[lang.java]\n+test = \"mvn -B --no-transfer-progress test\"\n+coverage = \"mvn -B --no-transfer-progress org.jacoco:jacoco-maven-plugin:0.8.13:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.13:report\"\n",
+        "diff": "--- /dev/null\n+++ b/cupel.toml\n@@ -0,0 +1,18 @@\n+# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.\n+depth = \"standard\"\n+\n+[lang.java]\n+test = \"mvn -B --no-transfer-progress test\"\n+coverage = \"mvn -B --no-transfer-progress org.jacoco:jacoco-maven-plugin:0.8.13:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.13:report\"\n+\n+[gate.changed]\n+# No test is weakened: no assertion removed, matcher loosened, test skipped or deleted, or snapshot rewritten.\n+\"tests.weakening\" = \"none\"\n+# The mutation score is at least the base's less 0.02.\n+\"tests.mutation.score\" = \">= base - 0.02\"\n+# The largest cyclomatic complexity stays within cyclomatic_max, or, past it at the base already, grows by 2 at most.\n+\"static.complexity.cyclomatic_max\" = \"<= base\"\n+# No more pairs of cloned functions than the base has.\n+\"static.clones.pairs\" = \"<= base\"\n+# No breaking change to the public API.\n+\"static.api-surface\" = \"no-breaking\"\n",
         "path": "cupel.toml"
       },
       {

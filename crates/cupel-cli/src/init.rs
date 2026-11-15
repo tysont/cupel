@@ -227,8 +227,26 @@ pub fn config_text(repo: &Path, info: &ProjectInfo, default_branch: Option<&str>
             }
         }
     }
+    text.push_str(STARTER_GATE);
     text
 }
+
+/// The `[gate.changed]` every `cupel.toml` starts with (ADR-233): ratchets a change must not
+/// break, each under a comment saying what it holds. A rule against `base` passes before a
+/// baseline exists (ADR-205), so a fresh repository gates at once.
+const STARTER_GATE: &str = "
+[gate.changed]
+# No test is weakened: no assertion removed, matcher loosened, test skipped or deleted, or snapshot rewritten.
+\"tests.weakening\" = \"none\"
+# The mutation score is at least the base's less 0.02.
+\"tests.mutation.score\" = \">= base - 0.02\"
+# The largest cyclomatic complexity stays within cyclomatic_max, or, past it at the base already, grows by 2 at most.
+\"static.complexity.cyclomatic_max\" = \"<= base\"
+# No more pairs of cloned functions than the base has.
+\"static.clones.pairs\" = \"<= base\"
+# No breaking change to the public API.
+\"static.api-surface\" = \"no-breaking\"
+";
 
 /// Each root's name in `[roots]`: its directory's last component, or its language for `.`,
 /// suffixed with the language when two roots would share a name.
@@ -429,6 +447,8 @@ coverage = \"cargo llvm-cov --lcov --output-path {out}\"
 test = \"npx vitest run\"
 coverage = \"npx vitest run --coverage --coverage.reporter=lcov\"
 "
+            .to_owned()
+                + STARTER_GATE
         );
     }
 
