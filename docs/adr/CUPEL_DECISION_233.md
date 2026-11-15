@@ -34,7 +34,7 @@ Every `cupel.toml` that `init` writes ends with this table, each rule under a on
 It is written for every repository, whatever its languages, after the `[lang.*]` tables. `init` writes no `[gate.tree]`.
 
 ## Consequences
-- `check --changed --gate` on a freshly initialized repository evaluates these five rules instead of refusing. A rule against `base` compares with the range's base (ADR-175), and one with nothing to compare with is skipped with `baseline.missing` without failing (ADR-205 §1); a rule whose check did not run in the run still fails the gate, as before, so a `--depth quick` run fails `tests.mutation.score`.
+- `check --changed --gate` on a freshly initialized repository evaluates these five rules instead of refusing. A rule against `base` compares with the range's base (ADR-175), and one with nothing to compare with is skipped with `baseline.missing` without failing (ADR-205 §1); a rule skipped for any other reason fails the gate as before (ADR-205 §1). On a fresh repository whose change touches no source, all five pass (observed on a repository holding one text file).
 - `"static.clones.pairs" = "<= base"` has no tolerance: a change that extends deliberately parallel code fails it (NOTES Q-java-2), and such a project relaxes its own table.
 - The table is the project's to edit; `init --force` writes it again.
 - `crates/cupel-cli/tests/init.rs` checks that the written file loads and that `check --changed --gate` evaluates exactly these rules; every `init --dry-run` golden shows the table.

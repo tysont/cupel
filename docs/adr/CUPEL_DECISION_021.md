@@ -1,6 +1,6 @@
 # CUPEL_DECISION_021: Project detection and the `cupel.toml` that `init` writes
 
-**Date:** 2026-10-10 · **Status:** accepted · **Phase:** P0.8
+**Date:** 2026-10-10 · **Status:** accepted; the `cupel.toml` it writes gains a starter `[gate.changed]`, amended by [233](CUPEL_DECISION_233.md) (owner rulings, 2026-11-14) · **Phase:** P0.8
 
 ## Context
 
