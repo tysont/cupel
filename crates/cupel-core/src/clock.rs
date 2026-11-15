@@ -36,17 +36,27 @@ mod tests {
         digits.parse().unwrap()
     }
 
+    /// `now()` and the second the sleep-excluding clock read around it, taken again until that
+    /// clock reads the same second before and after.
+    fn now_within_a_second() -> (i64, String) {
+        loop {
+            let before = sleepless_seconds();
+            let instant = now();
+            if sleepless_seconds() == before {
+                return (before, format!("{instant:?}"));
+            }
+        }
+    }
+
     #[test]
     fn the_clock_stops_while_the_machine_sleeps() {
         // A clock that counts sleep (`CLOCK_MONOTONIC` on macOS, `CLOCK_BOOTTIME` on Linux) is
         // ahead of this one by every second the machine slept since it booted.
-        let before = sleepless_seconds();
-        let instant = now();
-        let after = sleepless_seconds();
-        let read = seconds(&format!("{instant:?}"));
-        assert!(
-            (before..=after).contains(&read),
-            "the clock read {read} s; the sleep-excluding clock read {before} s to {after} s"
+        let (sleepless, instant) = now_within_a_second();
+        assert_eq!(
+            seconds(&instant),
+            sleepless,
+            "the clock is not the one that stops while the machine sleeps"
         );
     }
 }

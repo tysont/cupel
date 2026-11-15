@@ -120,15 +120,13 @@ impl Producer<MutationOutcomes> for MutationEngine {
             suite_hash: &suite_hash,
             toolchain_hash: &toolchain,
         };
-        let root = &ctx.ctx.root;
         let planning = Instant::now();
-        let mut planned = plan(&inputs, &|file| read(root, file));
+        let mut planned = plan(&inputs, &|file| read(&ctx.ctx.root, file));
         let running = Running::new(ctx, runner, settings, symbols, &whole);
         let reference = Baseline::new(&suite_hash, &toolchain);
         running.run(&mut planned, planning, &reference, sink)?;
-        let runs_whole = planned
-            .iter()
-            .any(|planned| planned.covered && planned.tests.is_none());
+        // A covered mutant no per-test selection narrowed ran the whole suite.
+        let runs_whole = planned.iter().any(|p| p.covered && p.tests.is_none());
         let mutants = planned.into_iter().map(|planned| planned.mutant).collect();
         let mut outcomes = self.outcomes(ctx, Some(baseline), per_test.is_some(), mutants);
         if runs_whole {

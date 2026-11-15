@@ -7,10 +7,10 @@ use cupel_core::hint::{ALL_TESTS, COVERING_TESTS, OWN_ROOT, with_own_tests};
 use cupel_core::syntax::{ProjectInfo, SymbolDef, SymbolKey, Symbols, TestConventions};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CheckStatus, CostClass, Event, EventSink,
-    ExcludedTest, FactKind, Facts, Finding, FlakyTest, Manifest, Measurement, MetricPer,
-    MetricSpec, Mutant, MutantOutcome, MutationOutcomes, MutationPhase, MutationStrategy, Plan,
-    ProtectionMetric, Result, Scope, Score, SettingSpec, Severity, SiteHash, Stability, SymbolHash,
-    Tier, UnfinishedTest,
+    ExcludedTest, FactKind, Facts, Finding, FindingKindSpec, FlakyTest, Manifest, Measurement,
+    MetricPer, MetricSpec, Mutant, MutantOutcome, MutationOutcomes, MutationPhase,
+    MutationStrategy, Plan, ProtectionMetric, Result, Scope, Score, SettingSpec, Severity,
+    SiteHash, Stability, SymbolHash, Tier, UnfinishedTest,
 };
 use schemars::JsonSchema;
 use serde::Serialize;
@@ -170,49 +170,7 @@ fn manifest() -> Manifest {
         cost: CostClass::Standard,
         needs: vec![FactKind::Symbols, FactKind::MutationOutcomes],
         wants: vec![FactKind::TestConventions, FactKind::ProjectInfo],
-        findings: vec![
-            kind::<Survived>(
-                "mutant.survived",
-                ActionKind::WriteTest,
-                "Every test that ran against the mutant passed: no test tells the mutated \
-                 code from the original.",
-            ),
-            kind::<TimedOut>(
-                "mutant.timeout",
-                ActionKind::Review,
-                "The mutant was not decided within its time cap, so its outcome is unknown: a \
-                 run of the whole suite reached its timeout, which usually means it loops, or \
-                 its selected tests could not all run within max_mutant_timeout (ADR-160).",
-            ),
-            kind::<Site>(
-                "mutant.out-of-memory",
-                ActionKind::Review,
-                "The tests held more memory than the run's share of max_mutant_memory against \
-                 the mutant and were killed (ADR-148).",
-            ),
-            kind::<Uncovered>(
-                "mutant.uncovered",
-                ActionKind::WriteTest,
-                "No test runs the site, so its mutant was not run.",
-            ),
-            kind::<Equivalent>(
-                "mutant.equivalent?",
-                ActionKind::Review,
-                "The mutant survived and may behave exactly as the original (ADR-004).",
-            ),
-            kind::<SlowTest>(
-                "mutant.slow-test-excluded",
-                ActionKind::Review,
-                "A test slower than 60 s in the baseline was left out of the mutants' runs \
-                 that per-test selection did not narrow (ADR-147).",
-            ),
-            kind::<FlakyTestEvidence>(
-                "mutant.flaky-test-excluded",
-                ActionKind::Review,
-                "A test that failed in the mutation overlay with no mutant applied, though the \
-                 baseline passed it, was left out of every mutant's run (ADR-219).",
-            ),
-        ],
+        findings: finding_kinds(),
         metrics: metrics(),
         settings: settings(),
         stability: Stability::Experimental,
@@ -222,6 +180,53 @@ fn manifest() -> Manifest {
                   (ADR-141). Outcomes of unchanged code and tests are reused from earlier runs."
             .to_owned(),
     }
+}
+
+/// The finding kinds this check reports, with their evidence and actions.
+fn finding_kinds() -> Vec<FindingKindSpec> {
+    vec![
+        kind::<Survived>(
+            "mutant.survived",
+            ActionKind::WriteTest,
+            "Every test that ran against the mutant passed: no test tells the mutated \
+             code from the original.",
+        ),
+        kind::<TimedOut>(
+            "mutant.timeout",
+            ActionKind::Review,
+            "The mutant was not decided within its time cap, so its outcome is unknown: a \
+             run of the whole suite reached its timeout, which usually means it loops, or \
+             its selected tests could not all run within max_mutant_timeout (ADR-160).",
+        ),
+        kind::<Site>(
+            "mutant.out-of-memory",
+            ActionKind::Review,
+            "The tests held more memory than the run's share of max_mutant_memory against \
+             the mutant and were killed (ADR-148).",
+        ),
+        kind::<Uncovered>(
+            "mutant.uncovered",
+            ActionKind::WriteTest,
+            "No test runs the site, so its mutant was not run.",
+        ),
+        kind::<Equivalent>(
+            "mutant.equivalent?",
+            ActionKind::Review,
+            "The mutant survived and may behave exactly as the original (ADR-004).",
+        ),
+        kind::<SlowTest>(
+            "mutant.slow-test-excluded",
+            ActionKind::Review,
+            "A test slower than 60 s in the baseline was left out of the mutants' runs \
+             that per-test selection did not narrow (ADR-147).",
+        ),
+        kind::<FlakyTestEvidence>(
+            "mutant.flaky-test-excluded",
+            ActionKind::Review,
+            "A test that failed in the mutation overlay with no mutant applied, though the \
+             baseline passed it, was left out of every mutant's run (ADR-219).",
+        ),
+    ]
 }
 
 /// The settings this check declares, each configuring the engine's fact (ADR-147 §2).

@@ -432,6 +432,45 @@ fn a_run_whose_gate_failed_is_refused_whatever_its_skipped_rules_lacked() {
 
 // ------------------------------------------- runs only their budget cut short (ADR-216)
 
+/// Five partial runs each with one gap the budget did not make, numbered 1 to 5: a timeout skip,
+/// a check cut short before the deadline, an errored check, nothing left out, and a check cut short
+/// in a run with no budget.
+fn runs_with_other_gaps() -> Vec<cupel_core::Envelope> {
+    let budget_skip = check_result("tests.coverage", "skipped", Some("budget"));
+    let mut unbudgeted = budgeted(5, 1_500, &[check_result("tests.mutation", "partial", None)]);
+    unbudgeted.run.budget_ms = None;
+    vec![
+        budgeted(
+            1,
+            1_500,
+            &[
+                budget_skip.clone(),
+                check_result("tests.flaky", "skipped", Some("timeout")),
+            ],
+        ),
+        // Cut short before the budget's deadline: the timeout, not the budget, cut it.
+        budgeted(
+            2,
+            400,
+            &[
+                budget_skip.clone(),
+                check_result("tests.mutation", "partial", None),
+            ],
+        ),
+        budgeted(
+            3,
+            1_500,
+            &[
+                budget_skip.clone(),
+                check_result("tests.mutation", "error", None),
+            ],
+        ),
+        // Partial with nothing left out: cancelled after its checks ended.
+        budgeted(4, 1_500, &[]),
+        unbudgeted,
+    ]
+}
+
 /// The result of check `id` with `status`, skipped (or cut short) for `reason` when given.
 fn check_result(id: &str, status: &str, reason: Option<&str>) -> Value {
     let skipped = reason.map(|reason| json!({"reason": reason, "lang": "python"}));
@@ -492,39 +531,7 @@ fn a_run_whose_only_gaps_the_budget_made_can_be_the_baseline() {
 #[test]
 fn a_partial_run_with_a_gap_the_budget_did_not_make_is_refused() {
     let repo = Repo::new();
-    let budget_skip = check_result("tests.coverage", "skipped", Some("budget"));
-    let mut unbudgeted = budgeted(5, 1_500, &[check_result("tests.mutation", "partial", None)]);
-    unbudgeted.run.budget_ms = None;
-    repo.seed(&[
-        budgeted(
-            1,
-            1_500,
-            &[
-                budget_skip.clone(),
-                check_result("tests.flaky", "skipped", Some("timeout")),
-            ],
-        ),
-        // Cut short before the budget's deadline: the timeout, not the budget, cut it.
-        budgeted(
-            2,
-            400,
-            &[
-                budget_skip.clone(),
-                check_result("tests.mutation", "partial", None),
-            ],
-        ),
-        budgeted(
-            3,
-            1_500,
-            &[
-                budget_skip.clone(),
-                check_result("tests.mutation", "error", None),
-            ],
-        ),
-        // Partial with nothing left out: cancelled after its checks ended.
-        budgeted(4, 1_500, &[]),
-        unbudgeted,
-    ]);
+    repo.seed(&runs_with_other_gaps());
     let refusal = |n: u8| {
         let from = format!("run:{}", run_id(n));
         assert_usage(&repo.run(&["baseline", "set", "--from", &from, "--write"]))["title"].clone()

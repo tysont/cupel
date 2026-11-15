@@ -73,8 +73,11 @@ pub fn produce_configured<F: Fact>(
     root: &Path,
     settings: serde_json::Map<String, serde_json::Value>,
 ) -> F {
-    let (fact, events) =
-        produce_with_settings::<F>(lang, root, &Exclude::default(), None, Vec::new(), settings);
+    let setup = Setup {
+        settings,
+        ..Setup::default()
+    };
+    let (fact, events) = produce_with_settings::<F>(lang, root, setup);
     assert!(events.is_empty(), "{events:?}");
     fact
 }
@@ -97,19 +100,28 @@ fn produce_with<F: Fact>(
     scope: Option<Scope>,
     roots: Vec<cupel_core::config::RootConfig>,
 ) -> (F, Vec<Event>) {
-    produce_with_settings::<F>(lang, root, exclude, scope, roots, serde_json::Map::new())
+    let setup = Setup {
+        exclude: exclude.clone(),
+        scope,
+        roots,
+        ..Setup::default()
+    };
+    produce_with_settings::<F>(lang, root, setup)
 }
 
-/// Produces `F` for `lang` over `root` with `scope`, `roots` as the configured `[roots]`, and
-/// `settings` as the settings checks declare for the fact.
-fn produce_with_settings<F: Fact>(
-    lang: &str,
-    root: &Path,
-    exclude: &Exclude,
+/// What a production runs with beside its language and root: the walk's exclusions, the scope
+/// (every file the walk finds when `None`), the configured `[roots]`, and the settings checks
+/// declare for the fact.
+#[derive(Default)]
+struct Setup {
+    exclude: Exclude,
     scope: Option<Scope>,
     roots: Vec<cupel_core::config::RootConfig>,
     settings: serde_json::Map<String, serde_json::Value>,
-) -> (F, Vec<Event>) {
+}
+
+/// Produces `F` for `lang` over `root` as `setup` says.
+fn produce_with_settings<F: Fact>(lang: &str, root: &Path, setup: Setup) -> (F, Vec<Event>) {
     let languages = LanguageRegistry::builtin();
     let mut producers = ProducerRegistry::default();
     languages.register_producers(&mut producers);
@@ -121,20 +133,20 @@ fn produce_with_settings<F: Fact>(
     let writer = Writer::new(root, false).unwrap().confined();
     let mut ctx = ProduceCtx::new(
         Ctx {
-            exclude: exclude.clone(),
-            roots,
+            exclude: setup.exclude.clone(),
+            roots: setup.roots,
             ..Ctx::new(writer.root().to_path_buf())
         },
         writer,
         Cancellation::new(),
     );
-    ctx.settings = settings;
-    let scope = scope.unwrap_or_else(|| {
+    ctx.settings = setup.settings;
+    let scope = setup.scope.unwrap_or_else(|| {
         Scope::of_files(walk_excluding(
             root,
             &languages,
             &ProjectInfo::default(),
-            exclude,
+            &setup.exclude,
         ))
     });
     let mut events = Vec::new();

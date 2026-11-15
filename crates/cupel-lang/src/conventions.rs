@@ -87,23 +87,8 @@ impl Producer<TestConventions> for GlobTestConventions {
         candidates.dedup();
         let candidates: Vec<&str> = candidates.iter().map(String::as_str).collect();
         let read = |file: &str| fs::read_to_string(ctx.ctx.root.join(file)).unwrap_or_default();
-        // A file whose text names a benchmark harness is test code wherever it is (ADR-227): a
-        // glob matching exactly its path joins the test globs.
-        if !rules.test_contains.is_empty() {
-            for file in &candidates {
-                if conventions.is_test(file) {
-                    continue;
-                }
-                let text = read(file);
-                if rules
-                    .test_contains
-                    .iter()
-                    .any(|needle| text.contains(needle.as_str()))
-                {
-                    conventions.test_globs.push(globset::escape(file));
-                }
-            }
-        }
+        let marked = marked_tests(rules, &conventions, &candidates, &read);
+        conventions.test_globs.extend(marked);
         let sources: Vec<&str> = files
             .iter()
             .copied()
@@ -121,6 +106,31 @@ impl Producer<TestConventions> for GlobTestConventions {
         }
         Ok(conventions)
     }
+}
+
+/// A file whose text names a benchmark harness is test code wherever it is (ADR-227): a glob
+/// matching exactly the path of each such candidate the test globs do not already match.
+fn marked_tests(
+    rules: &ConventionRules,
+    conventions: &TestConventions,
+    candidates: &[&str],
+    read: &dyn Fn(&str) -> String,
+) -> Vec<String> {
+    if rules.test_contains.is_empty() {
+        return Vec::new();
+    }
+    candidates
+        .iter()
+        .filter(|file| !conventions.is_test(file))
+        .filter(|file| {
+            let text = read(file);
+            rules
+                .test_contains
+                .iter()
+                .any(|needle| text.contains(needle.as_str()))
+        })
+        .map(|file| globset::escape(file))
+        .collect()
 }
 
 /// The test files in `files` that `rules` pair with `source`, in rule order, without repeats.

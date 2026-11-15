@@ -1,6 +1,8 @@
 // ABOUTME: A tools.deps project's own `:deps/prep-lib` (ADR-230): the build its `deps.edn` declares it needs before use,
 // ABOUTME: read from the file, and run as `clojure -T<alias> <fn>` before a Clojure run when its `:ensure` directory is missing.
+use std::iter::Peekable;
 use std::path::Path;
+use std::str::Chars;
 
 use cupel_core::{Cancellation, Error, Process, Result, output_tail};
 
@@ -178,43 +180,55 @@ fn tokens(text: &str) -> Vec<Token> {
     let mut chars = text.chars().peekable();
     while let Some(c) = chars.next() {
         match c {
-            ';' => {
-                for c in chars.by_ref() {
-                    if c == '\n' {
-                        break;
-                    }
-                }
-            }
+            ';' => skip_line(&mut chars),
             '{' | '[' | '(' => tokens.push(Token::Open),
             '}' | ']' | ')' => tokens.push(Token::Close),
-            '"' => {
-                let mut string = String::new();
-                while let Some(c) = chars.next() {
-                    match c {
-                        '"' => break,
-                        '\\' => string.extend(chars.next()),
-                        c => string.push(c),
-                    }
-                }
-                tokens.push(Token::Text(string));
-            }
+            '"' => tokens.push(Token::Text(string(&mut chars))),
             c if c.is_whitespace() || c == ',' => {}
             c => {
-                let mut atom = String::from(c);
-                while let Some(next) = chars.peek() {
-                    if next.is_whitespace() || ",;\"{}[]()".contains(*next) {
-                        break;
-                    }
-                    atom.extend(chars.next());
+                let atom = atom(c, &mut chars);
+                if atom != "#" || chars.peek() != Some(&'{') {
+                    tokens.push(Token::Atom(atom));
                 }
-                if atom == "#" && chars.peek() == Some(&'{') {
-                    continue;
-                }
-                tokens.push(Token::Atom(atom));
             }
         }
     }
     tokens
+}
+
+/// Consumes the rest of a `;` comment's line.
+fn skip_line(chars: &mut Peekable<Chars>) {
+    for c in chars.by_ref() {
+        if c == '\n' {
+            break;
+        }
+    }
+}
+
+/// A string's characters after its opening `"`, through its closing one, unescaped.
+fn string(chars: &mut Peekable<Chars>) -> String {
+    let mut string = String::new();
+    while let Some(c) = chars.next() {
+        match c {
+            '"' => break,
+            '\\' => string.extend(chars.next()),
+            c => string.push(c),
+        }
+    }
+    string
+}
+
+/// The atom that starts with `first`, through the character before a blank, a comment, a string
+/// or a bracket.
+fn atom(first: char, chars: &mut Peekable<Chars>) -> String {
+    let mut atom = String::from(first);
+    while let Some(next) = chars.peek() {
+        if next.is_whitespace() || ",;\"{}[]()".contains(*next) {
+            break;
+        }
+        atom.extend(chars.next());
+    }
+    atom
 }
 
 #[cfg(test)]
@@ -251,6 +265,14 @@ mod tests {
                 "build/prep".to_owned()
             ])
         );
+    }
+
+    /// A key whose value is a nested form is passed over, however deep, and a `#{` set is one form.
+    #[test]
+    fn a_nested_value_among_the_prep_lib_keys_is_passed_over() {
+        let text =
+            r#"{:deps/prep-lib {:alias :b :extra {:x [1 #{2 3}] :y (f)} :fn f :ensure "t"}}"#;
+        assert_eq!(parse(text), Some(prep(":b", "f", "t")));
     }
 
     #[test]

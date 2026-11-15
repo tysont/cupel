@@ -478,6 +478,37 @@ enum Gate {
     Secret(&'static str),
 }
 
+impl Gate {
+    /// The secret that gates the job, when a secret does.
+    fn secret(self) -> Option<&'static str> {
+        match self {
+            Gate::Secret(name) => Some(name),
+            Gate::Variable(_) => None,
+        }
+    }
+
+    /// The `publishers` job's lines for this gate on `output`: its environment mapping and its
+    /// probe call.
+    fn probed(self, output: &str) -> [String; 2] {
+        let (context, word, name) = match self {
+            Gate::Variable(name) => ("vars", "variable", name),
+            Gate::Secret(name) => ("secrets", "secret", name),
+        };
+        [
+            format!("{name}: ${{{{ {context}.{name} }}}}"),
+            format!("{word} {output} {name}"),
+        ]
+    }
+}
+
+/// The `needs` line of a publish job: the Python Package Index upload also waits for its build.
+fn needs_of(job: &str) -> &'static str {
+    match job {
+        "publish-pypi" => "needs: [publishers, pypi-build]",
+        _ => "needs: publishers",
+    }
+}
+
 /// The publish jobs: each job's name, the `publishers` output it is gated on, and what sets it.
 const PUBLISHERS: [(&str, &str, Gate); 4] = [
     (
@@ -548,16 +579,7 @@ fn the_publishers_job_probes_each_publishing_gate_on_a_tag_push() {
         "echo \"::notice title=publish-$1::skipped: $2\"".to_owned(),
     ];
     expected.extend(PUBLISHERS.iter().flat_map(|(_, output, gate)| {
-        let (mapped, probe) = match gate {
-            Gate::Variable(name) => (
-                format!("{name}: ${{{{ vars.{name} }}}}"),
-                format!("variable {output} {name}"),
-            ),
-            Gate::Secret(name) => (
-                format!("{name}: ${{{{ secrets.{name} }}}}"),
-                format!("secret {output} {name}"),
-            ),
-        };
+        let [mapped, probe] = gate.probed(output);
         [
             format!("{output}: ${{{{ steps.probe.outputs.{output} }}}}"),
             mapped,
@@ -580,23 +602,16 @@ fn every_publish_job_is_gated_on_its_probe() {
                 .find(|(name, _)| name == job)
                 .map(|(_, lines)| lines.clone())
                 .unwrap_or_default();
-            let needs = if *job == "publish-pypi" {
-                "needs: [publishers, pypi-build]"
-            } else {
-                "needs: publishers"
-            };
             let expected = vec![
-                needs.to_owned(),
+                needs_of(job).to_owned(),
                 format!("if: needs.publishers.outputs.{output} == 'true'"),
             ];
             let mut absent = missing(&lines, expected);
-            if let Gate::Secret(secret) = gate
-                && !lines
-                    .iter()
-                    .any(|line| line.ends_with(&format!("${{{{ secrets.{secret} }}}}")))
-            {
-                absent.push(format!("secrets.{secret}"));
-            }
+            let unread = gate.secret().filter(|secret| {
+                let read = format!("${{{{ secrets.{secret} }}}}");
+                !lines.iter().any(|line| line.ends_with(&read))
+            });
+            absent.extend(unread.map(|secret| format!("secrets.{secret}")));
             (*job, absent)
         })
         .filter(|(_, absent)| !absent.is_empty())
@@ -622,10 +637,7 @@ fn only_its_publish_job_and_the_probe_read_each_secret() {
         .collect();
     let expected: Vec<(String, String)> = PUBLISHERS
         .iter()
-        .filter_map(|(job, _, gate)| match gate {
-            Gate::Secret(secret) => Some(((*job).to_owned(), (*secret).to_owned())),
-            Gate::Variable(_) => None,
-        })
+        .filter_map(|(job, _, gate)| Some(((*job).to_owned(), gate.secret()?.to_owned())))
         .collect();
     assert_eq!(readers, expected);
 }
