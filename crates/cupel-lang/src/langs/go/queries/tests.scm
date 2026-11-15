@@ -206,6 +206,20 @@
   (#any-of? @_t "t" "b" "tb")
   (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow"))
 
+; `if hasVote(cfg, "id0") { t.Fatalf(…) }`, `if !ok { t.Fatal(…) }`, `if n > 3 { t.Errorf(…) }`: any
+; other condition guarding a failure call. A Go condition is a boolean, so the test pins the value
+; it names (ADR-221).
+(if_statement
+  consequence: (block
+    (statement_list
+      (expression_statement
+        (call_expression
+          function: (selector_expression
+            operand: (identifier) @_t
+            field: (field_identifier) @_fail)) @test.assertion @assertion.idiom.guard)))
+  (#any-of? @_t "t" "b" "tb")
+  (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow"))
+
 ; Any other failure call: some condition held.
 (call_expression
   function: (selector_expression

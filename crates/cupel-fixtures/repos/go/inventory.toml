@@ -180,8 +180,8 @@ file = "ledger_test.go"
 name = "TestDepositAddsToTheBalance"
 
 [test-frames.assertion-truthiness]
-file = "ledger_test.go"
-name = "TestMembersGetADiscount"
+file = "pricing_test.go"
+name = "TestTallyReportsOverdraft"
 
 [test-frames.assertion-not-null]
 file = "ledger_test.go"

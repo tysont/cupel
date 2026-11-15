@@ -212,6 +212,21 @@
     (identifier) @_method
     (#eq? @_method "is_err"))) @test.assertion @assertion.idiom.is-err
 
+; `if !cond { panic!(…) }`: a failure under a boolean condition pins it, as Go's guarded `t.Fatal`
+; does (ADR-221). An `if let` is the `expect` a test spells out, and no assertion.
+(if_expression
+  condition: (_) @_condition
+  consequence: (block
+    [
+      (expression_statement
+        (macro_invocation
+          macro: (identifier) @_panic) @test.assertion @assertion.idiom.guard)
+      (macro_invocation
+        macro: (identifier) @_panic) @test.assertion @assertion.idiom.guard
+    ])
+  (#eq? @_panic "panic")
+  (#not-match? @_condition "^let\\b"))
+
 ; `r.unwrap_err()` and `r.expect_err("…")` panic unless `r` is an error, the check
 ; `assert!(r.is_err())` makes; `unwrap` and `expect` are setup, no assertion.
 (call_expression

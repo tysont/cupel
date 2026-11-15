@@ -225,6 +225,18 @@ const ASSERTION_FORMS: &[(&str, &[(AssertionKind, AssertionStrength)])] = &[
         "parse(\"1\").unwrap();\n    parse(\"2\").expect(\"a digit\");",
         &[],
     ),
+    // A `panic!` under an `if` pins the condition, as Go's guarded `t.Fatal` does (ADR-221); one
+    // under an `if let` is the `expect` it spells out, and a bare one asserts nothing.
+    (
+        "if !ready(x) {\n        panic!(\"not ready\");\n    }",
+        &[(Truthiness, Strong)],
+    ),
+    (
+        "if total > 3 { panic!(\"total {total}\") }",
+        &[(Truthiness, Strong)],
+    ),
+    ("if let Err(e) = parse(\"1\") { panic!(\"{e}\") }", &[]),
+    ("panic!(\"always\");", &[]),
 ];
 
 #[test]

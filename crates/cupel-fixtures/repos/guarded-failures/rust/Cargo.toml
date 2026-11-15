@@ -1,0 +1,10 @@
+# ABOUTME: A crate whose tests fail by `if … { panic!(…) }`, a strong assertion of the condition, beside one
+# ABOUTME: that only panics in an `if let`, which is no assertion (ADR-221).
+[package]
+name = "votes"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]

@@ -9,7 +9,7 @@
   "oracles": null,
   "plan": null,
   "rankings": {
-    "recommended": 17,
+    "recommended": 16,
     "targets": [
       {
         "findings": [
@@ -101,50 +101,6 @@
       },
       {
         "findings": [
-          "fnd_c9f8d6"
-        ],
-        "lang": "go",
-        "protection": {
-          "coverage": null,
-          "mutation_score": null,
-          "tests": null
-        },
-        "rank": 3,
-        "recommend": "protect",
-        "target": {
-          "display": "ledger.TestMembersGetADiscount",
-          "location": {
-            "col": 1,
-            "end_col": 2,
-            "end_line": 26,
-            "file": "ledger_test.go",
-            "line": 22
-          },
-          "symbol": "sh_53f862293ba6de55"
-        },
-        "values": [
-          {
-            "check": "static.complexity",
-            "metric": "cyclomatic",
-            "rank": 23,
-            "value": 2.0
-          },
-          {
-            "check": "static.complexity",
-            "metric": "cognitive",
-            "rank": 33,
-            "value": 1.0
-          },
-          {
-            "check": "tests.quality",
-            "metric": "mock_density",
-            "rank": 16,
-            "value": 0.0
-          }
-        ]
-      },
-      {
-        "findings": [
           "fnd_c72554"
         ],
         "lang": "go",
@@ -153,7 +109,7 @@
           "mutation_score": null,
           "tests": null
         },
-        "rank": 4,
+        "rank": 3,
         "recommend": "protect",
         "target": {
           "display": "ledger.TestNewAccountsAreRegistered",
@@ -197,7 +153,7 @@
           "mutation_score": null,
           "tests": null
         },
-        "rank": 5,
+        "rank": 4,
         "recommend": "protect",
         "target": {
           "display": "ledger.TestNewAccountsHaveDistinctIDs",
@@ -241,7 +197,7 @@
           "mutation_score": null,
           "tests": null
         },
-        "rank": 6,
+        "rank": 5,
         "recommend": "protect",
         "target": {
           "display": "ledger.TestOpeningAnAccountDoesNotPanic",
@@ -285,7 +241,7 @@
           "mutation_score": null,
           "tests": null
         },
-        "rank": 7,
+        "rank": 6,
         "recommend": "protect",
         "target": {
           "display": "ledger.TestParsingGarbageFails",
@@ -329,7 +285,7 @@
           "mutation_score": null,
           "tests": null
         },
-        "rank": 8,
+        "rank": 7,
         "recommend": "protect",
         "target": {
           "display": "ledger.TestStatementsAreNotEmpty",
@@ -373,7 +329,7 @@
           "mutation_score": null,
           "tests": null
         },
-        "rank": 9,
+        "rank": 8,
         "recommend": "simplify",
         "target": {
           "display": "ledger.Label",
@@ -411,7 +367,7 @@
           "mutation_score": null,
           "tests": null
         },
-        "rank": 10,
+        "rank": 9,
         "recommend": "simplify",
         "target": {
           "display": "ledger.Settle",
@@ -436,6 +392,50 @@
             "metric": "cognitive",
             "rank": 1,
             "value": 15.0
+          }
+        ]
+      },
+      {
+        "findings": [
+          "fnd_258580"
+        ],
+        "lang": "go",
+        "protection": {
+          "coverage": null,
+          "mutation_score": null,
+          "tests": null
+        },
+        "rank": 10,
+        "recommend": "simplify",
+        "target": {
+          "display": "ledger.TestBlankAmountsAreRejected",
+          "location": {
+            "col": 1,
+            "end_col": 2,
+            "end_line": 16,
+            "file": "ledger_quality_test.go",
+            "line": 13
+          },
+          "symbol": "sh_1484de0443216190"
+        },
+        "values": [
+          {
+            "check": "static.complexity",
+            "metric": "cyclomatic",
+            "rank": 65,
+            "value": 1.0
+          },
+          {
+            "check": "static.complexity",
+            "metric": "cognitive",
+            "rank": 65,
+            "value": 0.0
+          },
+          {
+            "check": "tests.quality",
+            "metric": "mock_density",
+            "rank": 6,
+            "value": 0.0
           }
         ]
       }

@@ -36,7 +36,7 @@ fn standard_library_tests_classify_the_condition_guarding_each_failure() {
             ),
             case(
                 "TestMembersGetADiscount",
-                &[(Truthiness, Weak)],
+                &[(Truthiness, Strong)],
                 Runs,
                 &[],
                 22
@@ -150,7 +150,7 @@ fn only_test_functions_taking_testing_t_are_cases_and_gomock_doubles_are_mocks()
         [
             case(
                 "TestGet",
-                &[(Truthiness, Weak)],
+                &[(Truthiness, Strong)],
                 Skipped,
                 &["NewMockStore"],
                 15
@@ -368,7 +368,7 @@ fn standard_library_equality_calls_compound_conditions_and_switch_cases_pin_valu
     );
 }
 
-/// A package's shared helpers: a weak `check` and an exact `checkExact`.
+/// A package's shared helpers: a `check` failing under a predicate and an exact `checkExact`.
 const HELPERS_TEST: &str = r#"package cli
 
 import (
@@ -424,7 +424,7 @@ fn a_helper_of_another_test_file_of_the_package_asserts_as_it_does() {
         [
             case(
                 "TestOutputMentionsTheName",
-                &[(Truthiness, Weak)],
+                &[(Truthiness, Strong)],
                 Runs,
                 &[],
                 5
@@ -501,6 +501,73 @@ fn a_method_or_function_handed_the_test_asserts_only_when_the_package_defines_it
             case("TestTheClusterOnlyStops", &[], Runs, &[], 10),
             case("TestAScratchDirectoryIsNoAssertion", &[], Runs, &[], 15),
             case("TestAnUnknownMethodIsNoAssertion", &[], Runs, &[], 19),
+        ]
+    );
+}
+
+/// Failure calls under conditions no other idiom names: a predicate, a negated flag, and an
+/// ordering are pinned, as Go conditions are booleans (ADR-221); a failure call outside an `if`
+/// and the `err` and `nil` guards keep their classes.
+const GUARDS_TEST: &str = r#"package cluster
+
+import "testing"
+
+func TestPredicate(t *testing.T) {
+	if hasVote(cfg, "id0") {
+		t.Fatalf("id0 has a vote")
+	}
+}
+
+func TestNegated(t *testing.T) {
+	if _, ok := lookup("id1"); !ok {
+		t.Fatal("id1 is missing")
+	}
+}
+
+func TestOrdering(t *testing.T) {
+	if n := Count(); n > 3 {
+		t.Errorf("count %d", n)
+	}
+}
+
+func TestUnguarded(t *testing.T) {
+	select {
+	case <-done:
+	default:
+		t.FailNow()
+	}
+}
+
+func TestGuardsKeepTheirClasses(t *testing.T) {
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg == nil {
+		t.Fatal("no configuration")
+	}
+}
+"#;
+
+#[test]
+fn a_failure_call_under_a_condition_no_idiom_names_pins_that_condition() {
+    let dir = tree(&[("guards_test.go", GUARDS_TEST)]);
+    let frames: TestFrames = produce("go", dir.path());
+    let guards = &assert_framework(&frames, "guards_test.go", "go-test");
+    assert_eq!(
+        rows(guards),
+        [
+            case("TestPredicate", &[(Truthiness, Strong)], Runs, &[], 5),
+            case("TestNegated", &[(Truthiness, Strong)], Runs, &[], 11),
+            case("TestOrdering", &[(Truthiness, Strong)], Runs, &[], 17),
+            case("TestUnguarded", &[(Truthiness, Weak)], Runs, &[], 23),
+            case(
+                "TestGuardsKeepTheirClasses",
+                &[(NotNull, Weak), (NotNull, Weak)],
+                Runs,
+                &[],
+                31
+            ),
         ]
     );
 }

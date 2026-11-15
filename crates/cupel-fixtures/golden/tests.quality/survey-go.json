@@ -4,12 +4,12 @@
       "cost": "quick",
       "delta": null,
       "duration_ms": "<duration-ms>",
-      "findings": 9,
+      "findings": 8,
       "id": "tests.quality",
       "metrics": {
         "assertion_density": 1.1111111111111112,
         "no_assertion": 2.0,
-        "weak_ratio": 0.36666666666666664
+        "weak_ratio": 0.3333333333333333
       },
       "oracle": null,
       "score": {
@@ -147,47 +147,6 @@
       },
       "tier": 2,
       "title": "`ledger.TestMailGoesThroughEveryNotifier` is mock-heavy: 3 doubles and 1 assertion(s), 75% doubles (max 50%)"
-    },
-    {
-      "action": {
-        "hints": {},
-        "kind": "strengthen_assertion",
-        "priority": 2,
-        "summary": "Replace the truthiness, presence, or inequality checks in `TestMembersGetADiscount` with an assertion that pins the expected value."
-      },
-      "check": "tests.quality",
-      "confidence": 1.0,
-      "detail": null,
-      "evidence": {
-        "actionability": "guided",
-        "assertions": 1,
-        "kinds": [
-          "truthiness"
-        ],
-        "remediation_mode": "strengthen",
-        "weak": 1
-      },
-      "id": "fnd_c9f8d6",
-      "kind": "test.weak-assertion",
-      "location": {
-        "col": 1,
-        "end_col": 2,
-        "end_line": 26,
-        "file": "ledger_test.go",
-        "line": 22
-      },
-      "new_since_baseline": false,
-      "repro": "cupel check --only tests.quality --symbols sh_53f862293ba6de55",
-      "severity": "warn",
-      "suppress": "cupel suppress fnd_c9f8d6 --reason '…'",
-      "suppressed": false,
-      "symbol": {
-        "display": "ledger.TestMembersGetADiscount",
-        "hash": "sh_53f862293ba6de55",
-        "lang": "go"
-      },
-      "tier": 2,
-      "title": "`ledger.TestMembersGetADiscount` asserts only weakly: 1 weak assertion(s), none pinning a value"
     },
     {
       "action": {
