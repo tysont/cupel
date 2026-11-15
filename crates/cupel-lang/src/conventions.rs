@@ -1,5 +1,5 @@
-// ABOUTME: `GlobTestConventions`: which files are tests (globs) and which tests belong to which source
-// ABOUTME: files (path templates), from `[conventions]`. Reads paths, and file text only for `contains`.
+// ABOUTME: `GlobTestConventions`: which files are tests (globs, or text they contain) and which tests belong
+// ABOUTME: to which source files (path templates), from `[conventions]`. Reads paths, and file text for `contains`.
 use std::collections::BTreeSet;
 use std::fs;
 use std::sync::Arc;
@@ -87,6 +87,23 @@ impl Producer<TestConventions> for GlobTestConventions {
         candidates.dedup();
         let candidates: Vec<&str> = candidates.iter().map(String::as_str).collect();
         let read = |file: &str| fs::read_to_string(ctx.ctx.root.join(file)).unwrap_or_default();
+        // A file whose text names a benchmark harness is test code wherever it is (ADR-227): a
+        // glob matching exactly its path joins the test globs.
+        if !rules.test_contains.is_empty() {
+            for file in &candidates {
+                if conventions.is_test(file) {
+                    continue;
+                }
+                let text = read(file);
+                if rules
+                    .test_contains
+                    .iter()
+                    .any(|needle| text.contains(needle.as_str()))
+                {
+                    conventions.test_globs.push(globset::escape(file));
+                }
+            }
+        }
         let sources: Vec<&str> = files
             .iter()
             .copied()

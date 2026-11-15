@@ -1,0 +1,3 @@
+// ABOUTME: The build of the benchmark fixture: a library whose JMH benchmarks live in a Gradle `jmh` source set
+// ABOUTME: and in a `jmh/` module of their own, as jackson-core's do. Only static checks read it.
+plugins { id 'java' }

@@ -677,3 +677,24 @@ fn unreachable_in_a_local_impl_is_no_assertion() {
     let body = "struct Special;\n    impl BufMut for Special {\n        fn remaining_mut(&self) -> usize {\n            unreachable!(\"remaining_mut\");\n        }\n        fn chunk_mut(&mut self) -> usize {\n            if self.done() {\n                unreachable!(\"chunk_mut\");\n            }\n            0\n        }\n        fn put_u8(&mut self, _: u8) {}\n    }\n    Special.put_u8(b'x');";
     assert_eq!(assertions_in(body), []);
 }
+
+/// A crate's `benches/` files are test code, as Cargo builds each for `cargo bench` alone, so
+/// checks that leave tests out leave benchmarks out too (ADR-227).
+#[test]
+fn bench_files_are_test_files() {
+    let dir = tree(&[
+        ("src/lib.rs", "pub fn get() -> u8 { 1 }\n"),
+        (
+            "benches/buf.rs",
+            "fn get(c: &mut Criterion) { c.bench_function(\"get\", |b| b.iter(bytes::get)); }\n",
+        ),
+    ]);
+    let conventions: TestConventions = produce("rust", dir.path());
+    assert_eq!(
+        [
+            conventions.is_test("src/lib.rs"),
+            conventions.is_test("benches/buf.rs")
+        ],
+        [false, true]
+    );
+}

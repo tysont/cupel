@@ -386,6 +386,7 @@ pub struct AssertionClass {
 /// ```toml
 /// [conventions]
 /// test_globs = ["**/tests/**/*.rs"]   # a file is a test file exactly when one matches
+/// test_contains = ["org.openjdk.jmh"]  # or when its text contains one of these (ADR-227)
 ///
 /// [[conventions.tests_for]]           # candidate test files for a source file, in order
 /// template = "{base}tests/{stem}.rs"
@@ -407,6 +408,9 @@ pub struct AssertionClass {
 #[serde(deny_unknown_fields, default)]
 pub struct ConventionRules {
     pub test_globs: Vec<String>,
+    /// A file of the language whose text contains one of these is a test file too, wherever it
+    /// is: a benchmark harness's import (ADR-227).
+    pub test_contains: Vec<String>,
     pub tests_for: Vec<TestsFor>,
 }
 

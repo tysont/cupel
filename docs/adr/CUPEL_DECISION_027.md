@@ -1,6 +1,6 @@
 # CUPEL_DECISION_027: Test frames from queries, assertion idioms, and path-template test conventions
 
-**Date:** 2026-10-10 · **Status:** accepted; the pairing candidates amended on 2026-10-25 (P9.9 group 1): every file of the language, not the scope's · **Phase:** P1.6
+**Date:** 2026-10-10 · **Status:** accepted; the pairing candidates amended on 2026-10-25 (P9.9 group 1): every file of the language, not the scope's; a file whose text contains one of `[conventions] test_contains` is a test file per [227](CUPEL_DECISION_227.md) · **Phase:** P1.6
 
 ## Context
 

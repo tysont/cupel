@@ -131,8 +131,11 @@ property = { kind = "custom", strength = "strong" }
 
 # Maven and Gradle keep tests in the test source set, `src/test/java`, in the package of the code
 # they test; a test class is named for its subject with a `Test` or `Tests` suffix.
+# Benchmarks are test code (ADR-227): Gradle's `jmh` source set by its path, and any file that
+# imports JMH, such as a benchmark module of its own (jackson-core's `jmh/src/main/java`).
 [conventions]
-test_globs = ["src/test/**", "**/src/test/**"]
+test_globs = ["src/test/**", "**/src/test/**", "src/jmh/**", "**/src/jmh/**"]
+test_contains = ["org.openjdk.jmh"]
 
 [[conventions.tests_for]]
 template = "**/src/test/java/{module}Test.java"

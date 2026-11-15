@@ -2,7 +2,7 @@
 // ABOUTME: of its own class asserts as that helper does, and a `try` ending in `fail` asserts its exception.
 mod support;
 
-use cupel_core::syntax::{AssertionKind, AssertionStrength, TestFrames};
+use cupel_core::syntax::{AssertionKind, AssertionStrength, TestConventions, TestFrames};
 use support::Skip::Runs;
 use support::{assert_framework, assert_source_file, assertion_lines, case, produce, rows, tree};
 
@@ -141,4 +141,39 @@ fn a_try_with_resources_whose_block_ends_in_fail_is_one_throws_assertion() {
             ("testParseThrows", Equality, Strong, 13, 13),
         ]
     );
+}
+
+/// JMH benchmarks are test code (ADR-227): Gradle's `jmh` source set by its path, and a file that
+/// imports JMH wherever it is, as jackson-core's `jmh/` module; the library's sources are not.
+#[test]
+fn jmh_sources_and_files_importing_jmh_are_test_files() {
+    let dir = tree(&[
+        (
+            "src/main/java/codec/Escaper.java",
+            "package codec;\n\npublic final class Escaper {}\n",
+        ),
+        (
+            "src/jmh/java/codec/Inputs.java",
+            "package codec;\n\nfinal class Inputs {}\n",
+        ),
+        (
+            "jmh/src/main/java/codec/jmh/EscapeBench.java",
+            "package codec.jmh;\n\nimport org.openjdk.jmh.annotations.Benchmark;\n\npublic class EscapeBench {\n    @Benchmark\n    public void escape() {}\n}\n",
+        ),
+        (
+            "jmh/src/main/java/codec/jmh/Helper.java",
+            "package codec.jmh;\n\nfinal class Helper {}\n",
+        ),
+    ]);
+    let conventions: TestConventions = produce("java", dir.path());
+    let tests: Vec<bool> = [
+        "src/main/java/codec/Escaper.java",
+        "src/jmh/java/codec/Inputs.java",
+        "jmh/src/main/java/codec/jmh/EscapeBench.java",
+        "jmh/src/main/java/codec/jmh/Helper.java",
+    ]
+    .iter()
+    .map(|file| conventions.is_test(file))
+    .collect();
+    assert_eq!(tests, [false, true, true, false]);
 }

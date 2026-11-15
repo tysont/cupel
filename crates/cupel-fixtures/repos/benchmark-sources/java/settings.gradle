@@ -1,0 +1,3 @@
+// ABOUTME: A Java library with JMH benchmarks beside it, whose repeated benchmark methods are test-code clones
+// ABOUTME: rather than source clones (ADR-227, jackson-core #1775).
+rootProject.name = 'codec'

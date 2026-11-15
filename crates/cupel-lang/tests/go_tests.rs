@@ -601,3 +601,26 @@ fn a_blank_typed_var_in_a_test_is_a_static_assertion_of_that_test() {
         ]
     );
 }
+
+/// Go benchmark functions live in `_test.go` files, which are test code, so checks that leave
+/// tests out leave them out too; a benchmark is no test case (ADR-227).
+#[test]
+fn benchmark_functions_are_in_test_files_and_are_no_cases() {
+    let dir = tree(&[
+        ("lru.go", "package lru\n\nfunc Get() int { return 1 }\n"),
+        (
+            "lru_test.go",
+            "package lru\n\nimport \"testing\"\n\nfunc BenchmarkGet(b *testing.B) {\n\tfor i := 0; i < b.N; i++ {\n\t\tGet()\n\t}\n}\n",
+        ),
+    ]);
+    let conventions: TestConventions = produce("go", dir.path());
+    assert_eq!(
+        [
+            conventions.is_test("lru.go"),
+            conventions.is_test("lru_test.go")
+        ],
+        [false, true]
+    );
+    let frames: TestFrames = produce("go", dir.path());
+    assert!(frames.files.is_empty(), "{frames:?}");
+}
