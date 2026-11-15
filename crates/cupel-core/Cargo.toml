@@ -20,6 +20,7 @@ ulid.workspace = true
 thiserror.workspace = true
 similar.workspace = true
 inventory.workspace = true
+tempfile.workspace = true
 
 [target.'cfg(unix)'.dependencies]
 nix.workspace = true
@@ -27,7 +28,6 @@ nix.workspace = true
 [dev-dependencies]
 insta.workspace = true
 proptest.workspace = true
-tempfile.workspace = true
 
 [target.'cfg(unix)'.dev-dependencies]
 nix = { workspace = true, features = ["time"] }

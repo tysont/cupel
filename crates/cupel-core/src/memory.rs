@@ -196,18 +196,36 @@ fn sample_since(not_before: Instant) -> Option<Arc<Vec<Listed>>> {
 /// (last, as it may hold spaces); `None` where `ps` cannot run.
 #[cfg(unix)]
 fn list() -> Option<Vec<Listed>> {
-    let output = std::process::Command::new("ps")
-        .args([
-            "-A", "-o", "pid=", "-o", "ppid=", "-o", "pgid=", "-o", "rss=", "-o", "etime=", "-o",
-            "comm=",
-        ])
-        .output()
+    let mut ps = std::process::Command::new("ps");
+    ps.args([
+        "-A", "-o", "pid=", "-o", "ppid=", "-o", "pgid=", "-o", "rss=", "-o", "etime=", "-o",
+        "comm=",
+    ]);
+    listed_by(&mut ps)
+}
+
+/// The processes `command` lists in `ps`'s columns; `None` where it cannot run or fails. The
+/// listing goes to an unlinked file read once `command` exits, not to a pipe read to its end: a
+/// process that inherited the pipe would hold that end back for as long as it lives.
+#[cfg(unix)]
+fn listed_by(command: &mut std::process::Command) -> Option<Vec<Listed>> {
+    use std::io::{Read, Seek};
+    use std::process::Stdio;
+    let mut out = tempfile::tempfile().ok()?;
+    let status = command
+        .stdin(Stdio::null())
+        .stdout(out.try_clone().ok()?)
+        .stderr(Stdio::null())
+        .status()
         .ok()?;
-    if !output.status.success() {
+    if !status.success() {
         return None;
     }
+    let mut stdout = Vec::new();
+    out.rewind().ok()?;
+    out.read_to_end(&mut stdout).ok()?;
     let mut processes = Vec::new();
-    for line in String::from_utf8_lossy(&output.stdout).lines() {
+    for line in String::from_utf8_lossy(&stdout).lines() {
         let fields: Vec<&str> = line.split_whitespace().collect();
         if let [pid, ppid, pgid, kib, etime, ref command @ ..] = fields[..]
             && let (Ok(pid), Ok(ppid), Ok(pgid), Ok(kib), Some(age)) = (
@@ -269,6 +287,25 @@ mod tests {
             age: Duration::from_secs(age_secs),
             command: String::new(),
         }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_process_left_holding_the_listings_output_does_not_hold_up_the_sample() {
+        // On macOS a pipe is made close-on-exec only after it is made, so a run another thread
+        // spawns in between keeps the listing's output open for as long as it lives. Every wait
+        // loop takes its sample under one lock, so a listing that waited for that run to close
+        // the output would stop every timeout, the one that would end the run among them.
+        let mut ps = std::process::Command::new("sh");
+        ps.args(["-c", "echo '10 1 10 4 00:01 ps'; sleep 20 &"]);
+        let started = Instant::now();
+        let listed = listed_by(&mut ps).unwrap();
+        assert!(
+            started.elapsed() < Duration::from_secs(10),
+            "the listing waited {:?} for a process holding its output",
+            started.elapsed()
+        );
+        assert_eq!(listed.len(), 1);
     }
 
     #[test]
