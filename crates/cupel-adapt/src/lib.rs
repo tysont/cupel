@@ -41,7 +41,7 @@
 //! `{ json, path, prefix?, members? }` a JSON file has a value at `path` (a string starting
 //! with `prefix`, when given), in the root or also in members; `{ maven_goal, plugin }` the
 //! root's Maven build runs the plugin's goal itself, by its POM and the parents on disk or in the
-//! local repository; `{ all = [...] }` every rule.
+//! local repository; `{ all = [...] }` every rule; `{ not = {...} }` the rule does not hold.
 //! `<packages>` is filled from `ProjectRoot.packages`; `{out}`, `{name}`, and `{id}` stay for
 //! the producers to fill at run time (design §6.7).
 
