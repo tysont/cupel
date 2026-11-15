@@ -535,8 +535,9 @@ pub enum RootReason {
     Export,
     Test,
     FrameworkHook,
-    /// A function its language marks as unused on purpose (Rust's leading `_`): it exists for the
-    /// compiler alone, and nothing calls or runs it (ADR-226).
+    // A function its language marks as unused on purpose (Rust's leading `_`): it exists for the
+    // compiler alone, and nothing calls or runs it (ADR-226). A plain comment, as the other
+    // variants have none, keeps the schema one string enum.
     Unused,
 }
 

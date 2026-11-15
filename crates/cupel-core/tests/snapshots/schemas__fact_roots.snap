@@ -42,7 +42,8 @@ expression: pretty(&schema)
         "entry-point",
         "export",
         "test",
-        "framework-hook"
+        "framework-hook",
+        "unused"
       ]
     },
     "SymbolKey": {
