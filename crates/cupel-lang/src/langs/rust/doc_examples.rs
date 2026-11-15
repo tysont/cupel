@@ -27,7 +27,6 @@ fn doc_lines(parsed: &Parsed, node: Node<'_>) -> Vec<String> {
     while let Some(previous) = sibling {
         let text = parsed.text(previous);
         match previous.kind() {
-            "attribute_item" => {}
             "line_comment" if text.starts_with("///") && !text.starts_with("////") => {
                 comments.push(text["///".len()..].to_owned());
             }
@@ -35,7 +34,7 @@ fn doc_lines(parsed: &Parsed, node: Node<'_>) -> Vec<String> {
                 let inner = text["/**".len()..].trim_end_matches("*/");
                 comments.push(inner.to_owned());
             }
-            "line_comment" | "block_comment" => {}
+            "attribute_item" | "line_comment" | "block_comment" => {}
             _ => break,
         }
         sibling = previous.prev_sibling();

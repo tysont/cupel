@@ -172,7 +172,7 @@ fn methods_of_an_impl_for_a_reference_or_a_primitive_are_methods_on_that_type() 
 }
 
 /// A crate whose functions' doc comments hold examples rustdoc runs and examples it does not.
-const DOCUMENTED: &str = r#"/// Adds one.
+const DOCUMENTED: &str = r"/// Adds one.
 ///
 /// ```
 /// assert_eq!(demo::add_one(1), 2);
@@ -223,7 +223,7 @@ impl S {
 // A plain comment is no documentation: ```
 // demo::plain();
 pub fn plain() {}
-"#;
+";
 
 /// A function's own doc comment holds a runnable example when a fenced block in it is one
 /// rustdoc runs (no info string, or `rust` and its test attributes; not `ignore`, `no_run`,

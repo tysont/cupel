@@ -258,9 +258,9 @@ mod tests {
         let texts = [
             r#"{:paths ["src"]}"#,
             r#"{:aliases {:x {:deps/prep-lib {:alias :b :fn f :ensure "t"}}}}"#,
-            r#"{:deps/prep-lib {:alias :b :fn f}}"#,
+            r"{:deps/prep-lib {:alias :b :fn f}}",
             r#"{:deps/prep-lib {:alias b :fn f :ensure "t"}}"#,
-            r#"{:deps/prep-lib {:alias :b :fn f :ensure t}}"#,
+            r"{:deps/prep-lib {:alias :b :fn f :ensure t}}",
             r#"{:deps/prep-lib "not a map"}"#,
             "",
         ];
