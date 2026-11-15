@@ -331,7 +331,10 @@ fn a_pytest_root_gets_coverage_py_unless_it_declares_pytest_cov() {
     let coverage = support::repository(&[("requirements.txt", "pytest==8\ncoverage[toml]==7\n")]);
     let bare = support::repository(&[("pytest.ini", "[pytest]\n")]);
     let uv = support::repository(&[
-        ("pyproject.toml", "[dependency-groups]\ndev = [\"pytest\"]\n"),
+        (
+            "pyproject.toml",
+            "[dependency-groups]\ndev = [\"pytest\"]\n",
+        ),
         ("uv.lock", ""),
     ]);
     let coverage_py = |dir: &Path| commands("python", dir, &[], &["."]).coverage;

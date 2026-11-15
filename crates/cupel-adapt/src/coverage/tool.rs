@@ -6,9 +6,8 @@ use std::path::Path;
 use cupel_core::coverage::{CoverageMap, Listing};
 use cupel_core::{
     Action, ActionKind, Availability, Cancellation, CheckId, CostClass, Ctx, Error, Event,
-    EventSink, Evidence,
-    FactKind, Finding, FindingId, LangId, Langs, Process, ProduceCtx, Producer, ProducerId, Result,
-    Scope, Severity, Tier, ToolId, ToolProbe, output_tail,
+    EventSink, Evidence, FactKind, Finding, FindingId, LangId, Langs, Process, ProduceCtx,
+    Producer, ProducerId, Result, Scope, Severity, Tier, ToolId, ToolProbe, output_tail,
 };
 use serde_json::json;
 

@@ -647,7 +647,9 @@ impl Runner {
 
     /// Prepares `root` as the spec says, before a run or listing there.
     fn prepare(&self, root: &Root, cancel: &Cancellation) -> Result<()> {
-        self.0.prepare.map_or(Ok(()), |prepare| prepare(&root.dir, cancel))
+        self.0
+            .prepare
+            .map_or(Ok(()), |prepare| prepare(&root.dir, cancel))
     }
 
     /// The program to run in `dir`: its `node_modules/.bin` copy when the spec allows one, else
@@ -958,7 +960,11 @@ mod tests {
                 arguments(None),
             ],
             [
-                vec!["-m".to_owned(), "not network".to_owned(), "tests".to_owned()],
+                vec![
+                    "-m".to_owned(),
+                    "not network".to_owned(),
+                    "tests".to_owned()
+                ],
                 vec!["-x".to_owned()],
                 Vec::new(),
                 Vec::new(),
