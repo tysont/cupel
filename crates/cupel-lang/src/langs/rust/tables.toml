@@ -115,6 +115,9 @@ compile-test = { kind = "custom", strength = "strong" }
 is-present = { kind = "not-null", strength = "weak" }
 is-err = { kind = "throws", strength = "weak" }
 should-panic = { kind = "throws", strength = "strong" }
+# A `const _` assertion, or a call of a bounded local function with an empty body: the compiler
+# checks it (ADR-222).
+static = { kind = "custom", strength = "strong" }
 # `if cond { panic!(…) }`: the condition is a boolean the test pins (ADR-221).
 guard = { kind = "truthiness", strength = "strong" }
 # A property check (`quickcheck(…)`, a `#[quickcheck]` function's result) fails the test with

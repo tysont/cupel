@@ -1,0 +1,10 @@
+# ABOUTME: A crate whose tests check at compile time that a type is `Send + Sync` and that a constant holds,
+# ABOUTME: as clap's `*_send_sync` tests do (ADR-222).
+[package]
+name = "groups"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]

@@ -571,3 +571,33 @@ fn a_failure_call_under_a_condition_no_idiom_names_pins_that_condition() {
         ]
     );
 }
+
+/// Compile-time conformance in a test's body asserts strongly (ADR-222); one at package level is no
+/// test's.
+const CONFORMANCE_TEST: &str = r#"package lru
+
+import "testing"
+
+var _ Cache = (*LRU)(nil)
+
+func TestLRUInterface(_ *testing.T) {
+	var _ Cache = &LRU{}
+}
+
+func TestBlankWithoutAType(t *testing.T) {
+	var _ = NewLRU()
+}
+"#;
+
+#[test]
+fn a_blank_typed_var_in_a_test_is_a_static_assertion_of_that_test() {
+    let dir = tree(&[("lru_test.go", CONFORMANCE_TEST)]);
+    let frames: TestFrames = produce("go", dir.path());
+    assert_eq!(
+        rows(file(&frames, "lru_test.go")),
+        [
+            case("TestLRUInterface", &[(Custom, Strong)], Runs, &[], 7),
+            case("TestBlankWithoutAType", &[], Runs, &[], 11),
+        ]
+    );
+}

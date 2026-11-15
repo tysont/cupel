@@ -237,6 +237,24 @@ const ASSERTION_FORMS: &[(&str, &[(AssertionKind, AssertionStrength)])] = &[
     ),
     ("if let Err(e) = parse(\"1\") { panic!(\"{e}\") }", &[]),
     ("panic!(\"always\");", &[]),
+    // Compile-time assertions in a test assert strongly (ADR-222): a `const _` assertion, alone or
+    // in a block, and a call of a bounded function the test defines with an empty body.
+    (
+        "const _: () = assert!(std::mem::size_of::<u64>() == 8);",
+        &[(Custom, Strong)],
+    ),
+    (
+        "const _: () = {\n        assert!(LIMIT > 0);\n    };",
+        &[(Custom, Strong)],
+    ),
+    (
+        "fn foo<T: Send + Sync>(_: T) {}\n    foo(ArgGroup::new(\"test\"));",
+        &[(Custom, Strong)],
+    ),
+    (
+        "fn foo<T: Send>(t: T) { drop(t) }\n    foo(ArgGroup::new(\"test\"));",
+        &[],
+    ),
 ];
 
 #[test]

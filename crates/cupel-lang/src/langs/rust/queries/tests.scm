@@ -176,6 +176,44 @@
   ]
   (#eq? @_quickcheck "quickcheck")) @test.assertion @assertion.idiom.property @property.quickcheck
 
+; Compile-time assertions (ADR-222): `const _: () = assert!(…);`, an assertion macro in a
+; `const _: () = { … };` block, and a call of a function the test defines with a bounded type
+; parameter and an empty body (`fn foo<T: Send + Sync>(_: T) {}` then `foo(x)`), which compiles only
+; when the argument's type satisfies the bound.
+(const_item
+  name: (identifier) @_blank
+  value: [
+    (macro_invocation
+      macro: (identifier) @_assert) @test.assertion @assertion.idiom.static
+    (block
+      [
+        (expression_statement
+          (macro_invocation
+            macro: (identifier) @_assert) @test.assertion @assertion.idiom.static)
+        (macro_invocation
+          macro: (identifier) @_assert) @test.assertion @assertion.idiom.static
+      ])
+  ]
+  (#eq? @_blank "_")
+  (#match? @_assert "^(debug_)?assert"))
+
+(block
+  (function_item
+    name: (identifier) @_bounded
+    type_parameters: (type_parameters
+      (type_parameter
+        bounds: (trait_bounds)))
+    body: (block) @_body)
+  [
+    (expression_statement
+      (call_expression
+        function: (identifier) @_call) @test.assertion @assertion.idiom.static)
+    (call_expression
+      function: (identifier) @_call) @test.assertion @assertion.idiom.static
+  ]
+  (#eq? @_bounded @_call)
+  (#eq? @_body "{}"))
+
 ; Assertion idioms come before plain assertion macros: the earliest pattern wins. A `==` at the top
 ; level of `assert!`'s arguments compares two values, as `assert_eq!` does; a `!=` rules one out.
 (macro_invocation

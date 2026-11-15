@@ -228,6 +228,15 @@
   (#any-of? @_t "t" "b" "tb")
   (#any-of? @_fail "Error" "Errorf" "Fatal" "Fatalf" "Fail" "FailNow")) @test.assertion @assertion.idiom.fails
 
+; Compile-time conformance: `var _ Cache = &LRU{}` compiles only when the value's type implements
+; the declared interface, so the test holding it asserts that (ADR-222). At package level it is in no
+; case and asserts for no test.
+(var_spec
+  name: (identifier) @_blank
+  type: (_)
+  value: (expression_list)
+  (#eq? @_blank "_")) @test.assertion @assertion.idiom.static
+
 ; Property tests: `quick.Check(…)` and `quick.CheckEqual(…)` generate the case's inputs with
 ; testing/quick (ADR-095); the check is also an assertion, whose error the test reports.
 (call_expression

@@ -1,6 +1,6 @@
 # CUPEL_DECISION_032: Go syntactic facts: visibility, test idioms, and mutation spellings
 
-**Date:** 2026-10-10 · **Status:** accepted; a failure call under a condition no idiom names is `truthiness`/`strong` per [221](CUPEL_DECISION_221.md) · **Phase:** P1.2–P1.6
+**Date:** 2026-10-10 · **Status:** accepted; a failure call under a condition no idiom names is `truthiness`/`strong` per [221](CUPEL_DECISION_221.md); a blank typed `var _ I = v` in a test is a strong static assertion per [222](CUPEL_DECISION_222.md) · **Phase:** P1.2–P1.6
 
 ## Context
 
