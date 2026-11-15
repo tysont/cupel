@@ -429,3 +429,128 @@ fn a_run_whose_gate_failed_is_refused_whatever_its_skipped_rules_lacked() {
     };
     assert_eq!([refusal(1), refusal(2)], [title(1), title(2)]);
 }
+
+// ------------------------------------------- runs only their budget cut short (ADR-216)
+
+/// The result of check `id` with `status`, skipped (or cut short) for `reason` when given.
+fn check_result(id: &str, status: &str, reason: Option<&str>) -> Value {
+    let skipped = reason.map(|reason| json!({"reason": reason, "lang": "python"}));
+    json!({
+        "id": id, "status": status, "tier": 1, "cost": "standard", "score": null, "metrics": {},
+        "delta": null, "findings": 0, "duration_ms": 3, "skipped": skipped, "oracle": null
+    })
+}
+
+/// `run_id(n)`'s `partial` survey under a 1 s budget that took `duration_ms`, with `checks`
+/// beside a passing `static.complexity`.
+fn budgeted(n: u8, duration_ms: u64, checks: &[Value]) -> cupel_core::Envelope {
+    let mut all = vec![complexity_check(0.5)];
+    all.extend_from_slice(checks);
+    let run = envelope(&run_id(n), "survey", &[], &all);
+    let mut value = serde_json::to_value(&run).unwrap();
+    value["status"] = json!("partial");
+    value["exit_code"] = json!(5);
+    value["run"]["budget_ms"] = json!(1_000);
+    value["run"]["duration_ms"] = json!(duration_ms);
+    serde_json::from_value(value).unwrap()
+}
+
+#[test]
+fn a_run_whose_only_gaps_the_budget_made_can_be_the_baseline() {
+    let repo = Repo::new();
+    repo.seed(&[budgeted(
+        1,
+        1_002,
+        &[
+            check_result("tests.coverage", "skipped", Some("budget")),
+            // Cut short with no skip of its own: the budget's deadline had passed.
+            check_result("tests.mutation", "partial", None),
+            check_result("tests.flaky", "partial", Some("budget")),
+            // Skips that never make a run partial stay as they are.
+            check_result("static.api-surface", "skipped", Some("needs-range")),
+            check_result("conc.race", "skipped", Some("unsupported")),
+        ],
+    )]);
+    let set = repo.run(&["baseline", "set", "--write"]);
+    assert_eq!(set.code, 0, "{}", set.stdout);
+    assert_eq!(baseline_id(&repo), json!(run_id(1)));
+
+    repo.write(
+        "budgeted.json",
+        &serde_json::to_string(&budgeted(
+            2,
+            40,
+            &[check_result("tests.coverage", "skipped", Some("budget"))],
+        ))
+        .unwrap(),
+    );
+    let imported = repo.run(&["baseline", "import", "budgeted.json", "--write"]);
+    assert_eq!(imported.code, 0, "{}", imported.stdout);
+    assert_eq!(baseline_id(&repo), json!(run_id(2)));
+}
+
+#[test]
+fn a_partial_run_with_a_gap_the_budget_did_not_make_is_refused() {
+    let repo = Repo::new();
+    let budget_skip = check_result("tests.coverage", "skipped", Some("budget"));
+    let mut unbudgeted = budgeted(5, 1_500, &[check_result("tests.mutation", "partial", None)]);
+    unbudgeted.run.budget_ms = None;
+    repo.seed(&[
+        budgeted(
+            1,
+            1_500,
+            &[
+                budget_skip.clone(),
+                check_result("tests.flaky", "skipped", Some("timeout")),
+            ],
+        ),
+        // Cut short before the budget's deadline: the timeout, not the budget, cut it.
+        budgeted(
+            2,
+            400,
+            &[
+                budget_skip.clone(),
+                check_result("tests.mutation", "partial", None),
+            ],
+        ),
+        budgeted(
+            3,
+            1_500,
+            &[
+                budget_skip.clone(),
+                check_result("tests.mutation", "error", None),
+            ],
+        ),
+        // Partial with nothing left out: cancelled after its checks ended.
+        budgeted(4, 1_500, &[]),
+        unbudgeted,
+    ]);
+    let refusal = |n: u8| {
+        let from = format!("run:{}", run_id(n));
+        assert_usage(&repo.run(&["baseline", "set", "--from", &from, "--write"]))["title"].clone()
+    };
+    let title = |n: u8, gap: &str| {
+        json!(format!(
+            "The run {} did not pass (status `partial`), and not only for its budget: {gap}; a \
+             baseline names only a passing run on the default branch",
+            run_id(n)
+        ))
+    };
+    assert_eq!(
+        (1..=5).map(refusal).collect::<Vec<_>>(),
+        [
+            title(1, "`tests.flaky` was skipped (timeout)"),
+            title(
+                2,
+                "`tests.mutation` was cut short before the budget ran out"
+            ),
+            title(3, "`tests.mutation` errored"),
+            title(4, "the budget left out no check"),
+            title(
+                5,
+                "`tests.mutation` was cut short, and the run had no budget"
+            ),
+        ]
+    );
+    assert_eq!(baseline_id(&repo), Value::Null);
+}

@@ -393,6 +393,55 @@ fn a_tree_rule_against_base_compares_with_the_stored_baseline() {
     );
 }
 
+#[test]
+fn a_rule_on_a_check_the_baseline_s_budget_left_out_is_skipped_with_baseline_missing() {
+    // A baseline from a run its budget cut short holds no result of the checks the budget
+    // left out, so a later rule against `base` on one of them has no reference (ADR-216).
+    let repo = repo("[gate.tree]\n\"static.clones.pairs\" = \"<= base\"\n");
+    repo.write(
+        "src/sums.rs",
+        &[clone_of("alpha"), clone_of("beta")].concat(),
+    );
+    let check = ["check", "--only", "static.clones"];
+    let budgeted = repo.run(&["check", "--only", "static.clones", "--budget", "1ms"]);
+    assert_eq!(budgeted.code, 5, "{}", budgeted.stdout);
+    let clones = budgeted.envelope()["checks"][0].clone();
+    assert_eq!(
+        (
+            &clones["id"],
+            &clones["status"],
+            &clones["skipped"]["reason"]
+        ),
+        (&json!("static.clones"), &json!("skipped"), &json!("budget"))
+    );
+
+    let set = repo.run(&["baseline", "set", "--write"]);
+    assert_eq!(set.code, 0, "{}", set.stdout);
+    let held = repo.run(&check);
+    assert_eq!(held.code, 0, "{}", held.stdout);
+    let envelope = held.envelope();
+    let reason = "no reference: the reference run did not report `static.clones.pairs`";
+    assert_eq!(
+        gate(&envelope)["rules"][0],
+        json!({"rule": "static.clones.pairs <= base", "actual": 1.0, "bound": null,
+               "result": "skipped", "reason": reason})
+    );
+    let missing: Vec<&Value> = envelope["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|finding| finding["kind"] == json!("baseline.missing"))
+        .collect();
+    assert_eq!(missing.len(), 1, "{}", envelope["findings"]);
+    assert_eq!(
+        (&missing[0]["severity"], &missing[0]["evidence"]),
+        (
+            &json!("info"),
+            &json!({"rule": "static.clones.pairs <= base", "reason": reason})
+        )
+    );
+}
+
 /// A function `wide` with `count` parameters and cyclomatic complexity 2.
 fn with_params(count: usize) -> String {
     let params: Vec<String> = (0..count).map(|n| format!("p{n}: i32")).collect();

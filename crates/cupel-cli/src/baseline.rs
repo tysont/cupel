@@ -4,8 +4,8 @@ use std::path::Path;
 
 use cupel_core::git::Git;
 use cupel_core::{
-    ActionKind, BaselineRef, Envelope, EventSink, ExitCode, NextAction, PlannedWrite, RunId,
-    RunPlan, Status, WriteError, Writer, deltas,
+    ActionKind, BaselineRef, CheckStatus, Envelope, EventSink, ExitCode, NextAction, PlannedWrite,
+    RunId, RunPlan, SkipReason, Status, WriteError, Writer, deltas,
 };
 use cupel_store::Store;
 
@@ -71,18 +71,30 @@ fn default_branch(invocation: &Invocation<'_>) -> Option<String> {
 /// What every refusal of a run as a baseline ends with (ADR-182).
 const ONLY_PASSING_DEFAULT: &str = "a baseline names only a passing run on the default branch";
 
-/// Why `envelope`'s run cannot be a baseline: it did not pass, or it was recorded in a work tree
-/// on a branch other than `default` (a detached `HEAD` included). `None` when it can.
+/// Why `envelope`'s run cannot be a baseline: it did not pass, and is not a `partial` run only
+/// its budget cut short (ADR-216), or it was recorded in a work tree on a branch other than
+/// `default` (a detached `HEAD` included). `None` when it can.
 fn unfit(envelope: &Envelope, default: Option<&str>) -> Option<String> {
     let id = envelope.run.id;
-    if envelope.status != Status::Pass {
-        let status = serde_json::to_value(envelope.status)
-            .ok()
-            .and_then(|value| value.as_str().map(str::to_owned))
-            .unwrap_or_default();
-        return Some(format!(
-            "The run {id} did not pass (status `{status}`); {ONLY_PASSING_DEFAULT}"
-        ));
+    let status = serde_json::to_value(envelope.status)
+        .ok()
+        .and_then(|value| value.as_str().map(str::to_owned))
+        .unwrap_or_default();
+    match envelope.status {
+        Status::Pass => {}
+        Status::Partial => {
+            if let Some(gap) = unbudgeted(envelope) {
+                return Some(format!(
+                    "The run {id} did not pass (status `{status}`), and not only for its \
+                     budget: {gap}; {ONLY_PASSING_DEFAULT}"
+                ));
+            }
+        }
+        _ => {
+            return Some(format!(
+                "The run {id} did not pass (status `{status}`); {ONLY_PASSING_DEFAULT}"
+            ));
+        }
     }
     let branch = envelope.run.git.as_ref()?.branch.as_deref();
     let place = branch.map_or_else(
@@ -98,6 +110,42 @@ fn unfit(envelope: &Envelope, default: Option<&str>) -> Option<String> {
             "The run {id} is {place}, and no default branch is known; {ONLY_PASSING_DEFAULT}"
         )),
     }
+}
+
+/// What of a `partial` run its budget did not make, as a phrase; `None` when the budget made
+/// every gap, so the run counts as passing for a baseline (ADR-216). The budget makes a check
+/// skipped or cut short for reason `budget`, and a check cut short with no reason once the run
+/// reached its budget; a skip for a reason that never makes a run partial (`unsupported`,
+/// `needs-range`, …) is no gap. A run whose budget left nothing out was cut short otherwise.
+/// A check the budget left out has no result in the baseline, so a rule against `base` on it
+/// is skipped with `baseline.missing` (ADR-198, ADR-205).
+fn unbudgeted(envelope: &Envelope) -> Option<String> {
+    let budget_ms = envelope.run.budget_ms;
+    let reached = budget_ms.is_some_and(|budget_ms| envelope.run.duration_ms >= budget_ms);
+    let mut budgeted = false;
+    for check in &envelope.checks {
+        let id = &check.id;
+        let reason = check.skipped.as_ref().map(|skipped| skipped.reason);
+        match (check.status, reason) {
+            (CheckStatus::Pass | CheckStatus::Fail, _) => {}
+            (CheckStatus::Skipped | CheckStatus::Partial, Some(SkipReason::Budget)) => {
+                budgeted = true;
+            }
+            (CheckStatus::Skipped, Some(SkipReason::Timeout)) => {
+                return Some(format!("`{id}` was skipped (timeout)"));
+            }
+            (CheckStatus::Skipped, _) => {}
+            (CheckStatus::Partial, None) if reached => budgeted = true,
+            (CheckStatus::Partial, None) if budget_ms.is_none() => {
+                return Some(format!("`{id}` was cut short, and the run had no budget"));
+            }
+            (CheckStatus::Partial, _) => {
+                return Some(format!("`{id}` was cut short before the budget ran out"));
+            }
+            (CheckStatus::Error, _) => return Some(format!("`{id}` errored")),
+        }
+    }
+    (!budgeted).then(|| "the budget left out no check".to_owned())
 }
 
 impl Baseline<'_> {
