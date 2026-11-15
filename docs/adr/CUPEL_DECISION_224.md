@@ -25,5 +25,5 @@ Open: which names a method needs, how a method assertion is classified, and wher
 ## Consequences
 - clap's `cmd.debug_assert()` tests and tests asserting with project methods such as `.assert_success()` are no longer `test.no-assertion`.
 - A project that runs its tests in release mode sets `debug_assertions = false` so that checks the build compiles out do not count.
-- `describe tests.quality` and the README's settings table list `debug_assertions`; it is the second setting, after `tests.mutation`'s two, to configure a fact.
+- `describe tests.quality` and the README's settings table list `debug_assertions`; `tests.quality` is the second check, after `tests.mutation`, to configure a fact through a setting.
 - Fixture: `crates/cupel-fixtures/repos/method-assertions/rust`.
