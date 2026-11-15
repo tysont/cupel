@@ -1,5 +1,5 @@
-// ABOUTME: Keeps the README's generated sections (install routes, verbs, global flags, exit codes, checks, matrix,
-// ABOUTME: settings, MCP tools, agent guide) equal to the binary's `describe` and `serve --mcp` output; `make readme` rewrites them (ADR-073).
+// ABOUTME: Keeps the generated sections of the README and docs/guide (install routes, verbs, flags, exit codes, depths, checks,
+// ABOUTME: matrix, settings, MCP tools, agent guide) equal to `describe` and `serve --mcp` output; `make readme` rewrites them (ADR-073).
 
 mod support;
 
@@ -11,8 +11,39 @@ use support::{described, listed_tools};
 /// The command that rewrites the generated sections; failures name it.
 const UPDATE_COMMAND: &str = "make readme";
 
-fn readme_path() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../README.md")
+/// Each Markdown file with generated sections, relative to the workspace root, and the sections it
+/// holds, each once.
+const DOCUMENTS: [(&str, &[&str]); 7] = [
+    (
+        "README.md",
+        &[
+            "agent-loop",
+            "mcp-tools",
+            "check-table",
+            "depths",
+            "exit-codes",
+            "stability",
+            "targets",
+            "install-routes",
+        ],
+    ),
+    ("docs/guide/install.md", &["install-routes"]),
+    ("docs/guide/agents.md", &["exit-codes", "agent-guide"]),
+    ("docs/guide/usage.md", &["verbs", "mcp-tools", "global-flags"]),
+    ("docs/guide/checks.md", &["check-table"]),
+    ("docs/guide/languages.md", &["support-matrix"]),
+    ("docs/guide/configuration.md", &["check-settings"]),
+];
+
+fn workspace_path(relative: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(relative)
+}
+
+fn read(relative: &str) -> String {
+    std::fs::read_to_string(workspace_path(relative))
+        .unwrap_or_else(|error| panic!("{relative} is readable: {error}"))
 }
 
 fn strings(value: &Value) -> Vec<String> {
@@ -314,18 +345,134 @@ fn install_routes(cli: &Value) -> String {
     )
 }
 
+/// The checks each depth adds and how many run at it: a depth runs every check whose cost class
+/// is that depth or a cheaper one, in the order `check --depth` lists the depths.
+fn depths(manifests: &[Value]) -> String {
+    let check = described(&["check"]);
+    let depth = check["arguments"]
+        .as_array()
+        .expect("check's arguments")
+        .iter()
+        .find(|argument| argument["name"] == "--depth")
+        .expect("check takes --depth");
+    let names = strings(&depth["values"]);
+    for manifest in manifests {
+        assert!(
+            names.iter().any(|name| manifest["cost"] == name.as_str()),
+            "{} costs {}, which is no depth",
+            manifest["id"],
+            manifest["cost"]
+        );
+    }
+    let mut running = 0;
+    let rows: Vec<Vec<String>> = names
+        .iter()
+        .map(|name| {
+            let mut adds: Vec<String> = manifests
+                .iter()
+                .filter(|manifest| manifest["cost"] == name.as_str())
+                .map(|manifest| manifest["id"].as_str().expect("id").to_owned())
+                .collect();
+            adds.sort();
+            running += adds.len();
+            vec![
+                format!("`{name}`"),
+                running.to_string(),
+                code_list(&adds),
+            ]
+        })
+        .collect();
+    markdown_table(&owned(&["Depth", "Checks run", "Adds"]), &rows)
+}
+
+/// How many of each kind of described entity carry each `stability`, as `cupel describe` reports it.
+fn stability(cli: &Value, manifests: &[Value]) -> String {
+    let count = |items: Vec<&Value>| -> String {
+        let mut levels: Vec<String> = items
+            .iter()
+            .map(|item| item["stability"].as_str().expect("stability").to_owned())
+            .collect();
+        levels.sort();
+        let mut counted: Vec<(String, usize)> = Vec::new();
+        for level in levels {
+            match counted.last_mut() {
+                Some((last, n)) if *last == level => *n += 1,
+                _ => counted.push((level, 1)),
+            }
+        }
+        counted
+            .iter()
+            .map(|(level, n)| format!("{n} `{level}`"))
+            .collect::<Vec<_>>()
+            .join(", ")
+    };
+    let all = |key: &str| -> Vec<&Value> { cli[key].as_array().expect(key).iter().collect() };
+    let rows = vec![
+        vec!["The CLI".to_owned(), count(vec![cli])],
+        vec!["Verbs".to_owned(), count(all("verbs"))],
+        vec!["Global flags".to_owned(), count(all("global_flags"))],
+        vec!["Exit codes".to_owned(), count(all("exit_codes"))],
+        vec!["Checks".to_owned(), count(manifests.iter().collect())],
+        vec!["Schemas".to_owned(), count(all("schemas"))],
+        vec!["Install routes".to_owned(), count(all("install_routes"))],
+    ];
+    markdown_table(&owned(&["Described", "Stability"]), &rows)
+}
+
+/// One row per release target in `dist/targets.toml`, the file the release workflow and every
+/// installer follow (ADR-125).
+fn targets() -> String {
+    let document: toml_edit::DocumentMut = read("dist/targets.toml")
+        .parse()
+        .expect("dist/targets.toml is TOML");
+    let archive = document["archive"].as_str().expect("an archive pattern");
+    let rows: Vec<Vec<String>> = document["target"]
+        .as_array_of_tables()
+        .expect("[[target]] tables")
+        .iter()
+        .map(|target| {
+            let field = |key: &str| target[key].as_str().expect(key).to_owned();
+            vec![
+                system(&field("os")).to_owned(),
+                field("arch"),
+                format!("`{}`", field("triple")),
+                format!(
+                    "`{}`",
+                    archive
+                        .replace("{target}", &field("triple"))
+                        .replace("{format}", &field("format"))
+                ),
+            ]
+        })
+        .collect();
+    markdown_table(&owned(&["System", "Arch", "Target", "Archive"]), &rows)
+}
+
+/// The start of the guide `cupel describe --agent` prints, through its loop, fenced.
+fn agent_loop() -> String {
+    let guide = agent_guide();
+    let end = guide
+        .find("## Exit codes")
+        .expect("the guide has an exit-code section after its loop");
+    format!("{}…\n```\n", &guide[..end])
+}
+
 /// Each generated section's name and body, rendered from the binary's `describe` output and
 /// the tools its MCP server lists.
-fn generated() -> [(&'static str, String); 9] {
+fn generated() -> Vec<(&'static str, String)> {
     let cli = described(&[]);
     let matrix = described(&["matrix"]);
     let manifests = manifests(&matrix);
-    [
+    vec![
         ("install-routes", install_routes(&cli)),
         ("verbs", verbs(&cli)),
         ("global-flags", global_flags(&cli)),
         ("agent-guide", agent_guide()),
+        ("agent-loop", agent_loop()),
         ("exit-codes", exit_codes(&cli)),
+        ("depths", depths(&manifests)),
+        ("stability", stability(&cli, &manifests)),
+        ("targets", targets()),
         ("check-table", check_table(&matrix, &manifests)),
         ("support-matrix", support_matrix(&matrix)),
         ("check-settings", check_settings(&manifests)),
@@ -333,37 +480,153 @@ fn generated() -> [(&'static str, String); 9] {
     ]
 }
 
-/// `readme` with the body between each section's `<!-- generated:NAME -->` and `<!-- end:NAME -->`
-/// markers replaced by its rendered body.
-fn with_sections(readme: &str, sections: &[(&str, String)]) -> String {
-    sections
-        .iter()
-        .fold(readme.to_owned(), |text, (name, body)| {
-            let begin = format!("<!-- generated:{name} -->\n");
-            let end = format!("<!-- end:{name} -->");
-            let start = text
-                .find(&begin)
-                .unwrap_or_else(|| panic!("README.md has no `{}` marker", begin.trim_end()))
-                + begin.len();
-            let stop = start
-                + text[start..]
-                    .find(&end)
-                    .unwrap_or_else(|| panic!("README.md has no `{end}` marker"));
-            format!("{}{body}{}", &text[..start], &text[stop..])
+/// The names of the generated sections `text` marks, in order.
+fn marked(text: &str) -> Vec<&str> {
+    text.match_indices("<!-- generated:")
+        .map(|(at, prefix)| {
+            let name = &text[at + prefix.len()..];
+            &name[..name.find(" -->").expect("a closed marker")]
         })
+        .collect()
+}
+
+/// `text` with the body between each named section's `<!-- generated:NAME -->` and
+/// `<!-- end:NAME -->` markers replaced by its rendered body.
+fn with_sections(file: &str, text: &str, names: &[&str], sections: &[(&str, String)]) -> String {
+    names.iter().fold(text.to_owned(), |text, name| {
+        let body = &sections
+            .iter()
+            .find(|(section, _)| section == name)
+            .unwrap_or_else(|| panic!("no generated section is named {name}"))
+            .1;
+        let begin = format!("<!-- generated:{name} -->\n");
+        let end = format!("<!-- end:{name} -->");
+        let start = text
+            .find(&begin)
+            .unwrap_or_else(|| panic!("{file} has no `{}` marker", begin.trim_end()))
+            + begin.len();
+        let stop = start
+            + text[start..]
+                .find(&end)
+                .unwrap_or_else(|| panic!("{file} has no `{end}` marker"));
+        format!("{}{body}{}", &text[..start], &text[stop..])
+    })
 }
 
 #[test]
-fn the_readme_generated_sections_match_describe() {
-    let path = readme_path();
-    let readme = std::fs::read_to_string(&path).expect("README.md is readable");
-    let expected = with_sections(&readme, &generated());
-    if std::env::var("UPDATE_README").as_deref() == Ok("1") {
-        std::fs::write(&path, &expected).expect("README.md is writable");
-        return;
+fn the_generated_sections_match_describe() {
+    let sections = generated();
+    let update = std::env::var("UPDATE_README").as_deref() == Ok("1");
+    let mut stale = Vec::new();
+    for (file, names) in DOCUMENTS {
+        let text = read(file);
+        let mut found = marked(&text);
+        found.sort_unstable();
+        let mut listed = names.to_vec();
+        listed.sort_unstable();
+        assert_eq!(found, listed, "{file} marks exactly the sections listed for it");
+        let expected = with_sections(file, &text, names, &sections);
+        if update {
+            std::fs::write(workspace_path(file), &expected)
+                .unwrap_or_else(|error| panic!("{file} is writable: {error}"));
+        } else if text != expected {
+            stale.push(file);
+        }
     }
     assert!(
-        readme == expected,
-        "README.md's generated sections are stale; run `{UPDATE_COMMAND}` and review the diff"
+        stale.is_empty(),
+        "the generated sections of {stale:?} are stale; run `{UPDATE_COMMAND}` and review the diff"
     );
+}
+
+/// The Markdown files the README and its guide are made of.
+fn documents() -> Vec<String> {
+    let guide = workspace_path("docs/guide");
+    let mut files: Vec<String> = std::fs::read_dir(&guide)
+        .expect("docs/guide is readable")
+        .map(|entry| {
+            let name = entry.expect("an entry").file_name();
+            format!("docs/guide/{}", name.to_str().expect("a UTF-8 name"))
+        })
+        .filter(|name| name.ends_with(".md"))
+        .collect();
+    files.sort();
+    files.insert(0, "README.md".to_owned());
+    files
+}
+
+/// The bodies of `text`'s fenced blocks whose info string is `language`.
+fn fenced<'a>(text: &'a str, language: &str) -> Vec<&'a str> {
+    let open = format!("```{language}\n");
+    text.match_indices(&open)
+        .map(|(at, _)| {
+            let body = &text[at + open.len()..];
+            &body[..body.find("```").expect("a closed fence")]
+        })
+        .collect()
+}
+
+/// Every JSON block is one JSON value or, for JSON Lines such as a recorded trace, several.
+#[test]
+fn every_json_block_in_the_readme_and_its_guide_parses() {
+    for file in documents() {
+        for block in fenced(&read(&file), "json") {
+            for value in serde_json::Deserializer::from_str(block).into_iter::<Value>() {
+                if let Err(error) = value {
+                    panic!("a JSON block in {file} does not parse ({error}):\n{block}");
+                }
+            }
+        }
+    }
+}
+
+/// The README's Claude Code settings: the JSON block that configures a `Stop` hook.
+fn stop_hook_command() -> String {
+    let readme = read("README.md");
+    let settings: Vec<Value> = fenced(&readme, "json")
+        .into_iter()
+        .filter_map(|block| serde_json::from_str::<Value>(block).ok())
+        .filter(|settings| !settings["hooks"]["Stop"].is_null())
+        .collect();
+    assert_eq!(settings.len(), 1, "the README configures one Stop hook");
+    let hook = &settings[0]["hooks"]["Stop"][0]["hooks"][0];
+    assert_eq!(hook["type"], "command");
+    hook["command"].as_str().expect("a command").to_owned()
+}
+
+/// The README's Stop hook exits 2, which keeps Claude Code working and hands it stderr, exactly
+/// when `cupel check` fails its gate (exit 1), with what `cupel` printed on stderr; on any other
+/// exit it lets Claude stop.
+#[cfg(unix)]
+#[test]
+fn the_readme_stop_hook_blocks_exactly_on_a_failed_gate() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let command = stop_hook_command();
+    let bin = tempfile::tempdir().expect("temporary directory");
+    let cupel = bin.path().join("cupel");
+    std::fs::write(
+        &cupel,
+        "#!/bin/sh\necho \"cupel $*\"\nexit \"$CUPEL_STUB_EXIT\"\n",
+    )
+    .expect("the stub is writable");
+    std::fs::set_permissions(&cupel, std::fs::Permissions::from_mode(0o755))
+        .expect("the stub is executable");
+    let path = format!("{}:/usr/bin:/bin", bin.path().display());
+    for code in 0..=6 {
+        let output = std::process::Command::new("sh")
+            .args(["-c", &command])
+            .env("PATH", &path)
+            .env("CUPEL_STUB_EXIT", code.to_string())
+            .output()
+            .expect("sh runs");
+        let expected = if code == 1 { 2 } else { 0 };
+        assert_eq!(output.status.code(), Some(expected), "cupel exit {code}");
+        assert!(output.stdout.is_empty(), "the hook prints nothing on stdout");
+        assert_eq!(
+            String::from_utf8_lossy(&output.stderr),
+            "cupel check --changed --gate --format text\n",
+            "the hook hands cupel's report to Claude on stderr"
+        );
+    }
 }

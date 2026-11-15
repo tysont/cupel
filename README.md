@@ -1,747 +1,210 @@
 # Cupel
 
-Cupel grades the code a coding agent produced: it measures structure and test strength across a repository or a change, and returns a ranked list of what to fix next. One binary, one JSON envelope from every command, and a gate that tells an agent when it is allowed to stop.
+[![CI](https://github.com/tysont/cupel/actions/workflows/ci.yml/badge.svg)](https://github.com/tysont/cupel/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/tysont/cupel)](https://github.com/tysont/cupel/releases/latest)
+[![License](https://img.shields.io/github/license/tysont/cupel)](LICENSE)
 
-A *cupel* is the porous cup used in fire assay to separate precious metal from base.
+Cupel grades the code and tests a coding agent wrote. It runs [checks](#checks) over a change or a whole tree, from complexity, clones, and dead code through coverage, mutation testing, and tests weakened on the branch, in seven languages, and prints one JSON envelope: findings with stable IDs, `next_actions` ranked for an agent to work through, and a gate verdict in the exit code. An agent's own report that the work is done is not evidence; a deleted assertion, an untested function, or a copied block all pass a green test suite. Cupel measures those, so an agent can be told not to stop until `cupel check --changed --gate` exits 0. It never edits code: the agent fixes, Cupel grades. (A cupel is the porous cup used in fire assay to separate precious metal from base.)
 
-```sh
-cupel init --write && cupel check --changed
-```
+## Quickstart
 
-That detects your project, writes `cupel.toml`, and grades everything that differs from your default branch.
-
-## What Cupel does
-
-Cupel runs seven static checks over JavaScript, TypeScript, Rust, Go, Python, Java, and Clojure. They measure complexity, CRAP, clones, dependency structure, dead code, test quality, and tests weakened on a branch. Every check works in every language, because checks read language-neutral facts and never see source syntax.
-
-Every command writes one JSON envelope to stdout. It carries the checks that ran, the findings with stable IDs, the gate's verdict, and `next_actions` ranked for an agent to work through. `--format text` renders the same envelope for people.
-
-Cupel never changes your code. It grades; the agent fixes.
-
-- [Technical design](docs/CUPEL_TECHNICAL_DESIGN.md): the specification, covering the CLI, the output contract, the check catalog, and the architecture.
-- [Implementation plan](docs/CUPEL_IMPLEMENTATION_PLAN.md): the phased build plan, kept current as work proceeds. Architecture decision records live in `docs/adr/`.
-
-This README describes only what exists.
-
-## Quick start
+Install the latest release into `~/.local/bin` (Linux and macOS; [every route](docs/guide/install.md)):
 
 ```sh
-cd your-repo
-cupel init --write           # detect roots and languages; write cupel.toml and .cupel/.gitignore
-cupel doctor                 # verify the setup
-cupel survey --depth quick   # the worst hot spots in the whole tree
-cupel check --changed        # grade what changed since the merge base with your default branch
+curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh | sh
 ```
 
-Add a `[gate.changed]` table to `cupel.toml` (see [Configuration](#configuration)) and `check` becomes a pass/fail verdict with exit code 0 or 1.
-
-## Install
-
-### From a release archive
-
-Each [GitHub Release](https://github.com/tysont/cupel/releases) carries one archive per platform, `cupel-<version>-<target>.tar.gz`, for `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl` (static binaries), `aarch64-apple-darwin`, and `x86_64-apple-darwin`, `cupel-<version>-x86_64-pc-windows-msvc.zip` for Windows, and a `SHA256SUMS` file. Download your platform's archive and `SHA256SUMS`, verify the checksum, and put `cupel` on your PATH:
-
-```sh
-sha256sum --ignore-missing -c SHA256SUMS     # on macOS: shasum -a 256 --ignore-missing -c SHA256SUMS
-tar -xzf cupel-0.2.9-x86_64-unknown-linux-musl.tar.gz
-install cupel-0.2.9-x86_64-unknown-linux-musl/cupel ~/.local/bin/
+<!-- captured by scripts/readme-capture.sh with cupel 0.2.9 built from batch-0.3.0 at a64a6303, on hashicorp/golang-lru at 2bb29091 (main) with one change on agent/add-all; … marks a trim -->
+```console
+$ cupel --version
+cupel 0.2.9
 ```
 
-On Windows, extract the `.zip` and put `cupel.exe` on your PATH; `cupel serve` listens on a named pipe there ([ADR-137](docs/adr/CUPEL_DECISION_137.md)). Commands Cupel runs through `sh -c` (configured coverage and oracle commands, `--install`) need `sh` on PATH, as Git for Windows provides, and a timeout stops the command but not the processes it started. WSL runs the Linux archive without these limits.
-
-### From source
-
-Build from source with a Rust toolchain. The pinned version is in `rust-toolchain.toml`.
-
-```sh
-git clone https://github.com/tysont/cupel
-cd cupel
-make install            # cargo install --path crates/cupel-cli
-```
-
-The binary has no runtime dependencies except `git`, which Cupel calls for `--changed` and `--base` scopes.
-
-Every other route installs a release binary from GitHub Releases, checked against the release's `SHA256SUMS`; `<target>` is one of the targets above. The installers are in `dist/` and are tested in CI against a fake release. The table is the binary's own: `cupel describe` lists the same routes as `install_routes`, and `doctor`'s `doctor.version-unsatisfied` finding names the ones available now.
-
-<!-- generated:install-routes -->
-| Route | Command | Platforms | Available |
-| --- | --- | --- | --- |
-| Install script | `curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh \| sh` | Linux, macOS | now |
-| cargo-binstall | `cargo binstall --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
-| Release archive | `gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'` | Linux, macOS | now |
-| From source | `cargo install --locked --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
-| Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap |
-| npm | `npx cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to npm |
-| pipx | `pipx install cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to PyPI |
-| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's |
-| cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
-<!-- end:install-routes -->
-
-- **Install script** (POSIX `sh`): installs Linux x86_64/aarch64 and macOS arm64/x86_64 binaries into `~/.local/bin`, or `CUPEL_INSTALL_DIR`, and prints the line to add to your `PATH` when that directory is not on it. `CUPEL_VERSION=0.1.0` installs that release instead of the latest. It needs `curl` or `wget`, `tar`, and `sha256sum` or `shasum`.
-- **npm and pipx**: the `cupel-cli` package's `cupel` command downloads the binary of the package's own version on first run into `CUPEL_CACHE_DIR`, else `~/.cache/cupel` (`%LOCALAPPDATA%\cupel` on Windows), then runs it with your arguments, stdio, and exit code. When the binary cannot be downloaded or its checksum differs, it prints why and exits 3. npm needs Node 18 or newer; pipx, Python 3.9 or newer.
-- **Homebrew**: the formula, rendered per release by `dist/homebrew/render.sh` from `SHA256SUMS`, covers macOS and Linux.
-
-## The agent loop
-
-Put one rule in your agent's instructions:
-
-> Do not stop until `cupel check --changed --depth standard --gate` exits 0.
-
-When it exits 1, the envelope's `next_actions` lists what to do, most important first. Each action names a closed `kind` (`reduce_complexity`, `restore_test`, `strengthen_assertion`, `refactor_extract`, …), a summary written for the agent, and the finding it came from. Each finding carries a `repro` command that reruns only its check, on only its symbol or range, so the agent can confirm a fix cheaply before rerunning the whole gate.
-
-Every command exits with one of these codes, and the envelope's `exit_code` always matches:
-
-<!-- generated:exit-codes -->
-| Code | Name | Meaning |
-| --- | --- | --- |
-| 0 | pass | Ran fully; gate passed or no gate. |
-| 1 | fail | Ran fully; gate failed. |
-| 2 | usage | Bad flags or config; the envelope names the fix. |
-| 3 | environment | Missing tool, oracle, or toolchain; doctor findings attached. |
-| 4 | unevaluable | Baseline test suite fails or build broken; scoring refused. |
-| 5 | partial | Timeout or budget hit; the envelope has valid partial results. |
-| 6 | internal | Cupel bug; the envelope includes a bug-report payload. |
-<!-- end:exit-codes -->
-
-## Usage
-
-Every verb takes the same global flags (below) and writes the same envelope. Run any verb with `--describe` to see its flags instead of running it.
-
-<!-- generated:verbs -->
-| Verb | Does |
-| --- | --- |
-| `cupel init` | Detect project roots, languages, and test, coverage, and bench commands; write cupel.toml. |
-| `cupel doctor` | Verify the binary's version, the configuration, .cupel/ write access, and needed tools. |
-| `cupel describe` | Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema. |
-| `cupel check` | Run checks over a scope at a depth and evaluate the gate. |
-| `cupel survey` | Rank a whole tree without a baseline or gate: the worst targets per metric, protect-first. |
-| `cupel explain` | Give full context and remediation for one finding or check result. |
-| `cupel baseline` | Set, show, diff, export, or import the baseline runs are compared with. |
-| `cupel oracle` | Add, list, remove, or verify the oracles differential checks compare with. |
-| `cupel tests` | List the tests a scope impacts, why, and the command that runs them. |
-| `cupel suppress` | Suppress a finding, with a reason and an optional expiry. |
-| `cupel serve` | Run the daemon that answers this repository's invocations with warm caches, or stop it. |
-<!-- end:verbs -->
-
-### `cupel init`
-
-`init` detects project roots and languages and chooses test, coverage, and bench commands for each. It understands Cargo crates and workspaces, Go modules and workspaces, npm, pnpm, and yarn packages and workspaces (TypeScript when `tsconfig.json` is present), and Python projects (`pyproject.toml`, `setup.cfg`, `requirements.txt`).
-
-A workspace whose root `package.json` `test` script delegates to its packages (`pnpm -r test`) gets one root per package under `[roots]`, each tested by its own runner and configuration; configured `[roots]` are the project's roots, so editing them narrows what Cupel tests, mutates, and analyzes ([ADR-177](docs/adr/CUPEL_DECISION_177.md), [ADR-167](docs/adr/CUPEL_DECISION_167.md), [ADR-173](docs/adr/CUPEL_DECISION_173.md)), and a language they name no root of runs nothing anywhere, not even at the repository root ([ADR-171](docs/adr/CUPEL_DECISION_171.md)). A root whose own `test` script runs something other than the runner Cupel would choose and has no packages to split into (a wrapper script) gets no test or coverage command from `init`, and a run uses no runner there unless `[lang.<id>] runner` pins one ([ADR-166](docs/adr/CUPEL_DECISION_166.md)): a runner's command at that root would not be the project's tests and could reach tiers the project runs apart, such as tests against a deployed environment. `init` reports it as `init.runner-deferred` (a note naming the runner and the rule), and `cupel describe language <id>` lists each runner's `defer` rules ([ADR-162](docs/adr/CUPEL_DECISION_162.md)). Add `test` and `coverage` under `[lang.<id>]` for the packages Cupel should run.
-
-Every `cupel.toml` it writes starts with a `[gate.changed]` of ratchets, each rule under a comment saying what it holds, so `cupel check --changed --gate` gates a change at once ([ADR-233](docs/adr/CUPEL_DECISION_233.md)); a rule against `base` compares with the range's base, and is skipped without failing where there is nothing to compare with, such as a change whose files are all new ([ADR-205](docs/adr/CUPEL_DECISION_205.md)):
-
-```toml
-[gate.changed]
-# No test is weakened: no assertion removed, matcher loosened, test skipped or deleted, or snapshot rewritten.
-"tests.weakening" = "none"
-# The mutation score is at least the base's less 0.02.
-"tests.mutation.score" = ">= base - 0.02"
-# The largest cyclomatic complexity stays within cyclomatic_max, or, past it at the base already, grows by 2 at most.
-"static.complexity.cyclomatic_max" = "<= base"
-# No more pairs of cloned functions than the base has.
-"static.clones.pairs" = "<= base"
-# No breaking change to the public API.
-"static.api-surface" = "no-breaking"
-```
-
-```sh
-cupel init                   # preview: the envelope carries unified diffs of what would be written
-cupel init --write           # write cupel.toml and .cupel/.gitignore
-cupel init --write --force   # replace an existing cupel.toml
-```
-
-### `cupel doctor`
-
-`doctor` verifies the binary against `required_version` (see [Configuration](#configuration); the other verbs refuse to run outside it), the validity of `cupel.toml`, and write access to `.cupel/`, and reports the disk the mutation engine's copies of the repository hold in `.cupel/work/slots/` (`doctor.mutation-slots`, a note). For every tool a configured check needs through its facts (a test runner, for a check that needs test results; a coverage tool, for a language with a `coverage` command), it checks the tool is on `PATH` and reports its version under `run.toolchain`; a `[lang.<id>] runner` that names no runner is a finding listing the valid ones. Every problem is a finding with a `configure` or `install_tool` action. Exit 3 means something required is missing.
-
-A missing tool's finding names the command that installs it, or, for a language toolchain Cupel does not install (`cargo`, `go`, `python3`), what to do by hand. `--fix` runs those commands:
-
-```sh
-cupel doctor --fix --install             # install every missing tool, then check again
-cupel doctor --fix                       # on a terminal, ask before each install
-cupel doctor --fix --install --dry-run   # list the installs in the plan's would_install; run none
-```
-
-| Tool | Install command |
-|---|---|
-| `cargo-nextest` | `cargo install cargo-nextest --locked` |
-| `cargo-llvm-cov` | `cargo install cargo-llvm-cov --locked && rustup component add llvm-tools-preview` |
-| `pytest`, `pytest-cov`, `coverage` | `python -m pip install <package>`; `uv add --dev` or `poetry add --group dev` when the project uses uv or poetry |
-| `vitest`, `@vitest/coverage-v8`, `jest`, `c8` | a dev dependency of the root: `npm install --save-dev`, `pnpm add --save-dev`, or `yarn add --dev` |
-
-Installs run in the repository root with your environment, so the tool lands where your shell would put it: `CARGO_HOME`, the Python `PATH` finds (activate a virtual environment first), or the root's `node_modules`. With `--install` nothing is asked; without it Cupel asks on stderr when stdout is a terminal and installs nothing otherwise, and `--no-install` never installs. Vitest's coverage needs a provider package (`@vitest/coverage-v8` or `@vitest/coverage-istanbul`) that resolves from each root coverage runs in, or from where `vitest` is installed. Without one, `doctor` reports the provider as missing, even though `vitest` itself runs ([ADR-170](docs/adr/CUPEL_DECISION_170.md)). Likewise a `pytest` command with `--cov` options needs the pytest-cov plugin: `doctor` asks the command's interpreter (the `python` of `python -m pytest`, or the one the `pytest` on `PATH` names in its `#!` line) whether it finds `pytest_cov`, and reports `pytest-cov` as missing (a warning, as for a command's other programs) with its install command when it does not. A launcher such as `uv run` is not asked, since answering may change its environment. After installing, `doctor` resolves and probes again: `install.succeeded` names the version now installed, and `install.failed` (exit 3) carries the command and the tail of its stderr. `install.skipped` says why `--fix` installed nothing. `cupel check` and `cupel survey` follow the same flags for the tools their checks need, before they run; `--dry-run` lists those installs too.
-
-### `cupel describe`
-
-The binary documents itself. Every verb, flag, check, finding kind, language, fact, exit code, and schema is described by the same data that drives the CLI, so the documentation cannot drift from the behavior.
-
-```sh
-cupel describe                      # verbs, global flags, exit codes, schemas, config precedence
-cupel describe check                # one verb: its flags with types, defaults, and examples
-cupel describe static.clones        # one check: tier, cost, facts it needs, finding kinds, metrics, languages
-cupel describe finding dep.cycle    # one finding kind: its check, its action, and its evidence schema
-cupel describe matrix               # which checks run in which languages
-cupel describe schema config        # a JSON Schema (draft 2020-12): run | finding | events | config | plugin
-cupel describe --all                # the CLI, every verb, and every schema as one JSON document
-```
-
-Each schema's `$id` is the URL it is published at, under [`https://tysont.github.io/cupel/schema/v1/`](https://tysont.github.io/cupel/): `run.json`, `finding.json`, `events.json`, `config.json`, `plugin.json`, and `fact/<kind>.json` for each fact kind. The `pages` workflow publishes them from `main` with `scripts/schemas.sh` ([ADR-127](docs/adr/CUPEL_DECISION_127.md)).
-
-### `cupel check`
-
-`check` is the workhorse. It resolves a scope, selects checks, produces the facts those checks need, runs them, applies baselines and suppressions, and evaluates the gate.
-
-**Scope** decides which files and symbols are graded. Scope flags intersect.
-
-| Flag | Scope |
-|---|---|
-| (none) | The whole tree, minus `[scope] exclude` and always `target`, `node_modules`, `vendor`, and `.cupel`; with `[roots]`, only the files under some root |
-| `--changed` | Files changed since the merge base with `default_branch`, including uncommitted work |
-| `--base REF [--head REF]` | Files changed in an explicit range; `--head` defaults to the working tree |
-| `--paths P` | Files, directories, or globs (gitignore-aware); repeatable |
-| `--symbols S` | Symbols by qualified name (`shop.shipping.shipping_cost`) or structural hash (`sh_c7dca337c9ad7dd1`); repeatable |
-
-With `[roots]` configured, every check, the static ones included, reads only files under some root: a file outside all roots is not reported, not counted in any metric or gate bound, and not in a `--changed` or `--base` scope, and a `--paths` value naming only such files is refused ([ADR-177](docs/adr/CUPEL_DECISION_177.md)). Import resolution still reads past the roots to find an import's target, without reporting on it. Without `[roots]`, the whole repository is in scope.
-
-Under `--changed` or `--base` the symbols in scope are the functions and methods the range's changed lines touch (a file git does not track yet counts whole): a clone group is reported when one of its members was touched, every other per-symbol finding when its symbol was, so the changed gate rules on what the change wrote, and the tree gate grades the rest ([ADR-142](docs/adr/CUPEL_DECISION_142.md)). Facts are still produced for whole files, so a touched function's clone elsewhere in its file is found. A `--changed` scope with no changes passes with `scope.symbols: 0`. `tests.weakening` compares tests between two revisions, so it runs only with `--changed` or `--base` and is reported as skipped on a tree.
-
-**Selection** decides which checks run.
-
-| Flag | Selects |
-|---|---|
-| `--depth quick\|standard\|deep\|exhaustive` | How much evidence to gather; default `standard`, which adds the checks that run the test suite (`gen.property` and `conc.race` among them) to the `quick` ones; `deep` adds `gen.differential`, `gen.metamorphic`, `gen.fuzz`, `perf.bench`, and `conc.linearizability`; `exhaustive` adds `conc.dst`, `spec.trace`, `conc.model-check`, and `spec.prove` |
-| `--only ID`, `--skip ID` | Checks by ID (`static.clones`) or group (`static`, `tests`); repeatable |
-| `--tier N+` | Only checks at or above evidence tier N, e.g. `--tier 2+` |
-| `--budget DURATION` | A budget of awake time (`250ms`, `20s`, `10m`): run the most valuable selected checks that fit and skip the rest; `CUPEL_BUDGET` or `budget` in `cupel.toml` also set it |
-| `--jobs N` | How many threads and mutation workers run at once; default the cores (and, for mutation, the language's `mutation.jobs`) |
-| `--oracle NAME` | The oracle checks that compare against one use; default the first verified (see [`cupel oracle`](#cupel-oracle)) |
-| `--cases N` | The case budget of generative checks: how many inputs `gen.differential` and `gen.metamorphic` generate per entry point or relation (default 100), and how many generated cases each property test runs and how many inputs each fuzz target runs on (see [Property tests](#property-tests) and [Fuzzing](#fuzzing); default 1 000 at `standard`, ten times more at each deeper depth) |
-| `--scaffold` | Also write a property-test stub for each `property.missing` finding; without `--write` the envelope's `plan.would_write` shows each file's diff and nothing is written |
-
-**Budget.** `--budget` chooses among the checks the depth and the selection flags already chose; it never adds deeper ones. Each check costs its own run plus the facts it needs that nothing has made yet: the baseline test run, a coverage report, the mutation engine. A fact two checks share is paid once. A cost is the median of the last ten recorded runs of the same kind of work on this repository (the same check, language, and order of magnitude of targets; the same producer and language, run or read from cache), once three are recorded in `.cupel/cupel.db`; before that it comes from the cost class (a `quick` producer 100 ms, `standard` 30 s, `deep` 5 min). A check's value is its evidence tier plus one, doubled when it has never produced a result here, halved when its last result was made at this commit on a clean tree, and doubled again inside a `--changed` or `--base` scope. Checks are taken greedily by value per millisecond while they fit; ties are broken by `--seed`. The budget counts from the start of the invocation, as `--timeout` does, and both count only the time the machine is awake: a laptop that sleeps through a run does not spend its budget asleep, and `duration_ms` reports the same awake time ([ADR-217](docs/adr/CUPEL_DECISION_217.md)). A check is not started when its estimate exceeds what is left, and work still running at the deadline is stopped (its processes are killed), so a run overshoots its budget only by the moment that takes; a mutation run stopped that way reports `partial` with the score and findings of the mutants it finished, counts the rest as `not_run`, and stores what it finished, so the next run reuses those and runs the rest ([ADR-172](docs/adr/CUPEL_DECISION_172.md)). Anything the budget left out is `skipped` with `reason: budget` and `est_ms`, its estimate, the run is `partial` (exit 5), and `next_actions` offers the command that runs it alone. On a small Python project with a test suite and no recorded runs, one second leaves out everything that needs the suite:
+In a repository, `cupel init` detects the languages and their test and coverage commands and shows the `cupel.toml` it would write, starter gate included; `cupel init --write` writes it (`cupel doctor` then checks the tools it names are installed):
 
 ```console
-$ cupel check --budget 1s --format text
-cupel check: partial (exit 5)
+$ cupel init
+cupel init: plan (exit 0)
+
+plan      est 0 ms
+would write
+  cupel.toml
+    --- /dev/null
+    +++ b/cupel.toml
+    @@ -0,0 +1,20 @@
+    +# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.
+    +default_branch = "main"
+    +depth = "standard"
+    +
+    +[lang.go]
+    +test = "go test -json ./..."
+    +coverage = "go test -coverprofile={out} ./..."
+    +bench = "go test -run=^$ -bench=. ./..."
+    +
+    +[gate.changed]
+    …
+next actions
+  1. configure: Nothing was written; run `cupel init --write` to write these files.
+     $ cupel init --write
+
+$ cupel init --write
+cupel init: pass (exit 0)
 …
+```
+
+`cupel survey` grades the whole tree and ranks what to work on, protect-first: code with the weakest tests before code that is merely complex. It never gates, so it exits 0 whatever it finds.
+
+```console
+$ cupel survey
+cupel survey: pass (exit 0)
+
+summary   175 findings · fail 55 · warn 43 · info 77 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
+
 checks
-  static.clones      pass     tier 0 · quick · score 0 pairs (n 1) · metrics clusters 0, max_jaccard 0, pairs 0 · 0 findings · 0 ms
-  static.complexity  pass     tier 0 · quick · score 3 cyclomatic_max (n 4) · metrics cognitive_max 3, cyclomatic_max 3, length_max 5, nesting_max 1, params_max 2 · 0 findings · 0 ms
-  static.crap        skipped  tier 0 · quick · 0 findings · 0 ms · skipped: budget (lang python, est 30.0 s)
-  static.dead-code   pass     tier 0 · quick · score 0 dead_symbols (n 4) · metrics dead_exports 0, dead_symbols 0 · 0 findings · 256 ms
-  static.deps        pass     tier 0 · quick · score 0 cycles (n 3) · metrics cycles 0, max_distance 0, violations 0 · 0 findings · 0 ms
-  tests.coverage     skipped  tier 2 · standard · 0 findings · 0 ms · skipped: budget (lang python, est 30.4 s)
-  tests.flaky        skipped  tier 2 · standard · 0 findings · 0 ms · skipped: budget (lang python, est 60.4 s)
-  tests.mutation     skipped  tier 3 · standard · 0 findings · 0 ms · skipped: budget (lang python, est 90.4 s)
-  tests.quality      pass     tier 2 · quick · score 1 assertion_density (n 2) · metrics assertion_density 1, no_assertion 0, weak_ratio 0 · 0 findings · 137 ms
-  tests.weakening    skipped  tier 2 · quick · 0 findings · 0 ms · skipped: needs-range (lang python, see `cupel check --changed --only tests.weakening`)
+  …
+  static.clones             fail     tier 0 · quick · score 48 pairs (n 150) · … · 26 findings · 439 ms
+  static.complexity         fail     tier 0 · quick · score 27 cyclomatic_max (n 168) · … · 24 findings · 26 ms
+  …
+  tests.coverage            fail     tier 2 · standard · score 0.9202279202279202 line_ratio (n 702) · … · 2 findings · 405 ms · …
+  tests.flaky               pass     tier 2 · standard · score 0 unstable (n 48) · … · 0 findings · 4383 ms
+  tests.mutation            fail     tier 3 · standard · score 0.5672268907563025 killed_ratio (n 238) · …
+  …
+  targets  68 recommended, protect first
+     …
+     2. protect  lru.Cache.RemoveOldest  mutation 0 · coverage 0 · tests 0  go · lru.go:204:1-218:2 · sh_998421c3989fc3ac
+        static.complexity.cyclomatic 5 (#56) · static.complexity.cognitive 4 (#68) · static.crap.crap 30 (#1) · tests.coverage.uncovered_lines 13 (#1) · …
+     3. both  arc.ARCCache.Add  mutation 0 · coverage - · tests 0  go · arc/arc.go:88:1-179:2 · sh_3f3d786cad558232
+        static.complexity.cyclomatic 14 (#11) · static.complexity.cognitive 23 (#4) · … · tests.mutation.mutation_score 0 (#1) · …
 …
 next actions
-  1. rerun: Run `static.crap`, which the budget cut short on python.
-     $ cupel check --only static.crap
-…
-  4. rerun: Run `tests.mutation`, which the budget cut short on python.
-     $ cupel check --only tests.mutation
+  1. strengthen_assertion: Replace the truthiness, presence, or inequality checks in `TestOnEvictReentrant` with an assertion that pins the expected value. (finding fnd_e8115d)
+  2. write_test: Write a test that calls `RemoveOldest`. (finding fnd_cde7cb)
+  3. write_test: Write a test that runs line 110 of arc/arc.go. (finding fnd_552970)
+  …
 ```
 
-`--dry-run` makes the same choice without running anything: the checks it would skip are under `would skip` with their estimates, and every planned check's `est_ms` counts the facts it would make, so `est_total_ms` is what the run is expected to take. With a minute, the same project plans the coverage report once for `static.crap` and `tests.coverage` and still leaves out mutation and flakiness, which would add the suite run and the engine:
+On a branch, `cupel check --changed --gate` grades only what the branch changed. Here an agent added a method no test calls and deleted one assertion from an existing test; the suite still passes, and the gate does not:
 
 ```console
-$ cupel check --dry-run --budget 1m --format text
-cupel check: plan (exit 0)
-
-plan      est 30440 ms
-would run
-  static.clones      4 targets · est 4 ms · needs symbols, norm-tree
-  static.complexity  4 targets · est 4 ms · needs symbols, decisions, norm-tree
-  static.crap        4 targets · est 4 ms · needs symbols, decisions, norm-tree, coverage-map, test-conventions, coverage-map(run)
-  static.dead-code   4 targets · est 4 ms · needs symbols, norm-tree, module-graph, roots, references
-  static.deps        4 targets · est 4 ms · needs module-graph, api-surface
-  tests.coverage     4 targets · est 30400 ms · needs symbols, coverage-map, norm-tree, test-conventions, coverage-map(run)
-  tests.quality      4 targets · est 20 ms · needs test-frames, symbols, norm-tree, decisions
-would skip
-  tests.weakening  needs-range (lang python, see `cupel check --changed --only tests.weakening`)
-  tests.flaky      budget (lang python, est 60.4 s)
-  tests.mutation   budget (lang python, est 60.4 s)
-…
-```
-
-Without `--budget`, checks run in the order `cupel describe --all` lists them; with one, the most valuable per millisecond run first, and the envelope keeps the usual order.
-
-**Grading** flags decide what the result is compared with.
-
-| Flag | Effect |
-|---|---|
-| `--gate`, `--no-gate` | Evaluate `[gate.changed]` for range scopes or `[gate.tree]` otherwise. On by default when the table exists; `--gate` without the table is exit 2 |
-| `--against baseline\|REF\|run:ID` | What `new_since_baseline` and each check's `delta` are computed against |
-| `--dry-run` | Return the plan (checks, targets, facts, estimates, files it would write) and run nothing |
-| `--format json\|jsonl\|text\|sarif` | JSON when stdout is not a terminal, text when it is |
-
-Here is a small Python repository. An agent's branch added a shipping calculator, loosened one test's assertion, and skipped another test. The gate fails:
-
-```console
-$ cupel check --changed --depth standard --gate --format text
+$ cupel check --changed --gate
 cupel check: fail (exit 1)
 
 gate      fail (gate.changed)
-  fail  tests.weakening none  actual 2
-  fail  static.complexity none  actual 1
-  pass  static.clones none  actual 0
+  fail  tests.weakening none  actual 1
+  fail  tests.mutation.score >= base - 0.02  actual 0  bound 0.98
+  pass  static.complexity.cyclomatic_max <= base  actual 6 (lru.TestLRUContainsOrAdd at lru_test.go:181)  bound 9 (lru.TestLRUContainsOrAdd at lru_test.go:181)  tolerance 2
+  pass  static.clones.pairs <= base  actual 0  bound 0  tolerance 0
+  pass  static.api-surface no-breaking  actual 0
 
-summary   39 findings · fail 7 · warn 4 · info 28 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
-
-checks
-  conc.race                 skipped  tier 4 · standard · 0 findings · 0 ms · skipped: unsupported (fact race-reports, lang python, see `cupel describe matrix`)
-  gen.property              pass     tier 4 · standard · score 0 falsified (n 0) · metrics falsified 0, missing 1, properties 0 · 1 finding · 50 ms
-  meta.oracle-independence  pass     tier 2 · quick · score 0 independently tested share (n 0) · metrics independent 0, self_authored_only 0 · 0 findings · 0 ms · note: tests that existed before the change exercise 0 of the 0 changed functions tests run; an oracle's independence is its verification (`cupel oracle verify`) (python)
-  meta.traceability         pass     tier 2 · standard · 0 findings · 0 ms · note: no requirements are configured: list their IDs as `requirements` under [checks."meta.traceability"] (python)
-  perf.footprint            pass     tier 0 · quick · score 0 dependencies (n 0) · metrics artifact_bytes 0, copyleft 0, dependencies 0, vulnerable 0 · 0 findings · 13 ms · note: artifact sizes not measured: set `[lang.<id>] artifacts` to their paths or globs (python) · note: no lockfile or manifest found (python) · note: vulnerabilities not measured: set `[lang.<id>] advisories` to a directory of OSV advisories (python)
-  spec.contracts            pass     tier 5 · standard · 0 findings · 0 ms · note: tool.icontract: no project root declares the contract library it reads, so no contract was checked (python)
-  static.analyze            fail     tier 1 · standard · score 5 diagnostics (n 2) · metrics diagnostics 5, errors 5 · 5 findings · 830 ms
-  static.api-surface        pass     tier 0 · quick · score 0 breaking (n 3) · metrics breaking 0, widened 1 · 1 finding · 0 ms
-  static.clones             pass     tier 0 · quick · score 0 pairs (n 1) · metrics clusters 0, max_jaccard 0, pairs 0 · 0 findings · 0 ms
-  static.complexity         fail     tier 0 · quick · score 18 cyclomatic_max (n 2) · metrics cognitive_max 30, cyclomatic_max 18, length_max 26, nesting_max 3, params_max 5 · 1 finding · 4 ms
-  static.crap               fail     tier 0 · quick · score 342 max (n 1) · metrics max 342, mean 342 · 1 finding · 0 ms
-  static.dead-code          pass     tier 0 · quick · score 0 dead_symbols (n 2) · metrics dead_exports 1, dead_symbols 0 · 1 finding · 14 ms
-  static.deps               pass     tier 0 · quick · score 0 cycles (n 2) · metrics cycles 0, max_distance 0, violations 0 · 0 findings · 0 ms
-  tests.assertion-density   pass     tier 2 · quick · score 1 assertions_per_test (n 1) · metrics assertions_per_public_function 0, assertions_per_test 1, sparse_files 0, sparse_tests 0, tested_public_functions 0 · 0 findings · 0 ms
-  tests.coverage            fail     tier 2 · standard · score 0 line_ratio (n 22) · metrics line 0, lines 22, uncovered 1 · 1 finding · 0 ms · note: branches: unavailable (python)
-  tests.flaky               pass     tier 2 · standard · score 0 unstable (n 2) · metrics flaky 0, order_dependent 0 · 0 findings · 779 ms
-  tests.mutation            pass     tier 3 · standard · score 0 killed_ratio (n 25) · metrics build_ms 0, equivalent 0, executed 0, fallback 0, killed 0, out_of_memory 0, plan_ms 0, reused 0, rewrite_ms 0, run_ms 0, schemata 0, score 0, survived 0, sync_ms 0, timeout 0, uncovered 25, unviable 0, validate_ms 0 · 25 findings · 64 ms
-  tests.quality             fail     tier 2 · quick · score 1 assertion_density (n 1) · metrics assertion_density 1, no_assertion 0, weak_ratio 1 · 1 finding · 0 ms
-  tests.weakening           fail     tier 2 · quick · score 2 weakened (n 2) · metrics weakened 2 · 2 findings · 0 ms
-
-fail (7)
-  static.analyze
-    mypy no-untyped-def: Function is missing a type annotation
-      fnd_478bce · analyze.mypy.no-untyped-def · tier 1 · confidence 1
-      at src/shop/shipping.py:1:1-26:26
-      evidence: level "error" · message "Function is missing a type annotation" · rule "no-untyped-def" · tool "mypy" (full: cupel explain fnd_478bce)
-      action fix_bug (priority 1): Fix what mypy reports at src/shop/shipping.py:1 (no-untyped-def), or configure mypy if the rule does not apply to this project.
-      repro: cupel check --only static.analyze --paths src/shop/shipping.py
-      suppress: cupel suppress fnd_478bce --reason '…'
-    mypy no-untyped-def: Function is missing a return type annotation
-      fnd_677648 · analyze.mypy.no-untyped-def · tier 1 · confidence 1
-      …
-    …
+summary   8 findings · fail 2 · warn 2 · info 4 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
+…
+fail (2)
   tests.weakening
-    `test_discount_reduces_the_total` replaced 1 exact assertion(s) with weaker ones
-      fnd_0c6fc5 · matcher.loosened · tier 2 · confidence 1
-      at tests/test_pricing.py:6:1-7:47
-      evidence: strong_base 1 · strong_head 0 · test "test_discount_reduces_the_total" · weak_base 0 · weak_head 1 (full: cupel explain fnd_0c6fc5)
-      action restore_test (priority 1): Restore the exact expected values in `test_discount_reduces_the_total` instead of truthiness, presence, or inequality checks.
-      repro: cupel check --only tests.weakening --base 8b01e28e053946898459f4337ff51f760c976fb7
-      suppress: cupel suppress fnd_0c6fc5 --reason '…'
-    `test_discount_rejects_a_negative_percent` is now skipped
-      fnd_2b25cf · test.skipped · tier 2 · confidence 1
+    `TestLRUContainsOrAdd` makes 5 assertions, down from 6
+      fnd_400a22 · assertion.removed · tier 2 · confidence 1
+      at lru_test.go:181:1-205:2
+      evidence: base 6 · head 5 · test "TestLRUContainsOrAdd" (full: cupel explain fnd_400a22)
+      action restore_test (priority 1): Restore the assertions removed from `TestLRUContainsOrAdd` (see it at e28b6a599275113972f81b47dbfa6436780d0f5c); if one is wrong, replace it with a correct one rather than dropping it.
+      repro: cupel check --only tests.weakening --base e28b6a599275113972f81b47dbfa6436780d0f5c
+      suppress: cupel suppress fnd_400a22 --reason '…'
+  static.analyze
+    staticcheck SA4006: this value of evict is never used
+      fnd_b8f153 · analyze.staticcheck.SA4006 · tier 1 · confidence 1
       …
-
-warn (4)
-  static.complexity
-    `shop.shipping.shipping_cost` is too complex: cyclomatic 18 (max 10), cognitive 30 (max 15)
-      fnd_002c9a · complexity.high · tier 0 · confidence 1
-      at src/shop/shipping.py:1:1-26:26 in shop.shipping.shipping_cost (python, sh_7cfabd3ccaf75503)
-      evidence: cognitive 30 · cognitive_max 15 · cyclomatic 18 · cyclomatic_max 10 (full: cupel explain fnd_002c9a)
-      action reduce_complexity (priority 2): Split `shipping_cost` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15.
-        deepest_block: branch > ternary > ternary at src/shop/shipping.py:5:39-5:66, nesting 2
-      repro: cupel check --only static.complexity --symbols sh_7cfabd3ccaf75503
-      suppress: cupel suppress fnd_002c9a --reason '…'
+warn (2)
   static.crap
-    `shop.shipping.shipping_cost` has CRAP 342.0 (high at 30): cyclomatic 18 with 0% coverage
+    `lru.Cache.AddAll` has CRAP 30.0 (high at 30): cyclomatic 5 with 0% coverage
       …
   tests.coverage
-    `shop.shipping.shipping_cost` never ran under test: none of its 22 instrumented lines
+    `lru.Cache.AddAll` never ran under test: none of its 11 instrumented lines
       …
-  tests.quality
-    `tests.test_pricing.test_discount_reduces_the_total` asserts only weakly: 1 weak assertion(s), none pinning a value
-      …
-
-info (28)
-  gen.property
-    `shop.shipping.shipping_cost` has no property test
-      …
-  static.api-surface
-    public `shop.shipping.shipping_cost` was added
-      …
-  static.dead-code
-    `shop.shipping.shipping_cost` is exported but no import resolves to src/shop/shipping.py
-      …
+info (4)
+  …
   tests.mutation
-    No test runs src/shop/shipping.py:2; its mutant `<=` → `<` was not run
+    No test runs lru.go:147; its mutant `>=` → `>` was not run
       …
-    …
-
-run       run_01M66ESWMTBB8N6E3H2KDWCNZ8 · started 2026-10-30T13:08:21Z · 2652 ms · seed 8293632077924340691
-git       fc5a540a3e2ca9a11ed2ff63e8cbf1774f1bbeca · branch agent/shipping · base 8b01e28e053946898459f4337ff51f760c976fb7 · clean
-scope     changed · 2 files · 2 symbols · roots . · languages python
-depth     standard
-suite     python full · 2 rerun · 0 reused
-…
-
 next actions
-  1. restore_test: Restore the exact expected values in `test_discount_reduces_the_total` instead of truthiness, presence, or inequality checks. (finding fnd_0c6fc5)
-  2. restore_test: Remove the skip marker from `test_discount_rejects_a_negative_percent` and fix what made it fail. (finding fnd_2b25cf)
-  3. fix_bug: Fix what mypy reports at src/shop/shipping.py:1 (no-untyped-def), or configure mypy if the rule does not apply to this project. (finding fnd_478bce)
-  4. fix_bug: Fix what mypy reports at tests/test_pricing.py:6 (no-untyped-def), or configure mypy if the rule does not apply to this project. (finding fnd_677648)
+  1. restore_test: Restore the assertions removed from `TestLRUContainsOrAdd` (see it at e28b6a599275113972f81b47dbfa6436780d0f5c); if one is wrong, replace it with a correct one rather than dropping it. (finding fnd_400a22)
+  2. fix_bug: Fix what staticcheck reports at lru_test.go:198 (SA4006), or configure staticcheck if the rule does not apply to this project. (finding fnd_b8f153)
+  3. write_test: Write a test that calls `AddAll`. (finding fnd_eec201)
   …
 ```
 
-The same check as JSON, trimmed to two checks, one finding, and one action:
+## Using Cupel with an agent
+
+**Instructions.** Add to `CLAUDE.md` or `AGENTS.md`:
+
+```markdown
+## Done means graded
+Before you stop, run `cupel check --changed --gate --format json`. While it exits 1, fix
+`next_actions[0]`, confirm with its finding's `repro`, and run it again. Never loosen the
+gate or suppress a finding to pass. Run `cupel describe --agent` once for the loop, the
+exit codes, and the envelope.
+```
+
+`cupel describe --agent` prints a guide of about sixty lines written for an agent ([all of it](docs/guide/agents.md)). It begins:
+
+<!-- generated:agent-loop -->
+```markdown
+# Cupel
+
+Cupel grades what a coding agent produced. It measures structure and test strength over a change or a whole tree and returns one JSON envelope: findings with stable IDs, ranked `next_actions`, and a gate verdict. It never edits code; you fix, it grades.
+
+## The loop
+
+1. Run `cupel check --changed --format json`.
+2. If `exit_code` is 0, stop: the gate passed, or there is no gate.
+3. Otherwise take `next_actions[0]`, fix what it names, and rerun its finding's `repro` to confirm.
+4. Go back to 1. Do not stop until it exits 0.
+
+- `cupel explain <finding-id>` shows a finding's source, covering tests, and a test skeleton.
+- `cupel tests --impacted --changed` lists the tests the change affects and the command that runs them.
+- `cupel describe <check-id>` and `cupel describe finding <kind>` explain any check or finding kind.
+- `--dry-run` shows what any command would run or write; `<verb> --describe` lists its flags.
+
+…
+```
+<!-- end:agent-loop -->
+
+**A Stop hook.** In Claude Code, a `Stop` hook that exits 2 keeps Claude working and hands it the hook's stderr ([hooks reference](https://code.claude.com/docs/en/hooks)). This `.claude/settings.json` blocks stopping exactly while the gate fails (exit 1); any other exit, such as a missing tool (3) or a red suite (4), lets Claude stop and report it:
 
 ```json
 {
-  "cupel": { "version": "0.2.9", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
-  "run": {
-    "id": "run_01M66ESZ81EZ7HN1Z8NM3YHJY0", "verb": "check",
-    "started": "2026-10-30T13:08:23Z", "duration_ms": 1303,
-    "git": { "sha": "fc5a540a3e2ca9a11ed2ff63e8cbf1774f1bbeca", "dirty": false,
-             "base": "8b01e28e053946898459f4337ff51f760c976fb7", "branch": "agent/shipping" },
-    "scope": { "mode": "changed", "files": 2, "symbols": 2, "roots": ["."], "languages": ["python"] },
-    "depth": "standard", "seed": 5896116977636554219, "…": "…"
-  },
-  "status": "fail",
-  "exit_code": 1,
-  "checks": [
-    {
-      "id": "static.complexity", "status": "fail", "tier": 0, "cost": "quick",
-      "score": { "value": 18.0, "unit": "cyclomatic_max", "n": 2 },
-      "metrics": { "cognitive_max": 30.0, "cyclomatic_max": 18.0, "length_max": 26.0, "nesting_max": 3.0, "params_max": 5.0 },
-      "delta": null, "findings": 1, "duration_ms": 4, "skipped": null, "oracle": null
-    },
-    {
-      "id": "tests.weakening", "status": "fail", "tier": 2, "cost": "quick",
-      "score": { "value": 2.0, "unit": "weakened", "n": 2 },
-      "metrics": { "weakened": 2.0 },
-      "delta": null, "findings": 2, "duration_ms": 0, "skipped": null, "oracle": null
-    }
-  ],
-  "findings": [
-    {
-      "id": "fnd_002c9a", "check": "static.complexity", "kind": "complexity.high",
-      "severity": "warn", "confidence": 1.0, "tier": 0,
-      "symbol": { "display": "shop.shipping.shipping_cost", "hash": "sh_7cfabd3ccaf75503", "lang": "python" },
-      "location": { "file": "src/shop/shipping.py", "line": 1, "col": 1, "end_line": 26, "end_col": 26 },
-      "title": "`shop.shipping.shipping_cost` is too complex: cyclomatic 18 (max 10), cognitive 30 (max 15)",
-      "detail": null,
-      "evidence": { "cognitive": 30, "cognitive_max": 15, "cyclomatic": 18, "cyclomatic_max": 10 },
-      "action": {
-        "kind": "reduce_complexity", "priority": 2, "hints": {},
-        "summary": "Split `shipping_cost` into smaller functions or replace conditional chains with data, until cyclomatic is at most 10 and cognitive at most 15."
-      },
-      "repro": "cupel check --only static.complexity --symbols sh_7cfabd3ccaf75503",
-      "suppress": "cupel suppress fnd_002c9a --reason '…'",
-      "new_since_baseline": false,
-      "suppressed": false
-    }
-  ],
-  "summary": {
-    "findings": { "fail": 7, "warn": 4, "info": 28 },
-    "new": 0, "resolved": 0, "suppressed": 0,
-    "gate": {
-      "result": "fail", "evaluated": "gate.changed",
-      "rules": [
-        { "rule": "tests.weakening none", "actual": 2.0, "result": "fail" },
-        { "rule": "static.complexity none", "actual": 1.0, "result": "fail" },
-        { "rule": "static.clones none", "actual": 0.0, "result": "pass" }
-      ]
-    }
-  },
-  "next_actions": [
-    { "priority": 1, "finding": "fnd_0c6fc5", "kind": "restore_test", "command": null,
-      "summary": "Restore the exact expected values in `test_discount_reduces_the_total` instead of truthiness, presence, or inequality checks." }
-  ],
-  "truncated": false,
-  "total_findings": 37
-}
-```
-
-Every object has a fixed key set; an absent value is `null`, never a missing key (a check result's `notes`, omitted when empty, is the one exception). `status` is one of `pass`, `fail`, `partial`, `error`, or `plan`. A check result in `error` says why in its `notes`, such as a tool that could not run. `--format jsonl` writes the envelope header and then one finding per line. `cupel describe schema run` and `cupel describe schema finding` are the full schemas.
-
-`--format sarif` writes the envelope as a [SARIF 2.1.0](https://docs.oasis-open.org/sarif/sarif/v2.1.0/) log for code-scanning tools and editors, from every verb. Each finding is a result: its kind is the `ruleId`, its severity the `level` (`fail` is `error`, `warn` is `warning`, `info` is `note`), its location a region relative to the `SRCROOT` base (the repository root), and its ID `partialFingerprints["cupel/findingId"]`; a suppressed finding carries an `accepted` suppression, and `fixes` is always empty. The rules are the finding kinds of the checks that ran, described as `cupel describe finding` describes them. The commit is in `versionControlProvenance` and the exit code in the invocation. What SARIF has no place for is kept in `properties`: a result's holds the finding's check, tier, confidence, evidence, action, and repro; the invocation's holds the envelope's `run`; the run's holds the rest of the envelope (checks, summary and gate, `next_actions`, and each verb's own payload).
-
-### `cupel survey`
-
-`survey` is the first command to run on an unfamiliar repository. It takes the same scope and selection flags as `check`, never gates, and adds `rankings`: the ten worst targets for every per-symbol, per-module, and per-group metric (`worst` says which end ranks first: `lowest` for the protection metrics `tests.mutation.mutation_score`, `tests.mutation.tests`, and `tests.coverage.line_coverage`, `highest` for every other), and `targets`, protect-first.
-
-`targets` are the symbols a finding asks to protect (`write_test`, `strengthen_assertion`) or to simplify (`reduce_complexity`, `refactor_extract`), each with its `recommend` (`protect`, `simplify`, or `both`), its `protection` (`mutation_score`, `coverage`, and `tests`; null where nothing measured them), its value and rank in every dimension, and the findings that recommend it. Refactoring code no test protects is unsafe, so targets to protect come first, the weakest protection (the mutation score, else coverage) first among them; equal protection falls back to the target's best rank in any other dimension. `recommended` counts them all; `targets` lists the first ten. `survey`'s `next_actions` follow the same order: an action to protect each target, then one to simplify each, then the rest. Protection is measured from `--depth standard`, where `tests.mutation` and `tests.coverage` run; at `--depth quick` it is null and only the findings say what to do. Suppressed findings recommend nothing.
-
-```console
-$ cupel survey --depth quick --format text
-cupel survey: pass (exit 0)
-
-summary   5 findings · fail 0 · warn 3 · info 2 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
-
-checks
-  …
-  tests.weakening    skipped  tier 2 · quick · 0 findings · 0 ms · skipped: needs-range (lang python, see `cupel check --changed --only tests.weakening`)
-
-rankings  top 10 per dimension
-  static.clones.cluster_size  group · 1 measured · Symbols in each clone group: 2 for a pair, more for a cluster.
-     1. 2  shop.pricing.apply_discount and 1 other  python · src/shop/pricing.py:5:1-8:41
-  static.complexity.cyclomatic  symbol · 6 measured · Modified cyclomatic complexity per function (a match counts once).
-     1. 15  shop.shipping.shipping_cost  python · src/shop/shipping.py:1:1-27:16 · sh_c7dca337c9ad7dd1
-     2. 3  shop.pricing.apply_discount  python · src/shop/pricing.py:5:1-8:41 · sh_1daf7938d546f072
-     3. 3  shop.shipping.apply_shipping_discount  python · src/shop/shipping.py:30:1-33:41 · sh_1daf7938d546f072
-     …
-  static.deps.coupling  module · 2 measured · Afferent plus efferent coupling per module.
-     1. 1  src/shop/pricing.py  python · src/shop/pricing.py:1
-     2. 1  tests/test_pricing.py  python · tests/test_pricing.py:1
-  …
-  targets  2 recommended, protect first
-     1. simplify  shop.shipping.shipping_cost  mutation - · coverage - · tests -  python · src/shop/shipping.py:1:1-27:16 · sh_c7dca337c9ad7dd1
-        static.complexity.cyclomatic 15 (#1) · static.complexity.cognitive 19 (#1) · …
-     2. simplify  shop.pricing.apply_discount  mutation - · coverage - · tests -  python · src/shop/pricing.py:5:1-8:41 · sh_1daf7938d546f072
-        static.complexity.cyclomatic 3 (#2) · … · fnd_c5c4da
-
-warn (3)
-  static.clones
-    `shop.pricing.apply_discount` and `shop.shipping.apply_shipping_discount` (src/shop/shipping.py:30) are type-2 clones (jaccard 1.00)
-      fnd_c5c4da · clone.pair · tier 0 · confidence 1
-      …
-```
-
-On the tree, `survey` finds the clone the changed-scope `check` above did not: `check --changed` builds facts only for the changed files, so a new function that copies an unchanged one is visible to `survey` and to tree-scope `check`, not to `--changed`.
-
-### `cupel explain`
-
-`explain` reads the fact store and never re-runs anything. Given a finding ID it returns the stored finding with a source excerpt, its full evidence, and its remediation hint in full: for `clone.cluster` the largest subtree every member shares (its place in each member and the names and literals that differ, the extracted function's parameters), for `complexity.high` the most deeply nested block (its place, the constructs on the path to it, and the complexity it carries), and for `dep.cycle` the cheapest import to cut (the names it carries, and whether removing it breaks every cycle among the modules). The checks compute these hints when they report the finding, so `check` and `survey` carry them in `action.hints` too. For what a range removed (a deleted test, a removed public item), the excerpt is the file as the range's base had it, named with the commit, since the working tree's lines at that place are other code. Given a check ID it returns that check's result, findings, and metrics from the last run that included it.
-
-```console
-$ cupel explain fnd_c5c4da --format text
-cupel explain: pass (exit 0)
-
-explain   finding fnd_c5c4da from run_01M4X8VRAYVSC12KFEYGD2BX8A
-  src/shop/pricing.py
-    2 |     return sum(item.price * item.quantity for item in items)
-    3 |
-    4 |
-  > 5 | def apply_discount(total, percent):
-  > 6 |     if percent < 0 or percent > 100:
-  > 7 |         raise ValueError("percent must be between 0 and 100")
-  > 8 |     return total * (100 - percent) / 100
-  evidence
-    {
-      "clone_type": 2,
-      "jaccard": 1.0,
-      "left": { "symbol": "shop.pricing.apply_discount", "file": "src/shop/pricing.py", "line": 5, "end_line": 8, "lines": 4, "nodes": 34, … },
-      "right": { "symbol": "shop.shipping.apply_shipping_discount", "file": "src/shop/shipping.py", "line": 30, "end_line": 33, "lines": 4, "nodes": 34, … },
-      "threshold": 0.82
-    }
-…
-```
-
-### `cupel baseline`
-
-A baseline is a stored run that later runs are compared with. Findings absent from the baseline are marked `new_since_baseline`, and each check reports a `delta` against it. Writing a baseline changes only `.cupel/`, but `set` and `import` still preview until you pass `--write`. A baseline advances only on a passing run on the default branch ([ADR-182](docs/adr/CUPEL_DECISION_182.md), [ADR-195](docs/adr/CUPEL_DECISION_195.md)): `set` and `import` refuse a run that failed its gate, was cut short, or errored, and a run recorded on another branch or a detached `HEAD`. A run that is `partial` only because its `--budget` left checks out or cut them short at the deadline is accepted; the baseline then holds no result for those checks, so a rule against `base` on one of them is skipped with `baseline.missing` until a later baseline has it ([ADR-216](docs/adr/CUPEL_DECISION_216.md)). The default branch is `default_branch` in `cupel.toml`, else the branch `origin/HEAD` names, else `main` or `master`. The run before the first baseline passes when its other rules do, since a rule against `base` with no reference is skipped rather than failed ([ADR-198](docs/adr/CUPEL_DECISION_198.md)); a run recorded outside a git work tree has no branch and is accepted.
-
-```sh
-cupel baseline set --write            # the latest check or survey run becomes the baseline
-cupel baseline set --from run:ID --write
-cupel baseline show                   # the baseline run as an envelope
-cupel baseline diff                   # the latest run against the baseline: new and resolved findings
-cupel baseline diff --against main    # ... or against the latest run at a git ref, or run:ID
-cupel baseline export baseline.json   # a committable copy
-cupel baseline import baseline.json --write
-```
-
-`--name NAME` keeps several named baselines. Here the baseline was set on `main`, then the agent's branch was checked:
-
-```console
-$ cupel baseline diff --format text
-cupel baseline: pass (exit 0)
-
-summary   5 findings · fail 0 · warn 3 · info 2 · new 5 · resolved 0 · suppressed 0
-
-checks
-  static.clones      fail     tier 0 · quick · score 1 pairs (n 3) · metrics clusters 0, max_jaccard 1, pairs 1 · delta +1 vs baseline · 1 finding · 0 ms
-  static.complexity  fail     tier 0 · quick · score 15 cyclomatic_max (n 6) · metrics cognitive_max 19, cyclomatic_max 15, length_max 27, nesting_max 2, params_max 5 · delta +12 vs baseline · 1 finding · 4 ms
-  …
-
-warn (3)
-  static.clones
-    `shop.pricing.apply_discount` and `shop.shipping.apply_shipping_discount` (src/shop/shipping.py:30) are type-2 clones (jaccard 1.00)
-      fnd_c5c4da · clone.pair · tier 0 · confidence 1 · new
-      …
-```
-
-A finding's ID is derived from its function's structure, so renaming or moving a function keeps it, but editing the function changes it. Under `--changed` or `--base`, the functions the range removed are matched to the ones it added by how much of their structure they share: a rename with an edit, a move, a function split in two, or two merged into one. A finding on the old function with a finding of the same check and kind on any of its successors is neither new nor resolved. Each check's `delta` lists these matches as `sets`: the functions on each side, how similar they are, the findings carried across, and each per-function metric over each side (the sum of a count such as `cyclomatic`, the size-weighted mean of a score such as `crap`). `tests.weakening` matches a renamed or split test the same way instead of reporting it deleted ([ADR-131](docs/adr/CUPEL_DECISION_131.md)).
-
-A baseline finding is resolved only when the run compared with it could have reported it again: its check ran to completion (it passed or failed, rather than being skipped, erroring, or cut short), and, when the run did not cover the whole tree, the finding is in a file the run considered and not on a function the run left out. Under `--changed`, a function the change did not touch is left out, so `check --changed` against a baseline set over the whole tree resolves only the findings the change removed, and `baseline diff` after it lists only those. A finding with no file is resolved only by a whole-tree run. A check's `delta` likewise compares scores only for checks that ran to completion in both runs. Each non-tree run records the files it considered (`run.scope.paths`) and the functions it left out (`run.scope.symbols_left_out`), so a stored run compares the same way later ([ADR-206](docs/adr/CUPEL_DECISION_206.md)).
-
-### `cupel oracle`
-
-An oracle is something a check compares against: an earlier version at a git ref, a command that computes the reference answer, or a specification. Oracles are defined in `cupel.toml` as `[oracles.<name>]` tables, so they are reviewed and committed like the rest of the configuration; whether each one is verified is recorded in the fact store. `add` and `remove` change only that table, keeping the rest of the file as it was, and preview the diff until you pass `--write`.
-
-```sh
-cupel oracle add release --kind ref --ref v1.2.0 --write
-cupel oracle add sum --kind command --cmd "python3 sum.py {input}" --input "1 2 3" --input "40 2" --write
-cupel oracle add model --kind spec --spec specs/cart.qnt --lang quint --write
-cupel oracle list                     # every oracle with its state
-cupel oracle verify sum               # run its smoke comparison; --all verifies every oracle
-cupel oracle remove sum --write       # drop the table and the verification
-```
-
-`verify` runs a smoke comparison for each kind. A ref must resolve to a commit. A command runs twice on each known input (`--input`, or one empty input; `{input}` is replaced by the shell-quoted input) and must exit 0 and print the same both times. A spec must be accepted by its language's parser: `quint parse`, `sany` for TLA+, or `p compile`. A pass records the oracle's identity hash (its definition, plus the commit its ref resolves to or the spec file's content) with the run that verified it. The oracle stays `verified` while that identity holds. Editing its table, moving its ref, or changing its spec file makes it `changed`. A ref or spec file that is gone makes it `unreachable`. A failed `verify` revokes the verification. An oracle that cannot be reached exits 3 (`oracle.unreachable`); one that answers differently each time exits 1 (`oracle.smoke-failed`):
-
-```console
-$ cupel oracle verify --all --format text
-cupel oracle: fail (exit 1)
-
-summary   1 finding · fail 1 · warn 0 · info 0 · suppressed 0
-
-oracles  3
-  clock    command `python3 -c 'import time; print(time.time())'` · unverified
-  release  ref v1.2.0 · verified · recorded 2026-10-16T21:42:51Z by run_01M53ANXSYM8E0R93GKZRRF5CT
-  sum      command `python3 sum.py {input}` · inputs 2 · verified · recorded 2026-10-16T21:42:51Z by run_01M53ANXSYM8E0R93GKZRRF5CT
-
-fail (1)
-  oracle
-    Oracle `clock` is not verified: the command printed different output twice for the empty input
-      fnd_daeb25 · oracle.smoke-failed · tier 0 · confidence 1
-      …
-
-$ cupel oracle list --format text     # after adding an input to `sum`
-…
-oracles  3
-  clock    command `python3 -c 'import time; print(time.time())'` · unverified
-  release  ref v1.2.0 · verified · recorded 2026-10-16T21:42:51Z by run_01M53ANXSYM8E0R93GKZRRF5CT
-  sum      command `python3 sum.py {input}` · inputs 3 · changed · recorded 2026-10-16T21:42:51Z by run_01M53ANXSYM8E0R93GKZRRF5CT
-```
-
-The envelope of every `oracle` command carries the oracles it reported in `oracles`: each one's `name`, `definition`, `state`, identity `hash`, `verified_at`, and `verified_run`.
-
-A check that compares against an oracle names it in its result's `oracle` member. It uses `--oracle NAME` on `check` or `survey`, else the first verified oracle, else the first defined one; with no oracle defined, the check is skipped as `unconfigured`. When the run is graded, a result against an oracle that is not verified at that moment is capped at tier 3 and the run carries a `warn` finding, `oracle.unverified` (`cupel describe finding oracle.unverified`), whose action is `verify_oracle`. Only `cupel oracle verify` lifts the cap; suppressing the finding does not. `gen.differential` is the built-in check that compares against an oracle (see [Differential testing](#differential-testing)); it compares against `ref` and `command` oracles and skips itself, as `unconfigured`, when the run's oracle is a spec. `spec.trace` compares against `spec` oracles (see [Trace validation](#trace-validation)): name one with `--oracle` when the repository defines oracles of both kinds.
-
-### `cupel suppress`
-
-`suppress` silences one finding with a reason and an optional expiry date or git ref. It writes `.cupel/suppressions.toml`, the one file under `.cupel/` meant to be committed. A suppressed finding still appears, with `suppressed: true` and severity `info`, and no longer counts against the gate. When the expiry passes, the finding is active again and a `suppression.expired` finding says so.
-
-```console
-$ cupel suppress fnd_af9323 --reason "public API; the checkout service imports it" --until 2027-01-31 --format text
-cupel suppress: pass (exit 0)
-
-summary   1 finding · fail 0 · warn 0 · info 1 · suppressed 1
-
-info (1)
-  static.dead-code
-    `shop.shipping.shipping_cost` is exported but no import resolves to src/shop/shipping.py
-      fnd_af9323 · dead.export · tier 0 · confidence 0.4 · new · suppressed
-      …
-
-$ cat .cupel/suppressions.toml
-# Cupel suppressions: written by `cupel suppress <finding-id> --reason TEXT [--until DATE|REF]`.
-[[suppression]]
-finding = "fnd_af9323"
-reason = "public API; the checkout service imports it"
-until = "2027-01-31"
-created = "2026-10-14"
-```
-
-### `cupel tests --impacted`
-
-`tests --impacted` lists the tests a scope impacts, why, and a ready-to-run command per runner. It takes the same scope flags as `check`; with `--changed` or `--base` it reads the changed lines and widens each change to the functions it touches. Where a language has a per-test coverage map (Rust through `cargo llvm-cov` and `cargo nextest`, Go through `go test -coverprofile` per test, Python through pytest-cov's test contexts), a test is impacted when it executes one of those lines. JavaScript, TypeScript, Java, and Clojure have no per-test map, so their impacted tests are the test files that import a changed file, directly or through other files; the envelope says so with `per_test_map: false` and the reason. The same happens for any language whose coverage tool is not installed.
-
-```console
-$ cupel tests --impacted --changed --format text    # `add` changed in calc.py
-cupel tests: pass (exit 0)
-
-tests  1 impacted · per-test map: yes
-  python  per-test map from tool.pytest-cov-per-test (2 measured)
-  tests/test_calc.py::test_add  python
-    covers calc.add (calc.py:6)
-  run in .: python -m pytest tests/test_calc.py::test_add
-  …
-
-$ cupel tests --impacted --changed --format text    # `add` changed in add.js
-cupel tests: pass (exit 0)
-
-tests  1 impacted · per-test map: no
-  javascript  file-level impact: no producer makes per-test-map for this language (see `cupel describe matrix`)
-  add.test.js  javascript
-    imports add.js
-  run in .: npx jest add.test.js
-  …
-```
-
-In JSON the same report is the envelope's `tests`: `per_test_map`, `impacted` (`id`, `file`, `reason`, `lang`), `commands` (`lang`, `runner`, `dir`, `command`, and `narrowed: false` when the runner cannot run only those tests and the command runs its whole suite), and `languages` (per language, whether a per-test map chose the tests or why not, and how many of the map's tests were `measured` for this run and `reused` from the cache). `cupel describe matrix` shows which languages can have a per-test map here.
-
-Measuring a per-test map costs a test run under coverage: one instrumented `cargo llvm-cov nextest` run for Rust (each test's coverage is told apart by process, and the instrumented build has its own `target/cupel-llvm-cov`, so a configured `cargo llvm-cov` never discards it), one pytest-cov run for Python, and one `go test` per test for Go. Each project root's map is cached under `.cupel/cache/per-test/<producer>/`, with the hash of every file under the root and of every line the tests ran, so a later run reuses it. After a change, only the stale tests are measured again: those that ran a line of a function the change touched, those whose own test file changed (for Go, any test file of their package), and tests the cache does not hold; tests that are gone are dropped, and the kept tests' lines move with the edit. A change outside every function (a new function, an import, a constant, a comment above a function) makes stale every test that covers the file. A change to build or test configuration (`Cargo.toml`, `Cargo.lock`, `go.mod`, `conftest.py`, `pyproject.toml`, and the like) measures every test again, and so does deleting the cache. The text report says how many tests were measured, or `(cached)` when none was.
-
-### `cupel serve`
-
-`serve` runs a daemon for one repository in the foreground. It keeps every file's syntax tree, keyed by a hash of the file's content, and what each fact producer extracted from it, across invocations, so a warm `check --depth quick` neither parses nor re-extracts an unchanged file. While `.cupel/serve.sock` exists and answers, every `cupel` invocation in the repository is answered by the daemon, and prints exactly what it would print without it: the same envelope, the same stderr, the same exit code. `--events stderr` lines stream to the invoking process as the run writes them.
-
-```console
-$ cupel serve --watch
-cupel: serving /home/me/shop at .cupel/serve.sock (pid 72908, watching)
-```
-
-In another terminal, `doctor` reports the daemon, and `serve --stop` stops it:
-
-```console
-$ cupel doctor --format text
-cupel doctor: pass (exit 0)
-
-summary   1 finding · fail 0 · warn 0 · info 1 · suppressed 0
-
-info (1)
-  doctor
-    The daemon at .cupel/serve.sock serves this repository (pid 72908)
-      fnd_c243c8 · doctor.daemon-running · tier 0 · confidence 1
-      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.2.9" · watching true (full: cupel explain fnd_c243c8)
-      …
-
-$ cupel serve --stop --format text
-cupel serve: pass (exit 0)
-
-summary   1 finding · fail 0 · warn 0 · info 1 · suppressed 0
-
-info (1)
-  serve
-    Stopped the daemon at .cupel/serve.sock
-      fnd_8ec73e · serve.stopped · tier 0 · confidence 1
-      …
-```
-
-```console
-$ cupel check --format json > envelope.json      # cupel was rebuilt after the daemon started
-cupel: ran without the daemon: the daemon at /home/me/shop/.cupel/serve.sock runs another build of cupel (cupel 0.2.9 (binary 56427528-1792134645316655513)) than this client (cupel 0.2.1 (binary 56427528-1792134881357328000)). Restart it from this one: `cupel serve --stop`, then `cupel serve`.
-```
-
-- **When the CLI uses it.** Every invocation whose repository root (`--cwd`, else the working directory) has a `.cupel/serve.sock`. It runs in its own process instead when `CUPEL_NO_DAEMON=1` is set, for `serve` itself, when an argument is not UTF-8, when the run could ask a question on the terminal (stdout is a terminal and neither `--install` nor `--no-install` is given), when `--jobs` is given (a process sizes its thread pool once), and when nothing answers on the socket (a daemon that was killed leaves its socket file behind; it is ignored).
-- **When it declines.** A daemon runs only invocations from the same build of `cupel` (the same version and the same executable) and with the same `PATH`, since `PATH` decides which tools run. Otherwise the invocation runs in its own process and says why in one line on stderr (unless `--quiet`); rebuilding or reinstalling `cupel` therefore means restarting the daemon. Other variables (`HOME`, `CARGO_HOME`, `VIRTUAL_ENV`) are the daemon's own: start it from the environment the agent runs in.
-- **`--watch`** reparses a file the daemon has parsed as soon as it changes, from its previous tree (tree-sitter's incremental parse), so the next invocation finds it ready. Without `--watch`, the next invocation that reads the file parses it. Under `--watch` the daemon also keeps the coverage-instrumented build warm: once a change to a Rust source or manifest settles (2 s) and no command is running, it builds what the next suite run would build first (ADR-155), never while the machine-wide heavy-command lock (`CUPEL_HEAVY_LOCK`, `/tmp/cupel-heavy.lock` by default) is held, and holding it while it builds. Correctness never depends on the watcher: every invocation reads and hashes every file it uses.
-- **Lifetime.** The daemon serves until `cupel serve --stop`, its `--timeout`, Ctrl-C, or its socket file being removed. Invocations run concurrently, as separate processes would; one whose client is killed is cancelled. Starting a second daemon where one answers exits 3 with `serve.running`. The socket is readable and writable only by the user who started the daemon. A socket path is limited to about 100 bytes, so a repository whose root path is longer than about 85 characters cannot have a daemon (`serve` exits 3 with `serve.failed`).
-- **`--socket PATH`** listens elsewhere; the CLI looks only at `.cupel/serve.sock`, so a daemon elsewhere serves programs that speak its protocol themselves ([ADR-009](docs/adr/CUPEL_DECISION_009.md): one JSON line per message).
-
-**Performance.** Measured on the Cupel repository itself (333 Rust files, 78k lines, 4133 symbols, release build, 8-core Apple silicon, other builds running: load average 30–60):
-
-| `cupel check --depth quick` | Cold process | Warm daemon |
-|---|---|---|
-| Wall time, no coverage tool installed | 0.97–1.06 s | 0.28–0.31 s |
-| Wall time, `cargo llvm-cov` installed and its cached report fresh | 1.07–1.20 s | 0.42–0.47 s |
-
-**Without the daemon.** A run also keeps what it extracted from each file in `.cupel/cupel.db`, by the file's path and content and this build of `cupel`, deflated ([ADR-188](docs/adr/CUPEL_DECISION_188.md)). A later process of the same build reads an unchanged file's facts from there instead of parsing it, and prints exactly what it would have printed parsing every file. On the Cupel repository (666 files parsed; release build, load average 20–45), a cold `check --depth quick` spent a median 725 ms in its static checks once the facts were kept, against 2.7 s parsing every file and 0.6 s through a warm daemon; the first run of a build, which writes them (18 MB), took about as long as one that keeps nothing. A rebuilt `cupel` reads none of an older build's facts, and its first write drops them. Each run also notes the files it used, and the facts of a file none of the last 20 such runs used are dropped, so the store holds about the current tree's facts plus recent history ([ADR-201](docs/adr/CUPEL_DECISION_201.md)). `--verbose` prints how many files were read from the store and how many trees were parsed.
-
-What a warm run still does: walk the tree and hash every file, run the checks over the facts, ask git for the commit, and record the run. A run makes a check's optional facts only within its depth ([ADR-162](docs/adr/CUPEL_DECISION_162.md)), so `static.crap` at `quick` reads a coverage report only while a fresh cached one exists; after a change to the tree it scores no CRAP until a `standard` run measures coverage again. A `quick` run never runs the test suite.
-
-### MCP
-
-`cupel serve --mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server on stdin and stdout (JSON-RPC 2.0, one message per line, protocol revision `2025-11-25` or `2025-06-18`), for clients that call tools rather than run commands. Configure it as a stdio server whose working directory, or `--cwd`, is the repository:
-
-```json
-{
-  "mcpServers": {
-    "cupel": {
-      "command": "cupel",
-      "args": ["serve", "--mcp", "--cwd", "/home/me/shop"]
-    }
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cupel check --changed --gate --format text >&2; [ $? -ne 1 ] || exit 2"
+          }
+        ]
+      }
+    ]
   }
 }
 ```
 
-The tools, from the server's own `tools/list`:
+Run on the branch above, the hook exits 2 with the gate's report:
+
+```console
+$ sh -c 'cupel check --changed --gate --format text >&2; [ $? -ne 1 ] || exit 2'
+cupel check: fail (exit 1)
+
+gate      fail (gate.changed)
+  fail  tests.weakening none  actual 1
+  fail  tests.mutation.score >= base - 0.02  actual 0  bound 0.98
+…
+[exit 2]
+```
+
+Claude Code ends the turn anyway after eight consecutive blocks, and a hook that runs past its timeout (600 s by default) is cancelled; a long run can be bounded with `--budget`, whose `partial` result (exit 5) also lets Claude stop.
+
+**MCP.** `cupel serve --mcp` is a Model Context Protocol server on stdio for clients that call tools rather than run commands. Each tool takes its verb's flags as arguments and returns the same envelope ([details](docs/guide/usage.md#mcp)):
+
+```json
+{ "mcpServers": { "cupel": { "command": "cupel", "args": ["serve", "--mcp", "--cwd", "/path/to/repo"] } } }
+```
 
 <!-- generated:mcp-tools -->
 | Tool | Runs | What it does |
@@ -753,42 +216,65 @@ The tools, from the server's own `tools/list`:
 | `describe` | `cupel describe` | Describe the CLI, a verb, a check, a finding kind, a language, a fact, the support matrix, or a schema. Returns the envelope `cupel describe --format json` prints; its exit_code and status say how the run ended. |
 <!-- end:mcp-tools -->
 
-- **Arguments are the verb's flags.** Each tool's input schema is its verb's flags and the global flags as JSON properties: `--only a b` is `"only": ["a", "b"]`, `--no-gate` is `"no_gate": true`, `--limit 5` is `"limit": 5`, and a positional argument is a property too (`explain`'s `target`, `describe`'s `subject`). `format` takes only `json`, and no tool takes `--no-color`, `--events`, `--describe`, `--help`, or `--jobs`.
-- **The result is the envelope.** A call runs the command line its arguments spell, in the order given, with `--format json` last unless given, exactly as a cold `cupel` run in the repository would (the result's `_meta` names that command line under `cupel.dev/command`). The envelope is the result's `structuredContent` and, for clients that show only text, its text content. `isError` is true for exit 2, 3, 4, and 6; a failed gate (exit 1) or a partial run (exit 5) is a result. An argument the schema does not have, or one of the wrong type, is a usage envelope (exit 2) naming it.
-- **Events are progress.** A call with a `progressToken` receives each event of [the event stream](#global-flags) as a `notifications/progress` whose `message` is the event's JSON line and whose `_meta` holds it under `cupel.dev/event`. What the run writes to stderr arrives as `notifications/message` at level `info` (`logging/setLevel` above `info` silences it).
-- **Lifetime.** The server runs until its stdin closes, its `--timeout`, or Ctrl-C; a `notifications/cancelled` stops that call's run, which gets no response. It keeps its own warm syntax trees across calls, as the daemon does, and `--watch` reparses changed files; it is not the socket daemon and runs beside one. Stdout carries only protocol messages: the server's own envelope (`serve.mcp-stopped`) goes to stderr when it ends.
+## The output contract
 
-### Global flags
+Every verb prints one JSON envelope on stdout (`--format text` renders it for people; `jsonl` and `sarif` also exist), and its `exit_code` always equals the process's. A finding has a stable `id`, a `kind`, a `severity`, a `tier`, a `location`, an `action` for the agent, and a `repro` that reruns only its check on only its scope. `next_actions` orders the actions, most important first. From the check above, the first finding and the first action:
 
-Every verb takes these. A flag's variable sets it too, below the flag and above `cupel.toml` (see [Configuration](#configuration)); `--no-path-plugins` is described under [Plugins](#plugins).
+```json
+{
+  "cupel": { "version": "0.2.9", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
+  "status": "fail",
+  "exit_code": 1,
+  "findings": [
+    {
+      "id": "fnd_400a22",
+      "check": "tests.weakening",
+      "kind": "assertion.removed",
+      "severity": "fail",
+      "confidence": 1.0,
+      "tier": 2,
+      "symbol": null,
+      "location": { "file": "lru_test.go", "line": 181, "col": 1, "end_line": 205, "end_col": 2 },
+      "title": "`TestLRUContainsOrAdd` makes 5 assertions, down from 6",
+      "detail": null,
+      "evidence": { "base": 6, "head": 5, "test": "TestLRUContainsOrAdd" },
+      "action": {
+        "kind": "restore_test",
+        "priority": 1,
+        "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at e28b6a599275113972f81b47dbfa6436780d0f5c); if one is wrong, replace it with a correct one rather than dropping it.",
+        "hints": {}
+      },
+      "repro": "cupel check --only tests.weakening --base e28b6a599275113972f81b47dbfa6436780d0f5c",
+      "suppress": "cupel suppress fnd_400a22 --reason '…'",
+      "new_since_baseline": false,
+      "suppressed": false
+    }
+  ],
+  "next_actions": [
+    {
+      "priority": 1,
+      "finding": "fnd_400a22",
+      "kind": "restore_test",
+      "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at e28b6a599275113972f81b47dbfa6436780d0f5c); if one is wrong, replace it with a correct one rather than dropping it.",
+      "command": null
+    },
+    {
+      "priority": 2,
+      "finding": "fnd_b8f153",
+      "kind": "fix_bug",
+      "summary": "Fix what staticcheck reports at lru_test.go:198 (SA4006), or configure staticcheck if the rule does not apply to this project.",
+      "command": null
+    }
+  ],
+  "…": "…"
+}
+```
 
-<!-- generated:global-flags -->
-| Flag | Default | Variable | Meaning |
-| --- | --- | --- | --- |
-| `--format json\|jsonl\|text\|sarif` | — | `CUPEL_FORMAT` | Output format: json (the envelope), jsonl, text, or sarif (SARIF 2.1.0); json when stdout is not a terminal, text when it is. |
-| `--dry-run` | — | — | Preview what would run or be written; change nothing. |
-| `--describe` | — | — | Describe this verb instead of running it, and exit 0. |
-| `--config PATH` | — | — | The cupel.toml to use instead of the nearest one. |
-| `--profile NAME` | — | `CUPEL_PROFILE` | Apply [profile.NAME] from cupel.toml. |
-| `--cwd PATH` | — | — | The repository root; defaults to the current directory. |
-| `--quiet` | — | — | Write no diagnostics to stderr. |
-| `--verbose` | — | — | Write extra diagnostics to stderr. |
-| `--events PATH\|stderr` | — | — | Stream progress events as JSON lines to stderr or a file under .cupel/. |
-| `--timeout DURATION` | — | — | Stop after this long, keeping partial results. |
-| `--seed N` | `random` | — | Seed for generative checks; recorded in the envelope. |
-| `--limit N` | — | — | Return at most N findings. |
-| `--offset N` | — | — | Skip the first N findings. |
-| `--no-color` | — | `NO_COLOR` | Render text without color. |
-| `--no-install` | — | — | Never install tools; the default unless stdout is a terminal, where Cupel asks. |
-| `--install` | — | — | Install the missing tools producers need, without asking. |
-| `--write` | — | — | Permit writes outside .cupel/. |
-| `--no-path-plugins` | — | — | Load no cupel-check-* or cupel-produce-* plugins from PATH; [plugins] still loads. |
-| `--help` | — | — | Print help and exit. |
-<!-- end:global-flags -->
+`cupel describe schema run` and `cupel describe schema finding` are the full JSON Schemas, published under [`tysont.github.io/cupel/schema/v1/`](https://tysont.github.io/cupel/schema/v1/run.json).
 
 ## Checks
 
-Every check below exists. Each is supported in all seven languages except `gen.property`, which Go, Java, and Clojure lack (Cupel runs no property framework for them); `gen.metamorphic`, which has a Python harness only; `conc.race`, which has race detectors for Go and Rust only; `gen.fuzz`, which has no TypeScript, Java, or Clojure fuzzer; `perf.bench`, which has no Java or Clojure bench tool; `conc.dst`, which has a simulator for Rust only (madsim); `conc.model-check`, which has a model checker for Rust only; `spec.contracts`, which reads Rust's `contracts` crate and Python's icontract only; and `gen.differential`, `static.analyze`, and `perf.footprint`, which have no Java or Clojure harness, analyzer, or lockfile reader yet; the [support matrix](#languages) says `unsupported`. All run at `--depth quick` except `gen.property`, `tests.coverage`, `tests.flaky`, `tests.mutation`, `conc.race`, and `spec.contracts`, which run the project's test suite, `meta.traceability`, and `static.analyze`, which runs its type checkers and linters, so they run from `--depth standard`, the default; and `gen.differential`, `gen.metamorphic`, `gen.fuzz`, and `perf.bench`, which run from `--depth deep` (or by name with `--only`), the first two once a language lists the functions it compares or declares relations (see [Differential testing](#differential-testing) and [Metamorphic relations](#metamorphic-relations)); `conc.linearizability` also runs from `--depth deep`, once a language names the command that records its histories; and `conc.dst`, `spec.trace`, `conc.model-check`, and `spec.prove` run from `--depth exhaustive` (or by name with `--only`), `spec.trace` once a spec oracle is defined (see [Trace validation](#trace-validation)). The table is generated from `cupel describe` (see [Development](#development)). Tier is the strength of the evidence, from 0 (structural) upward. Gate metrics are the keys a gate rule can name as `<check>.<metric>`; ranked metrics are what `survey` ranks.
+`Tier` is the strength of a check's evidence (below); `Cost` is the cheapest depth that runs it. `Gate metrics` are what a gate rule can name as `<check>.<metric>`; `Ranked by` is what `survey` ranks. What each check looks for: [docs/guide/checks.md](docs/guide/checks.md); the full language matrix: [docs/guide/languages.md](docs/guide/languages.md).
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
@@ -823,859 +309,20 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 | `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | clojure, go, java, javascript, python, rust, typescript |
 <!-- end:check-table -->
 
-What each check looks for:
+## Depths and exit codes
 
-- **`static.complexity`** measures every function's cyclomatic and cognitive complexity, nesting depth, parameter count, and length against configurable limits. A `match` or `switch` counts as one decision however many arms it has.
-- **`static.crap`** scores each function by complexity weighted by missing test coverage, from the language's coverage report (see [Coverage](#coverage)); without one it passes with a null score and no findings rather than guess.
-- **`static.clones`** finds functions whose normalized syntax trees are mostly the same, so renamed variables and reformatting do not hide a copy. Two members are a `clone.pair`; three or more are a `clone.cluster`. Each says its `clone_type`: 1 for the same tokens (only layout, comments, or the function's name differ), 2 for the same tree with identifiers or literals renamed (listed in `renamed`, one text per member), 3 for statements inserted, removed, or changed (listed in `edits`, with where each is). A group whose members all lie in test files is reported at `info` with `shape` `test-code` and is not counted in `pairs`, `clusters`, or `max_jaccard`, so it does not move the clone gate ([ADR-184](docs/adr/CUPEL_DECISION_184.md)).
-- **`static.deps`** builds the module graph from resolved imports. It reports import cycles, modules that are both unstable and abstract, and imports that break the layering you configure. A module's abstractness is the share of its exported members that are abstract: interfaces, abstract classes, and type aliases are abstract; exported functions, concrete classes, and values are concrete ([ADR-178](docs/adr/CUPEL_DECISION_178.md)). A cycle follows only the imports used at run time: a TypeScript import of types alone (`import type`, or every name marked `type`) is erased by the compiler, so it couples modules but closes no cycle ([ADR-165](docs/adr/CUPEL_DECISION_165.md)); so does a Python import under `if TYPE_CHECKING:` or `if typing.TYPE_CHECKING:`, which runs only for a type checker ([ADR-211](docs/adr/CUPEL_DECISION_211.md)).
-- **`static.dead-code`** reports symbols and exports in modules that no import reaches and no entry point, test, framework hook, or test file (one the runner finds by its path, such as a Rust bench) keeps alive. A file the project's own manifests say it runs also keeps its module alive: for JavaScript and TypeScript, `package.json`'s `main`, `bin`, and the files its scripts run with `node`, `tsx`, `ts-node`, or `bun`, a `wrangler*.toml`'s `main`, and the sources a `Dockerfile` copies into its image ([ADR-163](docs/adr/CUPEL_DECISION_163.md)). JavaScript and TypeScript are judged together, so a module of one that the other imports or runs is reached. Reachability is decided per module, not per call, so an export of a module nothing imports is reported as `info` with low confidence: it may be public API.
-- **`tests.quality`** reads every test: tests with no assertions or only weak ones (truthiness, presence, inequality, a range; `toContain`, `toMatch`, and `toMatchObject` pin what they name and are not weak, [ADR-184](docs/adr/CUPEL_DECISION_184.md), nor are Chai's `include`, `contain`, `match`, `deep.include`, `assert.include`, and `assert.match`, [ADR-200](docs/adr/CUPEL_DECISION_200.md)), heavy mocking, loops and branches inside tests, and duplicated setup. A loop whose body holds an assertion runs a table of cases and is not logic; a branch is. Duplicated setup is at least `setup_tests_min` (3) tests of one file repeating at least `setup_statements_min` (5) leading statements. A call to an asserting function of the same file counts as that function's assertion. A Go test that hands its `t` to a function or method of its package (any file of the directory in scope, test file or not) asserts as that helper does, and not at all when the helper only sets up (`t.Helper()`, `t.Cleanup`, `t.TempDir()`) ([ADR-207](docs/adr/CUPEL_DECISION_207.md)). A Rust `r.unwrap_err()` or `r.expect_err(…)` panics unless `r` is an error, so it is the weak throws check `assert!(r.is_err())` is; `unwrap` and `expect` are setup and assert nothing. A Rust test that calls a helper through a module path (`common::check(…)`, `crate::common::check::<T>(…)`) asserts as that helper does when the file the path names (`common.rs` or `common/mod.rs` beside the test file or in the nearest directory above it in scope) defines it asserting, and not at all otherwise ([ADR-214](docs/adr/CUPEL_DECISION_214.md)). Heavy mocking counts the doubles a test makes itself: a module-level mock (`vi.mock`, a class-level `@Mock`) is the file's, not each test's ([ADR-164](docs/adr/CUPEL_DECISION_164.md)).
-- **`static.api-surface`** compares the public API at the range's base with the API now, path by path. A public item that is gone (deleted, renamed, or made private) or lost a signature is `api.breaking` (`warn`); one that is new, gained a signature (an overload), or gained trailing parameters a caller may leave out (optional, defaulted, or variadic) is `api.widened` (`info`). An item moved to another module is unchanged at its old path when the old module re-exports it (`export … from`, `pub use`); it is compared with what the re-export names ([ADR-174](docs/adr/CUPEL_DECISION_174.md)). For JavaScript and TypeScript, a package's API is what the nearest `package.json` exposes: the files its `exports` map names (every subpath and condition; a `*` target exposes every file it matches), or without one its `main` and `types`, and what those re-export; built output such as `./dist/index.js` stands for the same path under `src`. Any other exported item is internal, so moving, renaming, or removing it is neither breaking nor widening, and a package whose manifest names no entries has no API ([ADR-176](docs/adr/CUPEL_DECISION_176.md), [ADR-192](docs/adr/CUPEL_DECISION_192.md)). For Clojure, a project's API is what its published source paths hold: the top-level `:paths` of the nearest `deps.edn` (`src` when it names none), or the top-level `:source-paths` of the nearest Leiningen `project.clj` (`src` likewise). A var elsewhere, such as a dev script on `bb.edn`'s `:paths`, a build script, or a file on an alias's `:extra-paths`, is internal; a file under no `deps.edn` or `project.clj` keeps every public var as API ([ADR-215](docs/adr/CUPEL_DECISION_215.md)). In every language, an item defined in a test file (by the language's test conventions, such as `test/**` for Clojure or `*_test.go` for Go) is no package's API: changing, removing, or adding one is neither breaking nor widening. Metadata on a Clojure parameter vector or parameter, such as a type hint (`^String [s]`, `[^long n]`), is no part of a signature. It needs `--changed` or `--base`, and the gate rule `"static.api-surface" = "no-breaking"` holds a branch to no unsuppressed break.
-- **`static.analyze`** runs each language's type checker at its strictest and its linters, and reports every result in a file in scope as `analyze.<tool>.<rule>` (`analyze.mypy.arg-type`, `analyze.clippy.needless_return`): errors `fail`, warnings `warn`, notes `info`. See [Analyzers](#analyzers).
-- **`perf.footprint`** reads the dependencies the lockfiles list, without network access, and reports those with a known vulnerability (`dep.vuln`) or a copyleft license (`dep.license`); under a range it reports only dependencies the range added or changed, and `footprint.grew` when there are more than at the base. See [Dependencies and footprint](#dependencies-and-footprint).
-- **`tests.assertion-density`** measures assertions per test and per tested public function (one whose file has tests). It reports long tests that assert little for their length (`density.sparse-test`) and test files whose assertions per test fall far below the repository's (`density.sparse-file`); a test that asserts nothing is `tests.quality`'s.
-- **`tests.weakening`** compares the tests at the range's base with the tests now. It reports removed or loosened assertions, skipped or deleted tests, and rewritten snapshots. It needs `--changed` or `--base`.
-- **`tests.flaky`** reruns the test suite (over a range, the tests it impacts) several times in different orders and with different seeds, and reports tests whose outcome changes: `test.flaky` when two reruns in the same order disagree, `test.order-dependent` when the outcome follows the order. See [Flakiness](#flakiness).
-- **`gen.differential`** calls the functions you name on generated inputs, in the working tree and against an oracle (the same code at an earlier commit, or a command that computes the reference answer), and reports the smallest input on which the two answer differently, with both answers. See [Differential testing](#differential-testing).
-- **`gen.property`** runs the project's existing property tests (proptest and quickcheck, Hypothesis, fast-check) with the run's seed and many more generated cases than the suite usually gives them. A property that fails is `property.falsified`, with the framework's shrunk counterexample; a public function that takes arguments, in a file whose tests hold no property test, is `property.missing` (`info`). A property that sets its own case count runs at it and is `property.cases-pinned` (`info`). See [Property tests](#property-tests).
-- **`tests.mutation`** changes the code in small ways (`<` to `<=`, `+` to `-`, `&&` to `||`, `true` to `false`, `0` to `1`) and runs the tests that cover each change. A mutant every test passes against survived: the tests do not notice that line changing; a site no test runs is uncovered, not run, and missed. The score is killed / (killed + survived + uncovered). See [Mutation testing](#mutation-testing).
+`--depth` (default `standard`) chooses how much evidence to gather. Each depth runs every check of its cost and of the cheaper depths: `quick` reads the source and runs no tests, `standard` adds the checks that run the test suite (coverage, mutation testing, reruns for flakiness) and the analyzers, and `deep` and `exhaustive` add generated inputs, benchmarks, simulation, model checking, and proofs where a project has them. `--budget 10m` runs the most valuable checks that fit and reports the rest as skipped ([budgets](docs/guide/usage.md#cupel-check)).
 
-- **`gen.metamorphic`** evaluates the metamorphic relations you declare (sorting a list and sorting its reverse give the same result; `add(a, b) == add(b, a)`) on generated inputs, and reports each relation that does not hold, with the smallest failing input it could find and both outputs. See [Metamorphic relations](#metamorphic-relations).
-- **`gen.fuzz`** runs every fuzz target the project has (cargo-fuzz targets, Go `FuzzXxx` functions, Jazzer.js and atheris modules) with the run's seed and an execution budget, and reports each input that crashes a target (`fuzz.crash`) or runs past the per-input limit (`fuzz.timeout`), with the saved input and the command that reruns it; a project root with no fuzz target is `fuzz.target-missing` (`info`). See [Fuzzing](#fuzzing).
-- **`conc.race`** runs the tests under a race detector (Go's `-race`; Miri or ThreadSanitizer for Rust) and reports each data race (`race.detected`) and each operation with undefined behavior (`ub.detected`), with the stacks of the accesses inside the repository. See [Race detectors](#race-detectors).
-- **`conc.linearizability`** runs the command you name to record histories of concurrent operations (a test or harness writing JSON lines), checks each against the model it declares (a register, a key-value store) with Porcupine, and reports each history, or key, that no order consistent with real time explains (`consistency.violation`), with the operations that cannot come next. See [Linearizability](#linearizability).
-- **`conc.dst`** runs the project's deterministic simulation harnesses (madsim's `#[madsim::test]`) over a range of seeds from the run's seed, and reports each harness's first failing seed (`dst.failure`) with what it printed, replayed alone, and the command that replays it. See [Deterministic simulation](#deterministic-simulation).
-- **`perf.bench`** runs the project's benchmarks (Go's, criterion, pytest-benchmark, or commands timed by hyperfine) at the range's base commit and in the working tree, and compares each benchmark's samples with a Mann-Whitney U test: a significant slowdown of at least 5% is `perf.regression` (`warn`), a speedup `perf.improvement` (`info`). Without a range there is nothing to compare, and it says so. See [Benchmarks](#benchmarks).
-- **`spec.trace`** runs the tests with `CUPEL_TRACE_DIR` set, so the implementation logs each step it takes (its state, and the spec action it took) as JSON lines, and validates every recorded trace against the run's TLA+ spec oracle with TLC. A trace with a step the spec does not allow is `trace.diverged`, at the step, with the state logged there and the last state the spec allows. See [Trace validation](#trace-validation).
-- **`conc.model-check`** model-checks the project's proof harnesses (Kani's `#[kani::proof]` functions for Rust) over every input within their bounds, and reports each property an input breaks (an assertion, an overflow, an out-of-bounds access) as `model.counterexample`, with the values that break it and a test that replays them. See [Model checking](#model-checking).
-- **`spec.prove`** verifies the project's Dafny proofs, and reports each proof obligation the verifier could not prove (`proof.failed`) and each the proofs assume instead of proving or leave undecided in the verifier's budget (`proof.obligation-open`, `warn`). See [Proofs](#proofs).
-- **`spec.contracts`** runs the tests again with every contract the project's contract library checks turned on, the debug-only and slow ones too, and its property tests at the case budget, and reports each precondition, postcondition, and invariant a test violated (`contract.violated`), at the contract. See [Contracts](#contracts).
-- **`meta.traceability`** maps each requirement ID you list to the tests the range added whose names or doc comments carry it (`test_req_12_parses`, `parses week dates #REQ-12`, `/// Parses week dates (REQ-12).`), and reports each requirement no such test names (`spec.untested-requirement`); a `REQ-<n>` marker on an added test that names no listed requirement is listed as one (`spec.unlisted-requirement`, `info`). It needs `--changed` or `--base`. See [Requirements and test provenance](#requirements-and-test-provenance).
-- **`meta.oracle-independence`** labels each changed function the tests exercise by whether a test that existed before the change runs it, and reports one only the change's own tests run (`evidence.self-authored-only`, `warn`): the only evidence it works was written with it. It needs `--changed` or `--base` and a per-test coverage map. See [Requirements and test provenance](#requirements-and-test-provenance).
-
-`cupel describe <check>` and `cupel describe finding <kind>` give the full contract, including each finding kind's evidence schema.
-
-## Languages
-
-Cupel understands **JavaScript, TypeScript, Rust, Go, Python, Java, and Clojure**. Each language is a tree-sitter grammar plus a declarative spec (queries and tables), and produces the same language-neutral facts: `symbols`, `decisions`, `norm-tree` (the structural hash that gives every function an identity surviving rename, move, and reformat), `mutation-sites`, `test-frames`, `test-conventions`, `module-graph` (imports resolved to files, with Node, `tsconfig` `paths`, Go module, Rust `mod`, Python package, Java source-root, and Clojure classpath resolution), `api-surface`, `roots`, `references` (every place that may name a function, resolved within its file or through its imports, and where names are computed at run time), and `project-info`. Checks consume facts and never see a language, so every check works in every language that produces what it needs.
-
-The support matrix, from `cupel describe matrix`:
-
-<!-- generated:support-matrix -->
-| Check | clojure | go | java | javascript | python | rust | typescript |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| `conc.dst` | unsupported | unsupported | unsupported | unsupported | unsupported | supported | unsupported |
-| `conc.linearizability` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
-| `conc.model-check` | unsupported | unsupported | unsupported | unsupported | unsupported | supported | unsupported |
-| `conc.race` | unsupported | supported | unsupported | unsupported | unsupported | supported | unsupported |
-| `gen.differential` | unsupported | unconfigured | unsupported | unconfigured | unconfigured | unconfigured | unconfigured |
-| `gen.fuzz` | unsupported | supported | unsupported | supported | supported | supported | unsupported |
-| `gen.metamorphic` | unsupported | unsupported | unsupported | unsupported | unconfigured | unsupported | unsupported |
-| `gen.property` | unsupported | unsupported | unsupported | supported | supported | supported | supported |
-| `meta.oracle-independence` | supported | supported | supported | supported | supported | supported | supported |
-| `meta.traceability` | supported | supported | supported | supported | supported | supported | supported |
-| `perf.bench` | unsupported | supported | unsupported | unconfigured | supported | supported | unconfigured |
-| `perf.footprint` | unsupported | supported | unsupported | supported | supported | supported | supported |
-| `spec.contracts` | unsupported | unsupported | unsupported | unsupported | supported | supported | unsupported |
-| `spec.prove` | supported | supported | supported | supported | supported | supported | supported |
-| `spec.trace` | supported | supported | supported | supported | supported | supported | supported |
-| `static.analyze` | unsupported | supported | unsupported | supported | supported | supported | supported |
-| `static.api-surface` | supported | supported | supported | supported | supported | supported | supported |
-| `static.clones` | supported | supported | supported | supported | supported | supported | supported |
-| `static.complexity` | supported | supported | supported | supported | supported | supported | supported |
-| `static.crap` | supported | supported | supported | supported | supported | supported | supported |
-| `static.dead-code` | supported | supported | supported | supported | supported | supported | supported |
-| `static.deps` | supported | supported | supported | supported | supported | supported | supported |
-| `tests.assertion-density` | supported | supported | supported | supported | supported | supported | supported |
-| `tests.coverage` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
-| `tests.flaky` | supported | supported | supported | supported | supported | supported | supported |
-| `tests.mutation` | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured | unconfigured |
-| `tests.quality` | supported | supported | supported | supported | supported | supported | supported |
-| `tests.weakening` | supported | supported | supported | supported | supported | supported | supported |
-<!-- end:support-matrix -->
-
-```sh
-cupel describe languages           # the seven languages, one line each
-cupel describe language go         # extensions, facts produced, checks that apply, toolchain row
-cupel describe fact norm-tree      # a fact's schema, version, producers per language, consumers
-```
-
-JS and TS form one family: `static.clones` reports a TypeScript function copied from JavaScript. Languages in different families are never compared.
-
-Java is read through its package clauses: a method's name is `package.Class.method`, `public` and `protected` members are public, package-private ones `internal`, and a Maven or Gradle build (`pom.xml`, `build.gradle(.kts)`, `settings.gradle(.kts)`) is a project whose modules are members; a `pom.xml` that does not name its coordinates (its own `artifactId`, and a `groupId` and `version` of its own or from a `<parent>`), such as the template a Clojure project's tools.build fills at release, is no Maven build, so it gets no Java root or runner. Tests are JUnit 5, JUnit 4, and jqwik methods. Clojure is read through its `ns` forms: a var is `namespace/name`, `defn-` and `^:private` make it private, `cond` is its else-if, and a `deps.edn` or Leiningen `project.clj` is a project. A Leiningen project (a `project.clj` and no `deps.edn`) gets `test = "lein test"` from `init`, and `coverage = "lein cloverage --lcov"` only where its `project.clj` declares the lein-cloverage plugin; Cupel runs neither, so its test checks skip and its static checks run ([ADR-234](docs/adr/CUPEL_DECISION_234.md)). Tests are `clojure.test` `deftest`s and test.check `defspec`s. Every language is held to the same conformance inventory, a shared list of constructs per fact that each language must exhibit in its fixture repository and detect, or mark not applicable with a reason.
-
-## Test runners
-
-Checks that depend on running the test suite read a `test-results` fact, which Cupel makes by running the project's own test runner and reading its machine-readable output:
-
-| Language | Runners, in default order | Reads |
+<!-- generated:depths -->
+| Depth | Checks run | Adds |
 | --- | --- | --- |
-| Rust | `cargo nextest` (when `.config/nextest.toml` exists), `cargo test` | JUnit through a nextest tool profile; libtest output |
-| Go | `go test -json` | test2json events |
-| Python | `pytest` (when the project mentions it), `unittest` | JUnit XML; `unittest -v` output |
-| JavaScript, TypeScript | `vitest`, `jest` (whichever `package.json` depends on), `node --test` (Node's built-in runner, when neither is the root's runner) | the Jest JSON report; `node --test`'s JUnit XML (Node 24.11.1 or later, which names each test's file) |
-| Java | Maven (`mvn test`, when a `pom.xml` exists), Gradle (`gradle test --rerun`) | Surefire's and Gradle's JUnit XML, one file per test class |
-| Clojure | `clojure.test` through the Clojure CLI (`clojure -M:test` and a runner script Cupel writes under `.cupel/`; an alias Cupel adds clears the `:test` alias's `:main-opts`, such as cognitect-labs/test-runner's or Kaocha's, so the script runs with that alias's paths and dependencies, [ADR-210](docs/adr/CUPEL_DECISION_210.md); a project whose `deps.edn` declares `:deps/prep-lib` is prepared first, [ADR-230](docs/adr/CUPEL_DECISION_230.md)) | `clojure.test.junit` XML |
-
-A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in the root's `node_modules/.bin`); otherwise checks that need test results are skipped as `unavailable` with the tool named, and `cupel doctor` says what to install (`cupel doctor --fix --install` installs it). `[lang.<id>] runner` chooses one explicitly, by its name with or without the `tool.` prefix:
-
-```toml
-[lang.python]
-runner = "unittest"
-```
-
-A tools.deps project that needs its own build before its code loads declares it in `deps.edn` as `:deps/prep-lib {:alias :build :fn compile-java :ensure "target/classes"}` (clj-commons/clj-yaml compiles Java classes so). Before each Clojure run in such a root (the baseline, reruns, mutants' runs in their copies of the tree, and Cloverage), Cupel runs `clojure -T:build compile-java` there when the `:ensure` directory does not exist, and a build that fails fails the run with its output. `cupel doctor` reports a root whose `:ensure` directory is missing as `doctor.prep-needed` with the command: a note, or a warning without the Clojure CLI ([ADR-230](docs/adr/CUPEL_DECISION_230.md)).
-
-Every pytest run Cupel makes (the baseline, the [one suite run](#one-suite-run), the per-test map, reruns, and mutants' runs) passes the arguments `[lang.python] test` gives pytest, so `test = "python -m pytest -m 'not network'"` leaves a project's network tests out of all of them. A run narrowed to tests Cupel names keeps the options with their values and leaves out configured paths, which pytest would run in full ([ADR-229](docs/adr/CUPEL_DECISION_229.md)).
-
-Before any check that needs test results runs, Cupel runs the suite once in the real tree, the **baseline**. If any test fails, or the runner cannot finish (a build error), the run is refused: `status: "error"`, exit code 4, no check scores, and one `baseline.test-failed` finding per failing test (with its file, runner, and the tail of its output) or `baseline.run-incomplete` per run that did not finish. A Go package that did not build or set up, and a Go build that failed outside any package's tests (such as a toolchain without `covdata`), is one errored test named after the package, its output the build output `go test -json` printed for it. Fix the suite, then rerun. A mutation or flakiness score over a red suite would mean nothing, so no mutant and no rerun runs before the baseline is green. Every test of the baseline is also indexed in `.cupel/cupel.db`. `tests.flaky` and `tests.mutation` need test results, so `cupel check` at the default depth (`standard`) runs the baseline; at `--depth quick` no test runs. A language whose baseline ran no test at all skips them as `unavailable`.
-
-### One suite run
-
-The baseline, the coverage report, and the per-test map each need the suite to run. Where the runner and the coverage tool are one toolchain and the `coverage` command is the one `cupel init` writes, a run that needs two of them runs the suite once, under coverage, and takes all three from it:
-
-| Language | One run | Makes |
-| --- | --- | --- |
-| Rust (runner `cargo-nextest`) | `cargo llvm-cov nextest`, each test process's profile kept apart | baseline, coverage (`cargo llvm-cov`'s own report of the run), per-test map |
-| Python (runner `pytest`) | `pytest --cov --cov-context=test` | baseline, coverage, per-test map |
-| Go | `go test -json -coverprofile` | baseline, coverage (the per-test map stays one run per test) |
-
-A green run is cached in `.cupel/cache/suite/` with the hash of every file under the project root and the toolchain that measured it (`rustc -vV`'s release and host; the Python interpreter's and pytest's versions). While nothing there changes, the next run reuses it and runs no test, the baseline included. A red or incomplete run is never cached: it refuses the run with exit 4 and runs again next time, since what made it red may lie outside the tree (a full disk, a missing service). On a tree scope, at `--depth deep`, or under another toolchain, any change runs the suite again, so the mutation and flakiness engines always start from a real baseline of the tree they test.
-
-On a `--changed` or `--base` scope below `deep`, a Rust or Python joint with a cached run reruns only the tests the change makes stale and keeps the rest from its cache ([ADR-149](docs/adr/CUPEL_DECISION_149.md)): a test is stale when a file it covers changed inside a function it executed, when its own test case's structure changed, when a file it owns changed, or when a build or test configuration file changed (then every test is). The kept tests' results and per-test lines join the rerun tests', and the coverage report of the rerun gets a hit on every line a kept test executed, so which lines ran is what a whole run would say. A new test file still runs the whole suite. The envelope's `run.suite` says what happened per language (`{"rust": {"mode": "incremental", "rerun": 3, "reused": 1275}}`; `full` or `cached` otherwise), and the text output prints it as `suite  rust incremental · 3 rerun · 1275 reused`. A customized coverage command, another runner (`cargo test`, `unittest`), or a pin on one keeps separate runs. `cupel check --dry-run` says which in each check's `needs`:
-
-```console
-$ cupel check --only tests.mutation --dry-run    # pytest, with the default coverage command
-  "needs": ["symbols", "mutation-outcomes", "test-conventions", "test-results+coverage-map+per-test-map(one run)"]
-
-$ cupel check --only tests.mutation --dry-run    # coverage = "pytest --cov --cov-branch --cov-report=lcov:{out}"
-  "needs": ["symbols", "mutation-outcomes", "test-conventions", "test-results(run)", "coverage-map(run)", "per-test-map(deep)"]
-```
-
-With the run cached the first says `test-results+coverage-map+per-test-map(cached)`; on a range with a cached run it says `(incremental: 3 stale)`, the tests it would rerun.
-
-A test that spawns the repository's own binary covers, through it, most of the code, so nearly any change makes it stale. An attribution names such tests by ID glob and the files they are attributed to instead ([ADR-151](docs/adr/CUPEL_DECISION_151.md)):
-
-```toml
-[lang.rust.attribution.binary]
-tests = ["cupel-cli::*"]                          # globs over the test IDs the envelope shows
-files = ["crates/cupel-cli", "crates/cupel-fixtures"]   # paths as `[scope] exclude` writes them
-```
-
-Below `--depth deep`, such a test reruns only when one of those files, its own files, or a build or test configuration file changed; a change elsewhere keeps its cached result and lines even when it ran the changed function, and `run.suite` counts it in `tagged` (`suite  rust incremental · 18 rerun · 2784 reused (10 by attribution)`). When only kept tests ran a change, they rerun after all, so the change is measured. Its coverage still counts everywhere coverage counts, and the mutation engine still selects it for the mutants it covers. `tests --impacted` lists it with `kept` saying which attribution kept it and leaves it out of the commands. At `--depth deep` no attribution applies.
-
-### Flakiness
-
-`tests.flaky` reruns the tests the baseline ran, three times by default, with the same runner, and compares the outcomes. The reruns differ on purpose: the first two run the tests in their declared order one at a time, differing only in seed; the third runs them reversed (pytest and unittest, which take the tests in order) or in the runner's seeded shuffle (`go test -shuffle`, libtest's `--shuffle-seed`, `jest --randomize`, `vitest --sequence.shuffle`, Surefire's random class order (`node --test` has no shuffle: its reruns differ only in `--test-concurrency`), which otherwise runs classes alphabetically; Cupel's Clojure runner takes the reversed order); further reruns shuffle again, alternating between the runner's default parallelism and one test at a time. Every rerun's seed is derived from the run's `--seed`, so `cupel check --only tests.flaky --seed N`, which each finding gives as its `repro`, repeats the same reruns.
-
-- `test.flaky`: the test passed and failed in two reruns that ran the tests in the same order. Something besides the code and the order decides it: time, randomness, concurrency, or the environment.
-- `test.order-dependent`: the outcome is the same in every rerun of one order and differs between orders. The evidence lists `preceded_by`, the tests that ran before it in every rerun it failed and after it in some rerun it passed, when the runner reports its order.
-
-```toml
-[lang.rust]
-flake_runs = 5      # reruns per check run; 0 turns them off
-```
-
-Over the whole tree (or `--paths`) the reruns repeat the whole suite, so they cost about three baseline runs. Over a range (`--changed`, `--base`) they rerun only the tests the range impacts, chosen before the run as `cupel tests --impacted` chooses them: by the language's per-test map where the run's depth affords one, else the test files that import a changed file ([ADR-186](docs/adr/CUPEL_DECISION_186.md), [ADR-190](docs/adr/CUPEL_DECISION_190.md)). A range that impacts no test reruns nothing, and `tests.flaky` is skipped as `no-impacted-tests`. `cargo nextest` runs each test in its own process, where order cannot matter; with it as the runner, the flake engine does not rerun, and `tests.flaky` is skipped for that language as `unsupported`, naming the fact (`test-reruns`) and the tool (`cargo-nextest`), with the reason in its notes.
-
-## Property tests
-
-`gen.property` finds the property tests among the tests in scope (Hypothesis's `@given`, each test in a `proptest!` block, `proptest!` inside a test, `#[proptest]`, `#[quickcheck]` and `quickcheck(…)`, and fast-check's `fc.assert` and `fc.check`), runs them once more after the baseline with the same runner, and reads back what each framework reports. Every framework keeps its own shrinking; the counterexample in a finding is the framework's minimized input, as it printed it.
-
-Each framework gets the run's `--seed` and the case budget `--cases` (default 1 000 at `--depth standard`, 10 000 at `deep`, 100 000 at `exhaustive`) its own way, and writes nothing outside `.cupel/` while it runs:
-
-| Framework | Runners | How the budget reaches it |
-|---|---|---|
-| proptest | `cargo test`, `cargo nextest` | `PROPTEST_CASES`, `PROPTEST_RNG_SEED`, and `PROPTEST_DISABLE_FAILURE_PERSISTENCE` (no `proptest-regressions/` files) |
-| quickcheck | `cargo test`, `cargo nextest` | `QUICKCHECK_TESTS`; quickcheck takes no seed, so its findings say `seed: null` |
-| Hypothesis | `pytest` | A plugin Cupel writes under `.cupel/` loads a settings profile with `max_examples` the budget, unpinned and without an example database, after the project's conftests; the seed is `--hypothesis-seed`, and Hypothesis's files stay under `.cupel/` |
-| fast-check | `vitest`, `jest` | A setup file under `.cupel/` calls `fc.configureGlobal` with `numRuns` and `seed`; a configuration file beside it, passed as `--config`, loads the project's own vitest or jest configuration and appends that setup file to its setup files |
-
-A property whose own code fixes its count or seed (`ProptestConfig::with_cases`, `@settings(max_examples=…)`, `fc.assert(p, { numRuns })`) keeps them: `--cases` applies only to the properties that set no count. Each one that sets its count is `property.cases-pinned` (`info`), naming the test and the count (null when a variable or an expression gives it), and a falsified one's `evidence.cases` is the count it ran (ADR-183). Cupel reads the count from the test's source: fast-check's `numRuns` in the test, Hypothesis's `max_examples` in the test or its decorators, proptest's `with_cases` or `cases` in the `#![proptest_config(…)]` of the test's `proptest!` block or its `#[proptest(…)]` attribute, and quickcheck's `QuickCheck::new().tests(…)`; a count set elsewhere (a shared settings object, a Hypothesis profile, a `fc.assert` parameters variable) runs as set but is not reported. A project whose everyday suite runs few cases with a pinned seed is the usual case, and the one `gen.property` exists for: on the fixtures, the suite's ten pinned cases pass and Cupel's thousand find the bug:
-
-```
-$ cupel check --only gen.property --seed 3 --format text
-cupel check: pass (exit 0)
-
-checks
-  gen.property  fail     tier 4 · standard · score 1 falsified (n 1) · metrics falsified 1, missing 1, properties 1 · 2 findings · 1027 ms
-
-fail (1)
-  gen.property
-    `test_digits_counts_decimal_places` is falsified by `n=100000`
-      fnd_2341b0 · property.falsified · tier 4 · confidence 0.95
-      at tests/test_digits.py:7:1-8:36
-      evidence: cases 1000 · counterexample "n=100000" · framework "hypothesis" · runner "tool.pytest" · seed 3 · test "tests/test_digits.py::test_digits_counts…" (full: cupel explain fnd_2341b0)
-      repro: cupel check --only gen.property --paths tests/test_digits.py --seed 3 --cases 1000
-
-info (1)
-  gen.property
-    `units.percent.clamp_percent` has no property test
-      fnd_7307dd · property.missing · tier 4 · confidence 0.5
-      at src/units/percent.py:1:1-3:35
-        nearest_test_file: tests/test_percent.py
-```
-
-With no gate the run passes (exit 0) while the check fails; a `[gate]` rule such as `"gen.property.falsified" = "== 0"` makes it exit 1.
-
-`property.falsified` gives the framework, the runner, the counterexample, the seed, and the case budget as evidence, and a `repro` that runs the same property with the same seed and budget. A property that failed without a counterexample (it errored before any case ran) is reported the same way with `counterexample: null` and lower confidence.
-
-`--scaffold` turns each `property.missing` into a skipped stub that names the function, generates one input per parameter (typed by the function's signature where the language's table maps the type), and calls it, for you to state the property and remove the skip marker: a Hypothesis test appended to the source's nearest test file in Python, a fast-check test in JavaScript and TypeScript (imported the way the file imports), and an ignored proptest test in an inline `#[cfg(test)]` module of the function's own file in Rust, where a parameter type the table does not map (a struct, a generic) gets no stub. Without `--write` nothing is written and `plan.would_write` holds each file's diff; with it the stubs are written, a file's header lines once, and a function already stubbed is left alone.
-
-```sh
-cupel check --only gen.property --scaffold          # preview the stubs
-cupel check --only gen.property --scaffold --write  # write them
-```
-
-## Coverage
-
-`tests.coverage` and `static.crap` read a `coverage-map` fact: line hits, and branch hits where the tool measures them. Cupel runs the coverage command the repository configures — `cupel init --write` writes one per language — and reads the report it leaves, in any of LCOV, Cobertura XML, Istanbul JSON, Go coverprofile, or JaCoCo XML:
-
-```toml
-[lang.rust]
-coverage = "cargo llvm-cov --lcov --output-path {out}"    # {out}: a report path Cupel chooses
-
-[lang.typescript]
-coverage = "npx vitest run --coverage --coverage.reporter=lcov"   # no {out}: coverage/lcov.info
-```
-
-| Language | Coverage producers, in default order | Branches |
-|---|---|---|
-| Rust | `cargo llvm-cov` | no (stable llvm-cov reports none) |
-| Go | `go test -coverprofile` | no (coverprofile has none) |
-| Python | `pytest-cov` (with pytest, where a manifest declares it), `coverage.py` (with unittest, and with pytest otherwise: `coverage run -m pytest`, [ADR-228](docs/adr/CUPEL_DECISION_228.md)) | with `--cov-branch` |
-| JavaScript, TypeScript | `vitest --coverage`, `jest --coverage`, `node --test --experimental-test-coverage` (for a `node --test` root without `c8` in `devDependencies`), `c8` (with Mocha, or a `node --test` root that lists it) | yes |
-| Java | JaCoCo through Maven (its goals by coordinate around `mvn test`; for a build that runs JaCoCo's `prepare-agent` itself, by its `pom.xml` and the parents on disk or in the local repository, `mvn test jacoco:report` with the project's own plugin, since a second agent kills the forked JVM, [ADR-209](docs/adr/CUPEL_DECISION_209.md)), JaCoCo through Gradle (`gradle test jacocoTestReport`, with the `jacoco` plugin applied and XML reports on) | yes |
-| Clojure | Cloverage (`-Sdeps` adds it for the run, with an alias clearing the `:test` alias's `:main-opts`, `--lcov`) | no |
-
-Without a `coverage` command a language's `tests.coverage` is skipped as `unconfigured` and `static.crap` reports no CRAP; with one but without the tool, it is `unavailable` and `cupel doctor` names the tool. A report is reused instead of rerunning the suite while it is fresh: Cupel records the hash of every file under the project root when it makes one (and trusts files not modified since), and a report the tool left at its default location is used when it is newer than every source. A command that exits non-zero gives no coverage and a `coverage.run-failed` finding, since a red suite has no meaningful coverage.
-
-`tests.coverage` reports `coverage.uncovered-symbol` for each function no test ran (a warning, which fails the check), `coverage.uncovered-branch` for a function that ran with a branch no test took, and `coverage.unloaded-file` for each function of a file no test loaded, where the tool lists only the files the suite loaded (coverage.py without a source, [ADR-152](docs/adr/CUPEL_DECISION_152.md)); `cupel init` passes the source (`--cov=src` or `--cov=.`), so coverage.py lists every file and such a function is an ordinary uncovered symbol. It writes pytest-cov's command only for a root whose `pyproject.toml`, `setup.cfg`, or `requirements*.txt` declares `pytest-cov`; any other pytest root gets `python -m coverage run -m pytest && python -m coverage lcov -o {out}`, which runs with what it declares ([ADR-228](docs/adr/CUPEL_DECISION_228.md)). A project whose coverage configuration chooses its files (`source`, `source_pkgs`, or `include` in `.coveragerc`, `setup.cfg` or `tox.ini` `[coverage:run]`, or `pyproject.toml` `[tool.coverage.run]`) gets a bare `--cov` instead, since a source would make coverage.py ignore its `include` (a warning that `filterwarnings = ["error"]` makes fatal); its configuration decides what is listed, and a file it leaves out is not reported unloaded ([ADR-208](docs/adr/CUPEL_DECISION_208.md)). Rust's coverage runs doctests too where `rustup` has the `nightly` toolchain with its llvm-tools component (`cargo +nightly llvm-cov --doctests …` in place of the configured `cargo llvm-cov …`; asked of `rustup` without the network); elsewhere a function no test ran whose own doc comment holds an example rustdoc runs (a fenced block that is not `ignore`, `no_run`, `compile_fail`, or another language) and that names it is `coverage.doctest-only`, a note, since that example alone may cover it, instead of `coverage.uncovered-symbol` ([ADR-231](docs/adr/CUPEL_DECISION_231.md)). Where the tool measured no branches (Go, Rust), there are no branch findings and the result says `notes: ["branches: unavailable (go)"]`. Its gate keys are `tests.coverage.line` and `tests.coverage.branch` (covered shares), `lines`, `branches`, and `uncovered`. `static.crap` computes `CC² × (1 − coverage)³ + CC` from the same map.
-
-Where a language has several project roots (configured `[roots]` or detected), each root's coverage report holds its own tests only, so code another root's tests exercise reads as uncovered. A per-test map adds them: Python's pytest-cov map measures each root's tests on every root's files, and `tests.coverage` and the mutation engine count a line a dependent root's test ran as covered, so that test also runs against the line's mutants. Without a per-test map each root keeps its own tests only, and each `coverage.*`, `mutant.survived`, and `mutant.uncovered` finding there says so: evidence `own_root` names the root, and the action ends "(own tests of `<root>` only; no per-test map)" ([ADR-179](docs/adr/CUPEL_DECISION_179.md), [ADR-194](docs/adr/CUPEL_DECISION_194.md)). The Rust and Go per-test maps measure a root's whole workspace: a test records the lines it runs in every crate of its cargo workspace (`--workspace`), and in every package of its Go module, or of each module its `go.work` uses (`-coverpkg`), so a sibling crate's integration test or a sibling package's test covers and kills a library's code ([ADR-202](docs/adr/CUPEL_DECISION_202.md)). They do not reach separate roots: a file of another root counts only its own root's tests.
-
-## Mutation testing
-
-`tests.mutation` scores a `mutation-outcomes` fact, which the mutation engine makes from the `mutation-sites` every language produces, the coverage report, and the baseline. The engine runs each mutant with the same runner as the baseline; the check only counts and reports, so another producer of the fact feeds the same check. For Java that producer can be PIT, through the [PIT plugin](#the-pit-plugin). Coverage gates which mutants run, so a language without a `coverage` command skips `tests.mutation` as `unconfigured`, as it does `tests.coverage`.
-
-- `mutant.survived` (fails the check): every test that ran against the mutant passed. The finding sits at the mutated site and names the change (`from`, `to`, `operator`), the tests that missed it (`covering_tests`, as a per-test map selected them; without one, `all_tests` is true and the list is empty, since every test ran: `explain` says "all tests (no per-test map)", [ADR-191](docs/adr/CUPEL_DECISION_191.md)), and the nearest test file. Write a test that fails on the mutant.
-- `mutant.uncovered` (a note): no test runs the site, so its mutant was not run.
-- `mutant.timeout` (a note): the mutant was not decided within its time cap, so its outcome is unknown. A mutant that ran the whole suite reached its timeout, which usually means it loops; a mutant whose selected tests ran one at a time could not run them all within `max_mutant_timeout`, and the finding names the slowest it did not complete (see Timeouts below). A test that hangs well inside its own cap kills the mutant instead ([ADR-160](docs/adr/CUPEL_DECISION_160.md)).
-- `mutant.out-of-memory` (a note): the tests held more memory than the run's share of `max_mutant_memory` against the mutant and were killed, which usually means it loops while allocating.
-- `mutant.equivalent?` (a note, confidence 0.3): the mutant survived but may behave exactly as the original — today, swapping `+`/`-` before a literal `0` or `*`/`/` before a literal `1`; flipping WebCrypto `subtle.importKey`'s `extractable` argument in a function that calls neither `exportKey` nor `wrapKey`; and changing the whole initializer of a `let`, `let mut`, or `:=` variable that the next statement naming it, at the same indentation in the same block, assigns again without reading it. It is left out of the score; suppress it once you agree.
-- `mutant.slow-test-excluded` (a note): a test that took more than 60 seconds in the baseline was left out of every mutant run that per-test selection did not narrow (see Timeouts below); the finding names the test and its baseline duration.
-- `mutant.flaky-test-excluded` (a note): a test that failed in the mutation slot with no mutant applied, though the baseline passed it (a timing test under parallel slots, a test that depends on its directory), was left out of every mutant's run, and the other tests scored the mutants ([ADR-219](docs/adr/CUPEL_DECISION_219.md)). Without that, a red unmutated run in the slot is an error, as it still is for a runner that cannot leave a test out.
-
-The score `tests.mutation.score` is killed / (killed + survived + uncovered), 1 when nothing was scored: a change no test runs scores 0, so a score floor in a gate also asks for tests of it. Timeouts, mutants killed over their memory budget, unviable mutants, possibly equivalent survivors, and mutants a run cut short by `--budget` or `--timeout` did not reach are left out; a cut run is `partial`, with a note saying how many mutants it did not run. The other gate keys count mutants by outcome (`killed`, `survived`, `timeout`, `out_of_memory`, `uncovered`, `unviable` for one that did not build, `not_run` for one the cut left, `equivalent`) and say how many ran this time (`executed`) or were reused (`reused`), and how many of those ran behind a schemata build (`schemata`) or fell back to file copies (`fallback`).
-
-How much is mutated follows the depth: at `standard` with `--changed` or `--base`, the functions the change touched; at `deep` and `exhaustive`, every function of the files in scope (the touched files with `--changed`, the tree without). Under a range, `tests.mutation` scores only the mutants in the functions the change touched (ADR-142). Test code is never mutated. Only the `default` operators run unless the language asks for more:
-
-```toml
-[lang.python]
-mutation = { operators = "extended", jobs = 2, timeout_factor = 10 }
-
-[lang.rust]
-mutation = { strategy = "file-copy" }   # "schemata" (the default) or "file-copy"
-
-[checks."tests.mutation"]
-max_mutant_timeout = "5m"               # the longest any mutant's run may take; default 120s
-max_mutant_memory = "6g"                # what the workers' runs may hold together; default 50% of physical memory
-```
-
-String and regex literals have their own operators, the `strings` group: a non-empty string used as a value becomes `""` (JavaScript, TypeScript, Python), and in a JavaScript or TypeScript regex literal each quantifier is edited (`*`↔`+`, a `?` removed, `{n,m}` to `{n}`) and each class too (a negated class un-negated, a range narrowed to its first member). They make many equivalent mutants (log messages, labels), so the group is off unless a language enables it, beside the extended set; neither `operators = "extended"` nor `--depth deep` turns it on ([ADR-180](docs/adr/CUPEL_DECISION_180.md), [ADR-187](docs/adr/CUPEL_DECISION_187.md)):
-
-```toml
-[lang.typescript]
-mutation = { operators = "extended", strings = true }   # `strings = true` needs `operators = "extended"`
-```
-
-Mutation testing is expensive, so the engine stacks every saving it can. Before the first mutant, the baseline, the coverage report, and the per-test map come from [one run of the suite](#one-suite-run) where the toolchain allows, or from its cache when nothing changed. Then:
-
-1. **Coverage gating.** A site no test runs, by the coverage report, is reported `uncovered` and never run. A site on a line the report does not instrument, in a file it does (code a `cfg` or build tag leaves out of the build, a constant the compiler evaluates), is not a mutant: no test can reach it.
-2. **Reuse.** An outcome is stored in `.cupel/cupel.db` under a key of the function's source text, the site, the replacement, the tests that cover it, and the runner's version; a later run reuses it while that key holds, except a timeout, whose outcome is unknown. A second run with nothing changed runs no mutant; changing one test file reruns only the mutants that test covers.
-3. **Per-test selection.** Where the language has a per-test coverage map from the baseline's runner (Go; Python with pytest-cov; Rust when cargo-nextest is the runner and cargo-llvm-cov is installed), a mutant runs only the tests that execute its line. The [one suite run](#one-suite-run) makes the map for Rust and Python at any depth. Otherwise, measuring a map from nothing happens at `--depth deep` and beyond; at `standard` the engine uses a cached map (see [`cupel tests --impacted`](#cupel-tests---impacted)) when refreshing it is cheap: one suite run for Rust and Python, at most 32 tests for Go. `cupel check --dry-run` says which, in the check's `needs`: `per-test-map(cached)`, `per-test-map(refresh 3 stale)`, or `per-test-map(deep)` when the depth leaves it out. Without a map a mutant runs the whole suite, or, where the language has several project roots, its own root's suite (ADR-194).
-4. **Schemata (Rust).** Instead of one build per mutant, each Rust file is rewritten once with every mutant behind a run-time switch — the smallest whole expression around each site becomes `if cupel_mutant_id() == N { mutated } else { original }`, and a small reader of the `CUPEL_MUTANT` environment variable is appended to the file — so the file builds once and each mutant runs with `CUPEL_MUTANT=N`. Every line stays where it was. Before any mutant runs, each worker builds the rewritten file and runs its tests with no mutant selected; they must pass. Sites where an `if` cannot stand (patterns, `const` and `static` items, `const fn`, array lengths, macro arguments, attributes) and constants the compiler checks run as ordinary file copies. If the rewritten file does not compile, the sites on the lines the compiler names run as file copies and the file is rebuilt; if it still fails, the whole file runs as file copies. Nothing is lost either way: outcomes are the same under both, which the tests check on the Rust fixtures. The check reports how many mutants ran each way (`schemata`, `fallback`) and a note for each reason a mutant fell back. Other languages build per mutant (Go's builds take a fraction of a second; see [ADR-005](docs/adr/CUPEL_DECISION_005.md)).
-5. **Overlays.** Mutants run in copies of the tree in the repository's `.cupel/work/slots/`, which `.cupel/.gitignore` keeps out of version control, one per worker (half the cores, at most four), kept between runs so builds stay incremental: files are cloned (macOS) or hard-linked, what `.gitignore` ignores is shared through symlinks except the runner's build directory (`target/` for cargo), and the mutated file is a private copy. Mutants of one file run concurrently; files run one after another. The copies stay there between runs, out of reach of the operating system's cleanup of temporary directories, and go with the repository; a run that is stopped (the budget, Ctrl-C) puts the original files back. Removing `.cupel/work/slots/` frees the space at once, and the next run rebuilds what it needs. `cupel doctor` reports how much they hold (`doctor.mutation-slots`).
-6. **Timeouts.** File copies are timed by one **unmutated baseline** per run: before the first file copy, the first worker runs the whole suite once with no mutant, rebuild included, and that time sets every file copy's timeout. It is stored in `.cupel/cupel.db` by a suite hash over the test IDs and test files, every file under the runner's project roots that `.gitignore` does not ignore (what a test loads lies among them), the runner's command, its version, the test threads per worker, and Cupel's version, so a later run reuses it and runs no baseline while none of those changes ([ADR-185](docs/adr/CUPEL_DECISION_185.md)). A Rust file built as schemata is timed by its own schemata build's validation instead. A mutant's whole run takes at most `max_mutant_timeout` (default two minutes, under `[checks."tests.mutation"]`, overridable per language).
-   - **A narrowed mutant** runs its selected tests one at a time, fastest first by their baseline durations, those the baseline did not time last ([ADR-160](docs/adr/CUPEL_DECISION_160.md)). It stops at the first test that decides it.
-     - Each test gets ten times its baseline duration (`timeout_factor`), at least two seconds, plus the runner's start-up for one test, which the worker measures once per file.
-     - A test that fails kills the mutant. So does a test that runs past its own cap when it normally finishes in under a quarter of it: a hang, named in the mutant's `hung`.
-     - When the tests cannot all run within `max_mutant_timeout` for slowness, the mutant is a `timeout`. Its outcome is unknown, it is left out of the score, and its `mutant.timeout` note names the slowest tests it did not complete. A stored timeout is never reused, so the next run tries again.
-     - A mutant of a function nearly every test runs is killed in seconds by its fastest failing test, however slow the rest.
-   - **A mutant that per-test selection did not narrow** runs its tests as one run under ten times the timing run (the baseline, or for schemata the validation), at least two seconds and at most `max_mutant_timeout`, so a mutant that makes a loop endless costs at most the cap, however long the suite. Such a mutant that per-test selection did not narrow runs the whole suite, and a test slower than 60 seconds in the baseline is left out of that run (and of the timing run) where the runner can leave a test out, with one `mutant.slow-test-excluded` note per test; mutants whose covering tests the map selected run them however slow. A mutant only that test would kill then survives, so the note is worth reading beside the survivors.
-7. **The machine's share.** The workers together never run more test processes than the machine has cores: each run (the timing run and every mutant) gets an equal share of the cores as the runner's parallelism, where the runner takes one (`cargo test` and `cargo nextest` `--test-threads`, and their build jobs with it; `go test -p`/`-parallel`; Jest and Vitest `--maxWorkers`; pytest, unittest, Surefire, and `clojure.test` keep their own). Each run also gets an equal share of `max_mutant_memory` (default half of physical memory, under `[checks."tests.mutation"]`, as a size like `6g` or a share like `50%`): a run whose processes hold more resident memory than that, sampled through `ps` about five times a second, is killed and is `mutant.out-of-memory`, left out of the score like a timeout. A mutant that honestly needs more (a large crate to link, a suite that spawns many processes) is reported with the remedy: raise the budget or lower `jobs`. Without the budget, a few mutants that loop while allocating can take the machine down before the timeout ends them ([ADR-148](docs/adr/CUPEL_DECISION_148.md)).
-8. **Order.** Last run's survivors run first, then mutants of functions never run before, then the rest, so a time limit cuts the least informative work.
-
-A Rust file's mutants cost one build per worker plus one test run each; outside Rust, each mutant costs an incremental build of what it changes plus the tests. The run's `--seed` reaches every mutant run. With `--events`, a long run is not silent: `tests.mutation` reports `progress` as each mutant finishes, `done` of `total` mutants (those reused or uncovered are done from the start) with `eta_ms`, the time left at the mean time of the mutants run so far.
-
-Which tests a mutant's run can be narrowed to, or leave out, depends on the runner ([ADR-147](docs/adr/CUPEL_DECISION_147.md)); a mutant is narrowed only with a per-test map from the baseline's runner:
-
-| Runner | Runs one test alone | Per-test map | Leaves a slow test out |
-|---|---|---|---|
-| `cargo-nextest` | every test (a `trybuild` test is one test) | yes | yes |
-| `cargo-test` | none: the whole workspace, each integration binary whole | no | no (libtest reports no durations) |
-| `go test` | each `Test` function, by name | yes | yes, by name in every package |
-| `pytest` | each node ID and file | yes | yes |
-| `unittest` | each dotted ID | no | no |
-| `jest`, `vitest`, `node --test` | test files | no | no |
-| Maven, Gradle (Surefire) | classes and methods | no | no |
-| `clojure.test` | each var and file | no | no |
-
-With a runner that has no map, every mutant runs the whole suite; with one that cannot leave a test out, a slow test stays in each such run and the cap bounds it. For a Rust repository, `[lang.rust] runner = "cargo-nextest"` gives per-test durations, selection, and exclusion.
-
-On the Cupel repository itself (1377 tests, release build, 8-core Apple silicon, a quiet machine), a one-function change checked at `standard` with a warm cache takes about 10.5 minutes: one instrumented run of the suite (5.3 min) and the mutants (5.2 min, two mutants with sixteen covering tests each); an unchanged rerun takes 2 seconds.
-
-## Differential testing
-
-`gen.differential` compares functions with an [oracle](#cupel-oracle) on generated inputs. You name the functions, per language, as `<file>:<function>`; the file is relative to the repository root:
-
-```toml
-[oracles.release]
-kind = "ref"
-ref = "v1"
-
-[lang.python]
-differential_entries = ["shipping.py:shipping"]
-```
-
-For each entry in scope, the differential engine reads the function's parameter types from its signature, generates inputs from them (boundary values first: 0, 1, -1, the type's extremes, empty strings and lists; then random values that grow in size), and calls the function on every input in the working tree and through the oracle. A `ref` oracle runs the same function at the commit its ref names, exported into a temporary directory; a `command` oracle runs once per input with `{input}` replaced by the argument (a string's text, any other value's JSON) or, for several parameters, the JSON array of them, and its standard output is its answer; a command oracle's known inputs (`--input`) are compared first. The first input on which the answers differ is shrunk step by step (integers toward 0, strings and lists shorter) while the answers still differ, so the finding shows the smallest such input. Nothing is written in the working tree.
-
-```console
-$ cupel oracle verify release
-$ cupel check --only gen.differential --seed 7 --format text
-cupel check: pass (exit 0)
-
-summary   1 finding · fail 1 · warn 0 · info 0 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
-
-checks
-  gen.differential  fail     tier 4 · deep · score 1 divergent (n 1) · metrics cases 100, divergences 1 · 1 finding · 5993 ms · oracle release
-
-fail (1)
-  gen.differential
-    `shipping(20001)` returned `2500`, but oracle `release` returned `2600`
-      fnd_fb42fe · diff.divergence · tier 4 · confidence 1
-      at shipping.py:1:1-3:52 in shipping.shipping (python, sh_d5d28ffa7e1a1f68)
-      …
-      action fix_bug (priority 2): Decide which answer is right for `shipping(20001)`: fix the implementation, or, if the change is intended, the oracle.
-      repro: cupel check --only gen.differential --symbols sh_d5d28ffa7e1a1f68 --oracle release --seed 7 --cases 100
-```
-
-The change capped the cost at 2500; the boundary input `9223372036854775807` diverged first and shrank in 53 steps to `20001`. The finding's evidence holds the `entry`, the `oracle` (`name`, `kind`, and a ref's `commit`), the minimized `input`, the input as `found`, its `case` index, the `shrinks`, and both answers, `implementation` and `reference`, each one of `{"returned": …}`, `{"raised": …}`, or `{"crashed": …}`. The repro regenerates the same inputs: the seed decides them, and `--cases` sets how many are generated per entry (100 by default). The gate keys are `gen.differential.divergences` (entries that diverged) and `cases` (inputs compared); when no entry could be compared, the check passes with no score and no metrics, and its notes say why.
-
-| Language | How it is called | Parameter types it generates |
-|---|---|---|
-| Python | `python3 -B` imports the module and calls the function; answers are JSON (or `repr`), exceptions `raised` | `int`, `float`, `bool`, `str`, `list[T]`, `Optional[T]` / `T \| None`; unannotated parameters get mixed values |
-| JavaScript, TypeScript | `node` imports the file (TypeScript by Node's type stripping, Node 22.18 or later) and calls the named export | `number`, `string`, `boolean`, `T[]`, `T \| null`; JavaScript's untyped parameters get mixed values |
-| Go | an internal test file laid over the package with `go test -overlay`, built once | integer types, `float32`, `float64`, `bool`, `string`, `[]T` |
-| Rust | a separate crate that depends on the entry's crate by path, built once into `.cupel/cache/differential/` | integer types, `f32`, `f64`, `bool`, `String`, `&str`, `Vec<T>`, `&[T]`, `Option<T>` |
-
-An entry is called with whatever side effects it has, so name functions that are safe to call with any argument. It must be a module-level, public function (in Rust, one reachable from the crate root): an entry that is missing, private, a method, or has a parameter of another type is not compared, and the result's notes say why. Without `differential_entries` a language is skipped as `unconfigured`; without its program (`python3`, `node`, `go`, `cargo`) it is `unavailable`. A command answers in text, so against a command oracle a returned string matches the same text unquoted, and any error matches any error; against a `ref` oracle answers match when they are equal as text or as JSON.
-## Metamorphic relations
-
-A metamorphic relation says how a function's output changes when its input does, without saying what the output is: sorting a list and sorting its reverse give the same list. `gen.metamorphic` checks relations you declare in `cupel.toml`, per language, under `[lang.<id>.relations.<name>]`. Python is the language with a harness today.
-
-```toml
-[lang.python.relations.sort-reverse]
-function = "sorting:sort_list"          # module:name, imported from the repository root
-input = "list[int]"                     # bool, int, str, list[T], tuple[T, ...]
-transform = "lambda xs: list(reversed(xs))"   # the follow-up input, from the input
-
-[lang.python.relations.add-commutes]
-function = "arith:add"                  # a tuple input is spread into the arguments: add(a, b)
-input = "tuple[int, int]"
-transform = "lambda pair: (pair[1], pair[0])"
-relation = "lambda a, b: a == b"        # how the two outputs relate; default ==
-cases = 50                              # inputs to generate; default 100
-```
-
-`transform` and `relation` are Python expressions evaluated in the function's module. For every input the harness calls the function on it, the transform on it, and the function on the transform's result, each on its own copy; the relation is violated when it returns false or when any of those calls raises. A relation whose function cannot be imported, or whose expressions do not evaluate to callables, makes the check `error` with the reason in its `notes`; a key that is not one of these five, a missing one, or an input type outside the list is a usage error (exit 2) when `cupel.toml` loads.
-
-Inputs are generated from `--seed`, the relation's name, and the case number alone, starting small (lists of at most one element, integers within ±16) and growing to lists and strings of up to eight elements and integers within ±1024. `--cases N` sets how many inputs every relation gets, over its `cases`. The first input that breaks a relation is minimized: integers move toward zero, lists and strings shrink and their elements get simpler, as long as the relation still breaks. The finding's evidence has the minimized input, the transformed input, both outputs (each `{"value": …}`, `{"raised": "Type: message"}`, or `{"repr": …}` for a value JSON cannot hold), the generated input it started from, and the seed; its `repro` reruns the same inputs. A relation is one finding however many inputs break it, located at the function's definition. In the fixture, `sort_list` makes a single bubble pass:
-
-```text
-$ cupel check --only gen.metamorphic --seed 3 --format text
-checks
-  gen.metamorphic  fail     tier 4 · deep · score 1 violated (n 2) · metrics relations 2, violated 1 · 1 finding · 1042 ms
-
-fail (1)
-  gen.metamorphic
-    `sorting:sort_list` breaks the relation `sort-reverse`
-      fnd_30a135 · metamorphic.violated · tier 4 · confidence 1
-      at sorting.py:1-7
-      evidence: case 11 · followup_output {1} · function "sorting:sort_list" · input [3] · input_type "list[int]" · original_input [3] · relation "sort-reverse" · seed 3 · shrinks 10 · source_output {1} · transformed {1} (full: cupel explain fnd_30a135)
-      action fix_bug (priority 1): Fix `sorting:sort_list` so that `sort-reverse` holds for the input [0,1,1]; the evidence has the follow-up input and both outputs.
-      repro: cupel check --only gen.metamorphic --seed 3
-```
-
-The minimized input `[0, 1, 1]` sorts to `[0, 1, 1]`, its reverse `[1, 1, 0]` to `[1, 0, 1]`. A failing check does not fail the run by itself; a gate rule such as `"gen.metamorphic.violated" = "== 0"` does. Without any relation declared for a language, the check is skipped there as `unconfigured` (`lang.python.relations`); the support matrix above, which knows no repository's configuration, shows Python that way. The other four languages have no harness yet, so the check is `unsupported` for them. Every relation is evaluated whatever the scope, and only those whose function is defined in a file in scope are reported.
-
-## Analyzers
-
-`static.analyze` runs every analyzer of a language that is installed, in each project root, and keeps the results in files in scope. Type checkers run at their strictest; linters use the project's own configuration.
-
-| Language | Analyzers | Run as |
-|---|---|---|
-| Rust | clippy | `cargo clippy --all-targets --message-format=json`, with the project's `[lints]` |
-| Python | mypy, ruff | `mypy --strict --output json` and `ruff check --output-format json` on the files in scope |
-| JavaScript | ESLint | `eslint --format json --no-warn-ignored` (files the config ignores are skipped), only where the root or a directory above it has a flat config (`eslint.config.js` and its siblings), as ESLint finds it |
-| TypeScript | tsc, ESLint | `tsc --noEmit --strict` over the root's `tsconfig.json`, else over the files in scope; ESLint as for JavaScript |
-| Go | go vet, staticcheck | `go vet -json` and `staticcheck -f json` over the module's packages |
-
-The check runs when at least one of a language's analyzers is installed; each one that is missing, unconfigured (ESLint without a config), or failed (its output could not be read) is a note in the result saying what to install or fix, and the others still run. A failure names the project root it happened in, and the roots where the analyzer did run keep their findings ([ADR-169](docs/adr/CUPEL_DECISION_169.md)). The finding's evidence holds the `tool`, its `rule`, the `level`, and the `message`; its ID does not change when the line moves. clippy's E0554, a `#![feature]` attribute the stable channel rejects (a nightly-only benchmark, say), is a note, `info`, whatever level rustc gives it: it says which toolchain the target needs, not what is wrong with its code ([ADR-232](docs/adr/CUPEL_DECISION_232.md)). The gate keys are `static.analyze.errors` and `diagnostics`. Results depend on each tool's version, so pin them where a gate reads them.
-
-## Dependencies and footprint
-
-`perf.footprint` reads, in each project root, the lockfile or manifest the ecosystem keeps, and never the network:
-
-| Language | Dependencies | Licenses |
-|---|---|---|
-| Rust | `Cargo.lock`, except the workspace's own packages | `cargo metadata --offline --locked`, from the local registry cache |
-| Python | `uv.lock`, else `poetry.lock`, else `requirements*.txt` | the package metadata in `.venv/` or `venv/` |
-| JavaScript, TypeScript | `package-lock.json`, else the `pnpm-lock.yaml` pnpm installs the root from (its workspace's, for a member: what its importer locks, transitively), else `package.json` (without versions) | the lockfile; for pnpm, the packages installed in `node_modules/.pnpm` |
-| Go | `go.mod`'s `require` lines | not read |
-
-A dependency is direct when the project declares it itself. Roots that share a lockfile list each of its packages once ([ADR-168](docs/adr/CUPEL_DECISION_168.md)). Two measurements are opt-in, per language:
-
-```toml
-[lang.rust]
-advisories = "advisories"            # a directory of OSV advisories (*.json), such as an osv.dev export
-artifacts = ["target/release/app"]   # files or globs whose sizes the artifact_bytes metric adds up
-```
-
-A dependency whose name and version an advisory's `affected` entry lists, or falls in its ranges, is `dep.vuln` (`fail`, with the advisory and the fixed version); a license expression with no alternative free of GPL, AGPL, LGPL, SSPL, EUPL, or OSL is `dep.license` (`warn`). Under `--changed` or `--base` the same files are read at the base commit, and only dependencies whose name and version are new are reported; `footprint.grew` (`warn`) lists what was added and removed when the count grew. The gate keys are `perf.footprint.dependencies`, `vulnerable`, `copyleft`, and `artifact_bytes` (a size budget, such as `"perf.footprint.artifact_bytes" = "<= 4000000"`); what was not measured (licenses, advisories, artifacts) is a note, never a silent zero.
-
-## Race detectors
-
-`conc.race` runs a language's tests in each project root under its race detector, and reports what the detector saw:
-
-| Language | Detector | Run as |
-|---|---|---|
-| Go | Go's race detector | `go test -race -count=1 -json` over the module's packages |
-| Rust | Miri (`tool.miri`, the default) | `cargo +nightly miri test --no-fail-fast`, one test at a time, with full backtraces |
-| Rust | ThreadSanitizer (`tool.tsan`) | `cargo +nightly test -Zbuild-std --target <host> --tests` with `-Zsanitizer=thread` |
-
-Miri interprets every test, so it finds undefined behavior (an out-of-bounds read, a dangling pointer, an invalid value) as well as data races, but it refuses what it cannot model (foreign functions, most file and process calls); ThreadSanitizer runs the tests natively and finds data races only. Both need a nightly toolchain (`rustup toolchain install nightly --component miri --component rust-src`); `[lang.rust] race = "tsan"` picks ThreadSanitizer. Builds go to `.cupel/cache/race/`, so nothing is written in the tree. Python, JavaScript, and TypeScript have no race detector, and the matrix says `unsupported`.
-
-A report's two accesses are listed in the order of their place in the code, whichever happened first, and only frames in the repository are kept, so the same race reads the same on every run and machine. On the Go fixture, where `Publish` reads a variable a goroutine writes without synchronizing:
-
-```text
-$ cupel check --only conc.race --format text
-fail (1)
-  conc.race
-    data race: `write` in `example.com/tally.Publish.func1` and `read` in `example.com/tally.Publish`
-      fnd_c9f4ec · race.detected · tier 4 · confidence 1
-      at tally.go:10
-      evidence: message "data race" · stacks [2] · test "TestPublish" · tool "tool.go-race" (full: cupel explain fnd_c9f4ec)
-      action fix_bug (priority 1): Synchronize the accesses (a lock, an atomic, a channel) or stop sharing the memory, then rerun the race detector.
-      repro: cupel check --only conc.race --paths tally.go
-```
-
-The evidence holds the `tool`, the `test` that was running, the detector's `message` (addresses and allocation IDs masked), and the `stacks`, each an `access` (`read`, `write`, `non-atomic write`; none for undefined behavior) and its `frames`. Under `--changed` a report is kept when one of its frames is in a changed file. A project root whose run could not test what it was given (a build failure, `-race` without cgo, an operation Miri does not support) is a note, beside whatever was found before it. The gate keys are `conc.race.races` and `undefined_behavior`.
-
-## Benchmarks
-
-`perf.bench` compares the project's benchmarks at the range's base commit with the working tree. The producer exports the base commit with `git archive`, measures it, then measures the working tree right after, on the same machine with the same tool; nothing is cached, and everything the tools write goes to `.cupel/cache/bench/`:
-
-| Language | Tool | Run as | Samples |
-|---|---|---|---|
-| Go | `go test -bench` | `go test -run=^$ -bench=. -benchmem -count=<n> -benchtime=100ms -json` | `ns`, `bytes`, and `allocs` per operation |
-| Rust | criterion | `cargo bench --bench <target> -- --noplot` for each bench target of a package that depends on criterion | `ns` per iteration |
-| Python | pytest-benchmark | `python3 -m pytest --benchmark-only` with its storage in the cache | `ns` per call |
-| JavaScript, TypeScript, Python | hyperfine | `hyperfine --runs <n> --export-json` over the commands `[lang.<id>] bench_commands` lists | `ns` per run |
-
-Each benchmark is measured 5 times per side at `--depth standard` (with `--only`), 10 at `deep`, and 20 at `exhaustive`. Every sample is a cost, so lower is better; allocation counts do not depend on the machine's load, and wall time does. The check compares the two sides of each benchmark and unit with benchstat's method, a two-sided Mann-Whitney U test, and the change of the medians: a change with p below `significance_percent` (5) and at least `threshold_percent` (5) slower is `perf.regression`, as much faster `perf.improvement`. On the Go fixture, after a branch makes `Sum` copy its input:
-
-```text
-$ cupel check --only perf.bench --changed --gate --format text
-cupel check: fail (exit 1)
-
-gate      fail (gate.changed)
-  fail  perf.bench.regression < 5%  actual 1.75065491783758
-
-warn (3)
-  perf.bench
-    `example.com/units.BenchmarkSum` regressed 100.0% in bytes (p = 0.0079)
-    `example.com/units.BenchmarkSum` regressed 175.1% in ns (p = 0.0079)
-    `example.com/units.BenchmarkSum` regressed 100.0% in allocs (p = 0.0079)
-```
-
-The evidence holds the `benchmark`, its `unit`, both medians, the `change` (a fraction of the base's median; growth from a median of 0 counts as 1), the `p_value`, both sample counts, and the settings it was judged by. The gate keys are `perf.bench.regression`, the largest significant slowdown as a fraction whatever the threshold (so `"perf.bench.regression" = "< 5%"` fails on a significant 5% slowdown), and `benchmarks`, `compared`, `regressed`, and `improved`. On a whole tree the benchmarks run once and nothing is compared; a note says to run under `--changed` or `--base`. The base side is an export, so ignored files (a virtual environment, `node_modules`) are not there: a benchmark that needs them fails on the base side only, with a note. JavaScript and TypeScript have no bench producer but hyperfine, so `perf.bench` is `unconfigured` for them until `bench_commands` is set.
-
-## Fuzzing
-
-`gen.fuzz` fuzzes every target in each project root that holds a file in scope, each with the same execution budget: `--cases`, else 1 000 inputs at `--depth standard` (with `--only`), 10 000 at `deep`, and 100 000 at `exhaustive`, each input limited to 10 s and each target to 300 s.
-
-| Language | Fuzzer | Targets | Ready when |
-|---|---|---|---|
-| Rust | cargo-fuzz (libFuzzer) | the binaries of a `fuzz/Cargo.toml` with `cargo-fuzz = true`, built with `cargo +nightly fuzz build` and run directly | `cargo-fuzz` and a nightly toolchain are installed |
-| Go | Go's native fuzzer | `FuzzXxx` functions, run with `go test -fuzz=^<Name>$ -fuzztime=<cases>x` | `go` is installed |
-| JavaScript | Jazzer.js | `*.fuzz.js` modules exporting `fuzz` | `jazzer` is in `node_modules/.bin` or on `PATH` |
-| Python | atheris | `fuzz_*.py` scripts that call `atheris.Fuzz(` | `python3` imports `atheris` |
-
-libFuzzer-based fuzzers get the run's `--seed`, so `--seed` and `--cases` repeat a run on one toolchain; Go's fuzzer takes no seed. Nothing is written in the tree: each target's corpus and saved inputs live in `.cupel/cache/fuzz/` and are emptied before each run (a corpus the project commits is read as well), and Go, which saves a failing input into the package's `testdata/`, fuzzes a copy of the module. atheris builds only against a clang that ships libFuzzer, so on macOS with Apple's clang the Python pair is `unavailable`; TypeScript has no producer (Jazzer.js loads only `.js` modules) and is `unsupported`. On the Rust fixture, whose `first` target indexes its input:
-
-```text
-$ cupel check --only gen.fuzz --format text
-fail (1)
-  gen.fuzz
-    fuzz target `first` crashes on the empty input: index out of bounds: the len is 0 but the index is 0
-      fnd_d59cd3 · fuzz.crash · tier 4 · confidence 1
-      at src/lib.rs:5:5-5
-      action fix_bug (priority 1): Fix `first`'s failure on the saved input (`cargo +nightly fuzz run first .cupel/cache/fuzz/rust/root/first/inputs/crash-da39a3ee5e6b4b0d3255bfef95601890afd80709` reruns it), then keep the input in the target's corpus as a regression case.
-      repro: cupel check --only gen.fuzz --paths fuzz/fuzz_targets/first.rs --seed 3 --cases 1000
-```
-
-The evidence holds the `target`, the `tool`, the `message`, the `input` (as text, or `hex:` and its bytes), the `reproducer` file and the `reproduce` command (for Go, the commands that make the input a regression case under `testdata/fuzz/`), the `seed`, and the `cases`. An input that runs past the per-input limit is `fuzz.timeout` (`warn`, confidence 0.7: a slow path under load can cross it). A target that does not build is a note. The gate keys are `gen.fuzz.crashes`, `timeouts`, `targets`, and `missing`.
-
-## Linearizability
-
-`conc.linearizability` checks histories of concurrent operations that your own tests or harness record: Cupel never runs the system itself. Name the command in `[lang.<id>] history_command`; Cupel runs it from the repository root with `CUPEL_HISTORY_DIR` set to an empty directory under `.cupel/cache/linearizability/` and `CUPEL_SEED` set to the run's seed, and checks every `*.jsonl` file the command writes there. Until the command is set the check is `unconfigured` for the language.
-
-A history is JSON lines in the order things happened. The first line declares the model, `register` (one value: `read`, `write`, and `cas` with the value `[expected, new]`) or `kv` (the same per `key`, checked key by key); each other line is an event of a process, an `invoke` and then its completion, `ok` (it took effect), `fail` (it did not), or `info` (unknown: a timeout, a crash). An invocation the history never completes is unknown too, and may have taken effect anywhere after it began.
-
-```text
-{"model": "register"}
-{"process": 0, "type": "invoke", "f": "write", "value": 1}
-{"process": 0, "type": "ok", "f": "write", "value": 1}
-{"process": 0, "type": "invoke", "f": "write", "value": 2}
-{"process": 0, "type": "ok", "f": "write", "value": 2}
-{"process": 1, "type": "invoke", "f": "read", "value": null}
-{"process": 1, "type": "ok", "f": "read", "value": 1}
-```
-
-Porcupine (v1.3.1, run with `go run` through a small runner Cupel writes into `.cupel/cache/linearizability/porcupine/`) decides whether some order of the operations, consistent with real time, is a legal run of the model. The read above began after the write of 2 completed, so no order explains it:
-
-```text
-$ cupel check --only conc.linearizability --format text
-fail (1)
-  conc.linearizability
-    history `histories/stale-read.jsonl` (register) is non-linearizable: `read 1` by process 1 (line 6) cannot follow state `2`
-      fnd_a1c5c8 · consistency.violation · tier 5 · confidence 1
-      evidence: anomaly "non-linearizable" · command "cp -R histories "$CUPEL_HISTORY_DIR"/" · history "histories/stale-read.jsonl" · linearized [2] · model "register" · seed 3 · states [1] · stuck [1] · tool "tool.porcupine" (full: cupel explain fnd_a1c5c8)
-      action fix_bug (priority 1): Find why `read 1` by process 1 (line 6) cannot follow state `2` in `histories/stale-read.jsonl`: the operations a linearizable system completes take effect in an order real time allows. `CUPEL_SEED=3 cp -R histories "$CUPEL_HISTORY_DIR"/` records the history again.
-      repro: cupel check --only conc.linearizability --seed 3
-```
-
-The evidence holds the `linearized` operations (the last three of the longest prefix the checker could order), the `states` the model is in after them, and the `stuck` operations that could come next in real time but that the model does not allow; each operation names its `process`, `f`, `key`, `value`, `outcome`, and the `line` that invoked it. A history that is malformed, or declares a model Porcupine does not check, is a note; so is one the checker ran out of time on (30 s per key, 300 s at `exhaustive`). The command's failure is a note, and the histories it wrote are still checked. Porcupine is downloaded from the Go module proxy on the first run; Go must be on `PATH`. The gate keys are `conc.linearizability.violations`, `histories`, `operations`, `unknown`, and `invalid`.
-
-## Deterministic simulation
-
-`conc.dst` runs deterministic simulation harnesses over a range of seeds. A simulator replaces a program's clock, network, scheduler, and randomness with one driven by a seed, so a seed replays the same interleaving, delays, and faults every time. Cupel wraps [madsim](https://github.com/madsim-rs/madsim): in each Rust project root holding a file in scope, every package that depends on `madsim` has its library and test targets run as `cargo test` under `RUSTFLAGS=--cfg madsim`, building into `.cupel/cache/dst/madsim/target`; its `#[madsim::test]` functions are the harnesses. The seeds are the run's seed and the ones after it: `--cases`, else 1 000 at `--depth standard` (with `--only`), 10 000 at `deep`, and 100 000 at `exhaustive`, where the check runs by default. madsim stops a harness at its first failing seed and names it; Cupel then replays that seed alone, which gives the trace of that seed only and shows whether the failure repeats. Other languages have no simulator Cupel wraps, and the matrix says `unsupported`.
-
-On the fixture, where two deposits read a balance, wait on an audit, and write it back, so overlapping audits lose one:
-
-```text
-$ cupel check --only conc.dst --seed 3 --format text
-fail (2)
-  conc.dst
-    simulation `a_withdrawal_waits_for_its_deposit` fails at seed 5: overdrawn: 10 from 0
-      fnd_d7a5ab · dst.failure · tier 4 · confidence 1
-      at src/lib.rs:29:9-29
-      ...
-    simulation `concurrent_deposits_are_all_kept` fails at seed 4: assertion `left == right` failed: a deposit was lost
-      fnd_350eac · dst.failure · tier 4 · confidence 1
-      at tests/sim.rs:23:5-23
-      evidence: first_seed 3 · harness "concurrent_deposits_are_all_kept" · message "assertion `left == right` failed: a depo…" · reproduce "RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEE…" · reproduced true · seed 4 · seeds 1000 · tool "tool.madsim" · trace [10] (full: cupel explain fnd_350eac)
-      action fix_bug (priority 1): Fix the failure `concurrent_deposits_are_all_kept` shows at seed 4 (`RUSTFLAGS='--cfg madsim' MADSIM_TEST_SEED=4 MADSIM_TEST_NUM=1 cargo test -p ledger --test sim concurrent_deposits_are_all_kept -- --exact` replays it from `.`), then keep the seed as a regression case of the harness.
-      repro: cupel check --only conc.dst --paths tests/sim.rs --seed 4 --cases 1
-```
-
-The repro runs that one seed again (`--seed 4 --cases 1`). The evidence holds the `harness`, the failing `seed`, the range (`first_seed`, `seeds`), the panic's `message`, the `trace` (what the replayed seed printed, at most 50 lines, with thread numbers and paths outside the repository removed), whether it `reproduced` alone (a failure that does not repeat is a harness that is not deterministic, and is reported with confidence 0.5), and the `reproduce` command. A root whose build fails is a note, and so is a root with no harness. The gate keys are `conc.dst.failures` and `harnesses`.
-## Trace validation
-
-`spec.trace` checks that what the implementation did is a behavior of its specification. The specification is a `spec` oracle in TLA+ (`cupel oracle add counter --kind spec --spec spec/Counter.tla --lang tla+ --write`), and the evidence is a trace the implementation logs while its tests run. The convention is a file format, so it needs no build step or library in any of the seven languages: when the variable `CUPEL_TRACE_DIR` is set, a test writes one `.jsonl` file per behavior into that directory, one JSON object per step, and writes nothing when it is unset.
-
-```json
-{"state": {"count": 0, "done": false}}
-{"action": "Inc", "state": {"count": 1, "done": false}, "file": "counter.go", "line": 24}
-```
-
-`state` holds the values of the spec's variables after the step (a variable left out is left to the spec); `action` names the spec action the step took, `file` and `line` where it was logged, all three optional. Integers, strings, booleans, arrays (sequences), and objects (records) map to TLA+ values, and `{"$tla": "{1, 2}"}` is any TLA+ expression (a set, a model value). The producer reruns the suite once with `CUPEL_TRACE_DIR` pointing at a fresh `.cupel/cache/trace/` directory, then runs TLC (`tlc` on `PATH`, as tla-bin installs it) on a module that extends the spec and allows from each logged state only the spec's next-state relation (or the named action) to the next logged state. The spec's `INIT`, `NEXT`, and `CONSTANTS` come from the `.cfg` beside it, else `Init` and `Next`. On the Go fixture, whose `Bump` adds two but logs an `Inc`:
-
-```text
-$ cupel check --only spec.trace --format text
-fail (1)
-  spec.trace
-    trace `bumps.jsonl` leaves spec/Counter.tla at step 3: `Inc` to {"count":3,"done":false} is not a step the spec allows from {"count":1,"done":false}
-      fnd_c58eaf · trace.diverged · tier 5 · confidence 1
-      at counter.go:29
-      evidence: action "Inc" · oracle "counter" · previous {2} · spec "spec/Counter.tla" · state {2} · step 3 · steps 3 · tool "tool.tlc" · trace "bumps.jsonl" (full: cupel explain fnd_c58eaf)
-      repro: cupel check --only spec.trace --oracle counter --paths counter.go
-```
-
-A trace whose first state is not an initial state of the spec diverges at step 1. A trace that is not JSON lines of steps, or that TLC rejects (a variable or action the spec does not have), is a note, and so is a recording run whose tests failed or that recorded nothing. The result is against an oracle, so it is tier 5 only while `cupel oracle verify` holds for the spec; otherwise it is capped at tier 3 with `oracle.unverified` (see [`cupel oracle`](#cupel-oracle)). Quint and P specs are oracles TLC does not read, and the result says so. The gate keys are `spec.trace.diverged`, `traces`, and `unvalidated`.
-
-## Model checking
-
-`conc.model-check` runs Kani (`cargo kani`, with concrete playback) in each Rust project root and checks every `#[kani::proof]` harness over all the inputs its `kani::any()` values can take, within the harness's bounds. Builds go to `.cupel/cache/model-check/`. Each property an input breaks is a finding at the place it breaks, with the values, in the order the harness drew them, and the unit test Kani wrote to replay them:
-
-```text
-$ cupel check --only conc.model-check --format text
-fail (2)
-  conc.model-check
-    harness `proofs::average_never_overflows` refutes `attempt to add with overflow` in `average` with 128, 128
-      fnd_f4c6a6 · model.counterexample · tier 5 · confidence 1
-      at src/lib.rs:3
-      evidence: description "attempt to add with overflow" · function "average" · harness "proofs::average_never_overflows" · replay "/// Test generated for harness `proofs::…" · tool "tool.kani" · values [2] (full: cupel explain fnd_f4c6a6)
-      repro: cupel check --only conc.model-check --paths src/lib.rs
-    harness `proofs::at_stays_in_bounds` refutes `index out of bounds: the length is less than or equal to the given index` in `at` with 4ul
-      …
-```
-
-A harness Kani cannot decide is a note, and so is a root that does not build. Kani needs `cargo install --locked kani-verifier` and `cargo kani setup`, which downloads its bundle and the nightly it builds with. The other languages have no model checker, and the matrix says `unsupported`. The gate keys are `conc.model-check.failed`, `harnesses`, `verified`, and `undetermined`.
-
-## Proofs
-
-`spec.prove` runs `dafny verify` over the `.dfy` files in each project root of every language (Dafny compiles to several of them, and its proofs stand on their own), and reports each obligation the verifier did not discharge, at its place:
-
-```text
-$ cupel check --only spec.prove --format text
-fail (1)
-  spec.prove
-    proof fails at proofs/tally.dfy:24: a postcondition could not be proved on this return path
-      fnd_993483 · proof.failed · tier 6 · confidence 1
-      at proofs/tally.dfy:24:1-24:2
-      evidence: message "a postcondition could not be proved on t…" · related [1] · tool "tool.dafny" (full: cupel explain fnd_993483)
-      repro: cupel check --only spec.prove --paths proofs/tally.dfy
-
-warn (2)
-  spec.prove
-    proof obligation open at proofs/tally.dfy:31: assume statement has no {:axiom} annotation
-      fnd_6f1c03 · proof.obligation-open · tier 6 · confidence 1
-      …
-    proof obligation open at proofs/tally.dfy:35: This ensures clause is part of a bodyless method. Add the {:axiom} attribute to it or the enclosing method to suppress this warning
-      …
-```
-
-An obligation the verifier could not prove is `proof.failed` (`fail`), with the places it relates (the postcondition a return path breaks). One the proofs assume (an `assume` without `{:axiom}`, a lemma or method without a body) or that ran out of time or resources is `proof.obligation-open` (`warn`): nothing refutes it, and nothing proves it either. A file that does not parse or resolve is a note. Dafny's releases bundle Z3; put `dafny` on `PATH`. The gate keys are `spec.prove.failed`, `open`, and `verified`.
-## Contracts
-
-`spec.contracts` reruns the suite once more through the baseline's runner, after the baseline passes, with the contract library's switches on and every property test given the run's seed and case budget (as `gen.property` gives them), and reads each failed test's output for the library's report. A project root whose manifests do not declare the library is not run again, and a note says nothing was checked.
-
-| Language | Library | Contracts | Turned on for the run |
-|---|---|---|---|
-| Rust | the `contracts` crate | `#[requires]`, `#[ensures]`, `#[invariant]`, and their `debug_` and `test_` forms | debug assertions in every profile a test builds with (`CARGO_PROFILE_DEV_DEBUG_ASSERTIONS`, `CARGO_PROFILE_TEST_DEBUG_ASSERTIONS`), which `debug_*` contracts need |
-| Python | icontract | `@require`, `@ensure`, `@invariant` | `ICONTRACT_SLOW=1`, which enables contracts declared `enabled=icontract.SLOW` |
-
-A violation is placed at the contract (the attribute or decorator), names the function or class it is declared on, and keeps the library's message: the description and condition, and for icontract the values it saw, with addresses masked. Under `--changed` a violation is kept when its contract or its test is in a changed file. On the Rust fixture, whose `debug_*` contracts its own `[profile.dev]` leaves unchecked:
-
-```text
-$ cupel check --only spec.contracts --format text
-fail (3)
-  spec.contracts
-    precondition of `share` violated in `ledger/src/lib.rs::tests::shares_nothing_among_no_parts`: a share needs at least one part: parts > 0
-      fnd_1d32c0 · contract.violated · tier 5 · confidence 1
-      at src/lib.rs:4
-      action fix_bug (priority 1): A caller passed what the precondition rejects: fix the call the test makes, or the precondition if it is wrong, then rerun.
-      repro: cupel check --only spec.contracts --paths src/lib.rs
-    postcondition of `half` violated in `ledger/src/lib.rs::tests::halves_one`: half of a positive amount is positive: ret > 0
-      fnd_4aa38d · contract.violated · tier 5 · confidence 1
-      at src/lib.rs:10
-    invariant of `post` violated in `ledger/src/lib.rs::tests::posts_three_entries`: an account holds two entries: self.entries.len() <= 2
-      fnd_bedc57 · contract.violated · tier 5 · confidence 1
-      at src/lib.rs:25
-```
-
-The evidence holds the `tool`, the contract's `kind` (`precondition`, `postcondition`, `invariant`), the `function`, the `message`, and the `test`. A run that did not complete in a root is a note. The gate key is `spec.contracts.violations`. Go, JavaScript, TypeScript, Java, and Clojure have no producer: their tests' failures do not say a contract failed (an `assert`, a Guava precondition, and a Clojure `:pre` all read as plain assertions), so the pair is `unsupported`.
-
-## Requirements and test provenance
-
-`meta.traceability` checks a change against the task's requirements. List their IDs in `cupel.toml`, under a per-language override when a repository's languages trace different ones:
-
-```toml
-[checks."meta.traceability"]
-requirements = ["REQ-12", "REQ-13"]
-```
-
-A test traces a requirement when the range added it (no test of that name in that file at the base commit) and its name or its doc comment carries the ID as whole words, in any case and with any separator: `test_req_12_parses`, `it("parses week dates #REQ-12")`, `/// Parses week dates (REQ-12).`, but not `test_req_120` or `testReq12`. The doc comment is the language's: Rust's `///` lines or `/** */` above the test's attributes, Go's `//` lines above the function, a Python docstring, a JSDoc or Javadoc `/** */` block above the test, and Clojure's `;` lines above `deftest`. A test's body is not read. A test that existed before the change passed without it, so it cannot show the change meets the requirement; the finding lists such tests with `added: false`.
-
-A `REQ-<n>` marker (`req` followed by a number as its own word, as in `#REQ-7`, `req_7`, `TestParse_REQ_7`) on a test the range added is a requirement too, when no listed ID matches it: the test traces it, and the check lists it as `spec.unlisted-requirement` (`info`, so no gate fails on it), whose evidence says `source: marker` where a listed requirement's says `source: config`. So a repository that writes requirement IDs only into its tests gets them traced without configuration, and one that lists them hears of a marker the task does not name (often a mistyped ID). Markers on tests that existed before the change add nothing. With no requirement listed or marked the check passes with a note. The gate keys are `meta.traceability` (none untested) and `meta.traceability.untested`.
-
-`meta.oracle-independence` asks who wrote the evidence. Under a range, with a per-test coverage map (made at `--depth standard` for Rust, Go, and Python; see [Coverage](#coverage)), it finds the tests that run each changed function. A function a test from before the change runs is `independent`; one only tests the range added run is `evidence.self-authored-only`: worth checking those tests' expectations against the task rather than the code. Without a map, it labels nothing and says why. A registered oracle's independence is its verification: a result against an unverified oracle is already capped at tier 3 with an `oracle.unverified` finding (see [`cupel oracle`](#cupel-oracle)). The gate keys are `meta.oracle-independence.independent` and `self_authored_only`.
-
-## Plugins
-
-A plugin is a check or a fact producer in its own executable, in any language, that speaks JSON over standard input and output. Cupel registers it beside the built-in checks and producers, so `describe`, `--only`, `--dry-run`, gates, `[checks."<id>"]` settings, and the support matrix treat it like one of them.
-
-Cupel finds plugins in two places on every run: the `[plugins]` table of `cupel.toml`, and any executable named `cupel-check-<name>` or `cupel-produce-<name>` on `PATH` (the first directory wins, as in a shell). `--no-path-plugins` skips `PATH`.
-
-```toml
-[plugins]
-untested = ["python3", "tools/untested.py"]   # a program and its arguments
-per-test = "tools/cupel-produce-per-test"      # one executable; a path with "/" is relative to the root
-```
-
-Each plugin runs in the repository root as `<plugin> describe`, `<plugin> plan`, and `<plugin> run`, the last two with a request on standard input: the files in scope, the plugin's settings, the run's time left, a scratch directory under `.cupel/work/`, and a JSON file for each fact it declared. `cupel describe schema plugin` is the schema of every message.
-
-- **A check plugin** describes itself with the manifest a built-in check has (`cupel describe <check>`), plus `"kind": "check"`: its ID, tier, cost, the facts it needs and wants, its finding kinds with their evidence schemas, and its gate metrics. `run` prints `finding` lines and one `result`.
-- **A producer plugin** describes `"kind": "producer"`, an ID starting with `plugin.`, the fact kind and version it provides, its languages, and its needs. `run` prints one `fact` line. Producers are chosen the same way for plugins and built-ins (a pin in `[lang.<id>]`, `runner` for test results and `mutator` for mutation outcomes, then the first producer that is ready); plugins come after the built-in producers, so a plugin fills a gap or stands in for a missing tool rather than displacing a built-in producer that works.
-
-Cupel holds plugins to the protocol. A plugin that cannot describe itself in 10 seconds with a manifest Cupel can register stops the run with exit 2, naming the plugin and the fix. A finding of an undeclared kind, evidence its schema rejects, an undeclared metric, a fact of another kind, version, or shape, or a non-zero exit without a `result` or `fact` makes the check `error`, with the reason in its `notes`, and nothing the plugin printed reaches the envelope. When `--timeout` or `--budget` runs out, the plugin gets SIGTERM, then SIGKILL two seconds later.
-
-### The PIT plugin
-
-[`plugins/pit/cupel_produce_pit.py`](plugins/pit/cupel_produce_pit.py) is a producer plugin that makes `mutation-outcomes` for Java with [PIT](https://pitest.org): it copies the project into its scratch directory, runs PIT there (Maven: the `pitest-maven` plugin with `pitest-junit5-plugin` declared in the `pom.xml`; Gradle: the `info.solidsoft.pitest` plugin with XML output and untimestamped reports), and places each PIT mutation on the Cupel mutation site of its line and operator, with the tests that killed it. `mutator` pins it over the built-in engine:
-
-```toml
-[plugins]
-pit = ["python3", "plugins/pit/cupel_produce_pit.py"]
-
-[lang.java]
-mutator = "plugin.pit"
-pit = "mvn -B -q test-compile org.pitest:pitest-maven:mutationCoverage -DoutputFormats=XML -DtimestampedReports=false -DfullMutationMatrix=true"   # the default for Maven
-```
-
-`pit_report` names where the command leaves `mutations.xml`, and `pit_report_ready = true` reads a report already in the tree instead of running PIT.
-
-### Reference plugins
-
-Reference plugins in Rust, Python, and TypeScript live in [`crates/cupel-fixtures/plugins/`](crates/cupel-fixtures/plugins/): a producer that reads a `per-test-map` for JavaScript and TypeScript from an LCOV file with one `TN:` section per test, and a check that reports the files in scope no test executes. With the Python pair in `[plugins]` of a TypeScript repository, `cupel describe fact per-test-map` lists it beside the built-in producers, `cupel tests --impacted` works for TypeScript, and the check runs:
-
-```text
-$ cupel check --only ref.untested-python --format text
-cupel check: pass (exit 0)
-
-summary   1 finding · fail 0 · warn 1 · info 0 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
-
-checks
-  ref.untested-python  fail     tier 2 · quick · score 0.6666666666666666 tested_files (n 3) · metrics untested 1 · 1 finding · 100 ms
-
-warn (1)
-  ref.untested-python
-    No test executes src/report.ts
-      fnd_2d9067 · ref.untested-file · tier 2 · confidence 1
-      at src/report.ts:1
-      evidence: file "src/report.ts" (full: cupel explain fnd_2d9067)
-      action write_test (priority 1): Write a test that executes src/report.ts.
-```
-
-## Configuration
-
-`cupel.toml` is found by walking up from `--cwd`. Precedence is flags, then `CUPEL_*` environment variables (`CUPEL_DEPTH`, `CUPEL_FORMAT`, `CUPEL_PROFILE`), then `--profile`, then `cupel.toml`, then defaults. `CUPEL_NO_DAEMON=1` makes an invocation run in its own process even when a daemon serves the repository (see `cupel serve`). The envelope echoes the effective configuration and the layers that contributed under `run.config`. Unknown keys are usage errors (exit 2) that list the valid keys, and `cupel describe schema config` is the full schema.
-
-```toml
-required_version = ">=0.1"         # a Cargo version requirement this binary must satisfy
-default_branch = "main"            # what --changed diffs against
-depth = "standard"
-
-[roots]                            # monorepos; when set, exactly these are the project's roots and scope (ADR-167, ADR-177)
-engine = { path = "engine", lang = "rust" }
-web = { path = "web", lang = "typescript" }
-
-[scope]
-exclude = ["generated/**", "*.pb.go"]   # gitignore-style; a pattern without "/" matches at any depth
-
-[lang.rust]                        # tools for one language, chosen by init
-test = "cargo test --workspace"
-coverage = "cargo llvm-cov --lcov --output-path {out}"
-runner = "cargo-nextest"           # the test runner Cupel uses; see Test runners
-differential_entries = ["src/money.rs:split"]   # what gen.differential compares
-advisories = "advisories"          # OSV advisories perf.footprint matches dependencies against
-race = "tsan"                      # the race detector conc.race uses; Miri by default
-history_command = "cargo test --test history"   # what records conc.linearizability's histories
-
-[lang.javascript]
-bench_commands = ["node bench.js"] # what perf.bench times with hyperfine
-
-[checks."static.complexity"]       # check settings, for every language
-cyclomatic_max = 10
-
-[checks."static.complexity".lang.go]   # the same settings, overridden for one language
-cyclomatic_max = 15
-
-[checks."static.deps".layers]      # lower layers may not import higher ones
-order = ["domain", "app", "infra"]
-map = { domain = "src/domain/**", app = "src/app/**", infra = "src/infra/**" }
-
-[checks."meta.traceability"]       # the task's requirement IDs, traced by the names and docs of added tests
-requirements = ["REQ-12", "REQ-13"]
-
-[oracles.release]                  # what checks compare against; see cupel oracle
-kind = "ref"
-ref = "v1.2.0"
-
-[gate.changed]                     # evaluated for --changed and --base scopes
-"tests.weakening" = "none"
-"static.api-surface" = "no-breaking"
-"static.complexity" = "none"
-"static.complexity.cyclomatic_max" = "<= 10"
-"static.deps.cycles" = "== 0"
-
-[gate.tree]                        # evaluated for whole-tree and --paths scopes
-"static.clones.pairs" = "<= base"  # no more than the baseline run had
-
-[profile.loop]                     # cupel check --profile loop
-depth = "quick"
-```
-
-**`required_version`** is a Cargo version requirement (`>=0.4`, `^0.4`, `~0.4.1`, comma-joined ranges) on the `cupel` binary. When the binary does not satisfy it, `doctor` reports `doctor.version-unsatisfied` with the required and actual versions and an `install_tool` action naming the [install routes](#install) available now, and every verb that reads or grades the repository (all but `describe`, `doctor`, `init`, `suppress`, and `serve`) refuses with that finding and exit 3; a requirement that does not parse is `doctor.version-invalid`, exit 2 outside `doctor`. A suppressed version finding (`cupel suppress`) refuses nothing.
-
-**Check settings** live under `[checks."<id>"]`, and `[checks."<id>".lang.<lang>]` overrides any of them for one language. Each check declares its settings in its manifest, and `cupel describe <check>` lists them with their defaults; a key a check does not declare is a configuration error that lists the ones it does. The checks that take settings:
-
-<!-- generated:check-settings -->
-| Check | Setting | Default | What it sets |
-| --- | --- | --- | --- |
-| `meta.traceability` | `requirements` | `[]` | The task's requirement IDs, such as `REQ-12`; a per-language override assigns them to the language whose tests trace them. |
-| `perf.bench` | `threshold_percent` | `5` | The smallest change of a benchmark's median, in percent of the base's, that is reported. |
-| `perf.bench` | `significance_percent` | `5` | The Mann-Whitney U test's level, in percent: a change with a lower p is significant. |
-| `static.clones` | `threshold` | `0.82` | The least Jaccard similarity of two symbols' fingerprint sets that makes a clone, greater than 0 and at most 1. |
-| `static.clones` | `min_lines` | `4` | The fewest lines a symbol must span to be compared. |
-| `static.clones` | `min_nodes` | `23` | The fewest normalized-tree nodes a symbol must have to be compared. |
-| `static.complexity` | `cyclomatic_max` | `10` | The highest cyclomatic complexity a symbol may have; above it is complexity.high. |
-| `static.complexity` | `cognitive_max` | `15` | The highest cognitive complexity a symbol may have; above it is complexity.high. |
-| `static.complexity` | `nesting_max` | `4` | The deepest control-flow nesting a symbol may have; deeper is nesting.deep. |
-| `static.complexity` | `params_max` | `5` | The most parameters a symbol may declare, not counting a receiver; more is params.many. |
-| `static.complexity` | `length_max` | `60` | The most lines a symbol may span; more is function.long. |
-| `static.crap` | `high` | `30` | The CRAP score at or above which a symbol is crap.high. |
-| `static.crap` | `watch` | `5` | The CRAP score at or above which a symbol below high is crap.watch. |
-| `static.deps` | `distance_max` | `0.7` | The most A + I − 1 an abstract module may reach before dep.unstable-abstract, from 0 to 1. |
-| `static.deps` | `layers` | — | Layers as order (names, lowest first) and map (a glob per layer); a module importing a higher layer is dep.layer-violation. No layering rule when unset. |
-| `tests.assertion-density` | `lines_per_assertion_max` | `20` | The most lines per assertion a test may span before density.sparse-test. |
-| `tests.assertion-density` | `file_density_percent_min` | `50` | The least assertions per test a file may make, in percent of the repository's, before density.sparse-file. |
-| `tests.assertion-density` | `file_tests_min` | `3` | The fewest tests a file needs to be compared with the repository. |
-| `tests.mutation` | `max_mutant_timeout` | `"120s"` | The longest a mutant's run may take, as a duration such as 90s or 5m; a run that reaches it is a timeout, whatever timeout_factor allows. |
-| `tests.mutation` | `max_mutant_memory` | `"50%"` | The resident memory the mutant runs may hold together, as a size such as 3g or 512m or a share of physical memory such as 50%; each slot's run gets an equal part, and a run over it is killed and is out-of-memory. |
-| `tests.quality` | `mock_density_max` | `50` | The highest share, in percent, of doubles among a test's doubles and assertions before test.mock-heavy. |
-| `tests.quality` | `mocks_min` | `2` | The fewest test doubles that can make a test test.mock-heavy. |
-| `tests.quality` | `logic_max` | `0` | The most loops, alternatives, and unguarded branches a test may have before test.logic. |
-| `tests.quality` | `setup_statements_min` | `5` | The fewest leading statements tests in one file must share to be test.duplicate-setup. |
-| `tests.quality` | `setup_tests_min` | `3` | The fewest tests in one file that must share their leading statements to be test.duplicate-setup. |
-| `tests.quality` | `debug_assertions` | `true` | Whether assertions only a build with debug assertions evaluates (`debug_assert…` macros and methods) count as assertions; false leaves them out of every test. |
-<!-- end:check-settings -->
-
-**Gate rules** map a key to a condition. The key is a check ID or `<check-id>.<metric>`, where the metric is one of that check's gate metrics in the check table under Checks. The condition is `none` (the check reported no unsuppressed `warn` or `fail` finding), `no-breaking` (no unsuppressed breaking finding, a kind ending in `.breaking`, such as `static.api-surface`'s `api.breaking`; any other check is rejected when the config loads), or a comparison `>= > <= < ==` against a number or against `base`; a number ending in `%` is divided by 100. `base` is the metric's value in the reference run, optionally with an offset in the metric's unit (`"<= base"`, `">= base - 0.02"`, `"< base + 3"`). With no offset written, the metric's tolerance loosens the bound: base − δ under `>=` and `>`, base + δ under `<=` and `<`, none under `==` ([ADR-182](docs/adr/CUPEL_DECISION_182.md), [ADR-195](docs/adr/CUPEL_DECISION_195.md)). δ is 0.02 for `tests.mutation.score`, a sampled ratio; 2 for `static.complexity`'s `cyclomatic_max`, `cognitive_max`, and `nesting_max`, one function's largest value; and 0 for every other metric, so counts such as `static.deps.cycles` are exact; a written offset replaces it (`">= base - 0"` is exact). Those three `static.complexity` metrics also have a watch threshold, the check's limit setting of the same name (default 10, 15, and 4, with each language's override, the lowest among the scope's languages): a `<=` or `<` rule against `base` that writes no offset passes while the value is at most it, and fails when a change takes the value past it from a base at or below it, even within δ; a function already past the limit may still move by δ. So one branch added to a small function passes, and a function pushed past the limit fails ([ADR-199](docs/adr/CUPEL_DECISION_199.md), [ADR-205](docs/adr/CUPEL_DECISION_205.md)). A rule whose result the threshold decided carries `watch` (text: `within watch 10` or `past watch 10`). The reference run is the run `--against` names; otherwise, for `--changed` and `--base`, the base recomputed, by running the rule's checks over the base commit's versions of the changed files in a temporary copy, narrowed to the code the change replaced there ([ADR-175](docs/adr/CUPEL_DECISION_175.md)), as the current side is narrowed to the code it changed; otherwise the `default` baseline (`cupel baseline set --write`). A rule passes only when its check ran to completion and reported the metric; a rule on a check that did not run is `skipped`, as is a rule against `base` with no reference value (no baseline is set, or every changed file is new), and any rule that does not pass fails the gate, except one against `base` skipped for want of a reference: it emits a `baseline.missing` finding at `info` naming the rule, and the gate passes if every other rule does ([ADR-198](docs/adr/CUPEL_DECISION_198.md)). Each rule in `summary.gate` carries `actual`, the `bound` it was compared with (with the tolerance applied), `tolerance` when one was applied (text: `tolerance 0.02`), and for a skipped rule the `reason`. When the metric is a largest value over functions or modules (`static.complexity`'s `*_max`, `static.crap.max`, `static.deps.max_distance`), the rule also names what each value was measured on: `actual_target`, and for a rule against `base`, `bound_target` from the reference run, each with its display name and location (text: `actual 30 (fmt::render at src/fmt.rs:12)  bound 18 (fmt::render at src/fmt.rs:9)`). Counts and ratios name nothing, and nor does a threshold. `[gate.changed]` applies to `--changed` and `--base` scopes and `[gate.tree]` to everything else. A `[gate.tree]` rule on `tests.weakening`, `static.api-surface`, `meta.traceability`, or `meta.oracle-independence`, which need a range, is rejected when the config loads.
-
-Cupel writes only under `.cupel/` (run records, the SQLite fact store, `cache/` with coverage reports and per-test maps, scratch space) unless `--write` is given. An install you allow (`--install`, or yes to the question) runs your package manager, which for the JavaScript launchers, uv, and poetry adds a dev dependency to `package.json` or `pyproject.toml` and its lockfile. `.cupel/.gitignore` excludes everything there except `suppressions.toml`.
-
-## For agents
-
-An agent can learn Cupel from Cupel. `cupel describe --all` is one JSON document with every verb, flag, exit code, and schema. `cupel describe <check>` and `cupel describe finding <kind>` explain any check or finding the agent meets. Every verb accepts `--describe`, and `--dry-run` shows exactly what a command would do before it does anything.
-
-The loop is the one in [The agent loop](#the-agent-loop): run the gate, take `next_actions[0]`, fix it, confirm with the finding's `repro`, and repeat until the gate exits 0. An agent should parse only stdout, branch on `exit_code` and `status`, and treat exit 2 as a mistake in its own invocation, whose envelope names the fix.
-
-`cupel describe --agent --format text` prints a guide of about sixty lines to paste into `CLAUDE.md` or `AGENTS.md`; `--format json` carries the same Markdown as the envelope's `description.markdown`. Its exit codes, flags, depths, checks, statuses, MCP tools, and verbs come from the binary's registries. This is its output:
-
-<!-- generated:agent-guide -->
-```markdown
-# Cupel
-
-Cupel grades what a coding agent produced. It measures structure and test strength over a change or a whole tree and returns one JSON envelope: findings with stable IDs, ranked `next_actions`, and a gate verdict. It never edits code; you fix, it grades.
-
-## The loop
-
-1. Run `cupel check --changed --format json`.
-2. If `exit_code` is 0, stop: the gate passed, or there is no gate.
-3. Otherwise take `next_actions[0]`, fix what it names, and rerun its finding's `repro` to confirm.
-4. Go back to 1. Do not stop until it exits 0.
-
-- `cupel explain <finding-id>` shows a finding's source, covering tests, and a test skeleton.
-- `cupel tests --impacted --changed` lists the tests the change affects and the command that runs them.
-- `cupel describe <check-id>` and `cupel describe finding <kind>` explain any check or finding kind.
-- `--dry-run` shows what any command would run or write; `<verb> --describe` lists its flags.
-
-## Exit codes
-
+| `quick` | 11 | `meta.oracle-independence`, `perf.footprint`, `static.api-surface`, `static.clones`, `static.complexity`, `static.crap`, `static.dead-code`, `static.deps`, `tests.assertion-density`, `tests.quality`, `tests.weakening` |
+| `standard` | 19 | `conc.race`, `gen.property`, `meta.traceability`, `spec.contracts`, `static.analyze`, `tests.coverage`, `tests.flaky`, `tests.mutation` |
+| `deep` | 24 | `conc.linearizability`, `gen.differential`, `gen.fuzz`, `gen.metamorphic`, `perf.bench` |
+| `exhaustive` | 28 | `conc.dst`, `conc.model-check`, `spec.prove`, `spec.trace` |
+<!-- end:depths -->
+
+<!-- generated:exit-codes -->
 | Code | Name | Meaning |
 | --- | --- | --- |
 | 0 | pass | Ran fully; gate passed or no gate. |
@@ -1685,81 +332,96 @@ Cupel grades what a coding agent produced. It measures structure and test streng
 | 4 | unevaluable | Baseline test suite fails or build broken; scoring refused. |
 | 5 | partial | Timeout or budget hit; the envelope has valid partial results. |
 | 6 | internal | Cupel bug; the envelope includes a bug-report payload. |
+<!-- end:exit-codes -->
 
-Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the fix. On exit 3 run `cupel doctor` and follow its `install_tool` and `configure` actions. On exit 4 make the test suite pass first.
+## Gates and the ratchet
 
-## The gate
+A gate is a table of rules in `cupel.toml`: `[gate.changed]` for `--changed` and `--base`, `[gate.tree]` for the whole tree. A rule maps a check, or `<check>.<metric>`, to `none` (no unsuppressed `warn` or `fail` finding), `no-breaking`, or a comparison against a number or against `base`. A rule against `base` is a ratchet: on a branch, `base` is the metric recomputed on the merge base's version of the changed code, so a change may not make it worse. `init` writes this starter gate:
 
-`[gate.changed]` in `cupel.toml` applies to `--changed` and `--base` scopes, `[gate.tree]` to the rest. A rule maps a check, or `<check-id>.<metric>`, to `none`, `no-breaking`, or a comparison such as `"static.complexity.cyclomatic_max" = "<= 10"` or `"tests.weakening" = "none"`; `"static.clones.pairs" = "<= base"` compares with the baseline, or with a range's base (`--against baseline|REF|run:ID` names another reference). `--gate` is the default when the table exists and `--no-gate` reports without a verdict. A rule on a check that did not run is skipped, and every rule that does not pass fails the gate (exit 1), except one against `base` with no reference yet, which is skipped with a `baseline.missing` info finding; `summary.gate` has each rule's result. Do not loosen the gate or suppress findings to pass it unless asked.
-
-## Depth
-
-- `--depth quick|standard|deep|exhaustive`, default `standard`. How much evidence to gather.
-- `--budget DURATION`. A budget of awake time: run the most valuable checks that fit and skip the rest.
-- Scope flags (`--changed`, `--base` with `--head`, `--paths`, `--symbols`) intersect; under `--changed` or `--base` the checks rule on the functions the change touched. `--only` and `--skip` select checks by ID or group, `--tier N+` by tier; `--jobs N` caps the threads and test processes.
-- `--oracle NAME` picks the reference implementation `gen.differential` compares with and `--cases N` the inputs generative checks try; `check --scaffold --write` writes a property stub for each `property.missing` finding.
-
-| Depth | Adds |
-| --- | --- |
-| `quick` | `meta.oracle-independence`, `perf.footprint`, `static.api-surface`, `static.clones`, `static.complexity`, `static.crap`, `static.dead-code`, `static.deps`, `tests.assertion-density`, `tests.quality`, `tests.weakening` |
-| `standard` | `conc.race`, `gen.property`, `meta.traceability`, `spec.contracts`, `static.analyze`, `tests.coverage`, `tests.flaky`, `tests.mutation` |
-| `deep` | `conc.linearizability`, `gen.differential`, `gen.fuzz`, `gen.metamorphic`, `perf.bench` |
-| `exhaustive` | `conc.dst`, `conc.model-check`, `spec.prove`, `spec.trace` |
-
-## The envelope
-
-Stdout is one JSON envelope; diagnostics go to stderr. Read:
-
-- `status`: `pass`, `fail`, `partial`, `error`, `plan`; `exit_code` always equals the process's.
-- `findings[]`: `id`, `check`, `kind`, `severity`, `location`, `title`, `action`, and `repro`, the command that reruns only that check on only that symbol.
-- `next_actions[]`: what to fix, most important first; each has a `kind`, a `summary`, and its `finding`.
-- `summary.gate`: the verdict and each rule's result; `truncated` says `--limit` cut the findings.
-
-## MCP
-
-A client that calls tools can run `cupel serve --mcp` (JSON-RPC on stdio) instead of the commands. Its tools are `check`, `survey`, `explain`, `tests_impacted`, `describe`; each takes its verb's flags as arguments and returns the envelope the command prints. Without `--mcp`, `cupel serve` keeps facts warm for every command run in the repository, and `--watch` reparses files as they change.
-
-## More
-
-The verbs are `init`, `doctor`, `describe`, `check`, `survey`, `explain`, `baseline`, `oracle`, `tests`, `suppress`, `serve`. `cupel describe --all` is every verb, flag, exit code, and schema as one JSON document.
+```toml
+[gate.changed]
+# No test is weakened: no assertion removed, matcher loosened, test skipped or deleted, or snapshot rewritten.
+"tests.weakening" = "none"
+# The mutation score is at least the base's less 0.02.
+"tests.mutation.score" = ">= base - 0.02"
+# The largest cyclomatic complexity stays within cyclomatic_max, or, past it at the base already, grows by 2 at most.
+"static.complexity.cyclomatic_max" = "<= base"
+# No more pairs of cloned functions than the base has.
+"static.clones.pairs" = "<= base"
+# No breaking change to the public API.
+"static.api-surface" = "no-breaking"
 ```
-<!-- end:agent-guide -->
 
-## Development
+`>= base - 0.02` and the complexity rule's watch threshold leave room for noise; a rule against `base` with nothing to compare (every changed file is new) is skipped with an `info` finding instead of failing. For the tree, `cupel baseline set --write` stores a passing run on the default branch as the reference. Every rule, tolerance, and the baseline's lifecycle: [docs/guide/configuration.md](docs/guide/configuration.md) and [docs/guide/usage.md](docs/guide/usage.md#cupel-baseline).
 
-All automation goes through `make`.
+## Evidence tiers
 
-`make dev-setup` installs the pinned tool environment the tests, goldens, and gates need: every runner, coverage tool, analyzer, fuzzer, JVM build tool, and verifier CI installs, at CI's versions, under `~/.cache/cupel/dev-tools` (or `CUPEL_DEV_TOOLS`); a second run only verifies them. `make check` and every other target run with those tools first on `PATH`, and `eval "$(make -s dev-env)"` gives a shell that runs cargo directly the same environment ([ADR-139](docs/adr/CUPEL_DECISION_139.md)).
+Every check result and finding carries a tier, the kind of evidence behind it: 0 is structure read from the source (complexity, clones, dependencies), 1 a type checker or linter, 2 the tests' own structure, coverage, and reruns, 3 mutation testing (tests that notice the code changing), 4 generated inputs or an independent oracle (property tests, fuzzing, differential testing, race detectors), 5 conformance to a specification (contracts, traces, linearizability, model checking), and 6 a proof. A gate passing at tier 0 says less than one passing at tier 3; `--tier 3+` selects only the stronger checks, and a result compared with an oracle that is not verified is capped at tier 3.
 
-In an agent checkout, a linked git worktree, that environment also caps cargo's jobs and nextest's and libtest's test threads at half the cores (`CARGO_BUILD_JOBS`, `NEXTEST_TEST_THREADS`, `RUST_TEST_THREADS`), and `make check` compiles everything it runs in one step under `scripts/heavy.sh`'s machine-wide lock before running its lint, tests, and docs outside it. The main checkout, a single clone, and CI keep every core and take no lock for a check. Each checkout builds into its own `target/`: one target directory shared by checkouts of this workspace lets cargo judge one branch's build fresh with another branch's code ([ADR-156](docs/adr/CUPEL_DECISION_156.md)). Create and remove agent worktrees with `make worktree NAME=<name> [BASE=<ref>]` and `make worktree-remove NAME=<name>` (`scripts/worktree.sh`), not `git worktree add` and `remove`: removal also deletes the mutation slots the worktree's runs left under `$TMPDIR/cupel-mutate`, one of which holds a whole build.
+## Credit
 
-| Target | Does |
-|---|---|
-| `make dev-setup` | install or verify the pinned development tools and print each one's version |
-| `make check` | fmt, clippy with `-D warnings`, every test, rustdoc with `-D warnings`, and a check that the build left the tree clean; the pre-commit bar. The lint, tests, and docs run under `scripts/tmpdir-guard.sh`, with a temporary directory of their own as `TMPDIR`, and the check fails naming anything they leave in it. In an agent checkout its build step (`make check-build`) runs under the machine-wide lock first |
-| `make worktree NAME=<name>`, `make worktree-remove NAME=<name>` | add `.claude/worktrees/<name>` in the main checkout on branch `<name>` (from `BASE`, `main` by default, unless the branch exists); remove it with its build and its mutation slots, keeping the branch |
-| `make test` | `cargo test --workspace`; `UPDATE_GOLDENS=1 make test` rewrites golden envelopes |
-| `make lint`, `make fmt` | `cargo fmt --check` and clippy; `cargo fmt` |
-| `make build`, `make doc` | build the workspace; build its rustdoc |
-| `make matrix` | print the check × language support matrix |
-| `make readme` | regenerate this README's verb, global-flag, exit-code, check, check-settings, and support-matrix tables and its agent guide from `cupel describe`, and its MCP tool table from `cupel serve --mcp` |
-| `make parity` | every golden-harness run again through `cupel serve` on a copy of its directory, which must print the same after redaction ([ADR-085](docs/adr/CUPEL_DECISION_085.md)), and each run of a verb an MCP tool serves again as that tool's call to `cupel serve --mcp` on another copy, which must return the same envelope and stderr ([ADR-121](docs/adr/CUPEL_DECISION_121.md)) |
-| `make baseline` | after a green tree dogfood, sets the store's baseline to that run and exports it to `.cupel/baseline.json`, the committed reference the tree gate's `base` rules compare with ([ADR-140](docs/adr/CUPEL_DECISION_140.md)) |
-| `make reclaim` | removes the build outputs a checkout regenerates on demand (the coverage build, the incremental caches, the suite cache under `.cupel/cache`), which grow a worktree to 30 to 50 GB; `scripts/heavy.sh` refuses to start a heavy command below 40 GB of free space (`CUPEL_HEAVY_MIN_FREE_GB`) |
-| `make dogfood` | Cupel grades itself at `--depth deep`: `cupel check --changed --depth deep --gate` against `main`, which mutates every function of every changed file; `make dogfood DOGFOOD_SCOPE=tree` grades the whole tree with `[gate.tree]`, whose clone ratchets read `<= base` against the committed `.cupel/baseline.json` it imports first, and skips `tests.mutation`. Both skip `tests.flaky`, whose engine reruns the whole suite one test at a time and does not rerun cargo-nextest, and `conc.race`, which Miri cannot run on tests that spawn processes ([ADR-129](docs/adr/CUPEL_DECISION_129.md)). A local run is bounded by `DOGFOOD_BUDGET` (`--budget 120m` for the changed gate, enough for mutation of an ordinary change, and `45m` for the tree), lists what the budget left out, and exits 5 when it left anything out; CI runs both with `DOGFOOD_BUDGET=`, which runs every check. They need cargo-nextest and cargo-llvm-cov on `PATH`. The run goes through `scripts/heavy.sh`, the machine-wide lock every heavy command takes, so one dogfood (or one external test suite run through the same script) runs at a time on a machine |
-| `make install` | `cargo install --path crates/cupel-cli` |
-| `make dist` | build the stripped release binary and package it as `target/dist/cupel-<version>-<target>.tar.gz` (`.zip` on Windows) with `LICENSE` and this README; `TARGET=<triple>` builds another target, the Linux musl targets through `cargo-zigbuild` with `zig` on PATH ([ADR-124](docs/adr/CUPEL_DECISION_124.md)) |
-| `make version V=X.Y.Z` | write the release version into every file that names it: the workspace `Cargo.toml`, the workspace crates in `Cargo.lock`, `dist/npm/package.json`, and `dist/pipx/cupel.py`; a test holds them equal |
-| `make installers` | the tests of `dist/`'s installers against a fake release on a local HTTP server ([ADR-125](docs/adr/CUPEL_DECISION_125.md)); `make test` runs them too, skipping a test whose tool (ShellCheck, Ruby, Node, npm, Python with `flit_core`) is missing |
-| `make test-network` | the tests that need the network, the real `pip install pytest` of `doctor --fix --install` ([ADR-153](docs/adr/CUPEL_DECISION_153.md)); `make test` reports them skipped, and CI's `installers` job runs them |
+Cupel is inspired by tools [Robert C. Martin (Uncle Bob)](https://github.com/unclebob) published, and keeps their core metrics:
 
-The generated README sections sit between `<!-- generated:NAME -->` and `<!-- end:NAME -->` markers. A test in `crates/cupel-cli/tests/readme.rs` renders them from the binary's `describe` output and fails when the committed text differs, so `make check` catches a stale table. Run `make readme` and review the diff.
+- [crapper](https://github.com/unclebob/crapper): "CRAP scores for Clojure, Java, Go, TypeScript, Rust, and Python", from the formula `CRAP = CC² × (1 − coverage)³ + CC`. Cupel's `static.crap` computes the same formula.
+- [dryer](https://github.com/unclebob/dryer): "finds candidate duplicate code" by the Jaccard similarity of normalized structural fingerprints, reporting pairs at 0.82 or more. Cupel's `static.clones` normalizes the same way and defaults to the same threshold.
+- [mutator](https://github.com/unclebob/mutator): "Mutation testing for Clojure, Java, Go, TypeScript, Rust, and Python": it runs only sites a test covers, scores killed / (killed + survived), and on a later run reruns only survivors and changed functions. Cupel's `tests.mutation` also skips uncovered sites and reuses stored outcomes, but scores killed / (killed + survived + uncovered), so code no test runs counts against the score.
+- [scrap](https://github.com/unclebob/scrap): "a structural quality analyzer for Speclj specs", aimed "at test code in the same way CRAP is aimed at production code". Cupel's `tests.quality` and `tests.assertion-density` grade tests in every language it reads.
 
-CI runs `make check` and `make parity` on Linux and macOS and `make dogfood` on every push: the tree gate on `main` and the changed gate on branches, both at `--depth deep`, on a Linux runner with cargo-nextest and cargo-llvm-cov installed. It runs `make installers` and `make test-network` on Linux and macOS images with only Rust, Node, Python with `flit_core`, and ShellCheck added, and Homebrew's `brew style` on the rendered formula on macOS. A `v*` tag runs `.github/workflows/release.yml`, which builds each platform's archive with `make dist`, writes `SHA256SUMS`, and publishes the GitHub Release; the tag must be `v` followed by the crate version, and a manual run of the workflow builds and uploads the archives without releasing. Cupel's own `cupel.toml` is the example to copy.
+What Cupel adds, each shown above: the other checks in the [check table](#checks), among them `tests.weakening`, which caught the deleted assertion; JavaScript as a seventh language; a [gate](#gates-and-the-ratchet) whose rules ratchet against the merge base; and [one envelope](#the-output-contract) with ranked `next_actions`, from the command line, a [Stop hook](#using-cupel-with-an-agent), or MCP. Findings keep their IDs when a function is renamed or moved ([baselines](docs/guide/usage.md#cupel-baseline)).
 
-The workspace is a set of crates under `crates/`. `cupel-core` holds the output contract, the fact vocabulary, scope, the scheduler, and gates. `cupel-lang` holds the `Language` trait, the query-driven producers, and one `langs/<id>/` directory per language. `cupel-adapt` is the toolchain table of runners and coverage and bench tools per language. `cupel-mutate` is the mutation engine. `cupel-checks` holds the checks, which depend on `cupel-core` alone. `cupel-store` is the SQLite fact store. `cupel-serve` is the daemon's socket protocol, server, client, and file watcher, and the MCP server, generic over what they run. `cupel-cli` is the binary, and the daemon runs requests through the same code a cold invocation does. `cupel-fixtures` holds fixture repositories, conformance inventories, and golden envelopes. Every behavior is built test-first; the implementation plan has the definition of done for each step.
+## Status
 
-Checks and tool producers register themselves from their own modules ([ADR-074](docs/adr/CUPEL_DECISION_074.md)), so additions made in parallel never edit the same lines. Adding a check is one module in `crates/cupel-checks/src/` that submits itself with `inventory::submit!`, its `mod` line in that crate's `lib.rs`, its fixture code, and its goldens under `crates/cupel-fixtures/golden/<check-id>/` (the matrix golden per language, `describe.json`, and `survey-<lang>.json`); a check can keep its fixture code in its own `crates/cupel-fixtures/repos/<check-id>/<lang>/` so no other check's goldens change. Adding a tool producer is one module in `crates/cupel-adapt/src/` and its `mod` line. Adding a fact kind ([ADR-123](docs/adr/CUPEL_DECISION_123.md)) is its payload module in `crates/cupel-core/src/`, which submits the kind's catalog entry with `inventory::submit!`, its `mod` and `pub use` lines in that crate's `lib.rs`, its variant appended to `FactKind` in `crates/cupel-core/src/fact/kind.rs`, its conformance inventory in `crates/cupel-fixtures/conformance/` if it has one, and its schema snapshot, which `UPDATE_GOLDENS=1 INSTA_UPDATE=always make test` writes. Tests derive what must be described, golden, and supported from the registries, so nothing else lists checks; `UPDATE_GOLDENS=1 make test` writes a new check's goldens and `make readme` adds its rows here.
+This README describes only what exists. Cupel is pre-1.0; the [release badge](https://github.com/tysont/cupel/releases/latest) names the latest release. `cupel describe` gives everything it describes a stability: the exit codes are `stable`, and verbs, flags, checks, and schemas are `experimental` until 1.0 ([ADR-018](docs/adr/CUPEL_DECISION_018.md)). The schemas carry their major version in their URL (`schema/v1/`). From `cupel describe`:
+
+<!-- generated:stability -->
+| Described | Stability |
+| --- | --- |
+| The CLI | 1 `experimental` |
+| Verbs | 11 `experimental` |
+| Global flags | 19 `experimental` |
+| Exit codes | 7 `stable` |
+| Checks | 28 `experimental` |
+| Schemas | 5 `experimental` |
+| Install routes | 9 `experimental` |
+<!-- end:stability -->
+
+**Platforms.** Each release publishes one archive per target in [`dist/targets.toml`](dist/targets.toml), with a `SHA256SUMS`:
+
+<!-- generated:targets -->
+| System | Arch | Target | Archive |
+| --- | --- | --- | --- |
+| Linux | x86_64 | `x86_64-unknown-linux-musl` | `cupel-{version}-x86_64-unknown-linux-musl.tar.gz` |
+| Linux | aarch64 | `aarch64-unknown-linux-musl` | `cupel-{version}-aarch64-unknown-linux-musl.tar.gz` |
+| macOS | x86_64 | `x86_64-apple-darwin` | `cupel-{version}-x86_64-apple-darwin.tar.gz` |
+| macOS | aarch64 | `aarch64-apple-darwin` | `cupel-{version}-aarch64-apple-darwin.tar.gz` |
+| Windows | x86_64 | `x86_64-pc-windows-msvc` | `cupel-{version}-x86_64-pc-windows-msvc.zip` |
+<!-- end:targets -->
+
+CI runs `make check` (every test, with every runner, coverage tool, and analyzer installed) and `make parity` on Ubuntu 24.04 and macOS, and Cupel's own gate at `--depth deep` on Ubuntu. Windows is compiled in CI (`cargo check` of every target) and runs only the tests that need no Unix tools: the daemon's server tests and the library tests of `cupel-core`, `cupel-checks`, `cupel-lang`, and `cupel-mutate`; the end-to-end suites do not run there ([limits on Windows](docs/guide/install.md)). The install routes, from `cupel describe`:
+
+<!-- generated:install-routes -->
+| Route | Command | Platforms | Available |
+| --- | --- | --- | --- |
+| Install script | `curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh \| sh` | Linux, macOS | now |
+| cargo-binstall | `cargo binstall --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
+| Release archive | `gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'` | Linux, macOS | now |
+| From source | `cargo install --locked --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
+| Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap |
+| npm | `npx cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to npm |
+| pipx | `pipx install cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to PyPI |
+| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's |
+| cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
+<!-- end:install-routes -->
+
+## Documentation
+
+- [Install](docs/guide/install.md) · [Usage](docs/guide/usage.md) (every verb, with examples) · [Configuration](docs/guide/configuration.md) · [Using Cupel with an agent](docs/guide/agents.md)
+- [Checks](docs/guide/checks.md) · [Languages and test runners](docs/guide/languages.md) · [Coverage and mutation testing](docs/guide/coverage-and-mutation.md) · [Generative checks](docs/guide/generative.md) · [Analyzers, dependencies, and benchmarks](docs/guide/analysis.md) · [Concurrency](docs/guide/concurrency.md) · [Specifications and provenance](docs/guide/specifications.md) · [Plugins](docs/guide/plugins.md)
+- [Technical design](docs/CUPEL_TECHNICAL_DESIGN.md) · [Implementation plan](docs/CUPEL_IMPLEMENTATION_PLAN.md) · [Decision records](docs/adr/)
+
+## Contributing
+
+Every change is test-first and goes through `make`: `make dev-setup` installs the pinned tools, and `make check` (format, clippy, every test, rustdoc, a clean tree) is the bar for a commit. The tables and guide excerpts in this README and in `docs/guide/` marked as generated come from `cupel describe`; `make readme` rewrites them, and `make check` fails while they are stale. The captured examples are rerun with `scripts/readme-capture.sh`. Every target and the workspace layout: [docs/guide/development.md](docs/guide/development.md).
 
 ## License
 

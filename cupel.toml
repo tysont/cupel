@@ -35,6 +35,7 @@ files = [
   ".github",
   "Makefile",
   "README.md",
+  "docs/guide",
   "cupel.toml",
 ]
 

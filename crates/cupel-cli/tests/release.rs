@@ -970,7 +970,8 @@ fn version_set_refuses_what_is_not_a_version() {
     assert!(named_versions(dir.path()).iter().all(|(_, v)| v == VERSION));
 }
 
-/// `make version V=X.Y.Z` is the script's `version --set`, and the README's Makefile table lists it.
+/// `make version V=X.Y.Z` is the script's `version --set`, and the development guide's Makefile table
+/// lists it.
 #[test]
 fn make_version_sets_the_version_through_the_release_script() {
     let output = Command::new("make")
@@ -980,11 +981,11 @@ fn make_version_sets_the_version_through_the_release_script() {
         .expect("make runs");
     assert!(output.status.success(), "{}", stderr(&output));
     assert_eq!(stdout(&output), "scripts/release.sh version --set 9.8.7\n");
-    let readme = fs::read_to_string(repository().join("README.md")).unwrap();
+    let guide = fs::read_to_string(repository().join("docs/guide/development.md")).unwrap();
     assert!(
-        readme
+        guide
             .lines()
             .any(|line| line.starts_with("| `make version V=X.Y.Z` |")),
-        "the README's Makefile table lists `make version`"
+        "the development guide's Makefile table lists `make version`"
     );
 }

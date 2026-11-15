@@ -44,8 +44,8 @@ doc:
 matrix:
 	@$(CARGO) run --quiet --package cupel-cli -- describe matrix --format text
 
-# Rewrites the README's generated sections (exit codes, check table, support matrix) from
-# `cupel describe`. `make test` fails while they are stale (ADR-073).
+# Rewrites the generated sections of README.md and docs/guide/ (exit codes, depths, check table, support
+# matrix, and the rest) from `cupel describe`. `make test` fails while they are stale (ADR-073).
 readme:
 	UPDATE_README=1 $(CARGO) test --package cupel-cli --test readme
 
