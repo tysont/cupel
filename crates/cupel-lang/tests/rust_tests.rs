@@ -669,3 +669,11 @@ fn debug_assertions_count_unless_the_setting_turns_them_off() {
     let left_out: TestFrames = produce_configured("rust", dir.path(), settings);
     assert_eq!(classes(&left_out), [(Truthiness, Weak)]);
 }
+
+/// `unreachable!` in the methods of a test's local impl, as bytes' `test_deref_bufmut_forwards`
+/// does, checks only indirectly and is no assertion, guarded or not (ADR-225).
+#[test]
+fn unreachable_in_a_local_impl_is_no_assertion() {
+    let body = "struct Special;\n    impl BufMut for Special {\n        fn remaining_mut(&self) -> usize {\n            unreachable!(\"remaining_mut\");\n        }\n        fn chunk_mut(&mut self) -> usize {\n            if self.done() {\n                unreachable!(\"chunk_mut\");\n            }\n            0\n        }\n        fn put_u8(&mut self, _: u8) {}\n    }\n    Special.put_u8(b'x');";
+    assert_eq!(assertions_in(body), []);
+}
