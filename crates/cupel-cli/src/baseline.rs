@@ -126,17 +126,17 @@ fn unbudgeted(envelope: &Envelope) -> Option<String> {
     for check in &envelope.checks {
         let id = &check.id;
         let reason = check.skipped.as_ref().map(|skipped| skipped.reason);
+        let cut = check.status == CheckStatus::Partial;
+        if reason == Some(SkipReason::Budget) || (cut && reason.is_none() && reached) {
+            budgeted = true;
+            continue;
+        }
         match (check.status, reason) {
-            (CheckStatus::Pass | CheckStatus::Fail, _) => {}
-            (CheckStatus::Skipped | CheckStatus::Partial, Some(SkipReason::Budget)) => {
-                budgeted = true;
-            }
             (CheckStatus::Skipped, Some(SkipReason::Timeout)) => {
                 return Some(format!("`{id}` was skipped (timeout)"));
             }
-            (CheckStatus::Skipped, _) => {}
-            (CheckStatus::Partial, None) if reached => budgeted = true,
-            (CheckStatus::Partial, None) if budget_ms.is_none() => {
+            (CheckStatus::Pass | CheckStatus::Fail | CheckStatus::Skipped, _) => {}
+            (CheckStatus::Partial, _) if budget_ms.is_none() => {
                 return Some(format!("`{id}` was cut short, and the run had no budget"));
             }
             (CheckStatus::Partial, _) => {
