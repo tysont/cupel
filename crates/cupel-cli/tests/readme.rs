@@ -29,7 +29,10 @@ const DOCUMENTS: [(&str, &[&str]); 7] = [
     ),
     ("docs/guide/install.md", &["install-routes"]),
     ("docs/guide/agents.md", &["exit-codes", "agent-guide"]),
-    ("docs/guide/usage.md", &["verbs", "mcp-tools", "global-flags"]),
+    (
+        "docs/guide/usage.md",
+        &["verbs", "mcp-tools", "global-flags"],
+    ),
     ("docs/guide/checks.md", &["check-table"]),
     ("docs/guide/languages.md", &["support-matrix"]),
     ("docs/guide/configuration.md", &["check-settings"]),
@@ -375,11 +378,7 @@ fn depths(manifests: &[Value]) -> String {
                 .collect();
             adds.sort();
             running += adds.len();
-            vec![
-                format!("`{name}`"),
-                running.to_string(),
-                code_list(&adds),
-            ]
+            vec![format!("`{name}`"), running.to_string(), code_list(&adds)]
         })
         .collect();
     markdown_table(&owned(&["Depth", "Checks run", "Adds"]), &rows)
@@ -524,7 +523,10 @@ fn the_generated_sections_match_describe() {
         found.sort_unstable();
         let mut listed = names.to_vec();
         listed.sort_unstable();
-        assert_eq!(found, listed, "{file} marks exactly the sections listed for it");
+        assert_eq!(
+            found, listed,
+            "{file} marks exactly the sections listed for it"
+        );
         let expected = with_sections(file, &text, names, &sections);
         if update {
             std::fs::write(workspace_path(file), &expected)
@@ -544,11 +546,12 @@ fn documents() -> Vec<String> {
     let guide = workspace_path("docs/guide");
     let mut files: Vec<String> = std::fs::read_dir(&guide)
         .expect("docs/guide is readable")
-        .map(|entry| {
-            let name = entry.expect("an entry").file_name();
+        .map(|entry| entry.expect("an entry").path())
+        .filter(|path| path.extension().is_some_and(|extension| extension == "md"))
+        .map(|path| {
+            let name = path.file_name().expect("a file name");
             format!("docs/guide/{}", name.to_str().expect("a UTF-8 name"))
         })
-        .filter(|name| name.ends_with(".md"))
         .collect();
     files.sort();
     files.insert(0, "README.md".to_owned());
@@ -622,7 +625,10 @@ fn the_readme_stop_hook_blocks_exactly_on_a_failed_gate() {
             .expect("sh runs");
         let expected = if code == 1 { 2 } else { 0 };
         assert_eq!(output.status.code(), Some(expected), "cupel exit {code}");
-        assert!(output.stdout.is_empty(), "the hook prints nothing on stdout");
+        assert!(
+            output.stdout.is_empty(),
+            "the hook prints nothing on stdout"
+        );
         assert_eq!(
             String::from_utf8_lossy(&output.stderr),
             "cupel check --changed --gate --format text\n",
