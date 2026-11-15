@@ -1,6 +1,6 @@
 # CUPEL_DECISION_215: A Clojure project's API is what its published source paths hold
 
-**Date:** 2026-11-14 · **Status:** accepted · **Phase:** v0.2.9, item V20 · Amends [101](CUPEL_DECISION_101.md); the Clojure analogue of [176](CUPEL_DECISION_176.md) and [192](CUPEL_DECISION_192.md)
+**Date:** 2026-11-14 · **Status:** accepted; its note that Leiningen is no Cupel root amended by [234](CUPEL_DECISION_234.md) (owner rulings, 2026-11-14) · **Phase:** v0.2.9, item V20 · Amends [101](CUPEL_DECISION_101.md); the Clojure analogue of [176](CUPEL_DECISION_176.md) and [192](CUPEL_DECISION_192.md)
 
 ## Context
 Replaying clj-commons/clj-yaml PR #181 ("maintenance: dev, ci, test, doc", maintainer-merged), `check --changed --gate` failed `"static.api-surface" = "no-breaking"` with 10 `api.breaking`, every one in a babashka dev script: `ci-publish/clojars-deploy changed its signature`, `download-deps/-main was removed`, `lint/-main was removed`, `publish/-main was removed`, and so on. Those files are under `script/` and `build/`, on `bb.edn`'s `:paths ["script" "build"]`. clj-yaml's `deps.edn` publishes `:paths ["src/clojure" "target/classes" "resources"]`: no consumer of the library can call a var of `script/`. `static.api-surface` treated every public var of every Clojure file as API.

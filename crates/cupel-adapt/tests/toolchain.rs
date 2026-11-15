@@ -354,6 +354,47 @@ fn a_pytest_root_gets_coverage_py_unless_it_declares_pytest_cov() {
     );
 }
 
+/// A Leiningen project (a `project.clj` and no `deps.edn`) gets `lein test`, and Cloverage's
+/// Leiningen command only where its `project.clj` declares the lein-cloverage plugin; a
+/// directory with both manifests is a tools.deps project, as before (ADR-234).
+#[test]
+fn a_leiningen_project_gets_lein_test_and_cloverage_only_where_it_declares_the_plugin() {
+    let plain = support::repository(&[("project.clj", "(defproject a/b \"1\")\n")]);
+    let plugin = support::repository(&[(
+        "project.clj",
+        "(defproject a/b \"1\"\n  :plugins [[lein-cloverage \"1.2.4\"]])\n",
+    )]);
+    let both = support::repository(&[
+        ("project.clj", "(defproject a/b \"1\")\n"),
+        ("deps.edn", "{:paths [\"src\"]}\n"),
+    ]);
+    let got = |dir: &Path| {
+        let commands = commands("clojure", dir, &[], &[]);
+        (commands.test, commands.coverage)
+    };
+    assert_eq!(
+        [got(plain.path()), got(plugin.path())],
+        [
+            (Some("lein test".to_owned()), None),
+            (
+                Some("lein test".to_owned()),
+                Some("lein cloverage --lcov".to_owned())
+            ),
+        ]
+    );
+    assert_eq!(got(both.path()).0.as_deref(), Some("clojure -M:test"));
+    // No producer runs `lein test`, and the Clojure CLI's runner would run without the
+    // project's classpath: it is set aside in a Leiningen root at run time.
+    let clojure_test = ProducerId::from("tool.clojure-test");
+    assert_eq!(
+        [
+            toolchain::defers(&clojure_test, plain.path()),
+            toolchain::defers(&clojure_test, both.path()),
+        ],
+        [true, false]
+    );
+}
+
 #[test]
 fn a_python_bench_needs_pytest_and_pytest_benchmark_alone_does_not_mean_pytest() {
     let dir = support::repository(&[("requirements-dev.txt", "pytest-benchmark==4\n")]);

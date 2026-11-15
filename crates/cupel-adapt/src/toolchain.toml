@@ -327,9 +327,18 @@ property = ["test.check"]
 fuzz = []
 race = []
 
+# A Leiningen project (a `project.clj` and no `deps.edn`) is tested with `lein test`; no producer
+# runs it, so the Clojure CLI's runner is set aside there rather than run without the project's
+# classpath (ADR-234). A directory with both manifests is a tools.deps project.
+[[rows.runners]]
+id = "tool.lein-test"
+detect = [{ all = [{ file = "project.clj" }, { not = { file = "deps.edn" } }] }]
+command = "lein test"
+
 [[rows.runners]]
 id = "tool.clojure-test"
 command = "clojure -M:test"
+defer = [{ all = [{ file = "project.clj" }, { not = { file = "deps.edn" } }] }]
 
 # Cloverage by coordinate needs no `deps.edn` change; it instruments `src` and runs `test`. The
 # `:cupel/no-main` alias clears the `:main-opts` a `:test` alias may have (a test runner's `-m`,
@@ -338,3 +347,10 @@ command = "clojure -M:test"
 id = "tool.cloverage"
 format = "lcov"
 commands = { "tool.clojure-test" = "clojure -Sdeps '{:deps {cloverage/cloverage {:mvn/version \"1.2.4\"}} :aliases {:cupel/no-main {:main-opts []}}}' -M:test:cupel/no-main -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary" }
+
+# lein-cloverage's task, where the project declares the plugin; Cupel does not run it (ADR-234).
+[[rows.coverage]]
+id = "tool.lein-cloverage"
+format = "lcov"
+detect = [{ mentions = "lein-cloverage", in = ["project.clj"] }]
+commands = { "tool.lein-test" = "lein cloverage --lcov" }

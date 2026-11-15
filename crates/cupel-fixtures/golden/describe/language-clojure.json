@@ -140,6 +140,20 @@
           "format": "lcov",
           "install": null,
           "producer": "tool.cloverage"
+        },
+        {
+          "commands": [
+            {
+              "command": "lein cloverage --lcov",
+              "runner": "tool.lein-test"
+            }
+          ],
+          "detect": [
+            "`project.clj` in the root or a member mentions `lein-cloverage`"
+          ],
+          "format": "lcov",
+          "install": null,
+          "producer": "tool.lein-cloverage"
         }
       ],
       "fuzz": [],
@@ -152,9 +166,26 @@
         {
           "commands": [
             {
+              "command": "lein test",
+              "runner": null
+            }
+          ],
+          "detect": [
+            "file `project.clj` exists, and not (file `deps.edn` exists)"
+          ],
+          "format": null,
+          "install": null,
+          "producer": "tool.lein-test"
+        },
+        {
+          "commands": [
+            {
               "command": "clojure -M:test",
               "runner": null
             }
+          ],
+          "defer": [
+            "file `project.clj` exists, and not (file `deps.edn` exists)"
           ],
           "detect": [],
           "format": null,
