@@ -2736,7 +2736,7 @@ Items 1–7 are the rulings in order; 8 is `v0.2.8`: tag, verify the release as 
 
 **Goal:** Validate Cupel on a real repository per language, with PR replay as the method, and ship the fixes as `v0.2.9`.
 
-**Status:** in progress.
+**Status:** complete, accepted by the owner (2026-11-14), whose calibration rulings start batch v0.3.0. Tagged `v0.2.9` at c70600c7 (2026-11-14) and verified: SHA256SUMS, `release.sh verify` on all five archives, both macOS binaries, `install.sh` on macOS, Ubuntu 24.04 amd64 and Alpine 3.20 arm64, and `cargo binstall`; CI green on every job. The final rerun of clap, clj-yaml and bytes on the release binary confirmed V17–V22 on the real repositories: clap's parse errors 13 → 0 and `test.no-assertion` 44 → 31, clj-yaml #181 passes, bytes' `dead.symbol` 7 → 0 and no `perf.footprint` on any PR.
 
 The owner's method (2026-11-13):
 - Repositories: Rust clap, Python httpx, Go hashicorp/raft, Java jackson-core, Clojure ring.
