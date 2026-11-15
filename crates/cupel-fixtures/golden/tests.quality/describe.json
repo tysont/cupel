@@ -241,7 +241,7 @@
                 "type": "integer"
               },
               "loops": {
-                "description": "Loops other than tables.",
+                "description": "Loops other than tables and setup loops.",
                 "format": "uint32",
                 "minimum": 0,
                 "type": "integer"
@@ -257,6 +257,12 @@
                 ],
                 "type": "string"
               },
+              "setup": {
+                "description": "Loops holding no assertion and no decision but setup loops and boolean operators: they\nbuild inputs, running the same statements on every pass (ADR-220), and are not logic.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
               "tables": {
                 "description": "Loops over a table of cases written in place (ADR-069) or holding an assertion\n(ADR-184): parametrization, not logic.",
                 "format": "uint32",
@@ -271,6 +277,7 @@
               "logic_max",
               "loops",
               "tables",
+              "setup",
               "branches",
               "alternatives",
               "guards"

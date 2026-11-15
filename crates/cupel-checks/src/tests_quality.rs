@@ -129,11 +129,14 @@ struct TestLogic {
     /// Loops, plus alternatives, plus branches beyond the guards.
     logic: u32,
     logic_max: u32,
-    /// Loops other than tables.
+    /// Loops other than tables and setup loops.
     loops: u32,
     /// Loops over a table of cases written in place (ADR-069) or holding an assertion
     /// (ADR-184): parametrization, not logic.
     tables: u32,
+    /// Loops holding no assertion and no decision but setup loops and boolean operators: they
+    /// build inputs, running the same statements on every pass (ADR-220), and are not logic.
+    setup: u32,
     /// `if` and `else if` branches and switch or match arms.
     branches: u32,
     /// Conditional expressions and exception handlers.
@@ -405,6 +408,7 @@ struct Subject<'a> {
 struct LogicCount {
     loops: u32,
     tables: u32,
+    setup: u32,
     branches: u32,
     alternatives: u32,
     guards: u32,
@@ -427,14 +431,16 @@ impl LogicCount {
                     .filter(|decision| kinds.contains(&decision.kind)),
             )
         };
-        let loops = |table: bool| {
+        let loops = |role: LoopRole| {
             count(decisions.iter().filter(|decision| {
-                decision.kind == DecisionKind::Loop && table_driven(decision, case) == table
+                decision.kind == DecisionKind::Loop
+                    && LoopRole::of(decision, case, &decisions) == role
             }))
         };
         Self {
-            loops: loops(false),
-            tables: loops(true),
+            loops: loops(LoopRole::Logic),
+            tables: loops(LoopRole::Table),
+            setup: loops(LoopRole::Setup),
             // A case arm, like an `if`, may be the guard of one failure call
             // (`case got != want: t.Errorf(…)`).
             branches: of_kinds(&[DecisionKind::Branch, DecisionKind::Case]),
@@ -458,6 +464,42 @@ fn expected_exception(decision: &Decision, case: &TestCase) -> bool {
                 assertion.kind == AssertionKind::Throws && assertion.span.contains(span)
             })
         })
+}
+
+/// What a test's loop is to `test.logic`.
+#[derive(PartialEq, Eq)]
+enum LoopRole {
+    /// It runs a table of cases ([`table_driven`]).
+    Table,
+    /// It builds inputs ([`builds_inputs`]).
+    Setup,
+    /// Anything else.
+    Logic,
+}
+
+impl LoopRole {
+    /// The role of `decision`, a loop of `case` among its `decisions`.
+    fn of(decision: &Decision, case: &TestCase, decisions: &[&Decision]) -> Self {
+        if table_driven(decision, case) {
+            Self::Table
+        } else if builds_inputs(decision, decisions) {
+            Self::Setup
+        } else {
+            Self::Logic
+        }
+    }
+}
+
+/// Whether a loop that holds no assertion builds inputs: it holds no decision of `decisions` but
+/// loops and boolean operators, so every pass runs the same statements (ADR-220). A loop without
+/// a span cannot be placed and does not.
+fn builds_inputs(decision: &Decision, decisions: &[&Decision]) -> bool {
+    decision.span.as_ref().is_some_and(|outer| {
+        decisions.iter().all(|inner| {
+            matches!(inner.kind, DecisionKind::Loop | DecisionKind::BooleanOp)
+                || inner.span.as_ref().is_none_or(|span| !outer.contains(span))
+        })
+    })
 }
 
 /// Whether a loop runs a table of cases: it iterates one written in place (ADR-069), or its body
@@ -653,6 +695,7 @@ impl TestsQuality {
                     logic_max: limits.logic_max,
                     loops: logic.loops,
                     tables: logic.tables,
+                    setup: logic.setup,
                     branches: logic.branches,
                     alternatives: logic.alternatives,
                     guards: logic.guards,

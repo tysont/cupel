@@ -79,6 +79,8 @@ struct Case {
     loops_at: Vec<Span>,
     /// Exception handlers, where each is, after `loops_at`.
     catches_at: Vec<Span>,
+    /// `if` branches, where each is, after `catches_at`.
+    branches_at: Vec<Span>,
     /// Strong throws assertions spanning a whole `try` (the expected-exception idiom), after
     /// `assertions`.
     throws_over: Vec<Span>,
@@ -101,6 +103,7 @@ fn case(name: &'static str, line: u32) -> Case {
         clauses: Vec::new(),
         loops_at: Vec::new(),
         catches_at: Vec::new(),
+        branches_at: Vec::new(),
         throws_over: Vec::new(),
         body: Vec::new(),
         wrapped: false,
@@ -154,6 +157,12 @@ impl Case {
     /// Catch clauses spanning each of `spans`.
     fn catching_at(mut self, spans: &[Span]) -> Self {
         self.catches_at = spans.to_vec();
+        self
+    }
+
+    /// `if` branches spanning each of `spans`.
+    fn branching_at(mut self, spans: &[Span]) -> Self {
+        self.branches_at = spans.to_vec();
         self
     }
 
@@ -249,6 +258,11 @@ impl Case {
                 self.catches_at
                     .iter()
                     .map(|at| (DecisionKind::Catch, false, false, Some(*at))),
+            )
+            .chain(
+                self.branches_at
+                    .iter()
+                    .map(|at| (DecisionKind::Branch, false, false, Some(*at))),
             )
             .map(|(kind, table, expression, span)| Decision {
                 span,
@@ -634,6 +648,7 @@ fn loops_and_unguarded_branches_are_logic_but_guarded_failure_calls_are_not() {
             "logic_max": 0,
             "loops": 0,
             "tables": 0,
+            "setup": 0,
             "branches": 2,
             "alternatives": 0,
             "guards": 1,
@@ -670,9 +685,6 @@ fn a_loop_holding_an_assertion_is_table_driven_but_branching_inside_it_is_logic(
         case("asserting_loop", 100)
             .asserting_on(&[102])
             .looping_at(&[span(101, 3)]),
-        case("loop_before_the_assertion", 110)
-            .asserting_on(&[115])
-            .looping_at(&[span(111, 2)]),
         // `for (…) { if (a) { … } else if (b) { … } expect(…) }`: one branch beyond the guard.
         case("branching_in_an_asserting_loop", 120)
             .asserting_on(&[124])
@@ -693,20 +705,59 @@ fn a_loop_holding_an_assertion_is_table_driven_but_branching_inside_it_is_logic(
         .collect();
     assert_eq!(
         logic,
-        [
+        [(
+            "t::branching_in_an_asserting_loop",
+            &json!(0),
+            &json!(1),
+            &json!(2)
+        )]
+    );
+}
+
+#[test]
+fn a_loop_that_neither_asserts_nor_branches_builds_inputs_and_is_no_logic() {
+    let (_, findings) = Run::of(vec![
+        // `for i := 0; i < 3; i++ { servers = append(servers, newServer()) }`, then the check.
+        case("setup_loop", 110)
+            .asserting_on(&[115])
+            .looping_at(&[span(111, 2)]),
+        // A setup loop inside another builds a grid of inputs.
+        case("nested_setup_loops", 130)
+            .asserting_on(&[136])
+            .looping_at(&[span(131, 4), span(132, 2)]),
+        // `for i, r := range rafts { if i == 0 { … } … }`: the loop decides what it builds.
+        case("branching_setup_loop", 150)
+            .asserting_on(&[156])
+            .looping_at(&[span(151, 4)])
+            .branching_at(&[span(152, 2)]),
+        // A branch after a setup loop leaves the loop setup; the branch is the guard.
+        case("setup_loop_then_a_guard", 170)
+            .asserting_on(&[175])
+            .looping_at(&[span(171, 2)])
+            .branching_at(&[span(174, 3)]),
+    ])
+    .go();
+    let logic: Vec<(&str, &Value, &Value, &Value, &Value)> = findings
+        .iter()
+        .map(|finding| {
             (
-                "t::loop_before_the_assertion",
-                &json!(1),
-                &json!(0),
-                &json!(0)
-            ),
-            (
-                "t::branching_in_an_asserting_loop",
-                &json!(0),
-                &json!(1),
-                &json!(2)
-            ),
-        ]
+                finding.symbol.as_ref().unwrap().display.as_str(),
+                &finding.evidence.0["logic"],
+                &finding.evidence.0["loops"],
+                &finding.evidence.0["setup"],
+                &finding.evidence.0["branches"],
+            )
+        })
+        .collect();
+    assert_eq!(
+        logic,
+        [(
+            "t::branching_setup_loop",
+            &json!(1),
+            &json!(1),
+            &json!(0),
+            &json!(1)
+        )]
     );
 }
 

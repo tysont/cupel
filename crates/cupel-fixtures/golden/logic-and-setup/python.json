@@ -98,6 +98,7 @@
         "logic_max": 0,
         "loops": 0,
         "remediation_mode": "simplify",
+        "setup": 0,
         "tables": 0
       },
       "id": "fnd_51508d",
