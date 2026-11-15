@@ -34,6 +34,7 @@ static PYTEST: RunnerSpec = RunnerSpec {
     vary: &PYTHON,
     outputs: &[],
     build: None,
+    prepare: None,
 };
 
 inventory::submit!(crate::ToolProducer {

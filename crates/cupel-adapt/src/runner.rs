@@ -50,6 +50,9 @@ pub struct RunnerSpec {
     /// How it builds once for runs in other copies of the tree (ADR-150 §8); `None` when it
     /// always builds in the tree it runs in.
     pub build: Option<&'static Builder>,
+    /// What prepares a root (absolute) before each run or listing there, such as a Clojure
+    /// project's own `:deps/prep-lib` build (ADR-230); `None` when nothing does.
+    pub prepare: Option<fn(&Path, &Cancellation) -> Result<()>>,
 }
 
 /// One command of a build and the name of the file its standard output is kept in.
@@ -308,6 +311,7 @@ impl cupel_core::Runner for Runner {
         let mut ids = Vec::new();
         for (index, (dir, packages)) in suite_roots(ctx).into_iter().enumerate() {
             let root = self.root(ctx, index, &dir, packages, false)?;
+            self.prepare(&root, &ctx.cancel)?;
             let command = (lister.command)(&root);
             let captured = self.process(&root, &command, &[], None).run(&ctx.cancel)?;
             ids.extend(
@@ -549,6 +553,7 @@ impl Runner {
         run: &Run<'_>,
     ) -> Result<(RunnerInvocation, Vec<TestResult>, Vec<String>)> {
         let _ = std::fs::remove_file(&root.report);
+        self.prepare(root, run.cancel)?;
         let vary = self.0.vary;
         let command = self.command_line(root, dir, run);
         let env: Vec<(String, String)> = run
@@ -638,6 +643,11 @@ impl Runner {
             process = process.merged();
         }
         process
+    }
+
+    /// Prepares `root` as the spec says, before a run or listing there.
+    fn prepare(&self, root: &Root, cancel: &Cancellation) -> Result<()> {
+        self.0.prepare.map_or(Ok(()), |prepare| prepare(&root.dir, cancel))
     }
 
     /// The program to run in `dir`: its `node_modules/.bin` copy when the spec allows one, else

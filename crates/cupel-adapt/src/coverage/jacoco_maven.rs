@@ -18,6 +18,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     listing: every_file,
     providers: &[],
     uses: None,
+    prepare: None,
 };
 
 /// The producer of a build that runs `JaCoCo`'s agent itself (ADR-209): `mvn test` and the

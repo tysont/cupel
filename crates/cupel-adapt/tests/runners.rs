@@ -355,12 +355,17 @@ fn assert_clojure_reports(repo: &str, expected: &[(&str, TestOutcome)]) {
 
 /// A `:test` alias whose `:main-opts` run another test runner (cognitect-labs/test-runner's
 /// `-m cognitect.test-runner`, here a stand-in that runs nothing) lends its paths to Cupel's
-/// runner script without running that main.
+/// runner script without running that main; the project's `:deps/prep-lib` build runs first,
+/// as its `target/classes` is missing, so the namespace importing its Java class loads
+/// (ADR-230).
 #[test]
 fn clojure_test_runs_its_script_where_the_test_alias_has_main_opts() {
     assert_clojure_reports(
         "tools-build",
-        &[("shop.pricing-test/discount-takes-the-percent-off", Passed)],
+        &[
+            ("shop.pricing-test/discount-takes-the-percent-off", Passed),
+            ("shop.pricing-test/in-cents-rounds-to-whole-cents", Passed),
+        ],
     );
 }
 

@@ -86,6 +86,7 @@ mod model_check;
 mod node_test;
 mod per_test;
 pub mod plugin;
+pub mod prep_lib;
 mod proof;
 mod property;
 mod pytest;

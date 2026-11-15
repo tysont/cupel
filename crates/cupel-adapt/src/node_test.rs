@@ -32,6 +32,7 @@ static NODE_TEST: RunnerSpec = RunnerSpec {
     },
     outputs: &[],
     build: None,
+    prepare: None,
 };
 
 inventory::submit!(crate::ToolProducer {

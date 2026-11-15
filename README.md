@@ -916,7 +916,7 @@ Checks that depend on running the test suite read a `test-results` fact, which C
 | Python | `pytest` (when the project mentions it), `unittest` | JUnit XML; `unittest -v` output |
 | JavaScript, TypeScript | `vitest`, `jest` (whichever `package.json` depends on), `node --test` (Node's built-in runner, when neither is the root's runner) | the Jest JSON report; `node --test`'s JUnit XML (Node 24.11.1 or later, which names each test's file) |
 | Java | Maven (`mvn test`, when a `pom.xml` exists), Gradle (`gradle test --rerun`) | Surefire's and Gradle's JUnit XML, one file per test class |
-| Clojure | `clojure.test` through the Clojure CLI (`clojure -M:test` and a runner script Cupel writes under `.cupel/`; an alias Cupel adds clears the `:test` alias's `:main-opts`, such as cognitect-labs/test-runner's or Kaocha's, so the script runs with that alias's paths and dependencies, [ADR-210](docs/adr/CUPEL_DECISION_210.md)) | `clojure.test.junit` XML |
+| Clojure | `clojure.test` through the Clojure CLI (`clojure -M:test` and a runner script Cupel writes under `.cupel/`; an alias Cupel adds clears the `:test` alias's `:main-opts`, such as cognitect-labs/test-runner's or Kaocha's, so the script runs with that alias's paths and dependencies, [ADR-210](docs/adr/CUPEL_DECISION_210.md); a project whose `deps.edn` declares `:deps/prep-lib` is prepared first, [ADR-230](docs/adr/CUPEL_DECISION_230.md)) | `clojure.test.junit` XML |
 
 A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in the root's `node_modules/.bin`); otherwise checks that need test results are skipped as `unavailable` with the tool named, and `cupel doctor` says what to install (`cupel doctor --fix --install` installs it). `[lang.<id>] runner` chooses one explicitly, by its name with or without the `tool.` prefix:
 
@@ -924,6 +924,8 @@ A runner is used when its program is on `PATH` (or, for `vitest` and `jest`, in 
 [lang.python]
 runner = "unittest"
 ```
+
+A tools.deps project that needs its own build before its code loads declares it in `deps.edn` as `:deps/prep-lib {:alias :build :fn compile-java :ensure "target/classes"}` (clj-commons/clj-yaml compiles Java classes so). Before each Clojure run in such a root (the baseline, reruns, mutants' runs in their copies of the tree, and Cloverage), Cupel runs `clojure -T:build compile-java` there when the `:ensure` directory does not exist, and a build that fails fails the run with its output. `cupel doctor` reports a root whose `:ensure` directory is missing as `doctor.prep-needed` with the command: a note, or a warning without the Clojure CLI ([ADR-230](docs/adr/CUPEL_DECISION_230.md)).
 
 Every pytest run Cupel makes (the baseline, the [one suite run](#one-suite-run), the per-test map, reruns, and mutants' runs) passes the arguments `[lang.python] test` gives pytest, so `test = "python -m pytest -m 'not network'"` leaves a project's network tests out of all of them. A run narrowed to tests Cupel names keeps the options with their values and leaves out configured paths, which pytest would run in full ([ADR-229](docs/adr/CUPEL_DECISION_229.md)).
 

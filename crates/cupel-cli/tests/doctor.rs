@@ -450,3 +450,45 @@ fn doctor_says_nothing_of_mutation_slots_when_there_are_none() {
         .count();
     assert_eq!(reported, 0, "{kinds:?}");
 }
+
+/// The `doctor.prep-needed` findings of `doctor` in `repo`, as `(subject, severity, command)`.
+fn prep_needed(repo: &Repo) -> Vec<(Value, Value, Value)> {
+    let outcome = repo.run(&["doctor"]);
+    outcome.envelope()["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|finding| finding["kind"] == json!("doctor.prep-needed"))
+        .map(|finding| {
+            (
+                finding["evidence"]["root"].clone(),
+                finding["severity"].clone(),
+                finding["evidence"]["command"].clone(),
+            )
+        })
+        .collect()
+}
+
+/// A tools.deps project whose `deps.edn` declares `:deps/prep-lib` (clj-yaml's
+/// `{:alias :build :fn compile-java :ensure "target/classes"}`) is reported while its `:ensure`
+/// directory is missing, naming the command Cupel runs first, and not once it exists (ADR-230).
+#[test]
+fn a_clojure_project_whose_prep_lib_is_not_done_is_reported_with_its_command() {
+    let repo = Repo::new();
+    cupel_fixtures::copy_repo("tools-build", &repo.root());
+    let severity = if cupel_core::find_program("clojure").is_some() {
+        "info"
+    } else {
+        "warn"
+    };
+    assert_eq!(
+        prep_needed(&repo),
+        [(
+            json!("."),
+            json!(severity),
+            json!("clojure -T:build compile-java")
+        )]
+    );
+    std::fs::create_dir_all(repo.path("target/classes")).unwrap();
+    assert_eq!(prep_needed(&repo), []);
+}

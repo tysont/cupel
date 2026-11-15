@@ -17,6 +17,7 @@ static SPEC: CoverageSpec = CoverageSpec {
     listing: every_file,
     providers: &[],
     uses: Some("c8"),
+    prepare: None,
 };
 
 inventory::submit!(crate::ToolProducer {

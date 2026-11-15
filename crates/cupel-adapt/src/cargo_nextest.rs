@@ -43,6 +43,7 @@ pub(crate) static CARGO_NEXTEST: RunnerSpec = RunnerSpec {
     },
     outputs: &["target"],
     build: Some(&BUILD),
+    prepare: None,
 };
 
 inventory::submit!(crate::ToolProducer {

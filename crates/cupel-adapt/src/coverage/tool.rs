@@ -5,7 +5,8 @@ use std::path::Path;
 
 use cupel_core::coverage::{CoverageMap, Listing};
 use cupel_core::{
-    Action, ActionKind, Availability, CheckId, CostClass, Ctx, Error, Event, EventSink, Evidence,
+    Action, ActionKind, Availability, Cancellation, CheckId, CostClass, Ctx, Error, Event,
+    EventSink, Evidence,
     FactKind, Finding, FindingId, LangId, Langs, Process, ProduceCtx, Producer, ProducerId, Result,
     Scope, Severity, Tier, ToolId, ToolProbe, output_tail,
 };
@@ -57,6 +58,9 @@ pub struct CoverageSpec {
     /// pytest-cov's `--cov` and coverage.py with pytest); an option given a value (`--cov=src`)
     /// contains its name.
     pub uses: Option<&'static str>,
+    /// What prepares a root (absolute) before the command runs there, such as a Clojure
+    /// project's own `:deps/prep-lib` build (ADR-230); `None` when nothing does.
+    pub prepare: Option<fn(&Path, &Cancellation) -> Result<()>>,
 }
 
 /// A coverage producer: `spec` run, or its report ingested, once per project root.
@@ -299,6 +303,9 @@ impl CoverageTool {
         let out = area.join(REPORT);
         let _ = fs::remove_file(area.join(SOURCES));
         let _ = fs::remove_file(&out);
+        if let Some(prepare) = self.0.prepare {
+            prepare(root, &ctx.cancel)?;
+        }
         let line = command.replace(OUT, &quoted(&out));
         let captured = Process::new("sh", root)
             .args(["-c", line.as_str()])

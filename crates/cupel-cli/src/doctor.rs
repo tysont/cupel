@@ -1,5 +1,5 @@
 // ABOUTME: The `doctor` verb: checks configuration, `required_version`, write access to `.cupel/`, the tools the
-// ABOUTME: configuration needs (installed with `--fix`, ADR-081), and reports mutation slots; exit 3 for any `fail`.
+// ABOUTME: configuration needs (installed with `--fix`, ADR-081), unprepared Clojure projects, and mutation slots; exit 3 for any `fail`.
 use std::path::Path;
 
 use cupel_core::config::Config;
@@ -143,7 +143,7 @@ fn needed(
         .unwrap_or_default();
     let info = project::detect(writer, &exclude, &roots);
     let mut requirements = requirements(config.ok(), writer.root(), &info);
-    let mut problems = Vec::new();
+    let mut problems = preps(writer.root(), &info);
     if let Ok(config) = config {
         let resolved = Resolution::of(&Catalog::builtin(), config, writer.root(), &info);
         problems.extend(resolved.problems);
@@ -517,6 +517,58 @@ fn daemon(root: &Path) -> Option<Problem> {
         },
         fix: fix.to_owned(),
     })
+}
+
+/// One `doctor.prep-needed` per Clojure root of `info` (in the repository at `repo`) whose
+/// `deps.edn` declares a `:deps/prep-lib` its `:ensure` directory says is not done (ADR-230): a
+/// note, as Cupel runs the prep before its own Clojure runs there, and a warning without the
+/// Clojure CLI, which runs it.
+fn preps(repo: &Path, info: &ProjectInfo) -> Vec<Problem> {
+    let cli = cupel_core::find_program("clojure").is_some();
+    info.roots
+        .iter()
+        .filter(|root| root.lang.as_str() == "clojure")
+        .filter_map(|root| {
+            let dir = repo.join(&root.path);
+            let prep = cupel_adapt::prep_lib::declared(&dir).filter(|prep| !prep.done(&dir))?;
+            let command = prep.command().join(" ");
+            let fix = if cli {
+                format!(
+                    "Nothing to do for Cupel, which runs `{command}` in `{}` before its Clojure                      runs there; run it yourself before the project's own test command.",
+                    root.path
+                )
+            } else {
+                format!(
+                    "Install the Clojure CLI (https://clojure.org/guides/install_clojure), which                      runs `{command}`."
+                )
+            };
+            Some(Problem {
+                check: "doctor",
+                kind: "doctor.prep-needed",
+                subject: root.path.clone(),
+                severity: if cli { Severity::Info } else { Severity::Warn },
+                title: format!(
+                    "`{}` is not prepared: its deps.edn's :deps/prep-lib makes `{}`, which does                      not exist",
+                    root.path, prep.ensure
+                ),
+                detail: Some(
+                    "The project needs its own build before its code loads (compiled Java \
+                     classes, say); without it a test run fails, such as with a \
+                     ClassNotFoundException."
+                        .to_owned(),
+                ),
+                evidence: json!({
+                    "root": root.path,
+                    "alias": prep.alias,
+                    "fn": prep.function,
+                    "ensure": prep.ensure,
+                    "command": command,
+                }),
+                action: ActionKind::Review,
+                fix,
+            })
+        })
+        .collect()
 }
 
 /// The repository's mutation slots at `root` (ADR-159), when there are any: how much they hold.

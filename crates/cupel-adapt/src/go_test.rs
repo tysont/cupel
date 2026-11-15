@@ -33,6 +33,7 @@ pub(crate) static GO_TEST: RunnerSpec = RunnerSpec {
     },
     outputs: &[],
     build: None,
+    prepare: None,
 };
 
 inventory::submit!(crate::ToolProducer {

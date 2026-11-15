@@ -33,6 +33,7 @@ static MAVEN: RunnerSpec = RunnerSpec {
     },
     outputs: &["target"],
     build: None,
+    prepare: None,
 };
 
 inventory::submit!(crate::ToolProducer {
