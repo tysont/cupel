@@ -1,6 +1,6 @@
 # CUPEL_DECISION_146: The package is `cupel-cli` on PyPI, npm, and crates.io; `publish-crates` skips while another project holds a crate name
 
-**Date:** 2026-10-23 · **Status:** accepted · **Phase:** P9.F5
+**Date:** 2026-10-23 · **Status:** accepted; the probe job `publish-crates` needs in §4 is `publishers` by [235](CUPEL_DECISION_235.md) · **Phase:** P9.F5
 
 ## Context
 

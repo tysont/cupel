@@ -13,7 +13,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use serde_json::{Value, json};
-use support::{Outcome, Repo, installed, workspace};
+use support::{Outcome, Repo, git, installed, workspace};
 use tempfile::TempDir;
 use toml_edit::{DocumentMut, Item, Table};
 
@@ -392,7 +392,12 @@ fn the_install_scripts_pass_shellcheck() {
     let root = workspace();
     let outcome = outcome(
         Command::new("shellcheck")
-            .args(["--shell=sh", "dist/install.sh", "dist/homebrew/render.sh"])
+            .args([
+                "--shell=sh",
+                "dist/install.sh",
+                "dist/homebrew/render.sh",
+                "dist/homebrew/publish.sh",
+            ])
             .current_dir(root),
     );
     assert_eq!((outcome.code, outcome.stdout.as_str()), (0, ""));
@@ -660,6 +665,126 @@ fn the_formula_is_not_rendered_from_sha256sums_missing_a_target() {
                 sums.display()
             )
         )
+    );
+}
+
+/// An empty bare repository standing in for the tysont/homebrew-cupel tap, which had no branch
+/// before the first release published to it.
+fn empty_tap(dir: &Path) -> PathBuf {
+    let tap = dir.join("homebrew-cupel.git");
+    fs::create_dir(&tap).unwrap();
+    git(&tap, &["init", "--bare", "--quiet"]);
+    tap
+}
+
+/// dist/homebrew/publish.sh for the fixture release, pushing to `tap`.
+fn publish_formula(tap: &Path, sums: &Path) -> Outcome {
+    outcome(
+        Command::new("sh")
+            .arg(workspace().join("dist/homebrew/publish.sh"))
+            .arg(format!("v{FIXTURE_VERSION}"))
+            .arg(sums)
+            .arg(tap)
+            .env("GIT_CONFIG_GLOBAL", "/dev/null")
+            .env("GIT_CONFIG_NOSYSTEM", "1"),
+    )
+}
+
+/// What `tap`'s `main` holds: each commit's author and subject, newest first, and its files.
+fn tap_main(tap: &Path) -> (Vec<String>, Vec<String>) {
+    let log = git(tap, &["log", "--format=%an <%ae> %s", "main"]);
+    let files = git(tap, &["ls-tree", "-r", "--name-only", "main"]);
+    (
+        log.lines().map(str::to_owned).collect(),
+        files.lines().map(str::to_owned).collect(),
+    )
+}
+
+const TAP_AUTHOR: &str =
+    "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>";
+
+/// The first publish creates the tap's `main` with the rendered formula and a README saying how to
+/// install from it.
+#[test]
+fn publishing_to_an_empty_tap_creates_main_with_the_formula_and_a_readme() {
+    let dir = TempDir::new().unwrap();
+    let tap = empty_tap(dir.path());
+    let published = publish_formula(&tap, &fixture_sums());
+    assert_eq!(published.code, 0, "{}", published.stderr);
+    let rendered = render_formula(&fixture_sums()).stdout;
+    let readme = git(&tap, &["show", "main:README.md"]);
+    assert_eq!(
+        (
+            tap_main(&tap),
+            git(&tap, &["show", "main:Formula/cupel.rb"]),
+            readme.contains("brew install tysont/cupel/cupel"),
+        ),
+        (
+            (
+                vec![format!("{TAP_AUTHOR} cupel {FIXTURE_VERSION}")],
+                vec!["Formula/cupel.rb".to_owned(), "README.md".to_owned()]
+            ),
+            rendered.trim_end().to_owned(),
+            true
+        )
+    );
+}
+
+/// Publishing the same release again commits nothing.
+#[test]
+fn publishing_an_unchanged_formula_commits_nothing() {
+    let dir = TempDir::new().unwrap();
+    let tap = empty_tap(dir.path());
+    assert_eq!(publish_formula(&tap, &fixture_sums()).code, 0);
+    let again = publish_formula(&tap, &fixture_sums());
+    assert_eq!(again.code, 0, "{}", again.stderr);
+    assert_eq!(tap_main(&tap).0.len(), 1);
+}
+
+/// A later release replaces the formula and leaves the tap's README as it is.
+#[test]
+fn publishing_a_later_release_updates_the_formula_and_keeps_the_readme() {
+    let dir = TempDir::new().unwrap();
+    let tap = empty_tap(dir.path());
+    let work = dir.path().join("work");
+    git(
+        dir.path(),
+        &["clone", "--quiet", tap.to_str().unwrap(), "work"],
+    );
+    fs::write(work.join("README.md"), "The owner's README\n").unwrap();
+    git(&work, &["add", "README.md"]);
+    git(&work, &["commit", "--quiet", "-m", "README"]);
+    git(&work, &["push", "--quiet", "origin", "HEAD:main"]);
+    let published = publish_formula(&tap, &fixture_sums());
+    assert_eq!(published.code, 0, "{}", published.stderr);
+    assert_eq!(
+        (tap_main(&tap), git(&tap, &["show", "main:README.md"])),
+        (
+            (
+                vec![
+                    format!("{TAP_AUTHOR} cupel {FIXTURE_VERSION}"),
+                    "Cupel <cupel@example.com> README".to_owned()
+                ],
+                vec!["Formula/cupel.rb".to_owned(), "README.md".to_owned()]
+            ),
+            "The owner's README".to_owned()
+        )
+    );
+}
+
+/// A SHA256SUMS missing a target pushes nothing.
+#[test]
+fn publishing_from_sha256sums_missing_a_target_pushes_nothing() {
+    let dir = TempDir::new().unwrap();
+    let tap = empty_tap(dir.path());
+    let sums = sums_without(dir.path(), "aarch64-apple-darwin");
+    let published = publish_formula(&tap, &sums);
+    let branches = git(&tap, &["branch", "--list"]);
+    assert_eq!(
+        (published.code, branches),
+        (1, String::new()),
+        "{}",
+        published.stderr
     );
 }
 

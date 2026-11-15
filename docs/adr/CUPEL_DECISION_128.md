@@ -1,6 +1,6 @@
 # CUPEL_DECISION_128: Publish jobs that skip without their secrets, and install routes with their liveness in one place
 
-**Date:** 2026-10-19 · **Status:** accepted; the npm and pipx package names of §4 and the `publish-crates` steps of §2 amended by [146](CUPEL_DECISION_146.md) · **Phase:** P8.5
+**Date:** 2026-10-19 · **Status:** accepted; the npm and pipx package names of §4 and the `publish-crates` steps of §2 amended by [146](CUPEL_DECISION_146.md); the `secrets` job of §1 and the npm, PyPI, and Homebrew jobs of §2 amended by [235](CUPEL_DECISION_235.md) · **Phase:** P8.5
 
 ## Context
 

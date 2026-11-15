@@ -379,7 +379,9 @@ fn release_workflow_pins_every_action_to_a_commit() {
             "Swatinem/rust-cache",
             "actions/checkout",
             "actions/download-artifact",
-            "actions/upload-artifact"
+            "actions/setup-node",
+            "actions/upload-artifact",
+            "pypa/gh-action-pypi-publish"
         ]
     );
     let unpinned: Vec<&&str> = actions.iter().filter(|action| !is_pinned(action)).collect();
@@ -468,13 +470,41 @@ fn setting<'a>(yaml: &'a str, key: &str) -> Option<&'a str> {
         .find_map(|line| line.trim_start().strip_prefix(key)?.strip_prefix(": "))
 }
 
-/// The publish jobs: each job's name, the `secrets` output it is gated on, and its secret.
-const PUBLISHERS: [(&str, &str, &str); 4] = [
-    ("publish-npm", "npm", "NPM_TOKEN"),
-    ("publish-pypi", "pypi", "PYPI_API_TOKEN"),
-    ("publish-homebrew", "homebrew", "HOMEBREW_TAP_TOKEN"),
-    ("publish-crates", "crates", "CARGO_REGISTRY_TOKEN"),
+/// What turns a publish job on: a repository variable set to `true` once the registry trusts the
+/// workflow (ADR-235), or a repository secret that holds the job's credential (ADR-128).
+#[derive(Clone, Copy)]
+enum Gate {
+    Variable(&'static str),
+    Secret(&'static str),
+}
+
+/// The publish jobs: each job's name, the `publishers` output it is gated on, and what sets it.
+const PUBLISHERS: [(&str, &str, Gate); 4] = [
+    (
+        "publish-npm",
+        "npm",
+        Gate::Variable("NPM_TRUSTED_PUBLISHING"),
+    ),
+    (
+        "publish-pypi",
+        "pypi",
+        Gate::Variable("PYPI_TRUSTED_PUBLISHING"),
+    ),
+    (
+        "publish-homebrew",
+        "homebrew",
+        Gate::Secret("HOMEBREW_TAP_DEPLOY_KEY"),
+    ),
+    (
+        "publish-crates",
+        "crates",
+        Gate::Secret("CARGO_REGISTRY_TOKEN"),
+    ),
 ];
+
+/// The jobs that publish through the registry's trust in this workflow (OIDC), each with the GitHub
+/// environment the registry's trusted publisher names (ADR-235).
+const TRUSTED: [(&str, &str); 2] = [("publish-npm", "npm"), ("publish-pypi", "pypi")];
 
 /// Lines `lines` lacks of `expected`.
 fn missing(lines: &[String], expected: Vec<String>) -> Vec<String> {
@@ -503,50 +533,67 @@ fn the_release_job_stages_archives_outside_the_installers_directory() {
     assert_eq!(bare, Vec::<&String>::new());
 }
 
-/// The `secrets` job runs on a tag push after the release and turns each publishing secret into an
-/// output that says whether it is set, writing "skipped: secret X not set" when it is not.
+/// The `publishers` job runs on a tag push after the release and turns each publish job's variable or
+/// secret into an output that says whether the job may run, writing why it is skipped when not.
 #[test]
-fn the_secrets_job_probes_each_publishing_secret_on_a_tag_push() {
+fn the_publishers_job_probes_each_publishing_gate_on_a_tag_push() {
     let jobs = jobs(&release_workflow());
     let (_, lines) = jobs
         .iter()
-        .find(|(name, _)| name == "secrets")
-        .expect("a `secrets` job");
+        .find(|(name, _)| name == "publishers")
+        .expect("a `publishers` job");
     let mut expected = vec![
         "needs: release".to_owned(),
         "if: github.event_name == 'push' && github.ref_type == 'tag'".to_owned(),
-        "echo \"::notice title=publish-$1::skipped: secret $2 not set\"".to_owned(),
+        "echo \"::notice title=publish-$1::skipped: $2\"".to_owned(),
     ];
-    expected.extend(PUBLISHERS.iter().flat_map(|(_, output, secret)| {
+    expected.extend(PUBLISHERS.iter().flat_map(|(_, output, gate)| {
+        let (mapped, probe) = match gate {
+            Gate::Variable(name) => (
+                format!("{name}: ${{{{ vars.{name} }}}}"),
+                format!("variable {output} {name}"),
+            ),
+            Gate::Secret(name) => (
+                format!("{name}: ${{{{ secrets.{name} }}}}"),
+                format!("secret {output} {name}"),
+            ),
+        };
         [
             format!("{output}: ${{{{ steps.probe.outputs.{output} }}}}"),
-            format!("{secret}: ${{{{ secrets.{secret} }}}}"),
-            format!("probe {output} {secret}"),
+            mapped,
+            probe,
         ]
     }));
     assert_eq!(missing(lines, expected), Vec::<String>::new());
 }
 
-/// Every publish job runs only when the `secrets` job found its secret, and reads that secret.
+/// Every publish job runs only when the `publishers` job found it configured, and a secret-gated job
+/// reads its secret.
 #[test]
-fn every_publish_job_is_gated_on_its_secret() {
+fn every_publish_job_is_gated_on_its_probe() {
     let jobs = jobs(&release_workflow());
     let ungated: Vec<(&str, Vec<String>)> = PUBLISHERS
         .iter()
-        .map(|(job, output, secret)| {
+        .map(|(job, output, gate)| {
             let lines = jobs
                 .iter()
                 .find(|(name, _)| name == job)
                 .map(|(_, lines)| lines.clone())
                 .unwrap_or_default();
+            let needs = if *job == "publish-pypi" {
+                "needs: [publishers, pypi-build]"
+            } else {
+                "needs: publishers"
+            };
             let expected = vec![
-                "needs: secrets".to_owned(),
-                format!("if: needs.secrets.outputs.{output} == 'true'"),
+                needs.to_owned(),
+                format!("if: needs.publishers.outputs.{output} == 'true'"),
             ];
             let mut absent = missing(&lines, expected);
-            if !lines
-                .iter()
-                .any(|line| line.ends_with(&format!("${{{{ secrets.{secret} }}}}")))
+            if let Gate::Secret(secret) = gate
+                && !lines
+                    .iter()
+                    .any(|line| line.ends_with(&format!("${{{{ secrets.{secret} }}}}")))
             {
                 absent.push(format!("secrets.{secret}"));
             }
@@ -557,7 +604,8 @@ fn every_publish_job_is_gated_on_its_secret() {
     assert_eq!(ungated, Vec::<(&str, Vec<String>)>::new());
 }
 
-/// Nothing but the `secrets` job and the publish job a secret gates reads that secret.
+/// Nothing but the `publishers` job and the publish job a secret gates reads that secret; the
+/// trusted-publishing jobs read none.
 #[test]
 fn only_its_publish_job_and_the_probe_read_each_secret() {
     let jobs = jobs(&release_workflow());
@@ -570,13 +618,124 @@ fn only_its_publish_job_and_the_probe_read_each_secret() {
                 .map(|rest| (name.clone(), rest.trim_end_matches(" }}").to_owned()))
                 .collect::<Vec<_>>()
         })
-        .filter(|(name, _)| name != "secrets")
+        .filter(|(name, _)| name != "publishers")
         .collect();
     let expected: Vec<(String, String)> = PUBLISHERS
         .iter()
-        .map(|(job, _, secret)| ((*job).to_owned(), (*secret).to_owned()))
+        .filter_map(|(job, _, gate)| match gate {
+            Gate::Secret(secret) => Some(((*job).to_owned(), (*secret).to_owned())),
+            Gate::Variable(_) => None,
+        })
         .collect();
     assert_eq!(readers, expected);
+}
+
+/// npm and the Python Package Index publish through trusted publishing (ADR-235): each job runs in
+/// its registry's GitHub environment and is the only job granted an OIDC token, and no long-lived
+/// registry token appears anywhere in the workflow.
+#[test]
+fn npm_and_pypi_publish_with_an_oidc_token_in_their_environment() {
+    let workflow = release_workflow();
+    let jobs = jobs(&workflow);
+    let unconfigured: Vec<(&str, Vec<String>)> = TRUSTED
+        .iter()
+        .map(|(job, environment)| {
+            let lines = jobs
+                .iter()
+                .find(|(name, _)| name == job)
+                .map(|(_, lines)| lines.clone())
+                .unwrap_or_default();
+            let expected = vec![
+                format!("environment: {environment}"),
+                "id-token: write".to_owned(),
+                "contents: read".to_owned(),
+            ];
+            (*job, missing(&lines, expected))
+        })
+        .filter(|(_, absent)| !absent.is_empty())
+        .collect();
+    let mut granted: Vec<&str> = jobs
+        .iter()
+        .filter(|(_, lines)| lines.iter().any(|line| line == "id-token: write"))
+        .map(|(name, _)| name.as_str())
+        .collect();
+    granted.sort_unstable();
+    let tokens: Vec<&str> = [
+        "NPM_TOKEN",
+        "NODE_AUTH_TOKEN",
+        "_authToken",
+        "PYPI_API_TOKEN",
+        "TWINE_",
+        "HOMEBREW_TAP_TOKEN",
+    ]
+    .into_iter()
+    .filter(|token| workflow.contains(token))
+    .collect();
+    assert_eq!(
+        (unconfigured, granted, tokens),
+        (
+            Vec::new(),
+            vec!["publish-npm", "publish-pypi"],
+            Vec::<&str>::new()
+        )
+    );
+}
+
+/// The pipx wrapper's distributions are built in a job of their own without an OIDC token and
+/// handed to `publish-pypi` as an artifact, as pypa/gh-action-pypi-publish advises.
+#[test]
+fn the_pypi_distributions_are_built_apart_from_the_upload() {
+    let jobs = jobs(&release_workflow());
+    let job = |wanted: &str| {
+        jobs.iter()
+            .find(|(name, _)| name == wanted)
+            .map(|(_, lines)| lines.clone())
+            .unwrap_or_default()
+    };
+    let build = job("pypi-build");
+    let publish = job("publish-pypi");
+    let has = |lines: &[String], prefix: &str| lines.iter().any(|line| line.starts_with(prefix));
+    assert_eq!(
+        (
+            missing(
+                &build,
+                vec![
+                    "needs: publishers".to_owned(),
+                    "if: needs.publishers.outputs.pypi == 'true'".to_owned(),
+                ]
+            ),
+            has(&build, "run: python3 -m venv") || has(&build, "python3 -m venv"),
+            has(&build, "- uses: actions/upload-artifact@"),
+            has(&publish, "- uses: actions/download-artifact@"),
+            has(&publish, "- uses: pypa/gh-action-pypi-publish@"),
+        ),
+        (Vec::<String>::new(), true, true, true, true)
+    );
+}
+
+/// `publish-homebrew` pushes over SSH with the tap's deploy key, checking github.com against its
+/// published host key, through dist/homebrew/publish.sh.
+#[test]
+fn the_homebrew_job_pushes_to_the_tap_with_its_deploy_key() {
+    let jobs = jobs(&release_workflow());
+    let lines = jobs
+        .iter()
+        .find(|(name, _)| name == "publish-homebrew")
+        .map(|(_, lines)| lines.clone())
+        .expect("a `publish-homebrew` job");
+    let has = |wanted: &str| lines.iter().any(|line| line.contains(wanted));
+    assert_eq!(
+        (
+            has(
+                "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+            ),
+            has("StrictHostKeyChecking=yes"),
+            has(
+                "sh dist/homebrew/publish.sh \"$GITHUB_REF_NAME\" \"$RUNNER_TEMP/SHA256SUMS\" git@github.com:tysont/homebrew-cupel.git"
+            ),
+        ),
+        (true, true, true)
+    );
 }
 
 /// `publish-crates` asks crates.io who holds each publishable crate's name before it publishes
