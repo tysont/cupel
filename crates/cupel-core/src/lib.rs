@@ -11,6 +11,7 @@ mod bench;
 pub mod budget;
 mod cancel;
 mod check;
+pub mod clock;
 pub mod config;
 mod contract;
 pub mod coverage;

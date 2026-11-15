@@ -1,4 +1,4 @@
-// ABOUTME: What a `check` or `survey` run may spend (ADR-086): its wall-clock budget from the configuration, its
+// ABOUTME: What a `check` or `survey` run may spend (ADR-086): its awake-time budget from the configuration, its
 // ABOUTME: `--jobs` cap on rayon's threads, and the store's recorded durations and check results for the cost model.
 use std::num::NonZeroUsize;
 

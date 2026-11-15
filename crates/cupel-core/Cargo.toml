@@ -29,5 +29,8 @@ insta.workspace = true
 proptest.workspace = true
 tempfile.workspace = true
 
+[target.'cfg(unix)'.dev-dependencies]
+nix = { workspace = true, features = ["time"] }
+
 [lints]
 workspace = true

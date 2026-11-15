@@ -4,6 +4,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
 
+use crate::clock;
 use crate::error::{Error, Result};
 
 /// The longest `wait` sleeps before looking at the token again.
@@ -39,7 +40,7 @@ impl Cancellation {
     pub fn child(&self, timeout: Duration) -> Self {
         Self {
             parent: Some(Box::new(self.clone())),
-            ..Self::with_deadline(Instant::now() + timeout)
+            ..Self::with_deadline(clock::now() + timeout)
         }
     }
 
@@ -59,7 +60,7 @@ impl Cancellation {
     pub fn remaining(&self) -> Option<Duration> {
         let own = self
             .deadline
-            .map(|deadline| deadline.saturating_duration_since(Instant::now()));
+            .map(|deadline| deadline.saturating_duration_since(clock::now()));
         let inherited = self.parent.as_ref().and_then(|parent| parent.remaining());
         match (own, inherited) {
             (Some(own), Some(inherited)) => Some(own.min(inherited)),
@@ -74,7 +75,7 @@ impl Cancellation {
     pub fn is_cancelled(&self) -> bool {
         if self
             .deadline
-            .is_some_and(|deadline| Instant::now() >= deadline)
+            .is_some_and(|deadline| clock::now() >= deadline)
             || self
                 .parent
                 .as_ref()
@@ -97,12 +98,12 @@ impl Cancellation {
     /// Sleeps for `duration`, waking early if the token is cancelled. True when the whole
     /// duration passed.
     pub fn wait(&self, duration: Duration) -> bool {
-        let until = Instant::now() + duration;
+        let until = clock::now() + duration;
         loop {
             if self.is_cancelled() {
                 return false;
             }
-            let now = Instant::now();
+            let now = clock::now();
             if now >= until {
                 return true;
             }

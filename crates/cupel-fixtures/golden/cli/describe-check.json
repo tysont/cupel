@@ -126,7 +126,7 @@
         "repeated": false,
         "required": false,
         "stability": "experimental",
-        "summary": "A wall-clock budget: run the most valuable checks that fit and skip the rest.",
+        "summary": "A budget of awake time: run the most valuable checks that fit and skip the rest.",
         "value": "duration",
         "value_name": "DURATION",
         "values": []

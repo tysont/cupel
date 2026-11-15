@@ -753,7 +753,7 @@ fn scope_how_much_flags() -> Vec<ArgDescription> {
             "--budget",
             ValueType::Duration,
             "DURATION",
-            "A wall-clock budget: run the most valuable checks that fit and skip the rest.",
+            "A budget of awake time: run the most valuable checks that fit and skip the rest.",
         )
         .env(Setting::Budget.env_var()),
         valued(

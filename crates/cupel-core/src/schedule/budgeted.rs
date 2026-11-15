@@ -1,11 +1,11 @@
 // ABOUTME: The scheduler under a budget (ADR-086): costs each task with the producer runs it brings in, takes tasks by
 // ABOUTME: the knapsack, skips the rest with `est_ms`, cuts running work at the deadline, and times what ran.
 use std::collections::{BTreeSet, HashMap};
-use std::time::Instant;
 
 use super::{Execution, FactStore, Job, Prepared, Skip, Task, elapsed_ms, manifest_kinds};
 use crate::budget::{Candidate, History, TaskDuration, TaskShape, choose, tie, value};
 use crate::cancel::Cancellation;
+use crate::clock;
 use crate::error::Result;
 use crate::event::{Event, EventSink};
 use crate::fact::FactKind;
@@ -40,7 +40,7 @@ pub(super) fn schedule(job: &Job<'_>, store: &mut FactStore<'_>, prepared: &mut 
     let left = job
         .resources
         .budget
-        .map(|budget| budget.left_ms(Instant::now()));
+        .map(|budget| budget.left_ms(clock::now()));
     let choice = choose(&candidates, &costing.costs, left);
     let mut tasks: Vec<Option<Task<'_>>> = prepared.tasks.drain(..).map(Some).collect();
     for (index, cost_ms) in choice.taken {
@@ -66,7 +66,7 @@ pub(super) fn cancellation(job: &Job<'_>) -> Cancellation {
     match job.resources.budget {
         Some(budget) => job
             .cancel
-            .child(budget.deadline.saturating_duration_since(Instant::now())),
+            .child(budget.deadline.saturating_duration_since(clock::now())),
         None => job.cancel.clone(),
     }
 }
@@ -217,7 +217,7 @@ impl FactStore<'_> {
         produce: &mut dyn FnMut(&mut Vec<Event>) -> Result<T>,
     ) -> Result<T> {
         let mut events = Vec::new();
-        let started = Instant::now();
+        let started = clock::now();
         let result = produce(&mut events);
         if result.is_ok() && !self.cancel.is_cancelled() {
             self.durations.push(TaskDuration {
@@ -244,7 +244,7 @@ impl Execution<'_, '_> {
         let est_ms = closure.iter().fold(own_cost(task, history), |sum, index| {
             sum.saturating_add(costing.costs[*index])
         });
-        let left = budget.left_ms(Instant::now());
+        let left = budget.left_ms(clock::now());
         (left == 0 || est_ms > left).then_some(est_ms)
     }
 }

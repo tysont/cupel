@@ -60,7 +60,7 @@ impl Run {
         Self {
             id: RunId::generate(),
             started: SystemTime::now(),
-            clock: Instant::now(),
+            clock: cupel_core::clock::now(),
             cancel: Cancellation::new(),
             parent: Cancellation::new(),
             verb: None,

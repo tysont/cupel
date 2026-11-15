@@ -39,7 +39,7 @@ Exit 2 is a mistake in your command line or `cupel.toml`; its finding names the 
 ## Depth
 
 - `--depth quick|standard|deep|exhaustive`, default `standard`. How much evidence to gather.
-- `--budget DURATION`. A wall-clock budget: run the most valuable checks that fit and skip the rest.
+- `--budget DURATION`. A budget of awake time: run the most valuable checks that fit and skip the rest.
 - Scope flags (`--changed`, `--base` with `--head`, `--paths`, `--symbols`) intersect; under `--changed` or `--base` the checks rule on the functions the change touched. `--only` and `--skip` select checks by ID or group, `--tier N+` by tier; `--jobs N` caps the threads and test processes.
 - `--oracle NAME` picks the reference implementation `gen.differential` compares with and `--cases N` the inputs generative checks try; `check --scaffold --write` writes a property stub for each `property.missing` finding.
 

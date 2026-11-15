@@ -8,6 +8,7 @@ use crate::base::{BaseSide, BaseTree};
 use crate::budget::{Resources, TaskDuration, TaskShape};
 use crate::cancel::Cancellation;
 use crate::check::{Check, CheckCtx, CheckRegistry, Manifest, Plan};
+use crate::clock;
 use crate::config::Config;
 use crate::dry_run::{PlannedCheck, PlannedSkip, RunPlan};
 use crate::error::{ArgumentError, Error, Result};
@@ -547,7 +548,7 @@ impl<'a, 'j> Execution<'a, 'j> {
     /// Produces what `task` reads and runs it; never fails, since one check's failure must not
     /// stop the others (ADR-041).
     fn run_task(&mut self, task: &Task<'_>, sink: &mut CheckSink<'_>) -> CheckResult {
-        let started = Instant::now();
+        let started = clock::now();
         let ended = |status, skipped| CheckResult {
             duration_ms: elapsed_ms(started),
             ..unfinished(task.check.manifest(), status, skipped)
@@ -614,7 +615,7 @@ impl<'a, 'j> Execution<'a, 'j> {
     ) -> Result<CheckResult> {
         let mut ctx = check_ctx(self.job, task.check, &task.lang.id, task.scope.clone());
         ctx.cancel = self.cancel.clone();
-        let started = Instant::now();
+        let started = clock::now();
         let ran = task.check.run(&ctx, facts, &task.plan, sink);
         if ran
             .as_ref()
@@ -1573,7 +1574,7 @@ impl<'a> CheckRun<'a> {
             results: Vec::new(),
             findings: Vec::new(),
             measurements: Vec::new(),
-            started: Instant::now(),
+            started: clock::now(),
         }
     }
 

@@ -176,7 +176,8 @@ pub fn tie(seed: u64, check: &CheckId, lang: &LangId) -> u64 {
     u64::from_le_bytes(key)
 }
 
-/// A run's wall-clock budget: its length, and when it ends (the invocation's start plus it).
+/// A run's budget: its length, and when it ends (the invocation's start plus it), on the clock
+/// that counts only awake time (ADR-217).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Budget {
     pub limit: Duration,

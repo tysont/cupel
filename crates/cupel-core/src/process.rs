@@ -7,6 +7,7 @@ use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use crate::cancel::Cancellation;
+use crate::clock;
 use crate::error::{Error, Result};
 use crate::memory;
 
@@ -169,7 +170,7 @@ impl Process {
             None
         };
         let mut child = spawn(&mut command).map_err(|error| self.failed(&error))?;
-        let spawned = Instant::now();
+        let spawned = clock::now();
         // The command holds the parent's copies of a merged pipe's write end; the reader sees
         // the end of the output only once they are closed.
         drop(command);
@@ -206,11 +207,11 @@ impl Process {
 /// (`ETXTBSY`); a child another thread forked holds a just-written script's descriptor until it
 /// execs, so the spawn is retried until the program closes, within `BUSY_WAIT`.
 fn spawn(command: &mut Command) -> std::io::Result<Child> {
-    let deadline = Instant::now() + BUSY_WAIT;
+    let deadline = clock::now() + BUSY_WAIT;
     loop {
         match command.spawn() {
             Err(error)
-                if error.kind() == ErrorKind::ExecutableFileBusy && Instant::now() < deadline =>
+                if error.kind() == ErrorKind::ExecutableFileBusy && clock::now() < deadline =>
             {
                 std::thread::sleep(POLL);
             }
@@ -273,8 +274,8 @@ fn terminate(child: &mut Child, spawned: Instant, grace: Duration) {
             }
         }
     }
-    let until = std::time::Instant::now() + grace;
-    while std::time::Instant::now() < until {
+    let until = clock::now() + grace;
+    while clock::now() < until {
         if let Ok(Some(_)) = child.try_wait() {
             return;
         }
