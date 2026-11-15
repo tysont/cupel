@@ -572,15 +572,26 @@ fn fenced<'a>(text: &'a str, language: &str) -> Vec<&'a str> {
 /// Every JSON block is one JSON value or, for JSON Lines such as a recorded trace, several.
 #[test]
 fn every_json_block_in_the_readme_and_its_guide_parses() {
-    for file in documents() {
-        for block in fenced(&read(&file), "json") {
-            for value in serde_json::Deserializer::from_str(block).into_iter::<Value>() {
-                if let Err(error) = value {
-                    panic!("a JSON block in {file} does not parse ({error}):\n{block}");
-                }
-            }
-        }
-    }
+    let unparsed: Vec<String> = documents()
+        .iter()
+        .flat_map(|file| unparsed_json(file))
+        .collect();
+    assert_eq!(unparsed, Vec::<String>::new());
+}
+
+/// Each JSON block of `file` (one value or JSON Lines) that does not parse, with the error and
+/// the block.
+fn unparsed_json(file: &str) -> Vec<String> {
+    let text = read(file);
+    fenced(&text, "json")
+        .into_iter()
+        .filter_map(|block| {
+            serde_json::Deserializer::from_str(block)
+                .into_iter::<Value>()
+                .find_map(Result::err)
+                .map(|error| format!("{file} ({error}):\n{block}"))
+        })
+        .collect()
 }
 
 /// The README's Claude Code settings: the JSON block that configures a `Stop` hook.
