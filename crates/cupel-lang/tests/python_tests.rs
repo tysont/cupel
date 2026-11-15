@@ -155,7 +155,7 @@ fn files_without_test_cases_have_no_frames() {
 const MISC_CASES: &[Expected] = &[
     (
         "test_paths",
-        &[(Custom, Weak)],
+        &[(Custom, Strong)],
         Some(Some("posix only")),
         &[],
         9,
@@ -497,5 +497,25 @@ fn a_try_whose_block_ends_in_a_failure_call_is_one_raises_assertion_spanning_its
             ("test_decode_raises", Equality, Strong, 8, 8),
             ("test_decode_caught", Equality, Strong, 14, 14),
         ]
+    );
+}
+
+/// `assert a in b` pins the element it names and is strong; `assert a not in b` rules one out and
+/// is weak, as `!=` is (ADR-223).
+#[test]
+fn a_membership_is_strong_and_a_negated_membership_weak() {
+    let memberships = &assert_source_file(
+        "python",
+        "tests/test_auth.py",
+        "def test_token():\n    assert \"Bearer abc\" in str(headers)\n\n\
+         def test_no_cookie():\n    assert \"Cookie\" not in headers\n",
+        "pytest",
+    );
+    assert_eq!(
+        rows(memberships),
+        expected(&[
+            ("test_token", &[(Custom, Strong)], None, &[], 1),
+            ("test_no_cookie", &[(Custom, Weak)], None, &[], 4),
+        ])
     );
 }

@@ -114,7 +114,10 @@ not-equal = { kind = "equality", strength = "weak" }
 is-not-none = { kind = "not-null", strength = "weak" }
 snapshot = { kind = "snapshot", strength = "strong" }
 ordering = { kind = "custom", strength = "weak" }
-membership = { kind = "custom", strength = "weak" }
+# A membership pins the element it names, as Jest's `toContain` does; a negated one rules one out
+# (ADR-223).
+membership = { kind = "custom", strength = "strong" }
+not-membership = { kind = "custom", strength = "weak" }
 truthy = { kind = "truthiness", strength = "weak" }
 raises = { kind = "throws", strength = "strong" }
 # `pytest.fail(…)`, `self.fail(…)`: some condition held, as Go's bare failure call and JUnit's `fail`.

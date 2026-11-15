@@ -1,0 +1,8 @@
+# ABOUTME: A Python project whose tests assert memberships: `assert a in b` is strong and `assert a not in b`
+# ABOUTME: weak (ADR-223, httpx tests/test_auth.py:319).
+[project]
+name = "auth"
+version = "0.1.0"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

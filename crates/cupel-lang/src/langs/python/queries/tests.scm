@@ -154,10 +154,16 @@
   (comparison_operator
     operators: ["<" "<=" ">" ">="])) @test.assertion @assertion.idiom.ordering
 
+; `assert a in b` pins the element it names; `assert a not in b` rules one out (ADR-223).
 (assert_statement
   .
   (comparison_operator
-    operators: ["in" "not in"])) @test.assertion @assertion.idiom.membership
+    operators: "not in")) @test.assertion @assertion.idiom.not-membership
+
+(assert_statement
+  .
+  (comparison_operator
+    operators: "in")) @test.assertion @assertion.idiom.membership
 
 (assert_statement) @test.assertion @assertion.idiom.truthy
 
