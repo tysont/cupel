@@ -1,0 +1,8 @@
+# ABOUTME: A crate whose benchmark uses the nightly-only `test` crate behind `#![feature(test)]`, as tokio-rs/bytes'
+# ABOUTME: benches do (Q-rs-5): clippy on stable rejects it with E0554, which Cupel reports as info.
+[package]
+name = "meter"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]

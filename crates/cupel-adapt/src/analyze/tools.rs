@@ -281,8 +281,13 @@ fn rustc_level(level: &str) -> Option<AnalyzerLevel> {
     }
 }
 
+/// rustc's code for a `#![feature]` attribute on a channel that has none, such as stable's: it
+/// says the target needs a nightly toolchain, not that its code is wrong (ADR-232).
+const FEATURE_ON_STABLE: &str = "E0554";
+
 /// `cargo clippy --message-format=json`: one JSON message per line; compiler messages with a
-/// code, at their primary span. The rule drops clippy's `clippy::` prefix.
+/// code, at their primary span. The rule drops clippy's `clippy::` prefix. E0554 is a note at
+/// whatever level rustc gave it.
 fn clippy(captured: &Captured) -> Result<Vec<Raw>, String> {
     let mut raws = Vec::new();
     for line in captured.stdout.lines().filter(|line| line.starts_with('{')) {
@@ -303,6 +308,11 @@ fn clippy(captured: &Captured) -> Result<Vec<Raw>, String> {
             .and_then(|spans| spans.iter().find(|span| span["is_primary"] == true))
         else {
             continue;
+        };
+        let level = if code == FEATURE_ON_STABLE {
+            AnalyzerLevel::Note
+        } else {
+            level
         };
         raws.push(Raw {
             rule: code.strip_prefix("clippy::").unwrap_or(code).to_owned(),
@@ -650,6 +660,31 @@ mod tests {
                 "src/lib.rs",
                 [2, 5, 2, 17]
             )]
+        );
+    }
+
+    /// tokio-rs/bytes' benches open with `#![feature(test)]`, which stable rejects with E0554
+    /// as an error; it says which channel the target needs, not what is wrong with it (ADR-232).
+    #[test]
+    fn clippy_reports_a_feature_gate_the_stable_channel_rejects_as_a_note() {
+        let e0554 = |file: &str| {
+            format!(
+                r#"{{"reason":"compiler-message","message":{{"code":{{"code":"E0554","explanation":"x"}},"level":"error","message":"`#![feature]` may not be used on the stable release channel","spans":[{{"file_name":"{file}","is_primary":true,"line_start":1,"line_end":1,"column_start":1,"column_end":18}}]}}}}"#
+            )
+        };
+        let other = r#"{"reason":"compiler-message","message":{"code":{"code":"E0308"},"level":"error","message":"mismatched types","spans":[{"file_name":"benches/buf.rs","is_primary":true,"line_start":9,"line_end":9,"column_start":5,"column_end":6}]}}"#;
+        let stdout = format!("{}\n{other}\n", e0554("benches/buf.rs"));
+        let levels: Vec<(String, AnalyzerLevel)> = clippy(&captured(&stdout, ""))
+            .unwrap()
+            .into_iter()
+            .map(|raw| (raw.rule, raw.level))
+            .collect();
+        assert_eq!(
+            levels,
+            [
+                ("E0554".to_owned(), AnalyzerLevel::Note),
+                ("E0308".to_owned(), AnalyzerLevel::Error)
+            ]
         );
     }
 
