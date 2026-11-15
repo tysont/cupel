@@ -72,3 +72,39 @@ fn a_run_reading_parsed_facts_from_the_store_prints_what_a_run_parsing_every_fil
         );
     }
 }
+
+/// One quick check of `dir` with `src/pruned.py` holding `body`; the files it read from the store
+/// and the trees it parsed.
+fn checked_with(dir: &Path, body: &str) -> (u64, u64) {
+    std::fs::write(dir.join("src/pruned.py"), body).unwrap();
+    parsed_counts(&run_cupel_measuring(QUICK, dir))
+}
+
+#[test]
+fn a_file_s_parsed_facts_are_kept_while_one_of_the_last_20_runs_used_them_and_pruned_after() {
+    // ADR-201 through the binary: a run keeps what it parsed and records the files it used;
+    // the sweep after each run drops the facts of a file version none of the last 20 runs used.
+    let (old, new) = ("def pruned():\n    return 1\n", "def pruned():\n    return 2\n");
+    let dir = tempfile::tempdir().unwrap();
+    copy_repo("python", dir.path());
+    let (_, parsed) = checked_with(dir.path(), old);
+    assert!(parsed > 0, "the first run parses every file");
+    // Runs 2 to 20 use the new version, so `old` is still in one of the last 20 runs.
+    for _ in 2..=20 {
+        checked_with(dir.path(), new);
+    }
+    assert_eq!(
+        checked_with(dir.path(), old).1,
+        0,
+        "the old version, used 20 runs ago, is read from the store"
+    );
+    // Run 21 used `old`; runs 22 to 41 use only `new`, so after them no recent run used `old`.
+    for _ in 22..=41 {
+        checked_with(dir.path(), new);
+    }
+    assert_eq!(
+        checked_with(dir.path(), old).1,
+        1,
+        "the old version, last used 21 runs ago, was pruned and is parsed again"
+    );
+}
