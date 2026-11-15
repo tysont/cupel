@@ -207,6 +207,9 @@ pub struct Root {
     pub config: PathBuf,
     /// Whether the run is narrowed to a selection.
     pub narrowed: bool,
+    /// The arguments the language's configured `test` command gives the tool after its name
+    /// ([`configured_arguments`]); a runner whose command takes them appends them (ADR-229).
+    pub arguments: Vec<String>,
 }
 
 /// A finished run in one root.
@@ -531,6 +534,7 @@ impl Runner {
             report: area.join("report"),
             config: area.join("config.toml"),
             narrowed,
+            arguments: configured_arguments(&ctx.config, self.0.tool),
         })
     }
 
@@ -705,6 +709,77 @@ fn owned(paths: &[String], dir: &str, dirs: &[String], separator: &str) -> Vec<S
         .collect()
 }
 
+/// The `[lang.<id>]` key holding the test command a person runs.
+const TEST: &str = "test";
+
+/// The arguments the `test` command of `config` (a `[lang.<id>]` table) gives `tool`: the words
+/// after the first that names it (`tool`, or a path ending in `/tool`), as [`shell_words`]
+/// splits them; none when the command does not run it or is not configured (ADR-229).
+pub(crate) fn configured_arguments(
+    config: &serde_json::Map<String, serde_json::Value>,
+    tool: &str,
+) -> Vec<String> {
+    let Some(command) = config.get(TEST).and_then(serde_json::Value::as_str) else {
+        return Vec::new();
+    };
+    let words = shell_words(command);
+    words
+        .iter()
+        .position(|word| word.rsplit('/').next() == Some(tool))
+        .map(|at| words[at + 1..].to_vec())
+        .unwrap_or_default()
+}
+
+/// The words of `command` as `sh` splits them, up to its first control operator (`&&`, `||`,
+/// `;`, `|`, `&`): blanks outside quotes separate words, single quotes keep every character,
+/// double quotes keep every character but a backslash before `"`, `\`, `$`, or a backquote,
+/// and a backslash outside quotes keeps the next character. No expansion is made.
+pub(crate) fn shell_words(command: &str) -> Vec<String> {
+    let mut words = Vec::new();
+    let mut word = String::new();
+    let mut started = false;
+    let mut chars = command.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '\'' => {
+                started = true;
+                word.extend(chars.by_ref().take_while(|c| *c != '\''));
+            }
+            '"' => {
+                started = true;
+                while let Some(c) = chars.next() {
+                    match c {
+                        '"' => break,
+                        '\\' if chars.peek().is_some_and(|next| "\"\\$`".contains(*next)) => {
+                            word.extend(chars.next());
+                        }
+                        c => word.push(c),
+                    }
+                }
+            }
+            '\\' => {
+                started = true;
+                word.extend(chars.next());
+            }
+            ';' | '&' | '|' => break,
+            c if c.is_whitespace() => {
+                if started {
+                    words.push(std::mem::take(&mut word));
+                    started = false;
+                }
+            }
+            c => {
+                started = true;
+                word.push(c);
+            }
+        }
+    }
+    if started {
+        words.push(word);
+    }
+    words
+}
+
 /// `word` as one shell word.
 pub(crate) fn quote(word: &str) -> String {
     let plain = word
@@ -825,5 +900,60 @@ pub(crate) fn under(dir: &str, path: &str, separator: &str) -> String {
         path.to_owned()
     } else {
         format!("{dir}{separator}{path}")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use serde_json::{Map, Value};
+
+    use super::{configured_arguments, shell_words};
+
+    #[test]
+    fn shell_words_split_as_sh_does_up_to_a_control_operator() {
+        let split = |command: &str| shell_words(command);
+        assert_eq!(
+            [
+                split("python -m pytest -m 'not network'"),
+                split(r#"pytest -k "add and \"x\"" a\ b"#),
+                split("pytest tests/ && echo done"),
+                split("  pytest   -x;rm -rf ."),
+                split("pytest '' -q"),
+            ],
+            [
+                vec!["python", "-m", "pytest", "-m", "not network"],
+                vec!["pytest", "-k", "add and \"x\"", "a b"],
+                vec!["pytest", "tests/"],
+                vec!["pytest", "-x"],
+                vec!["pytest", "", "-q"],
+            ]
+            .map(|words| words.into_iter().map(str::to_owned).collect::<Vec<_>>())
+        );
+    }
+
+    #[test]
+    fn the_configured_test_command_gives_its_tool_the_words_after_its_name() {
+        let arguments = |test: Option<&str>| {
+            let config: Map<String, Value> = test
+                .map(|test| Map::from_iter([("test".to_owned(), Value::from(test))]))
+                .unwrap_or_default();
+            configured_arguments(&config, "pytest")
+        };
+        assert_eq!(
+            [
+                arguments(Some("uv run python -m pytest -m 'not network' tests")),
+                arguments(Some(".venv/bin/pytest -x")),
+                arguments(Some("python -m pytest")),
+                arguments(Some("python -m unittest -v")),
+                arguments(None),
+            ],
+            [
+                vec!["-m".to_owned(), "not network".to_owned(), "tests".to_owned()],
+                vec!["-x".to_owned()],
+                Vec::new(),
+                Vec::new(),
+                Vec::new(),
+            ]
+        );
     }
 }

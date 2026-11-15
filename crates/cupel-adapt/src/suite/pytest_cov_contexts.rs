@@ -101,15 +101,17 @@ fn toolchain(root: &Path) -> Option<String> {
 const QUIET: [&str; 2] = ["-p", "no:cacheprovider"];
 
 /// One pytest run with the runner's `JUnit` flags and pytest-cov's test contexts, its data file
-/// under `.cupel/` so the repository's own coverage configuration still applies; over every
-/// collected test but `kept` (ADR-149 §1), named by node ID, or all of them when none is kept
-/// or none remains.
+/// under `.cupel/` so the repository's own coverage configuration still applies, and the
+/// arguments the configured `test` command gives pytest (ADR-229); over every collected test but
+/// `kept` (ADR-149 §1), named by node ID, or all of them when none is kept or none remains.
 fn run(site: &Site<'_>, rerun: &Rerun) -> Result<SuiteRun> {
     let kept = &rerun.kept;
+    let configured = crate::runner::configured_arguments(&site.ctx.config, "pytest");
     let mut selected = Vec::new();
     if !kept.is_empty() {
         let mut list: Vec<String> = QUIET.map(str::to_owned).to_vec();
         list.extend(["--collect-only".to_owned(), "-q".to_owned()]);
+        list.extend(configured.iter().cloned());
         let listed = listing::pytest(&site.succeed("pytest", &list, &[])?.stdout);
         selected = listed.into_iter().filter(|id| !kept.contains(id)).collect();
     }
@@ -137,6 +139,7 @@ fn run(site: &Site<'_>, rerun: &Rerun) -> Result<SuiteRun> {
         ])
         .collect();
     let listing = pytest_cov_listing(&args.join(" "), &site.packages);
+    args.extend(crate::pytest::arguments(&configured, !selected.is_empty()));
     args.extend(selected);
     let captured = site.run("pytest", &args, &env)?;
     let found = std::fs::read_to_string(&junit)

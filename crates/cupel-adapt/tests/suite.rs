@@ -356,6 +356,64 @@ fn one_go_run_makes_the_baseline_and_coverage_the_separate_runs_make() {
     assert_parity(&GO);
 }
 
+/// The test IDs of a `test-results` fact as JSON.
+fn test_ids(results: &Value) -> Vec<&str> {
+    results["tests"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|test| test["id"].as_str())
+        .collect()
+}
+
+/// The arguments the configured `test` command gives pytest reach the joint's run and the
+/// runner's and per-test producer's runs (ADR-229): a selection with `-k`, a quoted expression,
+/// runs the one test it names in each, and the joint's command line carries it.
+#[test]
+fn the_python_joint_and_the_runs_it_stands_in_for_pass_the_test_commands_arguments() {
+    let Some(dir) = PYTHON.fixture() else {
+        return;
+    };
+    let with_test = |ctx: &mut ProduceCtx| {
+        let test = Value::from("python -m pytest -k 'add and not scale'");
+        ctx.config.insert("test".to_owned(), test.clone());
+        if let Some(table) = ctx.ctx.lang.get_mut(&LangId::from("python")) {
+            table.insert("test".to_owned(), test);
+        }
+    };
+    let mut ctx = PYTHON.ctx(dir.path());
+    with_test(&mut ctx);
+    let (together, _, command) = PYTHON.jointly_commanded(&ctx);
+    let make = |kind, id| {
+        producer(&REGISTRY, kind, id, "python")
+            .produce(&ctx, &Scope::default(), &mut Vec::new())
+            .unwrap()
+    };
+    let runner = comparable(
+        &make(FactKind::TestResults, "tool.pytest")
+            .downcast::<TestResults>()
+            .unwrap(),
+    );
+    let per_test = make(FactKind::PerTestMap, "tool.pytest-cov-per-test")
+        .downcast::<PerTestMap>()
+        .unwrap();
+    let measured: Vec<&str> = per_test.tests.iter().map(|test| test.id.as_str()).collect();
+    assert_eq!(
+        (
+            test_ids(&together.results),
+            test_ids(&runner),
+            measured,
+            command.iter().any(|word| word == "add and not scale"),
+        ),
+        (
+            vec!["tests/test_calc.py::test_add"],
+            vec!["tests/test_calc.py::test_add"],
+            vec!["tests/test_calc.py::test_add"],
+            true,
+        )
+    );
+}
+
 /// The estimate before a run, after it, and after a source edit; whether the second and third
 /// productions came from the cache (their per-test maps measured nothing).
 fn cache_lifecycle(joint: &Joint, file: &str, from: &str, to: &str) -> Option<Vec<String>> {

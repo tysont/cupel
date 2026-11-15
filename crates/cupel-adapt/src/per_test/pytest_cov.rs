@@ -52,6 +52,7 @@ fn measure(site: &Site<'_>, keep: &BTreeSet<String>) -> Result<Measured> {
     }
     let mut list: Vec<String> = QUIET.iter().map(|arg| (*arg).to_owned()).collect();
     list.extend(["--collect-only".to_owned(), "-q".to_owned()]);
+    list.extend(configured(site));
     let listed: BTreeSet<String> = listing::pytest(&site.succeed("pytest", &list, ENV)?.stdout)
         .into_iter()
         .collect();
@@ -91,6 +92,10 @@ fn run(site: &Site<'_>, selected: &[String]) -> Result<Vec<TestCoverage>> {
         format!("--cov-config={}", config.display()),
         format!("--cov-report=json:{}", report.display()),
     ]);
+    args.extend(crate::pytest::arguments(
+        &configured(site),
+        !selected.is_empty(),
+    ));
     args.extend(selected.iter().cloned());
     // Failing tests still measure what they ran; only a run that wrote no report failed.
     let captured = site.run("pytest", &args, ENV)?;
@@ -98,6 +103,11 @@ fn run(site: &Site<'_>, selected: &[String]) -> Result<Vec<TestCoverage>> {
         return Err(failed("pytest", &captured));
     };
     Ok(coverage_of(site, &text))
+}
+
+/// The arguments the language's configured `test` command gives pytest (ADR-229).
+fn configured(site: &Site<'_>) -> Vec<String> {
+    crate::runner::configured_arguments(&site.ctx.config, "pytest")
 }
 
 /// Each test's lines in a coverage.py JSON report with `show_contexts`, relative to the root of
