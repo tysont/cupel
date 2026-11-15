@@ -288,7 +288,7 @@ The same check as JSON, trimmed to two checks, one finding, and one action:
 
 ```json
 {
-  "cupel": { "version": "0.2.9", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
+  "cupel": { "version": "0.3.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
   "run": {
     "id": "run_01M66ESZ81EZ7HN1Z8NM3YHJY0", "verb": "check",
     "started": "2026-10-30T13:08:23Z", "duration_ms": 1303,
@@ -586,7 +586,7 @@ info (1)
   doctor
     The daemon at .cupel/serve.sock serves this repository (pid 72908)
       fnd_c243c8 · doctor.daemon-running · tier 0 · confidence 1
-      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.2.9" · watching true (full: cupel explain fnd_c243c8)
+      evidence: pid 72908 · socket ".cupel/serve.sock" · version "0.3.0" · watching true (full: cupel explain fnd_c243c8)
       …
 
 $ cupel serve --stop --format text
