@@ -148,6 +148,6 @@ fn a_function_named_with_a_leading_underscore_is_kept_on_purpose() {
             reasons(&roots, &symbols, "_assert_trait_object"),
             reasons(&roots, &symbols, "helper"),
         ],
-        [vec![RootReason::FrameworkHook], vec![]]
+        [vec![RootReason::Unused], vec![]]
     );
 }

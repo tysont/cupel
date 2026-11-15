@@ -1,10 +1,12 @@
 // ABOUTME: `tests.coverage`: per-symbol line and branch coverage from Symbols and a CoverageMap: symbols no test
 // ABOUTME: ran, files no test loaded, branches no test took (where measured), and line/branch ratios (ADR-079, ADR-152).
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use cupel_core::coverage::{CoverageMap, Listing};
 use cupel_core::hint::{OWN_ROOT, with_own_tests};
-use cupel_core::syntax::{NormTree, ProjectInfo, SymbolDef, SymbolKey, Symbols, TestConventions};
+use cupel_core::syntax::{
+    NormTree, ProjectInfo, RootReason, Roots, SymbolDef, SymbolKey, Symbols, TestConventions,
+};
 use cupel_core::{
     ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink, FactKind,
     Facts, Finding, Manifest, Measurement, MetricPer, MetricSpec, PerTestMap, Plan,
@@ -101,6 +103,7 @@ fn manifest() -> Manifest {
             FactKind::TestConventions,
             FactKind::PerTestMap,
             FactKind::ProjectInfo,
+            FactKind::Roots,
         ],
         findings: vec![
             kind::<UncoveredSymbol>(
@@ -133,7 +136,8 @@ fn manifest() -> Manifest {
                   left). Branch findings only where the tool measured branches; \
                   otherwise the result notes `branches: unavailable`. A function with \
                   no instrumented line is not scored, unless the tool lists only the files \
-                  the suite loaded: then a function in a file it left out never ran."
+                  the suite loaded: then a function in a file it left out never ran. A \
+                  function its language marks as unused on purpose is not scored (ADR-226)."
             .to_owned(),
     }
 }
@@ -202,6 +206,18 @@ impl Check for TestsCoverage {
                 .map(hashes_by_symbol)
                 .unwrap_or_default(),
         };
+        // A function unused on purpose exists for the compiler alone; no test runs it (ADR-226).
+        let unused: HashSet<&SymbolKey> = facts
+            .get::<Roots>()
+            .map(|roots| {
+                roots
+                    .roots
+                    .iter()
+                    .filter(|root| root.reason == RootReason::Unused)
+                    .map(|root| &root.symbol)
+                    .collect()
+            })
+            .unwrap_or_default();
         let mut tally = Tally::default();
         for symbol in facts
             .get::<Symbols>()?
@@ -209,6 +225,7 @@ impl Check for TestsCoverage {
             .iter()
             .filter(|symbol| ctx.scope.includes(&symbol.key()))
             .filter(|symbol| !inputs.conventions.is_some_and(|c| c.is_test(&symbol.file)))
+            .filter(|symbol| !unused.contains(&symbol.key()))
         {
             ctx.cancel.checkpoint()?;
             if let Some(finding) = self.score(symbol, &inputs, &mut tally, sink) {

@@ -97,6 +97,7 @@ pub mod capture {
     pub const API_ABSTRACT: &str = "api.abstract";
     pub const ROOT_ENTRY_POINT: &str = "root.entry-point";
     pub const ROOT_HOOK: &str = "root.hook";
+    pub const ROOT_UNUSED: &str = "root.unused";
     // references.scm
     pub const REFERENCE_NAME: &str = "reference.name";
     pub const REFERENCE_MEMBER: &str = "reference.member";
@@ -285,6 +286,7 @@ const API: Contract = Contract {
         c::API_ABSTRACT,
         c::ROOT_ENTRY_POINT,
         c::ROOT_HOOK,
+        c::ROOT_UNUSED,
         c::SCOPE,
         c::SCOPE_NAME,
         c::NAMESPACE_NAME,

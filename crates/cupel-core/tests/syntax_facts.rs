@@ -336,6 +336,7 @@ fn roots_payload_shape() {
         (RootReason::Export, "export"),
         (RootReason::Test, "test"),
         (RootReason::FrameworkHook, "framework-hook"),
+        (RootReason::Unused, "unused"),
     ]);
 }
 

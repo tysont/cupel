@@ -1,0 +1,15 @@
+{
+  "dir": ".",
+  "ran_in": "/private/tmp/claude-501/-Users-tysont-Workspace-cupel/fda0b927-dacb-4d0c-9f66-6ac9113c03d0/scratchpad/r030/unused-rust",
+  "skip_dirs": [
+    "target"
+  ],
+  "report": "4da5698bfa0c6fdc746f2011f6f31f023805768915097d41148aa25580515cab",
+  "files": {
+    "Cargo.lock": "f6e830a4596f958de2073a9ae143bb0bfd3f2ea0b1bac263e1ea7a91d1ce9208",
+    "Cargo.toml": "2041d2814dddde5e97e88261763fd294f8defa356538c6a742c4e3403ca64691",
+    "cupel.toml": "159edf617dad18b760623affd89826aaa54977df982a1b0378c6db46c6f3337e",
+    "src/lib.rs": "df647d3af273724262180e254936bd7ae97cc0d01870ca74b7b2a6d0d875847e",
+    "tests/decode.rs": "29d948378cab16e17b67fd5748465dee53f698e0a993e7de40b25a55b3e75064"
+  }
+}

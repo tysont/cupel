@@ -211,14 +211,15 @@
         "coverage-map"
       ],
       "stability": "experimental",
-      "summary": "Line and branch coverage per function, from the coverage tool the language's `[lang.<id>] coverage` command runs (or a fresh report it left). Branch findings only where the tool measured branches; otherwise the result notes `branches: unavailable`. A function with no instrumented line is not scored, unless the tool lists only the files the suite loaded: then a function in a file it left out never ran.",
+      "summary": "Line and branch coverage per function, from the coverage tool the language's `[lang.<id>] coverage` command runs (or a fresh report it left). Branch findings only where the tool measured branches; otherwise the result notes `branches: unavailable`. A function with no instrumented line is not scored, unless the tool lists only the files the suite loaded: then a function in a file it left out never ran. A function its language marks as unused on purpose is not scored (ADR-226).",
       "tier": 2,
       "version": 1,
       "wants": [
         "norm-tree",
         "test-conventions",
         "per-test-map",
-        "project-info"
+        "project-info",
+        "roots"
       ]
     },
     "subject": "check"

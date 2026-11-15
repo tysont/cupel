@@ -4,8 +4,8 @@ mod support;
 
 use cupel_core::coverage::{CoverageMap, FileCoverage, Listing};
 use cupel_core::syntax::{
-    NormNode, NormTree, NormalizedSymbol, Span, SymbolDef, SymbolKind, Symbols, TestConventions,
-    TestPairing, Visibility,
+    LiveRoot, NormNode, NormTree, NormalizedSymbol, RootReason, Roots, Span, SymbolDef, SymbolKind,
+    Symbols, TestConventions, TestPairing, Visibility,
 };
 use cupel_core::{
     ActionKind, Check, CheckId, CheckResult, CheckStatus, CostClass, Error, FactKind, Facts,
@@ -43,6 +43,7 @@ struct World {
     symbols: Vec<SymbolDef>,
     coverage: Option<CoverageMap>,
     conventions: Option<TestConventions>,
+    roots: Option<Roots>,
 }
 
 impl World {
@@ -51,6 +52,7 @@ impl World {
             symbols,
             coverage: Some(coverage),
             conventions: None,
+            roots: None,
         }
     }
 
@@ -84,6 +86,9 @@ impl World {
         }
         if let Some(conventions) = &self.conventions {
             facts.insert(conventions.clone()).unwrap();
+        }
+        if let Some(roots) = &self.roots {
+            facts.insert(roots.clone()).unwrap();
         }
         facts
     }
@@ -149,6 +154,7 @@ fn the_manifest_declares_its_facts_kinds_actions_and_metrics() {
                 FactKind::TestConventions,
                 FactKind::PerTestMap,
                 FactKind::ProjectInfo,
+                FactKind::Roots,
             ],
             tier: 2,
             cost: CostClass::Standard,
@@ -419,6 +425,46 @@ fn symbols_without_an_instrumented_line_or_in_test_files_are_not_scored() {
         json!("f_test.x")
     );
     assert_eq!(result.score.unwrap().n, 1, "one instrumented line scored");
+}
+
+/// A function its language marks as unused on purpose (`fn _assert_trait_object(…) {}`) exists for
+/// the compiler alone: no test runs it, so it is neither reported nor scored (ADR-226); a function
+/// that is a root for another reason is measured as before.
+#[test]
+fn a_function_unused_on_purpose_is_not_scored_but_other_roots_are() {
+    let mut world = World::new(
+        vec![
+            symbol("_assert_trait_object", "f.x", 1),
+            symbol("init", "f.x", 10),
+        ],
+        CoverageMap::new(vec![FileCoverage::from_hits(
+            "f.x",
+            &[(1, 0), (2, 0), (10, 0), (11, 0)],
+            None,
+        )]),
+    );
+    world.roots = Some(Roots {
+        roots: vec![
+            LiveRoot {
+                symbol: world.symbols[0].key(),
+                reason: RootReason::Unused,
+            },
+            LiveRoot {
+                symbol: world.symbols[1].key(),
+                reason: RootReason::FrameworkHook,
+            },
+        ],
+    });
+    let (result, findings) = run(&world);
+    assert_eq!(
+        support::kinds(&findings),
+        support::pairs(&[("m::init", "coverage.uncovered-symbol")])
+    );
+    assert_eq!(
+        result.score.unwrap().n,
+        1,
+        "only `init`'s body line is scored"
+    );
 }
 
 /// A map that lists only the files the suite loaded (ADR-152): a symbol in a file it leaves out

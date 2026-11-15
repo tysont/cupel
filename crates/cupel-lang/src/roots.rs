@@ -14,7 +14,7 @@ use crate::symbols::{Definition, definitions};
 ///
 /// A capture applies to the symbol whose definition node it is, else to the innermost symbol
 /// containing it. Each symbol is reported once per reason, reasons in the order entry point,
-/// export, test, framework hook.
+/// export, test, framework hook, unused.
 ///
 /// # Panics
 ///
@@ -54,7 +54,11 @@ pub fn extract(source: &Source<'_>) -> Roots {
     let api = captured(
         source,
         QueryFile::Api,
-        &[capture::ROOT_ENTRY_POINT, capture::ROOT_HOOK],
+        &[
+            capture::ROOT_ENTRY_POINT,
+            capture::ROOT_HOOK,
+            capture::ROOT_UNUSED,
+        ],
     );
     let tests = captured(source, QueryFile::Tests, &[capture::TEST_CASE]);
     let mut roots = Vec::new();
@@ -82,6 +86,7 @@ pub fn extract(source: &Source<'_>) -> Roots {
                 RootReason::FrameworkHook,
                 named(&rules.hooks) || api_root(capture::ROOT_HOOK),
             ),
+            (RootReason::Unused, api_root(capture::ROOT_UNUSED)),
         ];
         roots.extend(
             reasons

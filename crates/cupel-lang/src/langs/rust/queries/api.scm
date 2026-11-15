@@ -120,9 +120,10 @@
 
 ; A leading `_` tells rustc a function is unused on purpose, so it never warns about it: such a
 ; function exists for the compiler alone (`fn _assert_trait_object(_b: &dyn Buf) {}` fails to
-; compile when `Buf` is not object-safe), and nothing calling it is no sign it is dead.
+; compile when `Buf` is not object-safe), and nothing calling it is no sign it is dead, nor nothing
+; running it a gap in coverage (ADR-226).
 ((function_item
-  name: (identifier) @_unused) @root.hook
+  name: (identifier) @_unused) @root.unused
   (#match? @_unused "^_"))
 
 ; Namespaces, as in symbols.scm.

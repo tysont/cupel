@@ -535,6 +535,9 @@ pub enum RootReason {
     Export,
     Test,
     FrameworkHook,
+    /// A function its language marks as unused on purpose (Rust's leading `_`): it exists for the
+    /// compiler alone, and nothing calls or runs it (ADR-226).
+    Unused,
 }
 
 /// How test files are recognized and which tests belong to which source file.
