@@ -61,8 +61,8 @@
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 
 use cupel_core::syntax::{
-    Assertion, AssertionKind, AssertionStrength, Mock, SkipMarker, Span, TestCase, TestFile,
-    TestFrames,
+    Assertion, AssertionKind, AssertionStrength, Mock, Precision, SkipMarker, Span, TestCase,
+    TestFile, TestFrames,
 };
 use cupel_core::{FactKind, ProduceCtx};
 use serde::{Deserialize, Serialize};
@@ -300,6 +300,7 @@ fn attach_assertions(
             Assertion {
                 kind: class.kind,
                 strength: class.strength,
+                precision: class.precision,
                 span: span(m.node(capture::ASSERTION_EXTENT).unwrap_or(node)),
             },
         );
@@ -325,6 +326,8 @@ fn attach_assertions(
 struct Class {
     kind: AssertionKind,
     strength: AssertionStrength,
+    #[serde(default)]
+    precision: Precision,
 }
 
 /// The asserting helpers of `source`: each function that is not a case and holds one of the
@@ -356,6 +359,7 @@ fn file_helpers(
                 Class {
                     kind: first.kind,
                     strength: first.strength,
+                    precision: first.precision,
                 },
             ))
         })
@@ -418,6 +422,7 @@ fn file_macros(
                 Class {
                     kind: first.kind,
                     strength: first.strength,
+                    precision: first.precision,
                 },
             ))
         })
@@ -449,11 +454,13 @@ fn assert_through(assertions: &mut Vec<Assertion>, class: Class, call: Called) {
     if let Some(assertion) = assertions.iter_mut().find(|assertion| call.is(assertion)) {
         assertion.kind = class.kind;
         assertion.strength = class.strength;
+        assertion.precision = class.precision;
         return;
     }
     assertions.push(Assertion {
         kind: class.kind,
         strength: class.strength,
+        precision: class.precision,
         span: call.at,
     });
     assertions.sort_by_key(|assertion| (assertion.span.line, assertion.span.col));

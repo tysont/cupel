@@ -186,6 +186,42 @@
   (#eq? @_assert "assert")
   (#any-of? @_method "throws" "rejects")) @test.assertion @assertion.idiom.throws-specific
 
+; An equality matcher given an asymmetric matcher (`expect.any(Number)`, `expect.objectContaining(…)`)
+; as its argument, or as an element or property value of it: the key is the asymmetric matcher, which
+; pins only what it names (ADR-237).
+(call_expression
+  function: (member_expression
+    object: [
+      (call_expression function: (identifier) @_expect)
+      (member_expression
+        object: (call_expression function: (identifier) @_expect))
+    ]
+    property: (property_identifier) @_matcher)
+  arguments: (arguments
+    [
+      (call_expression
+        function: (member_expression
+          object: (identifier) @_asymmetric
+          property: (property_identifier) @assertion.name))
+      (array
+        (call_expression
+          function: (member_expression
+            object: (identifier) @_asymmetric
+            property: (property_identifier) @assertion.name)))
+      (object
+        (pair
+          value: (call_expression
+            function: (member_expression
+              object: (identifier) @_asymmetric
+              property: (property_identifier) @assertion.name))))
+    ])
+  (#eq? @_expect "expect")
+  (#eq? @_asymmetric "expect")
+  (#any-of? @_matcher "toBe" "toEqual" "toStrictEqual" "toHaveBeenCalledWith"
+    "toHaveBeenLastCalledWith" "toHaveBeenNthCalledWith" "toHaveReturnedWith")
+  (#any-of? @assertion.name "any" "anything" "objectContaining" "arrayContaining"
+    "stringContaining" "stringMatching" "closeTo")) @test.assertion
+
 ; Expect chains up to three links deep: `expect(x).toBe(y)`, `expect(p).resolves.toBe(y)`,
 ; chai's `expect(x).to.equal(y)` and `expect(x).to.deep.equal(y)`. The key is the last link.
 (call_expression

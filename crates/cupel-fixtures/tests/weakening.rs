@@ -4,7 +4,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use cupel_core::{ActionKind, CheckStatus, Envelope, Severity, SkipReason};
+use cupel_core::{ActionKind, CheckStatus, Envelope, GateOutcome, Severity, SkipReason};
 use cupel_fixtures::evidence;
 use cupel_fixtures::matrix::Registries;
 use cupel_fixtures::run_cupel;
@@ -633,4 +633,481 @@ fn a_test_that_gains_an_options_object_is_not_deleted() {
     let envelope = repo.check(&["--base", &base]);
     assert_eq!(findings(&envelope), []);
     assert_eq!(status(&envelope), CheckStatus::Pass);
+}
+
+// ---------------------------------------------------------------- loosened transitions
+
+/// One test file before and after one exact assertion is loosened, and the looser precision the
+/// `matcher.loosened` finding names (ADR-237).
+struct Loosening {
+    file: &'static str,
+    source: &'static str,
+    from: &'static str,
+    to: &'static str,
+    looser: &'static str,
+}
+
+const PYTEST_SOURCE: &str = "import re\nimport pytest\nfrom unittest.mock import ANY\n\n\n\
+def test_value():\n    x = make()\n    assert x == 1\n";
+
+const UNITTEST_SOURCE: &str = "import unittest\n\n\nclass ValueTest(unittest.TestCase):\n    \
+def test_value(self):\n        self.assertEqual(make(), 1.0)\n";
+
+const JEST_SOURCE: &str = "import { expect, it } from \"vitest\";\n\n\
+it(\"value\", () => {\n  const x = make();\n  expect(x).toEqual(1);\n});\n";
+
+const CHAI_SOURCE: &str = "import { assert, expect } from \"chai\";\n\n\
+it(\"value\", () => {\n  const x = make();\n  expect(x).to.equal(1);\n  assert.equal(x, 1);\n});\n";
+
+const GO_SOURCE: &str = "package value\n\nimport (\n\t\"testing\"\n\n\t\"github.com/stretchr/testify/assert\"\n)\n\n\
+func TestValue(t *testing.T) {\n\tx := make1()\n\tassert.Equal(t, 1, x)\n}\n";
+
+const RUST_SOURCE: &str =
+    "#[test]\nfn value() {\n    let x = make();\n    assert_eq!(x, 1.0);\n}\n";
+
+const JAVA_SOURCE: &str = "import static org.assertj.core.api.Assertions.assertThat;\n\n\
+import org.junit.jupiter.api.Test;\n\nclass ValueTest {\n    @Test\n    void value() {\n        \
+double x = make();\n        assertThat(x).isEqualTo(1.0);\n    }\n}\n";
+
+const CLOJURE_SOURCE: &str = "(ns value-test\n  (:require [clojure.test :refer [deftest is]]))\n\n\
+(deftest value\n  (is (= 1 (make))))\n";
+
+const LOOSENINGS: &[Loosening] = &[
+    // pytest
+    Loosening {
+        file: "tests/test_value.py",
+        source: PYTEST_SOURCE,
+        from: "assert x == 1",
+        to: "assert x in (1, 2)",
+        looser: "membership",
+    },
+    Loosening {
+        file: "tests/test_value.py",
+        source: PYTEST_SOURCE,
+        from: "assert x == 1",
+        to: "assert x in allowed",
+        looser: "membership",
+    },
+    Loosening {
+        file: "tests/test_value.py",
+        source: PYTEST_SOURCE,
+        from: "assert x == 1",
+        to: "assert x == pytest.approx(1)",
+        looser: "approximate",
+    },
+    Loosening {
+        file: "tests/test_value.py",
+        source: PYTEST_SOURCE,
+        from: "assert x == 1",
+        to: "assert x == ANY",
+        looser: "any",
+    },
+    Loosening {
+        file: "tests/test_value.py",
+        source: PYTEST_SOURCE,
+        from: "assert x == 1",
+        to: "assert str(x).startswith(\"1\")",
+        looser: "weak",
+    },
+    Loosening {
+        file: "tests/test_value.py",
+        source: PYTEST_SOURCE,
+        from: "assert x == 1",
+        to: "assert re.match(\"1\", str(x))",
+        looser: "weak",
+    },
+    Loosening {
+        file: "tests/test_value.py",
+        source: PYTEST_SOURCE,
+        from: "assert x == 1",
+        to: "assert isinstance(x, int)",
+        looser: "weak",
+    },
+    Loosening {
+        file: "tests/test_value.py",
+        source: UNITTEST_SOURCE,
+        from: "assertEqual(",
+        to: "assertAlmostEqual(",
+        looser: "approximate",
+    },
+    // Jest and Vitest
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toContain(1)",
+        looser: "membership",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toMatch(/1/)",
+        looser: "partial",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toMatchObject({ a: 1 })",
+        looser: "partial",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toBeCloseTo(1)",
+        looser: "approximate",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toEqual(expect.any(Number))",
+        looser: "type",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toEqual(expect.anything())",
+        looser: "any",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toEqual({ a: 1, b: expect.any(Number) })",
+        looser: "type",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toEqual(expect.stringContaining(\"1\"))",
+        looser: "partial",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toEqual([expect.closeTo(1)])",
+        looser: "approximate",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toHaveBeenCalledWith(expect.anything())",
+        looser: "any",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toBeInstanceOf(Number)",
+        looser: "weak",
+    },
+    Loosening {
+        file: "test/value.test.ts",
+        source: JEST_SOURCE,
+        from: "toEqual(1)",
+        to: "toEqual(expect.objectContaining({ a: 1 }))",
+        looser: "partial",
+    },
+    // Chai
+    Loosening {
+        file: "test/value.test.js",
+        source: CHAI_SOURCE,
+        from: "to.equal(1)",
+        to: "to.include(1)",
+        looser: "membership",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: CHAI_SOURCE,
+        from: "to.equal(1)",
+        to: "to.match(/1/)",
+        looser: "partial",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: CHAI_SOURCE,
+        from: "to.equal(1)",
+        to: "to.be.closeTo(1, 0.1)",
+        looser: "approximate",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: CHAI_SOURCE,
+        from: "to.equal(1)",
+        to: "to.be.a(\"number\")",
+        looser: "type",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: CHAI_SOURCE,
+        from: "assert.equal(x, 1)",
+        to: "assert.include(x, 1)",
+        looser: "membership",
+    },
+    Loosening {
+        file: "test/value.test.js",
+        source: CHAI_SOURCE,
+        from: "assert.equal(x, 1)",
+        to: "assert.closeTo(x, 1, 0.1)",
+        looser: "approximate",
+    },
+    // Go testify
+    Loosening {
+        file: "value_test.go",
+        source: GO_SOURCE,
+        from: "assert.Equal(t, 1, x)",
+        to: "assert.Contains(t, x, 1)",
+        looser: "membership",
+    },
+    Loosening {
+        file: "value_test.go",
+        source: GO_SOURCE,
+        from: "assert.Equal(t, 1, x)",
+        to: "assert.Regexp(t, \"1\", x)",
+        looser: "partial",
+    },
+    Loosening {
+        file: "value_test.go",
+        source: GO_SOURCE,
+        from: "assert.Equal(t, 1, x)",
+        to: "assert.InDelta(t, 1, x, 0.1)",
+        looser: "approximate",
+    },
+    Loosening {
+        file: "value_test.go",
+        source: GO_SOURCE,
+        from: "assert.Equal(t, 1, x)",
+        to: "assert.IsType(t, 0, x)",
+        looser: "type",
+    },
+    Loosening {
+        file: "value_test.go",
+        source: GO_SOURCE,
+        from: "assert.Equal(t, 1, x)",
+        to: "assert.True(t, x > 0)",
+        looser: "weak",
+    },
+    // Rust
+    Loosening {
+        file: "tests/value.rs",
+        source: RUST_SOURCE,
+        from: "assert_eq!(x, 1.0)",
+        to: "assert_relative_eq!(x, 1.0)",
+        looser: "approximate",
+    },
+    Loosening {
+        file: "tests/value.rs",
+        source: RUST_SOURCE,
+        from: "assert_eq!(x, 1.0)",
+        to: "assert_abs_diff_eq!(x, 1.0, epsilon = 0.1)",
+        looser: "approximate",
+    },
+    Loosening {
+        file: "tests/value.rs",
+        source: RUST_SOURCE,
+        from: "assert_eq!(x, 1.0)",
+        to: "assert_matches!(x, Some(_))",
+        looser: "partial",
+    },
+    Loosening {
+        file: "tests/value.rs",
+        source: RUST_SOURCE,
+        from: "assert_eq!(x, 1.0)",
+        to: "assert!(x.contains(\"1\"))",
+        looser: "weak",
+    },
+    // Java AssertJ
+    Loosening {
+        file: "src/test/java/ValueTest.java",
+        source: JAVA_SOURCE,
+        from: "isEqualTo(1.0)",
+        to: "isIn(1.0, 2.0)",
+        looser: "membership",
+    },
+    Loosening {
+        file: "src/test/java/ValueTest.java",
+        source: JAVA_SOURCE,
+        from: "isEqualTo(1.0)",
+        to: "isCloseTo(1.0, within(0.1))",
+        looser: "approximate",
+    },
+    Loosening {
+        file: "src/test/java/ValueTest.java",
+        source: JAVA_SOURCE,
+        from: "isEqualTo(1.0)",
+        to: "startsWith(\"1\")",
+        looser: "partial",
+    },
+    Loosening {
+        file: "src/test/java/ValueTest.java",
+        source: JAVA_SOURCE,
+        from: "isEqualTo(1.0)",
+        to: "isInstanceOf(Double.class)",
+        looser: "type",
+    },
+    // clojure.test
+    Loosening {
+        file: "test/value_test.clj",
+        source: CLOJURE_SOURCE,
+        from: "(= 1 (make))",
+        to: "(contains? #{1 2} (make))",
+        looser: "weak",
+    },
+    Loosening {
+        file: "test/value_test.clj",
+        source: CLOJURE_SOURCE,
+        from: "(= 1 (make))",
+        to: "(re-find #\"1\" (str (make)))",
+        looser: "weak",
+    },
+    Loosening {
+        file: "test/value_test.clj",
+        source: CLOJURE_SOURCE,
+        from: "(= 1 (make))",
+        to: "(instance? Long (make))",
+        looser: "weak",
+    },
+];
+
+/// A repository whose `main` holds `file` with `source` and whose next commit replaces `from`
+/// with `to`; returns it with the first commit's SHA.
+fn loosened(file: &str, source: &str, from: &str, to: &str) -> (Repo, String) {
+    let repo = Repo::new();
+    repo.write(file, source);
+    let base = repo.commit("exact");
+    repo.edit(file, from, to);
+    repo.commit("loosened");
+    (repo, base)
+}
+
+#[test]
+fn each_loosened_transition_is_a_matcher_loosened_naming_the_looser_precision() {
+    let mut missed = Vec::new();
+    for case in LOOSENINGS {
+        let (repo, base) = loosened(case.file, case.source, case.from, case.to);
+        let envelope = repo.check(&["--base", &base]);
+        let kinds: Vec<(String, String, String)> = findings(&envelope);
+        let found = envelope
+            .findings
+            .iter()
+            .find(|finding| finding.kind == "matcher.loosened");
+        let named = found.map(|finding| finding.evidence.0.get("looser").cloned());
+        if kinds.len() != 1 || named != Some(Some(serde_json::json!([case.looser]))) {
+            missed.push(format!(
+                "{} -> {} ({}): {kinds:?} {named:?}",
+                case.from, case.to, case.file
+            ));
+        }
+    }
+    assert!(missed.is_empty(), "{}", missed.join("\n"));
+}
+
+/// The test httpx #3773 changed, as it stood at the PR's parent.
+const HTTPX_3773: &str = r#"import httpx
+
+
+def autodetect(content):
+    return "ISO-8859-1"
+
+
+def test_response_decode_text_using_autodetect():
+    text = (
+        "Neither Kafka nor Kierkegaard ever fully understood the true nature of "
+        "Schadenfreude, but they both wrote about it."
+    )
+    content = text.encode("ISO-8859-1")
+    response = httpx.Response(200, content=content, default_encoding=autodetect)
+
+    assert response.status_code == 200
+    assert response.reason_phrase == "OK"
+    assert response.encoding == "ISO-8859-1"
+    assert response.text == text
+"#;
+
+/// Checks the branch against `base` with the gate `tests.weakening = "none"`; the run's exit
+/// code and its envelope.
+fn gated(repo: &Repo, base: &str) -> (Option<i32>, Envelope) {
+    repo.write(
+        "cupel.toml",
+        "[gate.changed]\n\"tests.weakening\" = \"none\"\n",
+    );
+    let outcome = run_cupel(
+        &[
+            "check", "--only", CHECK, "--base", base, "--gate", "--format", "json",
+        ],
+        repo.path(),
+    );
+    (outcome.code, outcome.envelope().clone())
+}
+
+fn assert_gate_fails_on_membership(repo: &Repo, base: &str, test: &str) {
+    let (code, envelope) = gated(repo, base);
+    assert_eq!(code, Some(1), "{:?}", envelope.findings);
+    assert_eq!(
+        findings(&envelope),
+        [(
+            "matcher.loosened".to_owned(),
+            "tests/models/test_responses.py".to_owned(),
+            test.to_owned()
+        )]
+    );
+    assert_eq!(
+        envelope.findings[0].evidence.0["looser"],
+        serde_json::json!(["membership"])
+    );
+    let gate = envelope.summary.gate.as_ref().expect("a gate result");
+    assert_eq!(gate.result, GateOutcome::Fail, "{gate:?}");
+}
+
+#[test]
+fn httpx_3773_equality_to_membership_of_a_literal_tuple_fails_the_gate() {
+    let (repo, base) = loosened(
+        "tests/models/test_responses.py",
+        HTTPX_3773,
+        "    assert response.encoding == \"ISO-8859-1\"\n",
+        "    # The encoded byte string is consistent with either ISO-8859-1 or\n    \
+         # WINDOWS-1252. Versions <6.0 of chardet claim the former, while chardet\n    \
+         # 6.0 detects the latter.\n    \
+         assert response.encoding in (\"ISO-8859-1\", \"WINDOWS-1252\")\n",
+    );
+    assert_gate_fails_on_membership(&repo, &base, "test_response_decode_text_using_autodetect");
+}
+
+#[test]
+fn equality_to_membership_of_any_collection_fails_the_gate_the_same_way() {
+    let (repo, base) = loosened(
+        "tests/models/test_responses.py",
+        HTTPX_3773,
+        "    assert response.encoding == \"ISO-8859-1\"\n",
+        "    assert response.encoding in ENCODINGS\n",
+    );
+    assert_gate_fails_on_membership(&repo, &base, "test_response_decode_text_using_autodetect");
+}
+
+#[test]
+fn a_looser_assertion_made_exact_again_is_not_a_loosening() {
+    for case in LOOSENINGS {
+        let (repo, base) = loosened(
+            case.file,
+            &case.source.replacen(case.from, case.to, 1),
+            case.to,
+            case.from,
+        );
+        let envelope = repo.check(&["--base", &base]);
+        assert_eq!(
+            findings(&envelope),
+            [],
+            "{} -> {} ({})",
+            case.to,
+            case.from,
+            case.file
+        );
+    }
 }

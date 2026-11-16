@@ -19,13 +19,17 @@ expression: pretty(&schema)
   "required": [
     "files"
   ],
-  "x-cupel-fact-version": 3,
+  "x-cupel-fact-version": 4,
   "$defs": {
     "Assertion": {
       "type": "object",
       "properties": {
         "kind": {
           "$ref": "#/$defs/AssertionKind"
+        },
+        "precision": {
+          "description": "How much of the expected value a strong assertion pins (ADR-237).",
+          "$ref": "#/$defs/Precision"
         },
         "span": {
           "$ref": "#/$defs/Span"
@@ -36,6 +40,7 @@ expression: pretty(&schema)
       },
       "required": [
         "kind",
+        "precision",
         "span",
         "strength"
       ]
@@ -72,6 +77,41 @@ expression: pretty(&schema)
       "required": [
         "span",
         "target"
+      ]
+    },
+    "Precision": {
+      "description": "How much of the expected value an assertion pins, apart from its strength: `tests.weakening`\nreads a change from `exact` to any other as a loosened matcher (ADR-237).",
+      "oneOf": [
+        {
+          "description": "One value: equality, an exception's type, a snapshot.",
+          "type": "string",
+          "const": "exact"
+        },
+        {
+          "description": "Any element of a collection: `assert a in b`, `toContain`, `Contains`, `isIn`.",
+          "type": "string",
+          "const": "membership"
+        },
+        {
+          "description": "Part of the value: a substring, prefix, pattern, or subset of properties.",
+          "type": "string",
+          "const": "partial"
+        },
+        {
+          "description": "A value within a tolerance: `pytest.approx`, `toBeCloseTo`, `InDelta`.",
+          "type": "string",
+          "const": "approximate"
+        },
+        {
+          "description": "Any value of a type: `expect.any(Number)`, `IsType`, `isInstanceOf`.",
+          "type": "string",
+          "const": "type"
+        },
+        {
+          "description": "Any value at all: `mock.ANY`, `expect.anything()`.",
+          "type": "string",
+          "const": "any"
+        }
       ]
     },
     "SkipMarker": {

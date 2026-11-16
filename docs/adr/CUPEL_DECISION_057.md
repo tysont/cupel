@@ -1,6 +1,6 @@
 # CUPEL_DECISION_057: `tests.weakening`: matching tests across a range, the five kinds, and snapshots
 
-**Date:** 2026-10-14 · **Status:** accepted · **Phase:** P2.7
+**Date:** 2026-10-14 · **Status:** accepted; `matcher.loosened` (§3, §5) amended by [237](CUPEL_DECISION_237.md): an exact assertion that becomes any looser one is loosened too, apart from strength · **Phase:** P2.7
 
 ## Context
 

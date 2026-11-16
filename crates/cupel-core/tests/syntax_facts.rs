@@ -4,9 +4,9 @@ use cupel_core::syntax::{
     ApiItem, ApiItemKind, ApiSurface, Assertion, AssertionKind, AssertionStrength, Decision,
     DecisionKind, Decisions, EdgeKind, ImportAlias, ImportEdge, ImportTarget, LiveRoot, Mock,
     ModuleGraph, MutationOperator, MutationSites, NormNode, NormTree, NormalizedSymbol,
-    OperatorSet, ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site, SkipMarker, Span,
-    SymbolDecisions, SymbolDef, SymbolKey, SymbolKind, SymbolSites, Symbols, TestCase,
-    TestConventions, TestFile, TestFrames, TestPairing, Visibility,
+    OperatorSet, Precision, ProjectInfo, ProjectRoot, RootImports, RootReason, Roots, Site,
+    SkipMarker, Span, SymbolDecisions, SymbolDef, SymbolKey, SymbolKind, SymbolSites, Symbols,
+    TestCase, TestConventions, TestFile, TestFrames, TestPairing, Visibility,
 };
 use cupel_core::{Fact, FactKind, LangId};
 use serde::Serialize;
@@ -217,6 +217,7 @@ fn test_frames_payload_shape() {
                 assertions: vec![Assertion {
                     kind: AssertionKind::Equality,
                     strength: AssertionStrength::Weak,
+                    precision: Precision::Exact,
                     span: span(9),
                 }],
                 mocks: vec![Mock {
@@ -455,7 +456,7 @@ fn each_payload_declares_its_own_kind_and_version() {
             (FactKind::Decisions, 3),
             (FactKind::NormTree, 1),
             (FactKind::MutationSites, 1),
-            (FactKind::TestFrames, 3),
+            (FactKind::TestFrames, 4),
             (FactKind::ModuleGraph, 2),
             (FactKind::ApiSurface, 1),
             (FactKind::Roots, 1),

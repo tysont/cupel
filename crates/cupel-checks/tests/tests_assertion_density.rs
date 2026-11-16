@@ -5,8 +5,8 @@ mod support;
 use std::collections::BTreeSet;
 
 use cupel_core::syntax::{
-    Assertion, AssertionKind, AssertionStrength, SymbolDef, SymbolKind, Symbols, TestCase,
-    TestConventions, TestFile, TestFrames, TestPairing, Visibility,
+    Assertion, AssertionKind, AssertionStrength, Precision, SymbolDef, SymbolKind, Symbols,
+    TestCase, TestConventions, TestFile, TestFrames, TestPairing, Visibility,
 };
 use cupel_core::{
     ActionKind, CheckId, CheckResult, CheckStatus, CostClass, FactKind, Facts, Finding, FindingId,
@@ -27,6 +27,7 @@ fn case(name: &str, line: u32, lines: u32, assertions: usize) -> TestCase {
             .map(|_| Assertion {
                 kind: AssertionKind::Equality,
                 strength: AssertionStrength::Strong,
+                precision: Precision::Exact,
                 span: at,
             })
             .collect(),

@@ -6,8 +6,8 @@ use std::collections::BTreeSet;
 
 use cupel_core::syntax::{
     Assertion, AssertionKind, AssertionStrength, Decision, DecisionKind, Decisions, Mock, NormNode,
-    NormTree, NormalizedSymbol, SkipMarker, Span, SymbolDecisions, SymbolDef, SymbolKind, Symbols,
-    TestCase, TestFile, TestFrames, Visibility,
+    NormTree, NormalizedSymbol, Precision, SkipMarker, Span, SymbolDecisions, SymbolDef,
+    SymbolKind, Symbols, TestCase, TestFile, TestFrames, Visibility,
 };
 use cupel_core::{
     ActionKind, CheckId, CheckResult, CheckStatus, FactKind, Facts, Finding, FindingId, Manifest,
@@ -219,11 +219,13 @@ impl Case {
                 .map(|(n, (kind, strength))| Assertion {
                     kind: *kind,
                     strength: *strength,
+                    precision: Precision::Exact,
                     span: self.asserted_on.get(n).map_or(at, |line| span(*line, 1)),
                 })
                 .chain(self.throws_over.iter().map(|over| Assertion {
                     kind: AssertionKind::Throws,
                     strength: AssertionStrength::Strong,
+                    precision: Precision::Exact,
                     span: *over,
                 }))
                 .collect(),

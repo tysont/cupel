@@ -6,7 +6,8 @@ use cupel_core::git::ChangeKind;
 use cupel_core::hint::LOCATION_COMMIT;
 use cupel_core::matching::{self, Candidate};
 use cupel_core::syntax::{
-    AssertionKind, AssertionStrength, NormTree, Span, SymbolKey, Symbols, TestCase, TestFrames,
+    Assertion, AssertionKind, AssertionStrength, NormTree, Precision, Span, SymbolKey, Symbols,
+    TestCase, TestFrames,
 };
 use cupel_core::{
     Action, ActionKind, Check, CheckCtx, CheckId, CheckResult, CostClass, Event, EventSink,
@@ -56,6 +57,13 @@ struct MatcherLoosened {
     weak_base: u32,
     /// Weak assertions at head.
     weak_head: u32,
+    /// Strong assertions that pin their value exactly, at base (ADR-237).
+    exact_base: u32,
+    /// Exact assertions at head.
+    exact_head: u32,
+    /// The looser forms the test has more of at head: `weak`, or a strong assertion's precision
+    /// (`membership`, `partial`, `approximate`, `type`, `any`).
+    looser: Vec<String>,
 }
 
 /// Evidence of `test.skipped`.
@@ -98,7 +106,7 @@ impl TestsWeakening {
         Self {
             manifest: Manifest {
                 id: CheckId::from(ID),
-                version: 2,
+                version: 3,
                 tier: Tier::try_from(2).expect("tier 2 exists"),
                 cost: CostClass::Quick,
                 needs: SIDES.to_vec(),
@@ -117,8 +125,10 @@ impl TestsWeakening {
                     kind::<MatcherLoosened>(
                         "matcher.loosened",
                         ActionKind::RestoreTest,
-                        "A test replaced assertions that pin one value with weaker ones \
-                         (truthiness, presence, inequality).",
+                        "A test replaced assertions that pin one value with weaker ones: an \
+                         exact assertion became a weak one (truthiness, presence, inequality) \
+                         or a strong one that pins less, whatever tests.quality calls it \
+                         (membership, partial, approximate, type, any).",
                     ),
                     kind::<SnapshotRewritten>(
                         "snapshot.rewritten",
@@ -391,48 +401,50 @@ pub(crate) fn added(base: &Tests<'_>, head: &Tests<'_>) -> Vec<bool> {
 }
 
 /// Assertion counts of one test.
+#[derive(Default)]
 struct Counts {
     total: u32,
     strong: u32,
     weak: u32,
+    /// Strong assertions of `exact` precision.
+    exact: u32,
+    /// Assertions that are not exact, by looser form: `weak`, or the strong ones' precision.
+    looser: BTreeMap<&'static str, u32>,
 }
 
 impl Counts {
     /// The counts of every test of `tests` together.
     fn sum(tests: &[&Test<'_>]) -> Self {
-        tests.iter().map(|test| Self::of(test.case)).fold(
-            Self {
-                total: 0,
-                strong: 0,
-                weak: 0,
-            },
-            |sum, counts| Self {
-                total: sum.total + counts.total,
-                strong: sum.strong + counts.strong,
-                weak: sum.weak + counts.weak,
-            },
-        )
+        let mut sum = Self::default();
+        for assertion in tests.iter().flat_map(|test| &test.case.assertions) {
+            sum.add(assertion);
+        }
+        sum
     }
 
-    fn of(case: &TestCase) -> Self {
-        let count = |strength| {
-            u32::try_from(
-                case.assertions
-                    .iter()
-                    .filter(|assertion| assertion.strength == strength)
-                    .count(),
-            )
-            .unwrap_or(u32::MAX)
+    fn add(&mut self, assertion: &Assertion) {
+        self.total += 1;
+        let looser = match (assertion.strength, assertion.precision) {
+            (AssertionStrength::Weak, _) => {
+                self.weak += 1;
+                "weak"
+            }
+            (AssertionStrength::Strong, Precision::Exact) => {
+                self.strong += 1;
+                self.exact += 1;
+                return;
+            }
+            (AssertionStrength::Strong, precision) => {
+                self.strong += 1;
+                precision.as_str()
+            }
         };
-        let (strong, weak) = (
-            count(AssertionStrength::Strong),
-            count(AssertionStrength::Weak),
-        );
-        Self {
-            total: strong + weak,
-            strong,
-            weak,
-        }
+        *self.looser.entry(looser).or_default() += 1;
+    }
+
+    /// Assertions that are not exact.
+    fn inexact(&self) -> u32 {
+        self.total - self.exact
     }
 }
 
@@ -665,13 +677,25 @@ fn removed(new: &Test<'_>, before: &Counts, after: &Counts, commit: &str) -> Opt
     })
 }
 
-/// `matcher.loosened` when strong assertions became weak ones.
+/// `matcher.loosened` when strong assertions became weak ones, or exact ones became any looser
+/// form (ADR-237): the larger of the two counts.
 fn loosened(new: &Test<'_>, before: &Counts, after: &Counts) -> Option<Said> {
     let name = &new.case.name;
-    let loosened = before
+    let weakened = before
         .strong
         .saturating_sub(after.strong)
         .min(after.weak.saturating_sub(before.weak));
+    let unpinned = before
+        .exact
+        .saturating_sub(after.exact)
+        .min(after.inexact().saturating_sub(before.inexact()));
+    let loosened = weakened.max(unpinned);
+    let looser: Vec<&str> = after
+        .looser
+        .iter()
+        .filter(|(form, count)| **count > before.looser.get(*form).copied().unwrap_or(0))
+        .map(|(form, _)| *form)
+        .collect();
     (loosened > 0).then(|| Said {
         kind: "matcher.loosened",
         title: format!("`{name}` replaced {loosened} exact assertion(s) with weaker ones"),
@@ -681,12 +705,31 @@ fn loosened(new: &Test<'_>, before: &Counts, after: &Counts) -> Option<Said> {
             strong_head: after.strong,
             weak_base: before.weak,
             weak_head: after.weak,
+            exact_base: before.exact,
+            exact_head: after.exact,
+            looser: looser.iter().map(|form| (*form).to_owned()).collect(),
         }),
         summary: format!(
-            "Restore the exact expected values in `{name}` instead of truthiness, presence, or \
-             inequality checks."
+            "Restore the exact expected values in `{name}` instead of {}.",
+            looser_checks(&looser)
         ),
     })
+}
+
+/// What the looser forms check, as the summary names them.
+fn looser_checks(looser: &[&str]) -> String {
+    let named: Vec<&str> = looser
+        .iter()
+        .map(|form| match *form {
+            "weak" => "truthiness, presence, or inequality checks",
+            "membership" => "membership checks",
+            "partial" => "partial matches",
+            "approximate" => "approximate comparisons",
+            "type" => "type-only checks",
+            _ => "any-value matchers",
+        })
+        .collect();
+    named.join(" and ")
 }
 
 /// The head tests a snapshot belongs to: those whose file's stem appears in the snapshot path

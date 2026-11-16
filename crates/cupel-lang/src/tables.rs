@@ -3,7 +3,7 @@
 use std::collections::{BTreeMap, HashMap};
 
 use cupel_core::syntax::{
-    AssertionKind, AssertionStrength, DecisionKind, MutationOperator, Visibility,
+    AssertionKind, AssertionStrength, DecisionKind, MutationOperator, Precision, Visibility,
 };
 use serde::Deserialize;
 
@@ -352,6 +352,7 @@ impl Default for TestRules {
                 kind: AssertionKind::Custom,
                 strength: AssertionStrength::Strong,
                 debug: false,
+                precision: Precision::Exact,
             },
             assertions: BTreeMap::new(),
             directory_helpers: false,
@@ -379,6 +380,10 @@ pub struct AssertionClass {
     /// (ADR-224).
     #[serde(default)]
     pub debug: bool,
+    /// How much of the expected value a strong assertion of this key pins; `exact` when omitted
+    /// (ADR-237).
+    #[serde(default)]
+    pub precision: Precision,
 }
 
 /// `[conventions]`: how `GlobTestConventions` recognizes test files and pairs them with sources.

@@ -6,6 +6,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 32,
@@ -31,6 +32,7 @@
           "assertions": [
             {
               "kind": "truthiness",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 31,
@@ -56,6 +58,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 42,
@@ -81,6 +84,7 @@
           "assertions": [
             {
               "kind": "not-null",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 46,
@@ -106,6 +110,7 @@
           "assertions": [
             {
               "kind": "throws",
+              "precision": "exact",
               "span": {
                 "col": 10,
                 "end_col": 35,
@@ -131,6 +136,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "approximate",
               "span": {
                 "col": 5,
                 "end_col": 70,
@@ -156,6 +162,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 47,
@@ -189,6 +196,7 @@
           "assertions": [
             {
               "kind": "snapshot",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 36,
@@ -214,6 +222,7 @@
           "assertions": [
             {
               "kind": "custom",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 39,
@@ -249,6 +258,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 28,
@@ -306,6 +316,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -331,6 +342,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 9,
                 "end_col": 70,
@@ -356,6 +368,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -366,6 +379,7 @@
             },
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -376,6 +390,7 @@
             },
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -386,6 +401,7 @@
             },
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -411,6 +427,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -421,6 +438,7 @@
             },
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -431,6 +449,7 @@
             },
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -441,6 +460,7 @@
             },
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 14,
                 "end_col": 22,
@@ -466,6 +486,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 9,
                 "end_col": 86,
@@ -499,6 +520,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 9,
                 "end_col": 36,
@@ -509,6 +531,7 @@
             },
             {
               "kind": "truthiness",
+              "precision": "exact",
               "span": {
                 "col": 9,
                 "end_col": 35,
@@ -534,6 +557,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 9,
                 "end_col": 56,
@@ -567,6 +591,7 @@
           "assertions": [
             {
               "kind": "custom",
+              "precision": "exact",
               "span": {
                 "col": 9,
                 "end_col": 45,
@@ -617,6 +642,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 44,
@@ -650,6 +676,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 41,
@@ -675,6 +702,7 @@
           "assertions": [
             {
               "kind": "throws",
+              "precision": "exact",
               "span": {
                 "col": 10,
                 "end_col": 35,
@@ -700,6 +728,7 @@
           "assertions": [
             {
               "kind": "truthiness",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 38,
@@ -739,6 +768,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 39,
@@ -792,6 +822,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 9,
                 "end_col": 41,
@@ -817,6 +848,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 9,
                 "end_col": 41,
@@ -842,6 +874,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 34,
@@ -867,6 +900,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 24,

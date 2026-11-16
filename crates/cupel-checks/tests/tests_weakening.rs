@@ -6,8 +6,8 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 
 use cupel_core::git::{Change, ChangeKind};
 use cupel_core::syntax::{
-    Assertion, AssertionKind, AssertionStrength, NormNode, NormTree, NormalizedSymbol, SkipMarker,
-    Span, SymbolDef, SymbolKind, Symbols, TestCase, TestFile, TestFrames, Visibility,
+    Assertion, AssertionKind, AssertionStrength, NormNode, NormTree, NormalizedSymbol, Precision,
+    SkipMarker, Span, SymbolDef, SymbolKind, Symbols, TestCase, TestFile, TestFrames, Visibility,
 };
 use cupel_core::{
     Check, CheckId, CheckResult, CheckStatus, Error, FactKind, Facts, Finding, FindingId, LangId,
@@ -31,6 +31,7 @@ fn assertion(kind: AssertionKind, strength: AssertionStrength) -> Assertion {
     Assertion {
         kind,
         strength,
+        precision: Precision::Exact,
         span: span(1),
     }
 }
@@ -401,8 +402,53 @@ fn trading_exact_assertions_for_fewer_weak_ones_is_both_removed_and_loosened() {
     );
     assert_eq!(
         Value::Object(findings[1].evidence.0.clone()),
-        json!({"test": "t", "strong_base": 3, "strong_head": 1, "weak_base": 0, "weak_head": 1})
+        json!({
+            "test": "t", "strong_base": 3, "strong_head": 1, "weak_base": 0, "weak_head": 1,
+            "exact_base": 3, "exact_head": 1, "looser": ["weak"]
+        })
     );
+}
+
+fn membership() -> Assertion {
+    Assertion {
+        precision: Precision::Membership,
+        ..strong()
+    }
+}
+
+/// httpx #3773: `== "ISO-8859-1"` became `in ("ISO-8859-1", "WINDOWS-1252")`, strong to strong
+/// in tests.quality and still a loosened matcher (ADR-237).
+#[test]
+fn an_exact_assertion_that_became_a_strong_membership_is_loosened() {
+    let base = frames(vec![("t.x", vec![case("t", 1, vec![strong(), strong()])])]);
+    let head = frames(vec![(
+        "t.x",
+        vec![case("t", 1, vec![strong(), membership()])],
+    )]);
+    let (result, findings) = run(base, head, vec![]);
+    assert_eq!(kinds(&findings), [("matcher.loosened", "t")]);
+    assert_eq!(result.metrics, [("weakened".to_owned(), 1.0)].into());
+    assert_eq!(
+        Value::Object(findings[0].evidence.0.clone()),
+        json!({
+            "test": "t", "strong_base": 2, "strong_head": 2, "weak_base": 0, "weak_head": 0,
+            "exact_base": 2, "exact_head": 1, "looser": ["membership"]
+        })
+    );
+    assert_eq!(
+        findings[0].action.summary,
+        "Restore the exact expected values in `t` instead of membership checks."
+    );
+}
+
+#[test]
+fn a_membership_kept_or_made_exact_is_not_loosened() {
+    let looser = frames(vec![("t.x", vec![case("t", 1, vec![membership()])])]);
+    let exact = frames(vec![("t.x", vec![case("t", 1, vec![strong()])])]);
+    let (_, kept) = run(looser.clone(), looser.clone(), vec![]);
+    let (_, pinned) = run(looser, exact, vec![]);
+    assert_eq!(kinds(&kept), []);
+    assert_eq!(kinds(&pinned), []);
 }
 
 #[test]

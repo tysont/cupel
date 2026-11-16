@@ -6,6 +6,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 36,
@@ -31,6 +32,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 33,
@@ -56,6 +58,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 40,
@@ -89,6 +92,7 @@
           "assertions": [
             {
               "kind": "custom",
+              "precision": "exact",
               "span": {
                 "col": 12,
                 "end_col": 33,
@@ -99,6 +103,7 @@
             },
             {
               "kind": "not-null",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 15,
@@ -132,6 +137,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 57,
@@ -157,6 +163,7 @@
           "assertions": [
             {
               "kind": "throws",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 34,
@@ -182,6 +189,7 @@
           "assertions": [
             {
               "kind": "truthiness",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 51,
@@ -221,6 +229,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 48,
@@ -274,6 +283,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 50,
@@ -299,6 +309,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 50,
@@ -324,6 +335,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 39,
@@ -349,6 +361,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 36,
@@ -382,6 +395,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 47,
@@ -407,6 +421,7 @@
           "assertions": [
             {
               "kind": "truthiness",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 37,
@@ -432,6 +447,7 @@
           "assertions": [
             {
               "kind": "not-null",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 43,
@@ -457,6 +473,7 @@
           "assertions": [
             {
               "kind": "throws",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 28,
@@ -482,6 +499,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 49,
@@ -507,6 +525,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 5,
                 "end_col": 68,
@@ -532,6 +551,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 36,
@@ -565,6 +585,7 @@
           "assertions": [
             {
               "kind": "not-null",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 15,
@@ -575,6 +596,7 @@
             },
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 3,
                 "end_col": 41,
@@ -635,6 +657,7 @@
           "assertions": [
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 35,
@@ -645,6 +668,7 @@
             },
             {
               "kind": "truthiness",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 27,
@@ -670,6 +694,7 @@
           "assertions": [
             {
               "kind": "not-null",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 25,
@@ -680,6 +705,7 @@
             },
             {
               "kind": "equality",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 36,
@@ -705,6 +731,7 @@
           "assertions": [
             {
               "kind": "throws",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 34,
@@ -730,6 +757,7 @@
           "assertions": [
             {
               "kind": "snapshot",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 51,
@@ -755,6 +783,7 @@
           "assertions": [
             {
               "kind": "not-null",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 55,
@@ -765,6 +794,7 @@
             },
             {
               "kind": "custom",
+              "precision": "exact",
               "span": {
                 "col": 2,
                 "end_col": 32,

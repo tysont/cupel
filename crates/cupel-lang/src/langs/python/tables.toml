@@ -107,7 +107,10 @@ directory_helpers = true
 [tests.assertions]
 # Idioms captured as @assertion.idiom.<key> from `assert` statements, `pytest.raises`, and failure calls.
 equal = { kind = "equality", strength = "strong" }
-approx = { kind = "equality", strength = "strong" }
+# A tolerance, a membership, and `mock.ANY` pin less than one value: tests.weakening reads a change
+# from an exact assertion to one of them as a loosened matcher (ADR-237).
+approx = { kind = "equality", strength = "strong", precision = "approximate" }
+any-value = { kind = "equality", strength = "strong", precision = "any" }
 is-none = { kind = "equality", strength = "strong" }
 # Inequality rules out one value and allows every other: weak.
 not-equal = { kind = "equality", strength = "weak" }
@@ -116,7 +119,7 @@ snapshot = { kind = "snapshot", strength = "strong" }
 ordering = { kind = "custom", strength = "weak" }
 # A membership pins the element it names, as Jest's `toContain` does; a negated one rules one out
 # (ADR-223).
-membership = { kind = "custom", strength = "strong" }
+membership = { kind = "custom", strength = "strong", precision = "membership" }
 not-membership = { kind = "custom", strength = "weak" }
 truthy = { kind = "truthiness", strength = "weak" }
 raises = { kind = "throws", strength = "strong" }
@@ -128,7 +131,7 @@ expected-exception = { kind = "throws", strength = "strong" }
 # unittest assert methods.
 assertEqual = { kind = "equality", strength = "strong" }
 assertEquals = { kind = "equality", strength = "strong" }
-assertAlmostEqual = { kind = "equality", strength = "strong" }
+assertAlmostEqual = { kind = "equality", strength = "strong", precision = "approximate" }
 assertIs = { kind = "equality", strength = "strong" }
 assertIsNone = { kind = "equality", strength = "strong" }
 assertCountEqual = { kind = "equality", strength = "strong" }

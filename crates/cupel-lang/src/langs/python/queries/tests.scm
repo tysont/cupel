@@ -139,6 +139,17 @@
     operators: "is"
     (none))) @test.assertion @assertion.idiom.is-none
 
+; `assert x == ANY` (`unittest.mock.ANY`) compares equal to every value (ADR-237).
+(assert_statement
+  .
+  (comparison_operator
+    operators: "=="
+    [
+      (identifier) @_any
+      (attribute attribute: (identifier) @_any)
+    ])
+  (#eq? @_any "ANY")) @test.assertion @assertion.idiom.any-value
+
 (assert_statement
   .
   (comparison_operator

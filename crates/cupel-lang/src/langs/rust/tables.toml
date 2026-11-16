@@ -106,6 +106,12 @@ assert_debug_snapshot = { kind = "snapshot", strength = "strong" }
 assert_display_snapshot = { kind = "snapshot", strength = "strong" }
 assert_json_snapshot = { kind = "snapshot", strength = "strong" }
 assert_yaml_snapshot = { kind = "snapshot", strength = "strong" }
+# The approx crate's tolerances and `assert_matches!`'s pattern pin less than one value (ADR-237).
+assert_relative_eq = { kind = "custom", strength = "strong", precision = "approximate" }
+assert_abs_diff_eq = { kind = "custom", strength = "strong", precision = "approximate" }
+assert_ulps_eq = { kind = "custom", strength = "strong", precision = "approximate" }
+assert_matches = { kind = "custom", strength = "strong", precision = "partial" }
+debug_assert_matches = { kind = "custom", strength = "strong", precision = "partial", debug = true }
 # Idioms captured as @assertion.idiom.<key>.
 equal = { kind = "equality", strength = "strong" }
 not-equal = { kind = "equality", strength = "weak" }

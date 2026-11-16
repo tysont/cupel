@@ -124,6 +124,18 @@ isNotEmpty = { kind = "truthiness", strength = "weak" }
 contains = { kind = "truthiness", strength = "weak" }
 isNotNull = { kind = "not-null", strength = "weak" }
 thrown = { kind = "throws", strength = "strong" }
+# AssertJ matchers that pin less than one value (ADR-237).
+isIn = { kind = "custom", strength = "strong", precision = "membership" }
+isCloseTo = { kind = "custom", strength = "strong", precision = "approximate" }
+isCloseToPercentage = { kind = "custom", strength = "strong", precision = "approximate" }
+startsWith = { kind = "custom", strength = "strong", precision = "partial" }
+endsWith = { kind = "custom", strength = "strong", precision = "partial" }
+matches = { kind = "custom", strength = "strong", precision = "partial" }
+containsPattern = { kind = "custom", strength = "strong", precision = "partial" }
+isInstanceOf = { kind = "custom", strength = "strong", precision = "type" }
+isExactlyInstanceOf = { kind = "custom", strength = "strong", precision = "type" }
+isInstanceOfAny = { kind = "custom", strength = "strong", precision = "type" }
+hasSameClassAs = { kind = "custom", strength = "strong", precision = "type" }
 # java-snapshot-testing.
 toMatchSnapshot = { kind = "snapshot", strength = "strong" }
 # A jqwik property returning a boolean asserts it for every generated input (ADR-095).

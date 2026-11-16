@@ -77,6 +77,25 @@
             "additionalProperties": false,
             "description": "Evidence of `matcher.loosened`.",
             "properties": {
+              "exact_base": {
+                "description": "Strong assertions that pin their value exactly, at base (ADR-237).",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "exact_head": {
+                "description": "Exact assertions at head.",
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "looser": {
+                "description": "The looser forms the test has more of at head: `weak`, or a strong assertion's precision\n(`membership`, `partial`, `approximate`, `type`, `any`).",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
               "strong_base": {
                 "description": "Assertions that pin one value, at the base commit.",
                 "format": "uint32",
@@ -110,13 +129,16 @@
               "strong_base",
               "strong_head",
               "weak_base",
-              "weak_head"
+              "weak_head",
+              "exact_base",
+              "exact_head",
+              "looser"
             ],
             "title": "MatcherLoosened",
             "type": "object"
           },
           "kind": "matcher.loosened",
-          "summary": "A test replaced assertions that pin one value with weaker ones (truthiness, presence, inequality)."
+          "summary": "A test replaced assertions that pin one value with weaker ones: an exact assertion became a weak one (truthiness, presence, inequality) or a strong one that pins less, whatever tests.quality calls it (membership, partial, approximate, type, any)."
         },
         {
           "action": "restore_test",
@@ -195,7 +217,7 @@
       "stability": "experimental",
       "summary": "Diff of the test suite against the range's base: removed and loosened assertions, skipped and deleted tests, rewritten snapshots. Runs only with --changed or --base.",
       "tier": 2,
-      "version": 2,
+      "version": 3,
       "wants": []
     },
     "subject": "check"

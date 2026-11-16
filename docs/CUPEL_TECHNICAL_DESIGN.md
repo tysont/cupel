@@ -107,7 +107,7 @@ Check IDs are stable. Namespace = group. Groups are valid `--only`/`--skip` targ
 | `tests.weakening` | **Diff of the test suite itself** vs base: removed assertions, skipped/disabled tests, loosened matchers, rewritten snapshots, widened `any`-style matchers | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | quick | build |
 | `tests.flaky` | Rerun impacted tests N times with shuffled order, varied seeds, parallelism | `test.flaky`, `test.order-dependent` | standard | build over runner producers |
 
-`tests.weakening` findings default to `severity: fail`. Agents routinely make tests pass by making tests weaker; this check watches the agent's own tail.
+`tests.weakening` findings default to `severity: fail`. A matcher is loosened when a test trades strong assertions for weak ones, or exact ones for any that pin less (membership, partial, approximate, type-only, any-value), whatever tests.quality calls their strength (ADR-237). Agents routinely make tests pass by making tests weaker; this check watches the agent's own tail.
 
 ### 5.3 `gen.*` — generative/dynamic testing (tier 4)
 
@@ -609,7 +609,7 @@ Syntactic facts come from language producers and are keyed by file content hash 
 | `Decisions` | per symbol: `Decision { kind: Branch \| Loop \| BooleanOp \| Case \| Catch \| EarlyReturn \| Ternary, nesting }` | language | `static.complexity`, `static.crap` |
 | `NormTree` | normalized AST per symbol; yields `symbol.hash` | language | identity everywhere, `static.clones` |
 | `MutationSites` | per symbol: `Site { operator: Relational \| Arith \| Boolean \| Literal \| …, set: Default \| Extended, from, to[], site_hash }` | language | mutation engine |
-| `TestFrames` | test cases: `Assertion { kind: Equality \| Truthiness \| NotNull \| Throws \| Snapshot \| Custom, strength }`, mocks, skip markers, setup blocks, framework | language | `tests.quality`, `tests.weakening`, `tests.flaky` |
+| `TestFrames` | test cases: `Assertion { kind: Equality \| Truthiness \| NotNull \| Throws \| Snapshot \| Custom, strength, precision: Exact \| Membership \| Partial \| Approximate \| Type \| Any }`, mocks, skip markers, setup blocks, framework | language | `tests.quality`, `tests.weakening`, `tests.flaky` |
 | `ModuleGraph` | resolved import edges per root: `File \| External \| Unresolved`, with relative-import flags | language | `static.deps`, `static.dead-code`, impact fallback, overlays |
 | `ApiSurface` | public items with normalized signatures; JavaScript and TypeScript items no entry of their package exposes marked `internal` (ADR-176, ADR-192) | language | `static.api-surface` |
 | `Roots` | symbols live by convention (entry points, exports, tests, framework hooks, functions unused on purpose, ADR-226) | language | `static.dead-code`, `tests.coverage` |

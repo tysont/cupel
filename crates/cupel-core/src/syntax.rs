@@ -328,7 +328,7 @@ pub enum OperatorSet {
 pub struct TestFrames {
     pub files: Vec<TestFile>,
 }
-fact!(TestFrames, TestFrames, "test-frames", 3);
+fact!(TestFrames, TestFrames, "test-frames", 4);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct TestFile {
@@ -363,6 +363,8 @@ pub struct TestCase {
 pub struct Assertion {
     pub kind: AssertionKind,
     pub strength: AssertionStrength,
+    /// How much of the expected value a strong assertion pins (ADR-237).
+    pub precision: Precision,
     pub span: Span,
 }
 
@@ -382,6 +384,53 @@ pub enum AssertionKind {
 pub enum AssertionStrength {
     Strong,
     Weak,
+}
+
+/// How much of the expected value an assertion pins, apart from its strength: `tests.weakening`
+/// reads a change from `exact` to any other as a loosened matcher (ADR-237).
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    Default,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    Hash,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+)]
+#[serde(rename_all = "kebab-case")]
+pub enum Precision {
+    /// One value: equality, an exception's type, a snapshot.
+    #[default]
+    Exact,
+    /// Any element of a collection: `assert a in b`, `toContain`, `Contains`, `isIn`.
+    Membership,
+    /// Part of the value: a substring, prefix, pattern, or subset of properties.
+    Partial,
+    /// A value within a tolerance: `pytest.approx`, `toBeCloseTo`, `InDelta`.
+    Approximate,
+    /// Any value of a type: `expect.any(Number)`, `IsType`, `isInstanceOf`.
+    Type,
+    /// Any value at all: `mock.ANY`, `expect.anything()`.
+    Any,
+}
+
+impl Precision {
+    /// The name the table and the evidence use.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Exact => "exact",
+            Self::Membership => "membership",
+            Self::Partial => "partial",
+            Self::Approximate => "approximate",
+            Self::Type => "type",
+            Self::Any => "any",
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]

@@ -119,7 +119,7 @@ property = { kind = "custom", strength = "strong" }
 toBe = { kind = "equality", strength = "strong" }
 toEqual = { kind = "equality", strength = "strong" }
 toStrictEqual = { kind = "equality", strength = "strong" }
-toBeCloseTo = { kind = "equality", strength = "strong" }
+toBeCloseTo = { kind = "equality", strength = "strong", precision = "approximate" }
 toHaveLength = { kind = "equality", strength = "strong" }
 toBeNull = { kind = "equality", strength = "strong" }
 toBeUndefined = { kind = "equality", strength = "strong" }
@@ -130,7 +130,7 @@ toHaveBeenNthCalledWith = { kind = "equality", strength = "strong" }
 toHaveBeenCalledTimes = { kind = "equality", strength = "strong" }
 toHaveReturnedWith = { kind = "equality", strength = "strong" }
 # A partial match pins the properties it names (ADR-184).
-toMatchObject = { kind = "equality", strength = "strong" }
+toMatchObject = { kind = "equality", strength = "strong", precision = "partial" }
 toBeTruthy = { kind = "truthiness", strength = "weak" }
 toBeFalsy = { kind = "truthiness", strength = "weak" }
 toBeDefined = { kind = "not-null", strength = "weak" }
@@ -143,8 +143,18 @@ toMatchFileSnapshot = { kind = "snapshot", strength = "strong" }
 toThrowErrorMatchingSnapshot = { kind = "snapshot", strength = "strong" }
 toThrowErrorMatchingInlineSnapshot = { kind = "snapshot", strength = "strong" }
 # A membership and a pattern pin the element or text they name (ADR-184).
-toContain = { kind = "custom", strength = "strong" }
-toMatch = { kind = "custom", strength = "strong" }
+toContain = { kind = "custom", strength = "strong", precision = "membership" }
+toMatch = { kind = "custom", strength = "strong", precision = "partial" }
+# An asymmetric matcher an equality matcher is given, as its argument or one of its argument's
+# elements or properties, keyed by the matcher: the comparison pins only what it pins (ADR-237).
+any = { kind = "equality", strength = "strong", precision = "type" }
+anything = { kind = "equality", strength = "strong", precision = "any" }
+objectContaining = { kind = "equality", strength = "strong", precision = "partial" }
+arrayContaining = { kind = "equality", strength = "strong", precision = "partial" }
+stringContaining = { kind = "equality", strength = "strong", precision = "partial" }
+stringMatching = { kind = "equality", strength = "strong", precision = "partial" }
+# Also chai's `closeTo`.
+closeTo = { kind = "equality", strength = "strong", precision = "approximate" }
 # Ranges, an equal member, and "was called" rule out values without pinning one.
 toHaveBeenCalled = { kind = "custom", strength = "weak" }
 toContainEqual = { kind = "custom", strength = "weak" }
@@ -166,11 +176,16 @@ exist = { kind = "not-null", strength = "weak" }
 throw = { kind = "throws", strength = "weak" }
 # A membership and a pattern pin the element or text they name, as Jest's do (ADR-200);
 # `deep.include` keys on its last link.
-include = { kind = "custom", strength = "strong" }
-includes = { kind = "custom", strength = "strong" }
-contain = { kind = "custom", strength = "strong" }
-contains = { kind = "custom", strength = "strong" }
-match = { kind = "custom", strength = "strong" }
+include = { kind = "custom", strength = "strong", precision = "membership" }
+includes = { kind = "custom", strength = "strong", precision = "membership" }
+contain = { kind = "custom", strength = "strong", precision = "membership" }
+contains = { kind = "custom", strength = "strong", precision = "membership" }
+match = { kind = "custom", strength = "strong", precision = "partial" }
+approximately = { kind = "equality", strength = "strong", precision = "approximate" }
+a = { kind = "custom", strength = "strong", precision = "type" }
+an = { kind = "custom", strength = "strong", precision = "type" }
+instanceOf = { kind = "custom", strength = "strong", precision = "type" }
+instanceof = { kind = "custom", strength = "strong", precision = "type" }
 # node:assert and chai's assert.
 "assert.equal" = { kind = "equality", strength = "strong" }
 "assert.strictEqual" = { kind = "equality", strength = "strong" }
@@ -190,8 +205,11 @@ assert = { kind = "truthiness", strength = "weak" }
 "assert.isNotNull" = { kind = "not-null", strength = "weak" }
 "assert.throws" = { kind = "throws", strength = "weak" }
 "assert.rejects" = { kind = "throws", strength = "weak" }
-"assert.include" = { kind = "custom", strength = "strong" }
-"assert.match" = { kind = "custom", strength = "strong" }
+"assert.include" = { kind = "custom", strength = "strong", precision = "membership" }
+"assert.match" = { kind = "custom", strength = "strong", precision = "partial" }
+"assert.closeTo" = { kind = "equality", strength = "strong", precision = "approximate" }
+"assert.approximately" = { kind = "equality", strength = "strong", precision = "approximate" }
+"assert.instanceOf" = { kind = "custom", strength = "strong", precision = "type" }
 # Idioms captured as @assertion.idiom.<key>.
 not-equal = { kind = "equality", strength = "weak" }
 not-nullish = { kind = "not-null", strength = "weak" }

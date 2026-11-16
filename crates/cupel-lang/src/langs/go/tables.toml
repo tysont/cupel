@@ -136,6 +136,26 @@ EqualError = { kind = "throws", strength = "strong" }
 ErrorContains = { kind = "throws", strength = "weak" }
 PanicsWithValue = { kind = "throws", strength = "strong" }
 PanicsWithError = { kind = "throws", strength = "strong" }
+# Assertions that pin less than one value: tests.weakening reads a change from an exact assertion to
+# one of them as a loosened matcher (ADR-237).
+Contains = { kind = "custom", strength = "strong", precision = "membership" }
+Containsf = { kind = "custom", strength = "strong", precision = "membership" }
+Subset = { kind = "custom", strength = "strong", precision = "partial" }
+Subsetf = { kind = "custom", strength = "strong", precision = "partial" }
+Regexp = { kind = "custom", strength = "strong", precision = "partial" }
+Regexpf = { kind = "custom", strength = "strong", precision = "partial" }
+InDelta = { kind = "custom", strength = "strong", precision = "approximate" }
+InDeltaf = { kind = "custom", strength = "strong", precision = "approximate" }
+InDeltaSlice = { kind = "custom", strength = "strong", precision = "approximate" }
+InDeltaSlicef = { kind = "custom", strength = "strong", precision = "approximate" }
+InEpsilon = { kind = "custom", strength = "strong", precision = "approximate" }
+InEpsilonf = { kind = "custom", strength = "strong", precision = "approximate" }
+WithinDuration = { kind = "custom", strength = "strong", precision = "approximate" }
+WithinDurationf = { kind = "custom", strength = "strong", precision = "approximate" }
+IsType = { kind = "custom", strength = "strong", precision = "type" }
+IsTypef = { kind = "custom", strength = "strong", precision = "type" }
+Implements = { kind = "custom", strength = "strong", precision = "type" }
+Implementsf = { kind = "custom", strength = "strong", precision = "type" }
 # go-snaps.
 MatchSnapshot = { kind = "snapshot", strength = "strong" }
 MatchJSON = { kind = "snapshot", strength = "strong" }
