@@ -104,11 +104,12 @@ fn with_a_ps_that_never_answers_every_mutant_timeout_still_fires_on_time() {
         outcome.stdout
     );
     // Every listing outlasts its 5 s timeout, so each is killed then and skipped; no wait loop waits
-    // on one, so the looping mutants, which run side by side, end at their 10 s cap. A reader
-    // that waited on a listing would end each up to 5 s late, and a kill that listed its groups
-    // up to 10 s more.
-    let ran_ms = envelope.checks[0].duration_ms;
-    assert!(ran_ms < 20_000, "{ran_ms} ms");
+    // on one, so each looping mutant's run ends at its 10 s cap. `run_ms` adds up the mutants' own
+    // runs, so it leaves out the coverage, reference, and build runs a slow machine stretches: the
+    // two caps, and a few seconds for the two mutants that end. A reader that waited on a listing
+    // would end each looping run up to 5 s late, and a kill that listed its groups up to 10 s more.
+    let run_ms = envelope.checks[0].metrics["run_ms"];
+    assert!(run_ms < 25_000.0, "{run_ms} ms");
     let events = std::fs::read_to_string(dir.path().join(".cupel/events.jsonl")).unwrap();
     let skipped = events
         .lines()

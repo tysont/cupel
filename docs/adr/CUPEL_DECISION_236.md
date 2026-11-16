@@ -1,6 +1,6 @@
 # CUPEL_DECISION_236: The memory sampler lists into a file, never holds its lock across a listing, and skips a listing that runs past 5 s
 
-**Date:** 2026-11-15 · **Status:** accepted · **Phase:** v0.3.0, release blocker found by gate b52 · Amends [148](CUPEL_DECISION_148.md) §3
+**Date:** 2026-11-15 · **Status:** accepted; the fixture test's bound amended on 2026-11-16: the looping mutants' own runs (`run_ms`) add up to under 25 s, since the check's whole duration also counts the coverage, reference, and build runs a slow CI runner stretches (23.5 s on macos-latest) · **Phase:** v0.3.0, release blocker found by gate b52 · Amends [148](CUPEL_DECISION_148.md) §3
 
 ## Context
 
