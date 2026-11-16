@@ -671,9 +671,18 @@ fn the_formula_is_not_rendered_from_sha256sums_missing_a_target() {
 /// An empty bare repository standing in for the tysont/homebrew-cupel tap, which had no branch
 /// before the first release published to it.
 fn empty_tap(dir: &Path) -> PathBuf {
+    empty_tap_on(dir, "main")
+}
+
+/// A bare tap with no commits whose HEAD names `branch`: GitHub names `main`, and a `git init`
+/// with no `init.defaultBranch` names `master` before git 3.
+fn empty_tap_on(dir: &Path, branch: &str) -> PathBuf {
     let tap = dir.join("homebrew-cupel.git");
     fs::create_dir(&tap).unwrap();
-    git(&tap, &["init", "--bare", "--quiet"]);
+    git(
+        &tap,
+        &["init", "--bare", "--quiet", "--initial-branch", branch],
+    );
     tap
 }
 
@@ -744,8 +753,20 @@ fn publishing_an_unchanged_formula_commits_nothing() {
 /// A later release replaces the formula and leaves the tap's README as it is.
 #[test]
 fn publishing_a_later_release_updates_the_formula_and_keeps_the_readme() {
+    later_release_keeps_the_readme_of_a_tap_on("main");
+}
+
+/// The release goes on top of the tap's main, whatever branch the tap's HEAD names.
+#[test]
+fn a_tap_whose_head_names_another_branch_gets_the_formula_on_top_of_its_main() {
+    later_release_keeps_the_readme_of_a_tap_on("master");
+}
+
+/// Publishes the fixture release to a tap whose HEAD names `head` and whose main holds only the
+/// owner's README, and asserts the formula commit follows it on main.
+fn later_release_keeps_the_readme_of_a_tap_on(head: &str) {
     let dir = TempDir::new().unwrap();
-    let tap = empty_tap(dir.path());
+    let tap = empty_tap_on(dir.path(), head);
     let work = dir.path().join("work");
     git(
         dir.path(),

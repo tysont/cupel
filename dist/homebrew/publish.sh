@@ -26,6 +26,11 @@ git clone --quiet "$tap_url" "$work/tap" 2> "$work/clone.err" || {
 	exit 1
 }
 cd "$work/tap"
+# The clone checks out the branch the tap's HEAD names, which need not be main; the formula
+# goes on top of main wherever it has commits.
+if git rev-parse --quiet --verify refs/remotes/origin/main > /dev/null; then
+	git checkout --quiet -B main origin/main
+fi
 mkdir -p Formula
 mv "$work/cupel.rb" Formula/cupel.rb
 if [ ! -e README.md ]; then
