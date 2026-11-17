@@ -357,11 +357,16 @@ fn a_pytest_root_gets_coverage_py_unless_it_declares_pytest_cov() {
     );
 }
 
-/// A Leiningen project (a `project.clj` and no `deps.edn`) gets `lein test`, and Cloverage's
-/// Leiningen command only where its `project.clj` declares the lein-cloverage plugin; a
-/// directory with both manifests is a tools.deps project, as before (ADR-234).
+const LEIN_CLOVERAGE_BY_COORDINATE: &str = "lein update-in :dependencies conj \
+     '[cloverage/cloverage \"1.2.4\"]' -- with-profile +test run -m cloverage.coverage \
+     --src-ns-path src --test-ns-path test --lcov --no-html --no-summary";
+
+/// A Leiningen project (a `project.clj` and no `deps.edn`) gets `lein test`, and Cloverage by
+/// coordinate through `lein update-in` unless its `project.clj` declares the lein-cloverage
+/// plugin, whose task it gets; a directory with both manifests is a tools.deps project (ADR-234,
+/// ADR-239).
 #[test]
-fn a_leiningen_project_gets_lein_test_and_cloverage_only_where_it_declares_the_plugin() {
+fn a_leiningen_project_gets_lein_test_and_cloverage_by_coordinate_or_by_its_plugin() {
     let plain = support::repository(&[("project.clj", "(defproject a/b \"1\")\n")]);
     let plugin = support::repository(&[(
         "project.clj",
@@ -378,7 +383,10 @@ fn a_leiningen_project_gets_lein_test_and_cloverage_only_where_it_declares_the_p
     assert_eq!(
         [got(plain.path()), got(plugin.path())],
         [
-            (Some("lein test".to_owned()), None),
+            (
+                Some("lein test".to_owned()),
+                Some(LEIN_CLOVERAGE_BY_COORDINATE.to_owned())
+            ),
             (
                 Some("lein test".to_owned()),
                 Some("lein cloverage --lcov".to_owned())
@@ -386,8 +394,8 @@ fn a_leiningen_project_gets_lein_test_and_cloverage_only_where_it_declares_the_p
         ]
     );
     assert_eq!(got(both.path()).0.as_deref(), Some("clojure -M:test"));
-    // No producer runs `lein test`, and the Clojure CLI's runner would run without the
-    // project's classpath: it is set aside in a Leiningen root at run time.
+    // The Clojure CLI's runner would run without the project's classpath: in a Leiningen root it
+    // is set aside for Leiningen's at run time.
     let clojure_test = ProducerId::from("tool.clojure-test");
     assert_eq!(
         [

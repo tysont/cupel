@@ -154,7 +154,11 @@ fn coverage_producers_register_for_their_languages_in_toolchain_table_order() {
                 "tool.jacoco-maven",
                 "tool.jacoco-gradle"
             ],
-            vec!["tool.cloverage"],
+            vec![
+                "tool.cloverage",
+                "tool.lein-cloverage",
+                "tool.cloverage-lein"
+            ],
         ]
         .map(|ids| ids.into_iter().map(str::to_owned).collect::<Vec<_>>())
     );
@@ -188,6 +192,8 @@ fn with_a_coverage_command_a_producer_needs_its_tool() {
         ("tool.vitest-coverage", "typescript", "vitest"),
         ("tool.jacoco-maven", "java", "mvn"),
         ("tool.cloverage", "clojure", "clojure"),
+        ("tool.cloverage-lein", "clojure", "lein"),
+        ("tool.lein-cloverage", "clojure", "lein"),
     ] {
         let dir = fixture(lang);
         let found = producer(&registry, id, lang).availability(&ctx(dir.path(), lang, true));
@@ -274,6 +280,9 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
     let maven = Ctx::new(repo_path("coverage/java"));
     let gradle = Ctx::new(repo_path("coverage/gradle"));
     let bound = Ctx::new(repo_path("jacoco-bound/java"));
+    let clojure = Ctx::new(repo_path("coverage/clojure"));
+    let leiningen = Ctx::new(repo_path("coverage/leiningen"));
+    let plugin = Ctx::new(repo_path("coverage/lein-cloverage"));
     let mut unittest = Ctx::new(repo_path("coverage/python"));
     unittest.lang.insert(
         LangId::from("python"),
@@ -288,6 +297,9 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
             preferred("java", &maven),
             preferred("java", &gradle),
             preferred("java", &bound),
+            preferred("clojure", &clojure),
+            preferred("clojure", &leiningen),
+            preferred("clojure", &plugin),
         ],
         [
             "tool.jest-coverage",
@@ -297,6 +309,9 @@ fn a_coverage_producer_is_detected_with_the_runner_it_pairs_with() {
             "tool.jacoco-maven",
             "tool.jacoco-gradle",
             "tool.jacoco-maven-project",
+            "tool.cloverage",
+            "tool.cloverage-lein",
+            "tool.lein-cloverage",
         ]
     );
 }
@@ -525,7 +540,7 @@ fn assert_covers(expected: &Expected) {
 }
 
 /// Every coverage producer the fixtures configure, with what it must report.
-const EXPECTED: [Expected; 9] = [
+const EXPECTED: [Expected; 11] = [
     Expected {
         producer: "tool.cargo-llvm-cov",
         lang: "rust",
@@ -595,6 +610,22 @@ const EXPECTED: [Expected; 9] = [
         lang: "clojure",
         repo: "clojure",
         tool: "clojure",
+        source: ("src/grade/core.clj", 14, 8, None),
+        test: "test/grade/core_test.clj",
+    },
+    Expected {
+        producer: "tool.cloverage-lein",
+        lang: "clojure",
+        repo: "leiningen",
+        tool: "lein",
+        source: ("src/grade/core.clj", 14, 8, None),
+        test: "test/grade/core_test.clj",
+    },
+    Expected {
+        producer: "tool.lein-cloverage",
+        lang: "clojure",
+        repo: "lein-cloverage",
+        tool: "lein",
         source: ("src/grade/core.clj", 14, 8, None),
         test: "test/grade/core_test.clj",
     },

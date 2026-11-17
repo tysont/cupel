@@ -154,6 +154,18 @@
           "format": "lcov",
           "install": null,
           "producer": "tool.lein-cloverage"
+        },
+        {
+          "commands": [
+            {
+              "command": "lein update-in :dependencies conj '[cloverage/cloverage \"1.2.4\"]' -- with-profile +test run -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary",
+              "runner": "tool.lein-test"
+            }
+          ],
+          "detect": [],
+          "format": "lcov",
+          "install": null,
+          "producer": "tool.cloverage-lein"
         }
       ],
       "fuzz": [],

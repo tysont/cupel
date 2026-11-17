@@ -77,6 +77,7 @@ mod go_test;
 mod gradle;
 mod java_tests;
 mod jest;
+mod lein_test;
 mod linearizability;
 mod madsim;
 mod maven;

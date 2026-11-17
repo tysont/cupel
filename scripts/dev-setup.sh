@@ -40,8 +40,7 @@ jdk_build=1
 maven_version=3.9.16
 gradle_version=9.6.1
 clojure_version=1.12.5.1664
-# Not in CI: no test of Cupel's runs Leiningen. Codeberg holds its releases and the launcher whose
-# LEIN_CHECKSUM is the standalone jar's sha256.
+# Codeberg holds Leiningen's releases, and the launcher whose LEIN_CHECKSUM is the standalone jar's sha256.
 lein_version=2.12.0
 tla_version=1.7.4
 dafny_version=4.11.0

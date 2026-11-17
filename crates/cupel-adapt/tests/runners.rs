@@ -45,7 +45,7 @@ fn runners_register_for_their_languages_in_toolchain_table_order() {
             vec!["tool.node-test", "tool.vitest", "tool.jest"],
             vec!["tool.node-test", "tool.vitest", "tool.jest"],
             vec!["tool.gradle", "tool.maven"],
-            vec!["tool.clojure-test"],
+            vec!["tool.clojure-test", "tool.lein-test"],
         ]
         .map(|ids| ids.into_iter().map(str::to_owned).collect::<Vec<_>>())
     );
@@ -69,6 +69,7 @@ fn detection_puts_the_runner_a_fixture_uses_first() {
             at("typescript", "typescript"),
             at("java", "java"),
             at("gradle", "java"),
+            at("leiningen", "clojure"),
         ],
         [
             vec!["tool.pytest", "tool.unittest"],
@@ -77,6 +78,7 @@ fn detection_puts_the_runner_a_fixture_uses_first() {
             vec!["tool.vitest", "tool.node-test", "tool.jest"],
             vec!["tool.maven", "tool.gradle"],
             vec!["tool.gradle", "tool.maven"],
+            vec!["tool.lein-test"],
         ]
         .map(|ids| ids.into_iter().map(str::to_owned).collect::<Vec<_>>())
     );
@@ -325,6 +327,19 @@ const CLOJURE_TEST: Expected = Expected {
     line: "totalling 2 and 2",
 };
 
+/// The test namespaces are those under `test/`, as `lein test` finds them, whatever their names.
+const LEIN_TEST: Expected = Expected {
+    runner: "tool.lein-test",
+    lang: "clojure",
+    repo: "leiningen",
+    tests: &[
+        ("tally.totals/totals-a-list", Passed),
+        ("tally.totals/totals-nothing", Passed),
+    ],
+    red: "tally.red/reports-a-wrong-total",
+    line: "totalling 2 and 2",
+};
+
 #[test]
 fn maven_runs_the_java_fixture() {
     assert_runs(&MAVEN);
@@ -338,6 +353,11 @@ fn gradle_runs_the_java_fixture() {
 #[test]
 fn clojure_test_runs_the_clojure_fixture() {
     assert_runs(&CLOJURE_TEST);
+}
+
+#[test]
+fn lein_test_runs_the_leiningen_fixture() {
+    assert_runs(&LEIN_TEST);
 }
 
 /// Runs `tool.clojure-test` on a copy of the fixture repository `repo` and checks it reported
@@ -460,6 +480,7 @@ fn a_runner_runs_nothing_where_its_language_has_no_project() {
         ("tool.maven", "java"),
         ("tool.gradle", "java"),
         ("tool.clojure-test", "clojure"),
+        ("tool.lein-test", "clojure"),
     ]
     .into_iter()
     .map(|(id, lang)| {
@@ -471,7 +492,7 @@ fn a_runner_runs_nothing_where_its_language_has_no_project() {
         )
     })
     .collect();
-    assert_eq!(ran, [(0, 0, true); 10]);
+    assert_eq!(ran, [(0, 0, true); 11]);
 }
 
 #[test]

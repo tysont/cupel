@@ -49,7 +49,7 @@ inventory::submit!(crate::ToolProducer {
 });
 
 /// The runner script, written beside the runner's configuration file.
-fn script(root: &Root) -> PathBuf {
+pub(crate) fn script(root: &Root) -> PathBuf {
     let script = root.config.with_file_name("cupel_test_runner.clj");
     // A failure to write it surfaces as the CLI's error that the file does not exist.
     let _ = std::fs::write(&script, SCRIPT);
@@ -82,7 +82,7 @@ fn list_command(root: &Root) -> Vec<String> {
 }
 
 /// A shuffled run's seed, which the script shuffles its tests with (ADR-078).
-fn vary(options: &RunOptions) -> Vec<String> {
+pub(crate) fn vary(options: &RunOptions) -> Vec<String> {
     match (options.order, options.seed) {
         (RunOrder::Shuffled, Some(seed)) => vec!["--seed".to_owned(), seed.to_string()],
         _ => Vec::new(),
@@ -90,7 +90,7 @@ fn vary(options: &RunOptions) -> Vec<String> {
 }
 
 /// The report's tests, each with the file of its namespace below the root's `test` or `src`.
-fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
+pub(crate) fn read(ran: &Ran<'_>) -> Option<Vec<TestResult>> {
     let mut tests = junit::clojure(ran.report.as_deref()?)?;
     for test in &mut tests {
         let namespace = test.id.split('/').next().unwrap_or_default();

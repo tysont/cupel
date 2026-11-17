@@ -126,8 +126,8 @@ runs:
       run: |
         npm install --prefix "$RUNNER_TEMP/jazzer" @jazzer.js/core@4.0.0
         echo "$RUNNER_TEMP/jazzer/node_modules/.bin" >> "$GITHUB_PATH"
-    # Java and Clojure (P6.4, ADR-108, ADR-109): the JDK, Maven, Gradle, and the Clojure CLI that the Java and
-    # Clojure runner, coverage, and PIT plugin tests and goldens drive for real. Pinned: the coverage fixtures'
+    # Java and Clojure (P6.4, ADR-108, ADR-109, ADR-239): the JDK, Maven, Gradle, the Clojure CLI, and Leiningen that
+    # the Java and Clojure runner, coverage, and PIT plugin tests and goldens drive for real. Pinned: the coverage fixtures'
     # committed JaCoCo and Cloverage reports and the PIT capture come from these releases. Each tool downloads the
     # fixtures' dependencies (JUnit, JaCoCo, PIT, Cloverage, test.check) into its own cache on first use.
     - uses: actions/setup-java@v4
@@ -148,6 +148,20 @@ runs:
         curl -sSfL -o "$RUNNER_TEMP/posix-install.sh" https://github.com/clojure/brew-install/releases/download/1.12.5.1664/posix-install.sh
         bash "$RUNNER_TEMP/posix-install.sh" --prefix "$HOME/clojure"
         echo "$HOME/clojure/bin" >> "$GITHUB_PATH"
+    # Leiningen's launcher, and the standalone jar it would download on first run, checked against the launcher's
+    # LEIN_CHECKSUM.
+    - name: Install Leiningen 2.12.0
+      shell: bash
+      run: |
+        mkdir -p "$HOME/lein"
+        curl -sSfL -o "$HOME/lein/lein" https://codeberg.org/leiningen/leiningen/raw/tag/2.12.0/bin/lein
+        jar=$HOME/lein/leiningen-2.12.0-standalone.jar
+        curl -sSfL -o "$jar" https://codeberg.org/leiningen/leiningen/releases/download/2.12.0/leiningen-2.12.0-standalone.jar
+        sum=$(sed -n "s/^export LEIN_CHECKSUM='\([0-9a-f]*\)'\$/\1/p" "$HOME/lein/lein")
+        echo "$sum  $jar" | shasum -a 256 -c -
+        chmod +x "$HOME/lein/lein"
+        echo "LEIN_JAR=$jar" >> "$GITHUB_ENV"
+        echo "$HOME/lein" >> "$GITHUB_PATH"
     # The trace validator, model checker, and verifier that spec.trace, conc.model-check, and spec.prove drive for
     # real (P7.2, P7.5, ADR-116, ADR-117, ADR-118). Pinned: the goldens hold their verdicts and messages. TLC and
     # SANY run from the TLA+ tools' jar on the JDK above, through `tlc` and `sany` scripts as tla-bin installs them;

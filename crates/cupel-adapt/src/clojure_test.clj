@@ -1,9 +1,10 @@
-;; ABOUTME: Cupel's clojure.test runner (ADR-109): loads the test namespaces on the classpath, runs them or the tests
-;; ABOUTME: and files named after the report path, and writes clojure.test's JUnit XML to the report file.
+;; ABOUTME: Cupel's clojure.test runner (ADR-109, ADR-239): loads the test namespaces, runs them or the tests and files
+;; ABOUTME: named after the report path, and writes clojure.test's JUnit XML to the report file.
 ;;
-;; clojure -M:test <this file> <report> [--list] [--seed N] [<namespace>/<var> | <file>]...
+;; clojure -M:test <this file> <report> [--list] [--seed N] [--test-dir DIR]... [<namespace>/<var> | <file>]...
 ;;
-;; With no tests or files named, every `*_test.clj(c)` namespace in a classpath directory runs. Named
+;; With no tests or files named, every `*_test.clj(c)` namespace in a classpath directory runs, or, given
+;; `--test-dir`, every namespace below those directories, as `lein test` runs its `:test-paths`. Named
 ;; tests run in the order given, grouped into one suite per run of the same namespace; `--seed` shuffles
 ;; them with that seed first. `--list` prints each test's ID instead of running anything. The exit code is
 ;; 0 when every test passed, else 1.
@@ -32,10 +33,15 @@
         (when (and (seq? form) (= 'ns (first form)))
           (second form))))))
 
-(defn- test-namespaces []
-  (->> (classpath-dirs)
+(defn- source-file? [^File file]
+  (and (.isFile file) (re-find #"\.cljc?$" (.getName file))))
+
+(defn- test-namespaces
+  "The namespaces of the test files on the classpath, or of every file below `test-dirs`."
+  [test-dirs]
+  (->> (if (seq test-dirs) (map io/file test-dirs) (classpath-dirs))
        (mapcat file-seq)
-       (filter test-file?)
+       (filter (if (seq test-dirs) source-file? test-file?))
        (sort-by #(.getPath ^File %))
        (keep namespace-of)
        distinct))
@@ -48,9 +54,9 @@
        (filter (comp :test meta))
        (sort-by (comp (juxt :line :column) meta))))
 
-(defn- selected-vars [selectors]
+(defn- selected-vars [test-dirs selectors]
   (if (empty? selectors)
-    (mapcat test-vars (test-namespaces))
+    (mapcat test-vars (test-namespaces test-dirs))
     (mapcat (fn [selector]
               (if (re-find #"\.cljc?$" selector)
                 (test-vars (namespace-of (io/file selector)))
@@ -84,18 +90,19 @@
       @test/*report-counters*)))
 
 (defn- options [args]
-  (loop [args args, parsed {:selectors []}]
+  (loop [args args, parsed {:selectors [], :test-dirs []}]
     (case (first args)
       nil parsed
       "--list" (recur (rest args) (assoc parsed :list true))
+      "--test-dir" (recur (drop 2 args) (update parsed :test-dirs conj (second args)))
       "--seed" (recur (drop 2 args) (assoc parsed :seed (Long/parseLong (second args))))
       (recur (rest args) (update parsed :selectors conj (first args))))))
 
 (defn -main
   "Runs or lists the selected tests, writing the report; exits 0 only when every test passed."
   [report & args]
-  (let [{:keys [list seed selectors]} (options args)
-        vars (cond-> (vec (selected-vars selectors)) seed (shuffled seed))]
+  (let [{:keys [list seed selectors test-dirs]} (options args)
+        vars (cond-> (vec (selected-vars test-dirs selectors)) seed (shuffled seed))]
     (if list
       (do (doseq [v vars] (println (id-of v)))
           (shutdown-agents)

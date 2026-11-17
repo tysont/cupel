@@ -16,6 +16,7 @@
 mod c8;
 mod cargo_llvm_cov;
 mod cloverage;
+mod cloverage_lein;
 mod cobertura;
 mod coverage_py;
 mod coverprofile;

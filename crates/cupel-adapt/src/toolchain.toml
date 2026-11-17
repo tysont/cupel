@@ -327,9 +327,10 @@ property = ["test.check"]
 fuzz = []
 race = []
 
-# A Leiningen project (a `project.clj` and no `deps.edn`) is tested with `lein test`; no producer
-# runs it, so the Clojure CLI's runner is set aside there rather than run without the project's
-# classpath (ADR-234). A directory with both manifests is a tools.deps project.
+# A Leiningen project (a `project.clj` and no `deps.edn`) is tested with `lein test`, which a person
+# runs; Cupel's runner runs its own script through `lein run` on the same classpath (ADR-234,
+# ADR-239). The Clojure CLI's runner is set aside there, as it would run without the project's
+# classpath. A directory with both manifests is a tools.deps project.
 [[rows.runners]]
 id = "tool.lein-test"
 detect = [{ all = [{ file = "project.clj" }, { not = { file = "deps.edn" } }] }]
@@ -348,9 +349,16 @@ id = "tool.cloverage"
 format = "lcov"
 commands = { "tool.clojure-test" = "clojure -Sdeps '{:deps {cloverage/cloverage {:mvn/version \"1.2.4\"}} :aliases {:cupel/no-main {:main-opts []}}}' -M:test:cupel/no-main -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary" }
 
-# lein-cloverage's task, where the project declares the plugin; Cupel does not run it (ADR-234).
+# lein-cloverage's task, where the project declares the plugin (ADR-234); otherwise Cloverage by
+# coordinate, which `lein update-in` adds to the project's dependencies without a `project.clj`
+# change, run on the `:test` profile's classpath as the runner is (ADR-239).
 [[rows.coverage]]
 id = "tool.lein-cloverage"
 format = "lcov"
 detect = [{ mentions = "lein-cloverage", in = ["project.clj"] }]
 commands = { "tool.lein-test" = "lein cloverage --lcov" }
+
+[[rows.coverage]]
+id = "tool.cloverage-lein"
+format = "lcov"
+commands = { "tool.lein-test" = "lein update-in :dependencies conj '[cloverage/cloverage \"1.2.4\"]' -- with-profile +test run -m cloverage.coverage --src-ns-path src --test-ns-path test --lcov --no-html --no-summary" }
