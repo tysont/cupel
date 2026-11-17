@@ -247,33 +247,44 @@ fn dist_builds_linux_and_windows_with_zig_and_macos_natively() {
     );
 }
 
+/// What would publish from a workflow: a release, a registry upload, or a push to the tap.
+const PUBLISHING: [&str; 7] = [
+    "gh release",
+    "npm publish",
+    "twine",
+    "gh-action-pypi-publish",
+    "cargo publish",
+    "homebrew/publish.sh",
+    "homebrew-cupel",
+];
+
+/// Each `<workflow file>: <marker>` for a PUBLISHING marker a file in `dir` names.
+fn publishing_in(dir: &Path) -> Vec<String> {
+    let mut found: Vec<String> = Vec::new();
+    for entry in fs::read_dir(dir).unwrap() {
+        let path = entry.unwrap().path();
+        let text = fs::read_to_string(&path).unwrap();
+        let name = path.file_name().unwrap().to_string_lossy().into_owned();
+        found.extend(
+            PUBLISHING
+                .iter()
+                .filter(|marker| text.contains(*marker))
+                .map(|marker| format!("{name}: {marker}")),
+        );
+    }
+    found
+}
+
 /// Nothing publishes from GitHub Actions (ADR-238): no workflow creates a release or uploads to a
 /// registry, and the release workflow is gone.
 #[test]
 fn no_workflow_publishes() {
     let workflows = repository().join(".github/workflows");
-    let publishing = [
-        "gh release",
-        "npm publish",
-        "twine",
-        "gh-action-pypi-publish",
-        "cargo publish",
-        "homebrew/publish.sh",
-        "homebrew-cupel",
-    ];
-    let mut found: Vec<String> = Vec::new();
-    for entry in fs::read_dir(&workflows).unwrap() {
-        let path = entry.unwrap().path();
-        let text = fs::read_to_string(&path).unwrap();
-        let name = path.file_name().unwrap().to_string_lossy().into_owned();
-        for marker in publishing {
-            if text.contains(marker) {
-                found.push(format!("{name}: {marker}"));
-            }
-        }
-    }
     assert_eq!(
-        (workflows.join("release.yml").exists(), found),
+        (
+            workflows.join("release.yml").exists(),
+            publishing_in(&workflows)
+        ),
         (false, Vec::<String>::new())
     );
 }
