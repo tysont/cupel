@@ -28,6 +28,9 @@ pub struct Ecosystem {
     pub builds: fn(&Path) -> bool,
     pub skip_dirs: &'static [&'static str],
     pub describe: fn(&Candidate) -> ProjectRoot,
+    /// Whether a directory below a root, holding one of the ecosystem's manifests, is a root of
+    /// its own rather than a member of the root above it (a Leiningen subproject, ADR-239).
+    pub apart: fn(&Path) -> bool,
 }
 
 impl Ecosystem {
@@ -43,6 +46,11 @@ impl Ecosystem {
 /// [`Ecosystem::builds`] for an ecosystem that builds every manifest it names.
 pub fn every_manifest(_: &Path) -> bool {
     true
+}
+
+/// [`Ecosystem::apart`] for an ecosystem whose every nested manifest is a member's.
+pub fn never(_: &Path) -> bool {
+    false
 }
 
 /// A directory holding an ecosystem's manifest, with the directories below it that hold that
@@ -154,7 +162,7 @@ pub fn configured_roots(
 
 /// Visits `dir` and the directories below it in sorted order, never entering one `exclude`
 /// excludes. A directory with one of the ecosystem's manifests becomes a root, or a member of
-/// the root above it when there is one.
+/// the nearest root above it when there is one and the ecosystem does not set it apart.
 fn walk(
     root: &Path,
     dir: &Path,
@@ -163,10 +171,12 @@ fn walk(
     candidates: &mut Vec<Candidate>,
 ) {
     if ecosystem.manifests_in(dir).next().is_some() {
-        match candidates
+        let above = candidates
             .iter_mut()
-            .find(|candidate| dir.starts_with(&candidate.dir))
-        {
+            .filter(|candidate| dir.starts_with(&candidate.dir))
+            .max_by_key(|candidate| candidate.dir.components().count())
+            .filter(|_| !(ecosystem.apart)(dir));
+        match above {
             Some(candidate) => candidate.members.push(dir.to_path_buf()),
             None => candidates.push(Candidate {
                 ecosystem,

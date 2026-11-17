@@ -7,13 +7,14 @@ use std::path::Path;
 use cupel_core::syntax::ProjectRoot;
 use serde_json::Value;
 
-use crate::project::{Candidate, Ecosystem, every_manifest};
+use crate::project::{Candidate, Ecosystem, every_manifest, never};
 
 pub const ECOSYSTEM: Ecosystem = Ecosystem {
     manifests: &["package.json"],
     builds: every_manifest,
     skip_dirs: &["node_modules", "dist", "coverage"],
     describe,
+    apart: never,
 };
 
 /// The extensions of the files a JavaScript or TypeScript project runs.

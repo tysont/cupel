@@ -153,7 +153,10 @@
           ],
           "format": "lcov",
           "install": null,
-          "producer": "tool.lein-cloverage"
+          "producer": "tool.lein-cloverage",
+          "skip": [
+            "not (file `test` exists)"
+          ]
         },
         {
           "commands": [
@@ -165,7 +168,10 @@
           "detect": [],
           "format": "lcov",
           "install": null,
-          "producer": "tool.cloverage-lein"
+          "producer": "tool.cloverage-lein",
+          "skip": [
+            "not (file `test` exists)"
+          ]
         }
       ],
       "fuzz": [],
@@ -187,7 +193,10 @@
           ],
           "format": null,
           "install": null,
-          "producer": "tool.lein-test"
+          "producer": "tool.lein-test",
+          "skip": [
+            "not (file `test` exists)"
+          ]
         },
         {
           "commands": [

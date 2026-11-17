@@ -309,7 +309,7 @@ impl cupel_core::Runner for Runner {
             });
         };
         let mut ids = Vec::new();
-        for (index, (dir, packages)) in suite_roots(ctx).into_iter().enumerate() {
+        for (index, (dir, packages)) in self.suite_roots(ctx).into_iter().enumerate() {
             let root = self.root(ctx, index, &dir, packages, false)?;
             self.prepare(&root, &ctx.cancel)?;
             let command = (lister.command)(&root);
@@ -393,7 +393,7 @@ impl cupel_core::Runner for Runner {
             return Ok(None);
         };
         let mut roots = Vec::new();
-        for (index, (dir, packages)) in suite_roots(ctx).into_iter().enumerate() {
+        for (index, (dir, packages)) in self.suite_roots(ctx).into_iter().enumerate() {
             let root = self.root(ctx, index, &dir, packages, false)?;
             let area = root
                 .config
@@ -435,10 +435,19 @@ struct Run<'a> {
 type Narrowed = (usize, (String, Vec<String>), Vec<String>);
 
 impl Runner {
+    /// The roots the runner runs the suite in: [`suite_roots`] but those a `skip` rule of its
+    /// own makes roots without a suite for it (ADR-239).
+    fn suite_roots(&self, ctx: &ProduceCtx) -> Vec<(String, Vec<String>)> {
+        suite_roots(ctx)
+            .into_iter()
+            .filter(|(dir, _)| !toolchain::skips(&self.id(), &ctx.ctx.root.join(dir)))
+            .collect()
+    }
+
     /// The roots `selection` reaches, each with the arguments that narrow its run; an error
     /// when the runner cannot narrow to it.
     fn narrowed(&self, ctx: &ProduceCtx, selection: &TestSelection) -> Result<Vec<Narrowed>> {
-        let roots = suite_roots(ctx);
+        let roots = self.suite_roots(ctx);
         let dirs: Vec<String> = roots.iter().map(|(dir, _)| dir.clone()).collect();
         let mut narrowed = Vec::new();
         for (index, root) in roots.into_iter().enumerate() {

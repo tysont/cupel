@@ -254,6 +254,11 @@ pub struct ToolDescription {
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     #[schemars(extend("x-cupel-optional" = true))]
     pub defer: Vec<String>,
+    /// Rules any one of which makes a project root one it runs nothing in, because the root
+    /// holds no suite for it (a Leiningen aggregator, ADR-239); absent when it has none.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("x-cupel-optional" = true))]
+    pub skip: Vec<String>,
     /// Default command templates.
     pub commands: Vec<CommandTemplate>,
     /// The command template that installs it, with the launcher's values as placeholders;

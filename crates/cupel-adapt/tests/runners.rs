@@ -360,6 +360,42 @@ fn lein_test_runs_the_leiningen_fixture() {
     assert_runs(&LEIN_TEST);
 }
 
+/// A Leiningen root with no `test/` holds no suite: an aggregator (ring's top level) is not
+/// run, and its subproject, a root of its own, is (ADR-239).
+#[test]
+fn lein_test_runs_in_each_subproject_and_not_in_their_aggregator() {
+    let dir = tempfile::tempdir().unwrap();
+    copy_repo("leiningen-sub/clojure", dir.path());
+    let registry = registry();
+    let producer = runner(&registry, "tool.lein-test", "clojure");
+    if let Availability::MissingTool { name, .. } =
+        producer.availability(&Ctx::new(dir.path().to_path_buf()))
+    {
+        eprintln!("SKIPPED: {name} not installed; tool.lein-test was not run");
+        return;
+    }
+    let mut ctx = produce_ctx(dir.path(), "clojure", Cancellation::new());
+    ctx.upstream.insert(
+        cupel_core::Produced::new(support::project_info("clojure", &[".", "core"])).share(),
+    );
+    let results = producer
+        .produce(&ctx, &Scope::default(), &mut Vec::new())
+        .unwrap()
+        .downcast::<TestResults>()
+        .unwrap();
+    assert_eq!(
+        (results.invocations.len(), outcomes(&results)),
+        (
+            1,
+            vec![(
+                "core: meter.readings/totals-the-readings".to_owned(),
+                Passed
+            )]
+        ),
+        "{results:?}"
+    );
+}
+
 /// Runs `tool.clojure-test` on a copy of the fixture repository `repo` and checks it reported
 /// exactly `expected`; skipped with a reason when the Clojure CLI is not installed.
 fn assert_clojure_reports(repo: &str, expected: &[(&str, TestOutcome)]) {

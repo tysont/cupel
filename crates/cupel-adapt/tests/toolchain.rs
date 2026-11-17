@@ -396,6 +396,21 @@ fn a_leiningen_project_gets_lein_test_and_cloverage_by_coordinate_or_by_its_plug
     assert_eq!(got(both.path()).0.as_deref(), Some("clojure -M:test"));
     // The Clojure CLI's runner would run without the project's classpath: in a Leiningen root it
     // is set aside for Leiningen's at run time.
+    // A Leiningen root without `test/` (an aggregator) holds no suite for Leiningen's runner or
+    // Cloverage, which skip it; a tools.deps root is never skipped.
+    let aggregator = support::repository(&[("project.clj", "(defproject a/b \"1\")\n")]);
+    std::fs::create_dir(plain.path().join("test")).unwrap();
+    assert_eq!(
+        [
+            "tool.lein-test",
+            "tool.cloverage-lein",
+            "tool.lein-cloverage",
+            "tool.cloverage"
+        ]
+        .map(|id| [aggregator.path(), plain.path()]
+            .map(|dir| toolchain::skips(&ProducerId::from(id), dir))),
+        [[true, false], [true, false], [true, false], [false, false]]
+    );
     let clojure_test = ProducerId::from("tool.clojure-test");
     assert_eq!(
         [

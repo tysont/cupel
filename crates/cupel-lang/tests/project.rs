@@ -207,6 +207,34 @@ fn deps_edn_roots_are_clojure_roots_and_no_recognized_root_is_unregistered() {
     assert!(cupel_lang::unregistered_roots(dir.path(), &Exclude::default()).is_empty());
 }
 
+/// A Leiningen `project.clj` below another is a root of its own, as Leiningen builds each
+/// subproject apart from the aggregator above it (`lein sub`); a `deps.edn` below a Leiningen
+/// subproject is still its member (ADR-239).
+#[test]
+fn leiningen_subprojects_are_roots_of_their_own() {
+    let dir = tree(&[
+        (
+            "project.clj",
+            "(defproject agg \"1\" :sub [\"core\" \"web\"])\n",
+        ),
+        ("core/project.clj", "(defproject core \"1\")\n"),
+        ("core/tools/deps.edn", "{}\n"),
+        ("web/project.clj", "(defproject web \"1\")\n"),
+    ]);
+    let skip = &["target", ".cpcache"];
+    assert_eq!(
+        produce::<ProjectInfo>("clojure", dir.path()).roots,
+        [
+            plain(".", "clojure", &["project.clj"], skip),
+            ProjectRoot {
+                members: strings(&["tools"]),
+                ..plain("core", "clojure", &["project.clj", "tools/deps.edn"], skip)
+            },
+            plain("web", "clojure", &["project.clj"], skip),
+        ]
+    );
+}
+
 /// Every registered language's ecosystem, from the registry alone.
 fn registered_ecosystems(registry: &LanguageRegistry) -> Vec<&'static Ecosystem> {
     registry

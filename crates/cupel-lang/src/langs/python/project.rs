@@ -2,13 +2,14 @@
 // ABOUTME: environments and caches as generated directories, and the directory coverage measures (ADR-021, ADR-037, ADR-152, ADR-208).
 use std::path::Path;
 
-use crate::project::{Ecosystem, every_manifest};
+use crate::project::{Ecosystem, every_manifest, never};
 
 pub const ECOSYSTEM: Ecosystem = Ecosystem {
     manifests: &["pyproject.toml", "setup.cfg", "requirements.txt"],
     builds: every_manifest,
     skip_dirs: &[".venv", "venv", "__pycache__", ".tox"],
     describe: |candidate| candidate.root("python", packages(&candidate.dir)),
+    apart: never,
 };
 
 /// The directories the root's coverage command measures (`<packages>`, ADR-152, ADR-208): none

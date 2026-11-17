@@ -3946,6 +3946,14 @@ expression: pretty(&schema)
         },
         "producer": {
           "$ref": "#/$defs/ProducerId"
+        },
+        "skip": {
+          "description": "Rules any one of which makes a project root one it runs nothing in, because the root\nholds no suite for it (a Leiningen aggregator, ADR-239); absent when it has none.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "x-cupel-optional": true
         }
       },
       "required": [

@@ -175,7 +175,8 @@ impl Producer<CoverageMap> for CoverageTool {
         let mut files = Vec::new();
         let mut listing = Listing::All;
         let mut doc_examples = false;
-        for (dir, packages) in roots(ctx) {
+        let skipped = |dir: &String| toolchain::skips(&self.id(), &ctx.ctx.root.join(dir));
+        for (dir, packages) in roots(ctx).into_iter().filter(|(dir, _)| !skipped(dir)) {
             let skip_dirs = self.skip_dirs(ctx, &dir);
             let tree = Tree {
                 repo: &ctx.ctx.root,

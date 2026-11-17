@@ -82,6 +82,10 @@ pub struct Tool {
     /// runs something else there, so this tool's command would not be the project's (ADR-162).
     #[serde(default)]
     pub defer: Vec<Rule>,
+    /// Any one that holds at a project root makes it a root this tool runs nothing in: the root
+    /// holds no suite for it (a Leiningen aggregator, ADR-239).
+    #[serde(default)]
+    pub skip: Vec<Rule>,
     /// The command for every runner.
     #[serde(default)]
     pub command: Option<String>,
@@ -173,6 +177,16 @@ pub fn defers(id: &ProducerId, root: &Path) -> bool {
         .flat_map(Row::tools)
         .find(|tool| tool.id == *id)
         .is_some_and(|tool| tool.defer.iter().any(|rule| rule.holds(&dirs)))
+}
+
+/// Whether a `skip` rule of the tool `id` holds at the project root `root` (ADR-239).
+pub fn skips(id: &ProducerId, root: &Path) -> bool {
+    let dirs = Dirs { root, members: &[] };
+    rows()
+        .iter()
+        .flat_map(Row::tools)
+        .find(|tool| tool.id == *id)
+        .is_some_and(|tool| tool.skip.iter().any(|rule| rule.holds(&dirs)))
 }
 
 /// The table's command for the runner `id` in `root`, with the launcher detected there and the
@@ -348,6 +362,7 @@ impl Tool {
             format: self.format.clone(),
             detect: self.detect.iter().map(Rule::describe).collect(),
             defer: self.defer.iter().map(Rule::describe).collect(),
+            skip: self.skip.iter().map(Rule::describe).collect(),
             commands: self
                 .command
                 .iter()
