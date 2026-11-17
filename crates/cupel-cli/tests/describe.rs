@@ -1053,13 +1053,13 @@ fn describe_lists_install_routes_each_live_or_saying_what_it_waits_for() {
             "Install script",
             "cargo-binstall",
             "Release archive",
-            "From source"
+            "From source",
+            "Homebrew",
+            "npm",
+            "pipx"
         ]
     );
-    assert_eq!(
-        pending,
-        ["Homebrew", "npm", "pipx", "crates.io", "cupel.dev"]
-    );
+    assert_eq!(pending, ["crates.io", "cupel.dev"]);
 }
 
 /// The registry routes install the packages dist/ and the binary crate are named (ADR-146): the npm,

@@ -50,7 +50,7 @@ fn release_repository() -> TempDir {
     dir
 }
 
-/// scripts/ship.sh in `dir`, without PyPI's token in its environment.
+/// scripts/ship.sh in `dir`, without the Python Package Index's token in its environment.
 fn ship(dir: &Path, args: &[&str]) -> Output {
     Command::new("sh")
         .arg(dir.join("scripts/ship.sh"))
@@ -142,7 +142,7 @@ fn release_refuses_a_version_other_than_the_crate_version() {
     );
 }
 
-/// PyPI reads its token only from the environment ship.sh is started in, which
+/// The Python Package Index upload reads its token only from the environment ship.sh is started in, which
 /// `op run --env-file=release.env.tpl` fills from 1Password; without it nothing is attempted. npm needs
 /// none: the owner signs in through the browser for each publish (ADR-238).
 #[test]
@@ -278,7 +278,7 @@ fn no_workflow_publishes() {
     );
 }
 
-/// release.env.tpl holds 1Password references and no values: one per token ship.sh reads, PyPI's alone.
+/// release.env.tpl holds 1Password references and no values: one per token ship.sh reads, the Python Package Index's alone.
 #[test]
 fn the_release_environment_template_holds_only_1password_references() {
     let template = fs::read_to_string(repository().join("release.env.tpl")).unwrap();
