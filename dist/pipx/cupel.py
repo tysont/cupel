@@ -28,7 +28,7 @@ TARGETS: dict[str, list[str]] = {
     "linux-aarch64": ["aarch64-unknown-linux-musl", "tar.gz"],
     "macos-x86_64": ["x86_64-apple-darwin", "tar.gz"],
     "macos-aarch64": ["aarch64-apple-darwin", "tar.gz"],
-    "windows-x86_64": ["x86_64-pc-windows-msvc", "zip"],
+    "windows-x86_64": ["x86_64-pc-windows-gnu", "zip"],
 }
 
 OS = {"Linux": "linux", "Darwin": "macos", "Windows": "windows"}

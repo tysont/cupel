@@ -80,9 +80,9 @@ install routes
   cargo-binstall   cargo binstall --git https://github.com/tysont/cupel cupel-cli · linux, macos
   Release archive  gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz' · linux, macos
   From source      cargo install --locked --git https://github.com/tysont/cupel cupel-cli · linux, macos
-  Homebrew         brew install tysont/cupel/cupel · linux, macos · once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap
-  npm              npx cupel-cli · linux, macos · once the `cupel-cli` package is published to npm
-  pipx             pipx install cupel-cli · linux, macos · once the `cupel-cli` package is published to PyPI
+  Homebrew         brew install tysont/cupel/cupel · linux, macos
+  npm              npx cupel-cli · linux, macos
+  pipx             pipx install cupel-cli · linux, macos
   crates.io        cargo install --locked cupel-cli · linux, macos · once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's
   cupel.dev        curl -fsSL https://cupel.dev/install | sh · linux, macos · once cupel.dev serves the install script
 

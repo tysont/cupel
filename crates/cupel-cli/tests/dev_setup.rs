@@ -1,4 +1,4 @@
-// ABOUTME: Tests for the development tool environment (ADR-139): every version ci.yml, its actions, and release.yml's build job pin
+// ABOUTME: Tests for the development tool environment (ADR-139): every version ci.yml and its actions pin
 // ABOUTME: appears in scripts/dev-setup.sh, CI and PATH have its ShellCheck, the scripts pass it, and `make dev-env` exports only tools that exist.
 mod support;
 
@@ -74,18 +74,6 @@ fn pins<'a>(lines: impl IntoIterator<Item = &'a str>) -> Vec<(String, String)> {
     pins
 }
 
-/// The steps of a job, from its trimmed lines: each starts at a `- ` list item.
-fn steps(lines: &[String]) -> Vec<&[String]> {
-    let starts: Vec<usize> = (0..lines.len())
-        .filter(|&i| lines[i].starts_with("- "))
-        .collect();
-    starts
-        .iter()
-        .enumerate()
-        .map(|(n, &start)| &lines[start..starts.get(n + 1).copied().unwrap_or(lines.len())])
-        .collect()
-}
-
 /// The version scripts/dev-setup.sh pins for `tool`: its `<tool>_version=` line.
 fn pinned(tool: &str) -> String {
     let key = format!("{tool}_version=");
@@ -102,9 +90,8 @@ fn action(name: &str) -> String {
     fs::read_to_string(workspace().join(format!(".github/actions/{name}/action.yml"))).unwrap()
 }
 
-/// Every pin the development environment mirrors: ci.yml's jobs but `windows` and its actions, and the steps of
-/// release.yml's `build` job that run on Linux or macOS (`make dist` is the local route to them). The Windows-only
-/// job and step (`choco install make`) and the publish jobs, which only CI runs, are not mirrored.
+/// Every pin the development environment mirrors: ci.yml's jobs but `windows`, which only CI runs, and its actions.
+/// zig and cargo-zigbuild, which `make release` builds with (ADR-238), are pinned in scripts/dev-setup.sh alone.
 fn workflow_pins() -> Vec<(String, String)> {
     let ci = jobs(&workflow("ci.yml"));
     let mut all: Vec<(String, String)> = ci
@@ -114,16 +101,6 @@ fn workflow_pins() -> Vec<(String, String)> {
         .collect();
     all.extend(pins(action("tools").lines()));
     all.extend(pins(action("shellcheck").lines()));
-    let release = jobs(&workflow("release.yml"));
-    let (_, build) = release
-        .iter()
-        .find(|(name, _)| name == "build")
-        .expect("a `build` job");
-    for step in steps(build) {
-        if !step.iter().any(|line| line == "if: runner.os == 'Windows'") {
-            all.extend(pins(step.iter().map(String::as_str)));
-        }
-    }
     all
 }
 
@@ -164,7 +141,7 @@ node-version: \"22.23.3\"
     );
 }
 
-/// A version pinned in ci.yml, its tools action, or release.yml's build job and not in scripts/dev-setup.sh means the
+/// A version pinned in ci.yml or its tools action and not in scripts/dev-setup.sh means the
 /// local environment and CI have drifted: goldens regenerated locally would not match CI's.
 #[test]
 fn dev_setup_installs_every_version_the_workflows_pin() {

@@ -1,5 +1,5 @@
 # ABOUTME: The targets Cupel releases and how each target's archive is named on GitHub Releases (ADR-125).
-# ABOUTME: The release workflow, cargo-binstall metadata, install script, Homebrew formula, and wrappers follow it.
+# ABOUTME: `make release` (scripts/ship.sh), cargo-binstall metadata, install script, Homebrew formula, and wrappers follow it.
 
 # A release `v{version}` publishes, under https://github.com/tysont/cupel/releases/download/v{version}/,
 # one archive per target and `checksums`, which lists each archive's SHA-256 as `sha256sum` prints it.
@@ -34,7 +34,7 @@ arch = "aarch64"
 format = "tar.gz"
 
 [[target]]
-triple = "x86_64-pc-windows-msvc"
+triple = "x86_64-pc-windows-gnu"
 os = "windows"
 arch = "x86_64"
 format = "zip"

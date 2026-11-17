@@ -418,7 +418,7 @@ fn stability(cli: &Value, manifests: &[Value]) -> String {
     markdown_table(&owned(&["Described", "Stability"]), &rows)
 }
 
-/// One row per release target in `dist/targets.toml`, the file the release workflow and every
+/// One row per release target in `dist/targets.toml`, the file `make release` and every
 /// installer follow (ADR-125).
 fn targets() -> String {
     let document: toml_edit::DocumentMut = read("dist/targets.toml")

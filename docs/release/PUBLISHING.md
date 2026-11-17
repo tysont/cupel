@@ -1,117 +1,118 @@
-<!-- ABOUTME: The owner's one-time steps that turn on publishing to npm, PyPI, and the Homebrew tap from release.yml (ADR-235), -->
-<!-- ABOUTME: how to check the first publish after a tag, and how to stop or undo one. -->
+<!-- ABOUTME: How the owner releases and publishes Cupel from their Mac (ADR-238): the one-time setup of tokens in 1Password, -->
+<!-- ABOUTME: the per-release make targets, verifying a release on every route, and how to stop or undo one. -->
 # Publishing
 
-`.github/workflows/release.yml` publishes on every `v*` tag, after the GitHub Release exists. Its `publishers` job opens one gate per registry; a closed gate skips that job with a `skipped: …` notice and the run still succeeds ([ADR-235](../adr/CUPEL_DECISION_235.md)).
+Nothing publishes from GitHub Actions ([ADR-238](../adr/CUPEL_DECISION_238.md)). The owner releases and publishes from their Mac through make targets over `scripts/ship.sh`.
 
-| Job | Registry | Credential | Gate (on `tysont/cupel`) | GitHub environment |
-| --- | --- | --- | --- | --- |
-| `publish-npm` | npm `cupel-cli` | OIDC trusted publisher | variable `NPM_TRUSTED_PUBLISHING` = `true` | `npm` |
-| `pypi-build`, `publish-pypi` | PyPI `cupel-cli` | OIDC trusted publisher | variable `PYPI_TRUSTED_PUBLISHING` = `true` | `pypi` |
-| `publish-homebrew` | `tysont/homebrew-cupel` | SSH deploy key | secret `HOMEBREW_TAP_DEPLOY_KEY` set | none |
-| `publish-crates` | crates.io | — | stays skipped ([ADR-146](../adr/CUPEL_DECISION_146.md)) | none |
+- Each target takes `V=X.Y.Z` and does nothing when that version is already released or published, so it is safe to run again.
+- `DRY=1` runs every local step and creates, uploads, and pushes nothing.
 
-Values every registry form asks for: owner **`tysont`**, repository **`cupel`**, workflow file **`release.yml`** (the file name only), package/project **`cupel-cli`**, environment **`npm`** on npm and **`pypi`** on PyPI.
+| Target | Publishes | Credential |
+| --- | --- | --- |
+| `make release` | the GitHub Release: five archives and `SHA256SUMS` | your `gh` login |
+| `make publish-npm` | npm `cupel-cli`, from the tag's `dist/npm` | the owner's browser sign-in, confirmed with their 2FA, each publish |
+| `make publish-pypi` | PyPI `cupel-cli`, from the tag's `dist/pipx` | `PYPI_TOKEN`, from 1Password |
+| `make publish-homebrew` | `Formula/cupel.rb` on `tysont/homebrew-cupel`'s `main` | your SSH key and git identity |
+| `make publish` | the three above, in that order | |
+| `make verify-release` | nothing; checks every route | |
 
-Set a gate only after its registry is configured: an open gate whose registry does not trust the workflow fails the run.
+crates.io stays unpublished while another project holds `cupel-core` there ([ADR-146](../adr/CUPEL_DECISION_146.md)).
 
-## Order
-
-1. GitHub: the environments (below). Any time.
-2. PyPI: the pending publisher, then its variable. Any time.
-3. Homebrew: the deploy key and its secret. Any time.
-4. npm: the first version by hand any time; the trusted publisher and its variable **within 2 days before the next tag** (npm expires an unused configuration after 2 days).
-5. Push the next tag.
-
-## 1. GitHub environments
-
-Create `npm` and `pypi`, each limited to `v*` tags:
+PyPI's token comes only from the environment of the command that runs, through 1Password's `op run`; `release.env.tpl` holds its 1Password reference, never its value:
 
 ```sh
-for env in npm pypi; do
-  gh api -X PUT "repos/tysont/cupel/environments/$env" --input - <<'JSON'
-{"deployment_branch_policy": {"protected_branches": false, "custom_branch_policies": true}}
-JSON
-  gh api -X POST "repos/tysont/cupel/environments/$env/deployment-branch-policies" -f name='v*' -f type=tag
-done
-gh api repos/tysont/cupel/environments --jq '.environments[].name'   # lists npm and pypi
+PYPI_TOKEN=op://Cupel/prod-cupel-pypi-api-token/credential
 ```
 
-## 2. PyPI (no project needed: a pending publisher creates it)
+npm keeps no token. Each `make publish-npm` signs in through the browser, where you confirm with your 2FA (a passkey works), and signs out when it ends. The session's token is held only in a config file in that step's private scratch directory, never `~/.npmrc`, and `npm logout` revokes it however the step ends. Nothing else writes a credential to disk or into the repository.
 
-1. Sign in at https://pypi.org and open https://pypi.org/manage/account/publishing/ (account sidebar → Publishing).
-2. Under "Add a new pending publisher", choose **GitHub** and enter:
-   - PyPI Project Name: `cupel-cli`
-   - Owner: `tysont`
-   - Repository name: `cupel`
-   - Workflow name: `release.yml`
-   - Environment name: `pypi`
-3. Click **Add**.
-4. `gh variable set PYPI_TRUSTED_PUBLISHING --repo tysont/cupel --body true`
+## One-time setup
 
-A pending publisher does not reserve the name; it becomes the project's publisher on the first upload.
+Some steps need the owner's own registry or 1Password login, which no agent can stand in for; they are marked **owner**. The agent runs the rest.
 
-## 3. Homebrew tap deploy key
+| Step | Who |
+| --- | --- |
+| 1. Tools | agent: `make dev-setup`; owner: sign in to `gh`, `op`, and Docker |
+| 2. npm: 2FA | **owner** (npm login) |
+| 3. PyPI: 2FA, the token | **owner** (PyPI login) |
+| 4. PyPI's token in 1Password | **owner** |
+| 5. Homebrew: nothing to set up | — |
 
-The tap is empty; the first run creates `main` with `Formula/cupel.rb` and a `README.md`.
+### 1. Tools
 
-```sh
-dir="$(mktemp -d)"
-ssh-keygen -t ed25519 -N '' -C 'tysont/cupel release.yml' -f "$dir/tap"
-gh repo deploy-key add "$dir/tap.pub" --repo tysont/homebrew-cupel --title 'tysont/cupel release.yml' --allow-write
-gh secret set HOMEBREW_TAP_DEPLOY_KEY --repo tysont/cupel < "$dir/tap"
-rm -rf "$dir"
-```
+- **Build tools:** `make dev-setup` installs zig 0.16.0 and cargo-zigbuild 0.23.4. It also adds the Rust targets: `x86_64-apple-darwin` (or `aarch64-apple-darwin` on an Intel Mac), both `*-unknown-linux-musl`, and `x86_64-pc-windows-gnu`.
+- **Sign-ins:**
+  - `gh auth login`, an account that can create releases on `tysont/cupel`.
+  - The 1Password CLI, `op`, signed in. With the desktop app, turn on Settings → Developer → "Integrate with 1Password CLI".
+- **For `make verify-release`:** Docker, pipx, Homebrew, and Node with npm.
+- **SSH:** `ssh -T git@github.com` must answer as an account that can push to `tysont/homebrew-cupel`.
 
-A key added by `gh` is removed if that `gh` login's token is ever de-authorized. To avoid that, replace the `gh repo deploy-key add` line with `cat "$dir/tap.pub"` and paste its output at https://github.com/tysont/homebrew-cupel/settings/keys/new (Title `tysont/cupel release.yml`, tick **Allow write access**).
+### 2. npm (owner)
 
-## 4. npm
+1. Use the npm account that owns `cupel-cli`, `sinuous-dev`.
+2. Turn on 2FA for it: avatar → **Account** → **Two-Factor Authentication**, **Authorization and writes**. A security key or passkey is enough, because `make publish-npm` confirms in the browser.
 
-npm cannot trust a workflow for a package that does not exist, so the first version is published by hand once, with a short-lived `npm login` session (no stored token). It must be a released version: the wrapper downloads its own version's binary.
+No token is created for npm.
 
-1. Turn on 2FA for the npm account `tysont` if it is not on (https://www.npmjs.com/settings/~/tfa).
-2. Publish `cupel-cli@0.2.9` from the `v0.2.9` tag (npm 11.5.1 or later):
+### 3. PyPI (owner)
+
+1. Turn on 2FA at https://pypi.org/manage/account/two-factor/.
+2. If a pending trusted publisher for `cupel-cli` was added at https://pypi.org/manage/account/publishing/, remove it; nothing uses it.
+3. For the first upload, which creates the project, create an API token at https://pypi.org/manage/account/token/ with **Scope: Entire account (all projects)**, named `cupel-cli first upload`.
+4. After the first upload:
+   1. Create a token with **Scope: Project: cupel-cli**, named `cupel-cli upload`.
+   2. Replace the first token with it in 1Password.
+   3. Delete the account-wide token on PyPI.
+
+### 4. PyPI's token in 1Password (owner)
+
+Make an **API Credential** item `prod-cupel-pypi-api-token` in the vault `Cupel`, with the PyPI API token (`pypi-…`) in its **credential** field. Keeping it under another name or in another vault means changing `release.env.tpl`'s reference to match. `op read op://Cupel/prod-cupel-pypi-api-token/credential >/dev/null && echo ok` checks the reference resolves without printing it.
+
+### 5. Homebrew
+
+Nothing to set up. `make publish-homebrew` clones the tap over SSH with your key, commits as your git identity, and pushes. The tap's `main` is created by the first publish when the tap is empty.
+
+## Each release
+
+1. Set the version, gate, push `main`, and tag:
    ```sh
-   git clone --depth 1 --branch v0.2.9 https://github.com/tysont/cupel.git "$TMPDIR/cupel-v0.2.9"
-   cd "$TMPDIR/cupel-v0.2.9"
-   npm login
-   npm publish ./dist/npm --access public
-   npm logout
+   make version V=X.Y.Z          # then commit, gate, and push main
+   git tag -a vX.Y.Z -m "Cupel X.Y.Z" && git push origin vX.Y.Z
    ```
-3. Within 2 days before the next tag, add the trusted publisher at https://www.npmjs.com/package/cupel-cli/access → **Trusted Publisher** → **GitHub Actions**:
-   - Organization or user: `tysont`
-   - Repository: `cupel`
-   - Workflow filename: `release.yml`
-   - Environment name: `npm`
-   - Allowed actions: tick **npm publish**
+2. From a clean checkout of the tag, build the archives and create the GitHub Release:
+   ```sh
+   git switch --detach vX.Y.Z
+   make release V=X.Y.Z DRY=1    # builds all five archives and SHA256SUMS under target/release-X.Y.Z; creates nothing
+   make release V=X.Y.Z
+   ```
+3. Publish to the registries, with the tokens from 1Password:
+   ```sh
+   op run --env-file=release.env.tpl -- make publish V=X.Y.Z DRY=1
+   op run --env-file=release.env.tpl -- make publish V=X.Y.Z
+   ```
+   `make publish-npm` prints `signing in to npm`, opens a browser sign-in, and asks for your 2FA again when it publishes; stay at the browser until it ends with `+ cupel-cli@X.Y.Z`. To rerun one registry alone, run its target: `make publish-npm V=X.Y.Z`, `op run --env-file=release.env.tpl -- make publish-pypi V=X.Y.Z`, or `make publish-homebrew V=X.Y.Z`; only PyPI's needs `op run`.
+4. Verify: `make verify-release V=X.Y.Z` (below).
 
-   Or with npm 11.15.0 or later: `npm trust github cupel-cli --file release.yml --repository tysont/cupel --environment npm --allow-publish`
-4. On the same page, under **Publishing access**, choose **Require two-factor authentication and disallow tokens** (trusted publishing keeps working).
-5. `gh variable set NPM_TRUSTED_PUBLISHING --repo tysont/cupel --body true`
+A step that fails can be run again once its cause is fixed: a finished step does nothing the second time.
 
-If the tag is more than 2 days away, wait to do step 3. An expired configuration cannot be edited: delete it and add it again.
+## Verify
 
-## Verify after the next tag
+`make verify-release V=X.Y.Z` checks the release as a user receives it, and ends with `verify=ok`. Wherever a check runs `cupel --version`, it must print exactly `cupel X.Y.Z`. It checks:
 
-```sh
-run="$(gh run list --repo tysont/cupel --workflow release.yml --event push --limit 1 --json databaseId --jq '.[0].databaseId')"
-gh run view "$run" --repo tysont/cupel   # publish-npm, pypi-build, publish-pypi, publish-homebrew green; one notice, publish-crates skipped
-v=0.3.0   # the tag's version
-npm view "cupel-cli@$v" version dist.attestations.provenance.predicateType   # the version and an SLSA provenance type
-curl -s "https://pypi.org/pypi/cupel-cli/$v/json" | jq -r '.info.version'
-gh api repos/tysont/homebrew-cupel/commits/main --jq '.commit.message'       # "cupel <version>"
-npx -y "cupel-cli@$v" --version                                              # cupel <version>
-pipx run --spec "cupel-cli==$v" cupel --version                              # cupel <version>
-brew install tysont/cupel/cupel && cupel --version                           # Homebrew 7 may first ask: brew trust tysont/cupel
-```
-
-A gate still closed shows as `skipped: variable … is not true` or `skipped: secret … not set` in the run's notices and summary.
+- **The GitHub Release:** the assets download, `SHA256SUMS` checks every archive, each archive holds exactly the binary, `LICENSE` and `README.md` (the tag's `scripts/release.sh verify`), and both macOS binaries run.
+- **`install.sh`:** the tag's copy, on the Mac, in `ubuntu:24.04` x86_64, and in `alpine:3.20` arm64.
+- **`cargo binstall`:** `cargo binstall --git https://github.com/tysont/cupel cupel-cli` in `rust:1.92-bookworm`.
+- **npm:** `npm view cupel-cli@X.Y.Z version` and `npx -y cupel-cli@X.Y.Z --version`.
+- **PyPI:** `https://pypi.org/pypi/cupel-cli/X.Y.Z/json` and `pipx run --spec cupel-cli==X.Y.Z cupel --version`.
+- **Homebrew:** the tap's last commit (`cupel X.Y.Z`); `brew fetch --formula tysont/cupel/cupel` on the Mac, which downloads the macOS archive and checks the formula's digest; and `brew install tysont/cupel/cupel` in `homebrew/brew` (Linux) in Docker. Your Mac's Homebrew installs nothing, so the check neither depends on it nor changes it.
 
 ## Stop or undo
 
-- **Stop a route** before the next tag: `gh variable delete NPM_TRUSTED_PUBLISHING --repo tysont/cupel`, `gh variable delete PYPI_TRUSTED_PUBLISHING --repo tysont/cupel`, or `gh secret delete HOMEBREW_TAP_DEPLOY_KEY --repo tysont/cupel`.
-- **Revoke trust**: npm, https://www.npmjs.com/package/cupel-cli/access → Trusted Publisher → delete (or `npm trust list cupel-cli`, then `npm trust revoke --id <id> cupel-cli`); PyPI, https://pypi.org/manage/project/cupel-cli/settings/publishing/ → Remove (a pending one: https://pypi.org/manage/account/publishing/); the tap, `gh repo deploy-key list --repo tysont/homebrew-cupel`, then `gh repo deploy-key delete <id> --repo tysont/homebrew-cupel`.
-- **A bad version**: npm, `npm deprecate cupel-cli@<version> "<reason>"` (`npm unpublish cupel-cli@<version>` only within 72 hours, and the version number can never be reused); PyPI, https://pypi.org/manage/project/cupel-cli/releases/ → the release → Options → **Yank**; the tap, revert its last commit:
+- **Stop a route:** PyPI, revoke the token at https://pypi.org/manage/account/token/ and delete its 1Password item; `make publish-pypi` then stops before it touches PyPI. npm and the tap keep no standing credential: they publish only while you sign in or push with your own SSH key. If `make publish-npm` reports `npm logout failed`, revoke the session at https://www.npmjs.com/settings/~/tokens.
+- **A bad GitHub Release:** `gh release delete vX.Y.Z --repo tysont/cupel --yes` deletes the release and keeps the tag. Fix the cause, then `make release V=X.Y.Z` again.
+- **A bad npm version:** `npm deprecate cupel-cli@X.Y.Z "<reason>"`. `npm unpublish cupel-cli@X.Y.Z` works only within 72 hours, and the version number can never be reused.
+- **A bad PyPI version:** at https://pypi.org/manage/project/cupel-cli/releases/, open the release → Options → **Yank**.
+- **A bad formula:** revert the tap's last commit:
   ```sh
   git clone git@github.com:tysont/homebrew-cupel.git "$TMPDIR/tap" && cd "$TMPDIR/tap"
   git revert --no-edit HEAD && git push origin main

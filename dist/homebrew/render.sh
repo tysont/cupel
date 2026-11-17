@@ -1,6 +1,6 @@
 #!/bin/sh
 # ABOUTME: Renders the Homebrew formula for one release from its SHA256SUMS (ADR-125) and prints it; the
-# ABOUTME: release workflow commits the output as Formula/cupel.rb in the tysont/homebrew-cupel tap.
+# ABOUTME: `make publish-homebrew` commits the output as Formula/cupel.rb in the tysont/homebrew-cupel tap.
 #
 #   sh dist/homebrew/render.sh <version> <SHA256SUMS> > cupel.rb
 set -eu

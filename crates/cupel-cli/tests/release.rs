@@ -1,4 +1,4 @@
-// ABOUTME: Tests for scripts/release.sh, which `make dist` and the release workflow use to package the binary:
+// ABOUTME: Tests for scripts/release.sh, which `make dist` and `make release` use to package the binary:
 // ABOUTME: the tag-to-version check, no branch named like a tag, archive names and layout, SHA256SUMS, the static check, and action pins.
 #![cfg(unix)]
 mod support;
@@ -204,10 +204,10 @@ fn package_writes_a_zip_for_a_windows_target() {
         dir: _dir,
         out,
         archive,
-    } = packaged("x86_64-pc-windows-msvc");
+    } = packaged("x86_64-pc-windows-gnu");
     assert_eq!(
         archive,
-        out.join(format!("cupel-{VERSION}-x86_64-pc-windows-msvc.zip"))
+        out.join(format!("cupel-{VERSION}-x86_64-pc-windows-gnu.zip"))
     );
     let output = release(&["verify", archive.to_str().unwrap()]);
     assert!(output.status.success(), "verify: {}", stderr(&output));
@@ -278,10 +278,6 @@ fn static_rejects_a_dynamically_linked_binary() {
     );
 }
 
-fn release_workflow() -> String {
-    workflow("release.yml")
-}
-
 /// dist/targets.toml (ADR-125): each `[[target]]`'s triple and archive format, in file order.
 fn targets() -> Vec<(String, String)> {
     let toml =
@@ -297,20 +293,6 @@ fn targets() -> Vec<(String, String)> {
             (text("triple"), text("format"))
         })
         .collect()
-}
-
-/// The workflow builds exactly the targets dist/targets.toml lists, which the installers read.
-#[test]
-fn release_workflow_builds_the_targets_the_installers_expect() {
-    let mut built: Vec<String> = release_workflow()
-        .lines()
-        .filter_map(|line| line.trim().strip_prefix("- target: "))
-        .map(str::to_owned)
-        .collect();
-    built.sort();
-    let mut listed: Vec<String> = targets().into_iter().map(|(triple, _)| triple).collect();
-    listed.sort();
-    assert_eq!(built, listed);
 }
 
 /// Each target's archive is named as dist/targets.toml's `archive` template says, so an installer
@@ -367,65 +349,7 @@ fn action_names<'a>(actions: &[&'a str]) -> Vec<&'a str> {
     names
 }
 
-/// Every action is pinned to a commit, with the release it is in a comment beside it.
-#[test]
-fn release_workflow_pins_every_action_to_a_commit() {
-    let workflow = release_workflow();
-    let actions = actions(&workflow);
-    let names = action_names(&actions);
-    assert_eq!(
-        names,
-        vec![
-            "Swatinem/rust-cache",
-            "actions/checkout",
-            "actions/download-artifact",
-            "actions/setup-node",
-            "actions/upload-artifact",
-            "pypa/gh-action-pypi-publish"
-        ]
-    );
-    let unpinned: Vec<&&str> = actions.iter().filter(|action| !is_pinned(action)).collect();
-    assert_eq!(unpinned, Vec::<&&str>::new());
-}
-
-/// The build job restores and saves the build cache per target, between installing the toolchain
-/// and `make dist`, so one target's cache never overwrites another's. The key leaves out
-/// rust-cache's environment hash: it covers every toolchain `rustup toolchain list` shows, so the
-/// runner image's preinstalled stable release, which differs between runners, made a dry run's
-/// cache unreachable from the tag run; the pinned toolchain is in the key through
-/// `rust-toolchain.toml`, one of the lockfiles it hashes.
-#[test]
-fn the_build_job_caches_each_targets_build() {
-    let jobs = jobs(&release_workflow());
-    let (_, lines) = jobs
-        .iter()
-        .find(|(name, _)| name == "build")
-        .expect("a `build` job");
-    let position = |wanted: &str| lines.iter().position(|line| line.contains(wanted));
-    let cache = position("uses: Swatinem/rust-cache@");
-    let toolchain = position("rustup toolchain install");
-    let dist = position("make dist");
-    assert!(
-        toolchain < cache && cache < dist && cache.is_some(),
-        "toolchain {toolchain:?}, cache {cache:?}, dist {dist:?}"
-    );
-    let inputs: Vec<&str> = lines[cache.unwrap() + 1..dist.unwrap()]
-        .iter()
-        .skip_while(|line| *line != "with:")
-        .skip(1)
-        .take_while(|line| !line.starts_with("- ") && !line.starts_with('#'))
-        .map(String::as_str)
-        .collect();
-    assert_eq!(
-        inputs,
-        [
-            "key: ${{ matrix.target }}",
-            "add-rust-environment-hash-key: false"
-        ]
-    );
-}
-
-/// The pages workflow (ADR-127) holds its actions to the release workflow's rule.
+/// The pages workflow (ADR-127) pins every action to a commit.
 #[test]
 fn pages_workflow_pins_every_action_to_a_commit() {
     let workflow = workflow("pages.yml");
@@ -470,349 +394,12 @@ fn setting<'a>(yaml: &'a str, key: &str) -> Option<&'a str> {
         .find_map(|line| line.trim_start().strip_prefix(key)?.strip_prefix(": "))
 }
 
-/// What turns a publish job on: a repository variable set to `true` once the registry trusts the
-/// workflow (ADR-235), or a repository secret that holds the job's credential (ADR-128).
-#[derive(Clone, Copy)]
-enum Gate {
-    Variable(&'static str),
-    Secret(&'static str),
-}
-
-impl Gate {
-    /// The secret that gates the job, when a secret does.
-    fn secret(self) -> Option<&'static str> {
-        match self {
-            Gate::Secret(name) => Some(name),
-            Gate::Variable(_) => None,
-        }
-    }
-
-    /// The `publishers` job's lines for this gate on `output`: its environment mapping and its
-    /// probe call.
-    fn probed(self, output: &str) -> [String; 2] {
-        let (context, word, name) = match self {
-            Gate::Variable(name) => ("vars", "variable", name),
-            Gate::Secret(name) => ("secrets", "secret", name),
-        };
-        [
-            format!("{name}: ${{{{ {context}.{name} }}}}"),
-            format!("{word} {output} {name}"),
-        ]
-    }
-}
-
-/// The `needs` line of a publish job: the Python Package Index upload also waits for its build.
-fn needs_of(job: &str) -> &'static str {
-    match job {
-        "publish-pypi" => "needs: [publishers, pypi-build]",
-        _ => "needs: publishers",
-    }
-}
-
-/// The publish jobs: each job's name, the `publishers` output it is gated on, and what sets it.
-const PUBLISHERS: [(&str, &str, Gate); 4] = [
-    (
-        "publish-npm",
-        "npm",
-        Gate::Variable("NPM_TRUSTED_PUBLISHING"),
-    ),
-    (
-        "publish-pypi",
-        "pypi",
-        Gate::Variable("PYPI_TRUSTED_PUBLISHING"),
-    ),
-    (
-        "publish-homebrew",
-        "homebrew",
-        Gate::Secret("HOMEBREW_TAP_DEPLOY_KEY"),
-    ),
-    (
-        "publish-crates",
-        "crates",
-        Gate::Secret("CARGO_REGISTRY_TOKEN"),
-    ),
-];
-
-/// The jobs that publish through the registry's trust in this workflow (OIDC), each with the GitHub
-/// environment the registry's trusted publisher names (ADR-235).
-const TRUSTED: [(&str, &str); 2] = [("publish-npm", "npm"), ("publish-pypi", "pypi")];
-
 /// Lines `lines` lacks of `expected`.
 fn missing(lines: &[String], expected: Vec<String>) -> Vec<String> {
     expected
         .into_iter()
         .filter(|line| !lines.contains(line))
         .collect()
-}
-
-/// The release job stages the downloaded archives under `target/dist`, never the repository's `dist/`,
-/// which holds the installers (ADR-125): `gh release create dist/*` would try to upload `dist/homebrew`.
-#[test]
-fn the_release_job_stages_archives_outside_the_installers_directory() {
-    let jobs = jobs(&release_workflow());
-    let (_, lines) = jobs
-        .iter()
-        .find(|(name, _)| name == "release")
-        .expect("a `release` job");
-    let bare: Vec<&String> = lines
-        .iter()
-        .filter(|line| {
-            line.split(|c: char| c.is_whitespace() || c == ':' || c == '"' || c == '\'')
-                .any(|word| word == "dist" || word.starts_with("dist/"))
-        })
-        .collect();
-    assert_eq!(bare, Vec::<&String>::new());
-}
-
-/// The `publishers` job runs on a tag push after the release and turns each publish job's variable or
-/// secret into an output that says whether the job may run, writing why it is skipped when not.
-#[test]
-fn the_publishers_job_probes_each_publishing_gate_on_a_tag_push() {
-    let jobs = jobs(&release_workflow());
-    let (_, lines) = jobs
-        .iter()
-        .find(|(name, _)| name == "publishers")
-        .expect("a `publishers` job");
-    let mut expected = vec![
-        "needs: release".to_owned(),
-        "if: github.event_name == 'push' && github.ref_type == 'tag'".to_owned(),
-        "echo \"::notice title=publish-$1::skipped: $2\"".to_owned(),
-    ];
-    expected.extend(PUBLISHERS.iter().flat_map(|(_, output, gate)| {
-        let [mapped, probe] = gate.probed(output);
-        [
-            format!("{output}: ${{{{ steps.probe.outputs.{output} }}}}"),
-            mapped,
-            probe,
-        ]
-    }));
-    assert_eq!(missing(lines, expected), Vec::<String>::new());
-}
-
-/// Every publish job runs only when the `publishers` job found it configured, and a secret-gated job
-/// reads its secret.
-#[test]
-fn every_publish_job_is_gated_on_its_probe() {
-    let jobs = jobs(&release_workflow());
-    let ungated: Vec<(&str, Vec<String>)> = PUBLISHERS
-        .iter()
-        .map(|(job, output, gate)| {
-            let lines = jobs
-                .iter()
-                .find(|(name, _)| name == job)
-                .map(|(_, lines)| lines.clone())
-                .unwrap_or_default();
-            let expected = vec![
-                needs_of(job).to_owned(),
-                format!("if: needs.publishers.outputs.{output} == 'true'"),
-            ];
-            let mut absent = missing(&lines, expected);
-            let unread = gate.secret().filter(|secret| {
-                let read = format!("${{{{ secrets.{secret} }}}}");
-                !lines.iter().any(|line| line.ends_with(&read))
-            });
-            absent.extend(unread.map(|secret| format!("secrets.{secret}")));
-            (*job, absent)
-        })
-        .filter(|(_, absent)| !absent.is_empty())
-        .collect();
-    assert_eq!(ungated, Vec::<(&str, Vec<String>)>::new());
-}
-
-/// Nothing but the `publishers` job and the publish job a secret gates reads that secret; the
-/// trusted-publishing jobs read none.
-#[test]
-fn only_its_publish_job_and_the_probe_read_each_secret() {
-    let jobs = jobs(&release_workflow());
-    let readers: Vec<(String, String)> = jobs
-        .iter()
-        .flat_map(|(name, lines)| {
-            lines
-                .iter()
-                .filter_map(|line| line.split_once("${{ secrets.").map(|(_, rest)| rest))
-                .map(|rest| (name.clone(), rest.trim_end_matches(" }}").to_owned()))
-                .collect::<Vec<_>>()
-        })
-        .filter(|(name, _)| name != "publishers")
-        .collect();
-    let expected: Vec<(String, String)> = PUBLISHERS
-        .iter()
-        .filter_map(|(job, _, gate)| Some(((*job).to_owned(), gate.secret()?.to_owned())))
-        .collect();
-    assert_eq!(readers, expected);
-}
-
-/// npm and the Python Package Index publish through trusted publishing (ADR-235): each job runs in
-/// its registry's GitHub environment and is the only job granted an OIDC token, and no long-lived
-/// registry token appears anywhere in the workflow.
-#[test]
-fn npm_and_pypi_publish_with_an_oidc_token_in_their_environment() {
-    let workflow = release_workflow();
-    let jobs = jobs(&workflow);
-    let unconfigured: Vec<(&str, Vec<String>)> = TRUSTED
-        .iter()
-        .map(|(job, environment)| {
-            let lines = jobs
-                .iter()
-                .find(|(name, _)| name == job)
-                .map(|(_, lines)| lines.clone())
-                .unwrap_or_default();
-            let expected = vec![
-                format!("environment: {environment}"),
-                "id-token: write".to_owned(),
-                "contents: read".to_owned(),
-            ];
-            (*job, missing(&lines, expected))
-        })
-        .filter(|(_, absent)| !absent.is_empty())
-        .collect();
-    let mut granted: Vec<&str> = jobs
-        .iter()
-        .filter(|(_, lines)| lines.iter().any(|line| line == "id-token: write"))
-        .map(|(name, _)| name.as_str())
-        .collect();
-    granted.sort_unstable();
-    let tokens: Vec<&str> = [
-        "NPM_TOKEN",
-        "NODE_AUTH_TOKEN",
-        "_authToken",
-        "PYPI_API_TOKEN",
-        "TWINE_",
-        "HOMEBREW_TAP_TOKEN",
-    ]
-    .into_iter()
-    .filter(|token| workflow.contains(token))
-    .collect();
-    assert_eq!(
-        (unconfigured, granted, tokens),
-        (
-            Vec::new(),
-            vec!["publish-npm", "publish-pypi"],
-            Vec::<&str>::new()
-        )
-    );
-}
-
-/// The pipx wrapper's distributions are built in a job of their own without an OIDC token and
-/// handed to `publish-pypi` as an artifact, as pypa/gh-action-pypi-publish advises.
-#[test]
-fn the_pypi_distributions_are_built_apart_from_the_upload() {
-    let jobs = jobs(&release_workflow());
-    let job = |wanted: &str| {
-        jobs.iter()
-            .find(|(name, _)| name == wanted)
-            .map(|(_, lines)| lines.clone())
-            .unwrap_or_default()
-    };
-    let build = job("pypi-build");
-    let publish = job("publish-pypi");
-    let has = |lines: &[String], prefix: &str| lines.iter().any(|line| line.starts_with(prefix));
-    assert_eq!(
-        (
-            missing(
-                &build,
-                vec![
-                    "needs: publishers".to_owned(),
-                    "if: needs.publishers.outputs.pypi == 'true'".to_owned(),
-                ]
-            ),
-            has(&build, "run: python3 -m venv") || has(&build, "python3 -m venv"),
-            has(&build, "- uses: actions/upload-artifact@"),
-            has(&publish, "- uses: actions/download-artifact@"),
-            has(&publish, "- uses: pypa/gh-action-pypi-publish@"),
-        ),
-        (Vec::<String>::new(), true, true, true, true)
-    );
-}
-
-/// `publish-homebrew` pushes over SSH with the tap's deploy key, checking github.com against its
-/// published host key, through dist/homebrew/publish.sh.
-#[test]
-fn the_homebrew_job_pushes_to_the_tap_with_its_deploy_key() {
-    let jobs = jobs(&release_workflow());
-    let lines = jobs
-        .iter()
-        .find(|(name, _)| name == "publish-homebrew")
-        .map(|(_, lines)| lines.clone())
-        .expect("a `publish-homebrew` job");
-    let has = |wanted: &str| lines.iter().any(|line| line.contains(wanted));
-    assert_eq!(
-        (
-            has(
-                "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
-            ),
-            has("StrictHostKeyChecking=yes"),
-            has(
-                "sh dist/homebrew/publish.sh \"$GITHUB_REF_NAME\" \"$RUNNER_TEMP/SHA256SUMS\" git@github.com:tysont/homebrew-cupel.git"
-            ),
-        ),
-        (true, true, true)
-    );
-}
-
-/// `publish-crates` asks crates.io who holds each publishable crate's name before it publishes
-/// (ADR-146): a name held by another project writes "skipped: crate names held by another project"
-/// and the dry run and the publish, in that order, run only when no name is taken.
-#[test]
-fn the_crates_job_skips_publishing_while_another_project_holds_a_crate_name() {
-    let jobs = jobs(&release_workflow());
-    let lines = jobs
-        .iter()
-        .find(|(name, _)| name == "publish-crates")
-        .map(|(_, lines)| lines.clone())
-        .expect("a `publish-crates` job");
-    let skip = "skipped: crate names held by another project on crates.io:$taken";
-    let gate = "if: steps.names.outputs.taken == 'false'".to_owned();
-    let expected = vec![
-        "- id: names".to_owned(),
-        "echo \"taken=true\" >> \"$GITHUB_OUTPUT\"".to_owned(),
-        "echo \"taken=false\" >> \"$GITHUB_OUTPUT\"".to_owned(),
-        format!("echo \"::notice title=publish-crates::{skip}\""),
-        format!("echo \"publish-crates {skip}\" >> \"$GITHUB_STEP_SUMMARY\""),
-    ];
-    let position = |line: &str| lines.iter().position(|candidate| candidate == line);
-    let names = position("- id: names");
-    let dry_run = position("run: cargo publish --workspace --dry-run --no-verify --locked");
-    let publish = position("run: cargo publish --workspace --locked");
-    // The line before each `run:` of a gated step is its `if:`, after `env:` and its variables.
-    let gated = |step: Option<usize>| {
-        step.and_then(|at| {
-            lines[..at]
-                .iter()
-                .rposition(|line| line.starts_with("- name:"))
-        })
-        .is_some_and(|start| {
-            lines[start..]
-                .iter()
-                .take_while(|line| !line.starts_with("run:"))
-                .any(|line| *line == gate)
-        })
-    };
-    assert_eq!(
-        (
-            missing(&lines, expected),
-            names < dry_run && dry_run < publish && names.is_some(),
-            gated(dry_run),
-            gated(publish),
-        ),
-        (Vec::<String>::new(), true, true, true)
-    );
-}
-
-/// The Windows build is a release target like the others (ADR-137): no build may fail without
-/// failing the release.
-#[test]
-fn every_release_build_holds_back_the_release_when_it_fails() {
-    let jobs = jobs(&release_workflow());
-    let (_, lines) = jobs
-        .iter()
-        .find(|(name, _)| name == "build")
-        .expect("a `build` job");
-    let lenient: Vec<&String> = lines
-        .iter()
-        .filter(|line| line.contains("continue-on-error") || line.contains("best-effort"))
-        .collect();
-    assert_eq!(lenient, Vec::<&String>::new());
 }
 
 /// CI's `windows` job (ADR-137) compiles the workspace for the Windows target and runs the tests

@@ -15,7 +15,7 @@ pkg-url = "{ repo }/releases/download/v{ version }/cupel-{ version }-{ target }.
 bin-dir = "cupel-{ version }-{ target }/{ bin }{ binary-ext }"
 pkg-fmt = "tgz"
 
-[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+[package.metadata.binstall.overrides.x86_64-pc-windows-gnu]
 pkg-url = "{ repo }/releases/download/v{ version }/cupel-{ version }-{ target }.zip"
 pkg-fmt = "zip"
 

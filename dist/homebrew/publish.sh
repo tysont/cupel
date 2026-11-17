@@ -1,6 +1,6 @@
 #!/bin/sh
-# ABOUTME: Commits the Homebrew formula rendered for one release to the tap's main branch and pushes it (ADR-235),
-# ABOUTME: creating main and a README on a tap with no commits; the release workflow runs it with the tap's deploy key.
+# ABOUTME: Commits the Homebrew formula rendered for one release to the tap's main branch and pushes it (ADR-238),
+# ABOUTME: creating main and a README on a tap with no commits; `make publish-homebrew` runs it over the owner's SSH key (ADR-238).
 #
 #   sh dist/homebrew/publish.sh <tag> <SHA256SUMS> <tap-git-url>
 set -eu
@@ -41,7 +41,7 @@ The Homebrew tap for [Cupel](https://github.com/tysont/cupel).
 
     brew install tysont/cupel/cupel
 
-`Formula/cupel.rb` is written by Cupel's release workflow on every release; change it in
+`Formula/cupel.rb` is written by Cupel's `make publish-homebrew` on every release; change it in
 https://github.com/tysont/cupel (`dist/homebrew/`), not here.
 EOF
 fi
@@ -50,8 +50,7 @@ if git diff --cached --quiet; then
 	echo "publish.sh: Formula/cupel.rb is already ${tag#v}"
 	exit 0
 fi
-git -c user.name="github-actions[bot]" \
-	-c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
-	commit --quiet -m "cupel ${tag#v}"
+# Committed as whoever runs the publish, by their own git identity.
+git commit --quiet -m "cupel ${tag#v}"
 git push --quiet origin HEAD:main
 echo "publish.sh: pushed Formula/cupel.rb for ${tag#v}"

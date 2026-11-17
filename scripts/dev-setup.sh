@@ -1,12 +1,12 @@
 #!/bin/sh
-# ABOUTME: Installs or verifies every tool the merge procedure needs (ADR-139), at the versions ci.yml and release.yml pin,
+# ABOUTME: Installs or verifies every tool the merge procedure and `make release` need (ADR-139, ADR-238), at the versions ci.yml pins,
 # ABOUTME: under $CUPEL_DEV_TOOLS (default ~/.cache/cupel/dev-tools). `make dev-setup` runs it; it ends with each tool's version.
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 tools=${CUPEL_DEV_TOOLS:-$HOME/.cache/cupel/dev-tools}
 
-# The pins. Each mirrors ci.yml, or release.yml's build job for zig and cargo-zigbuild, and
+# The pins. Each mirrors ci.yml, but zig and cargo-zigbuild, which only `make release` builds with, and
 # crates/cupel-cli/tests/dev_setup.rs fails while a version pinned there is missing here.
 nightly="nightly-2026-03-26"
 nextest_version=0.9.148
@@ -58,19 +58,19 @@ Darwin-arm64)
 	shellcheck_platform=darwin.aarch64 actionlint_platform=darwin_arm64 zig_platform=aarch64-macos
 	go_platform=darwin-arm64 python_platform=aarch64-apple-darwin node_platform=darwin-arm64
 	jdk_platform=aarch64_mac dafny_platform=arm64-macos-13
-	release_targets="x86_64-apple-darwin x86_64-unknown-linux-musl aarch64-unknown-linux-musl"
+	release_targets="x86_64-apple-darwin x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-pc-windows-gnu"
 	;;
 Darwin-x86_64)
 	shellcheck_platform=darwin.x86_64 actionlint_platform=darwin_amd64 zig_platform=x86_64-macos
 	go_platform=darwin-amd64 python_platform=x86_64-apple-darwin node_platform=darwin-x64
 	jdk_platform=x64_mac dafny_platform=x64-macos-13
-	release_targets="aarch64-apple-darwin x86_64-unknown-linux-musl aarch64-unknown-linux-musl"
+	release_targets="aarch64-apple-darwin x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-pc-windows-gnu"
 	;;
 Linux-x86_64)
 	shellcheck_platform=linux.x86_64 actionlint_platform=linux_amd64 zig_platform=x86_64-linux
 	go_platform=linux-amd64 python_platform=x86_64-unknown-linux-gnu node_platform=linux-x64
 	jdk_platform=x64_linux dafny_platform=x64-ubuntu-22.04
-	release_targets="x86_64-unknown-linux-musl aarch64-unknown-linux-musl"
+	release_targets="x86_64-unknown-linux-musl aarch64-unknown-linux-musl x86_64-pc-windows-gnu"
 	;;
 *) fail "no pinned tool downloads for $(uname -s) $(uname -m)" ;;
 esac

@@ -4,7 +4,7 @@
 
 ## From a release archive
 
-Each [GitHub Release](https://github.com/tysont/cupel/releases) carries one archive per platform, `cupel-<version>-<target>.tar.gz`, for `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl` (static binaries), `aarch64-apple-darwin`, and `x86_64-apple-darwin`, `cupel-<version>-x86_64-pc-windows-msvc.zip` for Windows, and a `SHA256SUMS` file. Download your platform's archive and `SHA256SUMS`, verify the checksum, and put `cupel` on your PATH:
+Each [GitHub Release](https://github.com/tysont/cupel/releases) carries one archive per platform, `cupel-<version>-<target>.tar.gz`, for `x86_64-unknown-linux-musl` and `aarch64-unknown-linux-musl` (static binaries), `aarch64-apple-darwin`, and `x86_64-apple-darwin`, `cupel-<version>-x86_64-pc-windows-gnu.zip` for Windows, and a `SHA256SUMS` file. Download your platform's archive and `SHA256SUMS`, verify the checksum, and put `cupel` on your PATH:
 
 ```sh
 sha256sum --ignore-missing -c SHA256SUMS     # on macOS: shasum -a 256 --ignore-missing -c SHA256SUMS
@@ -35,9 +35,9 @@ Every other route installs a release binary from GitHub Releases, checked agains
 | cargo-binstall | `cargo binstall --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
 | Release archive | `gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'` | Linux, macOS | now |
 | From source | `cargo install --locked --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
-| Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap |
-| npm | `npx cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to npm |
-| pipx | `pipx install cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to PyPI |
+| Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | now |
+| npm | `npx cupel-cli` | Linux, macOS | now |
+| pipx | `pipx install cupel-cli` | Linux, macOS | now |
 | crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's |
 | cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
 <!-- end:install-routes -->

@@ -420,9 +420,9 @@
       },
       {
         "command": "brew install tysont/cupel/cupel",
-        "live": false,
+        "live": true,
         "name": "Homebrew",
-        "pending": "once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap",
+        "pending": null,
         "platforms": [
           "linux",
           "macos"
@@ -431,9 +431,9 @@
       },
       {
         "command": "npx cupel-cli",
-        "live": false,
+        "live": true,
         "name": "npm",
-        "pending": "once the `cupel-cli` package is published to npm",
+        "pending": null,
         "platforms": [
           "linux",
           "macos"
@@ -442,9 +442,9 @@
       },
       {
         "command": "pipx install cupel-cli",
-        "live": false,
+        "live": true,
         "name": "pipx",
-        "pending": "once the `cupel-cli` package is published to PyPI",
+        "pending": null,
         "platforms": [
           "linux",
           "macos"

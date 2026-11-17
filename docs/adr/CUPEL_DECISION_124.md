@@ -1,6 +1,6 @@
 # CUPEL_DECISION_124: Release archives built by `make dist`, Linux musl through cargo-zigbuild, published from a tag
 
-**Date:** 2026-10-18 · **Status:** accepted; the Windows build amended by [137](CUPEL_DECISION_137.md) · **Phase:** P8.1
+**Date:** 2026-10-18 · **Status:** accepted; the Windows build amended by [137](CUPEL_DECISION_137.md); built and published from the owner's Mac by `make release`, no longer from a tag in CI, by [238](CUPEL_DECISION_238.md) · **Phase:** P8.1
 
 ## Context
 

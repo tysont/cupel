@@ -45,21 +45,19 @@ const ROUTES: &[Route] = &[
         name: "Homebrew",
         command: "brew install tysont/cupel/cupel",
         platforms: UNIX,
-        pending: Some(
-            "once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap",
-        ),
+        pending: None,
     },
     Route {
         name: "npm",
         command: "npx cupel-cli",
         platforms: UNIX,
-        pending: Some("once the `cupel-cli` package is published to npm"),
+        pending: None,
     },
     Route {
         name: "pipx",
         command: "pipx install cupel-cli",
         platforms: UNIX,
-        pending: Some("once the `cupel-cli` package is published to PyPI"),
+        pending: None,
     },
     Route {
         name: "crates.io",

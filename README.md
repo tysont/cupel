@@ -394,7 +394,7 @@ This README describes only what exists. Cupel is pre-1.0; the [release badge](ht
 | Linux | aarch64 | `aarch64-unknown-linux-musl` | `cupel-{version}-aarch64-unknown-linux-musl.tar.gz` |
 | macOS | x86_64 | `x86_64-apple-darwin` | `cupel-{version}-x86_64-apple-darwin.tar.gz` |
 | macOS | aarch64 | `aarch64-apple-darwin` | `cupel-{version}-aarch64-apple-darwin.tar.gz` |
-| Windows | x86_64 | `x86_64-pc-windows-msvc` | `cupel-{version}-x86_64-pc-windows-msvc.zip` |
+| Windows | x86_64 | `x86_64-pc-windows-gnu` | `cupel-{version}-x86_64-pc-windows-gnu.zip` |
 <!-- end:targets -->
 
 CI runs `make check` (every test, with every runner, coverage tool, and analyzer installed) and `make parity` on Ubuntu 24.04 and macOS, and Cupel's own gate at `--depth deep` on Ubuntu. Windows is compiled in CI (`cargo check` of every target) and runs only the tests that need no Unix tools: the daemon's server tests and the library tests of `cupel-core`, `cupel-checks`, `cupel-lang`, and `cupel-mutate`; the end-to-end suites do not run there ([limits on Windows](docs/guide/install.md)). The install routes, from `cupel describe`:
@@ -406,9 +406,9 @@ CI runs `make check` (every test, with every runner, coverage tool, and analyzer
 | cargo-binstall | `cargo binstall --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
 | Release archive | `gh release download --repo tysont/cupel --pattern SHA256SUMS --pattern 'cupel-*-<target>.tar.gz'` | Linux, macOS | now |
 | From source | `cargo install --locked --git https://github.com/tysont/cupel cupel-cli` | Linux, macOS | now |
-| Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | once the release workflow pushes the formula to the `tysont/homebrew-cupel` tap |
-| npm | `npx cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to npm |
-| pipx | `pipx install cupel-cli` | Linux, macOS | once the `cupel-cli` package is published to PyPI |
+| Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | now |
+| npm | `npx cupel-cli` | Linux, macOS | now |
+| pipx | `pipx install cupel-cli` | Linux, macOS | now |
 | crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's |
 | cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
 <!-- end:install-routes -->

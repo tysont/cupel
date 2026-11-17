@@ -21,7 +21,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check check-build clean-check worktree worktree-remove dogfood baseline reclaim parity install dist installers version windows-check windows-test dev-setup dev-env inner-loop
+.PHONY: build test lint fmt doc matrix readme check check-build clean-check worktree worktree-remove dogfood baseline reclaim parity install dist release publish publish-npm publish-pypi publish-homebrew verify-release installers version windows-check windows-test dev-setup dev-env inner-loop
 
 build:
 	$(CARGO) build --workspace
@@ -159,17 +159,38 @@ reclaim:
 
 # A release archive (ADR-124): builds the stripped release binary for TARGET (the host by default)
 # and packages it with LICENSE and README.md as target/dist/cupel-<version>-<TARGET>.tar.gz (.zip
-# on Windows). The Linux musl targets build through cargo-zigbuild, which needs `zig` on PATH; every
-# target needs `rustup target add <TARGET>`. The release workflow runs this target per platform.
+# on Windows). The Linux musl and Windows GNU targets cross-compile through cargo-zigbuild, which
+# needs `zig` on PATH; every target needs `rustup target add <TARGET>` (`make dev-setup` adds them).
+# `make release` runs this target for each target in dist/targets.toml.
 TARGET ?= $(shell rustc -vV | sed -n 's/^host: //p')
 DIST_DIR ?= target/dist
-DIST_BUILD = $(if $(findstring -linux-musl,$(TARGET)),zigbuild,build)
+DIST_BUILD = $(if $(or $(findstring -linux-musl,$(TARGET)),$(findstring -windows-gnu,$(TARGET))),zigbuild,build)
 DIST_BINARY = target/$(TARGET)/release/cupel$(if $(findstring windows,$(TARGET)),.exe)
 
 dist:
 	$(CARGO) $(DIST_BUILD) --release --locked --package cupel-cli --target $(TARGET)
 	@archive="$$(scripts/release.sh package $(DIST_BINARY) $(TARGET) $(DIST_DIR))" && \
 		scripts/release.sh verify "$$archive" && echo "$$archive"
+
+# The release and its publishing (ADR-238), run on the owner's Mac, never in CI; each step does nothing
+# when V is already released or published, and DRY=1 runs every local step and changes nothing remote.
+#   make release V=X.Y.Z         from a clean checkout of the pushed tag vX.Y.Z: build the five archives and
+#                                SHA256SUMS, and create the GitHub Release with them
+#   make publish V=X.Y.Z         publish-npm, publish-pypi, and publish-homebrew in turn; npm and PyPI read their
+#                                token from the environment: op run --env-file=release.env.tpl -- make publish V=X.Y.Z
+#   make verify-release V=X.Y.Z  check the release on every live route
+SHIP = scripts/ship.sh$(if $(filter 1,$(DRY)), --dry-run)
+
+release:
+	$(SHIP) release $(V)
+
+publish: publish-npm publish-pypi publish-homebrew
+
+publish-npm publish-pypi publish-homebrew:
+	$(SHIP) publish $(@:publish-%=%) $(V)
+
+verify-release:
+	$(SHIP) verify $(V)
 
 # Writes the release version V (MAJOR.MINOR.PATCH) into every file that names it: the workspace
 # package, the lock file's workspace crates, the npm wrapper's package.json, and the pipx module.

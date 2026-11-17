@@ -694,9 +694,20 @@ fn publish_formula(tap: &Path, sums: &Path) -> Outcome {
             .arg(format!("v{FIXTURE_VERSION}"))
             .arg(sums)
             .arg(tap)
-            .env("GIT_CONFIG_GLOBAL", "/dev/null")
+            .env("GIT_CONFIG_GLOBAL", owner_git_config(tap))
             .env("GIT_CONFIG_NOSYSTEM", "1"),
     )
+}
+
+/// A global git configuration beside `tap` naming the owner who runs the publish.
+fn owner_git_config(tap: &Path) -> PathBuf {
+    let config = tap.with_file_name("gitconfig");
+    fs::write(
+        &config,
+        format!("[user]\n\tname = {TAP_NAME}\n\temail = {TAP_EMAIL}\n"),
+    )
+    .unwrap();
+    config
 }
 
 /// What `tap`'s `main` holds: each commit's author and subject, newest first, and its files.
@@ -709,8 +720,11 @@ fn tap_main(tap: &Path) -> (Vec<String>, Vec<String>) {
     )
 }
 
-const TAP_AUTHOR: &str =
-    "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>";
+/// Who runs the publish: the formula is committed as the git identity of the owner running
+/// `make publish-homebrew` (ADR-238).
+const TAP_NAME: &str = "Cupel Owner";
+const TAP_EMAIL: &str = "owner@example.com";
+const TAP_AUTHOR: &str = "Cupel Owner <owner@example.com>";
 
 /// The first publish creates the tap's `main` with the rendered formula and a README saying how to
 /// install from it.

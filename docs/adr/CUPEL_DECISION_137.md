@@ -1,6 +1,6 @@
 # CUPEL_DECISION_137: The daemon's transport: Unix sockets, Windows named pipes behind an endpoint file, and Windows as a release target
 
-**Date:** 2026-10-21 · **Status:** accepted; amends the Windows consequences of [124](CUPEL_DECISION_124.md) · **Phase:** P9.8
+**Date:** 2026-10-21 · **Status:** accepted; amends the Windows consequences of [124](CUPEL_DECISION_124.md); the release's Windows archive is `x86_64-pc-windows-gnu`, cross-compiled with cargo-zigbuild, by [238](CUPEL_DECISION_238.md) · **Phase:** P9.8
 
 ## Context
 
