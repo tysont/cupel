@@ -40,6 +40,9 @@ jdk_build=1
 maven_version=3.9.16
 gradle_version=9.6.1
 clojure_version=1.12.5.1664
+# Not in CI: no test of Cupel's runs Leiningen. Codeberg holds its releases and the launcher whose
+# LEIN_CHECKSUM is the standalone jar's sha256.
+lein_version=2.12.0
 tla_version=1.7.4
 dafny_version=4.11.0
 
@@ -106,6 +109,15 @@ installing() {
 
 fetch() {
 	curl -sSfL --retry 3 -o "$2" "$1" || fail "could not download $1"
+}
+
+# sha256 FILE: FILE's SHA-256, in hex.
+sha256() {
+	if command -v sha256sum >/dev/null 2>&1; then
+		sha256sum "$1" | cut -d ' ' -f 1
+	else
+		shasum -a 256 "$1" | cut -d ' ' -f 1
+	fi
 }
 
 # needs NAME: whether $tools/NAME is not installed yet. Either way it sets $dir to $tools/NAME; when it
@@ -355,6 +367,31 @@ if [ "$(cat "$tools/clojure-config/deps.edn" 2>/dev/null || true)" != "$deps" ];
 	echo "$deps" >"$tools/clojure-config/deps.edn"
 fi
 
+# Leiningen: its launcher, and the standalone jar the launcher would otherwise download on first run,
+# checked against the launcher's own checksum. `bin/lein` runs the launcher with that jar.
+if needs "lein-$lein_version"; then
+	lein_releases=https://codeberg.org/leiningen/leiningen
+	lein_jar=leiningen-$lein_version-standalone.jar
+	fetch "$lein_releases/raw/tag/$lein_version/bin/lein" "$work/lein"
+	fetch "$lein_releases/releases/download/$lein_version/$lein_jar" "$work/$lein_jar"
+	lein_sum=$(sed -n "s/^export LEIN_CHECKSUM='\([0-9a-f]*\)'\$/\1/p" "$work/lein")
+	[ -n "$lein_sum" ] && [ "$(sha256 "$work/$lein_jar")" = "$lein_sum" ] ||
+		fail "$lein_jar does not match the checksum its launcher names"
+	mkdir "$work/bin"
+	# shellcheck disable=SC2016 # "$@" belongs in the written script
+	printf '#!/bin/sh\nLEIN_JAR="%s" exec "%s" "$@"\n' "$dir/$lein_jar" "$dir/lein" >"$work/bin/lein"
+	chmod +x "$work/lein" "$work/bin/lein"
+	place
+fi
+bin "$dir/bin/lein"
+# Leiningen's user profile, in LEIN_HOME: its dependencies go to the Maven repository above.
+mkdir -p "$tools/lein-home"
+profiles="{:user {:local-repo \"$tools/m2/repository\"}}"
+if [ "$(cat "$tools/lein-home/profiles.clj" 2>/dev/null || true)" != "$profiles" ]; then
+	installing "Leiningen's profiles.clj"
+	echo "$profiles" >"$tools/lein-home/profiles.clj"
+fi
+
 # TLC and SANY: the TLA+ tools' jar behind `tlc` and `sany` scripts, written as ci.yml writes them.
 if needs "tla-$tla_version"; then
 	fetch "https://github.com/tlaplus/tlaplus/releases/download/v$tla_version/tla2tools.jar" "$work/tla2tools.jar"
@@ -440,6 +477,7 @@ report java "$jdk_release" "$(found java -version | sed -n 's/.*(build \([^+-]*\
 report maven "$maven_version" "$(found mvn --version | word 3)"
 report gradle "$gradle_version" "$(found gradle --version | sed -n 's/^Gradle //p')"
 report clojure "$clojure_version" "$(found clojure --version | word 4)"
+report lein "$lein_version" "$(found lein version | word 2)"
 report "tlc, sany" "$tla_version" "$(readlink "$tools/bin/tlc" | sed -n 's|.*/tla-\([^/]*\)/bin/tlc$|\1|p')"
 
 if [ "$installs" -eq 0 ]; then

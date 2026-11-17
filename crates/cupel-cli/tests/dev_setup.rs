@@ -423,6 +423,7 @@ fn dev_env_puts_the_installed_tools_first_on_path() {
             format!("export GRADLE_USER_HOME='{t}/gradle-home'"),
             format!("export CLJ_CONFIG='{t}/clojure-config'"),
             format!("export CLJ_CACHE='{t}/clojure-cache'"),
+            format!("export LEIN_HOME='{t}/lein-home'"),
             format!("export KANI_HOME='{t}/kani-home'"),
         ]
     );

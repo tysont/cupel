@@ -69,6 +69,8 @@ cupel_dev_tools_env() {
 	echo "GRADLE_USER_HOME=$cupel_dev_tools/gradle-home"
 	echo "CLJ_CONFIG=$cupel_dev_tools/clojure-config"
 	echo "CLJ_CACHE=$cupel_dev_tools/clojure-cache"
+	# Leiningen's home, whose profiles.clj (written by dev-setup.sh) names the same local repository.
+	echo "LEIN_HOME=$cupel_dev_tools/lein-home"
 	echo "KANI_HOME=$cupel_dev_tools/kani-home"
 	unset cupel_dev_tools cupel_dev_path cupel_dev_dir
 }
