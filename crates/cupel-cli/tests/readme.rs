@@ -3,6 +3,7 @@
 
 mod support;
 
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
 use serde_json::Value;
@@ -95,15 +96,98 @@ fn finding_kinds(manifest: &Value) -> Vec<String> {
         .collect()
 }
 
-/// The languages whose matrix cell for `check` is `supported`.
-fn supported_languages(matrix: &Value, check: &str) -> Vec<String> {
+/// The languages `check` runs in once its tools are installed and configured: every one whose
+/// matrix cell is not `unsupported`, so the table does not depend on the machine or its config.
+fn available_languages(matrix: &Value, check: &str) -> Vec<String> {
     matrix["cells"]
         .as_array()
         .expect("cells")
         .iter()
-        .filter(|cell| cell["check"] == check && status(cell) == "supported")
+        .filter(|cell| cell["check"] == check && cell["support"]["status"] != "unsupported")
         .map(|cell| cell["lang"].as_str().expect("lang").to_owned())
         .collect()
+}
+
+/// Each language's producers of the facts a check needs that are not read from the source, as
+/// `describe fact` lists them: the runs and tools the check's evidence comes from.
+fn execution_producers(manifest: &Value) -> BTreeMap<String, BTreeSet<String>> {
+    let mut producers: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+    for fact in strings(&manifest["needs"]) {
+        let described = described(&["fact", &fact]);
+        if described["syntactic"] == true {
+            continue;
+        }
+        for entry in described["producers"].as_array().expect("producers") {
+            let lang = entry["lang"].as_str().expect("lang").to_owned();
+            let ids = entry["producers"]
+                .as_array()
+                .expect("a language's producers");
+            producers.entry(lang).or_default().extend(
+                ids.iter()
+                    .map(|producer| producer["id"].as_str().expect("id").to_owned()),
+            );
+        }
+    }
+    producers
+}
+
+/// The external tools among `producers` (`tool.<name>`), by name; Cupel's own engines are left out.
+fn tools(producers: Option<&BTreeSet<String>>) -> Vec<&str> {
+    producers
+        .into_iter()
+        .flatten()
+        .filter_map(|id| id.strip_prefix("tool."))
+        .collect()
+}
+
+/// The first tier of checks whose evidence comes from an external tool: generated inputs, an
+/// oracle, a specification, or a proof. Their languages cell names the tools.
+const TOOL_TIER: u64 = 4;
+
+/// A check's languages cell. Below tier 4, the languages it runs in. From tier 4, each language
+/// with the tools that produce its evidence there, or `any` and the tool when one tool serves
+/// every language.
+fn languages_cell(matrix: &Value, manifest: &Value) -> String {
+    let id = manifest["id"].as_str().expect("id");
+    let languages = available_languages(matrix, id);
+    if manifest["tier"].as_u64().expect("tier") < TOOL_TIER {
+        return languages.join(", ");
+    }
+    let producers = execution_producers(manifest);
+    let every = strings(&matrix["languages"]);
+    let distinct: BTreeSet<&String> = producers.values().flatten().collect();
+    let one_for_all = languages.len() == every.len()
+        && distinct.len() == 1
+        && every
+            .iter()
+            .all(|lang| producers.get(lang).is_some_and(|ids| ids.len() == 1));
+    if one_for_all {
+        let tools = tools(producers.values().next());
+        return if tools.is_empty() {
+            "any".to_owned()
+        } else {
+            format!("any ({})", tools.join(", "))
+        };
+    }
+    languages
+        .iter()
+        .map(|lang| match tools(producers.get(lang)).as_slice() {
+            [] => lang.clone(),
+            tools => format!("{lang} ({})", tools.join(", ")),
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+/// A check's tier cell: its evidence tier, or a dash for the `perf.*` checks, which measure speed
+/// and size rather than correctness.
+fn tier_cell(manifest: &Value) -> String {
+    let id = manifest["id"].as_str().expect("id");
+    if id.starts_with("perf.") {
+        "—".to_owned()
+    } else {
+        manifest["tier"].to_string()
+    }
 }
 
 /// A Markdown table: the header row, the separator, then one line per row.
@@ -134,12 +218,12 @@ fn check_table(matrix: &Value, manifests: &[Value]) -> String {
             let id = manifest["id"].as_str().expect("id");
             vec![
                 format!("`{id}`"),
-                manifest["tier"].to_string(),
+                tier_cell(manifest),
                 manifest["cost"].as_str().expect("cost").to_owned(),
                 code_list(&finding_kinds(manifest)),
                 code_list(&metric_names(manifest, true)),
                 code_list(&metric_names(manifest, false)),
-                supported_languages(matrix, id).join(", "),
+                languages_cell(matrix, manifest),
             ]
         })
         .collect();
@@ -539,6 +623,55 @@ fn the_generated_sections_match_describe() {
         stale.is_empty(),
         "the generated sections of {stale:?} are stale; run `{UPDATE_COMMAND}` and review the diff"
     );
+}
+
+/// The tier and languages cells of `check`'s row in a rendered check table.
+fn tier_and_languages(table: &str, check: &str) -> (String, String) {
+    let row = table
+        .lines()
+        .find(|line| line.starts_with(&format!("| `{check}` |")))
+        .unwrap_or_else(|| panic!("the check table has a row for {check}"));
+    let cells: Vec<&str> = row.trim_matches('|').split(" | ").map(str::trim).collect();
+    (cells[1].to_owned(), cells[6].to_owned())
+}
+
+/// The check table names every language a check runs in once configured, "any" for a check one
+/// tool serves in every language, each tool beside a check that runs one (tier 4 and up), and no
+/// tier for the `perf.*` checks, whose results are not correctness evidence.
+#[test]
+fn the_check_table_names_languages_tools_and_correctness_tiers() {
+    let matrix = described(&["matrix"]);
+    let table = check_table(&matrix, &manifests(&matrix));
+    let seven = "clojure, go, java, javascript, python, rust, typescript";
+    let rows: Vec<(&str, (String, String))> = [
+        "spec.prove",
+        "conc.linearizability",
+        "conc.race",
+        "gen.property",
+        "tests.coverage",
+        "tests.mutation",
+        "perf.bench",
+    ]
+    .into_iter()
+    .map(|check| (check, tier_and_languages(&table, check)))
+    .collect();
+    let expected: Vec<(&str, (String, String))> = [
+        ("spec.prove", "6", "any (dafny)"),
+        ("conc.linearizability", "5", "any (porcupine)"),
+        ("conc.race", "4", "go (go-race), rust (miri, tsan)"),
+        ("gen.property", "4", "javascript, python, rust, typescript"),
+        ("tests.coverage", "2", seven),
+        ("tests.mutation", "3", seven),
+        (
+            "perf.bench",
+            "—",
+            "go, javascript, python, rust, typescript",
+        ),
+    ]
+    .into_iter()
+    .map(|(check, tier, languages)| (check, (tier.to_owned(), languages.to_owned())))
+    .collect();
+    assert_eq!(rows, expected);
 }
 
 /// The Markdown files the README and its guide are made of.

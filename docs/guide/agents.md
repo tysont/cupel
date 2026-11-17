@@ -1,4 +1,4 @@
-<!-- ABOUTME: How a coding agent drives Cupel: the loop, the exit codes, and the guide `cupel describe --agent` prints. -->
+<!-- ABOUTME: How a coding agent drives Cupel: the loop, the exit codes, a Stop hook's limits, and the guide `cupel describe --agent` prints. -->
 <!-- ABOUTME: Part of Cupel's guide, linked from the README; `make readme` rewrites its generated sections and crates/cupel-cli/tests/readme.rs checks them. -->
 # Using Cupel with an agent
 
@@ -25,6 +25,10 @@ Every command exits with one of these codes, and the envelope's `exit_code` alwa
 <!-- end:exit-codes -->
 
 A Claude Code `Stop` hook that runs the gate, and the MCP server configuration, are in the [README](../../README.md#using-cupel-with-an-agent); every MCP tool's arguments and results are in [Usage](usage.md#mcp).
+
+## A Stop hook
+
+The README's `Stop` hook exits 2 while `cupel check --changed --gate` fails, which keeps Claude Code working and hands it the gate's report ([hooks reference](https://code.claude.com/docs/en/hooks)). Claude Code ends the turn anyway after eight consecutive blocks with no tool call between them, and a hook that runs past its timeout (600 s by default) is cancelled. A long run can be bounded with `--budget`, whose `partial` result (exit 5) also lets Claude stop.
 
 ## Learning Cupel from Cupel
 

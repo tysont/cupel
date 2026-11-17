@@ -7,21 +7,21 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
 | --- | --- | --- | --- | --- | --- | --- |
-| `conc.dst` | 4 | exhaustive | `dst.failure` | `harnesses`, `failures` | — | rust |
-| `conc.linearizability` | 5 | deep | `consistency.violation` | `histories`, `operations`, `violations`, `unknown`, `invalid` | — |  |
-| `conc.model-check` | 5 | exhaustive | `model.counterexample` | `harnesses`, `verified`, `failed`, `undetermined` | — | rust |
-| `conc.race` | 4 | standard | `race.detected`, `ub.detected` | `races`, `undefined_behavior` | — | go, rust |
-| `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — |  |
-| `gen.fuzz` | 4 | deep | `fuzz.crash`, `fuzz.timeout`, `fuzz.target-missing` | `targets`, `crashes`, `timeouts`, `missing` | — | go, javascript, python, rust |
-| `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
+| `conc.dst` | 4 | exhaustive | `dst.failure` | `harnesses`, `failures` | — | rust (madsim) |
+| `conc.linearizability` | 5 | deep | `consistency.violation` | `histories`, `operations`, `violations`, `unknown`, `invalid` | — | any (porcupine) |
+| `conc.model-check` | 5 | exhaustive | `model.counterexample` | `harnesses`, `verified`, `failed`, `undetermined` | — | rust (kani) |
+| `conc.race` | 4 | standard | `race.detected`, `ub.detected` | `races`, `undefined_behavior` | — | go (go-race), rust (miri, tsan) |
+| `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — | go, javascript, python, rust, typescript |
+| `gen.fuzz` | 4 | deep | `fuzz.crash`, `fuzz.timeout`, `fuzz.target-missing` | `targets`, `crashes`, `timeouts`, `missing` | — | go (go-fuzz), javascript (jazzer), python (atheris), rust (cargo-fuzz) |
+| `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — | python |
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing`, `property.cases-pinned` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
 | `meta.oracle-independence` | 2 | quick | `evidence.self-authored-only` | `independent`, `self_authored_only` | — | clojure, go, java, javascript, python, rust, typescript |
 | `meta.traceability` | 2 | standard | `spec.untested-requirement`, `spec.unlisted-requirement` | `untested` | — | clojure, go, java, javascript, python, rust, typescript |
-| `perf.bench` | 0 | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, python, rust |
-| `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
-| `spec.contracts` | 5 | standard | `contract.violated` | `violations` | — | python, rust |
-| `spec.prove` | 6 | exhaustive | `proof.failed`, `proof.obligation-open` | `verified`, `failed`, `open` | — | clojure, go, java, javascript, python, rust, typescript |
-| `spec.trace` | 5 | exhaustive | `trace.diverged` | `traces`, `diverged`, `unvalidated` | — | clojure, go, java, javascript, python, rust, typescript |
+| `perf.bench` | — | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, javascript, python, rust, typescript |
+| `perf.footprint` | — | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
+| `spec.contracts` | 5 | standard | `contract.violated` | `violations` | — | python (icontract), rust (rust-contracts) |
+| `spec.prove` | 6 | exhaustive | `proof.failed`, `proof.obligation-open` | `verified`, `failed`, `open` | — | any (dafny) |
+| `spec.trace` | 5 | exhaustive | `trace.diverged` | `traces`, `diverged`, `unvalidated` | — | any (tlc) |
 | `static.analyze` | 1 | standard | `analyze.<tool>.<rule>` | `errors`, `diagnostics` | — | go, javascript, python, rust, typescript |
 | `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | clojure, go, java, javascript, python, rust, typescript |
@@ -30,12 +30,14 @@ Every check below exists. Each is supported in all seven languages except `gen.p
 | `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.assertion-density` | 2 | quick | `density.sparse-test`, `density.sparse-file` | `assertions_per_test`, `assertions_per_public_function`, `tested_public_functions`, `sparse_tests`, `sparse_files` | — | clojure, go, java, javascript, python, rust, typescript |
-| `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch`, `coverage.unloaded-file`, `coverage.doctest-only` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines`, `line_coverage` |  |
+| `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch`, `coverage.unloaded-file`, `coverage.doctest-only` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines`, `line_coverage` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | clojure, go, java, javascript, python, rust, typescript |
-| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.out-of-memory`, `mutant.uncovered`, `mutant.equivalent?`, `mutant.slow-test-excluded`, `mutant.flaky-test-excluded` | `score`, `killed`, `survived`, `timeout`, `out_of_memory`, `uncovered`, `unviable`, `not_run`, `equivalent`, `executed`, `reused`, `schemata`, `fallback`, `plan_ms`, `sync_ms`, `rewrite_ms`, `build_ms`, `run_ms`, `validate_ms` | `survivors`, `mutation_score`, `tests` |  |
+| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.out-of-memory`, `mutant.uncovered`, `mutant.equivalent?`, `mutant.slow-test-excluded`, `mutant.flaky-test-excluded` | `score`, `killed`, `survived`, `timeout`, `out_of_memory`, `uncovered`, `unviable`, `not_run`, `equivalent`, `executed`, `reused`, `schemata`, `fallback`, `plan_ms`, `sync_ms`, `rewrite_ms`, `build_ms`, `run_ms`, `validate_ms` | `survivors`, `mutation_score`, `tests` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | clojure, go, java, javascript, python, rust, typescript |
 <!-- end:check-table -->
+
+Tier `—`: the `perf.*` checks measure speed and size, not correctness, and tiers grade correctness evidence (`describe` reports them at tier 0). From tier 4, the Languages column names each language's tool, or `any` when one tool serves every language.
 
 What each check looks for:
 

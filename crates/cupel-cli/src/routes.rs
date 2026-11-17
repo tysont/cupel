@@ -63,15 +63,9 @@ const ROUTES: &[Route] = &[
         name: "crates.io",
         command: "cargo install --locked cupel-cli",
         platforms: UNIX,
-        pending: Some(
-            "once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's",
-        ),
-    },
-    Route {
-        name: "cupel.dev",
-        command: "curl -fsSL https://cupel.dev/install | sh",
-        platforms: UNIX,
-        pending: Some("once cupel.dev serves the install script"),
+        // The library crates `cupel-cli` depends on are unpublished while another project holds
+        // `cupel-core` there.
+        pending: Some("not published (ADR-146)"),
     },
 ];
 

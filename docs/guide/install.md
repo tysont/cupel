@@ -38,8 +38,7 @@ Every other route installs a release binary from GitHub Releases, checked agains
 | Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | now |
 | npm | `npx cupel-cli` | Linux, macOS | now |
 | pipx | `pipx install cupel-cli` | Linux, macOS | now |
-| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's |
-| cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
+| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | not published (ADR-146) |
 <!-- end:install-routes -->
 
 - **Install script** (POSIX `sh`): installs Linux x86_64/aarch64 and macOS arm64/x86_64 binaries into `~/.local/bin`, or `CUPEL_INSTALL_DIR`, and prints the line to add to your `PATH` when that directory is not on it. `CUPEL_VERSION=0.1.0` installs that release instead of the latest. It needs `curl` or `wget`, `tar`, and `sha256sum` or `shasum`.

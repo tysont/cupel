@@ -459,18 +459,7 @@ expression: "serde_json::to_string_pretty(&redacted(envelope)).unwrap()"
         "command": "cargo install --locked cupel-cli",
         "live": false,
         "name": "crates.io",
-        "pending": "once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's",
-        "platforms": [
-          "linux",
-          "macos"
-        ],
-        "stability": "experimental"
-      },
-      {
-        "command": "curl -fsSL https://cupel.dev/install | sh",
-        "live": false,
-        "name": "cupel.dev",
-        "pending": "once cupel.dev serves the install script",
+        "pending": "not published (ADR-146)",
         "platforms": [
           "linux",
           "macos"

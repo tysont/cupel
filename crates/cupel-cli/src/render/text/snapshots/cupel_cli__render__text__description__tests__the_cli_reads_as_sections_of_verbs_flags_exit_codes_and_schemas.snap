@@ -81,5 +81,4 @@ install routes
   Homebrew         brew install tysont/cupel/cupel · linux, macos
   npm              npx cupel-cli · linux, macos
   pipx             pipx install cupel-cli · linux, macos
-  crates.io        cargo install --locked cupel-cli · linux, macos · once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's
-  cupel.dev        curl -fsSL https://cupel.dev/install | sh · linux, macos · once cupel.dev serves the install script
+  crates.io        cargo install --locked cupel-cli · linux, macos · not published (ADR-146)

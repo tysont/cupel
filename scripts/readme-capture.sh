@@ -1,5 +1,5 @@
 #!/bin/sh
-# ABOUTME: Captures the output the README quotes: `cupel --version`, then init, survey, and `check --changed --gate` on a
+# ABOUTME: Captures the output the README quotes: `init --write`, the `cupel.toml` it writes, survey, and `check --changed --gate` on a
 # ABOUTME: scratch clone of hashicorp/golang-lru with one agent-style change, run without egress in a clean environment.
 #
 # usage: scripts/readme-capture.sh [CUPEL] [OUTDIR]

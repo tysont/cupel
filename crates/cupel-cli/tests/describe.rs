@@ -1040,12 +1040,10 @@ fn describe_lists_install_routes_each_live_or_saying_what_it_waits_for() {
         .filter(|route| route["live"] == json!(true) && route["pending"].is_null())
         .map(|route| route_text(route, "name"))
         .collect();
-    let pending: Vec<String> = routes
+    let pending: Vec<(String, String)> = routes
         .iter()
-        .filter(|route| {
-            route["live"] == json!(false) && route_text(route, "pending").starts_with("once ")
-        })
-        .map(|route| route_text(route, "name"))
+        .filter(|route| route["live"] == json!(false))
+        .map(|route| (route_text(route, "name"), route_text(route, "pending")))
         .collect();
     assert_eq!(
         live,
@@ -1059,7 +1057,10 @@ fn describe_lists_install_routes_each_live_or_saying_what_it_waits_for() {
             "pipx"
         ]
     );
-    assert_eq!(pending, ["crates.io", "cupel.dev"]);
+    assert_eq!(
+        pending,
+        [("crates.io".to_owned(), "not published (ADR-146)".to_owned())]
+    );
 }
 
 /// The registry routes install the packages dist/ and the binary crate are named (ADR-146): the npm,
@@ -1112,7 +1113,7 @@ fn every_install_route_is_one_command_for_released_platforms() {
     assert_eq!(malformed, Vec::<Value>::new());
 }
 
-/// Every URL a route's command fetches is this repository, a file in it on `main`, or `cupel.dev`.
+/// Every URL a route's command fetches is this repository or a file in it on `main`.
 #[test]
 fn install_routes_fetch_from_this_repository() {
     let repository = env!("CARGO_PKG_REPOSITORY");
@@ -1134,9 +1135,9 @@ fn install_routes_fetch_from_this_repository() {
             let in_repository = url
                 .strip_prefix(&format!("{raw}/main/"))
                 .is_some_and(|path| root.join(path).is_file());
-            *url != repository && !in_repository && !url.starts_with("https://cupel.dev/")
+            *url != repository && !in_repository
         })
         .collect();
-    assert!(urls.len() >= 4, "{urls:?}");
+    assert!(urls.len() >= 3, "{urls:?}");
     assert_eq!(foreign, Vec::<&String>::new());
 }

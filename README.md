@@ -4,7 +4,9 @@
 [![Release](https://img.shields.io/github/v/release/tysont/cupel)](https://github.com/tysont/cupel/releases/latest)
 [![License](https://img.shields.io/github/license/tysont/cupel)](LICENSE)
 
-Cupel grades the code and tests a coding agent wrote. It runs [checks](#checks) over a change or a whole tree, from complexity, clones, and dead code through coverage, mutation testing, and tests weakened on the branch, in seven languages, and prints one JSON envelope: findings with stable IDs, `next_actions` ranked for an agent to work through, and a gate verdict in the exit code. An agent's own report that the work is done is not evidence; a deleted assertion, an untested function, or a copied block all pass a green test suite. Cupel measures those, so an agent can be told not to stop until `cupel check --changed --gate` exits 0. It never edits code: the agent fixes, Cupel grades. (A cupel is the porous cup used in fire assay to separate precious metal from base.)
+Cupel grades the code and tests a coding agent wrote.
+
+It measures structure and test strength in seven languages, from complexity and clones to coverage, mutation testing, and tests weakened on the branch. It prints one JSON envelope, with ranked `next_actions` for the agent and the gate's verdict in the exit code. It never edits code: the agent fixes, Cupel grades.
 
 ## Quickstart
 
@@ -14,42 +16,36 @@ Install the latest release into `~/.local/bin` (Linux and macOS; [every route](d
 curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh | sh
 ```
 
+Cupel is a single binary; checks that run tests use the project's own toolchain, and `cupel doctor` lists anything missing.
+
 <!-- captured by scripts/readme-capture.sh with a release build of cupel 0.3.0 from batch-0.3.0 at 2211a329, on hashicorp/golang-lru at 2bb29091 (main) with one change on agent/add-all; … marks a trim -->
-```console
-$ cupel --version
-cupel 0.3.0
-```
-
-In a repository, `cupel init` detects the languages and their test and coverage commands and shows the `cupel.toml` it would write, starter gate included; `cupel init --write` writes it (`cupel doctor` then checks the tools it names are installed):
+In a repository, `cupel init --write` detects the languages and their test and coverage commands and writes `cupel.toml`, starter gate included (`cupel init` alone shows it without writing):
 
 ```console
-$ cupel init
-cupel init: plan (exit 0)
-
-plan      est 0 ms
-would write
-  cupel.toml
-    --- /dev/null
-    +++ b/cupel.toml
-    @@ -0,0 +1,20 @@
-    +# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.
-    +default_branch = "main"
-    +depth = "standard"
-    +
-    +[lang.go]
-    +test = "go test -json ./..."
-    +coverage = "go test -coverprofile={out} ./..."
-    +bench = "go test -run=^$ -bench=. ./..."
-    +
-    +[gate.changed]
-    …
-next actions
-  1. configure: Nothing was written; run `cupel init --write` to write these files.
-     $ cupel init --write
-
 $ cupel init --write
 cupel init: pass (exit 0)
 …
+$ cat cupel.toml
+# Cupel configuration, written by `cupel init`; `cupel describe schema config` documents every key.
+default_branch = "main"
+depth = "standard"
+
+[lang.go]
+test = "go test -json ./..."
+coverage = "go test -coverprofile={out} ./..."
+bench = "go test -run=^$ -bench=. ./..."
+
+[gate.changed]
+# No test is weakened: no assertion removed, matcher loosened, test skipped or deleted, or snapshot rewritten.
+"tests.weakening" = "none"
+# The mutation score is at least the base's less 0.02.
+"tests.mutation.score" = ">= base - 0.02"
+# The largest cyclomatic complexity stays within cyclomatic_max, or, past it at the base already, grows by 2 at most.
+"static.complexity.cyclomatic_max" = "<= base"
+# No more pairs of cloned functions than the base has.
+"static.clones.pairs" = "<= base"
+# No breaking change to the public API.
+"static.api-surface" = "no-breaking"
 ```
 
 `cupel survey` grades the whole tree and ranks what to work on, protect-first: code with the weakest tests before code that is merely complex. It never gates, so it exits 0 whatever it finds.
@@ -59,22 +55,12 @@ $ cupel survey
 cupel survey: pass (exit 0)
 
 summary   177 findings · fail 57 · warn 43 · info 77 · suppressed 0 · new and resolved need a baseline (`cupel baseline set`)
-
-checks
-  …
-  static.clones             fail     tier 0 · quick · score 48 pairs (n 150) · … · 26 findings · 10 ms
-  static.complexity         fail     tier 0 · quick · score 27 cyclomatic_max (n 168) · … · 24 findings · 4 ms
-  …
-  tests.coverage            fail     tier 2 · standard · score 0.9202279202279202 line_ratio (n 702) · … · 2 findings · 3 ms · …
-  tests.flaky               pass     tier 2 · standard · score 0 unstable (n 48) · … · 0 findings · 4213 ms
-  tests.mutation            fail     tier 3 · standard · score 0.5588235294117647 killed_ratio (n 238) · …
-  …
+…
   targets  68 recommended, protect first
-     …
+     1. both  expirable.TestOnEvictReentrant  mutation - · coverage - · tests -  go · expirable/expirable_lru_test.go:646:1-708:2 · sh_d475a0ec2b17eac3
+        static.complexity.cyclomatic 3 (#79) · static.complexity.cognitive 4 (#65) · tests.quality.mock_density 0 (#21) · fnd_2e98df · fnd_43f0c5 · fnd_e8115d
      2. protect  lru.Cache.RemoveOldest  mutation 0 · coverage 0 · tests 0  go · lru.go:204:1-218:2 · sh_998421c3989fc3ac
         static.complexity.cyclomatic 5 (#56) · static.complexity.cognitive 4 (#68) · static.crap.crap 30 (#1) · tests.coverage.uncovered_lines 13 (#1) · …
-     3. both  arc.ARCCache.Add  mutation 0 · coverage - · tests 0  go · arc/arc.go:88:1-179:2 · sh_3f3d786cad558232
-        static.complexity.cyclomatic 14 (#11) · static.complexity.cognitive 23 (#4) · … · tests.mutation.mutation_score 0 (#1) · …
 …
 next actions
   1. strengthen_assertion: Replace the truthiness, presence, or inequality checks in `TestOnEvictReentrant` with an assertion that pins the expected value. (finding fnd_e8115d)
@@ -198,7 +184,7 @@ gate      fail (gate.changed)
 [exit 2]
 ```
 
-Claude Code ends the turn anyway after eight consecutive blocks with no tool call between them, and a hook that runs past its timeout (600 s by default) is cancelled; a long run can be bounded with `--budget`, whose `partial` result (exit 5) also lets Claude stop.
+Claude Code limits how long a Stop hook can keep it working; [the agent guide](docs/guide/agents.md#a-stop-hook) gives the limits and how `--budget` bounds a long run.
 
 **MCP.** `cupel serve --mcp` is a Model Context Protocol server on stdio for clients that call tools rather than run commands. Each tool takes its verb's flags as arguments and returns the same envelope ([details](docs/guide/usage.md#mcp)):
 
@@ -274,26 +260,26 @@ Every verb prints one JSON envelope on stdout (`--format text` renders it for pe
 
 ## Checks
 
-`Tier` is the strength of a check's evidence (below); `Cost` is the cheapest depth that runs it. `Gate metrics` are what a gate rule can name as `<check>.<metric>`; `Ranked by` is what `survey` ranks. What each check looks for: [docs/guide/checks.md](docs/guide/checks.md); the full language matrix: [docs/guide/languages.md](docs/guide/languages.md).
+`Tier` is the strength of a check's evidence (below); `Cost` is the cheapest depth that runs it. `Gate metrics` are what a gate rule can name as `<check>.<metric>`; `Ranked by` is what `survey` ranks. `Languages` lists where a check runs once its tools are installed and configured; from tier 4 it names each language's tool, or `any` when one tool serves every language. What each check looks for: [docs/guide/checks.md](docs/guide/checks.md); the full language matrix: [docs/guide/languages.md](docs/guide/languages.md).
 
 <!-- generated:check-table -->
 | Check | Tier | Cost | Finding kinds | Gate metrics | Ranked by | Languages |
 | --- | --- | --- | --- | --- | --- | --- |
-| `conc.dst` | 4 | exhaustive | `dst.failure` | `harnesses`, `failures` | — | rust |
-| `conc.linearizability` | 5 | deep | `consistency.violation` | `histories`, `operations`, `violations`, `unknown`, `invalid` | — |  |
-| `conc.model-check` | 5 | exhaustive | `model.counterexample` | `harnesses`, `verified`, `failed`, `undetermined` | — | rust |
-| `conc.race` | 4 | standard | `race.detected`, `ub.detected` | `races`, `undefined_behavior` | — | go, rust |
-| `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — |  |
-| `gen.fuzz` | 4 | deep | `fuzz.crash`, `fuzz.timeout`, `fuzz.target-missing` | `targets`, `crashes`, `timeouts`, `missing` | — | go, javascript, python, rust |
-| `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — |  |
+| `conc.dst` | 4 | exhaustive | `dst.failure` | `harnesses`, `failures` | — | rust (madsim) |
+| `conc.linearizability` | 5 | deep | `consistency.violation` | `histories`, `operations`, `violations`, `unknown`, `invalid` | — | any (porcupine) |
+| `conc.model-check` | 5 | exhaustive | `model.counterexample` | `harnesses`, `verified`, `failed`, `undetermined` | — | rust (kani) |
+| `conc.race` | 4 | standard | `race.detected`, `ub.detected` | `races`, `undefined_behavior` | — | go (go-race), rust (miri, tsan) |
+| `gen.differential` | 4 | deep | `diff.divergence` | `divergences`, `cases` | — | go, javascript, python, rust, typescript |
+| `gen.fuzz` | 4 | deep | `fuzz.crash`, `fuzz.timeout`, `fuzz.target-missing` | `targets`, `crashes`, `timeouts`, `missing` | — | go (go-fuzz), javascript (jazzer), python (atheris), rust (cargo-fuzz) |
+| `gen.metamorphic` | 4 | deep | `metamorphic.violated` | `violated`, `relations` | — | python |
 | `gen.property` | 4 | standard | `property.falsified`, `property.missing`, `property.cases-pinned` | `properties`, `falsified`, `missing` | — | javascript, python, rust, typescript |
 | `meta.oracle-independence` | 2 | quick | `evidence.self-authored-only` | `independent`, `self_authored_only` | — | clojure, go, java, javascript, python, rust, typescript |
 | `meta.traceability` | 2 | standard | `spec.untested-requirement`, `spec.unlisted-requirement` | `untested` | — | clojure, go, java, javascript, python, rust, typescript |
-| `perf.bench` | 0 | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, python, rust |
-| `perf.footprint` | 0 | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
-| `spec.contracts` | 5 | standard | `contract.violated` | `violations` | — | python, rust |
-| `spec.prove` | 6 | exhaustive | `proof.failed`, `proof.obligation-open` | `verified`, `failed`, `open` | — | clojure, go, java, javascript, python, rust, typescript |
-| `spec.trace` | 5 | exhaustive | `trace.diverged` | `traces`, `diverged`, `unvalidated` | — | clojure, go, java, javascript, python, rust, typescript |
+| `perf.bench` | — | deep | `perf.regression`, `perf.improvement` | `benchmarks`, `compared`, `regression`, `regressed`, `improved` | — | go, javascript, python, rust, typescript |
+| `perf.footprint` | — | quick | `footprint.grew`, `dep.vuln`, `dep.license` | `dependencies`, `vulnerable`, `copyleft`, `artifact_bytes` | — | go, javascript, python, rust, typescript |
+| `spec.contracts` | 5 | standard | `contract.violated` | `violations` | — | python (icontract), rust (rust-contracts) |
+| `spec.prove` | 6 | exhaustive | `proof.failed`, `proof.obligation-open` | `verified`, `failed`, `open` | — | any (dafny) |
+| `spec.trace` | 5 | exhaustive | `trace.diverged` | `traces`, `diverged`, `unvalidated` | — | any (tlc) |
 | `static.analyze` | 1 | standard | `analyze.<tool>.<rule>` | `errors`, `diagnostics` | — | go, javascript, python, rust, typescript |
 | `static.api-surface` | 0 | quick | `api.breaking`, `api.widened` | `breaking`, `widened` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.clones` | 0 | quick | `clone.pair`, `clone.cluster` | `pairs`, `clusters`, `max_jaccard` | `cluster_size` | clojure, go, java, javascript, python, rust, typescript |
@@ -302,12 +288,14 @@ Every verb prints one JSON envelope on stdout (`--format text` renders it for pe
 | `static.dead-code` | 0 | quick | `dead.symbol`, `dead.export` | `dead_symbols`, `dead_exports` | — | clojure, go, java, javascript, python, rust, typescript |
 | `static.deps` | 0 | quick | `dep.cycle`, `dep.layer-violation`, `dep.unstable-abstract` | `cycles`, `max_distance`, `violations` | `distance`, `coupling`, `cycle_size` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.assertion-density` | 2 | quick | `density.sparse-test`, `density.sparse-file` | `assertions_per_test`, `assertions_per_public_function`, `tested_public_functions`, `sparse_tests`, `sparse_files` | — | clojure, go, java, javascript, python, rust, typescript |
-| `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch`, `coverage.unloaded-file`, `coverage.doctest-only` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines`, `line_coverage` |  |
+| `tests.coverage` | 2 | standard | `coverage.uncovered-symbol`, `coverage.uncovered-branch`, `coverage.unloaded-file`, `coverage.doctest-only` | `line`, `branch`, `lines`, `branches`, `uncovered` | `uncovered_lines`, `line_coverage` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.flaky` | 2 | standard | `test.flaky`, `test.order-dependent` | `flaky`, `order_dependent` | — | clojure, go, java, javascript, python, rust, typescript |
-| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.out-of-memory`, `mutant.uncovered`, `mutant.equivalent?`, `mutant.slow-test-excluded`, `mutant.flaky-test-excluded` | `score`, `killed`, `survived`, `timeout`, `out_of_memory`, `uncovered`, `unviable`, `not_run`, `equivalent`, `executed`, `reused`, `schemata`, `fallback`, `plan_ms`, `sync_ms`, `rewrite_ms`, `build_ms`, `run_ms`, `validate_ms` | `survivors`, `mutation_score`, `tests` |  |
+| `tests.mutation` | 3 | standard | `mutant.survived`, `mutant.timeout`, `mutant.out-of-memory`, `mutant.uncovered`, `mutant.equivalent?`, `mutant.slow-test-excluded`, `mutant.flaky-test-excluded` | `score`, `killed`, `survived`, `timeout`, `out_of_memory`, `uncovered`, `unviable`, `not_run`, `equivalent`, `executed`, `reused`, `schemata`, `fallback`, `plan_ms`, `sync_ms`, `rewrite_ms`, `build_ms`, `run_ms`, `validate_ms` | `survivors`, `mutation_score`, `tests` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.quality` | 2 | quick | `test.weak-assertion`, `test.no-assertion`, `test.mock-heavy`, `test.logic`, `test.duplicate-setup` | `assertion_density`, `weak_ratio`, `no_assertion` | `mock_density` | clojure, go, java, javascript, python, rust, typescript |
 | `tests.weakening` | 2 | quick | `assertion.removed`, `test.skipped`, `matcher.loosened`, `snapshot.rewritten`, `test.deleted` | `weakened` | — | clojure, go, java, javascript, python, rust, typescript |
 <!-- end:check-table -->
+
+Tier `—`: the `perf.*` checks measure speed and size, not correctness, and tiers grade correctness evidence (`describe` reports them at tier 0).
 
 ## Depths and exit codes
 
@@ -336,7 +324,7 @@ Every verb prints one JSON envelope on stdout (`--format text` renders it for pe
 
 ## Gates and the ratchet
 
-A gate is a table of rules in `cupel.toml`: `[gate.changed]` for `--changed` and `--base`, `[gate.tree]` for the whole tree. A rule maps a check, or `<check>.<metric>`, to `none` (no unsuppressed `warn` or `fail` finding), `no-breaking`, or a comparison against a number or against `base`. A rule against `base` is a ratchet: on a branch, `base` is the metric recomputed on the merge base's version of the changed code, so a change may not make it worse. `init` writes this starter gate:
+A gate is a table of rules in `cupel.toml`: `[gate.changed]` for `--changed` and `--base`, `[gate.tree]` for the whole tree. A rule maps a check, or `<check>.<metric>`, to a condition. The condition is `none`, which allows no unsuppressed `warn` or `fail` finding, or `no-breaking`, which allows no breaking change. Otherwise it is a comparison against a number or against `base`. A rule against `base` is a ratchet: on a branch, `base` is the metric recomputed on the merge base's version of the changed code, so a change may not make it worse. `init` writes this starter gate:
 
 ```toml
 [gate.changed]
@@ -369,6 +357,8 @@ Cupel is inspired by tools [Robert C. Martin (Uncle Bob)](https://github.com/unc
 
 What Cupel adds, each shown above: the other checks in the [check table](#checks), among them `tests.weakening`, which caught the deleted assertion; JavaScript as a seventh language; a [gate](#gates-and-the-ratchet) whose rules ratchet against the merge base; and [one envelope](#the-output-contract) with ranked `next_actions`, from the command line, a [Stop hook](#using-cupel-with-an-agent), or MCP. Findings keep their IDs when a function is renamed or moved ([baselines](docs/guide/usage.md#cupel-baseline)).
 
+The name: a cupel is the porous cup used in fire assay to separate precious metal from base.
+
 ## Status
 
 This README describes only what exists. Cupel is pre-1.0; the [release badge](https://github.com/tysont/cupel/releases/latest) names the latest release. `cupel describe` gives everything it describes a stability: the exit codes are `stable`, and verbs, flags, checks, and schemas are `experimental` until 1.0 ([ADR-018](docs/adr/CUPEL_DECISION_018.md)). The schemas carry their major version in their URL (`schema/v1/`). From `cupel describe`:
@@ -382,7 +372,7 @@ This README describes only what exists. Cupel is pre-1.0; the [release badge](ht
 | Exit codes | 7 `stable` |
 | Checks | 28 `experimental` |
 | Schemas | 5 `experimental` |
-| Install routes | 9 `experimental` |
+| Install routes | 8 `experimental` |
 <!-- end:stability -->
 
 **Platforms.** Each release publishes one archive per target in [`dist/targets.toml`](dist/targets.toml), with a `SHA256SUMS`:
@@ -409,8 +399,7 @@ CI runs `make check` (every test, with every runner, coverage tool, and analyzer
 | Homebrew | `brew install tysont/cupel/cupel` | Linux, macOS | now |
 | npm | `npx cupel-cli` | Linux, macOS | now |
 | pipx | `pipx install cupel-cli` | Linux, macOS | now |
-| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | once the library crates `cupel-cli` depends on are published to crates.io; `cupel-core` there is another project's |
-| cupel.dev | `curl -fsSL https://cupel.dev/install \| sh` | Linux, macOS | once cupel.dev serves the install script |
+| crates.io | `cargo install --locked cupel-cli` | Linux, macOS | not published (ADR-146) |
 <!-- end:install-routes -->
 
 ## Documentation
