@@ -18,7 +18,7 @@ curl -fsSL https://raw.githubusercontent.com/tysont/cupel/main/dist/install.sh |
 
 Cupel is a single binary; checks that run tests use the project's own toolchain, and `cupel doctor` lists anything missing.
 
-<!-- captured by scripts/readme-capture.sh with a release build of cupel 0.3.0 from batch-0.3.0 at 2211a329, on hashicorp/golang-lru at 2bb29091 (main) with one change on agent/add-all; … marks a trim -->
+<!-- captured by scripts/readme-capture.sh with a release build of cupel 0.3.1 from release-0.3.1 at 994cd794, on hashicorp/golang-lru at 2bb29091 (main) with one change on agent/add-all; … marks a trim -->
 In a repository, `cupel init --write` detects the languages and their test and coverage commands and writes `cupel.toml`, starter gate included (`cupel init` alone shows it without writing):
 
 ```console
@@ -90,8 +90,8 @@ fail (2)
       fnd_400a22 · assertion.removed · tier 2 · confidence 1
       at lru_test.go:181:1-205:2
       evidence: base 6 · head 5 · test "TestLRUContainsOrAdd" (full: cupel explain fnd_400a22)
-      action restore_test (priority 1): Restore the assertions removed from `TestLRUContainsOrAdd` (see it at af5c262446d85753305f96475f417934d736ac13); if one is wrong, replace it with a correct one rather than dropping it.
-      repro: cupel check --only tests.weakening --base af5c262446d85753305f96475f417934d736ac13
+      action restore_test (priority 1): Restore the assertions removed from `TestLRUContainsOrAdd` (see it at d7bb6f8109f20d6fce7b3d81f0f310b0171a8c80); if one is wrong, replace it with a correct one rather than dropping it.
+      repro: cupel check --only tests.weakening --base d7bb6f8109f20d6fce7b3d81f0f310b0171a8c80
       suppress: cupel suppress fnd_400a22 --reason '…'
   static.analyze
     staticcheck SA4006: this value of evict is never used
@@ -110,7 +110,7 @@ info (4)
     No test runs lru.go:147; its mutant `>=` → `>` was not run
       …
 next actions
-  1. restore_test: Restore the assertions removed from `TestLRUContainsOrAdd` (see it at af5c262446d85753305f96475f417934d736ac13); if one is wrong, replace it with a correct one rather than dropping it. (finding fnd_400a22)
+  1. restore_test: Restore the assertions removed from `TestLRUContainsOrAdd` (see it at d7bb6f8109f20d6fce7b3d81f0f310b0171a8c80); if one is wrong, replace it with a correct one rather than dropping it. (finding fnd_400a22)
   2. fix_bug: Fix what staticcheck reports at lru_test.go:198 (SA4006), or configure staticcheck if the rule does not apply to this project. (finding fnd_b8f153)
   3. write_test: Write a test that calls `AddAll`. (finding fnd_eec201)
   …
@@ -208,7 +208,7 @@ Every verb prints one JSON envelope on stdout (`--format text` renders it for pe
 
 ```json
 {
-  "cupel": { "version": "0.3.0", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
+  "cupel": { "version": "0.3.1", "schema": "https://tysont.github.io/cupel/schema/v1/run.json" },
   "status": "fail",
   "exit_code": 1,
   "findings": [
@@ -227,10 +227,10 @@ Every verb prints one JSON envelope on stdout (`--format text` renders it for pe
       "action": {
         "kind": "restore_test",
         "priority": 1,
-        "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at af5c262446d85753305f96475f417934d736ac13); if one is wrong, replace it with a correct one rather than dropping it.",
+        "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at d7bb6f8109f20d6fce7b3d81f0f310b0171a8c80); if one is wrong, replace it with a correct one rather than dropping it.",
         "hints": {}
       },
-      "repro": "cupel check --only tests.weakening --base af5c262446d85753305f96475f417934d736ac13",
+      "repro": "cupel check --only tests.weakening --base d7bb6f8109f20d6fce7b3d81f0f310b0171a8c80",
       "suppress": "cupel suppress fnd_400a22 --reason '…'",
       "new_since_baseline": false,
       "suppressed": false
@@ -241,7 +241,7 @@ Every verb prints one JSON envelope on stdout (`--format text` renders it for pe
       "priority": 1,
       "finding": "fnd_400a22",
       "kind": "restore_test",
-      "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at af5c262446d85753305f96475f417934d736ac13); if one is wrong, replace it with a correct one rather than dropping it.",
+      "summary": "Restore the assertions removed from `TestLRUContainsOrAdd` (see it at d7bb6f8109f20d6fce7b3d81f0f310b0171a8c80); if one is wrong, replace it with a correct one rather than dropping it.",
       "command": null
     },
     {
