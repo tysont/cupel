@@ -210,14 +210,14 @@ test-network:
 	CUPEL_NETWORK_TESTS=1 $(CARGO) test --package cupel-cli --test install
 
 # The Windows target (ADR-137), which CI's `windows` job runs on a Windows runner: the workspace
-# compiles for it, and the tests that need no Unix tools pass: every test of cupel-serve (the daemon's
-# transport over real named pipes) and the unit tests of the crates whose unit tests spawn no process
-# and touch no file. Elsewhere `windows-check` needs `rustup target add x86_64-pc-windows-msvc` and a C
+# compiles for it with no clippy warning, as `make lint` holds the host to, and the tests that need
+# no Unix tools pass: every test of cupel-serve (the daemon's transport over real named pipes) and
+# the unit tests of the crates whose unit tests spawn no process and touch no file. Elsewhere `windows-check` needs `rustup target add x86_64-pc-windows-msvc` and a C
 # compiler for the target (bundled SQLite, the grammars, and BLAKE3 compile C).
 WINDOWS_TARGET = x86_64-pc-windows-msvc
 
 windows-check:
-	$(CARGO) check --workspace --all-targets --target $(WINDOWS_TARGET)
+	$(CARGO) clippy --workspace --all-targets --target $(WINDOWS_TARGET) -- -D warnings
 
 windows-test:
 	$(CARGO) test --package cupel-serve

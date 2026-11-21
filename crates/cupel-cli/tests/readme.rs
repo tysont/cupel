@@ -728,6 +728,7 @@ fn unparsed_json(file: &str) -> Vec<String> {
 }
 
 /// The README's Claude Code settings: the JSON block that configures a `Stop` hook.
+#[cfg(unix)]
 fn stop_hook_command() -> String {
     let readme = read("README.md");
     let settings: Vec<Value> = fenced(&readme, "json")

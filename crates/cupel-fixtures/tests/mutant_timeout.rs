@@ -2,7 +2,7 @@
 // ABOUTME: cuts two looping mutants at `max_mutant_timeout`, on time with a `ps` that never answers, and leaves a 61 s Go
 // ABOUTME: test out of every mutant with a finding.
 use cupel_core::{Envelope, Severity};
-use cupel_fixtures::{copy_repo, run_cupel, run_cupel_measuring, run_cupel_with_env};
+use cupel_fixtures::{copy_repo, run_cupel, run_cupel_measuring};
 
 /// Whether `program` is on `PATH`; prints the skip line when it is not.
 fn installed(program: &str, what: &str) -> bool {
@@ -79,7 +79,7 @@ fn with_a_ps_that_never_answers_every_mutant_timeout_still_fires_on_time() {
     std::fs::write(&toml, config.replace("\"30s\"", "\"10s\"")).unwrap();
     let bin = tempfile::tempdir().unwrap();
     let path = path_with_a_hung_ps(bin.path());
-    let outcome = run_cupel_with_env(
+    let outcome = cupel_fixtures::run_cupel_with_env(
         &[
             "check",
             "--only",

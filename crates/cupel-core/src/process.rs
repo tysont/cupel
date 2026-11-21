@@ -264,6 +264,9 @@ fn over(child: &Child, spawned: Instant, limit: u64) -> Option<String> {
 /// Sends SIGTERM to every process group of `child`'s run and waits up to `grace` for `child`
 /// to exit.
 fn terminate(child: &mut Child, spawned: Instant, grace: Duration) {
+    // Only Unix lists the run's process groups, which need the spawn's instant.
+    #[cfg(not(unix))]
+    let _ = spawned;
     #[cfg(unix)]
     {
         use nix::sys::signal::{Signal, killpg};
@@ -288,6 +291,9 @@ fn terminate(child: &mut Child, spawned: Instant, grace: Duration) {
 /// gives each test. The groups are stopped first, so none forks a process the kill misses, and
 /// listed again while stopped; no descendant outlives the run or keeps its output pipes open.
 fn kill(child: &mut Child, spawned: Instant) {
+    // Only Unix lists the run's process groups, which need the spawn's instant.
+    #[cfg(not(unix))]
+    let _ = spawned;
     #[cfg(unix)]
     {
         use nix::sys::signal::{Signal, killpg};

@@ -12,9 +12,11 @@ const SAMPLE_AGE: Duration = Duration::from_millis(200);
 /// How long one `ps` listing may run before its sample is skipped (ADR-236), in milliseconds as
 /// the `sampler.timeout` event reports it.
 pub(crate) const LIST_TIMEOUT_MS: u64 = 5_000;
+#[cfg(unix)]
 const LIST_TIMEOUT: Duration = Duration::from_millis(LIST_TIMEOUT_MS);
 
 /// How often a listing is checked for having ended.
+#[cfg(unix)]
 const LIST_POLL: Duration = Duration::from_millis(10);
 
 /// `ps` rounds a process's age to whole seconds, so a process started in the same second as the
@@ -163,6 +165,7 @@ pub(crate) fn resident_since(pid: u32, not_before: Instant) -> Option<Held> {
 /// The process groups the run of `pid`, spawned at `spawned`, spans, from a new sample: `pid`'s
 /// own first, then every other group one of its descendants is in. Only `pid`'s where no sample
 /// can be taken.
+#[cfg(unix)]
 pub(crate) fn groups(pid: u32, spawned: Instant) -> Vec<u32> {
     if sampler().stalled {
         return vec![pid];
@@ -376,6 +379,7 @@ fn parsed(text: &str) -> Vec<Listed> {
 }
 
 /// The elapsed time `ps` prints as `[[dd-]hh:]mm:ss`; `None` for anything else.
+#[cfg(unix)]
 fn elapsed(etime: &str) -> Option<Duration> {
     let (days, clock) = match etime.split_once('-') {
         Some((days, clock)) => (days.parse::<u64>().ok()?, clock),
@@ -501,6 +505,7 @@ mod tests {
         );
     }
 
+    #[cfg(unix)]
     #[test]
     fn elapsed_reads_every_form_ps_prints() {
         assert_eq!(
@@ -522,13 +527,16 @@ mod tests {
     }
 
     /// When the latest shared sample was taken.
+    #[cfg(unix)]
     fn latest_taken() -> Option<Instant> {
         sampler().latest.as_ref().map(|sample| sample.started)
     }
 
     /// Held by each test that reads or sets the shared sampler, so none sees another's state.
+    #[cfg(unix)]
     static SAMPLER_TESTS: Mutex<()> = Mutex::new(());
 
+    #[cfg(unix)]
     fn sampler_tests() -> std::sync::MutexGuard<'static, ()> {
         SAMPLER_TESTS
             .lock()
@@ -537,6 +545,7 @@ mod tests {
 
     /// `pid`'s run from the first sample taken at `since` or later: a reading starts the listing
     /// and returns at once, and a later one finds it.
+    #[cfg(unix)]
     fn resident_once_sampled(pid: u32, since: Instant) -> Option<Held> {
         let until = Instant::now() + LIST_TIMEOUT + Duration::from_secs(1);
         loop {

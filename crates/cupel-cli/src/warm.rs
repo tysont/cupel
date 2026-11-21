@@ -208,14 +208,13 @@ fn warm(root: &Path, changed: &[PathBuf], cancel: &Cancellation) {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod tests {
     use std::ffi::OsString;
     use std::path::PathBuf;
 
     use super::lock_path;
 
-    #[cfg(unix)]
     #[test]
     fn the_heavy_lock_is_the_one_the_variable_names_else_the_one_heavy_sh_takes() {
         assert_eq!(
