@@ -155,6 +155,11 @@ need_token() {
 # trap revokes it with `npm logout` however the step ends, then removes the directory.
 publish_npm() {
 	v=$1
+	# Both wait on the terminal for the owner's confirmation; without one npm falls back to a username
+	# prompt nothing can answer.
+	if ! $dry && ! [ -t 0 ]; then
+		fail "npm's browser sign-in and its publish each wait on a terminal for your confirmation; run make publish-npm V=$v in a terminal of your own"
+	fi
 	need_tag "$v"
 	need_release "$v"
 	tag_tree "$v"

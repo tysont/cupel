@@ -1,6 +1,6 @@
 # CUPEL_DECISION_238: Releases and publishing run on the owner's Mac through make targets; nothing publishes from GitHub Actions
 
-**Date:** 2026-11-17 · **Status:** accepted · **Phase:** v0.3.0 follow-up, before batch v0.3.1 (the owner's direction change) · Supersedes [235](CUPEL_DECISION_235.md); amends [124](CUPEL_DECISION_124.md) (the release is built and published locally), [128](CUPEL_DECISION_128.md) §1–§2 (no publish jobs), and [137](CUPEL_DECISION_137.md) (the Windows archive is `x86_64-pc-windows-gnu`)
+**Date:** 2026-11-17 · **Status:** accepted; §4 (an npm publish needs a terminal) amended by [241](CUPEL_DECISION_241.md) · **Phase:** v0.3.0 follow-up, before batch v0.3.1 (the owner's direction change) · Supersedes [235](CUPEL_DECISION_235.md); amends [124](CUPEL_DECISION_124.md) (the release is built and published locally), [128](CUPEL_DECISION_128.md) §1–§2 (no publish jobs), and [137](CUPEL_DECISION_137.md) (the Windows archive is `x86_64-pc-windows-gnu`)
 
 ## Context
 

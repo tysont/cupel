@@ -158,6 +158,22 @@ fn publishing_to_pypi_needs_its_token_in_the_environment() {
     );
 }
 
+/// npm's browser sign-in and its publish each wait on the terminal for the owner's confirmation, and a
+/// run with no terminal on stdin, such as one an agent starts, falls back to a username prompt it cannot
+/// answer. Such a run is refused before anything is checked, named, or signed in to (ADR-238 §4).
+#[test]
+fn publishing_to_npm_needs_a_terminal() {
+    let dir = release_repository();
+    assert_eq!(
+        refusal(&ship(dir.path(), &["publish", "npm", "1.2.3"])),
+        (
+            Some(1),
+            "ship.sh: npm's browser sign-in and its publish each wait on a terminal for your confirmation; run make publish-npm V=1.2.3 in a terminal of your own\n"
+                .to_owned()
+        )
+    );
+}
+
 /// crates.io is not a route while another project holds a crate name (ADR-146).
 #[test]
 fn publishing_names_only_npm_pypi_and_homebrew() {
