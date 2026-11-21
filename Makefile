@@ -21,7 +21,7 @@ TREE_STATE = { git status --porcelain --untracked-files=all; git diff; } | git h
 EMPTY_TREE_STATE = printf '' | git hash-object --stdin
 TREE_STATE_FILE = target/tree-state-before-check
 
-.PHONY: build test lint fmt doc matrix readme check check-build clean-check worktree worktree-remove dogfood baseline reclaim parity install dist release publish publish-npm publish-pypi publish-homebrew verify-release installers version windows-check windows-test dev-setup dev-env inner-loop
+.PHONY: build test lint fmt doc matrix readme check check-build clean-check worktree worktree-remove dogfood baseline reclaim parity install dist release publish publish-npm publish-pypi publish-homebrew verify-release installers version windows-check windows-test dev-setup mirror-lein dev-env inner-loop
 
 build:
 	$(CARGO) build --workspace
@@ -176,8 +176,9 @@ dist:
 # when V is already released or published, and DRY=1 runs every local step and changes nothing remote.
 #   make release V=X.Y.Z         from a clean checkout of the pushed tag vX.Y.Z: build the five archives and
 #                                SHA256SUMS, and create the GitHub Release with them
-#   make publish V=X.Y.Z         publish-npm, publish-pypi, and publish-homebrew in turn; npm and PyPI read their
-#                                token from the environment: op run --env-file=release.env.tpl -- make publish V=X.Y.Z
+#   make publish V=X.Y.Z         publish-npm, publish-pypi, and publish-homebrew in turn, in a terminal of your own:
+#                                npm signs in and publishes through the browser, and PyPI reads its token from the
+#                                environment: op run --env-file=release.env.tpl -- make publish V=X.Y.Z
 #   make verify-release V=X.Y.Z  check the release on every live route
 SHIP = scripts/ship.sh$(if $(filter 1,$(DRY)), --dry-run)
 
@@ -227,6 +228,11 @@ windows-test:
 # CUPEL_DEV_TOOLS. A second run installs nothing; each run ends with each tool's version.
 dev-setup:
 	CUPEL_DEV_TOOLS='$(CUPEL_DEV_TOOLS)' $(CURDIR)/scripts/dev-setup.sh
+
+# Copies Leiningen V from Codeberg to the GitHub Release tools-lein-V that dev-setup and CI install it from
+# (ADR-240), and prints the sha256 of each file to pin in scripts/dev-setup.sh and the tools action.
+mirror-lein:
+	scripts/mirror-lein.sh $(V)
 
 # Agent worktrees (ADR-156 §5): `make worktree NAME=<name> [BASE=<ref>]` adds `.claude/worktrees/<name>`
 # in the main checkout on branch <name> (made from BASE, `main` by default, unless it exists);

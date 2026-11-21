@@ -40,8 +40,12 @@ jdk_build=1
 maven_version=3.9.16
 gradle_version=9.6.1
 clojure_version=1.12.5.1664
-# Codeberg holds Leiningen's releases, and the launcher whose LEIN_CHECKSUM is the standalone jar's sha256.
+# Leiningen comes only from Cupel's copy of Codeberg's release, which scripts/mirror-lein.sh makes and
+# prints these sums for (ADR-240); updating it is that script, then these pins and the tools action's.
 lein_version=2.12.0
+lein_release=https://github.com/tysont/cupel/releases/download/tools-lein-$lein_version
+lein_launcher_sha256=f8e1266c0c78c08bd4af6e111889ecc316c9dd56d1e8645bbee6c1703d351bc3
+lein_jar_sha256=b721a573af631784f27ccb52e719e6d1287d9d3951ad56d316d38f7ecfa81aa2
 tla_version=1.7.4
 dafny_version=4.11.0
 
@@ -367,15 +371,13 @@ if [ "$(cat "$tools/clojure-config/deps.edn" 2>/dev/null || true)" != "$deps" ];
 fi
 
 # Leiningen: its launcher, and the standalone jar the launcher would otherwise download on first run,
-# checked against the launcher's own checksum. `bin/lein` runs the launcher with that jar.
+# each checked against its pinned sha256. `bin/lein` runs the launcher with that jar.
 if needs "lein-$lein_version"; then
-	lein_releases=https://codeberg.org/leiningen/leiningen
 	lein_jar=leiningen-$lein_version-standalone.jar
-	fetch "$lein_releases/raw/tag/$lein_version/bin/lein" "$work/lein"
-	fetch "$lein_releases/releases/download/$lein_version/$lein_jar" "$work/$lein_jar"
-	lein_sum=$(sed -n "s/^export LEIN_CHECKSUM='\([0-9a-f]*\)'\$/\1/p" "$work/lein")
-	[ -n "$lein_sum" ] && [ "$(sha256 "$work/$lein_jar")" = "$lein_sum" ] ||
-		fail "$lein_jar does not match the checksum its launcher names"
+	fetch "$lein_release/lein" "$work/lein"
+	fetch "$lein_release/$lein_jar" "$work/$lein_jar"
+	[ "$(sha256 "$work/lein")" = "$lein_launcher_sha256" ] || fail "Leiningen's launcher does not match its pinned sha256"
+	[ "$(sha256 "$work/$lein_jar")" = "$lein_jar_sha256" ] || fail "$lein_jar does not match its pinned sha256"
 	mkdir "$work/bin"
 	# shellcheck disable=SC2016 # "$@" belongs in the written script
 	printf '#!/bin/sh\nLEIN_JAR="%s" exec "%s" "$@"\n' "$dir/$lein_jar" "$dir/lein" >"$work/bin/lein"

@@ -245,6 +245,67 @@ fn the_shellcheck_action_pins_the_release_dev_setup_pins() {
     );
 }
 
+/// The value scripts/dev-setup.sh sets `name` to: its `<name>=` line.
+fn dev_setup_value(name: &str) -> String {
+    let key = format!("{name}=");
+    dev_setup_script()
+        .lines()
+        .find_map(|line| line.strip_prefix(&key))
+        .unwrap_or_else(|| panic!("scripts/dev-setup.sh sets no {name}"))
+        .to_owned()
+}
+
+/// The URLs `text` downloads from: every word holding `://`, unquoted.
+fn urls(text: &str) -> Vec<String> {
+    text.split_whitespace()
+        .filter(|word| word.contains("://"))
+        .map(|word| word.trim_matches('"').to_owned())
+        .collect()
+}
+
+/// Leiningen is installed only from Cupel's own copy, the GitHub Release `tools-lein-<version>` that
+/// scripts/mirror-lein.sh makes, and each of its two files is checked against a sha256 pinned in both
+/// scripts/dev-setup.sh and the tools action, so neither depends on Codeberg being up (ADR-240).
+#[test]
+fn leiningen_installs_only_from_cupel_s_copy_with_both_files_pinned() {
+    let version = pinned("lein");
+    let release = format!("https://github.com/tysont/cupel/releases/download/tools-lein-{version}");
+    let sums = [
+        dev_setup_value("lein_launcher_sha256"),
+        dev_setup_value("lein_jar_sha256"),
+    ];
+    let tools = action("tools");
+    let from_codeberg = |text: &str| {
+        urls(text)
+            .into_iter()
+            .filter(|url| url.contains("codeberg.org"))
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(
+        (
+            dev_setup_value("lein_release"),
+            urls(&tools)
+                .into_iter()
+                .filter(|url| url.contains("lein"))
+                .collect::<Vec<_>>(),
+            from_codeberg(&dev_setup_script()),
+            from_codeberg(&tools),
+            sums.iter()
+                .all(|sum| sum.len() == 64 && tools.contains(sum.as_str())),
+        ),
+        (
+            "https://github.com/tysont/cupel/releases/download/tools-lein-$lein_version".to_owned(),
+            vec![
+                format!("{release}/lein"),
+                format!("{release}/leiningen-{version}-standalone.jar"),
+            ],
+            vec![],
+            vec![],
+            true,
+        )
+    );
+}
+
 /// The `ShellCheck` the tests lint with is the release scripts/dev-setup.sh pins, so a lint passes here exactly when
 /// it passes in CI: run `make dev-setup` (which puts it first on `make`'s PATH) when this fails.
 #[test]

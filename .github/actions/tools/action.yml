@@ -148,17 +148,17 @@ runs:
         curl -sSfL -o "$RUNNER_TEMP/posix-install.sh" https://github.com/clojure/brew-install/releases/download/1.12.5.1664/posix-install.sh
         bash "$RUNNER_TEMP/posix-install.sh" --prefix "$HOME/clojure"
         echo "$HOME/clojure/bin" >> "$GITHUB_PATH"
-    # Leiningen's launcher, and the standalone jar it would download on first run, checked against the launcher's
-    # LEIN_CHECKSUM.
+    # Leiningen's launcher, and the standalone jar it would download on first run, from Cupel's copy of Codeberg's
+    # release, each checked against the sha256 scripts/dev-setup.sh also pins (ADR-240).
     - name: Install Leiningen 2.12.0
       shell: bash
       run: |
         mkdir -p "$HOME/lein"
-        curl -sSfL -o "$HOME/lein/lein" https://codeberg.org/leiningen/leiningen/raw/tag/2.12.0/bin/lein
+        curl -sSfL --retry 3 -o "$HOME/lein/lein" https://github.com/tysont/cupel/releases/download/tools-lein-2.12.0/lein
         jar=$HOME/lein/leiningen-2.12.0-standalone.jar
-        curl -sSfL -o "$jar" https://codeberg.org/leiningen/leiningen/releases/download/2.12.0/leiningen-2.12.0-standalone.jar
-        sum=$(sed -n "s/^export LEIN_CHECKSUM='\([0-9a-f]*\)'\$/\1/p" "$HOME/lein/lein")
-        echo "$sum  $jar" | shasum -a 256 -c -
+        curl -sSfL --retry 3 -o "$jar" https://github.com/tysont/cupel/releases/download/tools-lein-2.12.0/leiningen-2.12.0-standalone.jar
+        echo "f8e1266c0c78c08bd4af6e111889ecc316c9dd56d1e8645bbee6c1703d351bc3  $HOME/lein/lein" | shasum -a 256 -c -
+        echo "b721a573af631784f27ccb52e719e6d1287d9d3951ad56d316d38f7ecfa81aa2  $jar" | shasum -a 256 -c -
         chmod +x "$HOME/lein/lein"
         echo "LEIN_JAR=$jar" >> "$GITHUB_ENV"
         echo "$HOME/lein" >> "$GITHUB_PATH"

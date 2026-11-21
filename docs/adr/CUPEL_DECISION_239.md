@@ -1,6 +1,6 @@
 # CUPEL_DECISION_239: Leiningen roots' tests run through Leiningen, each subproject is a root, and Cloverage is added by coordinate where no plugin is declared
 
-**Date:** 2026-11-17 · **Status:** accepted · **Phase:** v0.3.1, item 1 (Leiningen execution) · Amends [234](CUPEL_DECISION_234.md) §1 (subprojects as members), §3 (coverage), and §4 (no producer); uses [109](CUPEL_DECISION_109.md)'s runner script and [210](CUPEL_DECISION_210.md)'s Cloverage by coordinate
+**Date:** 2026-11-17 · **Status:** accepted; where the pinned Leiningen is installed from amended by [240](CUPEL_DECISION_240.md) · **Phase:** v0.3.1, item 1 (Leiningen execution) · Amends [234](CUPEL_DECISION_234.md) §1 (subprojects as members), §3 (coverage), and §4 (no producer); uses [109](CUPEL_DECISION_109.md)'s runner script and [210](CUPEL_DECISION_210.md)'s Cloverage by coordinate
 
 ## Context
 
